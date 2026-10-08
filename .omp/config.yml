@@ -1,0 +1,12 @@
+# This configuration does not select models or grant broad tool approvals.
+# Check the installed schema through `omp config list` before delegation.
+task:
+  maxConcurrency: 4
+  maxRuntimeMs: 0
+  softRequestBudget: 0
+  maxRecursionDepth: 2
+  prewalk: false
+  isolation:
+    enabled: true
+    apply: false
+    merge: patch

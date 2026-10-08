@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "portable_core": {
+    "source_roots": [
+      "src"
+    ],
+    "allowed_builtin_modules": [
+      "std",
+      "builtin",
+      "root"
+    ],
+    "external_runtime_dependencies": [],
+    "compiler_runtime": "Declared through the exact Zig lock."
+  },
+  "development": {
+    "required_hosts": [
+      "Node 22+ or a qualified Bun runtime",
+      "Zig from the lock",
+      "OMP supplied by the owner",
+      "Git for isolation"
+    ],
+    "package_dependencies": []
+  },
+  "platform_adapters": [],
+  "audit_status": "lexical-bootstrap-check-only",
+  "note": "A lexical check is not proof of the final binary dependency graph. Native artifact audits remain required."
+}

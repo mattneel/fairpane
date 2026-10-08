@@ -1,0 +1,75 @@
+# Embedding and language contracts
+
+## Current status
+
+`api/bootstrap.json` describes a tiny experimental capability probe.
+ABI revision zero has no stability promise.
+The probe reports no browser capabilities.
+It exists to test compilation, headers, symbol export, and foreign calls.
+
+The complete embedding ABI is not frozen by this bootstrap.
+The lifecycle task replaces the experiment with a reviewed versioned contract.
+
+## Public boundary
+
+The eventual C ABI uses opaque owners and checked handles.
+It avoids Zig slices, error unions, C bitfields, and variadic calls.
+Every buffer states its length unit and lifetime.
+Every allocation states which party releases it.
+
+Public structures carry size and version fields where appropriate.
+Fixed-width integers carry statuses and flags.
+Target-sized lengths use the declared target ABI.
+Zig extern structures follow the target C ABI. [S05]
+
+Recoverable failures return structured status.
+Internal invariant failures follow a documented fail-stop policy.
+No exception or unwinding crosses the public C boundary.
+The in-process embedding profile accepts process-level failure risk.
+
+Foreign callbacks cannot reenter mutable engine operations unless the contract explicitly permits that path.
+Queued host requests are the default integration model.
+Batch operations avoid a foreign call for every glyph or box.
+
+## Process and WebAssembly boundaries
+
+The process protocol has an independent version and encoding.
+It contains no native pointers and validates every length.
+A native C layout is not a portable wire format.
+
+WebAssembly bindings use validated memory offsets and handles.
+Their memory-growth rules and view lifetimes remain explicit.
+A cross-compile alone does not qualify that runtime.
+
+## Wrapper design
+
+| Target | Public idiom |
+| --- | --- |
+| Zig | Explicit allocators and error unions over native internal interfaces. |
+| C | Explicit owner handles, statuses, and release operations. |
+| C++ | Move-only resource owners and scoped frame views. |
+| Rust | Ownership types, Result, and explicit thread restrictions. |
+| TypeScript | Explicit disposal, asynchronous operations, and separate native and Wasm transports. |
+| Elixir and Erlang | Supervised process ownership and message-based operations. |
+| Python | Context managers and runtime-appropriate asynchronous integration. |
+| Go | Explicit Close and context-based cancellation. |
+| Swift | Actor-owned engine state and scoped native lifetimes. |
+| Java and Kotlin | Managed resource owners over a qualified native adapter. |
+| .NET | Safe native ownership and task-based asynchronous operations. |
+| Other languages | A published adapter protocol and the same qualification suite. |
+
+A generator supplies raw bindings and ownership metadata.
+A language-specific layer supplies idiomatic behavior.
+Generated source alone does not qualify a wrapper.
+
+The initial Elixir path favors an external renderer process.
+A NIF crash can affect the entire Erlang VM. [S17]
+A future NIF path requires bounded scheduler work and explicit lifetime tests.
+Node native adapters can use Node-API rather than expose V8 internals. [S18]
+
+## Qualification
+
+The wrapper suite covers cancellation, stale handles, teardown, and allocation failure.
+It also covers foreign exceptions and callbacks from unexpected threads.
+Each supported language requires real execution on its declared runtime and targets.
+The phrase "every language" expresses an extensible public contract, not an unsupported list of generated files.

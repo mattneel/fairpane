@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "stability": "experimental",
+  "abi_revision": 0,
+  "implemented_browser_capabilities": [],
+  "functions": [
+    {
+      "name": "fp_abi_revision",
+      "return": "uint32_t",
+      "parameters": []
+    },
+    {
+      "name": "fp_query_capabilities",
+      "return": "uint32_t",
+      "parameters": [
+        {
+          "name": "out",
+          "type": "fp_capabilities *",
+          "ownership": "borrowed writable aligned storage for the call",
+          "nullable": true
+        },
+        {
+          "name": "out_size",
+          "type": "size_t",
+          "unit": "bytes"
+        }
+      ]
+    }
+  ],
+  "errors": {
+    "0": "success",
+    "1": "invalid argument"
+  },
+  "structs": {
+    "fp_capabilities": [
+      [
+        "struct_size",
+        "uint32_t"
+      ],
+      [
+        "abi_revision",
+        "uint32_t"
+      ],
+      [
+        "feature_bits",
+        "uint64_t"
+      ]
+    ]
+  },
+  "note": "The header is handwritten in this bootstrap. Schema generation is an explicit later task."
+}

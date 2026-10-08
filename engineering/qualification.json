@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "profile": "fairpane-full-browser",
+  "profile_revision": 0,
+  "profile_state": "scaffold",
+  "scope_rule": "All listed capability families remain required. A passing subset is not full-browser qualification.",
+  "capabilities": [
+    {
+      "id": "html-dom",
+      "description": "HTML parsing, DOM, events, custom elements, and shadow DOM",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "css-layout",
+      "description": "CSS syntax, cascade, selectors, layout families, fragmentation, and animation",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "text-fonts",
+      "description": "Unicode, OpenType, multilingual shaping, fallback, selection, and rasterization",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "javascript",
+      "description": "ECMAScript semantics, builtins, RegExp, BigInt, modules, GC, and Intl",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "web-idl",
+      "description": "Web IDL conversions, platform objects, and exception behavior",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "fetch-network",
+      "description": "URL, encoding, Fetch, redirects, cookies, HTTP behavior, and secure transport integration",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "storage-workers",
+      "description": "Storage, IndexedDB, workers, service workers, streams, and offline applications",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "svg-canvas-images",
+      "description": "SVG, canvas, image formats, animation, and decoder limits",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "audio-video",
+      "description": "Audio, video, media synchronization, capture, and platform policy",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "guest-graphics",
+      "description": "Guest WebGL and WebGPU, separate from internal GPU acceleration",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "webassembly",
+      "description": "Guest WebAssembly and host integration",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "web-security",
+      "description": "Origins, secure contexts, CSP, permissions, broker policy, and containment",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "web-app-apis",
+      "description": "Clipboard, files, notifications, cryptography, WebAuthn, WebSockets, WebRTC, and related declared app APIs",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "input-accessibility",
+      "description": "Keyboard, pointer, touch, IME, focus, accessibility, zoom, and printing",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "browser-product",
+      "description": "Address bar, page, navigation, history, downloads, app windows, profiles, restore, and diagnostics",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "embedding-wrappers",
+      "description": "C ABI, Zig API, process protocol, Wasm embedding, and qualified language wrappers",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "cross-platform",
+      "description": "Native Windows, Linux, macOS, architecture variants, and separately declared mobile targets",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "performance",
+      "description": "Named workload budgets for startup, tail latency, memory, binary size, and qualified power measurements",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    },
+    {
+      "id": "maintenance-adoption",
+      "description": "Releases, provenance, license, security response, maintainer continuity, and downstream integration",
+      "required": true,
+      "status": "unimplemented",
+      "manifest": null,
+      "evidence": []
+    }
+  ],
+  "standards_baseline": null,
+  "target_matrix": null,
+  "performance_budgets": null,
+  "applicability_review": null,
+  "license_decision": "pending-owner",
+  "release_authority": null,
+  "trusted_runner": {
+    "status": "unimplemented",
+    "public_key": null,
+    "verifier": null
+  },
+  "known_policy_questions": [
+    "Codec patent and distribution policy",
+    "DRM platform access and resulting compatibility claims",
+    "Outbound license selection",
+    "Public namespace and trademark clearance"
+  ],
+  "completion_policy": "Mechanical qualification does not prove the absence of every bug. New standards and defects remain maintenance work."
+}

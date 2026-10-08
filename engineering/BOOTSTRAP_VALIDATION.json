@@ -1,0 +1,302 @@
+{
+  "schema_version": 1,
+  "scope": "bootstrap-preparation-not-browser-qualification",
+  "host": "Linux x86_64",
+  "node_version": "v22.16.0",
+  "controller_tests": 55,
+  "compiler_for_syntax_only": "GCC 14.2.0",
+  "records": [
+    {
+      "name": "Node module syntax: library",
+      "command": [
+        "node",
+        "--check",
+        "tools/lib.mjs"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:22.275815+00:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "Node module syntax: CLI",
+      "command": [
+        "node",
+        "--check",
+        "tools/fairpane.mjs"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:22.295588+00:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "Node module syntax: tests",
+      "command": [
+        "node",
+        "--check",
+        "tools/selftest.mjs"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:22.315375+00:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "Repository integrity",
+      "command": [
+        "node",
+        "tools/fairpane.mjs",
+        "check"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:22.339095+00:00",
+      "stdout": "{\n  \"result\": \"pass\",\n  \"level\": \"bootstrap-integrity-only\",\n  \"tasks\": 27,\n  \"gates\": 9,\n  \"capability_families\": 19,\n  \"fingerprints\": {\n    \"source\": {\n      \"sha256\": \"cc433c683fca0689283bf0022d1ae4a9db333ee8b06af660844834818245c2e4\",\n      \"file_count\": 76\n    },\n    \"policy\": {\n      \"sha256\": \"3b9a828a8a1e26a715c051b7cd29f8322df4f1eb944afec8e635f5dd19c4b483\",\n      \"file_count\": 12\n    }\n  },\n  \"note\": \"This check is not browser conformance or an independent security attestation.\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "name": "Controller selftests",
+      "command": [
+        "node",
+        "tools/fairpane.mjs",
+        "test"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:22.393774+00:00",
+      "stdout": "TAP version 13\nok 1 - A normal relative file resolves within the repository\nok 2 - Traversal, empty components, and dot components fail\nok 3 - Absolute paths, backslashes, control bytes, and alternate streams fail\nok 4 - A missing path needs explicit permission\nok 5 - A symlink cannot redirect an input inventory\nok 6 - A dangling directory link is not a new output directory\nok 7 - An empty input inventory fails\nok 8 - Input hashes change with content\nok 9 - Input hashes include relative names\nok 10 - Input hashes ignore checkout location and input order\nok 11 - Repeated roots do not duplicate files\nok 12 - File hashes match the SHA-256 content hash\nok 13 - Atomic JSON output supports replacement and BOM input\nok 14 - The supplied compiler lock has a valid structure\nok 15 - A stable version cannot silently replace Zig master\nok 16 - A floating compiler version fails\nok 17 - A substituted compiler source fails\nok 18 - A substituted artifact URL fails\nok 19 - An invalid checksum or archive size fails\nok 20 - A checksum mismatch cannot qualify an archive\nok 21 - A size mismatch cannot qualify an archive\nok 22 - Host selection maps supported platform names explicitly\nok 23 - A valid task graph has one initial ready task\nok 24 - An accepted prerequisite reveals the next task\nok 25 - An active task does not become another ready task\nok 26 - A duplicate task ID fails\nok 27 - Unknown and duplicate prerequisites fail\nok 28 - A cycle in the task graph fails\nok 29 - Empty acceptance criteria and unknown gates fail\nok 30 - Missing state and unknown workstreams fail\nok 31 - Acceptance without evidence and review fails\nok 32 - Acceptance with an unaccepted prerequisite fails\nok 33 - An empty release profile fails closed\nok 34 - The full set of capability families cannot disappear\nok 35 - Qualified metadata alone cannot replace a release verifier\nok 36 - A successful command records its actual output\nok 37 - A nonzero child exit remains a failure\nok 38 - A missing executable produces an error record\nok 39 - A hung child reaches its watchdog and cannot pass\nok 40 - Command arguments do not execute through a shell\nok 41 - A real local gate produces a checkable unsigned receipt\nok 42 - Changed source makes a previous receipt stale\nok 43 - Changed evidence output invalidates a receipt\nok 44 - Changed gate definitions invalidate old receipts\nok 45 - A local receipt cannot upgrade its own trust label\nok 46 - A receipt without command records cannot pass\nok 47 - A receipt without output artifacts cannot pass\nok 48 - A failed command cannot hide behind a pass label\nok 49 - A command failure produces a failed gate receipt\nok 50 - A missing compiler produces a failed gate receipt\nok 51 - Input changes during execution produce a failed gate receipt\nok 52 - A removed input still produces a failed gate receipt\nok 53 - Unknown gates fail before execution\nok 54 - Evidence paths cannot escape their approved roots\nok 55 - The actual bootstrap repository passes its integrity check\n1..55\n# tests 55\n# pass 55\n# fail 0\n# Scope: controller behavior only. No renderer or JavaScript conformance claim.\n",
+      "stderr": ""
+    },
+    {
+      "name": "Actual environment report",
+      "command": [
+        "node",
+        "tools/fairpane.mjs",
+        "doctor"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.154363+00:00",
+      "stdout": "{\n  \"platform\": \"linux\",\n  \"architecture\": \"x64\",\n  \"runtime\": \"v22.16.0\",\n  \"bun\": null,\n  \"git\": {\n    \"available\": true,\n    \"version\": \"git version 2.47.3\"\n  },\n  \"omp\": {\n    \"available\": false,\n    \"error\": \"ENOENT\"\n  },\n  \"compiler\": {\n    \"available\": false,\n    \"error\": \"The locked compiler is absent. Run the local compiler installer.\",\n    \"expected_path\": \"/mnt/data/fairpane-bootstrap/.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig\"\n  },\n  \"git_checkout\": false,\n  \"note\": \"No conformance test ran. On Windows, check an OMP shell shim with omp --version in PowerShell.\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "name": "Initial task selection",
+      "command": [
+        "node",
+        "tools/fairpane.mjs",
+        "next"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.191413+00:00",
+      "stdout": "{\n  \"active\": [],\n  \"ready\": [\n    {\n      \"id\": \"FP-0001\",\n      \"title\": \"Establish the actual local baseline\",\n      \"workstream\": \"substrate\",\n      \"depends_on\": [],\n      \"role\": \"fairpane-core\",\n      \"allowed_paths\": [\n        \"build.zig\",\n        \"src\",\n        \"scripts\",\n        \"tools\",\n        \"engineering/state.json\",\n        \"engineering/HANDOFF.md\",\n        \"engineering/evidence\",\n        \"build.zig.zon\",\n        \".omp\",\n        \"toolchains/omp-baseline.json\"\n      ],\n      \"protected_paths\": [\n        \"AGENTS.md\",\n        \"docs/CHARTER.md\",\n        \"engineering/qualification.json\",\n        \"engineering/policy.json\",\n        \"engineering/gates.json\",\n        \"toolchains/zig.lock.json\",\n        \"specs/corpora.json\"\n      ],\n      \"authority\": \"routine-local-engineering\",\n      \"required_gates\": [\n        \"repo-check\",\n        \"controller-test\",\n        \"zig-fmt\",\n        \"zig-test\",\n        \"zig-build\",\n        \"c-abi\"\n      ],\n      \"required_reviewers\": [\n        \"fairpane-review\"\n      ],\n      \"acceptance\": [\n        \"Record actual Zig, OMP, Git, Node or Bun, operating system, and architecture versions.\",\n        \"Check the locked archive and install it locally without global configuration changes.\",\n        \"Compile the candidate library and run every Zig test with the exact master pin.\",\n        \"Link and execute the C smoke test on the actual host.\",\n        \"Check OMP prompt discovery and specialist tool grants against the installed schema.\",\n        \"Preserve failures honestly and establish Git history only with a valid local identity.\",\n        \"Keep the exact compiler pin and founding policy unchanged during baseline repairs.\"\n      ],\n      \"read\": [\n        \"docs/TOOLCHAIN.md\",\n        \"docs/AGENT_OPERATIONS.md\"\n      ],\n      \"contract_state\": \"bootstrap-seed\",\n      \"expansion_rule\": \"Freeze exact test cases and target commands before implementation. Preserve every criterion.\"\n    }\n  ],\n  \"instruction\": \"Complete or resume an authorized task. Freeze exact tests before implementation.\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "name": "Status report",
+      "command": [
+        "node",
+        "tools/fairpane.mjs",
+        "status"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.240222+00:00",
+      "stdout": "{\n  \"stage\": \"bootstrap\",\n  \"profile_state\": \"scaffold\",\n  \"tasks\": [\n    {\n      \"id\": \"FP-0001\",\n      \"title\": \"Establish the actual local baseline\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0002\",\n      \"title\": \"Design and test the protected qualification boundary\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0003\",\n      \"title\": \"Pin source corpora and preserve provenance\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0004\",\n      \"title\": \"Implement checked owners and generational handles\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0005\",\n      \"title\": \"Implement lossless owned web strings\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0006\",\n      \"title\": \"Implement bounded host requests and document lifecycle\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0007\",\n      \"title\": \"Build the inspectable headless laboratory\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0008\",\n      \"title\": \"Implement HTML tokenizer continuations\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0009\",\n      \"title\": \"Implement DOM identity and mutation foundations\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0010\",\n      \"title\": \"Implement initial HTML tree construction\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0011\",\n      \"title\": \"Establish JavaScript semantic and heap catalogs\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0012\",\n      \"title\": \"Implement a semantic VM vertical slice\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0013\",\n      \"title\": \"Establish multilingual text data and font parsing\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0014\",\n      \"title\": \"Implement initial CSS syntax and cascade\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0015\",\n      \"title\": \"Implement text shaping and inline layout slice\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0016\",\n      \"title\": \"Implement layout fragments and scalar paint\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0017\",\n      \"title\": \"Create the first native Windows browser window\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0018\",\n      \"title\": \"Connect real document output to the native shell\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0019\",\n      \"title\": \"Integrate script, DOM, and event execution\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0020\",\n      \"title\": \"Build the broker and origin-policy vertical slice\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0021\",\n      \"title\": \"Establish ABI schema generation and wrapper contracts\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0022\",\n      \"title\": \"Implement TypeScript and Elixir integration slices\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0023\",\n      \"title\": \"Establish Linux and macOS native execution lanes\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0024\",\n      \"title\": \"Qualify one SIMD kernel against a scalar reference\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0025\",\n      \"title\": \"Evaluate first-party native specialization\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0026\",\n      \"title\": \"Expand the full-browser feature frontier\",\n      \"status\": \"planned\"\n    },\n    {\n      \"id\": \"FP-0027\",\n      \"title\": \"Establish reproducible releases and stewardship\",\n      \"status\": \"planned\"\n    }\n  ],\n  \"capabilities\": [\n    {\n      \"id\": \"html-dom\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"css-layout\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"text-fonts\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"javascript\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"web-idl\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"fetch-network\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"storage-workers\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"svg-canvas-images\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"audio-video\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"guest-graphics\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"webassembly\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"web-security\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"web-app-apis\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"input-accessibility\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"browser-product\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"embedding-wrappers\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"cross-platform\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"performance\",\n      \"status\": \"unimplemented\"\n    },\n    {\n      \"id\": \"maintenance-adoption\",\n      \"status\": \"unimplemented\"\n    }\n  ],\n  \"browser_complete\": false,\n  \"note\": \"The bootstrap has no independent release verifier.\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "name": "Fail-closed release check",
+      "command": [
+        "node",
+        "tools/fairpane.mjs",
+        "release-check"
+      ],
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.272128+00:00",
+      "stdout": "{\n  \"result\": \"not-qualified\",\n  \"problems\": [\n    \"The full-browser qualification profile is not frozen.\",\n    \"No release-profile revision is ratified.\",\n    \"Capability html-dom is not qualified.\",\n    \"Capability html-dom has no exact applicability manifest.\",\n    \"Capability html-dom has no evidence.\",\n    \"Capability css-layout is not qualified.\",\n    \"Capability css-layout has no exact applicability manifest.\",\n    \"Capability css-layout has no evidence.\",\n    \"Capability text-fonts is not qualified.\",\n    \"Capability text-fonts has no exact applicability manifest.\",\n    \"Capability text-fonts has no evidence.\",\n    \"Capability javascript is not qualified.\",\n    \"Capability javascript has no exact applicability manifest.\",\n    \"Capability javascript has no evidence.\",\n    \"Capability web-idl is not qualified.\",\n    \"Capability web-idl has no exact applicability manifest.\",\n    \"Capability web-idl has no evidence.\",\n    \"Capability fetch-network is not qualified.\",\n    \"Capability fetch-network has no exact applicability manifest.\",\n    \"Capability fetch-network has no evidence.\",\n    \"Capability storage-workers is not qualified.\",\n    \"Capability storage-workers has no exact applicability manifest.\",\n    \"Capability storage-workers has no evidence.\",\n    \"Capability svg-canvas-images is not qualified.\",\n    \"Capability svg-canvas-images has no exact applicability manifest.\",\n    \"Capability svg-canvas-images has no evidence.\",\n    \"Capability audio-video is not qualified.\",\n    \"Capability audio-video has no exact applicability manifest.\",\n    \"Capability audio-video has no evidence.\",\n    \"Capability guest-graphics is not qualified.\",\n    \"Capability guest-graphics has no exact applicability manifest.\",\n    \"Capability guest-graphics has no evidence.\",\n    \"Capability webassembly is not qualified.\",\n    \"Capability webassembly has no exact applicability manifest.\",\n    \"Capability webassembly has no evidence.\",\n    \"Capability web-security is not qualified.\",\n    \"Capability web-security has no exact applicability manifest.\",\n    \"Capability web-security has no evidence.\",\n    \"Capability web-app-apis is not qualified.\",\n    \"Capability web-app-apis has no exact applicability manifest.\",\n    \"Capability web-app-apis has no evidence.\",\n    \"Capability input-accessibility is not qualified.\",\n    \"Capability input-accessibility has no exact applicability manifest.\",\n    \"Capability input-accessibility has no evidence.\",\n    \"Capability browser-product is not qualified.\",\n    \"Capability browser-product has no exact applicability manifest.\",\n    \"Capability browser-product has no evidence.\",\n    \"Capability embedding-wrappers is not qualified.\",\n    \"Capability embedding-wrappers has no exact applicability manifest.\",\n    \"Capability embedding-wrappers has no evidence.\",\n    \"Capability cross-platform is not qualified.\",\n    \"Capability cross-platform has no exact applicability manifest.\",\n    \"Capability cross-platform has no evidence.\",\n    \"Capability performance is not qualified.\",\n    \"Capability performance has no exact applicability manifest.\",\n    \"Capability performance has no evidence.\",\n    \"Capability maintenance-adoption is not qualified.\",\n    \"Capability maintenance-adoption has no exact applicability manifest.\",\n    \"Capability maintenance-adoption has no evidence.\",\n    \"Release field standards_baseline is unset.\",\n    \"Release field target_matrix is unset.\",\n    \"Release field performance_budgets is unset.\",\n    \"Release field applicability_review is unset.\",\n    \"Release field release_authority is unset.\",\n    \"The owner did not ratify an outbound license.\",\n    \"Independent release-attestation verification is not implemented in this bootstrap. Task FP-0002 must qualify that code.\"\n  ],\n  \"browser_complete\": false\n}\n",
+      "stderr": ""
+    },
+    {
+      "name": "Missing-compiler failure record",
+      "command": [
+        "node",
+        "tools/fairpane.mjs",
+        "run",
+        "zig-test"
+      ],
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.304166+00:00",
+      "stdout": "Execute gate zig-test.\n{\n  \"gate\": \"zig-test\",\n  \"status\": \"fail\",\n  \"receipt\": \"out/evidence/2026-10-08T23-11-23-342Z-zig-test-b9dff59e.json\",\n  \"error\": \"The locked compiler is absent. Run the local compiler installer.\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "name": "C11 header and caller syntax only",
+      "command": [
+        "cc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fsyntax-only",
+        "-Iinclude",
+        "tests/c/abi_smoke.c"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.353131+00:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "C++17 header syntax only",
+      "command": [
+        "c++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fsyntax-only",
+        "-Iinclude",
+        "-x",
+        "c++",
+        "-"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.360744+00:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "POSIX wrapper syntax",
+      "command": [
+        "sh",
+        "-n",
+        "scripts/fp.sh"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.368728+00:00",
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "POSIX wrapper execution",
+      "command": [
+        "sh",
+        "scripts/fp.sh",
+        "help"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.369553+00:00",
+      "stdout": "Fairpane development controller\n\n  doctor                      Report the actual local environment.\n  check                       Check bootstrap repository integrity.\n  test                        Run the controller tests.\n  status                      Report task and capability status.\n  next                        Print ready task contracts.\n  fingerprint                 Hash current source and policy inputs.\n  install-zig                 Install the exact locked compiler locally.\n  run <gate-id>               Execute a gate and write a local receipt.\n  evidence-check <path>       Check a receipt against current inputs.\n  release-check               Check release prerequisites and fail closed.\n  help                        Print these commands.\n\nNo command publishes, purchases, pushes, or grants tool approvals.\nLocal receipts are unsigned integrity records, not release attestations.\n",
+      "stderr": ""
+    },
+    {
+      "name": "Compiler for C syntax tests",
+      "command": [
+        "cc",
+        "--version"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.419366+00:00",
+      "stdout": "cc (Debian 14.2.0-19) 14.2.0\nCopyright (C) 2024 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "stderr": ""
+    },
+    {
+      "name": "Current receipt: repo-check",
+      "command": [
+        "node",
+        "tools/fairpane.mjs",
+        "evidence-check",
+        "out/evidence/2026-10-08T23-09-34-005Z-repo-check-d8d2c96e.json"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.421044+00:00",
+      "stdout": "{\n  \"result\": \"pass\",\n  \"gate\": \"repo-check\",\n  \"trust\": \"unsigned-local-integrity-only\",\n  \"current_source\": true\n}\n",
+      "stderr": ""
+    },
+    {
+      "name": "Current receipt: controller-test",
+      "command": [
+        "node",
+        "tools/fairpane.mjs",
+        "evidence-check",
+        "out/evidence/2026-10-08T23-09-34-107Z-controller-test-69c613b5.json"
+      ],
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.461163+00:00",
+      "stdout": "{\n  \"result\": \"pass\",\n  \"gate\": \"controller-test\",\n  \"trust\": \"unsigned-local-integrity-only\",\n  \"current_source\": true\n}\n",
+      "stderr": ""
+    },
+    {
+      "name": "Failed receipt rejection: zig-test",
+      "command": [
+        "node",
+        "tools/fairpane.mjs",
+        "evidence-check",
+        "out/evidence/2026-10-08T23-11-23-342Z-zig-test-b9dff59e.json"
+      ],
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "passed": true,
+      "started_at": "2026-10-08T23:11:23.503708+00:00",
+      "stdout": "",
+      "stderr": "Fairpane: The receipt does not report a passed gate.\n"
+    }
+  ],
+  "syntax_checks": {
+    "json_files": 15,
+    "yaml_config": true,
+    "agent_frontmatters": 10,
+    "prompt_frontmatters": 4
+  },
+  "not_executed": [
+    "Zig compilation",
+    "Zig tests",
+    "Native C ABI linking and execution",
+    "PowerShell execution",
+    "OMP sessions",
+    "Bun execution",
+    "Windows execution",
+    "Target cross-compilation",
+    "Any browser conformance suite"
+  ],
+  "packaging": {
+    "zip_crc": "pass",
+    "root_layout": "pass",
+    "manifest": "pass",
+    "extracted_integrity": "pass",
+    "extracted_controller_tests": 55,
+    "extracted_receipts": "pass"
+  }
+}

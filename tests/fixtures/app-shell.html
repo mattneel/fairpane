@@ -1,0 +1,16 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Fairpane application acceptance seed</title>
+<style>body { margin: 2rem; font: 18px sans-serif; } output { display: block; }</style>
+<h1>Application behavior</h1>
+<label>Note <input id="note" autocomplete="off"></label>
+<button id="save">Save locally</button>
+<output id="result" aria-live="polite">Ready</output>
+<script>
+  const note = document.getElementById("note");
+  const result = document.getElementById("result");
+  document.getElementById("save").addEventListener("click", () => {
+    localStorage.setItem("fairpane.fixture.note", note.value);
+    result.textContent = "Saved: " + note.value;
+  });
+</script>

@@ -1,0 +1,1258 @@
+{
+  "schema_version": 1,
+  "scope": "initial-frontier-not-full-project",
+  "tasks": [
+    {
+      "id": "FP-0001",
+      "title": "Establish the actual local baseline",
+      "workstream": "substrate",
+      "depends_on": [],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "build.zig",
+        "src",
+        "scripts",
+        "tools",
+        "engineering/state.json",
+        "engineering/HANDOFF.md",
+        "engineering/evidence",
+        "build.zig.zon",
+        ".omp",
+        "toolchains/omp-baseline.json"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-fmt",
+        "zig-test",
+        "zig-build",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Record actual Zig, OMP, Git, Node or Bun, operating system, and architecture versions.",
+        "Check the locked archive and install it locally without global configuration changes.",
+        "Compile the candidate library and run every Zig test with the exact master pin.",
+        "Link and execute the C smoke test on the actual host.",
+        "Check OMP prompt discovery and specialist tool grants against the installed schema.",
+        "Preserve failures honestly and establish Git history only with a valid local identity.",
+        "Keep the exact compiler pin and founding policy unchanged during baseline repairs."
+      ],
+      "read": [
+        "docs/TOOLCHAIN.md",
+        "docs/AGENT_OPERATIONS.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0002",
+      "title": "Design and test the protected qualification boundary",
+      "workstream": "laboratory",
+      "depends_on": [
+        "FP-0001"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "tools",
+        "tests",
+        "engineering/decisions",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Demonstrate why a writable local checker cannot independently attest its own author.",
+        "Define a separate protected policy input and immutable candidate source identity.",
+        "Reject forged, stale, truncated, zero-denominator, and changed-policy result records.",
+        "Implement an independently testable attestation verifier before any release success path.",
+        "Keep release-check fail-closed until that verifier qualifies."
+      ],
+      "read": [
+        "docs/QUALIFICATION.md",
+        "docs/SECURITY.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0003",
+      "title": "Pin source corpora and preserve provenance",
+      "workstream": "laboratory",
+      "depends_on": [
+        "FP-0001"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "specs",
+        "tools",
+        "tests",
+        "engineering/decisions"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "protected-corpus-change-needs-independent-review",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review",
+        "fairpane-spec"
+      ],
+      "acceptance": [
+        "Record exact WPT and Test262 revisions without inventing hashes.",
+        "Record license and inventory data before corpus import.",
+        "Create separate local applicability metadata with explicit denominators.",
+        "Add reproducible snapshot and inventory checks.",
+        "Record Unicode, CLDR, and font-fixture import requirements without bundling unauthorized fonts."
+      ],
+      "read": [
+        "docs/QUALIFICATION.md",
+        "specs/README.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0004",
+      "title": "Implement checked owners and generational handles",
+      "workstream": "substrate",
+      "depends_on": [
+        "FP-0001"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "api",
+        "include",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Provide engine-scoped handles with explicit stale-handle and wrong-owner rejection.",
+        "Define generation exhaustion without stale identity reuse.",
+        "Exercise allocation failure at every targeted allocation point.",
+        "Prove destructibility after each documented failure outcome.",
+        "Keep internal handles distinct from native pointers and wire identifiers."
+      ],
+      "read": [
+        "docs/ARCHITECTURE.md",
+        "docs/ABI_AND_WRAPPERS.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0005",
+      "title": "Implement lossless owned web strings",
+      "workstream": "substrate",
+      "depends_on": [
+        "FP-0004"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Preserve arbitrary UTF-16 code units, including isolated surrogates.",
+        "Define ownership and explicit UTF-8 convenience conversions.",
+        "Test empty strings, embedded zero, surrogates, normalization differences, and failed allocation.",
+        "Keep code-unit and byte offsets distinct in types or API names."
+      ],
+      "read": [
+        "docs/JAVASCRIPT_RUNTIME.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0006",
+      "title": "Implement bounded host requests and document lifecycle",
+      "workstream": "substrate",
+      "depends_on": [
+        "FP-0004"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "api",
+        "include",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Create and destroy an engine and document through native Zig and C APIs.",
+        "Queue host requests with identifiers, cancellation, and bounded ownership.",
+        "Provide step outcomes without reentrant external mutation.",
+        "Exercise destruction with outstanding requests and resource responses.",
+        "Do not claim that internal pauses create arbitrary JavaScript task boundaries."
+      ],
+      "read": [
+        "docs/ARCHITECTURE.md",
+        "docs/ABI_AND_WRAPPERS.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0007",
+      "title": "Build the inspectable headless laboratory",
+      "workstream": "laboratory",
+      "depends_on": [
+        "FP-0003",
+        "FP-0006"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "tools",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Accept explicit document bytes and environmental inputs without direct network access.",
+        "Emit structured pipeline state with source and corpus identifiers.",
+        "Distinguish unsupported behavior from failures and harness errors.",
+        "Add replay and fixture-minimization entry points without success stubs."
+      ],
+      "read": [
+        "docs/QUALIFICATION.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0008",
+      "title": "Implement HTML tokenizer continuations",
+      "workstream": "html-dom",
+      "depends_on": [
+        "FP-0005",
+        "FP-0007"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Implement a frozen subset of specified tokenizer states completely.",
+        "Compare whole-input results with every partition of small adversarial inputs.",
+        "Preserve source positions and recovery outcomes.",
+        "Record every unimplemented tokenizer state for subsequent tasks."
+      ],
+      "read": [
+        "docs/RENDERING_AND_TEXT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0009",
+      "title": "Implement DOM identity and mutation foundations",
+      "workstream": "html-dom",
+      "depends_on": [
+        "FP-0005",
+        "FP-0006"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "api",
+        "include",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Preserve parent, child, sibling, and document ownership invariants.",
+        "Reject invalid hierarchy mutations with correct observable outcomes.",
+        "Define trace roots for later VM integration.",
+        "Test mutation during iteration and owner teardown."
+      ],
+      "read": [
+        "docs/ARCHITECTURE.md",
+        "docs/JAVASCRIPT_RUNTIME.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0010",
+      "title": "Implement initial HTML tree construction",
+      "workstream": "html-dom",
+      "depends_on": [
+        "FP-0008",
+        "FP-0009"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Implement frozen tree-construction modes with standard recovery.",
+        "Exercise malformed nesting and chunk boundaries through the actual DOM.",
+        "Preserve parser continuation and future script-reentrancy boundaries.",
+        "Emit inspectable DOM dumps from real parsing."
+      ],
+      "read": [
+        "docs/RENDERING_AND_TEXT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0011",
+      "title": "Establish JavaScript semantic and heap catalogs",
+      "workstream": "javascript",
+      "depends_on": [
+        "FP-0005",
+        "FP-0009"
+      ],
+      "role": "fairpane-js",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "tools",
+        "build.zig",
+        "engineering/decisions"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Define operation effects with callback, allocation, exception, and mutation boundaries.",
+        "Define explicit heap-reference metadata and trace generation experiments.",
+        "Compare compact-value candidates without exposing their layout through the C ABI.",
+        "Preserve numerical edge cases and arbitrary string code units in tests.",
+        "Record measured design choices rather than claims of free speed."
+      ],
+      "read": [
+        "docs/JAVASCRIPT_RUNTIME.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0012",
+      "title": "Implement a semantic VM vertical slice",
+      "workstream": "javascript",
+      "depends_on": [
+        "FP-0011",
+        "FP-0003"
+      ],
+      "role": "fairpane-js",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "tools",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Execute a bounded language subset through an actual first-party parser and VM.",
+        "Run selected Test262 cases through that runtime rather than the development host.",
+        "Expose explicit generic execution and collection safepoints.",
+        "Preserve all remaining language obligations in the task graph.",
+        "Add adaptive-dispatch experiments without replacing semantics with constant results."
+      ],
+      "read": [
+        "docs/JAVASCRIPT_RUNTIME.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0013",
+      "title": "Establish multilingual text data and font parsing",
+      "workstream": "text",
+      "depends_on": [
+        "FP-0003",
+        "FP-0005"
+      ],
+      "role": "fairpane-text",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "tools",
+        "build.zig",
+        "specs"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Import only provenance-recorded Unicode data and redistributable fixtures.",
+        "Parse a frozen OpenType table set with checked offsets and sizes.",
+        "Reject malformed tables without unbounded allocation.",
+        "Create Arabic, Indic, CJK, and mixed-direction qualification seeds.",
+        "Keep shaping, fallback, and rasterization as explicit remaining obligations."
+      ],
+      "read": [
+        "docs/RENDERING_AND_TEXT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0014",
+      "title": "Implement initial CSS syntax and cascade",
+      "workstream": "css-layout",
+      "depends_on": [
+        "FP-0009",
+        "FP-0007"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "tools",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Parse a frozen property and selector set with standard recovery.",
+        "Keep selectors, cascade, and computed values separate.",
+        "Describe inheritance and invalidation in the property registry.",
+        "Exercise custom-property token preservation and malformed syntax."
+      ],
+      "read": [
+        "docs/RENDERING_AND_TEXT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0015",
+      "title": "Implement text shaping and inline layout slice",
+      "workstream": "text",
+      "depends_on": [
+        "FP-0013",
+        "FP-0014"
+      ],
+      "role": "fairpane-text",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Shape selected scripts through first-party code with reference fixtures.",
+        "Preserve bidirectional order and code-unit-to-glyph mappings.",
+        "Break lines under explicit available-size constraints.",
+        "Test fallback, marks, caret positions, and visual-to-logical selection.",
+        "Expose every unsupported script or table honestly."
+      ],
+      "read": [
+        "docs/RENDERING_AND_TEXT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0016",
+      "title": "Implement layout fragments and scalar paint",
+      "workstream": "css-layout",
+      "depends_on": [
+        "FP-0010",
+        "FP-0014",
+        "FP-0015"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Produce real box and fragment structures for the frozen vertical slice.",
+        "Rasterize an immutable scene into host-owned memory.",
+        "Compare incremental and full recomputation for supported behavior.",
+        "Use real parser and layout output instead of fixture-specific pixels.",
+        "Record all remaining CSS layout families."
+      ],
+      "read": [
+        "docs/ARCHITECTURE.md",
+        "docs/RENDERING_AND_TEXT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0017",
+      "title": "Create the first native Windows browser window",
+      "workstream": "browser",
+      "depends_on": [
+        "FP-0006"
+      ],
+      "role": "fairpane-platform",
+      "allowed_paths": [
+        "ports",
+        "apps",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Create a first-party native window with an address bar and page surface.",
+        "Implement keyboard focus, resize, close, and explicit unsupported-page states.",
+        "Keep page content from controlling browser origin identity.",
+        "Do not embed a system WebView or external browser engine.",
+        "Execute the shell on Windows and record actual results."
+      ],
+      "read": [
+        "docs/PRODUCT.md",
+        "docs/SECURITY.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0018",
+      "title": "Connect real document output to the native shell",
+      "workstream": "browser",
+      "depends_on": [
+        "FP-0016",
+        "FP-0017"
+      ],
+      "role": "fairpane-platform",
+      "allowed_paths": [
+        "ports",
+        "apps",
+        "src",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Present actual engine frames in the native page surface.",
+        "Load the multilingual fixture through the resource contract.",
+        "Exercise scrolling, resize, selection, and keyboard input where supported.",
+        "Keep unavailable behavior visible rather than simulated."
+      ],
+      "read": [
+        "docs/PRODUCT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0019",
+      "title": "Integrate script, DOM, and event execution",
+      "workstream": "javascript",
+      "depends_on": [
+        "FP-0009",
+        "FP-0012",
+        "FP-0018"
+      ],
+      "role": "fairpane-js",
+      "allowed_paths": [
+        "src",
+        "apps",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Mutate real document content through the first-party runtime.",
+        "Preserve conversion callbacks and root lifetime across native calls.",
+        "Exercise tasks, microtasks, events, exceptions, and parser continuation.",
+        "Render mutation results through the same layout and paint pipeline.",
+        "Add a real application interaction acceptance trace."
+      ],
+      "read": [
+        "docs/JAVASCRIPT_RUNTIME.md",
+        "docs/PRODUCT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0020",
+      "title": "Build the broker and origin-policy vertical slice",
+      "workstream": "security",
+      "depends_on": [
+        "FP-0006",
+        "FP-0017"
+      ],
+      "role": "fairpane-platform",
+      "allowed_paths": [
+        "ports",
+        "apps",
+        "src",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Separate privileged resource access from document execution.",
+        "Validate protocol sizes, request ownership, and cancellation.",
+        "Implement explicit origin and redirect policy tests.",
+        "Demonstrate a denied request and a contained renderer failure.",
+        "Declare the actual operating-system isolation boundary."
+      ],
+      "read": [
+        "docs/SECURITY.md",
+        "docs/ARCHITECTURE.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0021",
+      "title": "Establish ABI schema generation and wrapper contracts",
+      "workstream": "wrappers",
+      "depends_on": [
+        "FP-0006"
+      ],
+      "role": "fairpane-bindings",
+      "allowed_paths": [
+        "api",
+        "include",
+        "src",
+        "tools",
+        "bindings",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Generate raw declarations from ownership-aware interface metadata.",
+        "Detect stale generated files mechanically.",
+        "Qualify C and Zig lifecycle callers against the actual engine.",
+        "Define shared foreign-runtime failure scenarios before more wrappers."
+      ],
+      "read": [
+        "docs/ABI_AND_WRAPPERS.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0022",
+      "title": "Implement TypeScript and Elixir integration slices",
+      "workstream": "wrappers",
+      "depends_on": [
+        "FP-0021",
+        "FP-0020"
+      ],
+      "role": "fairpane-bindings",
+      "allowed_paths": [
+        "bindings",
+        "tests",
+        "tools",
+        "apps"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Execute a TypeScript native adapter with explicit disposal and cancellation.",
+        "Execute an Elixir supervised-process adapter with crash and restart behavior.",
+        "Test teardown with pending native resources.",
+        "Do not call generated bindings alone qualified support."
+      ],
+      "read": [
+        "docs/ABI_AND_WRAPPERS.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0023",
+      "title": "Establish Linux and macOS native execution lanes",
+      "workstream": "ports",
+      "depends_on": [
+        "FP-0018",
+        "FP-0020"
+      ],
+      "role": "fairpane-platform",
+      "allowed_paths": [
+        "ports",
+        "apps",
+        "tests",
+        "tools",
+        "build.zig",
+        "engineering/decisions"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Compile and execute the same engine behavior on actual Linux and macOS hosts.",
+        "Declare platform APIs and system dependencies separately from the core.",
+        "Exercise text input, resize, focus, and process teardown.",
+        "Keep cross-compilation results distinct from native execution evidence."
+      ],
+      "read": [
+        "docs/TOOLCHAIN.md",
+        "docs/PRODUCT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0024",
+      "title": "Qualify one SIMD kernel against a scalar reference",
+      "workstream": "javascript",
+      "depends_on": [
+        "FP-0012",
+        "FP-0015"
+      ],
+      "role": "fairpane-js",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "tools",
+        "engineering/decisions"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Select a measured bottleneck in a controlled-data kernel.",
+        "Prove scalar equivalence across randomized inputs and boundary lengths.",
+        "Test runtime target-feature selection on declared hardware.",
+        "Report code size and integrated workload impact, including regressions."
+      ],
+      "read": [
+        "docs/JAVASCRIPT_RUNTIME.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0025",
+      "title": "Evaluate first-party native specialization",
+      "workstream": "javascript",
+      "depends_on": [
+        "FP-0012"
+      ],
+      "role": "fairpane-js",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "tools",
+        "ports",
+        "engineering/decisions"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Compare Zig-generated stencils with a small assembler approach.",
+        "Validate patch sites, relocations, calling conventions, and stack roots.",
+        "Recover generic state after every tested speculation failure.",
+        "Preserve the no-JIT execution profile.",
+        "Retain or reject the experiment through measured evidence."
+      ],
+      "read": [
+        "docs/JAVASCRIPT_RUNTIME.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0026",
+      "title": "Expand the full-browser feature frontier",
+      "workstream": "laboratory",
+      "depends_on": [
+        "FP-0019",
+        "FP-0020",
+        "FP-0021"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "engineering/plan.json",
+        "engineering/workstreams.json",
+        "specs",
+        "engineering/decisions"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "qualification-expansion-needs-independent-review",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review",
+        "fairpane-spec"
+      ],
+      "acceptance": [
+        "Decompose every remaining required capability family into concrete tasks.",
+        "Preserve media, guest graphics, workers, storage, accessibility, and application obligations.",
+        "Create exact applicability manifests without reducing required behavior to current passes.",
+        "Identify legal or platform blockers separately from engineering gaps.",
+        "Assign the next executable tasks instead of ending at the first demo."
+      ],
+      "read": [
+        "docs/ROADMAP.md",
+        "docs/QUALIFICATION.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0027",
+      "title": "Establish reproducible releases and stewardship",
+      "workstream": "stewardship",
+      "depends_on": [
+        "FP-0002",
+        "FP-0003"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "tools",
+        "docs",
+        "engineering/decisions",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Document the owner decisions required for license and publication.",
+        "Define source archives, build provenance, signatures, and reproducibility checks.",
+        "Define private security reporting and maintainer succession requirements.",
+        "Create downstream integration qualification templates.",
+        "Do not publish or invent legal identities without owner authorization."
+      ],
+      "read": [
+        "docs/ADOPTION_AND_GOVERNANCE.md",
+        "LICENSE-DECISION.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "qualification_level": "bootstrap-only",
+  "gates": [
+    {
+      "id": "repo-check",
+      "kind": "controller-check",
+      "timeout_ms": 60000,
+      "description": "Check repository contracts, task graph, sources, and dependency lint."
+    },
+    {
+      "id": "controller-test",
+      "kind": "controller-test",
+      "timeout_ms": 120000,
+      "description": "Run dependency-free tests for local integrity and qualification guards."
+    },
+    {
+      "id": "zig-fmt",
+      "kind": "zig",
+      "args": [
+        "fmt",
+        "--check",
+        "build.zig",
+        "src"
+      ],
+      "timeout_ms": 60000,
+      "description": "Check candidate Zig formatting with the locked compiler."
+    },
+    {
+      "id": "zig-test",
+      "kind": "zig",
+      "args": [
+        "build",
+        "test"
+      ],
+      "timeout_ms": 600000,
+      "description": "Run actual candidate Zig unit tests."
+    },
+    {
+      "id": "zig-build",
+      "kind": "zig",
+      "args": [
+        "build"
+      ],
+      "timeout_ms": 600000,
+      "description": "Build the candidate native library."
+    },
+    {
+      "id": "c-abi",
+      "kind": "c-abi",
+      "timeout_ms": 600000,
+      "description": "Build, link, and execute a C caller against the candidate library."
+    },
+    {
+      "id": "cross-windows-x86_64",
+      "kind": "zig",
+      "args": [
+        "build",
+        "check",
+        "-Dtarget=x86_64-windows"
+      ],
+      "timeout_ms": 600000,
+      "description": "Cross-compile only. This result does not qualify Windows execution."
+    },
+    {
+      "id": "cross-linux-aarch64",
+      "kind": "zig",
+      "args": [
+        "build",
+        "check",
+        "-Dtarget=aarch64-linux"
+      ],
+      "timeout_ms": 600000,
+      "description": "Cross-compile only. This result does not qualify AArch64 execution."
+    },
+    {
+      "id": "cross-macos-aarch64",
+      "kind": "zig",
+      "args": [
+        "build",
+        "check",
+        "-Dtarget=aarch64-macos"
+      ],
+      "timeout_ms": 600000,
+      "description": "Cross-compile only. This result does not qualify macOS execution."
+    }
+  ]
+}
