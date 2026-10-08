@@ -1,0 +1,17 @@
+{
+  "agent": null,
+  "agent_note": "My definitions don't include an agent name. The prompt only calls me a 'project specialist' assigned by the main agent, with a role to read tasks and primary sources and report requirements and ambiguities, and no editing.",
+  "tools_sorted": [
+    "_glob",
+    "_grep",
+    "_read",
+    "_yield",
+    "web_search"
+  ],
+  "tools_note": "These are the exact function names in my definitions. The prompt's 'Tool Inventory' section uses unprefixed names (read, grep, glob, web_search, yield), which differ from the callable function names for four tools.",
+  "result_tool": "_yield",
+  "browser_tool_exists": false,
+  "browser_note": "There is no browser or page-interaction tool. _read can fetch URLs as reader text or raw HTML, and web_search runs web searches. Neither drives a browser.",
+  "write_or_shell_tools": [],
+  "write_or_shell_note": "No tool can write files or run commands. _read, _grep and _glob only read. web_search only queries. _yield only returns the result. The _read description mentions 'proc://' and 'agent://' write semantics, but those apply to other tools that I don't have."
+}

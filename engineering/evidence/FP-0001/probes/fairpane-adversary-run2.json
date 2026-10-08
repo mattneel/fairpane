@@ -1,0 +1,21 @@
+{
+  "agent": "Probe2Adversary",
+  "tools_sorted": [
+    "_bash",
+    "_edit",
+    "_glob",
+    "_grep",
+    "_read",
+    "_wait",
+    "_write",
+    "_yield"
+  ],
+  "result_tool": "_yield",
+  "browser_tool_exists": false,
+  "write_or_shell_tools": [
+    "_bash",
+    "_edit",
+    "_write"
+  ],
+  "notes": "These names are copied exactly from my function definitions, and each one starts with an underscore. The tool-inventory text in the system prompt lists them without the underscore (read, grep, glob, edit, write, bash, yield, wait). No dedicated browser tool is defined. _read can fetch URLs as reader text. The 'agent' value is my peer roster id, not a role name. In the order of the definitions: _read, _grep, _glob, _edit, _write, _bash, _yield, _wait. The only tool I called was _yield. I read, wrote and ran nothing in the repository."
+}

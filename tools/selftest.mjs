@@ -9,7 +9,7 @@ import {
   readJson, writeJson, sha256, fileHash, safePath, collectFiles, hashInputs,
   validateLock, hostPlatform, verifyArchive, validatePlan, readyTasks,
   qualificationProblems, checkRepository, validateReceipt, runProcess, runGate,
-  REQUIRED_CAPABILITIES,
+  resolveExecutable, recordCommand, REQUIRED_CAPABILITIES,
 } from './lib.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -275,6 +275,50 @@ test('Unknown gates fail before execution', async () => {
 test('Evidence paths cannot escape their approved roots', async () => {
   const { dir } = await goodReceipt(); assert.throws(() => validateReceipt(dir, 'input.txt'), /outside an allowed directory/);
   assert.throws(() => validateReceipt(dir, 'out/evidence/../../input.txt'), /traversal/);
+});
+test('A gate writes a checkable receipt under an approved evidence directory', async () => {
+  const dir = gateFixture(), evidenceDir = 'engineering/evidence/FP-9999/gates';
+  const r = await runGate(dir, 'fixture', { evidenceDir });
+  assert.equal(r.status, 'pass');
+  assert.ok(r.receipt_path.startsWith(`${evidenceDir}/`) && r.outputs[0].path.startsWith(`${evidenceDir}/`));
+  assert.equal(validateReceipt(dir, r.receipt_path).result, 'pass');
+  assert.equal(fs.existsSync(path.join(dir, 'out')), false);
+});
+test('An unapproved evidence directory fails before any gate command runs', async () => {
+  for (const evidenceDir of ['tools', 'out/evidence/../tools', 'engineering/evidence-other']) {
+    const dir = gateFixture('import fs from "node:fs"; fs.writeFileSync("ran.txt", "ran");');
+    await assert.rejects(() => runGate(dir, 'fixture', { evidenceDir }));
+    assert.equal(fs.existsSync(path.join(dir, 'ran.txt')), false, evidenceDir);
+  }
+});
+test('Environment overrides reach the child and its command record', async () => {
+  const dir = temp(), logPath = path.join(dir, 'log'), env = { FAIRPANE_FIXTURE_OVERRIDE: 'override-7f3a' };
+  const r = await runProcess(process.execPath, ['-e', 'console.log(`child saw ${process.env.FAIRPANE_FIXTURE_OVERRIDE}`)'],
+    { cwd: dir, logPath, env });
+  assert.equal(r.exit_code, 0); assert.deepEqual(r.environment_overrides, env);
+  assert.match(fs.readFileSync(logPath, 'utf8'), /child saw override-7f3a/);
+  assert.equal(process.env.FAIRPANE_FIXTURE_OVERRIDE, undefined);
+});
+test('Executable resolution follows PATH order and ignores the working directory', () => {
+  const first = temp(), second = temp(), cwd = temp(), name = 'fixture-tool';
+  const make = dir => { const f = put(dir, process.platform === 'win32' ? `${name}.exe` : name, 'fixture'); fs.chmodSync(f, 0o755); return f; };
+  const late = make(second); make(cwd);
+  const pathEnv = [first, second].join(path.delimiter);
+  assert.equal(resolveExecutable(cwd, name, { pathEnv }), late);
+  const early = make(first);
+  assert.equal(resolveExecutable(cwd, name, { pathEnv }), early);
+  assert.throws(() => resolveExecutable(cwd, name, { pathEnv: '' }), /not on PATH/);
+});
+test('A recorded command keeps its output, exit status, and resolved executable', async () => {
+  const dir = gateFixture(), log = 'out/evidence/record.log', argv = ['-e', 'console.log("recorded-output"); process.exit(3)'];
+  const r = await recordCommand(dir, log, process.execPath, argv);
+  assert.equal(r.exit_code, 3);
+  const text = fs.readFileSync(path.join(dir, log), 'utf8');
+  assert.match(text, /recorded-output/); assert.ok(text.includes(`COMMAND ${JSON.stringify([process.execPath, ...argv])}`));
+  const missing = await recordCommand(dir, log, 'fairpane-absent-tool', []);
+  assert.equal(missing.exit_code, null); assert.match(missing.error, /not on PATH/);
+  assert.match(fs.readFileSync(path.join(dir, log), 'utf8'), /fairpane-absent-tool/);
+  await assert.rejects(() => recordCommand(dir, 'tools/record.log', process.execPath, ['-e', '']), /outside an allowed directory/);
 });
 test('The actual bootstrap repository passes its integrity check', () => {
   const r = checkRepository(root); assert.equal(r.result, 'pass'); assert.equal(r.level, 'bootstrap-integrity-only');

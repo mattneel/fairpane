@@ -1,0 +1,102 @@
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","--version"]
+omp/18.8.6
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","arguments":["--version"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":75}
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","config","get","task.maxConcurrency","--json"]
+{
+  "key": "task.maxConcurrency",
+  "value": 4,
+  "type": "number",
+  "description": "Maximum number of subagents running concurrently"
+}
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","arguments":["config","get","task.maxConcurrency","--json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":150}
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","config","get","task.maxRuntimeMs","--json"]
+{
+  "key": "task.maxRuntimeMs",
+  "value": 0,
+  "type": "number",
+  "description": "Hard wall-clock limit per subagent (ms). 0 disables it. Defense-in-depth against provider-side stream hangs that escape the inference-layer watchdog; triggers a normal subagent abort with a 'timed out' reason."
+}
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","arguments":["config","get","task.maxRuntimeMs","--json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":158}
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","config","get","task.softRequestBudget","--json"]
+{
+  "key": "task.softRequestBudget",
+  "value": 0,
+  "type": "number",
+  "description": "Soft per-subagent request budget (assistant requests per run). Crossing it injects a wrap-up steering notice (see task.softRequestBudgetNotice); at 1.5x the budget the run is force-stopped and the agent must yield its partial findings. 0 disables the guard. Bundled scout/sonic agents cap out at a lower built-in budget, so a value below that cap still applies to them."
+}
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","arguments":["config","get","task.softRequestBudget","--json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":141}
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","config","get","task.maxRecursionDepth","--json"]
+{
+  "key": "task.maxRecursionDepth",
+  "value": 2,
+  "type": "number",
+  "description": "How many levels deep subagents can spawn their own subagents"
+}
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","arguments":["config","get","task.maxRecursionDepth","--json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":143}
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","config","get","task.prewalk","--json"]
+{
+  "key": "task.prewalk",
+  "value": false,
+  "type": "boolean",
+  "description": "Arm prewalk for the bundled generic `task` subagent: it starts on its resolved model, plans and begins the implementation, then hands off to the 'smol' role at its first edit/write. Per-agent overrides (task.agentPrewalk, configured from the /agents hub) and user agent `prewalk` frontmatter apply regardless of this toggle."
+}
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","arguments":["config","get","task.prewalk","--json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":139}
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","config","get","task.isolation.enabled","--json"]
+{
+  "key": "task.isolation.enabled",
+  "value": true,
+  "type": "boolean",
+  "description": "Run subagents in an isolated copy of the checkout and integrate their changes afterwards"
+}
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","arguments":["config","get","task.isolation.enabled","--json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":139}
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","config","get","task.isolation.apply","--json"]
+{
+  "key": "task.isolation.apply",
+  "value": false,
+  "type": "boolean",
+  "description": "Automatically apply successful isolated task changes to the parent checkout; disable to retain patch or branch artifacts"
+}
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","arguments":["config","get","task.isolation.apply","--json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":147}
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","config","get","task.isolation.merge","--json"]
+{
+  "key": "task.isolation.merge",
+  "value": "patch",
+  "type": "enum",
+  "description": "How isolated task changes are integrated (patch apply or branch merge)"
+}
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","arguments":["config","get","task.isolation.merge","--json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":142}
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","config","get","tools.approvalMode","--json"]
+{
+  "key": "tools.approvalMode",
+  "value": "yolo",
+  "type": "enum",
+  "description": "Default approval behavior for tool calls. 'Always ask' auto-approves read-only tools only. 'Write' auto-approves read and workspace-write tools. 'Yolo' auto-approves all tiers; user policy may still prompt or block."
+}
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\omp\\omp.exe","arguments":["config","get","tools.approvalMode","--json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":141}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'); for (const d of ['.omp/agents','.omp/prompts']) for (const f of fs.readdirSync(d).sort()) { const t=fs.readFileSync(d+'/'+f,'utf8'); const m=/^---\\n([^]*?)\\n---/.exec(t); console.log(d+'/'+f+' :: '+(m?m[1].split('\\n').filter(l=>/^(name|tools|description):/.test(l)).join(' | '):'NO FRONTMATTER')); }"]
+.omp/agents/fairpane-adversary.md :: name: fairpane-adversary | description: Develop independent counterexamples and failure-path tests. | tools: [read, grep, glob, edit, write, bash]
+.omp/agents/fairpane-bindings.md :: name: fairpane-bindings | description: Implement idiomatic wrappers against a frozen C contract. | tools: [read, grep, glob, edit, write, bash]
+.omp/agents/fairpane-compiler.md :: name: fairpane-compiler | description: Qualify exact Zig master upgrades in an isolated branch. | tools: [read, grep, glob, edit, write, bash, web_search]
+.omp/agents/fairpane-core.md :: name: fairpane-core | description: Implement bounded portable Zig engine tasks. | tools: [read, grep, glob, edit, write, bash]
+.omp/agents/fairpane-js.md :: name: fairpane-js | description: Implement and measure the Zig-native JavaScript runtime. | tools: [read, grep, glob, edit, write, bash]
+.omp/agents/fairpane-platform.md :: name: fairpane-platform | description: Implement native host, broker, and application behavior. | tools: [read, grep, glob, edit, write, bash]
+.omp/agents/fairpane-review.md :: name: fairpane-review | description: Review implementation behavior without write or shell access. | tools: [read, grep, glob]
+.omp/agents/fairpane-security.md :: name: fairpane-security | description: Review trust boundaries and hostile-input behavior read-only. | tools: [read, grep, glob]
+.omp/agents/fairpane-spec.md :: name: fairpane-spec | description: Extract normative behavior and acceptance cases from primary sources. | tools: [read, grep, glob, web_search]
+.omp/agents/fairpane-text.md :: name: fairpane-text | description: Implement text, font, Unicode, and inline layout behavior. | tools: [read, grep, glob, edit, write, bash]
+.omp/prompts/fairpane-audit.md :: description: Audit Fairpane claims against implementation and actual evidence
+.omp/prompts/fairpane-handoff.md :: description: Record an honest checkpoint for the next Fairpane session
+.omp/prompts/fairpane-resume.md :: description: Resume Fairpane from durable task state and evidence
+.omp/prompts/fairpane-start.md :: description: Execute the Fairpane founding assignment from the repository contract
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'); for (const d of ['.omp/agents','.omp/prompts']) for (const f of fs.readdirSync(d).sort()) { const t=fs.readFileSync(d+'/'+f,'utf8'); const m=/^---\\n([^]*?)\\n---/.exec(t); console.log(d+'/'+f+' :: '+(m?m[1].split('\\n').filter(l=>/^(name|tools|description):/.test(l)).join(' | '):'NO FRONTMATTER')); }"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}

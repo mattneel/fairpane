@@ -1,0 +1,22 @@
+{
+  "task": "FP-0001 environment probe",
+  "tools_sorted": [
+    "_glob",
+    "_grep",
+    "_read",
+    "_yield"
+  ],
+  "tool_count": 4,
+  "tool_used_to_return_result": "_yield",
+  "name_note": "These names come straight from the function definitions, including the leading underscore. The system prompt's Tool Inventory lists them without the underscore (read, grep, glob, yield). The callable names are the underscored ones.",
+  "capabilities": {
+    "_glob": "Reads only. It matches file and directory paths using glob patterns.",
+    "_grep": "Reads only. It runs regex searches over files, directories, globs or URLs.",
+    "_read": "Reads only. It reads files, directories, URLs, archives, SQLite, JSON, PDFs, images, video frames and internal URIs. It has no write mode.",
+    "_yield": "Sends this subagent's result back to the main agent. It does not touch the filesystem."
+  },
+  "can_write_files": false,
+  "can_run_shell_commands": false,
+  "write_shell_note": "None of these tools can write or edit files, run shell commands, or execute processes. The system prompt describes write operations for internal URLs (ssh:// write, proc:// stdin write, agent:// message write), but none of the tools here can do them. _read's description only covers reading.",
+  "contract_compliance": "I didn't read, edit, write or execute anything in the repository. _yield was the only tool I called."
+}

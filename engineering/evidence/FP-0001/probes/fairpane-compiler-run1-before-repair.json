@@ -1,0 +1,25 @@
+{
+  "agent_id": "ProbeCompilerTools",
+  "task": "FP-0001 environment probe",
+  "tools_sorted": [
+    "_bash",
+    "_edit",
+    "_glob",
+    "_grep",
+    "_read",
+    "_wait",
+    "_write",
+    "_yield",
+    "web_search"
+  ],
+  "tool_count": 9,
+  "result_tool": "_yield",
+  "sort_basis": "ASCII byte order. The '_' character (0x5F) sorts before lowercase letters, so the underscore-prefixed names come before 'web_search'.",
+  "browser_tool_exists": false,
+  "web_search_tool_exists": true,
+  "observations": [
+    "In the function definitions, every tool name except 'web_search' starts with an underscore: _bash, _edit, _glob, _grep, _read, _wait, _write and _yield. The prompt text (Tool Inventory and tool descriptions) uses the names without the underscore: read, grep, glob, edit, write, bash, yield, wait. The callable names are the underscore-prefixed ones.",
+    "The 'firecrawl' skills and other prompt text mention browser use, but no tool named 'browser' exists. The '_read' description says 'browser only if needed', yet no browser tool is defined.",
+    "No tools were called other than '_yield'. Nothing in the repository was read, edited, written or executed."
+  ]
+}

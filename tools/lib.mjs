@@ -282,24 +282,43 @@ export function validateReceipt(root, relative, { current = true } = {}) {
   }
   return { result: 'pass', gate: r.gate_id, trust: r.trust, current_source: current };
 }
+function copyFileToDescriptor(file, fd) {
+  const source = fs.openSync(file, 'r'), buffer = Buffer.alloc(128 * 1024);
+  try {
+    for (;;) {
+      const count = fs.readSync(source, buffer, 0, buffer.length, null);
+      if (!count) break;
+      let offset = 0;
+      while (offset < count) offset += fs.writeSync(fd, buffer, offset, count - offset);
+    }
+  } finally { fs.closeSync(source); }
+}
 /** Execute without a shell. OS sandboxing and disk quotas remain separate. */
 export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env } = {}) {
   invariant(typeof executable === 'string' && Array.isArray(args), 'An executable and argument array are required.');
   fs.mkdirSync(path.dirname(logPath), { recursive: true });
   const fd = fs.openSync(logPath, 'a'), started = Date.now();
   fs.writeSync(fd, `\nCOMMAND ${JSON.stringify([executable, ...args])}\n`);
+  // The child writes to a fresh file, not the append-only log handle.
+  // MSYS2 programs on Windows exit with status 1 and no output when given an append-only handle.
+  const capture = path.join(os.tmpdir(), `fairpane-output-${crypto.randomUUID()}.log`);
+  const outFd = fs.openSync(capture, 'wx');
   return new Promise(resolve => {
     let child, timer, timedOut = false, processError = null, settled = false;
     const finish = (code, signal) => {
       if (settled) return;
       settled = true; clearTimeout(timer);
+      fs.closeSync(outFd);
+      try { copyFileToDescriptor(capture, fd); }
+      catch (e) { processError ??= `Output capture failed: ${e.message}`; }
+      finally { try { fs.rmSync(capture, { force: true }); } catch { /* A surviving descendant can still hold the file. */ } }
       const result = { executable, arguments: args, exit_code: code, signal, timed_out: timedOut,
         error: processError, duration_ms: Date.now() - started };
       if (env) result.environment_overrides = env;
       fs.writeSync(fd, `RESULT ${JSON.stringify(result)}\n`); fs.closeSync(fd); resolve(result);
     };
     try {
-      child = spawn(executable, args, { cwd, stdio: ['ignore', fd, fd], shell: false,
+      child = spawn(executable, args, { cwd, stdio: ['ignore', outFd, outFd], shell: false,
         env: env ? { ...process.env, ...env } : process.env, windowsHide: true, detached: process.platform !== 'win32' });
       child.on('error', error => { processError = error.message; finish(null, null); });
       child.on('close', (code, signal) => finish(code, signal));
@@ -315,11 +334,45 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, 
     } catch (e) { processError = e.message; finish(null, null); }
   });
 }
-export async function runGate(root, id) {
+/** Resolve a command name through PATH only, so a record names the executable that actually ran. */
+export function resolveExecutable(root, name, { pathEnv = process.env.PATH ?? '', platform = process.platform } = {}) {
+  invariant(typeof name === 'string' && name.length > 0, 'An executable name is required.');
+  if (name.includes('/') || name.includes('\\')) {
+    const file = path.resolve(root, name);
+    invariant(fs.existsSync(file) && fs.statSync(file).isFile(), `The executable is absent: ${name}`);
+    return file;
+  }
+  const suffixes = platform === 'win32' ? (path.extname(name) ? [''] : ['.com', '.exe']) : [''];
+  for (const dir of pathEnv.split(platform === 'win32' ? ';' : ':').filter(Boolean)) {
+    for (const suffix of suffixes) {
+      const file = path.resolve(dir, name + suffix);
+      try {
+        if (!fs.statSync(file).isFile()) continue;
+        if (platform !== 'win32') fs.accessSync(file, fs.constants.X_OK);
+        return file;
+      } catch { /* Try the next PATH entry. */ }
+    }
+  }
+  throw new Error(`The executable is not on PATH: ${name}`);
+}
+/** Run one command without a shell and append its actual output and result to an evidence log. */
+export async function recordCommand(root, logRelative, executable, args, { cwd = root, env, timeoutMs = 600000 } = {}) {
+  const logPath = evidencePath(root, logRelative, { mustExist: false });
+  let resolved;
+  try { resolved = resolveExecutable(root, executable); }
+  catch (e) {
+    fs.mkdirSync(path.dirname(logPath), { recursive: true });
+    const result = { executable, arguments: args, exit_code: null, signal: null, timed_out: false, error: e.message, duration_ms: 0 };
+    fs.appendFileSync(logPath, `\nCOMMAND ${JSON.stringify([executable, ...args])}\nRESULT ${JSON.stringify(result)}\n`);
+    return result;
+  }
+  return runProcess(resolved, args, { cwd, logPath, timeoutMs, env });
+}
+export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
   const gate = readJson(safePath(root, 'engineering/gates.json')).gates.find(g => g.id === id);
   invariant(gate, `Unknown gate: ${id}`);
   const before = fingerprints(root);
-  const prefix = `out/evidence/${new Date().toISOString().replace(/[:.]/g, '-')}-${id}-${crypto.randomUUID().slice(0, 8)}`;
+  const prefix = `${evidenceDir}/${new Date().toISOString().replace(/[:.]/g, '-')}-${id}-${crypto.randomUUID().slice(0, 8)}`;
   const logRelative = `${prefix}.log`, logPath = evidencePath(root, logRelative, { mustExist: false });
   fs.mkdirSync(path.dirname(logPath), { recursive: true });
   fs.writeFileSync(logPath, `Fairpane local gate: ${id}\nTrust: unsigned-local-integrity-only\n`);

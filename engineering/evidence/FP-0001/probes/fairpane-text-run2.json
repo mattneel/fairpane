@@ -1,0 +1,21 @@
+{
+  "agent": "Probe2Text",
+  "tools_sorted": [
+    "_bash",
+    "_edit",
+    "_glob",
+    "_grep",
+    "_read",
+    "_wait",
+    "_write",
+    "_yield"
+  ],
+  "result_tool": "_yield",
+  "browser_tool_exists": false,
+  "write_or_shell_tools": [
+    "_bash",
+    "_edit",
+    "_write"
+  ],
+  "notes": "These names come straight from my own function definitions. No other tools were called, and nothing in the repository was read, edited, written or run, as the contract required. Some prompt text calls these tools by shorter names (read, grep, glob, edit, write, bash, yield, wait), but the callable function names have a leading underscore. No function in my definitions is a browser tool. The _read tool can fetch URLs as reader text or raw HTML, but it cannot drive a browser."
+}

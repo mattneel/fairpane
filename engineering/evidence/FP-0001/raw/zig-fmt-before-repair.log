@@ -1,0 +1,42 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","fmt","--check","out/wt-89109be/build.zig","out/wt-89109be/src"]
+out/wt-89109be/src\c_api.zig
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["fmt","--check","out/wt-89109be/build.zig","out/wt-89109be/src"],"exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":12}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","fmt","out/fmt-before/c_api.zig"]
+out/fmt-before/c_api.zig
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["fmt","out/fmt-before/c_api.zig"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":14}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--no-color","out/wt-89109be/src/c_api.zig","out/fmt-before/c_api.zig"]
+diff --git a/out/wt-89109be/src/c_api.zig b/out/fmt-before/c_api.zig
+index 212e12e..faab7e1 100644
+--- a/out/wt-89109be/src/c_api.zig
++++ b/out/fmt-before/c_api.zig
+@@ -17,14 +17,14 @@ export fn fp_abi_revision() callconv(.c) u32 {
+ }
+ 
+ export fn fp_query_capabilities(out: ?*Capabilities, out_size: usize) callconv(.c) u32 {
+-    const result = out orelse return @intFromEnum(Status.invalid_argument);
+-    if (out_size < @sizeOf(Capabilities)) return @intFromEnum(Status.invalid_argument);
++    const result = out orelse return @backingInt(Status.invalid_argument);
++    if (out_size < @sizeOf(Capabilities)) return @backingInt(Status.invalid_argument);
+     result.* = .{
+         .struct_size = @sizeOf(Capabilities),
+         .abi_revision = abi_revision,
+         .feature_bits = 0,
+     };
+-    return @intFromEnum(Status.ok);
++    return @backingInt(Status.ok);
+ }
+ 
+ test "the bootstrap reports no browser features" {
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--no-color","out/wt-89109be/src/c_api.zig","out/fmt-before/c_api.zig"],"exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--no-color","out/fmt-before/c_api.zig","src/c_api.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--no-color","out/fmt-before/c_api.zig","src/c_api.zig"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const t=require('fs').readFileSync(process.argv[1],'utf8').split(/\\n/); t.forEach((l,i)=>{ if (/id=\"intFromEnum\"|Deprecated\\. Use <a href=\"#backingInt\"|id=\"backingInt\"/.test(l)) console.log((i+1)+': '+l.trim()); })",".tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-windows/doc/langref.html"]
+10139: <h3 id="backingInt"><a href="#toc-backingInt">@backingInt</a> <a class="hdr" href="#backingInt">§</a></h3>
+11114: <h3 id="intFromEnum"><a href="#toc-intFromEnum">@intFromEnum</a> <a class="hdr" href="#intFromEnum">§</a></h3>
+11118: Deprecated. Use <a href="#backingInt">@backingInt</a> or <a href="#bitCast">@bitCast</a> instead.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const t=require('fs').readFileSync(process.argv[1],'utf8').split(/\\n/); t.forEach((l,i)=>{ if (/id=\"intFromEnum\"|Deprecated\\. Use <a href=\"#backingInt\"|id=\"backingInt\"/.test(l)) console.log((i+1)+': '+l.trim()); })",".tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-windows/doc/langref.html"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}

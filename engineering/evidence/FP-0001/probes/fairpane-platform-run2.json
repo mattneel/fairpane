@@ -1,0 +1,26 @@
+{
+  "agent": "Probe2Platform",
+  "tools_sorted": [
+    "_bash",
+    "_edit",
+    "_glob",
+    "_grep",
+    "_read",
+    "_wait",
+    "_write",
+    "_yield"
+  ],
+  "result_tool": "_yield",
+  "browser_tool_exists": false,
+  "write_or_shell_tools": [
+    "_bash",
+    "_edit",
+    "_write"
+  ],
+  "notes": [
+    "The function definitions name every tool with a leading underscore. The system prompt's Tool Inventory lists the same eight tools without the underscore: read, grep, glob, edit, write, bash, yield, wait.",
+    "The _read description says 'browser only if needed', but this runtime defines no browser tool.",
+    "_write can also send peer messages (agent://<id>) and write to xd://report_issue. I didn't use it because the contract allows only the result tool.",
+    "I made no repository reads, edits, writes or command runs. _yield was the only tool called."
+  ]
+}

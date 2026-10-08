@@ -21,7 +21,8 @@ It does not publish code, change approval settings, or choose an account identit
 | `status` | Reports task and capability state. |
 | `fingerprint` | Hashes declared source and policy inventories. |
 | `install-zig` | Downloads and checks the exact locked compiler in a local directory. |
-| `run <gate-id>` | Executes a gate without a command shell and writes its receipt. |
+| `run <gate-id> [--evidence-dir <dir>]` | Executes a gate without a command shell and writes its receipt. |
+| `record [--cwd <dir>] [--env NAME=VALUE]... <log> <executable> [arguments...]` | Runs one command without a shell and appends its output and result to an evidence log. |
 | `evidence-check <path>` | Checks a passed receipt against current inputs and output artifacts. |
 | `release-check` | Reports unmet obligations and returns a nonzero status. |
 
@@ -41,6 +42,23 @@ A failed gate retains its failure result.
 A missing compiler does not count as successful execution.
 Cross-compilation gates compile code without target execution.
 They cannot establish native target support.
+
+Gate receipts go to `out/evidence` by default.
+`--evidence-dir` writes the receipt and log under another directory inside `out/evidence` or `engineering/evidence`.
+A receipt under `engineering/evidence` keeps its log in the same tracked directory.
+A clean checkout of the receipt's source commit can therefore check it.
+
+## Record a command
+
+1. Select a log path under `out/evidence` or `engineering/evidence`.
+2. Run `node tools/fairpane.mjs record <log> <executable> [arguments...]`.
+3. Read the appended `COMMAND` line, the output, and the `RESULT` line.
+
+The command resolves a bare executable name through `PATH` only and records the absolute path.
+It never searches the working directory for an executable.
+A relative executable path resolves from the repository root.
+The `RESULT` line keeps the exit status, signal, watchdog outcome, and environment overrides.
+The `record` command exits with status 1 when the recorded command fails.
 
 ## Evidence boundary
 

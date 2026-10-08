@@ -1,0 +1,183 @@
+{
+  "verdict": "reject",
+  "summary": "The engineering changes are correct, and the gate receipts check out. Every receipt has the gate id the README claims, and every recorded exit code is 0 (c-abi has 0, 0, 0). The source digest 07ffd710… (76 files) and policy digest ec150588… (12 files) are identical before and after every gate. Each output sha256 in a receipt equals its entry in SHA256SUMS. I recounted the log byte sizes for zig-fmt (514), zig-build (465), zig-test (480) and cross-windows (545) from the log text, and each matches its receipt. The 7/7 Zig test count equals the test blocks in src (2 in c_api.zig, 4 in web_string.zig, 1 in root.zig). The verdict is still reject. Criterion 5 has no durable raw evidence: the main session wrote the OMP config output to a file and then deleted it with `rm -f out/omp-config-list.json`. Criteria 1 and 6 also rest on prose that no committed log or receipt supports. The project's own rules say 'A prose claim of success is not an acceptance receipt' (docs/AGENT_OPERATIONS.md) and 'Never claim a test ran without its actual output and exit status' (AGENTS.md). All the missing evidence can be captured cheaply, and no code defect blocks acceptance.",
+  "acceptance_criteria": [
+    {
+      "id": 1,
+      "text": "Record actual Zig, OMP, Git, Node or Bun, OS, and architecture versions",
+      "status": "partially supported",
+      "evidence": "Supported by receipts: platform win32, architecture x64, os_release 10.0.26200, Node v26.7.0 at C:\\nvm4w\\nodejs\\node.exe, and zig_version 0.18.0-dev.120+9fe22a29b. The receipt records zig_version only after checkCompiler confirms that `zig version` equals the lock (tools/lib.mjs runGate/checkCompiler). .tools/zig/.../fairpane-install.json has a BOM and Windows PowerShell 5.1 JSON formatting, which indirectly confirms that 5.1 ran. Not supported by any committed artifact: Git 2.54.0.windows.1, OMP 18.8.6, Bun 1.4.2, the PowerShell versions, 'Windows 11 Pro', and the PATH Zig version (README lines 14-22). The extended `doctor` was run twice but its output was not saved."
+    },
+    {
+      "id": 2,
+      "text": "Check the locked archive and install it locally without global configuration changes",
+      "status": "supported",
+      "evidence": "install-zig-attempt1.log shows the honest failure (Get-FileHash not recognized, install-exit=1). install-zig-attempt2.log shows install-exit=0 and downloaded=true. Get-Zig.ps1 checks the size (line 53) and the SHA-256 (line 54) before the archive moves out of .partial (lines 68-69), checks again at line 74, and checks the compiler version (lines 37-41). The install goes under .tools only. Not preserved: the independent sha256sum (README line 58) and the global-cache `find` check (line 70)."
+    },
+    {
+      "id": 3,
+      "text": "Compile the candidate library and run every Zig test with the exact master pin",
+      "status": "supported",
+      "evidence": "The zig-build receipt (exit 0) and the zig-test receipt (exit 0, 55762 ms) both name .tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-windows/zig.exe. zig-test-summary.log reports '7/7 tests passed', which matches the 7 test blocks in src. The log writes the command as bare `zig`. However, build.zig lines 5-8 panic on any other compiler version, so only the pinned compiler could pass that run."
+    },
+    {
+      "id": 4,
+      "text": "Link and execute the C smoke test on the actual host",
+      "status": "supported",
+      "evidence": "The c-abi receipt has 3 commands, all exit 0: `zig build --prefix out/c-abi-build`, `zig cc -std=c11 -Wall -Wextra -Werror tests/c/abi_smoke.c ... fairpane.lib`, and out/c-abi-smoke.exe. The host is win32/x64. c-assert-negative-control.log shows that assert(0) aborts with a nonzero status (run-exit=9). Its line number 2 matches out/assert-control/fail.c."
+    },
+    {
+      "id": 5,
+      "text": "Check OMP prompt discovery and specialist tool grants against the installed schema",
+      "status": "unmet (no durable evidence)",
+      "evidence": "README lines 111-147 are prose only. The `omp config list --json` output was written to out/omp-config-list.json and then deleted (history://Main: `rm -f out/omp-config-list.json`). There is no log for `omp config get`, the agent listing, or prompt discovery. The four probe results exist only as session artifacts (agent://ProbeCoreTools, ProbeReviewTools, ProbeSpecTools, ProbeCompilerTools). I read them, and they match the README grant table. My own session's grant (read, grep, glob, yield) also matches the fairpane-review row. None of this is committed. The prompt-discovery inference on line 128 is also weak (finding F6)."
+    },
+    {
+      "id": 6,
+      "text": "Preserve failures honestly and establish Git history only with a valid local identity",
+      "status": "partially supported",
+      "evidence": "The install failure is preserved. The supplied failed zig-test preparation receipt is still in out/evidence. .git/logs/HEAD shows that all three commits (89109be, 86de695, and the amend 70b876a) are authored by 'Matt Neel <m@neel.codes>'. .git/config has no remote and no repository-local identity, which is consistent with README line 37. Not preserved: the pre-repair `zig fmt --check` failure on src/c_api.zig (README line 63), the PSModulePath/Get-FileHash diagnosis, and the `git config --show-origin` output."
+    },
+    {
+      "id": 7,
+      "text": "Keep the exact compiler pin and founding policy unchanged",
+      "status": "partially supported (needs main-agent git check)",
+      "evidence": "toolchains/zig.lock.json and zig-version.txt both hold 0.18.0-dev.120+9fe22a29b, and the x86_64-windows sha256 and size match README line 57. For repo-check (83889f6c…), controller-test (43baf0f8…) and zig-test (277b10a2…), gate_sha256 in the supplied preparation receipts equals gate_sha256 in the final receipts, so those gates.json entries are unchanged. policy_roots includes `toolchains`, so the omp-baseline.json edit explains the policy digest change (3b9a8282… to ec150588…). I cannot decompress git objects, and the README's `git diff --stat` claim (line 151) was not preserved, so I could not verify it."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "blocker",
+      "file": "engineering/evidence/FP-0001/README.md",
+      "line": 111,
+      "title": "OMP schema, prompt-discovery and grant checks have no preserved raw output; the config output was deleted",
+      "reasoning": "Criterion 5 rests only on README prose (lines 111-147). history://Main shows `omp config list --json > out/omp-config-list.json` followed by `rm -f out/omp-config-list.json`. The probe outputs are not committed either. docs/AGENT_OPERATIONS.md says 'A prose claim of success is not an acceptance receipt.'",
+      "reproduction": "Search engineering/evidence/FP-0001 for any omp output. Only README.md mentions it. Fix: save `omp --version`, `omp config list --json`, `omp config get <key> --json` for each key, and the four probe yields (agent://Probe*Tools) under engineering/evidence/FP-0001, then add them to SHA256SUMS."
+    },
+    {
+      "severity": "major",
+      "file": "engineering/evidence/FP-0001/README.md",
+      "line": 14,
+      "title": "Host tool versions cite `doctor` and `--version` output that was never preserved",
+      "reasoning": "The FP-0001 change extended `doctor` (tools/fairpane.mjs lines 43-48) to report os_version, bun, git, omp and path_zig. Its output was not saved. The Git, OMP, Bun and PowerShell versions, the OS edition name, and the PATH Zig version (lines 14-22) appear in no log or receipt.",
+      "reproduction": "Save the output of `node tools/fairpane.mjs doctor > engineering/evidence/FP-0001/doctor.json` along with its exit status. Do the same for `$PSVersionTable` in powershell.exe and in pwsh."
+    },
+    {
+      "severity": "major",
+      "file": "engineering/evidence/FP-0001/README.md",
+      "line": 63,
+      "title": "The pre-repair zig fmt failure was not preserved",
+      "reasoning": "AGENTS.md says to keep failures with their actual output and exit status. Only the installer failure has a log. The fmt failure that justified the src/c_api.zig edit is prose only. history://Main shows that it ran (`$Z fmt --stdin < src/c_api.zig | diff -u ...`).",
+      "reproduction": "Run `git show 89109be:src/c_api.zig | .tools/zig/.../zig.exe fmt --check --stdin`. Save the output and exit code as engineering/evidence/FP-0001/zig-fmt-before-repair.log."
+    },
+    {
+      "severity": "major",
+      "file": "engineering/evidence/FP-0001/receipts/2026-10-08T23-31-07-738Z-c-abi-586855dc.json",
+      "line": 95,
+      "title": "Committed receipts cannot pass evidence-check from a clean checkout",
+      "reasoning": "outputs[].path names out/evidence/…, which .gitignore excludes. In a fresh clone, validateReceipt calls evidencePath(root, o.path), and safePath requires the path to exist by default. state.json lists these receipts as FP-0001 evidence, but the repository's own checker cannot validate them. Only the unanchored SHA256SUMS remains. README line 100 notes the path but not the consequence.",
+      "reproduction": "Clone 70b876a and run `node tools/fairpane.mjs evidence-check engineering/evidence/FP-0001/receipts/2026-10-08T23-31-07-738Z-c-abi-586855dc.json`. Expected failure: `Fairpane: Missing file or directory: out/evidence/2026-10-08T23-31-07-738Z-c-abi-586855dc.log`."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/evidence/FP-0001/zig-test-summary.log",
+      "line": 1,
+      "title": "Hand-written logs omit the actual executable and environment",
+      "reasoning": "Both zig-test-summary.log and c-assert-negative-control.log write the command as bare `zig`, while the PATH zig is 0.17.0-dev.2453+zigpp. history://Main shows that both ran with Z set to the pinned path and ZIG_GLOBAL_CACHE_DIR exported, but the logs do not record that. The build.zig version guard protects the summary run. Nothing shows which compiler built the negative control. README line 25 ('No gate or evidence command in this record used it') cannot be checked from the logs alone.",
+      "reproduction": "Read line 1 of each log."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/evidence/FP-0001/README.md",
+      "line": 128,
+      "title": "Overclaim: a matching message does not show that OMP expanded the template",
+      "reasoning": "The first user message in history://Main does equal the body of .omp/prompts/fairpane-start.md. Pasted text would produce the same match. Line 129 ('binary contains the prompts capability') comes from scanning the omp binary and is not a discovery test.",
+      "reproduction": "Compare history://Main with .omp/prompts/fairpane-start.md. They are identical, but nothing records how the message was entered. Fix: preserve a command or log that lists the discovered project prompts, or weaken the claim."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/evidence/FP-0001/README.md",
+      "line": 143,
+      "title": "Unsupported claim about the eval tool",
+      "reasoning": "No log or probe shows that browser automation lives in an `eval` tool. The probes show only that `browser` is absent.",
+      "reproduction": "None of the four probe yields mentions eval."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/evidence/FP-0001/README.md",
+      "line": 29,
+      "title": "Other prose-only claims",
+      "reasoning": "No raw output is preserved for these claims: the manifest check exited 0 for 86 entries (line 29), the preparation-receipt evidence-check results (lines 30-31), the independent sha256sum (line 58), the LOCALAPPDATA `find` (line 70), the per-receipt evidence-check passes (line 76), the Bun check and test (line 106; out/bun-check.json was deleted before the gate run), and the git diff --stat (line 151). out/fp0001-gate-run.txt exists but was not copied into the evidence.",
+      "reproduction": "Look in engineering/evidence/FP-0001. None of these outputs is present."
+    },
+    {
+      "severity": "minor",
+      "file": "tools/lib.mjs",
+      "line": 328,
+      "title": "New gate behavior has no controller test",
+      "reasoning": "tools/README.md ('Extend the controller', step 1) requires failing tests for new gate behavior. The env override and environment_overrides recording (lib.mjs lines 286-297, 302-303, 334-335) and the new doctor fields have no test in tools/selftest.mjs, which still has 55 tests, the same as the preparation run.",
+      "reproduction": "Grep tools/selftest.mjs for env, environment_overrides or ZIG_GLOBAL_CACHE_DIR. Nothing matches."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/HANDOFF.md",
+      "line": 8,
+      "title": "Handoff is stale",
+      "reasoning": "It still says 'Execute task FP-0001' and 'No Zig execution, Windows execution, or OMP session result is claimed here', while state.json marks FP-0001 implemented. AGENT_OPERATIONS step 8 and the founding rules require the next executable action to be on disk.",
+      "reproduction": "Read engineering/HANDOFF.md lines 8-29."
+    },
+    {
+      "severity": "note",
+      "file": "scripts/Get-Zig.ps1",
+      "line": 43,
+      "title": "The .NET SHA-256 function is correct and both checks fail closed",
+      "reasoning": "It opens the archive by absolute path through [IO.File]::OpenRead and disposes the hash algorithm and the stream in finally blocks. It returns lowercase hex with the '-' separators removed. Any exception propagates under ErrorActionPreference Stop. Assert-Archive throws on a size mismatch before hashing and on a digest mismatch. The `-ne` comparison is case-insensitive, which is harmless because the lock hash is validated as lowercase hex at line 24. The partial download is removed in finally (line 71), and the downloaded file is checked again at line 74. Only Get-FileHash, which is defined in Microsoft.PowerShell.Utility.psm1 in 5.1, was replaced. The binary cmdlets the script still uses are unaffected, and attempt 2 is consistent with that.",
+      "reproduction": "n/a"
+    },
+    {
+      "severity": "note",
+      "file": "tools/lib.mjs",
+      "line": 330,
+      "title": "The env override is scoped correctly; failure records and stale-receipt checks are intact",
+      "reasoning": "env is set only inside the zig/c-abi branch, and the controller receipts have no environment_overrides. The c-abi smoke binary also inherits the override, and that is recorded. commands.push runs before the invariant, so failed records are kept. validateReceipt is unchanged and still rejects stale source or policy. tools/ is a source root, so the lib.mjs edit invalidates earlier receipts. The override is not covered by gate_sha256, so the protected gates.json is untouched.",
+      "reproduction": "n/a"
+    },
+    {
+      "severity": "note",
+      "file": "tools/fairpane.mjs",
+      "line": 43,
+      "title": "Doctor output is truthful",
+      "reasoning": "compiler.version is reported only after checkCompiler confirms the binary's output. versionOf reports failures as available:false. path_zig is labeled as never used by gates. On Windows, libuv resolves bun, git and zig to .exe without a shell. The README's 'Windows 11 Pro' comes from os.version(), and history://Main shows that it was run.",
+      "reproduction": "n/a"
+    },
+    {
+      "severity": "note",
+      "file": ".omp/agents/fairpane-spec.md",
+      "line": 4,
+      "title": "Agent declarations match the recorded grants",
+      "reasoning": "fairpane-spec declares [read, grep, glob, web_search], and its probe shows _glob, _grep, _read, _yield, web_search. fairpane-compiler declares [read, grep, glob, edit, write, bash, web_search], and its probe shows those tools plus the automatic _wait and _yield. The core and review probes also match. The probes ran before the edit (history://Main order), so the 'before repair' column is accurate. No probe was re-run after the edit, and the six agents that were never probed are judged only by analogy.",
+      "reproduction": "Compare agent://ProbeSpecTools and agent://ProbeCompilerTools with the frontmatter of the two agent files."
+    },
+    {
+      "severity": "note",
+      "file": "src/c_api.zig",
+      "line": 21,
+      "title": "The @backingInt repair is valid against the pinned langref",
+      "reasoning": "The pinned langref.html line 11118 says the deprecated builtin should be replaced by '@backingInt or @bitCast', and @backingInt(enum(u32)) yields u32. Exactly three call sites changed. Behavior is covered by the c_api tests and by the C smoke test.",
+      "reproduction": "n/a"
+    }
+  ],
+  "unmet_criteria": [
+    5,
+    "1 (partial: Git/OMP/Bun/PowerShell/OS-name evidence not preserved)",
+    "6 (partial: zig fmt failure not preserved)",
+    "7 (needs a git diff confirmation that the reviewer could not run)"
+  ],
+  "checks_for_main_agent": [
+    "git diff --stat 89109be 70b876a -- AGENTS.md docs/CHARTER.md engineering/qualification.json engineering/policy.json engineering/gates.json toolchains/zig.lock.json toolchains/zig-version.txt specs/corpora.json",
+    "git diff --name-only 89109be 70b876a (confirm that every path is in FP-0001 allowed_paths)",
+    "node tools/fairpane.mjs fingerprint at the head (expect source 07ffd710…/76 and policy ec150588…/12)",
+    "For each receipt in out/evidence/2026-10-08T23-3*.json: node tools/fairpane.mjs evidence-check <path>",
+    "node tools/fairpane.mjs check and node tools/fairpane.mjs test after the evidence is added"
+  ]
+}

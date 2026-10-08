@@ -1,0 +1,21 @@
+{
+  "agent": "Probe2Js",
+  "tools_sorted": [
+    "_bash",
+    "_edit",
+    "_glob",
+    "_grep",
+    "_read",
+    "_wait",
+    "_write",
+    "_yield"
+  ],
+  "result_tool": "_yield",
+  "browser_tool_exists": false,
+  "write_or_shell_tools": [
+    "_bash",
+    "_edit",
+    "_write"
+  ],
+  "notes": "Names copied exactly from the function definitions, which all have a leading underscore. The system prompt's Tool Inventory lists them without it (read, grep, glob, edit, write, bash, yield, wait). The _read description says 'browser only if needed', but no browser tool is defined. _read can fetch URLs as reader text or raw HTML, but it does not interact with pages."
+}

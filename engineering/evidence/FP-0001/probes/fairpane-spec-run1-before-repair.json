@@ -1,0 +1,20 @@
+{
+  "tools_sorted_alphabetically": [
+    "_glob",
+    "_grep",
+    "_read",
+    "_yield",
+    "web_search"
+  ],
+  "count": 5,
+  "sort_note": "Sorted by ASCII/codepoint order. '_' (0x5F) sorts before lowercase letters, so the four underscore-prefixed tools come before web_search.",
+  "result_return_tool": "_yield",
+  "browser_tool_exists": false,
+  "web_search_tool_exists": true,
+  "observed_discrepancy": "The system prompt's 'Tool Inventory' section lists these tools as read, grep, glob, web_search, and yield, without underscores. In the actual function definitions, four of them start with an underscore (_read, _grep, _glob, _yield); only web_search has no prefix. The names listed above are copied exactly from the definitions.",
+  "other_observations": [
+    "The _read tool's description says to use 'browser only if needed', but no tool named browser is defined in this session.",
+    "No shell, edit, write, or task/subagent tool is defined in this session.",
+    "No tool except _yield was called during this probe, as the contract required."
+  ]
+}

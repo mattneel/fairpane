@@ -1,0 +1,18 @@
+{
+  "agent": "unknown — no agent name is stated in my definitions. My role section describes a security reviewer: read docs/SECURITY.md and the assigned patch, trace attacker-controlled inputs and report exploitable paths.",
+  "tools_sorted": [
+    "_glob",
+    "_grep",
+    "_read",
+    "_yield"
+  ],
+  "result_tool": "_yield",
+  "browser_tool_exists": false,
+  "write_or_shell_tools": [],
+  "notes": [
+    "The function definitions name the tools with a leading underscore (_read, _grep, _glob, _yield). The prose in the system prompt calls them read, grep, glob and yield.",
+    "The prompt mentions other tools that are not in my function definitions, such as bash, write and browser. I can't call any of them.",
+    "_read can open URLs as reader text, but it is not an interactive browser tool. It can also send content to agent:// and proc:// internal URLs as messages, but it cannot write files or run commands.",
+    "Following the contract, I made no tool calls other than this _yield."
+  ]
+}

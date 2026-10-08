@@ -1,0 +1,22 @@
+{
+  "agent": "Probe2Compiler",
+  "tools_sorted": [
+    "_bash",
+    "_edit",
+    "_glob",
+    "_grep",
+    "_read",
+    "_wait",
+    "_write",
+    "_yield",
+    "web_search"
+  ],
+  "result_tool": "_yield",
+  "browser_tool_exists": false,
+  "write_or_shell_tools": [
+    "_bash",
+    "_edit",
+    "_write"
+  ],
+  "notes": "Names are copied exactly from the function definitions and sorted by ASCII order, so the underscore-prefixed names come before 'web_search'. The prompt's tool inventory uses names without underscores (read, grep, glob, edit, write, bash, yield, wait), but the callable names have a leading underscore. No browser tool is defined. '_read' can fetch URLs as text, and 'web_search' runs search queries. Neither one can click, fill forms or render pages. The agent name is my roster id. The prompt does not give my specialist type label, so I have left it out."
+}

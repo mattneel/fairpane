@@ -1,0 +1,50 @@
+
+COMMAND ["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","-NoProfile","-NonInteractive","-Command","$env:PSModulePath -split \";\""]
+C:\Users\requi\Documents\PowerShell\Modules
+C:\Program Files\PowerShell\Modules
+c:\program files\powershell\7\Modules
+C:\Program Files\WindowsPowerShell\Modules
+C:\Windows\system32\WindowsPowerShell\v1.0\Modules
+RESULT {"executable":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","arguments":["-NoProfile","-NonInteractive","-Command","$env:PSModulePath -split \";\""],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":341}
+
+COMMAND ["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","-NoProfile","-NonInteractive","-Command","Get-Module Microsoft.PowerShell.Utility -ListAvailable | Format-List Name,Version,Path,CompatiblePSEditions"]
+
+
+Name                 : Microsoft.PowerShell.Utility
+Version              : 7.0.0.0
+Path                 : C:\program 
+                       files\powershell\7\Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1
+CompatiblePSEditions : {Core}
+
+Name                 : Microsoft.PowerShell.Utility
+Version              : 3.1.0.0
+Path                 : C:\Windows\system32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Utility\Microsoft.PowerS
+                       hell.Utility.psd1
+CompatiblePSEditions : {Desktop}
+
+
+
+RESULT {"executable":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","arguments":["-NoProfile","-NonInteractive","-Command","Get-Module Microsoft.PowerShell.Utility -ListAvailable | Format-List Name,Version,Path,CompatiblePSEditions"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":459}
+
+COMMAND ["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","-NoProfile","-NonInteractive","-Command","Get-FileHash -LiteralPath README.md -Algorithm SHA256"]
+Get-FileHash : The term 'Get-FileHash' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ Get-FileHash -LiteralPath README.md -Algorithm SHA256
++ ~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Get-FileHash:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+RESULT {"executable":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","arguments":["-NoProfile","-NonInteractive","-Command","Get-FileHash -LiteralPath README.md -Algorithm SHA256"],"exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":458}
+
+COMMAND ["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","-NoProfile","-NonInteractive","-Command","$s=[IO.File]::OpenRead((Join-Path (Get-Location) \"README.md\")); try { $a=[Security.Cryptography.SHA256]::Create(); try { $d=$a.ComputeHash($s) } finally { $a.Dispose() } } finally { $s.Dispose() }; ([BitConverter]::ToString($d) -replace \"-\", \"\").ToLowerInvariant()"]
+6571a113cb0266007c2a9225fe9b1b159a27f6eaf398b68d03b9166c1565bca6
+RESULT {"executable":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","arguments":["-NoProfile","-NonInteractive","-Command","$s=[IO.File]::OpenRead((Join-Path (Get-Location) \"README.md\")); try { $a=[Security.Cryptography.SHA256]::Create(); try { $d=$a.ComputeHash($s) } finally { $a.Dispose() } } finally { $s.Dispose() }; ([BitConverter]::ToString($d) -replace \"-\", \"\").ToLowerInvariant()"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":436}
+
+COMMAND ["C:\\Program Files\\PowerShell\\7\\pwsh.exe","-NoProfile","-NonInteractive","-Command","$s=[IO.File]::OpenRead((Join-Path (Get-Location) \"README.md\")); try { $a=[Security.Cryptography.SHA256]::Create(); try { $d=$a.ComputeHash($s) } finally { $a.Dispose() } } finally { $s.Dispose() }; ([BitConverter]::ToString($d) -replace \"-\", \"\").ToLowerInvariant()"]
+6571a113cb0266007c2a9225fe9b1b159a27f6eaf398b68d03b9166c1565bca6
+RESULT {"executable":"C:\\Program Files\\PowerShell\\7\\pwsh.exe","arguments":["-NoProfile","-NonInteractive","-Command","$s=[IO.File]::OpenRead((Join-Path (Get-Location) \"README.md\")); try { $a=[Security.Cryptography.SHA256]::Create(); try { $d=$a.ComputeHash($s) } finally { $a.Dispose() } } finally { $s.Dispose() }; ([BitConverter]::ToString($d) -replace \"-\", \"\").ToLowerInvariant()"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":354}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","README.md"]
+6571a113cb0266007c2a9225fe9b1b159a27f6eaf398b68d03b9166c1565bca6 *README.md
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["README.md"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":12}

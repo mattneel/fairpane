@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { readJson, checkRepository, readyTasks, qualificationProblems, fingerprints,
-  validateReceipt, runGate, installZig, compilerPath, checkCompiler } from './lib.mjs';
+  validateReceipt, runGate, recordCommand, installZig, compilerPath, checkCompiler, safePath } from './lib.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command = 'help', ...args] = process.argv.slice(2);
@@ -26,7 +26,11 @@ function help() {
   next                        Print ready task contracts.
   fingerprint                 Hash current source and policy inputs.
   install-zig                 Install the exact locked compiler locally.
-  run <gate-id>               Execute a gate and write a local receipt.
+  run <gate-id> [--evidence-dir <dir>]
+                              Execute a gate and write a local receipt.
+  record [--cwd <dir>] [--env NAME=VALUE]... <log> <executable> [arguments...]
+                              Run one command without a shell and append its
+                              output and exit status to an evidence log.
   evidence-check <path>       Check a receipt against current inputs.
   release-check               Check release prerequisites and fail closed.
   help                        Print these commands.
@@ -66,11 +70,29 @@ try {
   } else if (command === 'fingerprint') output(fingerprints(root));
   else if (command === 'install-zig') output(await installZig(root));
   else if (command === 'run') {
-    if (args.length !== 1) throw new Error('Usage: run <gate-id>');
-    console.log(`Execute gate ${args[0]}.`);
-    const r = await runGate(root, args[0]);
+    const rest = [...args], at = rest.indexOf('--evidence-dir');
+    const evidenceDir = at === -1 ? undefined : rest.splice(at, 2)[1];
+    if (rest.length !== 1 || (at !== -1 && !evidenceDir)) throw new Error('Usage: run <gate-id> [--evidence-dir <approved-relative-dir>]');
+    console.log(`Execute gate ${rest[0]}.`);
+    const r = await runGate(root, rest[0], evidenceDir ? { evidenceDir } : undefined);
     output({ gate: r.gate_id, status: r.status, receipt: r.receipt_path, error: r.error });
     process.exitCode = r.status === 'pass' ? 0 : 1;
+  } else if (command === 'record') {
+    const usage = 'Usage: record [--cwd <dir>] [--env NAME=VALUE]... <evidence-log> <executable> [arguments...]';
+    const env = {}; let cwd = root, i = 0;
+    for (;; i += 2) {
+      if (args[i] === '--env') {
+        const m = /^([A-Za-z_][A-Za-z0-9_]*)=([^]*)$/.exec(args[i + 1] ?? '');
+        if (!m) throw new Error(usage);
+        env[m[1]] = m[2];
+      } else if (args[i] === '--cwd') cwd = safePath(root, args[i + 1] ?? '');
+      else break;
+    }
+    const [log, executable, ...argv] = args.slice(i);
+    if (!log || !executable) throw new Error(usage);
+    const r = await recordCommand(root, log, executable, argv, { cwd, env: Object.keys(env).length ? env : undefined });
+    output(r);
+    process.exitCode = r.exit_code === 0 && !r.signal && !r.timed_out && !r.error ? 0 : 1;
   } else if (command === 'evidence-check') {
     if (args.length !== 1) throw new Error('Usage: evidence-check <repository-relative-path>');
     output(validateReceipt(root, args[0]));

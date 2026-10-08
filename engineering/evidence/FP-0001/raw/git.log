@@ -1,0 +1,20 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","config","--show-origin","--get","user.name"]
+file:C:/Users/requi/.gitconfig	Matt Neel
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["config","--show-origin","--get","user.name"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","config","--show-origin","--get","user.email"]
+file:C:/Users/requi/.gitconfig	m@neel.codes
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["config","--show-origin","--get","user.email"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","config","--show-origin","--get","init.defaultBranch"]
+file:C:/Program Files/Git/etc/gitconfig	master
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["config","--show-origin","--get","init.defaultBranch"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","remote","-v"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["remote","-v"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","log","--format=%H | author %an <%ae> | committer %cn <%ce> | %s"]
+70b876a8512042594479a07e2e148af70ef106db | author Matt Neel <m@neel.codes> | committer Matt Neel <m@neel.codes> | FP-0001: Establish the local baseline with the pinned compiler
+89109be156eecd356ff59bf9d6508977e76a6b2b | author Matt Neel <m@neel.codes> | committer Matt Neel <m@neel.codes> | Import the Fairpane bootstrap archive
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["log","--format=%H | author %an <%ae> | committer %cn <%ce> | %s"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}

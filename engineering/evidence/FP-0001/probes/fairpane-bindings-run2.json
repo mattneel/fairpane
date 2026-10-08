@@ -1,0 +1,21 @@
+{
+  "agent": "Probe2Bindings",
+  "tools_sorted": [
+    "_bash",
+    "_edit",
+    "_glob",
+    "_grep",
+    "_read",
+    "_wait",
+    "_write",
+    "_yield"
+  ],
+  "result_tool": "_yield",
+  "browser_tool_exists": false,
+  "write_or_shell_tools": [
+    "_bash",
+    "_edit",
+    "_write"
+  ],
+  "notes": "I copied these names exactly from my own function definitions. No repository files were read, edited, written or executed. There is no browser tool. The _read description says 'browser only if needed', but no function for that is defined. _write can also send messages to peers through agent:// paths. The role section's ABI instructions were not followed because this task's contract forbids touching the repository."
+}

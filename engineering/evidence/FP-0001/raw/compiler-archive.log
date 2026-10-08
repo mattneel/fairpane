@@ -1,0 +1,25 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe",".tools/downloads/zig-x86_64-windows-0.18.0-dev.120+9fe22a29b.zip"]
+a48ff20a7357640cf67ad7be819d3f988e9a5085362fe67dc9b94e02a42571ae *.tools/downloads/zig-x86_64-windows-0.18.0-dev.120+9fe22a29b.zip
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":[".tools/downloads/zig-x86_64-windows-0.18.0-dev.120+9fe22a29b.zip"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":175}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log(require('fs').statSync(process.argv[1]).size)",".tools/downloads/zig-x86_64-windows-0.18.0-dev.120+9fe22a29b.zip"]
+102765659
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log(require('fs').statSync(process.argv[1]).size)",".tools/downloads/zig-x86_64-windows-0.18.0-dev.120+9fe22a29b.zip"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const l=require(process.argv[1]); console.log(JSON.stringify({version:l.version, x86_64_windows:l.platforms['x86_64-windows']}))","./toolchains/zig.lock.json"]
+{"version":"0.18.0-dev.120+9fe22a29b","x86_64_windows":{"url":"https://ziglang.org/builds/zig-x86_64-windows-0.18.0-dev.120+9fe22a29b.zip","sha256":"a48ff20a7357640cf67ad7be819d3f988e9a5085362fe67dc9b94e02a42571ae","size":102765659,"archive_root":"zig-x86_64-windows-0.18.0-dev.120+9fe22a29b"}}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const l=require(process.argv[1]); console.log(JSON.stringify({version:l.version, x86_64_windows:l.platforms['x86_64-windows']}))","./toolchains/zig.lock.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","process.stdout.write(require('fs').readFileSync(process.argv[1]))",".tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-windows/fairpane-install.json"]
+﻿{
+    "version":  "0.18.0-dev.120+9fe22a29b",
+    "platform":  "x86_64-windows",
+    "archive_sha256":  "a48ff20a7357640cf67ad7be819d3f988e9a5085362fe67dc9b94e02a42571ae",
+    "source":  "https://ziglang.org/builds/zig-x86_64-windows-0.18.0-dev.120+9fe22a29b.zip"
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","process.stdout.write(require('fs').readFileSync(process.argv[1]))",".tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-windows/fairpane-install.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","version"]
+0.18.0-dev.120+9fe22a29b
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["version"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":13}
