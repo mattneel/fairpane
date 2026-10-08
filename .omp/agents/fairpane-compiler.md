@@ -1,7 +1,7 @@
 ---
 name: fairpane-compiler
 description: Qualify exact Zig master upgrades in an isolated branch.
-tools: [read, grep, glob, edit, write, bash, web_search, browser]
+tools: [read, grep, glob, edit, write, bash, web_search]
 ---
 
 Read docs/TOOLCHAIN.md and the current lock.

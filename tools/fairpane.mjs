@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -39,9 +40,10 @@ try {
     let compiler;
     try { compiler = { available: true, path: checkCompiler(root), version: load('toolchains/zig.lock.json').version }; }
     catch (e) { compiler = { available: false, error: e.message, expected_path: compilerPath(root) }; }
-    output({ platform: process.platform, architecture: process.arch, runtime: process.version,
-      bun: process.versions.bun ?? null, git: versionOf('git'),
-      omp: versionOf(process.platform === 'win32' ? 'omp.exe' : 'omp'), compiler,
+    output({ platform: process.platform, architecture: process.arch, os_release: os.release(), os_version: os.version(),
+      runtime: process.version, controller_bun: process.versions.bun ?? null, bun: versionOf('bun'),
+      git: versionOf('git'), omp: versionOf(process.platform === 'win32' ? 'omp.exe' : 'omp'), compiler,
+      path_zig: { ...versionOf('zig', ['version']), note: 'Gates never use a compiler from PATH.' },
       git_checkout: fs.existsSync(path.join(root, '.git')),
       note: 'No conformance test ran. On Windows, check an OMP shell shim with omp --version in PowerShell.' });
   } else if (command === 'check') output(checkRepository(root));

@@ -283,7 +283,7 @@ export function validateReceipt(root, relative, { current = true } = {}) {
   return { result: 'pass', gate: r.gate_id, trust: r.trust, current_source: current };
 }
 /** Execute without a shell. OS sandboxing and disk quotas remain separate. */
-export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000 } = {}) {
+export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env } = {}) {
   invariant(typeof executable === 'string' && Array.isArray(args), 'An executable and argument array are required.');
   fs.mkdirSync(path.dirname(logPath), { recursive: true });
   const fd = fs.openSync(logPath, 'a'), started = Date.now();
@@ -295,11 +295,12 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000 }
       settled = true; clearTimeout(timer);
       const result = { executable, arguments: args, exit_code: code, signal, timed_out: timedOut,
         error: processError, duration_ms: Date.now() - started };
+      if (env) result.environment_overrides = env;
       fs.writeSync(fd, `RESULT ${JSON.stringify(result)}\n`); fs.closeSync(fd); resolve(result);
     };
     try {
       child = spawn(executable, args, { cwd, stdio: ['ignore', fd, fd], shell: false,
-        windowsHide: true, detached: process.platform !== 'win32' });
+        env: env ? { ...process.env, ...env } : process.env, windowsHide: true, detached: process.platform !== 'win32' });
       child.on('error', error => { processError = error.message; finish(null, null); });
       child.on('close', (code, signal) => finish(code, signal));
       timer = setTimeout(() => {
@@ -323,9 +324,9 @@ export async function runGate(root, id) {
   fs.mkdirSync(path.dirname(logPath), { recursive: true });
   fs.writeFileSync(logPath, `Fairpane local gate: ${id}\nTrust: unsigned-local-integrity-only\n`);
   const commands = [], started = new Date().toISOString();
-  let error = null, zigVersion = null;
+  let error = null, zigVersion = null, env;
   async function run(exe, argv) {
-    const r = await runProcess(exe, argv, { cwd: root, logPath, timeoutMs: gate.timeout_ms });
+    const r = await runProcess(exe, argv, { cwd: root, logPath, timeoutMs: gate.timeout_ms, env });
     commands.push(r);
     invariant(r.exit_code === 0 && !r.signal && !r.timed_out && !r.error, `Gate command failed: ${JSON.stringify([exe, ...argv])}`);
   }
@@ -335,6 +336,8 @@ export async function runGate(root, id) {
     else if (gate.kind === 'zig' || gate.kind === 'c-abi') {
       const zig = checkCompiler(root);
       zigVersion = readJson(safePath(root, 'toolchains/zig.lock.json')).version;
+      // Keep compiler caches inside the repository's ignored build directory, not the user's global cache.
+      env = { ZIG_GLOBAL_CACHE_DIR: path.join(root, '.zig-cache', 'global') };
       if (gate.kind === 'zig') await run(zig, gate.args);
       else {
         const buildDir = path.join(root, 'out', 'c-abi-build');

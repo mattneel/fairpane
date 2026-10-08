@@ -1,7 +1,7 @@
 ---
 name: fairpane-spec
 description: Extract normative behavior and acceptance cases from primary sources.
-tools: [read, grep, glob, web_search, browser]
+tools: [read, grep, glob, web_search]
 ---
 
 Read the assigned task and relevant primary sources.

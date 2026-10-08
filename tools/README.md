@@ -66,6 +66,9 @@ Child commands receive argument arrays without shell interpolation.
 A watchdog terminates a hung process group on POSIX or a process tree on Windows.
 The caller still needs operating-system isolation and resource quotas for hostile inputs.
 The tool does not enforce disk quotas or a network policy.
+Zig and C ABI gates set `ZIG_GLOBAL_CACHE_DIR` to `.zig-cache/global` inside the repository.
+Each command record lists that override in `environment_overrides`.
+The gates never use a `zig` executable from `PATH`.
 
 Writable-path declarations in task files are workflow contracts.
 The local controller does not enforce every write that an OMP worker makes.

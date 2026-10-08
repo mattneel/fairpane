@@ -17,14 +17,14 @@ export fn fp_abi_revision() callconv(.c) u32 {
 }
 
 export fn fp_query_capabilities(out: ?*Capabilities, out_size: usize) callconv(.c) u32 {
-    const result = out orelse return @intFromEnum(Status.invalid_argument);
-    if (out_size < @sizeOf(Capabilities)) return @intFromEnum(Status.invalid_argument);
+    const result = out orelse return @backingInt(Status.invalid_argument);
+    if (out_size < @sizeOf(Capabilities)) return @backingInt(Status.invalid_argument);
     result.* = .{
         .struct_size = @sizeOf(Capabilities),
         .abi_revision = abi_revision,
         .feature_bits = 0,
     };
-    return @intFromEnum(Status.ok);
+    return @backingInt(Status.ok);
 }
 
 test "the bootstrap reports no browser features" {

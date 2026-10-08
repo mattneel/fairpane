@@ -40,10 +40,18 @@ function Assert-Compiler([string]$Executable) {
     $Actual = & $Executable version
     if ($LASTEXITCODE -ne 0 -or (($Actual -join "`n").Trim()) -ne $Lock.version) { throw 'The compiler version does not match the lock.' }
 }
+# Hash through .NET because an inherited PowerShell 7 module path can hide Get-FileHash in Windows PowerShell 5.1.
+function Get-Sha256([string]$File) {
+    $Stream = [IO.File]::OpenRead($File)
+    try {
+        $Algorithm = [Security.Cryptography.SHA256]::Create()
+        try { $Digest = $Algorithm.ComputeHash($Stream) } finally { $Algorithm.Dispose() }
+    } finally { $Stream.Dispose() }
+    return ([BitConverter]::ToString($Digest) -replace '-', '').ToLowerInvariant()
+}
 function Assert-Archive([string]$File) {
     if ((Get-Item -LiteralPath $File).Length -ne [long]$Artifact.size) { throw 'The compiler archive size does not match the lock.' }
-    $Hash = (Get-FileHash -LiteralPath $File -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($Hash -ne $Artifact.sha256) { throw 'The compiler archive SHA-256 does not match the lock.' }
+    if ((Get-Sha256 $File) -ne $Artifact.sha256) { throw 'The compiler archive SHA-256 does not match the lock.' }
 }
 
 $Destination = Assert-LocalPath ".tools/zig/$($Lock.version)/$Platform"
