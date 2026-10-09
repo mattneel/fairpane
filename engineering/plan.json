@@ -1253,6 +1253,51 @@
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0028",
+      "title": "Harden controller command records",
+      "workstream": "laboratory",
+      "depends_on": [
+        "FP-0001"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "tools",
+        "tests",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Record the working directory and UTC start time in every command record.",
+        "Produce a complete failure record and release every descriptor when output capture cannot start or copy.",
+        "Return a failed result instead of crashing when the log itself cannot be written.",
+        "Create output capture files with owner-only access in a private temporary directory.",
+        "Add tests that fail when resolution searches the working directory, when a record logs an unresolved bare name, or when a log is written before path validation.",
+        "Add tests for capture-copy failure, capture-file removal, stderr capture, run and record argument parsing, and the Zig gate cache override."
+      ],
+      "read": [
+        "tools/README.md",
+        "engineering/evidence/FP-0001/reviews/review-2-reject.json"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
   ]
 }
