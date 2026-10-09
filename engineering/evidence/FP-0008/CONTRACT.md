@@ -1,26 +1,31 @@
-# FP-0008 task contract draft
-
-Status: drafted by the `FP0008Contract` worker and not frozen.
-The root integrator freezes it as `CONTRACT.md` after applying the decisions that `engineering/HANDOFF.md` lists.
-No implementation may start from this draft.
+# FP-0008 task contract
 
 ## Identity
 
 Task ID: `FP-0008`, "Implement HTML tokenizer continuations".
 Workstream: `html-dom`.
-Base: commit `ab2e2ed`.
+Base: the commit that freezes this contract, after `FP-0054` was accepted.
 Prerequisites: `FP-0005` and `FP-0007`, accepted.
-The `fairpane-spec` worker drafted this contract, and the root integrator freezes it with the decisions below.
+The `fairpane-spec` worker `FP0008Contract` drafted this contract, and the root integrator froze it with the decisions below.
 Assigned role: `fairpane-core`.
 Authority: `routine-local-engineering`.
 
 ### Integrator decisions
 
-- The owner approves `entities.json` from the WHATWG and its license text in the public repository before implementation starts. `engineering/evidence/FP-0008/owner-answers.log` records the question and the answer.
-- The integrator adds plan task `FP-0064`, "Implement the text-content and CDATA tokenizer states", which depends on `FP-0008`, and makes `FP-0010` depend on it.
-- The integrator adds plan task `FP-0065`, "Implement encoding sniffing and decoders", for every decode behavior that this task leaves unsupported.
-- `FP-0054` lands before this task starts, and the worker rebases on it. The laboratory changes below apply to case versions 1 and 2.
-- This contract freezes the HTML Standard text as of "Last Updated 7 October 2026".
+- The owner approved `entities.json` from the WHATWG and its license text in the public repository on 2026-10-09.
+  `engineering/evidence/FP-0008/owner-answers.log` records the question and the answer, and `LICENSE-DECISION.md` records the decision.
+- Plan task `FP-0064`, "Implement the text-content and CDATA tokenizer states", depends on `FP-0008`, and `FP-0010` depends on it.
+- Plan task `FP-0065`, "Implement encoding sniffing and the Encoding Standard decoders", owns every decode behavior that this task leaves unsupported.
+- `FP-0054` is accepted, so the laboratory changes below apply to case versions 1 and 2.
+- This contract freezes the HTML Standard text as of "Last Updated 7 October 2026": whatwg/html commit `efc54f7b70858d9fcf06d1a5871ae215f448c029` [S85], whose `source` file has SHA-256 `8184f8d730b5a3c47bbf657c01c3021149774c9efb8e59a2183bf6857704f70b`.
+  `raw/html-standard-pin.log` records that digest, and the integrator counted 84 tokenizer states and 52 parse error codes in that file.
+- The laboratory `decode` stage completes only for a UTF-8 byte order mark, as "Laboratory stages" states.
+- FP-0007 case 2's stage assertions change on purpose: `decode` becomes `unsupported` and `tokenize` becomes `not-reached`.
+- Error positions and error order follow this contract's rules, which use the standard's "current input character" and its preprocessing-first order, where html5lib-tests differs.
+  Task `FP-0077` imports html5lib-tests and records each difference.
+- Test-only branch counters, compiled only when `builtin.is_test` is set, are acceptable.
+- `lab.ddmin` becomes generic over its element type for mismatch minimization.
+- The resolutions under "Specification ambiguities" are accepted.
 
 ## Sources
 
@@ -836,10 +841,11 @@ Never edit an expectation, an input, or an upstream byte to pass a case.
 ## Evidence
 
 Record each command with `node tools/fairpane.mjs record` under `engineering/evidence/FP-0008/raw/`.
+Run every Zig command with `--env ZIG_GLOBAL_CACHE_DIR=C:\src\fairpane\.zig-cache\global`, and keep each failed attempt as its own log.
 
 1. Record `tests-before.log` with `zig build test --summary all --cache-dir out/fp0008-cache-before` at the base.
 2. Record `entities-fetch.log`, with the download of `entities.json`, its response headers, and its exit status.
-3. Record `license-fetch.log`, with `git ls-remote https://github.com/whatwg/html refs/heads/main` and the `LICENSE` download at that commit.
+3. Record `license-fetch.log`, with the `LICENSE` download from whatwg/html at the frozen commit `efc54f7b70858d9fcf06d1a5871ae215f448c029`.
 4. Record `entities-digest.log`, with GNU `sha256sum` and the byte sizes of both files.
 5. Record an uncached `tests-after.log` with `zig build test --summary all --cache-dir out/fp0008-cache-after`.
 6. Write `engineering/evidence/FP-0008/README.md`.
@@ -848,8 +854,7 @@ Record each command with `node tools/fairpane.mjs record` under `engineering/evi
 The mutation control makes the preprocessor turn a CR at the end of the available input into LF immediately, without waiting for the next code unit.
 Store its exact diff in `mutation-pending-cr.diff` beside its log.
 The control must fail case 13 on input P1.
-The integrator records `HEAD`, the staged diff, and file hashes.
-The integrator then runs `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` with `--evidence-dir engineering/evidence/FP-0008/gates`.
+The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` with `--evidence-dir engineering/evidence/FP-0008/gates`.
 
 ## Authority
 
@@ -876,26 +881,12 @@ Required reviewer: `fairpane-review`.
   The testharness tests under `html/syntax/parsing/` that observe tokenization need `FP-0010` and `FP-0019`.
 - No `specs` file, threshold, gate, or corpus pin changes in this task.
 
-## Worker open questions
+## Specification ambiguities
 
-- Owner approval (blocks implementation): the owner's 2026-10-09 approval covered only Unicode License v3 data and OFL fonts. entities.json is under CC BY 4.0, with BSD-3-Clause for portions incorporated into source code. Every character reference state, including the named character reference state, depends on it, so the frozen subset cannot be finished without it.
-- There is no owner task for the 30 deferred states or for `eof-in-cdata` and `eof-in-script-html-comment-like-text`. The draft proposes a new plan task FP-0064, "Implement the text-content and CDATA tokenizer states", with FP-0010 depending on it. The other option is folding them into FP-0010. FP-0010 needs RCDATA for `title` and `textarea` and script data for `script`.
-- There is no plan task for encoding sniffing beyond BOM sniffing, the UTF-16BE and UTF-16LE decoders, legacy decoders, prescan, or changing the encoding. The draft proposes FP-0065.
-- Laboratory decode scope: please confirm decode completes only for a UTF-8 BOM. The alternatives are leaving tokenize unreachable in the laboratory, or adding a case field for a known definite encoding, which changes the case format.
-- Sequencing with FP-0054: both tasks edit `src/lab.zig`, `tests/lab`, and `build.zig`, and FP-0054 adds case version 2. I recommend landing FP-0054 first and rebasing FP-0008 on it. That would change the frozen base `ab2e2ed`.
-- FP-0007 case 2's stage assertions change on purpose: decode becomes `unsupported` and tokenize becomes `not-reached`, where both were `unsupported`. Please acknowledge editing an accepted task's test.
-- The WPT applicability record (`specs/applicability/wpt.json`) and `specs/sources.json` are outside FP-0008's writable paths. Should the integrator record the html/syntax decision and add source entries for entities.json, the Infra Standard, and the Encoding Standard? None of these has an S identifier yet.
-- html5lib-tests at upstream `master`, which is not pinned, already has processing-instruction tokenizer tests. Two of its conventions differ from the draft. It puts `eof-in-processing-instruction` for `<?a a` at column 4, where the draft gives column 6. It lists `invalid-first-character-of-processing-instruction-target` before `control-character-in-input-stream` for `<?\u000B`. Please confirm the draft's position and ordering rules, which follow the standard's "current input character" and its preprocessing-first order. Importing html5lib-tests later needs a new pin in the protected `specs/corpora.json` and a rule for these differences.
-- Branch coverage relies on test-only counters inside the tokenizer, compiled only when `builtin.is_test` is set. Please confirm that instrumentation is acceptable.
-- Mismatch minimization (required by docs/RENDERING_AND_TEXT.md) makes `lab.ddmin` generic over the element type, which touches the laboratory again.
-- The HTML Standard is a living document. Should the integrator record the SHA-256 of multipage/parsing.html at freeze time? Case 1's frozen state titles detect heading drift but not drift in branch text.
-
-## Worker specification ambiguities
-
-- The §13.2.5 introduction lists the token types as DOCTYPE, start tag, end tag, comment, character, and end-of-file. It omits the processing-instruction token, although states 13.2.5.73 to 13.2.5.76 create and emit one and §13.2.6 handles it. The draft adds a `processing_instruction` token kind.
-- At EOF, the processing instruction open state (13.2.5.72) emits no `<` or `?` characters, unlike the tag open state. The draft follows the text as written.
-- The standard defines no source position for a parse error. The draft uses the current input character from §13.2.3.5: the last character consumed, with EOF at the end of the input.
-- The standard does not say when an input-stream error is reported. The draft reports it when the character is first consumed, before any tokenizer action on that character, because preprocessing comes before tokenization.
-- The order is unspecified when an end tag has both attributes and a trailing solidus. The draft reports `end-tag-with-attributes` first.
-- Numeric character reference arithmetic is unbounded in the standard. The draft saturates above 0x10FFFF, which gives the same outcome.
-- In the named character reference state, a temporary buffer holds the characters 'consumed' while searching for a match. When nothing matches, the draft treats only `&` as consumed. The observable outcome is identical either way.
+- The §13.2.5 introduction lists the token types as DOCTYPE, start tag, end tag, comment, character, and end-of-file. It omits the processing-instruction token, although states 13.2.5.73 to 13.2.5.76 create and emit one and §13.2.6 handles it. This contract adds a `processing_instruction` token kind.
+- At EOF, the processing instruction open state (13.2.5.72) emits no `<` or `?` characters, unlike the tag open state. This contract follows the text as written.
+- The standard defines no source position for a parse error. This contract uses the current input character from §13.2.3.5: the last character consumed, with EOF at the end of the input.
+- The standard does not say when an input-stream error is reported. This contract reports it when the character is first consumed, before any tokenizer action on that character, because preprocessing comes before tokenization.
+- The order is unspecified when an end tag has both attributes and a trailing solidus. This contract reports `end-tag-with-attributes` first.
+- Numeric character reference arithmetic is unbounded in the standard. This contract saturates above 0x10FFFF, which gives the same outcome.
+- In the named character reference state, a temporary buffer holds the characters consumed while searching for a match. When nothing matches, this contract treats only `&` as consumed. The observable outcome is identical either way.
