@@ -208,24 +208,27 @@
       "notes": []
     },
     "FP-0013": {
-      "status": "active",
-      "owner": "fairpane-text worker FP0013Text, integrated by root-integrator",
+      "status": "implemented",
+      "owner": "fairpane-text workers FP0013Text and FP0013R1, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0013/README.md",
-        "engineering/evidence/FP-0013/gates/2026-10-09T09-37-48-986Z-repo-check-61f657c7.json",
-        "engineering/evidence/FP-0013/gates/2026-10-09T09-37-49-271Z-controller-test-24f7f361.json",
-        "engineering/evidence/FP-0013/gates/2026-10-09T09-38-20-142Z-zig-fmt-17d5dcdb.json",
-        "engineering/evidence/FP-0013/gates/2026-10-09T09-38-20-365Z-zig-test-5556126d.json",
-        "engineering/evidence/FP-0013/raw/tests-before.log",
-        "engineering/evidence/FP-0013/raw/integration-tests.log",
-        "engineering/evidence/FP-0013/raw/integration-corpus.log"
+        "engineering/evidence/FP-0013/gates/2026-10-09T10-43-59-332Z-repo-check-60c437dd.json",
+        "engineering/evidence/FP-0013/gates/2026-10-09T10-43-59-654Z-controller-test-6f36fc75.json",
+        "engineering/evidence/FP-0013/gates/2026-10-09T10-44-36-961Z-zig-fmt-eaabfe34.json",
+        "engineering/evidence/FP-0013/gates/2026-10-09T10-44-37-233Z-zig-test-c96aa096.json",
+        "engineering/evidence/FP-0013/raw/tests-before-r1.log",
+        "engineering/evidence/FP-0013/raw/mutation-cmap-r1.log",
+        "engineering/evidence/FP-0013/raw/r1-integration-tests.log",
+        "engineering/evidence/FP-0013/raw/r1-integration-corpus.log",
+        "engineering/evidence/FP-0013/raw/integrator-rfn-search-r1.log"
       ],
       "review": null,
       "notes": [
         "The frozen contract is engineering/evidence/FP-0013/CONTRACT.md, drafted by worker FP0013Contract and frozen on commit 28e2195.",
         "The owner approved Unicode data and OFL fonts in the repository; engineering/evidence/FP-0013/owner-answers.log records it.",
         "Commit b1fdb8c implements it with 180 of 180 controller tests and 177 of 177 Zig tests; the unicode and opentype-fixtures pins wait for acceptance.",
-        "fairpane-security rejected b1fdb8c and c5f7f2b in reviews/security-review-1-reject.json because cmap validation work is not linear in the input length; fairpane-review is pending."
+        "fairpane-security and fairpane-review rejected b1fdb8c and c5f7f2b in reviews/security-review-1-reject.json and reviews/review-1-reject.json because cmap validation work is not linear in the input length. Contract revision 1 is frozen in bdcc84c.",
+        "Commit 4a09ed5 implements revision 1 with 188 of 188 controller tests and 191 of 191 Zig tests. Awaiting fairpane-review and fairpane-security."
       ]
     },
     "FP-0014": {

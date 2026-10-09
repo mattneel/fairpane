@@ -1,0 +1,23 @@
+Fairpane local gate: repo-check
+Trust: unsigned-local-integrity-only
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","C:\\src\\fairpane\\tools\\fairpane.mjs","check"]
+{
+  "result": "pass",
+  "level": "bootstrap-integrity-only",
+  "tasks": 77,
+  "gates": 9,
+  "capability_families": 21,
+  "fingerprints": {
+    "source": {
+      "sha256": "82f9897dbfea5dd76e70e42632be24f4fabce6c5dd62f9fa0bfc43b8dbaecaed",
+      "file_count": 236
+    },
+    "policy": {
+      "sha256": "b075f8f412b1497b495e77cbf7bd839d81a97a0a6f526b6bed8a0336771e283e",
+      "file_count": 22
+    }
+  },
+  "note": "This check is not browser conformance or an independent security attestation."
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["C:\\src\\fairpane\\tools\\fairpane.mjs","check"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T10:43:59.334Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":130}

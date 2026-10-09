@@ -346,3 +346,29 @@ The mutation control `mutation-directory-order.diff` describes the parser before
 - The installation check does not verify bytecode under `__pycache__`, and it does not inspect `.pth` files in site-packages.
 - The usage line inside `tools/fonts/font_expectations.py` still shows a direct run from the repository root; changing it would change the script digest that every expectation file records.
 - The integrator records the search of the CJK subset's bytes for `Source` in ASCII and in UTF-16BE, as the contract assigns.
+
+### Integration
+
+The integrator applied the patch without conflicts and committed it as `4a09ed5`.
+The patch changes no expectation file, snapshot record, or proposed pin.
+The integrator accepts the worker's open questions as follows.
+
+- Case 55 observes the child environment through `runPython`, because controller tests cannot assume Python, and the recorded real runs cover the Python side.
+- The installation check covers every file that the wheel's `RECORD` lists, but not `__pycache__` bytecode or `.pth` files.
+  Changing either needs write access to the local virtual environment, which is the same trust level as the repository itself, so the integrator accepts this limit.
+- The usage line of `tools/fonts/font_expectations.py` stays unchanged, because the script's digest is part of every expectation file.
+
+`raw/integrator-rfn-search-r1.log` records the integrator's search of `cjk-subset.otf` with GNU `grep -c -a -i`.
+`Source` occurs zero times in ASCII and zero times in UTF-16BE, and the control string `NotoSans` occurs, which shows that the search reads the file's strings.
+
+One uninterrupted sequence ran on `4a09ed5`, with no commit or source edit during it.
+`raw/r1-integration-binding.log` records `HEAD` `4a09ed5` and an empty status, including ignored files, for every source root before the gates, and both again after the last run.
+
+- `gates/2026-10-09T10-43-59-332Z-repo-check-60c437dd.json`
+- `gates/2026-10-09T10-43-59-654Z-controller-test-6f36fc75.json`, with 188 of 188 controller tests.
+- `gates/2026-10-09T10-44-36-961Z-zig-fmt-eaabfe34.json`
+- `gates/2026-10-09T10-44-37-233Z-zig-test-c96aa096.json`
+
+`raw/r1-integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0013-r1-integration-cache` and the recorded override `ZIG_GLOBAL_CACHE_DIR`: 62 of 62 build steps and 191 of 191 tests, which include the FP-0011 revision 1 tests that landed after the worker's base.
+`raw/r1-integration-bun.log` records Bun 1.4.2 with 188 of 188 controller tests.
+`raw/r1-integration-corpus.log` records `ucd-check`, `corpus-verify unicode`, and `corpus-verify opentype-fixtures`, each with exit status 0 and result `pass`.
