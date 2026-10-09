@@ -1,0 +1,13 @@
+diff --git a/tools/rust.mjs b/tools/rust.mjs
+index f740ddc..4d199bd 100644
+--- a/tools/rust.mjs
++++ b/tools/rust.mjs
+@@ -376,7 +376,7 @@ function receiptMatches(lock, platform, dir) {
+     ? { package: c.package, ...(Object.hasOwn(c, 'target') && { target: c.target }), sha256: c.sha256 } : c));
+   return receipt.version === lock.version && receipt.platform === platform && receipt.host === lock.platforms[platform].host
+     && receipt.rustc_commit_hash === lock.rustc_commit_hash && receipt.manifest_sha256 === lock.manifest.sha256
+-    && isDeepStrictEqual(components, lockedComponents(lock, platform).map(c => c.entry));
++    && isDeepStrictEqual(components, lockedComponents(lock, platform).filter(c => !c.entry.target).map(c => c.entry));
+ }
+ 
+ /** The path at which the locked toolchain's `rustc` belongs for `platform`. */

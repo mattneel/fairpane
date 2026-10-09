@@ -1,0 +1,409 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M1',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/lib.mjs"]
+M1 tools/lib.mjs 5d9b5005a744f1902af57968bf4f2b3377b98570f8edc5cece766a3877eae0ab
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M1',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/lib.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:43.081Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":56}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0132/raw/mutation-M1.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0132/raw/mutation-M1.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:43.234Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M1',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/lib.mjs"]
+M1 tools/lib.mjs 299f4ab56bccedbe269a75ebd4d2e25d65bb88c05ec6b54f09319579bac60730
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M1',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/lib.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:43.364Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":56}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+not ok 11 - FP-0132 case 1: the Rust lock validator accepts the frozen target and rejects every malformed target
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   'row d: Unexpected component URL for rust-std on x86_64-unknown-linux-musl.',\n+   'row e: Unexpected component URL for rust-std on x86_64-unknown-linux-gnu.'\n+ ]\n- []\n"
+  ...
+ok 12 - FP-0132 case 2: rust-lock-verify checks each target against the signed manifest
+ok 13 - FP-0132 case 3: install-rust installs each locked target into every host toolchain and replaces a stale toolchain only after the new one passes
+ok 14 - FP-0132 case 4: the toolchain check rejects a toolchain whose receipt differs from the lock before any version check
+ok 15 - FP-0132 case 5: the toolchain documents describe the locked targets
+ok 16 - FP-0132 case 6: install-rust restores the earlier toolchain when the new one cannot move into place
+1..16
+# tests 16
+# pass 15
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:43.506Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":2617}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0132/raw/mutation-M1.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0132/raw/mutation-M1.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:46.208Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M1',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/lib.mjs"]
+M1 tools/lib.mjs 5d9b5005a744f1902af57968bf4f2b3377b98570f8edc5cece766a3877eae0ab
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M1',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/lib.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:46.325Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":62}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M2',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M2 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M2',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:46.482Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":59}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0132/raw/mutation-M2.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0132/raw/mutation-M2.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:46.632Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":40}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M2',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M2 tools/rust.mjs 2ea1f634618e4073ede6915bb245f4bdff1c6bfe0c636893d15cf4b31f32ef1e
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M2',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:46.770Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":58}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+ok 11 - FP-0132 case 1: the Rust lock validator accepts the frozen target and rejects every malformed target
+not ok 12 - FP-0132 case 2: rust-lock-verify checks each target against the signed manifest
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ []\n- [\n-   'The manifest hash of rust-std for i686-unknown-linux-gnu differs from the lock.'\n- ]\n"
+  ...
+ok 13 - FP-0132 case 3: install-rust installs each locked target into every host toolchain and replaces a stale toolchain only after the new one passes
+ok 14 - FP-0132 case 4: the toolchain check rejects a toolchain whose receipt differs from the lock before any version check
+ok 15 - FP-0132 case 5: the toolchain documents describe the locked targets
+ok 16 - FP-0132 case 6: install-rust restores the earlier toolchain when the new one cannot move into place
+1..16
+# tests 16
+# pass 15
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:46.936Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":2372}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0132/raw/mutation-M2.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0132/raw/mutation-M2.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:49.395Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M2',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M2 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M2',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:49.523Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":55}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M3',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M3 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M3',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:49.673Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":58}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0132/raw/mutation-M3.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0132/raw/mutation-M3.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:49.817Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M3',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M3 tools/rust.mjs aaebd741dbdc4b9b94af4777bb993d978f8b718b0374c163e2043f9e17ba390b
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M3',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:49.953Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":64}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+not ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   components: [\n+     {\n+       installer_components: [\n+         'rustc'\n+       ],\n+       package: 'rustc',\n+       sha256: '47e19e20f275e9cf97f78e5b6b8a596afc914aef4c04fef43e7f8f0b8bad95c7'\n+     },\n+     {\n+       installer_components: [\n+         'cargo'\n+       ],\n+       package: 'cargo',\n+       sha256: 'ddfd5f1c11d6d1721e4c8c5f14d870f10cc2214155e8b230988b3ee51e265c4e'\n+     },\n+     {\n+       installer_components: [\n+         'rust-std-x86_64-pc-windows-gnu'\n+       ],\n+       package: 'rust-std',\n+       sha256: 'd38998359f40496a6ef550d1afd38d74a48cf95d2c09ca34d131448476098dae'\n+     },\n+     {\n+       installer_components: [\n+         'rust-mingw-x86_64-pc-windows-gnu'\n+       ],\n+       package: 'rust-mingw',\n+       sha256: '4f20a80776d6a18986152ca75ab9324c461c15ec3eaec368cfacfd5213137645'\n+     },\n+     {\n+       installer_components: [\n+         'rustfmt-preview'\n+       ],\n+       package: 'rustfmt-preview',\n+       sha256: 'a2287a7a3ac91946e3a4418a379b610942ec8939c740cd83d22dcb1bbc17c54e'\n+     },\n+     {\n+       installer_components: [\n+         'rust-std-i686-unknown-linux-gnu'\n+       ],\n+       package: 'rust-std',\n+       sha256: '333d49e13292b3323952c148a233972fefc2f43aec7c5524110a4df37b141eec',\n+       target: 'i686-unknown-linux-gnu'\n+     }\n+   ],\n+   downloaded: true,\n+   replaced: true,\n-   downloaded: false,\n    toolchain: 'C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-rust-MQNeyO\\\\.tools\\\\rust\\\\1.99.0\\\\x86_64-windows\\\\bin\\\\rustc.exe'\n  }\n"
+  ...
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+ok 11 - FP-0132 case 1: the Rust lock validator accepts the frozen target and rejects every malformed target
+ok 12 - FP-0132 case 2: rust-lock-verify checks each target against the signed manifest
+not ok 13 - FP-0132 case 3: install-rust installs each locked target into every host toolchain and replaces a stale toolchain only after the new one passes
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   components: [\n+     {\n+       installer_components: [\n+         'rustc'\n+       ],\n+       package: 'rustc',\n+       sha256: '47e19e20f275e9cf97f78e5b6b8a596afc914aef4c04fef43e7f8f0b8bad95c7'\n+     },\n+     {\n+       installer_components: [\n+         'cargo'\n+       ],\n+       package: 'cargo',\n+       sha256: 'ddfd5f1c11d6d1721e4c8c5f14d870f10cc2214155e8b230988b3ee51e265c4e'\n+     },\n+     {\n+       installer_components: [\n+         'rust-std-x86_64-pc-windows-gnu'\n+       ],\n+       package: 'rust-std',\n+       sha256: 'd38998359f40496a6ef550d1afd38d74a48cf95d2c09ca34d131448476098dae'\n+     },\n+     {\n+       installer_components: [\n+         'rust-mingw-x86_64-pc-windows-gnu'\n+       ],\n+       package: 'rust-mingw',\n+       sha256: '4f20a80776d6a18986152ca75ab9324c461c15ec3eaec368cfacfd5213137645'\n+     },\n+     {\n+       installer_components: [\n+         'rustfmt-preview'\n+       ],\n+       package: 'rustfmt-preview',\n+       sha256: 'a2287a7a3ac91946e3a4418a379b610942ec8939c740cd83d22dcb1bbc17c54e'\n+     },\n+     {\n+       installer_components: [\n+         'rust-std-i686-unknown-linux-gnu'\n+       ],\n+       package: 'rust-std',\n+       sha256: '333d49e13292b3323952c148a233972fefc2f43aec7c5524110a4df37b141eec',\n+       target: 'i686-unknown-linux-gnu'\n+     }\n+   ],\n+   downloaded: true,\n+   replaced: true,\n-   downloaded: false,\n    toolchain: 'C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-rust-A7Ac1P\\\\.tools\\\\rust\\\\1.99.0\\\\x86_64-windows\\\\bin\\\\rustc.exe'\n  }\n"
+  ...
+not ok 14 - FP-0132 case 4: the toolchain check rejects a toolchain whose receipt differs from the lock before any version check
+  ---
+  message: "The installed Rust toolchain differs from the lock. Run node tools/fairpane.mjs install-rust."
+  ...
+ok 15 - FP-0132 case 5: the toolchain documents describe the locked targets
+not ok 16 - FP-0132 case 6: install-rust restores the earlier toolchain when the new one cannot move into place
+  ---
+  message: "Missing expected rejection."
+  ...
+1..16
+# tests 16
+# pass 12
+# fail 4
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:50.118Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":1562}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0132/raw/mutation-M3.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0132/raw/mutation-M3.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:51.760Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M3',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M3 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M3',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:51.870Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":48}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M4',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M4 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M4',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:52.033Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":49}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0132/raw/mutation-M4.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0132/raw/mutation-M4.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:52.203Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M4',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M4 tools/rust.mjs 46c54e8795e25d2e3d173bbcb5ec3f3560feb9c985984de794ba4c69ef4e0121
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M4',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:52.407Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":54}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+ok 11 - FP-0132 case 1: the Rust lock validator accepts the frozen target and rejects every malformed target
+ok 12 - FP-0132 case 2: rust-lock-verify checks each target against the signed manifest
+not ok 13 - FP-0132 case 3: install-rust installs each locked target into every host toolchain and replaces a stale toolchain only after the new one passes
+  ---
+  message: "ENOENT: no such file or directory, scandir 'C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-rust-WovDHo\\.tools\\rust\\1.99.0\\x86_64-windows'"
+  ...
+ok 14 - FP-0132 case 4: the toolchain check rejects a toolchain whose receipt differs from the lock before any version check
+ok 15 - FP-0132 case 5: the toolchain documents describe the locked targets
+not ok 16 - FP-0132 case 6: install-rust restores the earlier toolchain when the new one cannot move into place
+  ---
+  message: "ENOENT: no such file or directory, scandir 'C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-rust-U4kisn\\.tools\\rust\\1.99.0\\x86_64-windows'"
+  ...
+1..16
+# tests 16
+# pass 14
+# fail 2
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:52.547Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":1559}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0132/raw/mutation-M4.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0132/raw/mutation-M4.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:54.185Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":67}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M4',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M4 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M4',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:54.389Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":111}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M5',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tests/rust/pointer_width_probe.rs"]
+M5 tests/rust/pointer_width_probe.rs 8f4902a953008723235e4554901dc8a92e8958b84c14b3cc3ca8b62a7d98b6b5
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M5',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:54.675Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":53}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0132/raw/mutation-M5.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0132/raw/mutation-M5.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:54.840Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M5',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tests/rust/pointer_width_probe.rs"]
+M5 tests/rust/pointer_width_probe.rs c902b687f1e5f1b6722570908c69c2e1298efecf15b0c4d6a240c6cdfbf48eeb
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M5',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:54.983Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":56}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"]
+error[E0080]: evaluation panicked: the probe needs 4-byte pointers
+  --> tests/rust/pointer_width_probe.rs:8:15
+   |
+ 8 |   const _: () = assert!(
+   |  _______________^
+ 9 | |     core::mem::size_of::<usize>() == 8,
+10 | |     "the probe needs 4-byte pointers"
+11 | | );
+   | |_^ evaluation of `_` failed here
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0080`.
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:55.120Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":48,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","x86_64-pc-windows-gnu","-o","out/fp0132/pointer-width-host.rmeta","tests/rust/pointer_width_probe.rs"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","x86_64-pc-windows-gnu","-o","out/fp0132/pointer-width-host.rmeta","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:55.254Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":88,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0132/raw/mutation-M5.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0132/raw/mutation-M5.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:55.427Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M5',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tests/rust/pointer_width_probe.rs"]
+M5 tests/rust/pointer_width_probe.rs 8f4902a953008723235e4554901dc8a92e8958b84c14b3cc3ca8b62a7d98b6b5
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M5',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:55.545Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":52}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M6',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","toolchains/rust.lock.json"]
+M6 toolchains/rust.lock.json 05588f0c6905ddaae099323b63eec742ffca309e78e4dd9204017feed2a86926
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M6',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","toolchains/rust.lock.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:55.737Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":53}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0132/raw/mutation-M6.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0132/raw/mutation-M6.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:55.902Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M6',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","toolchains/rust.lock.json"]
+M6 toolchains/rust.lock.json 95221244b4d8c2394c2e2b3fc5bf0cf913eddfd8f521f67a4486bf0995543ab7
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M6',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","toolchains/rust.lock.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:56.033Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":50}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+not ok 11 - FP-0132 case 1: the Rust lock validator accepts the frozen target and rejects every malformed target
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ undefined\n- {\n-   'i686-unknown-linux-gnu': {\n-     archive_root: 'rust-std-1.99.0-i686-unknown-linux-gnu',\n-     package: 'rust-std',\n-     sha256: '2b7db847af9888ddb249d3e1c8aeaeeb82ae529bf62426b82330a4cddac8bb38',\n-     size: 46083412,\n-     url: 'https://static.rust-lang.org/dist/2026-10-01/rust-std-1.99.0-i686-unknown-linux-gnu.tar.gz'\n-   }\n- }\n"
+  ...
+ok 12 - FP-0132 case 2: rust-lock-verify checks each target against the signed manifest
+ok 13 - FP-0132 case 3: install-rust installs each locked target into every host toolchain and replaces a stale toolchain only after the new one passes
+ok 14 - FP-0132 case 4: the toolchain check rejects a toolchain whose receipt differs from the lock before any version check
+ok 15 - FP-0132 case 5: the toolchain documents describe the locked targets
+ok 16 - FP-0132 case 6: install-rust restores the earlier toolchain when the new one cannot move into place
+1..16
+# tests 16
+# pass 15
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:56.166Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":2112}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0132/raw/mutation-M6.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0132/raw/mutation-M6.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:58.358Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M6',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","toolchains/rust.lock.json"]
+M6 toolchains/rust.lock.json 05588f0c6905ddaae099323b63eec742ffca309e78e4dd9204017feed2a86926
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M6',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","toolchains/rust.lock.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:58.465Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":60}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M7',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M7 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M7',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:58.620Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0132/raw/mutation-M7.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0132/raw/mutation-M7.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:58.795Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":76}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M7',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M7 tools/rust.mjs 7a7538e66f08984b63e49fa4185ee4200b421674bfbcbe747a7f86a39079803f
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M7',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:58.987Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":59}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+ok 11 - FP-0132 case 1: the Rust lock validator accepts the frozen target and rejects every malformed target
+ok 12 - FP-0132 case 2: rust-lock-verify checks each target against the signed manifest
+ok 13 - FP-0132 case 3: install-rust installs each locked target into every host toolchain and replaces a stale toolchain only after the new one passes
+not ok 14 - FP-0132 case 4: the toolchain check rejects a toolchain whose receipt differs from the lock before any version check
+  ---
+  message: "row a ran a version check\n\n12 !== 8\n"
+  ...
+ok 15 - FP-0132 case 5: the toolchain documents describe the locked targets
+ok 16 - FP-0132 case 6: install-rust restores the earlier toolchain when the new one cannot move into place
+1..16
+# tests 16
+# pass 15
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:23:59.175Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":2057}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0132/raw/mutation-M7.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0132/raw/mutation-M7.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:01.312Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M7',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M7 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M7',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:01.485Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":53}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M8',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M8 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M8',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:01.653Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":98}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0132/raw/mutation-M8.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0132/raw/mutation-M8.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:01.862Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":84}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M8',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M8 tools/rust.mjs 3f8102a8e386afdd78a9783eac558dde0fca639650b7273cb330d707b73e31d5
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M8',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:02.107Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":62}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+ok 11 - FP-0132 case 1: the Rust lock validator accepts the frozen target and rejects every malformed target
+ok 12 - FP-0132 case 2: rust-lock-verify checks each target against the signed manifest
+ok 13 - FP-0132 case 3: install-rust installs each locked target into every host toolchain and replaces a stale toolchain only after the new one passes
+ok 14 - FP-0132 case 4: the toolchain check rejects a toolchain whose receipt differs from the lock before any version check
+ok 15 - FP-0132 case 5: the toolchain documents describe the locked targets
+not ok 16 - FP-0132 case 6: install-rust restores the earlier toolchain when the new one cannot move into place
+  ---
+  message: "ENOENT: no such file or directory, scandir 'C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-rust-Ln3boJ\\.tools\\rust\\1.99.0\\x86_64-windows'"
+  ...
+1..16
+# tests 16
+# pass 15
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:02.260Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":2076}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0132/raw/mutation-M8.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0132/raw/mutation-M8.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:04.439Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":60}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M8',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M8 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M8',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:04.583Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":54}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M9',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M9 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M9',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:04.728Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":61}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0132/raw/mutation-M9.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0132/raw/mutation-M9.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:04.870Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M9',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M9 tools/rust.mjs 126f9113722f5262701c2072bc1b1d5119a6a56b2c210d47fc273418fc525513
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M9',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:05.049Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":57}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+ok 11 - FP-0132 case 1: the Rust lock validator accepts the frozen target and rejects every malformed target
+ok 12 - FP-0132 case 2: rust-lock-verify checks each target against the signed manifest
+ok 13 - FP-0132 case 3: install-rust installs each locked target into every host toolchain and replaces a stale toolchain only after the new one passes
+ok 14 - FP-0132 case 4: the toolchain check rejects a toolchain whose receipt differs from the lock before any version check
+ok 15 - FP-0132 case 5: the toolchain documents describe the locked targets
+not ok 16 - FP-0132 case 6: install-rust restores the earlier toolchain when the new one cannot move into place
+  ---
+  message: "injected removal failure"
+  ...
+1..16
+# tests 16
+# pass 15
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:05.197Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":2249}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0132/raw/mutation-M9.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0132/raw/mutation-M9.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:07.522Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log('M9',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"]
+M9 tools/rust.mjs 29b3ba50ab94a64d947473d9d6f2af2abb48f12c7d8a5be903b28d6856b4616d
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log('M9',process.argv[1],require('crypto').createHash('sha256').update(require('fs').readFileSync(process.argv[1])).digest('hex'))","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:24:07.626Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":50}

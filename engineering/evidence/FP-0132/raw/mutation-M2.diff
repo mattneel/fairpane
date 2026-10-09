@@ -1,0 +1,13 @@
+diff --git a/tools/rust.mjs b/tools/rust.mjs
+index f740ddc..d4d7b19 100644
+--- a/tools/rust.mjs
++++ b/tools/rust.mjs
+@@ -84,7 +84,7 @@ export function rustLockProblems(lock, manifestBytes) {
+     const target = isTable(pkg) && isTable(pkg.target) ? pkg.target[host] : undefined;
+     if (!isTable(target) || target.available !== true) { problems.push(`The manifest has no available ${c.package} for ${host}.`); continue; }
+     if (target.url !== c.url) problems.push(`The manifest URL of ${c.package} for ${host} differs from the lock.`);
+-    if (target.hash !== c.sha256) problems.push(`The manifest hash of ${c.package} for ${host} differs from the lock.`);
++    if (target.hash !== c.sha256 && !Object.values(lock.targets ?? {}).includes(c)) problems.push(`The manifest hash of ${c.package} for ${host} differs from the lock.`);
+   }
+   return problems;
+ }

@@ -1,0 +1,53 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","--cpu-prof","--cpu-prof-dir=out/fp0132/profile-before","-e","import('./tools/rust.test.mjs').then(async m=>{const cs=m.rustCases.filter(c=>/FP-0132 case [346]:|FP-0079 case 7:/.test(c.name));const t={};for(let k=0;k<5;k++)for(const c of cs){const s=performance.now();await c.fn();(t[c.name.slice(0,14)]??=[]).push(Math.round(performance.now()-s))}for(const [n,v] of Object.entries(t))console.log(n,JSON.stringify(v),'median',[...v].sort((a,b)=>a-b)[2]);const f=m.removeRustFixtures();if(f.length)throw new Error(f.join())})"]
+FP-0079 case 7 [351,287,253,252,250] median 253
+FP-0132 case 3 [435,596,448,480,428] median 448
+FP-0132 case 4 [118,155,97,128,142] median 128
+FP-0132 case 6 [277,319,323,435,334] median 323
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["--cpu-prof","--cpu-prof-dir=out/fp0132/profile-before","-e","import('./tools/rust.test.mjs').then(async m=>{const cs=m.rustCases.filter(c=>/FP-0132 case [346]:|FP-0079 case 7:/.test(c.name));const t={};for(let k=0;k<5;k++)for(const c of cs){const s=performance.now();await c.fn();(t[c.name.slice(0,14)]??=[]).push(Math.round(performance.now()-s))}for(const [n,v] of Object.entries(t))console.log(n,JSON.stringify(v),'median',[...v].sort((a,b)=>a-b)[2]);const f=m.removeRustFixtures();if(f.length)throw new Error(f.join())})"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:04:16.419Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":6589}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');const dir=process.argv[1];const p=JSON.parse(fs.readFileSync(dir+'/'+fs.readdirSync(dir)[0]));const byId=new Map(p.nodes.map(n=>[n.id,n]));const parent=new Map();for(const n of p.nodes)for(const c of n.children||[])parent.set(c,n.id);const t=new Map();p.samples.forEach((s,i)=>t.set(s,(t.get(s)||0)+(p.timeDeltas[i]||0)));const self=new Map(),fsBy=new Map();for(const [id,us] of t){const f=byId.get(id).callFrame;const k=f.functionName+' '+f.url.split('/').pop()+':'+f.lineNumber;self.set(k,(self.get(k)||0)+us);if(f.url)continue;const chain=[];let c=parent.get(id);while(c&&chain.length<2){const g=byId.get(c).callFrame;if(/tools\\/rust/.test(g.url))chain.push(g.functionName+' '+g.url.split('/').pop()+':'+g.lineNumber);c=parent.get(c)}const fk=f.functionName+' <- '+chain.join(' <- ');fsBy.set(fk,(fsBy.get(fk)||0)+us)}const top=(m,n)=>[...m].sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k,v])=>(v/1000).toFixed(0).padStart(6)+' ms '+k).join('\\n');console.log('total sampled ms',([...t.values()].reduce((a,b)=>a+b,0)/1000).toFixed(0));console.log('top self time:');console.log(top(self,20));console.log('native time by rust.mjs or rust.test.mjs caller:');console.log(top(fsBy,20))","out/fp0132/profile-before"]
+total sampled ms 6468
+top self time:
+  1355 ms rmSync :-1
+  1139 ms mkdir :-1
+   881 ms open :-1
+   516 ms copyFile :-1
+   279 ms readdir :-1
+   210 ms rename :-1
+   187 ms writeBuffer :-1
+   182 ms close :-1
+   135 ms readFileUtf8 :-1
+   120 ms (idle) :-1
+   118 ms lstat :-1
+   112 ms existsSync :-1
+    66 ms join node:path:505
+    64 ms verifyToolchain rust.mjs:388
+    56 ms processChunkSync node:zlib:415
+    55 ms (garbage collector) :-1
+    50 ms writeFileUtf8 :-1
+    33 ms begin rust.mjs:145
+    32 ms FastBuffer buffer:959
+    31 ms mkdtemp :-1
+native time by rust.mjs or rust.test.mjs caller:
+   935 ms rmSync <- installRust rust.mjs:418
+   715 ms open <- begin rust.mjs:145 <- consume rust.mjs:196
+   711 ms mkdir <- begin rust.mjs:145 <- consume rust.mjs:196
+   516 ms copyFile <- installComponents rust.mjs:266 <-  rust.mjs:438
+   319 ms rmSync <- removeRustFixtures rust.test.mjs:800
+   199 ms mkdir <- installComponents rust.mjs:266 <-  rust.mjs:438
+   154 ms writeBuffer <- writeAll rust.mjs:130 <- consume rust.mjs:196
+   146 ms close <- finish rust.mjs:187 <- consume rust.mjs:196
+   127 ms readdir <- filesBelow rust.mjs:245 <- filesBelow rust.mjs:245
+   120 ms (idle) <- 
+   105 ms rename <- 
+   100 ms readdir <- walk rust.test.mjs:34 <- walk rust.test.mjs:34
+    98 ms readFileUtf8 <- installComponents rust.mjs:266 <-  rust.mjs:438
+    97 ms rmSync <- rmSyncExceptReplaced rust.test.mjs:783 <- installRust rust.mjs:418
+    94 ms mkdir <- installRust rust.mjs:418
+    84 ms open <- 
+    82 ms rename <- installRust rust.mjs:418
+    77 ms mkdir <- extractTarGz rust.mjs:140 <- installRust rust.mjs:418
+    71 ms open <- installRust rust.mjs:418
+    55 ms (garbage collector) <- 
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');const dir=process.argv[1];const p=JSON.parse(fs.readFileSync(dir+'/'+fs.readdirSync(dir)[0]));const byId=new Map(p.nodes.map(n=>[n.id,n]));const parent=new Map();for(const n of p.nodes)for(const c of n.children||[])parent.set(c,n.id);const t=new Map();p.samples.forEach((s,i)=>t.set(s,(t.get(s)||0)+(p.timeDeltas[i]||0)));const self=new Map(),fsBy=new Map();for(const [id,us] of t){const f=byId.get(id).callFrame;const k=f.functionName+' '+f.url.split('/').pop()+':'+f.lineNumber;self.set(k,(self.get(k)||0)+us);if(f.url)continue;const chain=[];let c=parent.get(id);while(c&&chain.length<2){const g=byId.get(c).callFrame;if(/tools\\/rust/.test(g.url))chain.push(g.functionName+' '+g.url.split('/').pop()+':'+g.lineNumber);c=parent.get(c)}const fk=f.functionName+' <- '+chain.join(' <- ');fsBy.set(fk,(fsBy.get(fk)||0)+us)}const top=(m,n)=>[...m].sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k,v])=>(v/1000).toFixed(0).padStart(6)+' ms '+k).join('\\n');console.log('total sampled ms',([...t.values()].reduce((a,b)=>a+b,0)/1000).toFixed(0));console.log('top self time:');console.log(top(self,20));console.log('native time by rust.mjs or rust.test.mjs caller:');console.log(top(fsBy,20))","out/fp0132/profile-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:04:23.079Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":68}

@@ -1,0 +1,34 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+a7219f9a73f3b0363a47b995643b006248c2c64f
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:27:14.940Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","process.stdout.write(require('crypto').createHash('sha256').update(require('fs').readFileSync('toolchains/rust.lock.json')).digest('hex')+'\\n')"]
+05588f0c6905ddaae099323b63eec742ffca309e78e4dd9204017feed2a86926
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","process.stdout.write(require('crypto').createHash('sha256').update(require('fs').readFileSync('toolchains/rust.lock.json')).digest('hex')+'\\n')"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:27:15.018Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0132/raw/p1-rust-lock.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0132/raw/p1-rust-lock.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:27:15.114Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","process.stdout.write(require('crypto').createHash('sha256').update(require('fs').readFileSync('toolchains/rust.lock.json')).digest('hex')+'\\n')"]
+95221244b4d8c2394c2e2b3fc5bf0cf913eddfd8f521f67a4486bf0995543ab7
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","process.stdout.write(require('crypto').createHash('sha256').update(require('fs').readFileSync('toolchains/rust.lock.json')).digest('hex')+'\\n')"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:27:15.199Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":81}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--exit-code","a7219f9","--","toolchains/rust.lock.json"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--exit-code","a7219f9","--","toolchains/rust.lock.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:27:15.343Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","process.stdout.write(require('crypto').createHash('sha256').update(require('fs').readFileSync('toolchains/rust.lock.json')).digest('hex')+'\\n')"]
+95221244b4d8c2394c2e2b3fc5bf0cf913eddfd8f521f67a4486bf0995543ab7
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","process.stdout.write(require('crypto').createHash('sha256').update(require('fs').readFileSync('toolchains/rust.lock.json')).digest('hex')+'\\n')"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:29:57.189Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":51}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0132/raw/p1-rust-lock.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0132/raw/p1-rust-lock.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:29:57.320Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","process.stdout.write(require('crypto').createHash('sha256').update(require('fs').readFileSync('toolchains/rust.lock.json')).digest('hex')+'\\n')"]
+05588f0c6905ddaae099323b63eec742ffca309e78e4dd9204017feed2a86926
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","process.stdout.write(require('crypto').createHash('sha256').update(require('fs').readFileSync('toolchains/rust.lock.json')).digest('hex')+'\\n')"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:29:57.426Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":45}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","--","toolchains/rust.lock.json"]
+ toolchains/rust.lock.json | 3 +++
+ 1 file changed, 3 insertions(+)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","--","toolchains/rust.lock.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:29:57.559Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}

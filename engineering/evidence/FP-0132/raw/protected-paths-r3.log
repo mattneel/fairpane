@@ -1,0 +1,27 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+a7219f9a73f3b0363a47b995643b006248c2c64f
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:35:27.955Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","a7219f9"]
+ docs/TOOLCHAIN.md         |   7 ++
+ toolchains/rust.lock.json |   3 +
+ tools/README.md           |   2 +-
+ tools/lib.mjs             |  22 +++-
+ tools/rust.mjs            | 162 ++++++++++++++++++--------
+ tools/rust.test.mjs       | 284 +++++++++++++++++++++++++++++++++++++++++-----
+ 6 files changed, 402 insertions(+), 78 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","a7219f9"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:35:28.050Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--exit-code","a7219f9","--","rust-toolchain.toml","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains/zig.lock.json","specs/corpora.json"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--exit-code","a7219f9","--","rust-toolchain.toml","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains/zig.lock.json","specs/corpora.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:35:28.169Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":28}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--short","--","tests","tools","docs","toolchains"]
+ M docs/TOOLCHAIN.md
+ M toolchains/rust.lock.json
+ M tools/README.md
+ M tools/lib.mjs
+ M tools/rust.mjs
+ M tools/rust.test.mjs
+?? tests/rust/pointer_width_probe.rs
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--short","--","tests","tools","docs","toolchains"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:35:28.265Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}

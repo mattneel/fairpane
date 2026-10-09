@@ -1,0 +1,15 @@
+diff --git a/tools/rust.mjs b/tools/rust.mjs
+index 43677b1..cb6f6b1 100644
+--- a/tools/rust.mjs
++++ b/tools/rust.mjs
+@@ -426,8 +426,9 @@ export function checkRust(root, { platform = hostPlatform(), run = defaultRun }
+   const lock = loadLock(root);
+   invariant(lock.platforms[platform], `No locked Rust toolchain exists for ${platform}.`);
+   const dir = toolchainDir(root, lock, platform), files = toolFiles(dir, platform);
++  const rustc = verifyToolchain(root, dir, lock, platform, run, files);
+   invariant(receiptMatches(lock, platform, dir), 'The installed Rust toolchain differs from the lock. Run node tools/fairpane.mjs install-rust.');
+-  return verifyToolchain(root, dir, lock, platform, run, files);
++  return rustc;
+ }
+ 
+ /**

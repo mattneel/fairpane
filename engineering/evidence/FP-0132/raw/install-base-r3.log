@@ -1,0 +1,104 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),p=require('path');const s='C:/Users/requi/.omp/wt/t5ba943653/m/.tools/downloads';for(const n of ['rustc','cargo','rust-std','rust-mingw','rustfmt'].map(k=>k+'-1.99.0-x86_64-pc-windows-gnu.tar.gz')){fs.copyFileSync(p.join(s,n),p.join('.tools/downloads',n),fs.constants.COPYFILE_EXCL);console.log(n,fs.statSync(p.join('.tools/downloads',n)).size)}"]
+rustc-1.99.0-x86_64-pc-windows-gnu.tar.gz 161263734
+cargo-1.99.0-x86_64-pc-windows-gnu.tar.gz 18667864
+rust-std-1.99.0-x86_64-pc-windows-gnu.tar.gz 44949786
+rust-mingw-1.99.0-x86_64-pc-windows-gnu.tar.gz 9594875
+rustfmt-1.99.0-x86_64-pc-windows-gnu.tar.gz 4938158
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),p=require('path');const s='C:/Users/requi/.omp/wt/t5ba943653/m/.tools/downloads';for(const n of ['rustc','cargo','rust-std','rust-mingw','rustfmt'].map(k=>k+'-1.99.0-x86_64-pc-windows-gnu.tar.gz')){fs.copyFileSync(p.join(s,n),p.join('.tools/downloads',n),fs.constants.COPYFILE_EXCL);console.log(n,fs.statSync(p.join('.tools/downloads',n)).size)}"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:00:20.170Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":137}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+a7219f9a73f3b0363a47b995643b006248c2c64f
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:00:23.216Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","install-rust"]
+{
+  "toolchain": "C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe",
+  "downloaded": true,
+  "components": [
+    {
+      "package": "rustc",
+      "sha256": "3c7bad76bebfda385cc1061c1f0b625b02c212dcca5ea70b7bc6773153e6f15c",
+      "installer_components": [
+        "rustc"
+      ]
+    },
+    {
+      "package": "cargo",
+      "sha256": "125f4a389c765e59c94a12ec16cd668dfe7d6884b5e8edc8eaf2575f0162890d",
+      "installer_components": [
+        "cargo"
+      ]
+    },
+    {
+      "package": "rust-std",
+      "sha256": "5d7f8eb792439b2e85afaf27497ff0f67e3ada0ef09adf81d564028e2aa1b90b",
+      "installer_components": [
+        "rust-std-x86_64-pc-windows-gnu"
+      ]
+    },
+    {
+      "package": "rust-mingw",
+      "sha256": "6ebe238508348b3faaabb8e259874415ce674dfcb0540392fe1a94f836e51b1b",
+      "installer_components": [
+        "rust-mingw"
+      ]
+    },
+    {
+      "package": "rustfmt-preview",
+      "sha256": "a32c5025c2fa54f53fba92b0be6a949d3b041541917f9d33962187c06e45217a",
+      "installer_components": [
+        "rustfmt-preview"
+      ]
+    }
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","install-rust"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:00:23.310Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":10338}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","process.stdout.write(require('fs').readFileSync('.tools/rust/1.99.0/x86_64-windows/fairpane-install.json','utf8'))"]
+{
+  "version": "1.99.0",
+  "platform": "x86_64-windows",
+  "host": "x86_64-pc-windows-gnu",
+  "rustc_commit_hash": "b940084d7eb6a299eb4bfeb8e34901bc051e7ac4",
+  "manifest_sha256": "ce6dddc886364f8d786514771212cebe9b731ba82d6b859951c6b0ccc516b6a2",
+  "components": [
+    {
+      "package": "rustc",
+      "sha256": "3c7bad76bebfda385cc1061c1f0b625b02c212dcca5ea70b7bc6773153e6f15c",
+      "installer_components": [
+        "rustc"
+      ]
+    },
+    {
+      "package": "cargo",
+      "sha256": "125f4a389c765e59c94a12ec16cd668dfe7d6884b5e8edc8eaf2575f0162890d",
+      "installer_components": [
+        "cargo"
+      ]
+    },
+    {
+      "package": "rust-std",
+      "sha256": "5d7f8eb792439b2e85afaf27497ff0f67e3ada0ef09adf81d564028e2aa1b90b",
+      "installer_components": [
+        "rust-std-x86_64-pc-windows-gnu"
+      ]
+    },
+    {
+      "package": "rust-mingw",
+      "sha256": "6ebe238508348b3faaabb8e259874415ce674dfcb0540392fe1a94f836e51b1b",
+      "installer_components": [
+        "rust-mingw"
+      ]
+    },
+    {
+      "package": "rustfmt-preview",
+      "sha256": "a32c5025c2fa54f53fba92b0be6a949d3b041541917f9d33962187c06e45217a",
+      "installer_components": [
+        "rustfmt-preview"
+      ]
+    }
+  ],
+  "source": "https://static.rust-lang.org/dist/channel-rust-1.99.0.toml"
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","process.stdout.write(require('fs').readFileSync('.tools/rust/1.99.0/x86_64-windows/fairpane-install.json','utf8'))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:00:33.728Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}

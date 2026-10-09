@@ -1,0 +1,36 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","require('fs').rmSync('out/fp0132/pointer-width-i686.rmeta',{force:true});console.log('exists before:',require('fs').existsSync('out/fp0132/pointer-width-i686.rmeta'))"]
+exists before: false
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","require('fs').rmSync('out/fp0132/pointer-width-i686.rmeta',{force:true});console.log('exists before:',require('fs').existsSync('out/fp0132/pointer-width-i686.rmeta'))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:39.132Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":103}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:39.370Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":312,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const f='out/fp0132/pointer-width-i686.rmeta';console.log('exists:',require('fs').existsSync(f),'size:',require('fs').statSync(f).size)"]
+exists: true size: 2536
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const f='out/fp0132/pointer-width-i686.rmeta';console.log('exists:',require('fs').existsSync(f),'size:',require('fs').statSync(f).size)"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:39.773Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":51}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","x86_64-pc-windows-gnu","-o","out/fp0132/pointer-width-host.rmeta","tests/rust/pointer_width_probe.rs"]
+error[E0080]: evaluation panicked: the probe needs 4-byte pointers
+ --> tests/rust/pointer_width_probe.rs:8:15
+  |
+8 | const _: () = assert!(core::mem::size_of::<usize>() == 4, "the probe needs 4-byte pointers");
+  |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ evaluation of `_` failed here
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0080`.
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","x86_64-pc-windows-gnu","-o","out/fp0132/pointer-width-host.rmeta","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:39.952Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":103,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustfmt.exe","--check","--edition","2024","tests/rust/pointer_width_probe.rs"]
+Diff in \\?\C:\Users\requi\.omp\wt\t5ba943653\m\tests\rust\pointer_width_probe.rs:5:
+ 
+ #![no_std]
+ 
+-const _: () = assert!(core::mem::size_of::<usize>() == 4, "the probe needs 4-byte pointers");
++const _: () = assert!(
++    core::mem::size_of::<usize>() == 4,
++    "the probe needs 4-byte pointers"
++);
+ 
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustfmt.exe","arguments":["--check","--edition","2024","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:40.134Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":70,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}

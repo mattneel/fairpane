@@ -1,0 +1,13 @@
+diff --git a/tools/rust.mjs b/tools/rust.mjs
+index f740ddc..1ffeb6e 100644
+--- a/tools/rust.mjs
++++ b/tools/rust.mjs
+@@ -454,7 +454,7 @@ export async function installRust(root, { platform = hostPlatform(), fetch = glo
+     // The earlier toolchain moves aside, and it moves back if the new one cannot take its place.
+     const replaced = path.join(path.dirname(dest), `.replaced-${crypto.randomUUID()}`);
+     fs.renameSync(dest, replaced);
+-    try { fs.renameSync(toolchain, dest); } catch (e) { fs.renameSync(replaced, dest); throw e; }
++    fs.renameSync(toolchain, dest);
+     const result = { toolchain: rustc, downloaded: true, replaced: true, components };
+     try { fs.rmSync(replaced, { recursive: true, force: true, maxRetries: 3 }); } catch (e) { result.replaced_cleanup_error = e.message; }
+     return result;

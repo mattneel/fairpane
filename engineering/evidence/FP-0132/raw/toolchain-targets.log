@@ -1,0 +1,163 @@
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","-vV"]
+rustc 1.99.0 (b940084d7 2026-09-28)
+binary: rustc
+commit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4
+commit-date: 2026-09-28
+host: x86_64-pc-windows-gnu
+release: 1.99.0
+LLVM version: 23.1.1
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["-vV"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:24.512Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":23,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--print","target-libdir","--target","i686-unknown-linux-gnu"]
+C:\Users\requi\.omp\wt\t5ba943653\m\.tools\rust\1.99.0\x86_64-windows\lib\rustlib\i686-unknown-linux-gnu\lib
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--print","target-libdir","--target","i686-unknown-linux-gnu"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:24.614Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const {spawnSync}=require('child_process'),path=require('path'),fs=require('fs');const win=process.platform==='win32';const tc=path.resolve('.tools/rust/1.99.0/'+(win?'x86_64-windows':'x86_64-linux'));const r=spawnSync(path.join(tc,'bin',win?'rustc.exe':'rustc'),['--print','target-libdir','--target','i686-unknown-linux-gnu'],{encoding:'utf8',env:{...process.env,CARGO_HOME:path.resolve('.tools/cargo-home')}});const out=r.stdout.trim(),want=path.join(tc,'lib','rustlib','i686-unknown-linux-gnu','lib');console.log('status:',r.status);console.log('output:',out);console.log('expected:',want);console.log('equal:',out===want);console.log('rlib files:',fs.readdirSync(want).filter(n=>n.endsWith('.rlib')).length)"]
+status: 0
+output: C:\Users\requi\.omp\wt\t5ba943653\m\.tools\rust\1.99.0\x86_64-windows\lib\rustlib\i686-unknown-linux-gnu\lib
+expected: C:\Users\requi\.omp\wt\t5ba943653\m\.tools\rust\1.99.0\x86_64-windows\lib\rustlib\i686-unknown-linux-gnu\lib
+equal: true
+rlib files: 27
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const {spawnSync}=require('child_process'),path=require('path'),fs=require('fs');const win=process.platform==='win32';const tc=path.resolve('.tools/rust/1.99.0/'+(win?'x86_64-windows':'x86_64-linux'));const r=spawnSync(path.join(tc,'bin',win?'rustc.exe':'rustc'),['--print','target-libdir','--target','i686-unknown-linux-gnu'],{encoding:'utf8',env:{...process.env,CARGO_HOME:path.resolve('.tools/cargo-home')}});const out=r.stdout.trim(),want=path.join(tc,'lib','rustlib','i686-unknown-linux-gnu','lib');console.log('status:',r.status);console.log('output:',out);console.log('expected:',want);console.log('equal:',out===want);console.log('rlib files:',fs.readdirSync(want).filter(n=>n.endsWith('.rlib')).length)"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:24.720Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--print","cfg","--target","i686-unknown-linux-gnu"]
+debug_assertions
+panic="unwind"
+target_abi=""
+target_arch="x86"
+target_endian="little"
+target_env="gnu"
+target_family="unix"
+target_feature="fxsr"
+target_feature="sse"
+target_feature="sse2"
+target_has_atomic="16"
+target_has_atomic="32"
+target_has_atomic="64"
+target_has_atomic="8"
+target_has_atomic="ptr"
+target_has_atomic_primitive_alignment="16"
+target_has_atomic_primitive_alignment="32"
+target_has_atomic_primitive_alignment="8"
+target_has_atomic_primitive_alignment="ptr"
+target_os="linux"
+target_pointer_width="32"
+target_vendor="unknown"
+unix
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--print","cfg","--target","i686-unknown-linux-gnu"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:24.938Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":47,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),path=require('path');const d=path.join('.tools/rust/1.99.0',process.platform==='win32'?'x86_64-windows':'x86_64-linux','lib/rustlib/i686-unknown-linux-gnu/lib');for(const n of fs.readdirSync(d).sort())console.log(fs.statSync(path.join(d,n)).size,n);console.log('versions:',fs.readdirSync('.tools/rust/1.99.0').sort().join(' '))"]
+27070 libaddr2line-014893f284824838.rlib
+479112 libaddr2line-014893f284824838.rmeta
+9636 libadler2-2fa1ef6a165762d9.rlib
+20729 libadler2-2fa1ef6a165762d9.rmeta
+843524 liballoc-b3639637446d0a24.rlib
+8781047 liballoc-b3639637446d0a24.rmeta
+4586 libcfg_if-52d93569b5ce7d96.rlib
+5528 libcfg_if-52d93569b5ce7d96.rmeta
+3738152 libcompiler_builtins-08afc943ed9c5b7b.rlib
+2049646 libcompiler_builtins-08afc943ed9c5b7b.rmeta
+2654874 libcore-1d5ebf1808714f57.rlib
+65488280 libcore-1d5ebf1808714f57.rmeta
+598408 libgetopts-e0334d1ed4f7650b.rlib
+219235 libgetopts-e0334d1ed4f7650b.rmeta
+939798 libgimli-2566ce51763100e6.rlib
+5937099 libgimli-2566ce51763100e6.rmeta
+36836 libhashbrown-0416d519b6d8689b.rlib
+1728082 libhashbrown-0416d519b6d8689b.rmeta
+27610 liblibc-0a00123059e88f98.rlib
+4422859 liblibc-0a00123059e88f98.rmeta
+129390 libmemchr-1ddc61ca9d253a65.rlib
+597815 libmemchr-1ddc61ca9d253a65.rmeta
+103622 libminiz_oxide-e208339681168f66.rlib
+131644 libminiz_oxide-e208339681168f66.rmeta
+270408 libobject-8d539f1e4f814f9f.rlib
+8924333 libobject-8d539f1e4f814f9f.rmeta
+9708 libpanic_abort-6c15f47f7192823e.rlib
+2743 libpanic_abort-6c15f47f7192823e.rmeta
+30382 libpanic_unwind-b2a472603d6f0351.rlib
+7113 libpanic_unwind-b2a472603d6f0351.rmeta
+3549412 libproc_macro-ecaed6795f5e232a.rlib
+1168350 libproc_macro-ecaed6795f5e232a.rmeta
+332948 libprofiler_builtins-8c690f8349276838.rlib
+1352 libprofiler_builtins-8c690f8349276838.rmeta
+217778 librustc_demangle-2c56f5f790028668.rlib
+92589 librustc_demangle-2c56f5f790028668.rmeta
+4748 librustc_literal_escaper-493615eb6f3c1a0a.rlib
+123877 librustc_literal_escaper-493615eb6f3c1a0a.rmeta
+4832 librustc_std_workspace_alloc-1c679ba83160a638.rlib
+2211 librustc_std_workspace_alloc-1c679ba83160a638.rmeta
+4818 librustc_std_workspace_core-c1ef7e8291e2f7e2.rlib
+6110 librustc_std_workspace_core-c1ef7e8291e2f7e2.rmeta
+4804 librustc_std_workspace_std-f666ce9731a8f2b5.rlib
+7184 librustc_std_workspace_std-f666ce9731a8f2b5.rmeta
+10244338 libstd-1798c09a5aeb71f1.rlib
+7781238 libstd-1798c09a5aeb71f1.rmeta
+2452960 libstd-1798c09a5aeb71f1.so
+62766 libstd_detect-711e480d8315b99d.rlib
+575536 libstd_detect-711e480d8315b99d.rmeta
+4652 libsysroot-c75924031f777a33.rlib
+2248 libsysroot-c75924031f777a33.rmeta
+6154168 libtest-fda1c320ecc0c1c6.rlib
+1023982 libtest-fda1c320ecc0c1c6.rmeta
+4638 libunwind-420760c184e60c98.rlib
+20108 libunwind-420760c184e60c98.rmeta
+versions: x86_64-windows
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),path=require('path');const d=path.join('.tools/rust/1.99.0',process.platform==='win32'?'x86_64-windows':'x86_64-linux','lib/rustlib/i686-unknown-linux-gnu/lib');for(const n of fs.readdirSync(d).sort())console.log(fs.statSync(path.join(d,n)).size,n);console.log('versions:',fs.readdirSync('.tools/rust/1.99.0').sort().join(' '))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:25.140Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":59}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","process.stdout.write(require('fs').readFileSync('.tools/rust/1.99.0/'+(process.platform==='win32'?'x86_64-windows':'x86_64-linux')+'/fairpane-install.json','utf8'))"]
+{
+  "version": "1.99.0",
+  "platform": "x86_64-windows",
+  "host": "x86_64-pc-windows-gnu",
+  "rustc_commit_hash": "b940084d7eb6a299eb4bfeb8e34901bc051e7ac4",
+  "manifest_sha256": "ce6dddc886364f8d786514771212cebe9b731ba82d6b859951c6b0ccc516b6a2",
+  "components": [
+    {
+      "package": "rustc",
+      "sha256": "3c7bad76bebfda385cc1061c1f0b625b02c212dcca5ea70b7bc6773153e6f15c",
+      "installer_components": [
+        "rustc"
+      ]
+    },
+    {
+      "package": "cargo",
+      "sha256": "125f4a389c765e59c94a12ec16cd668dfe7d6884b5e8edc8eaf2575f0162890d",
+      "installer_components": [
+        "cargo"
+      ]
+    },
+    {
+      "package": "rust-std",
+      "sha256": "5d7f8eb792439b2e85afaf27497ff0f67e3ada0ef09adf81d564028e2aa1b90b",
+      "installer_components": [
+        "rust-std-x86_64-pc-windows-gnu"
+      ]
+    },
+    {
+      "package": "rust-mingw",
+      "sha256": "6ebe238508348b3faaabb8e259874415ce674dfcb0540392fe1a94f836e51b1b",
+      "installer_components": [
+        "rust-mingw"
+      ]
+    },
+    {
+      "package": "rustfmt-preview",
+      "sha256": "a32c5025c2fa54f53fba92b0be6a949d3b041541917f9d33962187c06e45217a",
+      "installer_components": [
+        "rustfmt-preview"
+      ]
+    },
+    {
+      "package": "rust-std",
+      "target": "i686-unknown-linux-gnu",
+      "sha256": "2b7db847af9888ddb249d3e1c8aeaeeb82ae529bf62426b82330a4cddac8bb38",
+      "installer_components": [
+        "rust-std-i686-unknown-linux-gnu"
+      ]
+    }
+  ],
+  "source": "https://static.rust-lang.org/dist/channel-rust-1.99.0.toml"
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","process.stdout.write(require('fs').readFileSync('.tools/rust/1.99.0/'+(process.platform==='win32'?'x86_64-windows':'x86_64-linux')+'/fairpane-install.json','utf8'))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:57:25.289Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":57}

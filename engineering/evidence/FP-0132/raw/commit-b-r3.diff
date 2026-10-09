@@ -1,0 +1,15 @@
+diff --git a/tools/rust.test.mjs b/tools/rust.test.mjs
+index cbb6937..c697511 100644
+--- a/tools/rust.test.mjs
++++ b/tools/rust.test.mjs
+@@ -654,9 +654,7 @@ export const rustCases = [
+     }
+     assert.deepEqual(problems, []);
+     assert.equal(rustToolchainText(targetLock()), rustToolchainText(FROZEN_LOCK));
+-    // Before the protected lock change lands, the committed lock may still lack the targets member.
+-    const committed = committedLock().targets;
+-    if (committed !== undefined) assert.deepEqual(committed, FROZEN_TARGETS);
++    assert.deepEqual(committedLock().targets, FROZEN_TARGETS);
+   }],
+   ['FP-0132 case 2: rust-lock-verify checks each target against the signed manifest', () => {
+     const bytes = fs.readFileSync(path.join(root, 'engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml'));

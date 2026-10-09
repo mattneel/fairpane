@@ -1,0 +1,15 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","require('fs').mkdirSync('out/fp0132',{recursive:true});console.log('out/fp0132 exists:',require('fs').statSync('out/fp0132').isDirectory())"]
+out/fp0132 exists: true
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","require('fs').mkdirSync('out/fp0132',{recursive:true});console.log('out/fp0132 exists:',require('fs').statSync('out/fp0132').isDirectory())"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:51:05.084Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":40}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"]
+error[E0463]: can't find crate for `core`
+  |
+  = note: the `i686-unknown-linux-gnu` target may not be installed
+  = help: consider downloading the target with `rustup target add i686-unknown-linux-gnu`
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0463`.
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T19:51:05.188Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":137,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m/.tools/cargo-home"}}

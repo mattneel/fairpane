@@ -1,0 +1,79 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","process.stdout.write(require('fs').readFileSync('out/fp0132/ab.mjs','utf8'))"]
+import fs from 'node:fs'; import path from 'node:path'; import os from 'node:os';
+import { extractTarGz, installComponents } from '../../tools/rust.mjs';
+const archives = fs.readdirSync('out/fp0132/arch');
+const base = fs.mkdtempSync(path.join(os.tmpdir(), 'ab-'));
+// The per-file strategy of the first reduction: one mkdir per new parent and one rename per listed file.
+function perFile(extracted, root, toolchain) {
+  const b = path.join(extracted, root);
+  for (const component of fs.readFileSync(path.join(b, 'components'), 'utf8').split('\n').filter(Boolean)) {
+    const dir = path.join(b, component), made = new Set();
+    fs.readFileSync(path.join(b, 'rust-installer-version'), 'utf8');
+    const walk = d => { for (const e of fs.readdirSync(d, { withFileTypes: true })) if (e.isDirectory()) walk(path.join(d, e.name)); };
+    walk(dir);
+    for (const line of fs.readFileSync(path.join(dir, 'manifest.in'), 'utf8').split('\n').filter(Boolean)) fs.lstatSync(path.join(dir, ...line.slice(5).split('/')));
+    for (const line of fs.readFileSync(path.join(dir, 'manifest.in'), 'utf8').split('\n').filter(Boolean)) {
+      const file = line.slice(5), target = path.join(toolchain, ...file.split('/')), parent = path.dirname(target);
+      if (!made.has(parent)) { fs.mkdirSync(parent, { recursive: true }); made.add(parent); }
+      fs.renameSync(path.join(dir, ...file.split('/')), target);
+    }
+  }
+}
+const t = { subtree: 0, subtreeRm: 0, perFile: 0, perFileRm: 0 };
+const N = 30;
+for (let k = 0; k < N; k++) {
+  for (const mode of k % 2 ? ['perFile', 'subtree'] : ['subtree', 'perFile']) {
+    const stage = fs.mkdtempSync(path.join(base, '.extract-')), tc = path.join(stage, 'toolchain');
+    fs.mkdirSync(tc);
+    for (const [i, a] of archives.entries()) await extractTarGz(path.join('out/fp0132/arch', a), a.replace('.tar.gz', ''), path.join(stage, String(i)));
+    let s = performance.now();
+    const installed = new Set();
+    for (const [i, a] of archives.entries()) {
+      if (mode === 'subtree') installComponents(path.join(stage, String(i)), a.replace('.tar.gz', ''), tc, installed);
+      else perFile(path.join(stage, String(i)), a.replace('.tar.gz', ''), tc);
+    }
+    t[mode] += performance.now() - s;
+    fs.renameSync(tc, path.join(base, `${mode}-${k}`));
+    s = performance.now(); fs.rmSync(stage, { recursive: true, force: true }); t[`${mode}Rm`] += performance.now() - s;
+  }
+}
+console.log(Object.fromEntries(Object.entries(t).map(([k, v]) => [k, (v / N).toFixed(2)])));
+fs.rmSync(base, { recursive: true, force: true });
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","process.stdout.write(require('fs').readFileSync('out/fp0132/ab.mjs','utf8'))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:11:39.553Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":51}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log(require('fs').readdirSync('out/fp0132/arch').join('\\n'))"]
+cargo-1.99.0-x86_64-pc-windows-gnu.tar.gz
+rust-mingw-1.99.0-x86_64-pc-windows-gnu.tar.gz
+rust-std-1.99.0-i686-unknown-linux-gnu.tar.gz
+rust-std-1.99.0-x86_64-pc-windows-gnu.tar.gz
+rustc-1.99.0-x86_64-pc-windows-gnu.tar.gz
+rustfmt-1.99.0-x86_64-pc-windows-gnu.tar.gz
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log(require('fs').readdirSync('out/fp0132/arch').join('\\n'))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:11:39.693Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":73}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0132/ab.mjs"]
+{
+  subtree: '12.58',
+  subtreeRm: '6.99',
+  perFile: '9.29',
+  perFileRm: '8.93'
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0132/ab.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:11:39.877Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":2940}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0132/ab.mjs"]
+{
+  subtree: '16.13',
+  subtreeRm: '8.82',
+  perFile: '11.26',
+  perFileRm: '11.77'
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0132/ab.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:11:42.952Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":3679}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0132/ab.mjs"]
+{
+  subtree: '16.72',
+  subtreeRm: '9.43',
+  perFile: '14.03',
+  perFileRm: '13.33'
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0132/ab.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:11:46.767Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":3965}

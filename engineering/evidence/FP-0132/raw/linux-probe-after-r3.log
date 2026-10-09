@@ -1,0 +1,30 @@
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","--cd","/home/autark/fairpane-linux/work/FP-0132-r3","-e","/home/autark/fairpane-linux/node/bin/node","-e","const fs=require('fs');fs.mkdirSync('out/fp0132',{recursive:true});console.log('rmeta exists before:',fs.existsSync('out/fp0132/pointer-width-i686.rmeta'))"]
+rmeta exists before: false
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","--cd","/home/autark/fairpane-linux/work/FP-0132-r3","-e","/home/autark/fairpane-linux/node/bin/node","-e","const fs=require('fs');fs.mkdirSync('out/fp0132',{recursive:true});console.log('rmeta exists before:',fs.existsSync('out/fp0132/pointer-width-i686.rmeta'))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:55.709Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":81}
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","--cd","/home/autark/fairpane-linux/work/FP-0132-r3","-e","env","CARGO_HOME=/home/autark/fairpane-linux/work/FP-0132-r3/.tools/cargo-home",".tools/rust/1.99.0/x86_64-linux/bin/rustc","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"]
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","--cd","/home/autark/fairpane-linux/work/FP-0132-r3","-e","env","CARGO_HOME=/home/autark/fairpane-linux/work/FP-0132-r3/.tools/cargo-home",".tools/rust/1.99.0/x86_64-linux/bin/rustc","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:55.885Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":74}
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","--cd","/home/autark/fairpane-linux/work/FP-0132-r3","-e","/home/autark/fairpane-linux/node/bin/node","-e","const f='out/fp0132/pointer-width-i686.rmeta';console.log('exists:',require('fs').existsSync(f),'size:',require('fs').statSync(f).size)"]
+exists: true size: 2555
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","--cd","/home/autark/fairpane-linux/work/FP-0132-r3","-e","/home/autark/fairpane-linux/node/bin/node","-e","const f='out/fp0132/pointer-width-i686.rmeta';console.log('exists:',require('fs').existsSync(f),'size:',require('fs').statSync(f).size)"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:56.052Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":76}
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","--cd","/home/autark/fairpane-linux/work/FP-0132-r3","-e","env","CARGO_HOME=/home/autark/fairpane-linux/work/FP-0132-r3/.tools/cargo-home",".tools/rust/1.99.0/x86_64-linux/bin/rustc","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","x86_64-unknown-linux-gnu","-o","out/fp0132/pointer-width-host.rmeta","tests/rust/pointer_width_probe.rs"]
+error[E0080]: evaluation panicked: the probe needs 4-byte pointers
+  --> tests/rust/pointer_width_probe.rs:8:15
+   |
+ 8 |   const _: () = assert!(
+   |  _______________^
+ 9 | |     core::mem::size_of::<usize>() == 4,
+10 | |     "the probe needs 4-byte pointers"
+11 | | );
+   | |_^ evaluation of `_` failed here
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0080`.
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","--cd","/home/autark/fairpane-linux/work/FP-0132-r3","-e","env","CARGO_HOME=/home/autark/fairpane-linux/work/FP-0132-r3/.tools/cargo-home",".tools/rust/1.99.0/x86_64-linux/bin/rustc","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","x86_64-unknown-linux-gnu","-o","out/fp0132/pointer-width-host.rmeta","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:56.223Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","--cd","/home/autark/fairpane-linux/work/FP-0132-r3","-e","env","CARGO_HOME=/home/autark/fairpane-linux/work/FP-0132-r3/.tools/cargo-home",".tools/rust/1.99.0/x86_64-linux/bin/rustfmt","--check","--edition","2024","tests/rust/pointer_width_probe.rs"]
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","--cd","/home/autark/fairpane-linux/work/FP-0132-r3","-e","env","CARGO_HOME=/home/autark/fairpane-linux/work/FP-0132-r3/.tools/cargo-home",".tools/rust/1.99.0/x86_64-linux/bin/rustfmt","--check","--edition","2024","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:56.391Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":84}

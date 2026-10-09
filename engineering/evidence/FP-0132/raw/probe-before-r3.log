@@ -1,0 +1,19 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+a7219f9a73f3b0363a47b995643b006248c2c64f
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:28:45.035Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');fs.mkdirSync('out/fp0132',{recursive:true});fs.rmSync('out/fp0132/pointer-width-i686.rmeta',{force:true});console.log('out/fp0132 exists:',fs.statSync('out/fp0132').isDirectory(),'rmeta exists:',fs.existsSync('out/fp0132/pointer-width-i686.rmeta'))"]
+out/fp0132 exists: true rmeta exists: false
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');fs.mkdirSync('out/fp0132',{recursive:true});fs.rmSync('out/fp0132/pointer-width-i686.rmeta',{force:true});console.log('out/fp0132 exists:',fs.statSync('out/fp0132').isDirectory(),'rmeta exists:',fs.existsSync('out/fp0132/pointer-width-i686.rmeta'))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:28:45.205Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"]
+error[E0463]: can't find crate for `core`
+  |
+  = note: the `i686-unknown-linux-gnu` target may not be installed
+  = help: consider downloading the target with `rustup target add i686-unknown-linux-gnu`
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0463`.
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:28:45.349Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":139,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m\\.tools\\cargo-home"}}

@@ -1,0 +1,88 @@
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","-e","bash","-c","set -eu; dest=\"$HOME/fairpane-linux/work/FP-0132-r3\"; mkdir \"$dest\"; cd /mnt/c/Users/requi/.omp/wt/tf019b84f8/m; tar --exclude=./.git --exclude=./.tools --exclude=./out -cf - . | tar -xf - -C \"$dest\"; echo \"copied $PWD to $dest\""]
+copied /mnt/c/Users/requi/.omp/wt/tf019b84f8/m to /home/autark/fairpane-linux/work/FP-0132-r3
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","set -eu; dest=\"$HOME/fairpane-linux/work/FP-0132-r3\"; mkdir \"$dest\"; cd /mnt/c/Users/requi/.omp/wt/tf019b84f8/m; tar --exclude=./.git --exclude=./.tools --exclude=./out -cf - . | tar -xf - -C \"$dest\"; echo \"copied $PWD to $dest\""],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:44.249Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":3848}
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","-e","bash","-c","set -eu; cd \"$HOME/fairpane-linux/work/FP-0132-r3\"; find tools toolchains tests/rust docs/TOOLCHAIN.md -type f | LC_ALL=C sort | while IFS= read -r f; do printf \"%s %s\\n\" \"$(git hash-object --no-filters -- \"$f\")\" \"$f\"; done"]
+d7bb283d09ffe1b24c855337a6bce34c485a58ef docs/TOOLCHAIN.md
+c53cf5d87683d4a6fe9a2d8f3bab82298e91489e tests/rust/pointer_width_probe.rs
+7cd39eddefb6d412a1137417b1a03668f741924b tests/rust/toolchain_smoke.rs
+851ac833642005c76c70335f3fbbbbdc9e7976cb toolchains/omp-baseline.json
+76e20f6811713f467467eb88a9d4a2b8a8e6b1c0 toolchains/rust.lock.json
+62db5073725090e023bc59800ecded74f0f6665a toolchains/zig-version.txt
+4254844c6470b88df84b15dfaa22e07f3188f0f9 toolchains/zig.lock.json
+cc12ee6c57d4be0d5f339d8aecc637fb08f1f01b tools/README.md
+27a0c911f6261f421f3852dae660876f286332e3 tools/abi.mjs
+e8064470e75aea952b5a58e1ec8544ea25cc5b6c tools/abi.test.mjs
+6f9a4ae4a06cef40f0b2951a131fe32cddf89e2d tools/attest.mjs
+e92b75db1de0ed18a1811fd471069edf289617c9 tools/attest.test.mjs
+8c57e9ea732e03aca2e66f1cfa2f464ae719e245 tools/capabilities.mjs
+a6ed746b1d06b0378b0d315153a71f6a686fa3f2 tools/corpus.mjs
+bfca0633bed0304ef7340185837767f59f1e4ab9 tools/fairpane.mjs
+ea28995a2a7e7f93623e7b1ec09f1b4caacad027 tools/fileset.mjs
+f1e6563ae20bac5283ef187d03e15b7a95c6fba7 tools/fileset.test.mjs
+fe5a90571ac1de23feeeef9b52c846498a9eccd8 tools/fonts/font_expectations.py
+58b54cac1de9f510b5bd84ec5623258f53df3e9b tools/lib.mjs
+f2c2ffe7fdd5709460bfca67917a19b818c71de8 tools/mutation-harness.mjs
+97f2e3f2e6697d2bbca933224b6f92bb3cef4725 tools/release.mjs
+9f0d0882dedc324196d745496b4c891f370edd09 tools/release.test.mjs
+43677b11cb084487fb81d8f91ae82d7c2984cfb3 tools/rust.mjs
+c697511432bbf95afee11bb7a03f1a1b109def54 tools/rust.test.mjs
+51ca83329bcadd8516a7263c32d72a24cdf08520 tools/selftest.mjs
+02fc9919c66be925fbaeb7735f05b6915297e427 tools/test-runner.mjs
+831b4b589a3b45a1187d1e69bd3e3f26346ef44c tools/ucd.mjs
+a5a2c3864849e119e89dd827410764e6d782b00f tools/ucd.test.mjs
+ed08ed4e6998048d249d70159f3dfcccffaf197a tools/workflow-check.mjs
+0e4c06bfd76ff6744356043cce7ab9c40c03ca4d tools/workflow-check.test.mjs
+ce6da85900fd8d7744fdab0261f1dfdd066faad2 tools/zig/library_check.zig
+98baf5b02355dd62b045e93cb84a90d38c8b1157 tools/zig/test_profile_runner.zig
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","set -eu; cd \"$HOME/fairpane-linux/work/FP-0132-r3\"; find tools toolchains tests/rust docs/TOOLCHAIN.md -type f | LC_ALL=C sort | while IFS= read -r f; do printf \"%s %s\\n\" \"$(git hash-object --no-filters -- \"$f\")\" \"$f\"; done"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:48.202Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":98}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),crypto=require('crypto');const out=[];const walk=p=>{const s=fs.statSync(p);if(s.isDirectory())for(const n of fs.readdirSync(p))walk(p+'/'+n);else out.push(p);};['tools','toolchains','tests/rust','docs/TOOLCHAIN.md'].forEach(walk);out.sort((a,b)=>Buffer.compare(Buffer.from(a),Buffer.from(b)));for(const f of out){const b=fs.readFileSync(f);console.log(crypto.createHash('sha1').update('blob '+b.length+'\\0').update(b).digest('hex')+' '+f);}"]
+d7bb283d09ffe1b24c855337a6bce34c485a58ef docs/TOOLCHAIN.md
+c53cf5d87683d4a6fe9a2d8f3bab82298e91489e tests/rust/pointer_width_probe.rs
+7cd39eddefb6d412a1137417b1a03668f741924b tests/rust/toolchain_smoke.rs
+851ac833642005c76c70335f3fbbbbdc9e7976cb toolchains/omp-baseline.json
+76e20f6811713f467467eb88a9d4a2b8a8e6b1c0 toolchains/rust.lock.json
+62db5073725090e023bc59800ecded74f0f6665a toolchains/zig-version.txt
+4254844c6470b88df84b15dfaa22e07f3188f0f9 toolchains/zig.lock.json
+cc12ee6c57d4be0d5f339d8aecc637fb08f1f01b tools/README.md
+27a0c911f6261f421f3852dae660876f286332e3 tools/abi.mjs
+e8064470e75aea952b5a58e1ec8544ea25cc5b6c tools/abi.test.mjs
+6f9a4ae4a06cef40f0b2951a131fe32cddf89e2d tools/attest.mjs
+e92b75db1de0ed18a1811fd471069edf289617c9 tools/attest.test.mjs
+8c57e9ea732e03aca2e66f1cfa2f464ae719e245 tools/capabilities.mjs
+a6ed746b1d06b0378b0d315153a71f6a686fa3f2 tools/corpus.mjs
+bfca0633bed0304ef7340185837767f59f1e4ab9 tools/fairpane.mjs
+ea28995a2a7e7f93623e7b1ec09f1b4caacad027 tools/fileset.mjs
+f1e6563ae20bac5283ef187d03e15b7a95c6fba7 tools/fileset.test.mjs
+fe5a90571ac1de23feeeef9b52c846498a9eccd8 tools/fonts/font_expectations.py
+58b54cac1de9f510b5bd84ec5623258f53df3e9b tools/lib.mjs
+f2c2ffe7fdd5709460bfca67917a19b818c71de8 tools/mutation-harness.mjs
+97f2e3f2e6697d2bbca933224b6f92bb3cef4725 tools/release.mjs
+9f0d0882dedc324196d745496b4c891f370edd09 tools/release.test.mjs
+43677b11cb084487fb81d8f91ae82d7c2984cfb3 tools/rust.mjs
+c697511432bbf95afee11bb7a03f1a1b109def54 tools/rust.test.mjs
+51ca83329bcadd8516a7263c32d72a24cdf08520 tools/selftest.mjs
+02fc9919c66be925fbaeb7735f05b6915297e427 tools/test-runner.mjs
+831b4b589a3b45a1187d1e69bd3e3f26346ef44c tools/ucd.mjs
+a5a2c3864849e119e89dd827410764e6d782b00f tools/ucd.test.mjs
+ed08ed4e6998048d249d70159f3dfcccffaf197a tools/workflow-check.mjs
+0e4c06bfd76ff6744356043cce7ab9c40c03ca4d tools/workflow-check.test.mjs
+ce6da85900fd8d7744fdab0261f1dfdd066faad2 tools/zig/library_check.zig
+98baf5b02355dd62b045e93cb84a90d38c8b1157 tools/zig/test_profile_runner.zig
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),crypto=require('crypto');const out=[];const walk=p=>{const s=fs.statSync(p);if(s.isDirectory())for(const n of fs.readdirSync(p))walk(p+'/'+n);else out.push(p);};['tools','toolchains','tests/rust','docs/TOOLCHAIN.md'].forEach(walk);out.sort((a,b)=>Buffer.compare(Buffer.from(a),Buffer.from(b)));for(const f of out){const b=fs.readFileSync(f);console.log(crypto.createHash('sha1').update('blob '+b.length+'\\0').update(b).digest('hex')+' '+f);}"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:48.419Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":46}
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","-e","bash","-c","set -eu; cd \"$HOME/fairpane-linux/work/FP-0132-r3\"; test ! -e .tools; mkdir -p .tools/downloads; for f in \"$HOME\"/fairpane-linux/work/FP-0079-r1/.tools/downloads/*-x86_64-unknown-linux-gnu.tar.gz /mnt/c/Users/requi/.omp/wt/tf019b84f8/m/.tools/downloads/rust-std-1.99.0-i686-unknown-linux-gnu.tar.gz; do cp --update=none \"$f\" .tools/downloads/; done; ls -l .tools/downloads; sha256sum .tools/downloads/*"]
+total 249520
+-rw-r--r-- 1 autark autark  14521653 Oct  9 17:36 cargo-1.99.0-x86_64-unknown-linux-gnu.tar.gz
+-rwxr-x--x 1 autark autark  46083412 Oct  9 17:36 rust-std-1.99.0-i686-unknown-linux-gnu.tar.gz
+-rw-r--r-- 1 autark autark  50364291 Oct  9 17:36 rust-std-1.99.0-x86_64-unknown-linux-gnu.tar.gz
+-rw-r--r-- 1 autark autark 141398713 Oct  9 17:36 rustc-1.99.0-x86_64-unknown-linux-gnu.tar.gz
+-rw-r--r-- 1 autark autark   3133022 Oct  9 17:36 rustfmt-1.99.0-x86_64-unknown-linux-gnu.tar.gz
+c2b8ba1f59e7a230aa5522684f3f7aa620b98e5ad37683a5e5cf9b41f534fa1e  .tools/downloads/cargo-1.99.0-x86_64-unknown-linux-gnu.tar.gz
+2b7db847af9888ddb249d3e1c8aeaeeb82ae529bf62426b82330a4cddac8bb38  .tools/downloads/rust-std-1.99.0-i686-unknown-linux-gnu.tar.gz
+1dcaa01beb6bc78fdb13815b4f15214719167c58e3d79fbdf214591f8c195ee1  .tools/downloads/rust-std-1.99.0-x86_64-unknown-linux-gnu.tar.gz
+238e72b8617f79bc96f27a5bfeb1a208b5755fe1a48f8bc190fe403ef6d54ab8  .tools/downloads/rustc-1.99.0-x86_64-unknown-linux-gnu.tar.gz
+9fc3a87d3d4f6e5e2bd87e6fb8779b7a95831f533cb8cc8ae1304a797c648733  .tools/downloads/rustfmt-1.99.0-x86_64-unknown-linux-gnu.tar.gz
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","set -eu; cd \"$HOME/fairpane-linux/work/FP-0132-r3\"; test ! -e .tools; mkdir -p .tools/downloads; for f in \"$HOME\"/fairpane-linux/work/FP-0079-r1/.tools/downloads/*-x86_64-unknown-linux-gnu.tar.gz /mnt/c/Users/requi/.omp/wt/tf019b84f8/m/.tools/downloads/rust-std-1.99.0-i686-unknown-linux-gnu.tar.gz; do cp --update=none \"$f\" .tools/downloads/; done; ls -l .tools/downloads; sha256sum .tools/downloads/*"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:48.569Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":417}

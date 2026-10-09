@@ -1,0 +1,28 @@
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\Microsoft\\WinGet\\Links\\bun.exe","--version"]
+1.4.2
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\Microsoft\\WinGet\\Links\\bun.exe","arguments":["--version"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:23.576Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":11}
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\Microsoft\\WinGet\\Links\\bun.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+ok 11 - FP-0132 case 1: the Rust lock validator accepts the frozen target and rejects every malformed target
+ok 12 - FP-0132 case 2: rust-lock-verify checks each target against the signed manifest
+ok 13 - FP-0132 case 3: install-rust installs each locked target into every host toolchain and replaces a stale toolchain only after the new one passes
+ok 14 - FP-0132 case 4: the toolchain check rejects a toolchain whose receipt differs from the lock before any version check
+ok 15 - FP-0132 case 5: the toolchain documents describe the locked targets
+ok 16 - FP-0132 case 6: install-rust restores the earlier toolchain when the new one cannot move into place
+1..16
+# tests 16
+# pass 16
+# fail 0
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\Microsoft\\WinGet\\Links\\bun.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:36:23.651Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1086}

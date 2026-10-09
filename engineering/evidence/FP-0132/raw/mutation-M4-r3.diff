@@ -1,0 +1,12 @@
+diff --git a/tools/rust.mjs b/tools/rust.mjs
+index 43677b1..24da5b0 100644
+--- a/tools/rust.mjs
++++ b/tools/rust.mjs
+@@ -441,6 +441,7 @@ export async function installRust(root, { platform = hostPlatform(), fetch = glo
+   invariant(entry, `No locked Rust toolchain exists for ${platform}.`);
+   const dest = toolchainDir(root, lock, platform);
+   if (fs.existsSync(dest) && receiptMatches(lock, platform, dest)) return { toolchain: checkRust(root, { platform, run }), downloaded: false };
++  fs.rmSync(dest, { recursive: true, force: true });
+   const parts = lockedComponents(lock, platform);
+   const downloads = safePath(root, '.tools/downloads', { mustExist: false });
+   fs.mkdirSync(downloads, { recursive: true });

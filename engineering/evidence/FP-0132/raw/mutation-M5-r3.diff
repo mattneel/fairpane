@@ -1,0 +1,12 @@
+diff --git a/tests/rust/pointer_width_probe.rs b/tests/rust/pointer_width_probe.rs
+index c53cf5d..4882061 100644
+--- a/tests/rust/pointer_width_probe.rs
++++ b/tests/rust/pointer_width_probe.rs
+@@ -6,6 +6,6 @@
+ #![no_std]
+ 
+ const _: () = assert!(
+-    core::mem::size_of::<usize>() == 4,
++    core::mem::size_of::<usize>() == 8,
+     "the probe needs 4-byte pointers"
+ );

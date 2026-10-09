@@ -1,0 +1,81 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');for(const n of fs.readdirSync('.tools/downloads').sort())console.log(fs.statSync('.tools/downloads/'+n).size,n)"]
+18667864 cargo-1.99.0-x86_64-pc-windows-gnu.tar.gz
+9594875 rust-mingw-1.99.0-x86_64-pc-windows-gnu.tar.gz
+44949786 rust-std-1.99.0-x86_64-pc-windows-gnu.tar.gz
+161263734 rustc-1.99.0-x86_64-pc-windows-gnu.tar.gz
+4938158 rustfmt-1.99.0-x86_64-pc-windows-gnu.tar.gz
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');for(const n of fs.readdirSync('.tools/downloads').sort())console.log(fs.statSync('.tools/downloads/'+n).size,n)"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:30:58.564Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":81}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","install-rust"]
+{
+  "toolchain": "C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe",
+  "downloaded": true,
+  "replaced": true,
+  "components": [
+    {
+      "package": "rustc",
+      "sha256": "3c7bad76bebfda385cc1061c1f0b625b02c212dcca5ea70b7bc6773153e6f15c",
+      "installer_components": [
+        "rustc"
+      ]
+    },
+    {
+      "package": "cargo",
+      "sha256": "125f4a389c765e59c94a12ec16cd668dfe7d6884b5e8edc8eaf2575f0162890d",
+      "installer_components": [
+        "cargo"
+      ]
+    },
+    {
+      "package": "rust-std",
+      "sha256": "5d7f8eb792439b2e85afaf27497ff0f67e3ada0ef09adf81d564028e2aa1b90b",
+      "installer_components": [
+        "rust-std-x86_64-pc-windows-gnu"
+      ]
+    },
+    {
+      "package": "rust-mingw",
+      "sha256": "6ebe238508348b3faaabb8e259874415ce674dfcb0540392fe1a94f836e51b1b",
+      "installer_components": [
+        "rust-mingw"
+      ]
+    },
+    {
+      "package": "rustfmt-preview",
+      "sha256": "a32c5025c2fa54f53fba92b0be6a949d3b041541917f9d33962187c06e45217a",
+      "installer_components": [
+        "rustfmt-preview"
+      ]
+    },
+    {
+      "package": "rust-std",
+      "target": "i686-unknown-linux-gnu",
+      "sha256": "2b7db847af9888ddb249d3e1c8aeaeeb82ae529bf62426b82330a4cddac8bb38",
+      "installer_components": [
+        "rust-std-i686-unknown-linux-gnu"
+      ]
+    }
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","install-rust"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:30:58.841Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":23513}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');for(const n of fs.readdirSync('.tools/downloads').sort())console.log(fs.statSync('.tools/downloads/'+n).size,n)"]
+18667864 cargo-1.99.0-x86_64-pc-windows-gnu.tar.gz
+9594875 rust-mingw-1.99.0-x86_64-pc-windows-gnu.tar.gz
+46083412 rust-std-1.99.0-i686-unknown-linux-gnu.tar.gz
+44949786 rust-std-1.99.0-x86_64-pc-windows-gnu.tar.gz
+161263734 rustc-1.99.0-x86_64-pc-windows-gnu.tar.gz
+4938158 rustfmt-1.99.0-x86_64-pc-windows-gnu.tar.gz
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');for(const n of fs.readdirSync('.tools/downloads').sort())console.log(fs.statSync('.tools/downloads/'+n).size,n)"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:31:22.463Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":50}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","install-rust"]
+{
+  "toolchain": "C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe",
+  "downloaded": false
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","install-rust"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:31:22.626Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":164}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","console.log(require('fs').readdirSync('.tools/rust/1.99.0').join(' '))"]
+x86_64-windows
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","console.log(require('fs').readdirSync('.tools/rust/1.99.0').join(' '))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf019b84f8\\m","started_at":"2026-10-09T21:31:22.945Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}

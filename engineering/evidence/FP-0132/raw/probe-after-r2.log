@@ -1,0 +1,30 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","require('fs').rmSync('out/fp0132/pointer-width-i686.rmeta',{force:true});console.log('exists before:',require('fs').existsSync('out/fp0132/pointer-width-i686.rmeta'))"]
+exists before: false
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","require('fs').rmSync('out/fp0132/pointer-width-i686.rmeta',{force:true});console.log('exists before:',require('fs').existsSync('out/fp0132/pointer-width-i686.rmeta'))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:18:24.283Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":46}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","i686-unknown-linux-gnu","-o","out/fp0132/pointer-width-i686.rmeta","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:18:24.390Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":43,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const f='out/fp0132/pointer-width-i686.rmeta';console.log('exists:',require('fs').existsSync(f),'size:',require('fs').statSync(f).size)"]
+exists: true size: 2539
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const f='out/fp0132/pointer-width-i686.rmeta';console.log('exists:',require('fs').existsSync(f),'size:',require('fs').statSync(f).size)"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:18:24.535Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","x86_64-pc-windows-gnu","-o","out/fp0132/pointer-width-host.rmeta","tests/rust/pointer_width_probe.rs"]
+error[E0080]: evaluation panicked: the probe needs 4-byte pointers
+  --> tests/rust/pointer_width_probe.rs:8:15
+   |
+ 8 |   const _: () = assert!(
+   |  _______________^
+ 9 | |     core::mem::size_of::<usize>() == 4,
+10 | |     "the probe needs 4-byte pointers"
+11 | | );
+   | |_^ evaluation of `_` failed here
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0080`.
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--edition","2024","--crate-type","lib","--crate-name","pointer_width_probe","--emit","metadata","--target","x86_64-pc-windows-gnu","-o","out/fp0132/pointer-width-host.rmeta","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:18:24.640Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":50,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustfmt.exe","--check","--edition","2024","tests/rust/pointer_width_probe.rs"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustfmt.exe","arguments":["--check","--edition","2024","tests/rust/pointer_width_probe.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m","started_at":"2026-10-09T20:18:24.756Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\t5ba943653\\m\\.tools\\cargo-home"}}
