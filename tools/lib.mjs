@@ -132,8 +132,10 @@ export function validateLock(lock) {
 }
 export const RUST_SIGNING_KEY_FINGERPRINT = '108F66205EAEB0AAA8DD5E1C85AB96E6FA1BE5FE';
 const RUST_HOSTS = Object.freeze({ 'x86_64-windows': 'x86_64-pc-windows-gnu', 'x86_64-linux': 'x86_64-unknown-linux-gnu' });
+// A cross-compilation target whose standard library the lock may name. A new target needs a reviewed tools change and lock change.
+const RUST_TARGETS = Object.freeze(['i686-unknown-linux-gnu']);
 const RUST_KEYS = Object.freeze({
-  lock: ['schema_version', 'channel', 'version', 'release_date', 'checked_date', 'rustc_commit_hash', 'manifest', 'platforms'],
+  lock: ['schema_version', 'channel', 'version', 'release_date', 'checked_date', 'rustc_commit_hash', 'manifest', 'platforms', 'targets'],
   manifest: ['url', 'sha256', 'signature_url', 'signing_key_url', 'signing_key_fingerprint'],
   platform: ['host', 'components'],
   component: ['package', 'url', 'sha256', 'size', 'archive_root'],
@@ -147,7 +149,10 @@ function isoDate(value) {
 function rejectUnknownKeys(value, allowed) {
   if (isRecord(value)) for (const key of Object.keys(value)) invariant(allowed.includes(key), `Unexpected Rust lock key: ${key}`);
 }
-/** Check `toolchains/rust.lock.json`. Unknown keys at any level are reported first, then each field in a fixed order. */
+/**
+ * Check `toolchains/rust.lock.json`. Unknown keys at any level are reported first, then each field in a fixed order.
+ * The optional `targets` member maps a target triple to its `rust-std` component, which every host toolchain installs.
+ */
 export function validateRustLock(lock) {
   rejectUnknownKeys(lock, RUST_KEYS.lock);
   rejectUnknownKeys(lock?.manifest, RUST_KEYS.manifest);
@@ -157,6 +162,7 @@ export function validateRustLock(lock) {
       if (Array.isArray(platform?.components)) for (const c of platform.components) rejectUnknownKeys(c, RUST_KEYS.component);
     }
   }
+  if (isRecord(lock?.targets)) for (const c of Object.values(lock.targets)) rejectUnknownKeys(c, RUST_KEYS.component);
   invariant(lock?.schema_version === 1 && lock.channel === 'stable', 'The Rust lock must select a stable release.');
   invariant(matches(/^\d+\.\d+\.\d+$/, lock.version), 'The Rust lock needs an exact stable version.');
   invariant(isoDate(lock.release_date) && isoDate(lock.checked_date), 'The Rust lock needs ISO dates.');
@@ -181,6 +187,18 @@ export function validateRustLock(lock) {
       invariant(c.archive_root === archiveRoot, `Unexpected archive root for ${c.package} on ${key}.`);
       invariant(matches(HASH, c.sha256), `Invalid archive SHA-256 for ${c.package} on ${key}.`);
       invariant(Number.isSafeInteger(c.size) && c.size > 0, `Invalid archive size for ${c.package} on ${key}.`);
+    }
+  }
+  if (lock.targets !== undefined) {
+    invariant(isRecord(lock.targets) && Object.keys(lock.targets).length > 0, 'The Rust lock targets must be a nonempty object.');
+    for (const [target, c] of Object.entries(lock.targets)) {
+      invariant(RUST_TARGETS.includes(target), `Unsupported Rust lock target: ${target}`);
+      invariant(isRecord(c) && c.package === 'rust-std', `The Rust lock target ${target} must name rust-std.`);
+      const archiveRoot = `rust-std-${lock.version}-${target}`;
+      invariant(c.url === `https://static.rust-lang.org/dist/${lock.release_date}/${archiveRoot}.tar.gz`, `Unexpected component URL for rust-std on ${target}.`);
+      invariant(c.archive_root === archiveRoot, `Unexpected archive root for rust-std on ${target}.`);
+      invariant(matches(HASH, c.sha256), `Invalid archive SHA-256 for rust-std on ${target}.`);
+      invariant(Number.isSafeInteger(c.size) && c.size > 0, `Invalid archive size for rust-std on ${target}.`);
     }
   }
   return true;

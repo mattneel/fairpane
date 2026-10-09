@@ -168,7 +168,7 @@ Those receipts remain unsigned local integrity records, and a hosted runner is n
 A pull request runs its own copy of the workflow, the checker, and the controller.
 A green check on a pull request therefore enforces nothing independently of that pull request.
 `install-zig` also accepts an existing compiler directory after only a version check, so a pull request that adds one controls the compiler.
-`install-rust` also accepts an existing toolchain directory after only a version check.
+`install-rust` also accepts an existing toolchain directory whose `fairpane-install.json` matches the lock after only a version check, and it replaces one whose receipt differs; the receipt is a local integrity record, so a pull request that adds a toolchain directory with a matching receipt controls the toolchain.
 
 `tools/workflow-check.mjs` checks the workflow policy without a YAML package.
 It accepts only printable ASCII text with LF or CRLF line ends, because YAML parsers also break lines at NEL, LS, and PS.

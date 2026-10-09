@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Rust toolchain pin and installer tests for FP-0079 cases 1 through 10.
+ * Rust toolchain pin and installer tests for FP-0079 cases 1 through 10 and FP-0132 cases 1 through 6.
  * Run standalone with `node tools/rust.test.mjs`, or through `node tools/fairpane.mjs test`.
  * The cases need no network access and no installed Rust toolchain.
  */
@@ -14,7 +14,7 @@ import { spawnSync } from 'node:child_process';
 import {
   RUST_SIGNING_KEY_FINGERPRINT, checkRepository, readJson, rustToolchainProblems, rustToolchainText, sha256, validateRustLock,
 } from './lib.mjs';
-import { extractTarGz, installComponents, installRust, rustLockProblems, toolchainVersionProblems } from './rust.mjs';
+import { checkRust, extractTarGz, installComponents, installRust, rustLockProblems, toolchainVersionProblems } from './rust.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const LOCK_PATH = 'toolchains/rust.lock.json';
@@ -81,6 +81,14 @@ const FROZEN_LOCK = {
     },
   },
 };
+const I686 = 'i686-unknown-linux-gnu';
+const FROZEN_TARGETS = {
+  [I686]: { package: 'rust-std', url: 'https://static.rust-lang.org/dist/2026-10-01/rust-std-1.99.0-i686-unknown-linux-gnu.tar.gz', sha256: '2b7db847af9888ddb249d3e1c8aeaeeb82ae529bf62426b82330a4cddac8bb38', size: 46083412, archive_root: 'rust-std-1.99.0-i686-unknown-linux-gnu' },
+};
+/** `L` of the FP-0132 contract: the frozen lock with the frozen targets. */
+const targetLock = () => ({ ...clone(FROZEN_LOCK), targets: clone(FROZEN_TARGETS) });
+const withoutTargets = lock => { const copy = clone(lock); delete copy.targets; return copy; };
+const RECEIPT_MISMATCH = 'The installed Rust toolchain differs from the lock. Run node tools/fairpane.mjs install-rust.';
 const HOSTS = { 'x86_64-windows': 'x86_64-pc-windows-gnu', 'x86_64-linux': 'x86_64-unknown-linux-gnu' };
 
 /** The frozen version outputs of the contract, with the platform's host on the `host:` line. */
@@ -135,8 +143,14 @@ function tar(entries) {
 }
 const tarGz = entries => zlib.gzipSync(tar(entries));
 
-/** A component archive whose root and installer layout follow the real Rust archives. */
+const componentArchives = new Map();
+/**
+ * A component archive whose root and component layout follow the real Rust archives. Each package and host builds once, so fixtures share identical bytes.
+ * Of the real archive's top-level files, it holds only `rust-installer-version` and `components`, which the installer reads and must not install.
+ */
 function componentArchive(pkg, host) {
+  const cached = componentArchives.get(`${pkg} ${host}`);
+  if (cached) return cached;
   const stem = pkg.replace(/-preview$/, ''), archiveRoot = `${stem}-1.99.0-${host}`;
   const exe = host.includes('-windows-') ? '.exe' : '';
   const layouts = {
@@ -151,28 +165,37 @@ function componentArchive(pkg, host) {
     { name: `${archiveRoot}/`, type: '5', mode: 0o755 },
     { name: `${archiveRoot}/rust-installer-version`, data: '3\n' },
     { name: `${archiveRoot}/components`, data: `${component}\n` },
-    { name: `${archiveRoot}/install.sh`, data: '#!/bin/sh\nexit 1\n', mode: 0o755 },
-    { name: `${archiveRoot}/version`, data: '1.99.0 (b940084d7 2026-09-28)\n' },
     { name: `${archiveRoot}/${component}/`, type: '5', mode: 0o755 },
     { name: `${archiveRoot}/${component}/manifest.in`, data: files.map(f => `file:${f}\n`).join('') },
     ...files.map(f => ({ name: `${archiveRoot}/${component}/${f}`, data: `${pkg} fixture ${f}\n`, mode: f.startsWith('bin/') ? 0o755 : 0o644 })),
   ];
-  return { bytes: tarGz(entries), component, files };
+  const archive = Object.freeze({ bytes: tarGz(entries), component, files: Object.freeze(files) });
+  componentArchives.set(`${pkg} ${host}`, archive);
+  return archive;
 }
-/** A fixture root whose lock names fixture archives for `platform`, with a fetch that counts its calls. */
-function installFixture(platform, { serve } = {}) {
+/**
+ * A fixture root whose lock names fixture archives for `platform` and for each locked target, with a fetch that counts its calls.
+ * The lock is the committed lock, whose `targets` member `targets` replaces when it is given.
+ * `state.serve` chooses the served bytes and can change between runs; `writeLock` rewrites the fixture's lock.
+ */
+function installFixture(platform, { serve, targets } = {}) {
   const dir = temp(), lock = committedLock(), host = HOSTS[platform], byUrl = new Map(), layouts = [];
-  for (const c of lock.platforms[platform].components) {
-    const archive = componentArchive(c.package, host);
+  if (targets !== undefined) lock.targets = clone(targets);
+  const fixtureArchive = (c, archiveHost, target) => {
+    const archive = componentArchive(c.package, archiveHost);
     c.sha256 = sha256(archive.bytes); c.size = archive.bytes.length;
-    byUrl.set(c.url, archive.bytes); layouts.push({ ...archive, package: c.package, sha256: c.sha256, url: c.url });
-  }
-  put(dir, LOCK_PATH, `${JSON.stringify(lock, null, 2)}\n`);
-  const state = { fetches: 0, runs: [] };
+    byUrl.set(c.url, archive.bytes); layouts.push({ ...archive, package: c.package, ...(target && { target }), sha256: c.sha256, url: c.url });
+  };
+  for (const c of lock.platforms[platform].components) fixtureArchive(c, host);
+  for (const [target, c] of Object.entries(lock.targets ?? {})) fixtureArchive(c, target, target);
+  // The first write creates the lock's directory, and later rewrites only replace the file.
+  const lockFile = put(dir, LOCK_PATH, `${JSON.stringify(lock, null, 2)}\n`);
+  const writeLock = value => fs.writeFileSync(lockFile, `${JSON.stringify(value, null, 2)}\n`);
+  const state = { fetches: 0, runs: [], serve };
   const fetch = async (url, options) => {
     state.fetches++;
     assert.equal(options.redirect, 'error');
-    const bytes = (serve ?? (u => byUrl.get(u)))(url, byUrl.get(url));
+    const bytes = (state.serve ?? (u => byUrl.get(u)))(url, byUrl.get(url));
     return typeof bytes === 'number' ? new Response('not found', { status: bytes }) : new Response(bytes);
   };
   const run = (outputsFor = versionOutputs(host)) => (file, args, options) => {
@@ -183,8 +206,14 @@ function installFixture(platform, { serve } = {}) {
     assert.deepEqual(args, expectedArgs);
     return { status: 0, stdout: outputsFor[name], stderr: '' };
   };
-  return { dir, lock, host, layouts, state, fetch, run };
+  return { dir, lock, host, layouts, state, fetch, run, writeLock };
 }
+/** The receipt entries of a fixture's components: the platform's components, then each target's standard library. */
+const receiptComponents = f => f.layouts.map(l => ({ package: l.package, ...(l.target && { target: l.target }), sha256: l.sha256, installer_components: [l.component] }));
+/** Every staging entry in a `walk` listing: a `.partial` download, an `.extract-` stage, or a `.replaced-` toolchain. */
+const stagingEntries = listing => listing.filter(p => p.endsWith('.partial') || p.split('/').some(part => part.startsWith('.extract-') || part.startsWith('.replaced-')));
+/** The entries of a `walk` listing below the directory `prefix`, which ends with "/", relative to that directory, as `walk` of it lists them. */
+const below = (listing, prefix) => listing.filter(p => p.startsWith(prefix) && p !== prefix).map(p => p.slice(prefix.length));
 function assertNoLeftovers(dir, platform) {
   assert.equal(fs.existsSync(path.join(dir, '.tools/rust/1.99.0', platform)), false);
   const everything = walk(dir);
@@ -194,20 +223,20 @@ function assertNoLeftovers(dir, platform) {
 
 function manifestText(lock, { date = lock.release_date, version = '1.99.0 (b940084d7 2026-09-28)', commit = lock.rustc_commit_hash, edit } = {}) {
   const lines = ['manifest-version = "2"', `date = "${date}"`, '', '[pkg.rustc]', `version = "${version}"`, `git_commit_hash = "${commit}"`, ''];
-  for (const { host, components } of Object.values(lock.platforms)) {
-    for (const c of components) {
-      const table = { available: true, url: c.url, hash: c.sha256, xz_url: c.url.replace(/\.tar\.gz$/, '.tar.xz'), xz_hash: 'e'.repeat(64) };
-      const changed = edit ? edit(c.package, host, table) : table;
-      if (!changed) continue;
-      lines.push(`[pkg.${c.package}.target.${host}]`, `available = ${changed.available}`, `url = "${changed.url}"`, `hash = "${changed.hash}"`,
-        `xz_url = "${changed.xz_url}"`, `xz_hash = "${changed.xz_hash}"`, '');
-    }
+  // Each platform component, and then each target's standard library, gets its table under its own triple.
+  const entries = [...Object.values(lock.platforms).flatMap(({ host, components }) => components.map(c => [host, c])), ...Object.entries(lock.targets ?? {})];
+  for (const [host, c] of entries) {
+    const table = { available: true, url: c.url, hash: c.sha256, xz_url: c.url.replace(/\.tar\.gz$/, '.tar.xz'), xz_hash: 'e'.repeat(64) };
+    const changed = edit ? edit(c.package, host, table) : table;
+    if (!changed) continue;
+    lines.push(`[pkg.${c.package}.target.${host}]`, `available = ${changed.available}`, `url = "${changed.url}"`, `hash = "${changed.hash}"`,
+      `xz_url = "${changed.xz_url}"`, `xz_hash = "${changed.xz_hash}"`, '');
   }
   lines.push('[pkg.miri.target.x86_64-pc-windows-gnu]', 'available = false', '');
   return Buffer.from(lines.join('\n'));
 }
-function manifestProblems(options) {
-  const lock = committedLock(), bytes = manifestText(lock, options);
+function manifestProblems(options, lock = committedLock()) {
+  const bytes = manifestText(lock, options);
   lock.manifest.sha256 = sha256(bytes);
   return rustLockProblems(lock, bytes);
 }
@@ -293,6 +322,18 @@ const DOC_LINES = [
   'A lock change records a GnuPG verification of that signature and a `rust-lock-verify` run in its evidence.',
   'The installer checks the locked digests, not the signature, so it trusts the reviewed lock as `install-zig` trusts the Zig lock.',
 ];
+const TARGET_DOC_LINES = [
+  'The lock\'s `targets` member names the standard library of each cross-compilation target.',
+  '`i686-unknown-linux-gnu` is the only accepted target, so the wrapper\'s layout assertions can compile for a 32-bit target.',
+  '`install-rust` installs each locked target\'s standard library into every host toolchain and records it in `fairpane-install.json`.',
+  'It replaces a toolchain whose `fairpane-install.json` differs from the lock, and it keeps the earlier toolchain until the new one passes its checks.',
+  'The toolchain check rejects such a toolchain before it runs any version check, so `doctor` reports it as unavailable.',
+  '`fairpane-install.json` is a local integrity record, not a security boundary, so anyone who can write `.tools` controls the toolchain.',
+  '`rust-toolchain.toml` names no target, because no repository command runs rustup.',
+];
+const README_RUST_LINE = '`install-rust` also accepts an existing toolchain directory whose `fairpane-install.json` matches the lock after only a version check, '
+  + 'and it replaces one whose receipt differs; the receipt is a local integrity record, so a pull request that adds a toolchain directory with a matching receipt controls the toolchain.';
+const OLD_README_RUST_LINE = '`install-rust` also accepts an existing toolchain directory after only a version check.';
 
 export const rustCases = [
   ['FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts', () => {
@@ -300,7 +341,9 @@ export const rustCases = [
     assert.equal(validateRustLock(lock), true);
     assert.match(lock.checked_date, /^\d{4}-\d{2}-\d{2}$/);
     assert.ok(lock.checked_date >= '2026-10-09', lock.checked_date);
-    assert.deepEqual({ ...lock, checked_date: FROZEN_LOCK.checked_date }, FROZEN_LOCK);
+    const pinned = { ...lock, checked_date: FROZEN_LOCK.checked_date };
+    delete pinned.targets;
+    assert.deepEqual(pinned, FROZEN_LOCK);
     assert.equal(RUST_SIGNING_KEY_FINGERPRINT, '108F66205EAEB0AAA8DD5E1C85AB96E6FA1BE5FE');
   }],
   ['FP-0079 case 2: the Rust lock validator rejects every malformed field', () => {
@@ -466,7 +509,7 @@ export const rustCases = [
     for (const platform of Object.keys(HOSTS)) {
       const f = installFixture(platform), exe = platform.endsWith('-windows') ? '.exe' : '';
       const dest = path.join(f.dir, '.tools', 'rust', '1.99.0', platform);
-      const components = f.layouts.map(l => ({ package: l.package, sha256: l.sha256, installer_components: [l.component] }));
+      const components = receiptComponents(f);
       const first = await installRust(f.dir, { platform, fetch: f.fetch, run: f.run() });
       assert.deepEqual(first, { toolchain: path.join(dest, 'bin', `rustc${exe}`), downloaded: true, components });
       assert.equal(f.state.fetches, f.layouts.length);
@@ -547,7 +590,7 @@ export const rustCases = [
     for (const line of [
       '| `install-rust` | Downloads and checks the exact locked Rust toolchain components in a local directory. |',
       '| `rust-lock-verify <manifest>` | Exits with status 1 when a channel manifest file\'s digest or component entries differ from `toolchains/rust.lock.json`. |',
-      '`install-rust` also accepts an existing toolchain directory after only a version check.',
+      README_RUST_LINE,
     ]) assert.ok(readme.includes(line), line);
     // A program named rustc, first on PATH, creates a marker whenever it starts. doctor must not start it.
     const fakeBin = temp(), marker = path.join(temp(), 'rustc-started');
@@ -583,6 +626,191 @@ export const rustCases = [
     assert.ok(decision >= 0 && next > decision);
     assert.ok(adr.slice(decision, next).includes('On Windows, Fairpane\'s Rust toolchain uses the `x86_64-pc-windows-gnu` host.'));
   }],
+  ['FP-0132 case 1: the Rust lock validator accepts the frozen target and rejects every malformed target', () => {
+    assert.equal(validateRustLock(targetLock()), true);
+    const i686 = l => l.targets[I686];
+    const rows = [
+      ['a', l => { l.targets = {}; }, 'The Rust lock targets must be a nonempty object.'],
+      ['b', l => { l.targets = []; }, 'The Rust lock targets must be a nonempty object.'],
+      ['c', l => { l.targets = null; }, 'The Rust lock targets must be a nonempty object.'],
+      ['d', l => { l.targets['x86_64-unknown-linux-musl'] = clone(i686(l)); }, 'Unsupported Rust lock target: x86_64-unknown-linux-musl'],
+      ['e', l => { l.targets['x86_64-unknown-linux-gnu'] = clone(i686(l)); }, 'Unsupported Rust lock target: x86_64-unknown-linux-gnu'],
+      ['f', l => { i686(l).package = 'rustc'; }, `The Rust lock target ${I686} must name rust-std.`],
+      ['g', l => { l.targets[I686] = 'rust-std'; }, `The Rust lock target ${I686} must name rust-std.`],
+      ['h', l => { i686(l).url = i686(l).url.replace('2026-10-01', '2026-10-02'); }, `Unexpected component URL for rust-std on ${I686}.`],
+      ['i', l => { i686(l).url = i686(l).url.replace(/\.tar\.gz$/, '.tar.xz'); }, `Unexpected component URL for rust-std on ${I686}.`],
+      ['j', l => { i686(l).archive_root = 'rust-std-1.99.0-i686-unknown-linux-musl'; }, `Unexpected archive root for rust-std on ${I686}.`],
+      ['k', l => { i686(l).sha256 = i686(l).sha256.toUpperCase(); }, `Invalid archive SHA-256 for rust-std on ${I686}.`],
+      ['l', l => { i686(l).size = 0; }, `Invalid archive size for rust-std on ${I686}.`],
+      ['m', l => { i686(l).size = 1.5; }, `Invalid archive size for rust-std on ${I686}.`],
+      ['n', l => { i686(l).mirror = 'https://example.invalid/'; }, 'Unexpected Rust lock key: mirror'],
+    ];
+    const problems = [];
+    for (const [row, mutate, message] of rows) {
+      const lock = targetLock();
+      mutate(lock);
+      try { validateRustLock(lock); problems.push(`row ${row}: Missing expected rejection.`); }
+      catch (e) { if (e.message !== message) problems.push(`row ${row}: ${e.message}`); }
+    }
+    assert.deepEqual(problems, []);
+    assert.equal(rustToolchainText(targetLock()), rustToolchainText(FROZEN_LOCK));
+    // Before the protected lock change lands, the committed lock may still lack the targets member.
+    const committed = committedLock().targets;
+    if (committed !== undefined) assert.deepEqual(committed, FROZEN_TARGETS);
+  }],
+  ['FP-0132 case 2: rust-lock-verify checks each target against the signed manifest', () => {
+    const bytes = fs.readFileSync(path.join(root, 'engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml'));
+    assert.deepEqual(rustLockProblems(targetLock(), bytes), []);
+    const changed = targetLock(), entry = changed.targets[I686];
+    assert.equal(entry.sha256.at(-1), '8');
+    entry.sha256 = `${entry.sha256.slice(0, -1)}9`;
+    assert.deepEqual(rustLockProblems(changed, bytes), [`The manifest hash of rust-std for ${I686} differs from the lock.`]);
+    const i686Table = change => ({ edit: (pkg, host, t) => (host === I686 ? change(t) : t) });
+    assert.deepEqual(manifestProblems({}, targetLock()), []);
+    assert.deepEqual(manifestProblems(i686Table(t => ({ ...t, hash: 'd'.repeat(64) })), targetLock()),
+      [`The manifest hash of rust-std for ${I686} differs from the lock.`]);
+    assert.deepEqual(manifestProblems(i686Table(t => ({ ...t, url: t.url.replace('2026-10-01', '2026-10-02') })), targetLock()),
+      [`The manifest URL of rust-std for ${I686} differs from the lock.`]);
+    assert.deepEqual(manifestProblems(i686Table(t => ({ ...t, available: false })), targetLock()), [`The manifest has no available rust-std for ${I686}.`]);
+    assert.deepEqual(manifestProblems(i686Table(() => null), targetLock()), [`The manifest has no available rust-std for ${I686}.`]);
+  }],
+  ['FP-0132 case 3: install-rust installs each locked target into every host toolchain and replaces a stale toolchain only after the new one passes', async () => {
+    for (const platform of Object.keys(HOSTS)) {
+      const rustc = dest => path.join(dest, 'bin', platform.endsWith('-windows') ? 'rustc.exe' : 'rustc');
+      const n = committedLock().platforms[platform].components.length, targetFile = `lib/rustlib/${I686}/lib/libstd-fixture.rlib`;
+
+      const f1 = installFixture(platform, { targets: FROZEN_TARGETS }), dest1 = path.join(f1.dir, '.tools', 'rust', '1.99.0', platform);
+      const c1 = receiptComponents(f1);
+      assert.deepEqual(c1.at(-1), { package: 'rust-std', target: I686, sha256: f1.lock.targets[I686].sha256, installer_components: [`rust-std-${I686}`] });
+      assert.deepEqual(await installRust(f1.dir, { platform, fetch: f1.fetch, run: f1.run() }), { toolchain: rustc(dest1), downloaded: true, components: c1 });
+      assert.equal(f1.state.fetches, n + 1);
+      const expected = [
+        LOCK_PATH,
+        ...f1.layouts.map(l => `.tools/downloads/${path.posix.basename(new URL(l.url).pathname)}`),
+        ...f1.layouts.flatMap(l => l.files).map(p => `.tools/rust/1.99.0/${platform}/${p}`),
+        `.tools/rust/1.99.0/${platform}/fairpane-install.json`,
+      ].sort();
+      assert.ok(expected.includes(`.tools/rust/1.99.0/${platform}/${targetFile}`));
+      assert.deepEqual(filesUnder(f1.dir), expected);
+      assert.deepEqual(readJson(path.join(dest1, 'fairpane-install.json')).components, c1);
+      assert.deepEqual(await installRust(f1.dir, { platform, fetch: f1.fetch, run: f1.run() }), { toolchain: rustc(dest1), downloaded: false });
+      assert.equal(f1.state.fetches, n + 1);
+
+      // F2 installs without targets, and its lock then gains them.
+      const f2 = installFixture(platform, { targets: FROZEN_TARGETS }), dest2 = path.join(f2.dir, '.tools', 'rust', '1.99.0', platform);
+      const receipt = path.join(dest2, 'fairpane-install.json'), c2 = receiptComponents(f2), target = f2.lock.targets[I686];
+      f2.writeLock(withoutTargets(f2.lock));
+      await installRust(f2.dir, { platform, fetch: f2.fetch, run: f2.run() });
+      assert.equal(f2.state.fetches, n);
+      f2.writeLock(f2.lock);
+      // One walk of the fixture root serves both the listing of `dest` and the search for staging entries.
+      const destPrefix = `.tools/rust/1.99.0/${platform}/`, listing = walk(dest2), receiptBytes = fs.readFileSync(receipt);
+      const unchanged = row => {
+        const all = walk(f2.dir);
+        assert.deepEqual(below(all, destPrefix), listing, row);
+        assert.deepEqual(fs.readFileSync(receipt), receiptBytes, row);
+        assert.deepEqual(stagingEntries(all), [], row);
+      };
+      f2.state.serve = (url, bytes) => (url === target.url ? Buffer.alloc(target.size, 0x41) : bytes);
+      await assert.rejects(installRust(f2.dir, { platform, fetch: f2.fetch, run: f2.run() }),
+        { message: `The rust-std (${I686}) archive SHA-256 does not match the lock.` });
+      unchanged('digest row');
+      f2.state.serve = undefined;
+      await assert.rejects(installRust(f2.dir, { platform, fetch: f2.fetch, run: f2.run(versionOutputs('x86_64-pc-windows-msvc')) }), /Rust toolchain mismatch/);
+      unchanged('version row');
+      assert.deepEqual(await installRust(f2.dir, { platform, fetch: f2.fetch, run: f2.run() }),
+        { toolchain: rustc(dest2), downloaded: true, replaced: true, components: c2 });
+      assert.equal(f2.state.fetches, n + 2);
+      assert.deepEqual(fs.readdirSync(path.join(f2.dir, '.tools/rust/1.99.0')), [platform]);
+      assert.equal(fs.existsSync(path.join(dest2, ...targetFile.split('/'))), true);
+      assert.deepEqual(stagingEntries(walk(f2.dir)), []);
+      assert.deepEqual(readJson(receipt).components, c2);
+      assert.equal(checkRust(f2.dir, { platform, run: f2.run() }), rustc(dest2));
+    }
+  }],
+  ['FP-0132 case 4: the toolchain check rejects a toolchain whose receipt differs from the lock before any version check', async () => {
+    for (const platform of Object.keys(HOSTS)) {
+      const f = installFixture(platform, { targets: FROZEN_TARGETS }), dest = path.join(f.dir, '.tools', 'rust', '1.99.0', platform);
+      const receipt = path.join(dest, 'fairpane-install.json');
+      await installRust(f.dir, { platform, fetch: f.fetch, run: f.run() });
+      assert.equal(checkRust(f.dir, { platform, run: f.run() }), path.join(dest, 'bin', platform.endsWith('-windows') ? 'rustc.exe' : 'rustc'));
+      const receiptBytes = fs.readFileSync(receipt);
+      const editReceipt = change => { const r = JSON.parse(receiptBytes); change(r); fs.writeFileSync(receipt, `${JSON.stringify(r, null, 2)}\n`); };
+      // Each row names the one fixture file that it changes, and the case restores that file after the row.
+      const restore = { receipt: () => fs.writeFileSync(receipt, receiptBytes), lock: () => f.writeLock(f.lock) };
+      const rows = [
+        ['a', 'receipt', () => editReceipt(r => { r.components.find(c => c.target === I686).sha256 = 'f'.repeat(64); })],
+        ['b', 'receipt', () => fs.rmSync(receipt)],
+        ['c', 'lock', () => f.writeLock(withoutTargets(f.lock))],
+        ['d', 'receipt', () => editReceipt(r => { r.manifest_sha256 = '0'.repeat(64); })],
+        ['e', 'receipt', () => fs.writeFileSync(receipt, '{')],
+      ];
+      for (const [row, changed, change] of rows) {
+        change();
+        try {
+          const runs = f.state.runs.length;
+          assert.throws(() => checkRust(f.dir, { platform, run: f.run() }), { message: RECEIPT_MISMATCH }, `row ${row}`);
+          assert.equal(f.state.runs.length, runs, `row ${row} ran a version check`);
+        } finally {
+          restore[changed]();
+        }
+      }
+    }
+  }],
+  ['FP-0132 case 5: the toolchain documents describe the locked targets', () => {
+    const toolchain = fs.readFileSync(path.join(root, 'docs/TOOLCHAIN.md'), 'utf8').split('\n');
+    const windows = toolchain.indexOf('On Windows, the locked host is `x86_64-pc-windows-gnu`, as ADR 0010 records.');
+    const upgrade = toolchain.indexOf('## Upgrade procedure');
+    assert.ok(windows >= 0 && upgrade > windows);
+    let previous = windows;
+    for (const line of TARGET_DOC_LINES) {
+      const at = toolchain.indexOf(line);
+      assert.ok(at > previous && at < upgrade, line);
+      previous = at;
+    }
+    const readme = fs.readFileSync(path.join(root, 'tools/README.md'), 'utf8').split('\n');
+    assert.ok(readme.includes(README_RUST_LINE), README_RUST_LINE);
+    assert.equal(readme.includes(OLD_README_RUST_LINE), false, OLD_README_RUST_LINE);
+  }],
+  ['FP-0132 case 6: install-rust restores the earlier toolchain when the new one cannot move into place', async () => {
+    for (const platform of Object.keys(HOSTS)) {
+      const f = installFixture(platform, { targets: FROZEN_TARGETS }), versions = path.join(f.dir, '.tools', 'rust', '1.99.0');
+      const dest = path.join(versions, platform), receipt = path.join(dest, 'fairpane-install.json'), components = receiptComponents(f);
+      f.writeLock(withoutTargets(f.lock));
+      await installRust(f.dir, { platform, fetch: f.fetch, run: f.run() });
+      f.writeLock(f.lock);
+      const listing = walk(dest), receiptBytes = fs.readFileSync(receipt), { renameSync, rmSync } = fs;
+
+      // Row a: the staged toolchain cannot move to the destination; every other rename runs.
+      fs.renameSync = function renameSyncExceptInstall(from, to, ...rest) {
+        const parts = path.resolve(String(to)).split(path.sep);
+        if (path.basename(String(from)) === 'toolchain' && parts.at(-2) === '1.99.0' && parts.at(-1) === platform) throw new Error('injected rename failure');
+        return renameSync.call(this, from, to, ...rest);
+      };
+      try {
+        await assert.rejects(installRust(f.dir, { platform, fetch: f.fetch, run: f.run() }), { message: 'injected rename failure' });
+      } finally { fs.renameSync = renameSync; }
+      const all = walk(f.dir);
+      assert.deepEqual(below(all, `.tools/rust/1.99.0/${platform}/`), listing);
+      assert.deepEqual(fs.readFileSync(receipt), receiptBytes);
+      assert.deepEqual(stagingEntries(all), []);
+
+      // Row b: the earlier toolchain cannot be removed; every other removal runs.
+      fs.rmSync = function rmSyncExceptReplaced(target, ...rest) {
+        if (path.basename(String(target)).startsWith('.replaced-')) throw new Error('injected removal failure');
+        return rmSync.call(this, target, ...rest);
+      };
+      let result;
+      try { result = await installRust(f.dir, { platform, fetch: f.fetch, run: f.run() }); } finally { fs.rmSync = rmSync; }
+      assert.deepEqual(result, { toolchain: path.join(dest, 'bin', platform.endsWith('-windows') ? 'rustc.exe' : 'rustc'), downloaded: true, replaced: true,
+        components, replaced_cleanup_error: 'injected removal failure' });
+      assert.deepEqual(readJson(receipt).components, components);
+      const entries = fs.readdirSync(versions), replaced = entries.filter(name => name.startsWith('.replaced-'));
+      assert.deepEqual({ entries: entries.length, platform: entries.includes(platform), replaced: replaced.length }, { entries: 2, platform: true, replaced: 1 });
+      assert.equal(fs.statSync(path.join(versions, replaced[0])).isDirectory(), true);
+      assert.deepEqual(fs.readFileSync(path.join(versions, replaced[0], 'fairpane-install.json')), receiptBytes);
+    }
+  }, { processWide: 'the fs.renameSync and fs.rmSync functions of the node:fs module' }],
 ].map(([name, fn, declaration]) => ({ name, fn, ...declaration }));
 
 export function removeRustFixtures() {

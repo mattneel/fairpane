@@ -7,6 +7,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 import { spawnSync } from 'node:child_process';
+import { isDeepStrictEqual } from 'node:util';
 import { fetchLockedArchive, hostPlatform, invariant, readJson, relativePathProblem, safePath, sha256, validateRustLock, writeJson } from './lib.mjs';
 
 const LOCK_PATH = 'toolchains/rust.lock.json';
@@ -20,7 +21,10 @@ const TABLE = new RegExp(String.raw`^\[\s*(${KEY_PATH})\s*\]\s*(?:#.*)?$`);
 const ARRAY_TABLE = new RegExp(String.raw`^\[\[\s*(${KEY_PATH})\s*\]\]\s*(?:#.*)?$`);
 const STRING_PAIR = new RegExp(String.raw`^(${KEY_PART})\s*=\s*"([^"\\\r\n]*)"\s*(?:#.*)?$`);
 const BOOLEAN_PAIR = new RegExp(String.raw`^(${KEY_PART})\s*=\s*(true|false)\s*(?:#.*)?$`);
-const keyParts = text => [...text.matchAll(new RegExp(KEY_PART, 'g'))].map(m => (m[0].startsWith('"') ? m[0].slice(1, -1) : m[0]));
+/** The key that one `KEY_PART` names: a bare key as written, or a quoted key without its quotes. */
+const keyName = part => (part.startsWith('"') ? part.slice(1, -1) : part);
+const KEY_PARTS = new RegExp(KEY_PART, 'g');
+const keyParts = text => [...text.matchAll(KEY_PARTS)].map(m => keyName(m[0]));
 const isTable = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 
 /** Walk to a table, creating missing tables. A path through an array of tables enters its last table, as in TOML. */
@@ -43,23 +47,24 @@ function descend(node, parts, lineNumber) {
 export function parseChannelManifest(text) {
   const root = Object.create(null);
   let table = root;
+  const set = (key, value, lineNumber) => {
+    invariant(!Object.hasOwn(table, key), `The manifest line ${lineNumber} repeats the key ${key}.`);
+    table[key] = value;
+  };
   for (const [index, raw] of text.split('\n').entries()) {
     const line = raw.trim(), lineNumber = index + 1;
-    const set = (keyText, value) => {
-      const [key] = keyParts(keyText);
-      invariant(!Object.hasOwn(table, key), `The manifest line ${lineNumber} repeats the key ${key}.`);
-      table[key] = value;
-    };
     let m;
-    if ((m = ARRAY_TABLE.exec(line))) {
-      const parts = keyParts(m[1]), parent = descend(root, parts.slice(0, -1), lineNumber), last = parts.at(-1);
-      if (!Object.hasOwn(parent, last)) parent[last] = [];
-      invariant(Array.isArray(parent[last]), `The manifest line ${lineNumber} reuses a table as an array.`);
-      table = Object.create(null);
-      parent[last].push(table);
-    } else if ((m = TABLE.exec(line))) table = descend(root, keyParts(m[1]), lineNumber);
-    else if ((m = STRING_PAIR.exec(line))) set(m[1], m[2]);
-    else if ((m = BOOLEAN_PAIR.exec(line))) set(m[1], m[2] === 'true');
+    // Only a table header starts with `[`, and no key does, so a line can match only the patterns of its own kind.
+    if (line.startsWith('[')) {
+      if ((m = ARRAY_TABLE.exec(line))) {
+        const parts = keyParts(m[1]), parent = descend(root, parts.slice(0, -1), lineNumber), last = parts.at(-1);
+        if (!Object.hasOwn(parent, last)) parent[last] = [];
+        invariant(Array.isArray(parent[last]), `The manifest line ${lineNumber} reuses a table as an array.`);
+        table = Object.create(null);
+        parent[last].push(table);
+      } else if ((m = TABLE.exec(line))) table = descend(root, keyParts(m[1]), lineNumber);
+    } else if ((m = STRING_PAIR.exec(line))) set(keyName(m[1]), m[2], lineNumber);
+    else if ((m = BOOLEAN_PAIR.exec(line))) set(keyName(m[1]), m[2] === 'true', lineNumber);
   }
   return root;
 }
@@ -76,14 +81,14 @@ export function rustLockProblems(lock, manifestBytes) {
     problems.push(`The manifest rustc version ${rustc.version ?? 'none'} is not ${lock.version}.`);
   }
   if (rustc.git_commit_hash !== lock.rustc_commit_hash) problems.push(`The manifest rustc commit ${rustc.git_commit_hash ?? 'none'} differs from the lock.`);
-  for (const { host, components } of Object.values(lock.platforms)) {
-    for (const c of components) {
-      const pkg = isTable(manifest.pkg) ? manifest.pkg[c.package] : undefined;
-      const target = isTable(pkg) && isTable(pkg.target) ? pkg.target[host] : undefined;
-      if (!isTable(target) || target.available !== true) { problems.push(`The manifest has no available ${c.package} for ${host}.`); continue; }
-      if (target.url !== c.url) problems.push(`The manifest URL of ${c.package} for ${host} differs from the lock.`);
-      if (target.hash !== c.sha256) problems.push(`The manifest hash of ${c.package} for ${host} differs from the lock.`);
-    }
+  // Each platform component, and then each target's standard library, is looked up under its own triple.
+  const entries = [...Object.values(lock.platforms).flatMap(({ host, components }) => components.map(c => [host, c])), ...Object.entries(lock.targets ?? {})];
+  for (const [host, c] of entries) {
+    const pkg = isTable(manifest.pkg) ? manifest.pkg[c.package] : undefined;
+    const target = isTable(pkg) && isTable(pkg.target) ? pkg.target[host] : undefined;
+    if (!isTable(target) || target.available !== true) { problems.push(`The manifest has no available ${c.package} for ${host}.`); continue; }
+    if (target.url !== c.url) problems.push(`The manifest URL of ${c.package} for ${host} differs from the lock.`);
+    if (target.hash !== c.sha256) problems.push(`The manifest hash of ${c.package} for ${host} differs from the lock.`);
   }
   return problems;
 }
@@ -127,6 +132,17 @@ function headerFormat(header) {
 function decodePath(bytes) {
   try { return UTF8.decode(bytes); } catch { throw pathRejected(bytes.toString('latin1')); }
 }
+/** Read `file` in 64 KiB chunks on the calling thread. */
+function* readChunks(file) {
+  const fd = fs.openSync(file, 'r');
+  try {
+    for (;;) {
+      const chunk = Buffer.allocUnsafe(65536), n = fs.readSync(fd, chunk, 0, chunk.length, null);
+      if (n === 0) return;
+      yield n === chunk.length ? chunk : chunk.subarray(0, n);
+    }
+  } finally { fs.closeSync(fd); }
+}
 function writeAll(fd, data) {
   let offset = 0;
   while (offset < data.length) offset += fs.writeSync(fd, data, offset, data.length - offset);
@@ -139,7 +155,8 @@ function writeAll(fd, data) {
  */
 export async function extractTarGz(archive, archiveRoot, destination) {
   fs.mkdirSync(destination);
-  const seen = new Set(), counts = { files: 0, directories: 0 };
+  // `made` holds each directory that this extraction created, so a file in a known directory needs no mkdir call.
+  const seen = new Set(), made = new Set([destination]), counts = { files: 0, directories: 0 };
   let offset = 0, pending = Buffer.alloc(0), entry = null, longName = null, ended = false;
 
   function begin(header, at) {
@@ -171,10 +188,12 @@ export async function extractTarGz(archive, archiveRoot, destination) {
     const target = path.join(destination, ...relative.split('/'));
     if (directory) {
       fs.mkdirSync(target, { recursive: true });
+      made.add(target);
       counts.directories++;
       return { kind: 'skip', remaining: size, padding: padding(size) };
     }
-    fs.mkdirSync(path.dirname(target), { recursive: true });
+    const parent = path.dirname(target);
+    if (!made.has(parent)) { fs.mkdirSync(parent, { recursive: true }); made.add(parent); }
     const mode = (octal(header, 100, 8) ?? 0) & 0o111 ? 0o755 : 0o644;
     const fd = fs.openSync(target, 'wx', mode);
     counts.files++;
@@ -229,7 +248,7 @@ export async function extractTarGz(archive, archiveRoot, destination) {
 
   try {
     // Reading continues after the end blocks, so gunzip checks the whole stream's CRC and length.
-    await pipeline(fs.createReadStream(archive), zlib.createGunzip(), async source => {
+    await pipeline(readChunks(archive), zlib.createGunzip(), async source => {
       for await (const chunk of source) consume(chunk);
     });
     invariant(ended && entry === null && longName === null, 'The archive ends early.');
@@ -259,9 +278,10 @@ function statOrNull(file) {
 }
 
 /**
- * Install one extracted rust-installer archive into `toolchain`.
+ * Install one extracted rust-installer archive into `toolchain` by moving each listed file out of `extracted`.
  * Each component installs exactly the files that its `manifest.in` lists, and no top-level archive file.
  * `installed` holds every path, in lower case, that an earlier component installed into the same toolchain.
+ * `toolchain` holds no other file, so no move replaces a file.
  */
 export function installComponents(extracted, archiveRoot, toolchain, installed) {
   const base = path.join(extracted, archiveRoot);
@@ -297,10 +317,11 @@ export function installComponents(extracted, archiveRoot, toolchain, installed) 
       invariant(!installed.has(key) && !keys.has(key), `Two components install ${file}.`);
       keys.add(key);
     }
+    const made = new Set();
     for (const file of listed) {
-      const target = path.join(toolchain, ...file.split('/'));
-      fs.mkdirSync(path.dirname(target), { recursive: true });
-      fs.copyFileSync(path.join(dir, ...file.split('/')), target, fs.constants.COPYFILE_EXCL);
+      const target = path.join(toolchain, ...file.split('/')), parent = path.dirname(target);
+      if (!made.has(parent)) { fs.mkdirSync(parent, { recursive: true }); made.add(parent); }
+      fs.renameSync(path.join(dir, ...file.split('/')), target);
     }
     for (const key of keys) installed.add(key);
   }
@@ -344,16 +365,48 @@ function loadLock(root) {
 }
 const toolPath = (dir, platform, name) => path.join(dir, 'bin', platform.endsWith('-windows') ? `${name}.exe` : name);
 const toolchainDir = (root, lock, platform) => safePath(root, `.tools/rust/${lock.version}/${platform}`, { mustExist: false });
+const RECEIPT = 'fairpane-install.json';
+
+/**
+ * The components of a toolchain for `platform`: the platform's components in lock order, and then each locked target's standard library.
+ * `name` names the archive in messages, and `entry` is the component's receipt entry without its installer components.
+ */
+function lockedComponents(lock, platform) {
+  return [
+    ...lock.platforms[platform].components.map(c => ({ artifact: c, name: c.package, entry: { package: c.package, sha256: c.sha256 } })),
+    ...Object.entries(lock.targets ?? {}).map(([target, c]) => ({ artifact: c, name: `${c.package} (${target})`,
+      entry: { package: c.package, target, sha256: c.sha256 } })),
+  ];
+}
+/**
+ * Whether the receipt in `dir` records the lock's toolchain for `platform`: its identity fields, and its components reduced to
+ * `package`, `target` when present, and `sha256`, in lock order. The receipt is a local integrity record, not a signature.
+ */
+function receiptMatches(lock, platform, dir) {
+  let receipt;
+  try { receipt = JSON.parse(fs.readFileSync(path.join(dir, RECEIPT), 'utf8')); }
+  catch (e) { if (e.code === 'ENOENT' || e instanceof SyntaxError) return false; throw e; }
+  if (!isTable(receipt) || !Array.isArray(receipt.components)) return false;
+  const components = receipt.components.map(c => (isTable(c)
+    ? { package: c.package, ...(Object.hasOwn(c, 'target') && { target: c.target }), sha256: c.sha256 } : c));
+  return receipt.version === lock.version && receipt.platform === platform && receipt.host === lock.platforms[platform].host
+    && receipt.rustc_commit_hash === lock.rustc_commit_hash && receipt.manifest_sha256 === lock.manifest.sha256
+    && isDeepStrictEqual(components, lockedComponents(lock, platform).map(c => c.entry));
+}
 
 /** The path at which the locked toolchain's `rustc` belongs for `platform`. */
 export function rustcPath(root, platform = hostPlatform()) {
   const lock = loadLock(root);
   return toolPath(toolchainDir(root, lock, platform), platform, 'rustc');
 }
-/** Run the four version checks on the toolchain in `dir`, each in the toolchain's `bin` directory, and return its `rustc` path. */
-function verifyToolchain(root, dir, lock, platform, run) {
+/** The four executables of the toolchain in `dir`, which must exist. */
+function toolFiles(dir, platform) {
   const files = TOOLS.map(([name]) => toolPath(dir, platform, name));
   invariant(files.every(file => fs.existsSync(file)), 'The locked Rust toolchain is absent. Run node tools/fairpane.mjs install-rust.');
+  return files;
+}
+/** Run the four version checks on the toolchain in `dir`, each in the toolchain's `bin` directory, and return its `rustc` path. */
+function verifyToolchain(root, dir, lock, platform, run, files = toolFiles(dir, platform)) {
   const env = { ...process.env, CARGO_HOME: path.join(root, '.tools', 'cargo-home') }, cwd = path.join(dir, 'bin');
   const outputs = {};
   for (const [i, [name, args]] of TOOLS.entries()) {
@@ -365,44 +418,61 @@ function verifyToolchain(root, dir, lock, platform, run) {
   invariant(problems.length === 0, problems.join(' '));
   return files[0];
 }
-/** Check the installed toolchain for `platform` and return its `rustc` path. */
+/**
+ * Check the installed toolchain for `platform` and return its `rustc` path.
+ * A toolchain whose receipt differs from the lock is rejected before any version check runs.
+ */
 export function checkRust(root, { platform = hostPlatform(), run = defaultRun } = {}) {
   const lock = loadLock(root);
   invariant(lock.platforms[platform], `No locked Rust toolchain exists for ${platform}.`);
-  return verifyToolchain(root, toolchainDir(root, lock, platform), lock, platform, run);
+  const dir = toolchainDir(root, lock, platform), files = toolFiles(dir, platform);
+  invariant(receiptMatches(lock, platform, dir), 'The installed Rust toolchain differs from the lock. Run node tools/fairpane.mjs install-rust.');
+  return verifyToolchain(root, dir, lock, platform, run, files);
 }
 
 /**
- * Install the locked toolchain under `.tools/rust/<version>/<platform>`.
+ * Install the locked toolchain, with each locked target's standard library, under `.tools/rust/<version>/<platform>`.
  * It writes only to `.tools/downloads`, `.tools/rust/<version>`, and, through the version checks, `.tools/cargo-home`.
- * Like `install-zig`, it accepts an existing toolchain directory after only a version check.
+ * It accepts an existing toolchain directory whose receipt matches the lock after only a version check.
+ * It replaces a toolchain whose receipt differs, and it keeps that toolchain in place until the new one passes its checks.
  */
 export async function installRust(root, { platform = hostPlatform(), fetch = globalThis.fetch, run = defaultRun } = {}) {
   const lock = loadLock(root), entry = lock.platforms[platform];
   invariant(entry, `No locked Rust toolchain exists for ${platform}.`);
   const dest = toolchainDir(root, lock, platform);
-  if (fs.existsSync(dest)) return { toolchain: checkRust(root, { platform, run }), downloaded: false };
+  if (fs.existsSync(dest) && receiptMatches(lock, platform, dest)) return { toolchain: checkRust(root, { platform, run }), downloaded: false };
+  const parts = lockedComponents(lock, platform);
   const downloads = safePath(root, '.tools/downloads', { mustExist: false });
   fs.mkdirSync(downloads, { recursive: true });
   const archives = [];
-  for (const c of entry.components) {
-    const archive = path.join(downloads, path.posix.basename(new URL(c.url).pathname));
-    await fetchLockedArchive(archive, c, { name: c.package, fetch });
+  for (const { artifact, name } of parts) {
+    const archive = path.join(downloads, path.posix.basename(new URL(artifact.url).pathname));
+    await fetchLockedArchive(archive, artifact, { name, fetch });
     archives.push(archive);
   }
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   const stage = fs.mkdtempSync(path.join(path.dirname(dest), '.extract-'));
   try {
     const toolchain = path.join(stage, 'toolchain'), installed = new Set();
-    for (const [i, c] of entry.components.entries()) await extractTarGz(archives[i], c.archive_root, path.join(stage, String(i)));
+    for (const [i, { artifact }] of parts.entries()) await extractTarGz(archives[i], artifact.archive_root, path.join(stage, String(i)));
     fs.mkdirSync(toolchain);
-    const components = entry.components.map((c, i) => ({ package: c.package, sha256: c.sha256,
-      installer_components: installComponents(path.join(stage, String(i)), c.archive_root, toolchain, installed) }));
+    const components = parts.map(({ artifact, entry: receiptEntry }, i) => ({ ...receiptEntry,
+      installer_components: installComponents(path.join(stage, String(i)), artifact.archive_root, toolchain, installed) }));
     verifyToolchain(root, toolchain, lock, platform, run);
-    writeJson(path.join(toolchain, 'fairpane-install.json'), { version: lock.version, platform, host: entry.host,
+    writeJson(path.join(toolchain, RECEIPT), { version: lock.version, platform, host: entry.host,
       rustc_commit_hash: lock.rustc_commit_hash, manifest_sha256: lock.manifest.sha256, components, source: lock.manifest.url });
-    fs.renameSync(toolchain, dest);
-    return { toolchain: toolPath(dest, platform, 'rustc'), downloaded: true, components };
+    const rustc = toolPath(dest, platform, 'rustc');
+    if (!fs.existsSync(dest)) {
+      fs.renameSync(toolchain, dest);
+      return { toolchain: rustc, downloaded: true, components };
+    }
+    // The earlier toolchain moves aside, and it moves back if the new one cannot take its place.
+    const replaced = path.join(path.dirname(dest), `.replaced-${crypto.randomUUID()}`);
+    fs.renameSync(dest, replaced);
+    try { fs.renameSync(toolchain, dest); } catch (e) { fs.renameSync(replaced, dest); throw e; }
+    const result = { toolchain: rustc, downloaded: true, replaced: true, components };
+    try { fs.rmSync(replaced, { recursive: true, force: true, maxRetries: 3 }); } catch (e) { result.replaced_cleanup_error = e.message; }
+    return result;
   } finally {
     fs.rmSync(stage, { recursive: true, force: true, maxRetries: 3 });
   }

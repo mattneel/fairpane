@@ -64,6 +64,13 @@ It installs exactly the files that each component's `manifest.in` lists.
 It checks the version, commit, and host of the staged `rustc` before it moves the toolchain into place.
 It never runs rustup, changes `PATH`, or writes outside `.tools`.
 On Windows, the locked host is `x86_64-pc-windows-gnu`, as ADR 0010 records.
+The lock's `targets` member names the standard library of each cross-compilation target.
+`i686-unknown-linux-gnu` is the only accepted target, so the wrapper's layout assertions can compile for a 32-bit target.
+`install-rust` installs each locked target's standard library into every host toolchain and records it in `fairpane-install.json`.
+It replaces a toolchain whose `fairpane-install.json` differs from the lock, and it keeps the earlier toolchain until the new one passes its checks.
+The toolchain check rejects such a toolchain before it runs any version check, so `doctor` reports it as unavailable.
+`fairpane-install.json` is a local integrity record, not a security boundary, so anyone who can write `.tools` controls the toolchain.
+`rust-toolchain.toml` names no target, because no repository command runs rustup.
 
 The lock records the SHA-256 of the official channel manifest, `https://static.rust-lang.org/dist/channel-rust-<version>.toml`.
 Each component digest in the lock equals that component's `hash` value in the manifest.
