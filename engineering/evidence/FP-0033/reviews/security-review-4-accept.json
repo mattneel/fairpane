@@ -1,0 +1,120 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "c53c69690971fa44cafcea64dc0305af33295f3a",
+    "256fe34ba4cead01bcb98a0019f1591d0c4be912"
+  ],
+  "summary": "I accept revision 3. I read the working tree, the recorded logs, the c53c696 diff from the public mirror, and the GitHub API data for 256fe34. I fetched each action's release-tag ref from the action's own repository with the read tool. I ran no shell, git, node, or test command.\n\n**SHAs.** All five REVIEWED_ACTIONS SHAs (workflow-check.mjs:224-228) equal the commits that the action's own repository resolves for that release tag today. Each ref is a lightweight tag of type commit. They also match raw/action-tag-refs.log, ../docs-site/raw/action-pins.log, and every `uses:` line in gates.yml and pages.yml. A ref lookup in the upstream repository cannot return a commit that exists only in a fork. With the SHA fixed, the commit content is fixed too.\n\n**The change only adds a restriction.** In the c53c696 diff to workflow-check.mjs, the only executable change is a new final `else` branch at :332-337. It runs only after the earlier pinning and version-comment checks have both passed, and it only adds a problem. The only line removed is a doc-comment line (:367). In the test file, the fake setup-node and upload SHAs in the case 12 fixtures ('b'×40, 'c'×40) became the reviewed SHAs. That change is needed because case 12 also runs checkWorkflow(accepted), and no assertion was removed or loosened. Case 1 compares checkWorkflow of each real workflow file with its reviewed list, so all five map entries are checked against the committed workflows.\n\n**The check holds against other forms of `uses:`.**\n- A sub-path `owner/repo/path@sha` misses the map and fails.\n- A job-level reusable workflow (`owner/repo/.github/workflows/x.yml@sha`) misses the map and fails.\n- A local `./` reference or a `docker://` image fails PINNED_USES.\n- An uppercase SHA fails PINNED_USES.\n- An owner or repository name in different letter case maps to the same repository, which matches how GitHub resolves names.\n- A Map cannot be polluted through its prototype.\n\n**Nested actions.** Only upload-pages-artifact is a composite action. Its nested `actions/upload-artifact@bbbca2dd… # v7.0.0` matches upstream tag v7.0.0. checkout, setup-node, upload-artifact, and deploy-pages are node24 actions.\n\n**Evidence.**\n- The red baseline is genuine: the base checker blob is 48c7cbf, and against it only case 17 fails (exit 1).\n- After the change, 149 of 149 tests pass under both Node and Bun.\n- raw/revision-3-binding.log records HEAD c53c696, an empty status with --ignored, and unchanged workflow blob IDs.\n- 256fe34 has c53c696 as its only parent. It changes only FP-0033 evidence and engineering/state.json.\n- Run 37885183250 (push, headSha 256fe34) succeeded, and the log contains no conclusion other than success.\n\nThese remain local integrity checks. A pull request controls its own checker (tools/README.md:143-144), so under docs/SECURITY.md:80-81 they provide no independent enforcement.\n\n**Remaining notes.** No remaining note needs a change before acceptance. The step-output note no longer has an exploit path. The other three notes are narrower or unchanged, and each needs a reviewed merge to master. I add two notes: one about README consistency and one about nested pins in the update procedure.",
+  "criteria": [
+    {
+      "criterion": "Each REVIEWED_ACTIONS SHA equals the release-tag commit in the action's own repository",
+      "met": true,
+      "evidence": "GET api.github.com/repos/<owner>/<repo>/git/ref/tags/<tag> returned:\n- actions/checkout v7.0.1 → 3d3c42e5aac5ba805825da76410c181273ba90b1\n- actions/setup-node v7.1.0 → 949feb2413d6458794dcd2491c4babbbce0c15c1\n- actions/upload-artifact v7.0.2 → cf430e030ddbb5b0abf93d22962f4752f3646cd9\n- actions/upload-pages-artifact v5.0.0 → fc324d3547104276b827a68afc52ff2a11cc49c9\n- actions/deploy-pages v5.0.1 → 368f82528645a54fb793d4d04e342629a3f51346\n\nEach ref has object.type commit, so there is no annotated tag to dereference. Each SHA equals workflow-check.mjs:224-228, raw/action-tag-refs.log (curl, exit 0, 2026-10-09T01:57Z), and docs-site/raw/action-pins.log (gh api, exit 0). Each also equals the matching `uses:` line in gates.yml (:26, :31, :58, :70, :75, :99) and pages.yml (:20, :42, :58)."
+    },
+    {
+      "criterion": "workflowProblems accepts only the reviewed commit and release tag of each action, in every workflow",
+      "met": true,
+      "evidence": "workflow-check.mjs:332-337 run inside visit() on every mapping, which covers step-level and job-level `uses:`. A problem is reported when the owner/repo (lowercased) is not in the map, the SHA differs, or the comment differs from the version. Case 1 (test.mjs:72-77) requires gates.yml to report [] and pages.yml to report only its permission line, so every committed pin is checked. Case 17 (test.mjs:117-124) covers a different full SHA, a different version comment, and a different owner, and checks that owner/repo case does not matter."
+    },
+    {
+      "criterion": "The change only adds a restriction",
+      "met": true,
+      "evidence": "Diff 48c7cbf..9847774 adds the REVIEWED_ACTIONS constant and a final `else` branch that only calls add(). Its single deletion is the doc-comment line at :367. In the tests (dc421bf..5a99a97), case 17 is added, and the case 12 fixtures use the real SHAs in place of 'b'×40 and 'c'×40, with the same assertions. GATE_ACTIONS, the key lists, the expression and trigger allowlists, and the persist-credentials check are unchanged."
+    },
+    {
+      "criterion": "Red baseline, then green after the change",
+      "met": true,
+      "evidence": "raw/revision-3-tests-before.log: HEAD 97aa319 with checker blob 48c7cbf. The staged copies hash to 48c7cbf (checker) and 5a99a97 (the new test). 19 of 20 cases pass, and case 17 fails with 'Expected /is not a reviewed action commit/ in []' (exit 1). After the change, the controller-test receipt 73c528ab and raw/revision-3-tests-bun.log each show 149 of 149 passing (exit 0)."
+    },
+    {
+      "criterion": "Evidence binds to c53c696, and the integrated run succeeds",
+      "met": true,
+      "evidence": "raw/revision-3-binding.log records:\n- rev-parse HEAD c53c696.\n- An empty `status --porcelain --ignored` over every source root, including .github.\n- A `show --stat` of 7 files, none under .github.\n- Workflow blobs ccbd330 and a70741a, unchanged since revision 2.\n\nThe API shows that 256fe34 has c53c696 as its only parent and touches only FP-0033 evidence and engineering/state.json. raw/github-run-37885183250.log records a push run on 256fe34 with conclusion success. Both the Linux and Windows jobs are present, and a search for failure, skipped, cancelled, neutral, timed_out, action_required, or startup_failure found nothing."
+    },
+    {
+      "criterion": "Local integrity checks are not presented as independent enforcement",
+      "met": true,
+      "evidence": "tools/README.md:143-144 still say that a pull request runs its own workflow, checker, and controller. The receipts carry trust unsigned-local-integrity-only. This matches docs/SECURITY.md:80-81."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "note (security-review-3 #2, workflow-check.test.mjs:99): the Gates test and gateWorkflowProblems accept any 40-hex SHA under an accepted action name, including a commit from the fork network. The upload path, if-no-files-found, and the trigger filters are not pinned.",
+      "resolved": true,
+      "evidence": "The SHA part is resolved. workflowProblems (:332-337) rejects any SHA or version other than the reviewed one, and case 1 runs it on gates.yml, so changing a SHA fails the controller test. The SHAs are verified against upstream tags (see the criteria). Residual, unchanged: the Gates test does not pin path: out/evidence/, if-no-files-found: error, or the absence of paths-ignore/types filters. This stays a note: none of these lets a gate step pass without running, and each needs a reviewed merge to master."
+    },
+    {
+      "finding": "note (security-review-3 #1, tools/README.md:161): steps.*.outputs.* can reach a `with:` input of any pinned action, such as a composite action or github-script, outside Gates.",
+      "resolved": true,
+      "evidence": "The exploit path is closed. Only the five reviewed actions are now accepted, and github-script and arbitrary composite actions fail at :334. Of the five, only upload-pages-artifact is composite. Its run: interpolates `${{ inputs.include-hidden-files != 'true' && '--exclude=.[^/]*' || '' }}`, which evaluates to one of two constants, and it passes inputs.path through env. Residual: the wording of tools/README.md:162 ('no expression reaches a shell') applies only to workflow run: values. This is cosmetic and needs no change."
+    },
+    {
+      "finding": "note (security-review-3 #3, workflow-check.test.mjs:68): the pages.yml deploy job's steps and keys are not bound.",
+      "resolved": false,
+      "evidence": "Narrowed. A job-level `uses:` reusable workflow is now rejected by :334, and so is any deploy step other than a reviewed action. A reviewed change could still add a `run:` step to the deploy job, and that step could use the id-token: write or pages: write grant without changing REVIEWED['pages.yml']. pages.yml triggers only on push to master and workflow_dispatch (pages.yml:3-6). No change is needed before acceptance."
+    },
+    {
+      "finding": "note (security-review-3 #4, FP-0033/README.md:68, now :71): the 'byte-identical' claim mixes SHA-256 values with git blob IDs.",
+      "resolved": false,
+      "evidence": "Unchanged, and not affected by revision 3. raw/revision-3-binding.log shows the workflow blobs are still ccbd330 and a70741a. My recommendation applies to the next revision that changes a workflow. For this revision, the API confirms that 256fe34 has c53c696 as its only parent and changes only evidence and state.json. No change is needed."
+    },
+    {
+      "finding": "note: the setup-node runtime is not checked against a project-held digest",
+      "resolved": false,
+      "evidence": "Unchanged. setup-node is now bound to its reviewed commit 949feb24, but that commit still downloads Node at run time. I still accept this as the pinned action's trust boundary."
+    },
+    {
+      "finding": "note: Get-Zig.ps1 has no streaming size cap",
+      "resolved": false,
+      "evidence": "Unchanged, and not in the c53c696 stat."
+    },
+    {
+      "finding": "note: tar -tf checks names only, not entry types",
+      "resolved": false,
+      "evidence": "Unchanged, and not in the c53c696 stat. It is defense in depth after the SHA-256 match against the lock."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "note",
+      "path": "tools/README.md",
+      "line": 155,
+      "issue": "The README lists the workflowProblems rules, and that list still says only 'A uses: reference needs a full 40-hex commit SHA and a version comment.' The reviewed-commit rule appears only in the update procedure (:186, :191). :175 still reads 'or other action can therefore change what a gate step runs', while the code comment at workflow-check.mjs:367 was changed to 'unreviewed action code'.",
+      "recommendation": "Optional: extend the :155 bullet to say that the SHA and comment must equal the REVIEWED_ACTIONS entry. Align :175 with workflow-check.mjs:367."
+    },
+    {
+      "severity": "note",
+      "path": "tools/README.md",
+      "line": 180,
+      "issue": "The pin-update procedure resolves only the top-level action's tag. REVIEWED_ACTIONS cannot see the actions that a reviewed composite action pins. upload-pages-artifact@fc324d35 uses actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0. I confirmed that this equals upstream tag v7.0.0, so the current closure is sound. A future update could still bring in a nested pin to a fork-only commit without any check reporting it.",
+      "recommendation": "Optional: for a composite action, add a step that reads its action.yml at the reviewed SHA and resolves each nested `uses:` through the same upstream tag-ref lookup. Record that lookup alongside the others."
+    }
+  ],
+  "commands_run": [
+    {
+      "command": "read https://api.github.com/repos/actions/{checkout,setup-node,upload-artifact,upload-pages-artifact,deploy-pages}/git/ref/tags/{v7.0.1,v7.1.0,v7.0.2,v5.0.0,v5.0.1} (five HTTP fetches through the read tool, not a shell)",
+      "exit_status": 0,
+      "observation": "Each returned object.type commit, with SHAs 3d3c42e5…, 949feb24…, cf430e03…, fc324d35…, and 368f8252…. All equal workflow-check.mjs:224-228 and the recorded logs."
+    },
+    {
+      "command": "read https://api.github.com/repos/actions/upload-artifact/git/ref/tags/v7.0.0 (read tool)",
+      "exit_status": 0,
+      "observation": "Commit bbbca2ddaa5d8feaa63e36b76fdaad77386f024f. This equals the nested pin in upload-pages-artifact@fc324d35."
+    },
+    {
+      "command": "read raw.githubusercontent.com action.yml at each reviewed SHA (read and grep tools)",
+      "exit_status": 0,
+      "observation": "checkout, setup-node, upload-artifact, and deploy-pages run as node24. upload-pages-artifact is composite, with one nested uses, which is SHA-pinned, and constant-valued expressions in its run blocks."
+    },
+    {
+      "command": "read https://github.com/mattneel/fairpane/commit/c53c69690971fa44cafcea64dc0305af33295f3a.diff (read tool)",
+      "exit_status": 0,
+      "observation": "workflow-check.mjs 48c7cbf..9847774 adds REVIEWED_ACTIONS and an else branch that only adds problems, and changes one doc-comment line. The test file dc421bf..5a99a97 adds case 17 and replaces the fake fixture SHAs with the reviewed ones. tools/README.md adds the record and REVIEWED_ACTIONS steps. No .github file is in the diff."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/commits/256fe34ba4cead01bcb98a0019f1591d0c4be912 (read tool)",
+      "exit_status": 0,
+      "observation": "c53c696 is the only parent. The files are the FP-0033 README, two receipts with their logs, revision-3-binding.log, revision-3-tests-bun.log, and engineering/state.json."
+    }
+  ]
+}

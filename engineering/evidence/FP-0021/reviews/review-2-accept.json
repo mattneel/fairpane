@@ -1,0 +1,176 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "574c2242d10821b45e2dd412f2b39e0187b371f5",
+    "03fbab3",
+    "e1ecd79"
+  ],
+  "summary": "I accept FP-0021 revision 1. It resolves the major finding and every minor finding from review 1, and I found no blocker or major defect. (1) `api/fairpane.schema.json:275` now declares `engine_destroy.engine` as `consumed_on_success` with lifetime `engine_destroy`. The validator (`tools/abi.mjs:154-157`) accepts that value only on an input handle parameter whose lifetime the function ends. `include/fairpane.h:202` states the rule in C names. (2) Description references render as C names in the header and as Zig names in the Zig file. The validator rejects an unknown reference and a bare function, constant, status, or event name. (3) The ABI is unchanged. In the GitHub diff of 574c224, every changed line of `include/fairpane.h` is a comment. A regex search for changed lines that are not comments found none in the header. In `src/abi_generated.zig` it found only the new `statuses` block, which is a Zig-only declaration. The schema diff changes descriptions, one ownership value, and lifetimes only. `abi_layout.h` asserts the same sizes and offsets that the deleted hand-written subset did. abi-exports reports exactly 13 exports. (4) The status-set check works. `finish` maps every error of each export's inferred error set into `abi.statuses.<symbol>` at compile time. All 12 status exports pass their own symbol (`src/c_api.zig:106-298`). `raw/revision-1-check-controls.log` shows compilation failing when `out_of_memory` is removed from the `fp_document_create` status set. (5) abi-exports reads the archive symbol table and fails closed when it is absent. It reports both unexpected and missing `fp_` symbols. The check-controls log shows an added `fp_unexpected` export failing with exit 1. (6) The `c-abi` gate change (`tools/lib.mjs:478-479`) only adds one `run` call, and that call aborts the gate on a nonzero exit. The receipt's `gate_sha256` (e768491e…) is the same as in the first submission's c-abi receipt, so `engineering/gates.json` did not change. No protected path changed in 574c224, e1ecd79, or 03fbab3. (7) The evidence binds to 574c224. `raw/revision-1-binding.log` records HEAD 574c2242 at 04:44:10.269 and an empty `git status --ignored` over exactly the `policy.json` source roots. Six gate receipts follow within 30 s, and all pass with source 3dc7c202… (129 files) and policy b142ba18…, identical before and after each gate. The mutation diff's base blob 4fa0c0e equals the committed `c_api.zig` blob in 574c224. (8) Case 14: with the thread check removed, Zig fails 88 of 89 tests (`expected 7, found 1` at the invalid-argument assertion). The C smoke test aborts at `abi_smoke.c:398`. The valid-argument assertions still pass under that mutation, because `engine.zig` checks the thread again inside each method. This shows that the new invalid-argument calls are what catch the ordering regression. My remaining findings are notes only. I ran no commands. All observations come from file reads, the recorded logs and receipts, and read-only GitHub diff and API fetches of 574c224, 03fbab3, e1ecd79, and the commit list.",
+  "criteria": [
+    {
+      "criterion": "Revision: `consumed_on_success` ownership, valid only for an input handle parameter, on `engine_destroy.engine`; identifier families name their lifetimes.",
+      "met": true,
+      "evidence": "Schema lines 133, 138, and 275. `tools/abi.mjs:154-157` passes a consumer only when `p.direction === 'in' && kind === 'handle'` (line ~427), so the value is rejected on fields, `receives`, outputs, and structures. Case 10 checks all four rejections plus the identifier-lifetime rules (gate log ok 84)."
+    },
+    {
+      "criterion": "Revision case 10: the validator rejects `consumed_on_success` on an output parameter, and the generated C and Zig text states the consumption rule for `fp_engine_destroy`.",
+      "met": true,
+      "evidence": "`tools/abi.test.mjs` case 10 asserts the rejection and the exact C text (`include/fairpane.h:202`) and Zig text (`abi_generated.zig`, `fp_engine_destroy` doc comment). The case fails in `raw/revision-1-tests-before.log` (not ok 78) and passes in controller-test gate 5a19c3c6 (ok 84)."
+    },
+    {
+      "criterion": "Revision case 11: the validator rejects an unknown reference and an unreferenced name, and the header contains no schema-only name outside a C name.",
+      "met": true,
+      "evidence": "Case 11 rejects an unknown target, an unknown kind, and bare names of a function, a constant, a status, and an event. It tokenizes the generated header and finds no schema-only multiword name. Header diff: `query_capabilities`→`fp_query_capabilities`, `deadline_none constant`→`FP_DEADLINE_NONE`, `kind is none`→`FP_EVENT_NONE`, and `the declared structure size`→`sizeof(fp_engine_options)`. Before: not ok 79; gate: ok 85."
+    },
+    {
+      "criterion": "Revision case 12: the generated C static assertions compile for x86_64 and for a 32-bit x86 target.",
+      "met": true,
+      "evidence": "`tests/c/abi_layout.h` is generated from the same `layoutOf` model and covers every structure's size and every member offset. The c-abi gate e553f902 compiles it on x86_64-windows. `raw/revision-1-layout-32bit.log` compiles it for x86-linux-musl, x86-windows-gnu, and x86_64-linux-musl, each with exit 0. A mutated 32-bit `fp_document_info` size fails on x86-linux-musl ('16 == 20') and compiles on x86_64."
+    },
+    {
+      "criterion": "Revision case 13: a foreign-thread call with an invalid argument returns `wrong_thread` and writes no output, in C and in Zig.",
+      "met": true,
+      "evidence": "`tests/c/abi_smoke.c:330-343` and `src/abi_scenarios.zig:265-280` make 14 invalid calls, covering each owner function except `fp_engine_destroy`, which takes only the engine. Both assert `wrong_thread`, unchanged `document_out` and `request_out`, 0xA5-filled info, outcome, and event, and an unchanged engine snapshot or queues. The scenario JSON lists those calls. Case 13 checks the coverage. The c-abi and zig-test gates pass."
+    },
+    {
+      "criterion": "Revision case 14: a mutation that skips the thread check fails both the C and the Zig scenarios, and the diff and logs are recorded.",
+      "met": true,
+      "evidence": "`raw/revision-1-mutation-thread.diff` removes `try resolved.checkThread();` from `enter`. Zig: 88 pass and 1 fail, at `abi_scenarios.zig:309` (`expected 7, found 1`). C: assertion failure at `abi_smoke.c:398`, exit 3221226505. `c_api.zig` is restored to SHA-256 abad0ad7… The mutation base blob 4fa0c0e matches the committed file in 574c224."
+    },
+    {
+      "criterion": "Revision: generated status sets and a compile-time check that every native error of each export maps into its set.",
+      "met": true,
+      "evidence": "The `abi_generated.zig` `statuses` struct matches the schema lists. `c_api.zig:57-91` (`statusOf` fails compilation for an unmapped error, and `expectAllowed` and `finish` use `inline else` over the inferred error set). The status-set controller case requires `finish(\"fp_<name>\", ` for every status function. `raw/revision-1-check-controls.log` shows the compile error `fp_document_create can return out_of_memory, which its schema status set lacks.`"
+    },
+    {
+      "criterion": "Revision: a test fails when the library exports an undeclared `fp_` symbol.",
+      "met": true,
+      "evidence": "`archiveSymbols` and `exportProblems` in `tools/abi.mjs`. The export-check controller case covers the GNU and BSD layouts, an extra symbol, a missing symbol, and the CLI exit status. `raw/revision-1-check-controls.log` shows a real `fp_unexpected` export making `abi-exports` exit 1. The c-abi gate log shows `abi-exports` passing with 13 exports before the smoke compile."
+    },
+    {
+      "criterion": "Revision: `api/README.md` states that the C and Zig scenarios only establish that there is no unwinding channel, and that later wrappers must inject a real panic or exception.",
+      "met": true,
+      "evidence": "`api/README.md:164-167`; evidence README:81-82."
+    },
+    {
+      "criterion": "Every name, value, and layout of the ABI is unchanged.",
+      "met": true,
+      "evidence": "Every changed header line in 574c224 is a comment, and the regex search over the header diff found no non-comment change. The Zig diff adds only `statuses` besides comments, and the layout block is unchanged. The schema diff changes no type, value, or name. The `c_api.zig` export signatures are still checked against the generated function types (`c_api.zig:41-43`). abi-exports reports 13 exports."
+    },
+    {
+      "criterion": "C comments name only C items.",
+      "met": true,
+      "evidence": "The header diff and the current `include/fairpane.h` use `fp_*`, `FP_*`, `sizeof(fp_*)`, C field names, and C parameter names only. `tests/c/abi_layout.h` comments name `fairpane.h` and C11. Case 11's tokenized scan finds no schema-only multiword name."
+    },
+    {
+      "criterion": "The `c-abi` gate change only adds a check.",
+      "met": true,
+      "evidence": "The `tools/lib.mjs` diff adds lines 478-479, a comment and a `run(node, fairpane.mjs abi-exports <lib>)`, before the unchanged compile and run steps. `run` makes any nonzero exit fail the gate. `gate_sha256` e768491e… is identical in both c-abi receipts."
+    },
+    {
+      "criterion": "Evidence binds to 574c224, and the integrator gates include zig-build.",
+      "met": true,
+      "evidence": "`raw/revision-1-binding.log` records HEAD 574c2242… with clean source roots, including ignored files. repo-check, controller-test (155/155), zig-fmt, zig-test, zig-build, and c-abi all pass with source 3dc7c202… and policy b142ba18…, before equal to after. The uncached Zig run passes 101/101, and Bun passes 155/155. e1ecd79 (docs) came after the gates, so the receipts bind to 574c224, not to the tip, as the contract requires."
+    },
+    {
+      "criterion": "Protected paths stay unchanged.",
+      "met": true,
+      "evidence": "The file lists of 574c224 (api, include, src, tests, tools, and FP-0021 evidence), e1ecd79 (`docs/ABI_AND_WRAPPERS.md`), and 03fbab3 (evidence, an FP-0033 review file, and `state.json`) touch none of the paths in `engineering/policy.json` `protected_paths`."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "major: `fp_engine_destroy.engine` was recorded as borrowed for the call, so consumption on success was lost (`api/fairpane.schema.json:268`).",
+      "resolved": true,
+      "evidence": "Schema:275 has `consumed_on_success` with lifetime `engine_destroy`. The validator restricts the value to an input handle whose lifetime the function ends. `include/fairpane.h:202` and the Zig doc state that ok ends the handle and any other status leaves it with the caller. `api/README.md` documents the rule. Case 10."
+    },
+    {
+      "finding": "minor: generated comments used schema names instead of C names (`include/fairpane.h:30`, and others).",
+      "resolved": true,
+      "evidence": "Reference markup with per-language rendering (`tools/abi.mjs:194-262`). The validator rejects unknown references and bare function, constant, status, and event names. Per-parameter direction, nullability, ownership, lifetime, thread, and status lines are added, and enumeration fields are annotated (`FP_DOCUMENT_*`). Case 11."
+    },
+    {
+      "finding": "minor: `docs/ABI_AND_WRAPPERS.md:5` referenced the deleted `api/bootstrap.json`.",
+      "resolved": true,
+      "evidence": "e1ecd79 replaces it with the schema, the generator, `abi-check`, and the failure-scenario references. Its generated-file list omits `tests/c/abi_layout.h` (note below)."
+    },
+    {
+      "finding": "minor: the zig-build receipt was missing.",
+      "resolved": true,
+      "evidence": "`gates/2026-10-09T04-44-37-901Z-zig-build-37ed25d6.json` passes on source 3dc7c202…, the same digest as the other five receipts."
+    },
+    {
+      "finding": "minor: the wrong-thread ordering ('before any other argument check') was untested.",
+      "resolved": true,
+      "evidence": "14 invalid-argument foreign-thread calls in C and Zig, each asserting wrong_thread and no output, plus the case 14 mutation killed in both languages."
+    },
+    {
+      "finding": "minor: no compile-time tie between each export and its schema status list, and an extra `fp_` export would go undetected (`src/c_api.zig:41`).",
+      "resolved": true,
+      "evidence": "The generated `statuses` and `finish`/`expectAllowed` check, with its control in check-controls.log. abi-exports runs in the c-abi gate, with its control in check-controls.log."
+    },
+    {
+      "finding": "minor: the foreign-unwind scenario must not count as unwind qualification (`src/abi_scenarios.zig:689`).",
+      "resolved": true,
+      "evidence": "`api/README.md:164-167` and evidence README:81-82 state the limitation and require a real panic or exception in each later wrapper."
+    },
+    {
+      "finding": "note: identifier families had prose-only liveness.",
+      "resolved": true,
+      "evidence": "`identifiers[].lifetime` is now required and validated. document uses the new `document_destroy` lifetime and request uses `request_end` (schema:133, 138). Both are rendered in the header and the Zig file."
+    },
+    {
+      "finding": "note: natural-alignment model vs. i386 SysV, and the C layout checks were a hand-written subset.",
+      "resolved": true,
+      "evidence": "`tests/c/abi_layout.h` is generated from the same model, and the hand-written asserts were removed. A recorded 32-bit `zig cc` run passes and its mutant fails. The contract allowed a recorded run. No gate repeats the 32-bit compile (note below)."
+    },
+    {
+      "finding": "note: `optional` cannot express three-state pointer kinds, and integer ranges are metadata only.",
+      "resolved": false,
+      "evidence": "Unchanged in `tools/abi.mjs` `validateType` optional branch. Review 1 deferred this until the first web-facing API needs it, and revision 1 did not adopt it. It is not a defect of this task."
+    },
+    {
+      "finding": "note: baseline wording '20 compile errors', and no engine-side mutation.",
+      "resolved": true,
+      "evidence": "Evidence README:25 now says 'at least 20 errors before clang stops at its error limit'. The case 14 thread-check mutation is killed by both C and Zig."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "note",
+      "path": "src/c_api.zig",
+      "line": 80,
+      "issue": "The status-set check depends on each export passing its own symbol as a string literal to `finish`. The controller case only checks that every `finish(\"fp_<name>\", ` literal appears somewhere in the file. Two exports that swapped literals, or an export that returned a raw status before calling `finish`, would compile without the check. All 12 exports are correct today (lines 106-298).",
+      "recommendation": "Derive the symbol from the enclosing export, for example `finish(@src().fn_name, ...)`, so the binding is mechanical rather than conventional."
+    },
+    {
+      "severity": "note",
+      "path": "api/README.md",
+      "line": 104,
+      "issue": "The 32-bit layout check (C `_Static_assert` on x86, and the Zig `layout(…, narrow)` branch) runs only in the one-time recorded `raw/revision-1-layout-32bit.log`. The c-abi gate and the three cross gates are all 64-bit, so a future schema change could break the i386 model without any gate failing. The contract permits a recorded run, so this is not a defect.",
+      "recommendation": "When a cross gate is next revised, through the protected `gates.json` path, add a 32-bit x86 target that compiles `tests/c/abi_smoke.c` with `-c`."
+    },
+    {
+      "severity": "note",
+      "path": "tools/abi.mjs",
+      "line": 154,
+      "issue": "The validator accepts `consumed_on_success` on an input handle of a function whose `returns` is an integer rather than `status`. The rendered rule 'a call that returns FP_STATUS_OK ends the handle' would then be meaningless. No current function is affected.",
+      "recommendation": "Also require `fn.returns === 'status'` when a parameter is `consumed_on_success`, and add a rejection to case 10."
+    },
+    {
+      "severity": "note",
+      "path": "tools/abi.mjs",
+      "line": 230,
+      "issue": "The bare-name rule covers functions, constants, statuses, and events, as the contract requires. It does not cover enumeration types or members, structures, or lifetimes. A future description such as 'the kind is none' or 'a reject_reason value' would pass validation and reach the C header in schema spelling. Case 11's header scan also ignores single-word names such as `none`.",
+      "recommendation": "Extend `bare` to enumeration and structure names, and to enumeration members, in a later schema revision."
+    },
+    {
+      "severity": "note",
+      "path": "docs/ABI_AND_WRAPPERS.md",
+      "line": 6,
+      "issue": "The e1ecd79 correction says the generator produces `include/fairpane.h` and `src/abi_generated.zig`. It omits `tests/c/abi_layout.h` and the `abi-exports` check that revision 1 added.",
+      "recommendation": "Name all three generated files and mention `abi-exports` in the next docs-scoped change."
+    }
+  ],
+  "commands_run": []
+}

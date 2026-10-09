@@ -263,7 +263,7 @@
       "notes": []
     },
     "FP-0021": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-bindings workers FP0021Schema and FP0021Revision, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0021/README.md",
@@ -276,11 +276,12 @@
         "engineering/evidence/FP-0021/raw/revision-1-integration-zig-tests.log",
         "engineering/evidence/FP-0021/raw/revision-1-mutation-thread.log"
       ],
-      "review": "engineering/evidence/FP-0021/reviews/review-1-reject.json",
+      "review": "engineering/evidence/FP-0021/reviews/review-2-accept.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0021/CONTRACT.md, based on commit 24c0c64, with revision 1.",
         "fairpane-review rejected 13372de because engine_destroy's consumption was lost from the ownership data.",
-        "Commit 574c224 implements revision 1 with 155 of 155 controller tests and 101 of 101 Zig tests. Awaiting fairpane-review."
+        "Commit 574c224 implements revision 1 with 155 of 155 controller tests and 101 of 101 Zig tests.",
+        "fairpane-review accepted 574c224, 03fbab3, and e1ecd79 with notes only."
       ]
     },
     "FP-0022": {
@@ -390,7 +391,7 @@
       ]
     },
     "FP-0033": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-core workers FP0033Actions and FP0033Revision2, and root-integrator",
       "evidence": [
         "engineering/evidence/FP-0033/README.md",
@@ -398,14 +399,15 @@
         "engineering/evidence/FP-0033/gates/2026-10-09T04-41-51-414Z-controller-test-73c528ab.json",
         "engineering/evidence/FP-0033/raw/revision-3-tests-before.log",
         "engineering/evidence/FP-0033/raw/revision-1-actionlint.log",
-        "engineering/evidence/FP-0033/raw/github-run-37884244035.log"
+        "engineering/evidence/FP-0033/raw/github-run-37884244035.log",
+        "engineering/evidence/FP-0033/raw/github-run-37885183250.log"
       ],
-      "review": "engineering/evidence/FP-0033/reviews/review-3-reject.json",
+      "review": "engineering/evidence/FP-0033/reviews/review-4-accept.json",
       "notes": [
         "Created so continuous integration runs the controller and Zig checks that docs/GIT_OPERATIONS.md names for branch protection.",
         "The frozen contract is engineering/evidence/FP-0033/CONTRACT.md, based on commit 7bc9ace, with revisions 1, 2, and 3.",
-        "GitHub runs 37873082602 (24c0c64), 37875841603 (94c96ed), and 37884244035 (586b854) succeeded in both jobs.",
-        "fairpane-review rejected revision 2 because actions were bound only by owner and repository. Commit c53c696 implements revision 3 with 149 of 149 controller tests. Awaiting fairpane-review and fairpane-security."
+        "GitHub runs 37873082602 (24c0c64), 37875841603 (94c96ed), 37884244035 (586b854), and 37885183250 (256fe34) succeeded in both jobs.",
+        "fairpane-review (review-4-accept.json) and fairpane-security (security-review-4-accept.json) accepted c53c696 and 256fe34; FP-0067 carries the remaining minor finding."
       ]
     },
     "FP-0034": {
@@ -575,7 +577,7 @@
       ]
     },
     "FP-0051": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "root-integrator",
       "evidence": [
         "engineering/evidence/FP-0051/README.md",
@@ -584,11 +586,11 @@
         "engineering/evidence/FP-0051/raw/revision-2-tests-before.log",
         "engineering/evidence/FP-0051/raw/revision-2-tests-after.log"
       ],
-      "review": "engineering/evidence/FP-0051/reviews/review-2-reject.json",
+      "review": "engineering/evidence/FP-0051/reviews/review-3-accept.json",
       "notes": [
         "Created from the minor findings and notes in engineering/evidence/FP-0002/reviews/review-3-accept.json.",
         "The frozen contract is engineering/evidence/FP-0051/CONTRACT.md, based on commit 9ee1725, with revisions 1 and 2.",
-        "fairpane-review rejected 199b279 and 9b878bc. Commit 3373788 implements revision 2 with 155 of 155 controller tests. Awaiting fairpane-review."
+        "fairpane-review rejected 199b279 and 9b878bc, then accepted 3373788 and bb29487 with four minor findings; FP-0067 carries them."
       ]
     },
     "FP-0052": {
@@ -691,6 +693,34 @@
       "evidence": [],
       "review": null,
       "notes": ["Created to own platform font discovery from the FP-0013 capability record."]
+    },
+    "FP-0064": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created for the tokenizer states that the FP-0008 contract defers, which FP-0010 tree construction needs."]
+    },
+    "FP-0065": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created for encoding sniffing and decoders, which the FP-0008 contract leaves outside its decode stage."]
+    },
+    "FP-0066": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created because the FP-0027 worker's reproduce-check found that the static library differs between two build directories."]
+    },
+    "FP-0067": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created from the minor findings in the FP-0033 review-4 and FP-0051 review-3 records."]
     }
   }
 }

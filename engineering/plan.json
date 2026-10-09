@@ -430,7 +430,8 @@
       "workstream": "html-dom",
       "depends_on": [
         "FP-0008",
-        "FP-0009"
+        "FP-0009",
+        "FP-0064"
       ],
       "role": "fairpane-core",
       "allowed_paths": [
@@ -2906,6 +2907,89 @@
         "Test discovery with fixtures instead of assumptions about installed fonts."
       ],
       "read": ["docs/RENDERING_AND_TEXT.md", "docs/SECURITY.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0064",
+      "title": "Implement the text-content and CDATA tokenizer states",
+      "workstream": "html-dom",
+      "depends_on": ["FP-0008"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Implement the RCDATA, RAWTEXT, script data, PLAINTEXT, and CDATA section tokenizer states completely, with every parse error they raise.",
+        "Expose the state switches that tree construction makes, without implementing tree construction.",
+        "Compare whole-input results with every partition of small adversarial inputs for each new state.",
+        "Record that no tokenizer state remains unimplemented."
+      ],
+      "read": ["engineering/evidence/FP-0008/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0065",
+      "title": "Implement encoding sniffing and the Encoding Standard decoders",
+      "workstream": "html-dom",
+      "depends_on": ["FP-0008"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Implement the HTML encoding sniffing algorithm, including the prescan and changing the encoding.",
+        "Implement every decoder of the Encoding Standard from first-party code and recorded index data.",
+        "Run the applicable WPT encoding tests through the laboratory or record exactly why each cannot run yet.",
+        "Preserve decoder errors and replacement behavior exactly."
+      ],
+      "read": ["engineering/evidence/FP-0008/CONTRACT.md", "specs/IMPORT_REQUIREMENTS.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0066",
+      "title": "Make release builds independent of the build directory",
+      "workstream": "stewardship",
+      "depends_on": ["FP-0027"],
+      "role": "fairpane-core",
+      "allowed_paths": ["tools", "build.zig", "src", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Identify every input that makes two release builds of one commit in different directories differ.",
+        "Remove each such input, or record it with a measured reason and a reproducible normalization.",
+        "Make reproduce-check report reproducible for the implementation commit on Windows and Linux."
+      ],
+      "read": ["engineering/evidence/FP-0027/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0067",
+      "title": "Close the FP-0033 and FP-0051 review findings",
+      "workstream": "laboratory",
+      "depends_on": ["FP-0033", "FP-0051"],
+      "role": "fairpane-core",
+      "allowed_paths": ["tools", "tests", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Check every filter key of the Gates triggers, so a filter cannot narrow which pushes and pull requests run the gates.",
+        "Report every corruption fixture of the verifier's case FP-0051 3 in one assertion.",
+        "State in tools/README.md that an unreadable object under the candidate's ID is a tool error and that a readable object of another type is unknown-candidate.",
+        "Record the base identity of every red baseline run in the evidence logs."
+      ],
+      "read": ["engineering/evidence/FP-0033/reviews/review-4-accept.json", "engineering/evidence/FP-0051/reviews/review-3-accept.json"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }

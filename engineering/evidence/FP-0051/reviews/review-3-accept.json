@@ -1,0 +1,125 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "33737882ebb65817daaf1bb05691c055c061985e",
+    "bb29487a8a96edb426086705eb9193186bf4ff02"
+  ],
+  "summary": "Accepted, with no blocker or major finding. Commit 3373788 fixes the major finding of review 2. When `^{commit}` exits with status 1 and `cat-file -e` finds the object, `candidateIdentity` now runs `rev-parse --verify --quiet <id>^{object}` (tools/attest.mjs:203-206). It reads the type with `cat-file -t` only after that check succeeds (lines 207-208). In Git's peel_onion, the `^{object}` path calls parse_object on the outer object for every type. parse_object checks blobs with stream_object_signature and every other type with check_object_signature. It does this for loose and packed objects, because both checks hash the object's content and type header after reading it through the normal object path. The commit-graph shortcut runs only with PARSE_OBJECT_SKIP_HASH_CHECK, and `--no-replace-objects` (line 138) keeps a replacement from supplying the hashed object. The cases follow. A hash mismatch under any header gives status 1 (Git prints 'hash mismatch'). A malformed commit or tag body also gives status 1, because parse_object_buffer fails. A bad loose or packed zlib stream, or a missing delta base, gives status 1 or 128. Each of these is a tool error. Only a missing object (-e status 1), a readable object of another type, or a readable annotated tag that peels to another commit (line 196) is unknown-candidate [INFERENCE from Git source; the run used git 2.54.0.windows.1, per the Bun log]. Legitimate IDs keep their classification. A valid commit never reaches the changed branch. A valid tree or blob reaches unknown-candidate through `^{object}` and then `-t`, as it did at 9b878bc. A valid annotated tag reaches unknown-candidate through line 196 or through `-t` 'tag', whatever its target is. The only objects whose classification changed are corrupt ones, plus objects with a valid hash that Git cannot parse, such as a `--literally` tag with a malformed body. Those now fail closed as tool errors, which contract revision 2 requires. Only the tree-header fixture is tested. Blob and tag headers and packed objects are covered by source analysis only. The evidence binds to 3373788. HEAD was 3373788 at 04:47:39.662Z, with an empty status that includes ignored files. The gates ran from 04:47:39.865Z to 04:48:04.318Z with an unchanged source digest, 537c4a5b… (129 files). tests-after and Bun followed, and all of this precedes bb29487 at 04:48:50Z. The policy digest b142ba18… matches the parent's FP-0021 revision-1 receipts and the FP-0033 receipts. It differs from revision 1 only because of the separate commits 'policy: …' (dcfb0fd and 28e2195). Four minor findings remain, all about documentation, test structure, and baseline provenance. I ran no commands. I read the working tree at a later HEAD (ba3a352). That tools/attest.mjs and tools/attest.test.mjs equal their 3373788 versions is [INFERENCE].",
+  "criteria": [
+    {
+      "criterion": "Report a verifier that runs from a linked work tree of the candidate repository as advisory, with a test.",
+      "met": true,
+      "evidence": "This part did not change in revision 2. Case FP-0051 1 appears as 'ok 15' in raw/revision-2-tests-after.log, as 'ok 51' in gates/2026-10-09T04-47-40-096Z-controller-test-2c7a9b46.log, and as 'ok 51' in raw/revision-2-tests-bun.log."
+    },
+    {
+      "criterion": "Reserve unknown-candidate for a missing commit object, and report any other Git failure of the commit lookup as a tool error, with a corrupted-object fixture.",
+      "met": true,
+      "evidence": "Lines 199-209 of tools/attest.mjs handle this. A missing object exits -e with status 1 and gives unknown-candidate. Any `^{object}` failure is a tool error (lines 204-205). Only an object that `^{object}` reads, with a `-t` type other than commit, gives unknown-candidate (line 208). Case FP-0051 3 (attest.test.mjs:257-279) covers five objects. An invalid zlib stream gives a tool error. A missing object gives unknown-candidate. A tree ID gives unknown-candidate. A commit over another commit's object, a tree over a commit's object, and a `--literally` malformed commit each give the new 'exists, but Git cannot read it' tool error. In run 3 of revision-2-tests-before.log, the base reports the tree-header object as 'unknown-candidate'. The case passes in tests-after ('ok 17'), in the gate log ('ok 53'), and in Bun ('ok 53')."
+    },
+    {
+      "criterion": "Reject a trust-policy path whose lexical form or resolved form lies inside the candidate repository or its Git directory, and read the same resolved path that was checked.",
+      "met": true,
+      "evidence": "This part did not change in revision 2. Case FP-0051 4 is 'ok 18' in tests-after and 'ok 54' in the gate and Bun logs."
+    },
+    {
+      "criterion": "Document that path comparison cannot detect a UNC or administrative-share alias of the candidate.",
+      "met": true,
+      "evidence": "See engineering/decisions/0002-qualification-boundary.md:28 and tools/README.md:108."
+    },
+    {
+      "criterion": "Make the outside-repository test independent of whether the temporary directory lies inside a Git work tree.",
+      "met": true,
+      "evidence": "This part did not change. Case 14 is 'ok 13' in tests-after."
+    },
+    {
+      "criterion": "Revision 1 test cases 6-9 exist and pass.",
+      "met": true,
+      "evidence": "These cases did not change. The results are 18 of 18 in tests-after (04:48:04Z) and 155 of 155 in both the controller-test gate and Bun."
+    },
+    {
+      "criterion": "Revision 2: after cat-file -e finds an object, peel it with `rev-parse --verify --quiet <id>^{object}`, so that only a readable object of another type is unknown-candidate and every unreadable object is a tool error.",
+      "met": true,
+      "evidence": "See tools/attest.mjs:202-209. For OBJ_ANY, peel_onion calls parse_object(outer), which runs the hash check for every type, before peel_to_type returns. That makes the `-t` result trustworthy, because the hashed content includes the type header. The docstring (lines 188-191) and ADR 0002:77-79 state the rule."
+    },
+    {
+      "criterion": "Revision 2: document that a bare Git directory on the verifier's path is not detected, and that a broken `.git` entry above the nearest repository is a tool error.",
+      "met": true,
+      "evidence": "See ADR 0002:49, tools/README.md:111, and the 'Limits' section of the evidence README."
+    },
+    {
+      "criterion": "Revision test case 10: a tree's object stored under a commit's ID is a tool error, and case FP-0051 3 reports the outcome of every corruption fixture in one assertion.",
+      "met": true,
+      "evidence": "The tree-over-commit fixture is at attest.test.mjs:268-269, and the combined assertion is at lines 274-278. Before the change it fails with the outcome list [tool error, 'unknown-candidate', tool error] (revision-2-tests-before.log, run 3), and after the change it passes. The invalid-zlib fixture is still asserted separately at line 262. See the minor finding."
+    },
+    {
+      "criterion": "Protected paths stay unchanged.",
+      "met": true,
+      "evidence": "Both revision-2 receipts show policy digest b142ba18… (17 files) before and after. The parent's FP-0021 revision-1 receipts (gates/2026-10-09T04-44-10-442Z-*) and the FP-0033 receipts (04:41:51Z) show the same digest. The change from bb313e06… comes from the separate policy commits dcfb0fd and 28e2195 in .git/logs/HEAD, not from 3373788."
+    },
+    {
+      "criterion": "Evidence binds to the reviewed commit.",
+      "met": true,
+      "evidence": "raw/revision-2-binding.log shows `rev-parse HEAD` = 33737882ebb6… at 04:47:39.662Z. It also shows `status --porcelain --untracked-files=all --ignored` over every source root, with empty output and exit status 0. The repo-check and controller-test receipts cover 04:47:39.865Z to 04:48:04.318Z, with source digest 537c4a5b… (129 files) before and after. tests-after started at 04:48:04.387Z, and Bun ran from 04:48:08.297Z for 22.3 s. In the reflog, 3373788 is at epoch 1791521254 (04:47:34Z) and bb29487 at 1791521330 (04:48:50Z), so every run falls between them."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "(major) attest.mjs:203: `git cat-file -t` reads only the stored header, so a hash-mismatched object with a tree, blob, or tag header under the candidate's ID gave unknown-candidate.",
+      "resolved": true,
+      "evidence": "attest.mjs:203-206 now requires `<id>^{object}` to succeed before line 207 reads the type. A failure is a tool error that quotes Git's stderr. The tree-header fixture fails against the base (before log, run 3: 'unknown-candidate') and passes after the change. Blob-header, tag-header, and packed variants follow the same parse_object hash check [INFERENCE from Git source; not tested]."
+    },
+    {
+      "finding": "(note) enclosingGitDirectories does not detect a bare-style Git directory on the path whose commondir names the candidate.",
+      "resolved": true,
+      "evidence": "The limit is now documented in ADR 0002:49, tools/README.md:111, and the evidence README 'Limits' section."
+    },
+    {
+      "finding": "(note) A broken `.git` entry above the nearest repository is an undocumented tool error.",
+      "resolved": true,
+      "evidence": "The same three locations now state that a broken `.git` entry on the path is a tool error."
+    },
+    {
+      "finding": "(note) The baseline log did not record the staging command, the hash of the modified copy, or the hash of the test file.",
+      "resolved": false,
+      "evidence": "raw/revision-2-tests-before.log records only three `node tools/attest.test.mjs` runs. It has no HEAD, no blob ID for attest.mjs or attest.test.mjs, and no staging record. Revision 1's before log at least recorded HEAD and the base blob. The base identity is therefore inferred from the base message wording, 'Commit … exists, but Git cannot read it'."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/README.md",
+      "line": 104,
+      "issue": "The line still says 'a commit object that exists but cannot be read … is a tool error'. Revision 2's change makes any object under the candidate's ID that cannot be read a tool error, such as a tree-headed object with a hash mismatch. The README also never says that a readable object of another type is unknown-candidate. ADR 0002:77-79 states both points correctly, so the two documents now disagree.",
+      "recommendation": "Change the line to 'an object under the candidate's ID that exists but cannot be read', and add the unknown-candidate rule as ADR 0002:77 states it."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/attest.test.mjs",
+      "line": 262,
+      "issue": "Contract case 10 requires case FP-0051 3 to report 'the outcome of every corruption fixture in one assertion'. The invalid-zlib corruption fixture (lines 260-262) still has its own assert.match, and it runs before the combined assertion at lines 274-278. If it fails, the other three outcomes are never reported, which is the problem the clause addresses. Behavior is unaffected, because the fixture passes.",
+      "recommendation": "Add the zlib fixture to the outcomes array with its own expected pattern. Alternatively, amend the contract to say 'every hash or parse failure fixture'."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0051/README.md",
+      "line": 68,
+      "issue": "The row describes 'Two runs against the base code. In the second, …'. raw/revision-2-tests-before.log contains three runs (04:46:07Z, 04:46:21Z, and 04:46:32Z), and the combined-assertion outcome list is in the third. Runs 1 and 2 fail only because the regex expects the new 'Object …' wording instead of the base 'Commit …' wording, not because of the behavior being fixed.",
+      "recommendation": "Describe all three runs. State that only run 3 shows the substantive base defect, the tree-header object as 'unknown-candidate'."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0051/raw/revision-2-tests-before.log",
+      "line": null,
+      "issue": "Nothing in the log identifies the code under test. It has no HEAD, no `git hash-object` of tools/attest.mjs or tools/attest.test.mjs, and no staging record, although review 2 asked for such records in future baselines. The base identity is consistent with the base message strings, but the log does not show it [INFERENCE].",
+      "recommendation": "In future baselines, record HEAD and the blob IDs of the verifier and test files before the run."
+    },
+    {
+      "severity": "note",
+      "path": "tools/attest.test.mjs",
+      "line": 257,
+      "issue": "Only a tree header under a commit ID is tested. Blob-header and tag-header objects with a hash mismatch, packed corruption, and the classification of a legitimate blob or annotated tag ID have no fixtures. Their behavior follows from parse_object (stream_object_signature for blobs, and check_object_signature otherwise) and from unchanged code paths, by source analysis only. The `cat-file -t` probe at line 207 is redundant after `^{object}` succeeds, except under a race, but it is harmless.",
+      "recommendation": "Optionally extend the outcomes array with a blob-header fixture, an annotated tag ID, and a `git repack -ad` variant."
+    }
+  ],
+  "commands_run": []
+}

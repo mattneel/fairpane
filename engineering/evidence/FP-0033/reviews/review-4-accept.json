@@ -1,0 +1,154 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "c53c69690971fa44cafcea64dc0305af33295f3a",
+    "256fe34ba4cead01bcb98a0019f1591d0c4be912"
+  ],
+  "summary": "I accept revision 3. It has no blocker or major finding. Review 3's major finding is resolved. The checker now binds each accepted action to its reviewed commit and release tag, not only to its owner and repository. REVIEWED_ACTIONS (tools/workflow-check.mjs:223-229) lists five actions. workflowProblems reports any `uses:` whose lower-cased owner/repo is not in that list, whose SHA differs, or whose version comment differs (:332-336). This applies to every workflow, so a fork-network (impostor) commit now fails even under a plausible comment. I fetched all five tag refs from each action's own repository through the GitHub API. Each is a lightweight tag whose object is a commit, and each SHA equals both the REVIEWED_ACTIONS entry and the recorded lookup. Case 17 (workflow-check.test.mjs:117-125) covers a different SHA, a different comment, a different owner, and an accepted case variant. I traced all four fixtures through the code, and each gives the asserted result. The case 12 fixture now uses the reviewed setup-node and upload-artifact SHAs (:195-198), so `checkWorkflow(accepted)` stays empty. I made one more attempt to find a Gates step that exits 0 without running its gate while both checkers report nothing, and found none. I tried keys, case variants, inputs and their values (including node-version and expressions), subpath, docker and local `uses`, YAML anchors, merge keys, quoted keys and duplicate keys, triggers, concurrency, job names, and environment-file writes. Each route either reports a problem, fails the job, or only runs the gates in full. A pull request can still change the controller itself, and the README Limits section already documents that. The evidence binds to c53c696. raw/revision-3-binding.log records HEAD c53c696 at 04:41:50.880Z and an empty status over every source root, including ignored files. The receipts follow at 04:41:51.211Z and 04:41:51.414Z, with source digest 5f12704a… before and after and 149 of 149 tests passing. The GitHub API shows c53c696 holding checker blob 9847774 and test blob 5a99a972, which is the test blob in the red baseline. It also shows c53c696 as the latest commit to touch tools/workflow-check.mjs and 24c0c64 as the latest to touch .github/workflows. 256fe34 touches only FP-0033 evidence and engineering/state.json. Run 37884244035 (586b854) and run 37885183250 (256fe34) both completed with conclusion success in both jobs, and every step in the run 37885183250 jobs listing succeeded. No run exists for c53c696 itself, because it was pushed together with 256fe34. The remaining findings are one minor and three notes. Trigger filters are still unpinned. The revision 3 run log is uncited and arrived in an unrelated commit. One tools/README.md bullet is stale. The red-baseline record is thin. I ran no shell commands. My conclusions about checker behavior come from tracing the code. My GitHub facts come from API reads through the read tool.",
+  "criteria": [
+    {
+      "criterion": "Review 3 major: action identity is bound to the reviewed commit, not only to owner/repo",
+      "met": true,
+      "evidence": "tools/workflow-check.mjs:223-229 defines REVIEWED_ACTIONS: checkout 3d3c42e5… v7.0.1, setup-node 949feb24… v7.1.0, upload-artifact cf430e03… v7.0.2, upload-pages-artifact fc324d35… v5.0.0, and deploy-pages 368f8252… v5.0.1. Lines :332-336 report 'is not a reviewed action commit' when the lower-cased action is missing, the SHA differs, or the comment differs. The check runs in workflowProblems, so it covers every workflow. A subpath such as actions/setup-node/x@… is missing from the map and fails. Docker and local refs already fail PINNED_USES (:330). Lines :365-367 narrow the doc comment to 'unreviewed action code'."
+    },
+    {
+      "criterion": "Each reviewed SHA equals the action's own repository release tag",
+      "met": true,
+      "evidence": "The GitHub API git/ref/tags lookups returned type commit with SHA 3d3c42e5aac5ba805825da76410c181273ba90b1 for actions/checkout v7.0.1, 949feb2413d6458794dcd2491c4babbbce0c15c1 for actions/setup-node v7.1.0, cf430e030ddbb5b0abf93d22962f4752f3646cd9 for actions/upload-artifact v7.0.2, fc324d3547104276b827a68afc52ff2a11cc49c9 for actions/upload-pages-artifact v5.0.0, and 368f82528645a54fb793d4d04e342629a3f51346 for actions/deploy-pages v5.0.1. Each equals REVIEWED_ACTIONS, raw/action-tag-refs.log (checkout, setup-node, upload-artifact) or ../docs-site/raw/action-pins.log (checkout, upload-pages-artifact, deploy-pages), and the pins and comments in gates.yml and pages.yml."
+    },
+    {
+      "criterion": "Check 17: another SHA, another version comment, or another owner each report a problem, and owner/repo case does not matter",
+      "met": true,
+      "evidence": "workflow-check.test.mjs:117-125. By tracing: an all-'a' SHA under # v7.0.1 fails on the SHA. The reviewed SHA under # v7.0.2 fails on the comment. someone/checkout is not in the map. Actions/Checkout lower-cases to a match, and the checkout persist check also lower-cases (:338), so it returns []. The red baseline (raw/revision-3-tests-before.log) runs the committed test blob 5a99a972 against base checker 48c7cbf: 19 of 20 pass, and case 17 fails with 'Expected /is not a reviewed action commit/ in []'. The controller-test receipt 73c528ab passes it as test 58."
+    },
+    {
+      "criterion": "Updated case 12 fixture",
+      "met": true,
+      "evidence": "test:195-198 now pins setup-node 949feb24… # v7.1.0 and upload-artifact cf430e03… # v7.0.2. Without them, `assert.deepEqual(checkWorkflow(accepted), [])` would now fail. Case 9's short upload SHA (:184) goes only through gateWorkflowProblems, which does not check SHAs, so it remains valid."
+    },
+    {
+      "criterion": "No Gates step can exit 0 without running its gate while gateWorkflowProblems and workflowProblems report nothing",
+      "met": true,
+      "evidence": "Impostor SHAs now fail (:334). The accepted inputs cannot substitute a binary. setup-node node-version selects only official Node builds, because mirror and node-version-file are not allowed inputs. An empty or unresolved value falls back to the runner's real Node. An old version makes the gate fail, not pass. YAML anchors, aliases, tags, merge keys (`<<` is not a KEY), quoted keys and duplicate keys fail to parse. Case-variant keys fail the case-sensitive allowlists. Jobs, step order, runner labels and concurrency values are pinned by the test (:83-107). Repository content that a pull request changes is a documented limit (README.md Limits)."
+    },
+    {
+      "criterion": "Evidence binds to c53c696",
+      "met": true,
+      "evidence": "raw/revision-3-binding.log records `rev-parse HEAD` = c53c696 at 04:41:50.880Z and an empty `git status --porcelain --untracked-files=all --ignored` over all source roots including .github at 04:41:50.953Z. It also records `git show --stat c53c696` and workflow blobs ccbd330 and a70741a. The repo-check receipt (04:41:51.211Z) and the controller-test receipt (04:41:51.414Z, 149/149) show source sha256 5f12704a… before and after. Bun 1.4.2 ran 149/149 at 04:42:14. The GitHub commit API shows c53c696 with checker blob 9847774 and test blob 5a99a972, the test blob that the baseline hashed."
+    },
+    {
+      "criterion": "Cited GitHub runs show success",
+      "met": true,
+      "evidence": "The API reports run 37884244035 with head_sha 586b854, event push, status completed, conclusion success. raw/github-run-37884244035.log (added in c53c696, cited at README.md:78) records both jobs successful. The API jobs listing for run 37885183250 gives head_sha 256fe34. 'Linux gates' (ubuntu-24.04) has steps 1-10 and 'Windows gates' (windows-2025) has steps 1-11 all successful, with every gate step included. That matches raw/github-run-37885183250.log. The API lists no run for c53c696, because it was pushed with 256fe34. 256fe34 changes only FP-0033 evidence and engineering/state.json."
+    },
+    {
+      "criterion": "Pin-update procedure updated",
+      "met": true,
+      "evidence": "tools/README.md:185-191 adds recording the lookups and updating REVIEWED_ACTIONS together with the workflow, and explains the fork-network reason."
+    },
+    {
+      "criterion": "Protected paths unchanged",
+      "met": true,
+      "evidence": "c53c696 touches CONTRACT.md, two raw logs, review-3-reject.json, tools/README.md, tools/workflow-check.mjs and tools/workflow-check.test.mjs. 256fe34 touches FP-0033 evidence and engineering/state.json. None of these is in policy.json protected_paths (:46-54)."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "major: action identity bound only by owner/repo; a fork-network commit under a plausible version comment passed both checkers and the sequence test (workflow-check.mjs:370, test:99)",
+      "resolved": true,
+      "evidence": "workflowProblems now requires the exact reviewed SHA and tag per action (workflow-check.mjs:223-229, :332-336). Case 17 adds SHA-only, comment-only and owner-only fixtures. The SHAs match the actions' own tag refs, both in the recorded logs and in my API reads. The sequence test still strips '@' (test:99), but checkWorkflow on gates.yml (case 1) now enforces the full pin."
+    },
+    {
+      "finding": "minor: no `gh run view` record for the revision 2 integration run 37884244035",
+      "resolved": true,
+      "evidence": "raw/github-run-37884244035.log (added in c53c696) records exit 0, headSha 586b854, conclusion success, and both jobs successful. README.md:78 cites it. The API confirms conclusion success."
+    },
+    {
+      "finding": "note: raw/github-run-37875841603.log (revision 1 run) uncited",
+      "resolved": true,
+      "evidence": "README.md:46 now cites it as Gates run 37875841603 for 94c96ed with both jobs successful."
+    },
+    {
+      "finding": "note: multi-fixture red baselines show only the first failing fixture",
+      "resolved": false,
+      "evidence": "Case 17 again stops at its first assertion, so the baseline shows only the all-'a' SHA fixture red. By tracing base checker 48c7cbf, which has no reviewed-commit check, the comment and owner fixtures would also have reported nothing. The baseline is valid but coarse. This was advice for future baselines and does not block."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/workflow-check.test.mjs",
+      "line": 88,
+      "issue": "The contract says Gates runs on every push to master and every pull request that targets master (CONTRACT.md:14). The Gates test asserts only that push and pull_request carry `branches: [master]` (:88-90). Neither checker inspects other filter keys. Reproduction, traced and not executed: add `types: [closed]` under pull_request, or `paths-ignore: ['**']` under push, in gates.yml. Both checkers and every case still pass, and Gates no longer runs on opened or synchronized pull requests, or on master pushes. No step exits 0. The run is absent, and only owner-configured branch protection would notice. security-review-3-accept.json raised the same gap as a note, and revision 3 did not address it. The upload `path` and `if-no-files-found` values are likewise unpinned.",
+      "recommendation": "In the Gates test, assert that each push and pull_request mapping has exactly the key `branches`, and that workflow_dispatch is null. Also assert the upload inputs `path: out/evidence/` and `if-no-files-found: error`."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0033/README.md",
+      "line": 80,
+      "issue": "Contract revision 3 requires a record of the GitHub run of the revision 3 commit (CONTRACT.md:127). raw/github-run-37885183250.log exists and shows success for 256fe34. It was committed in f53f465 ('plan: freeze the FP-0027 contract and start it'), not in an FP-0033 commit, and the Revision 3 section does not cite it. The run is of the evidence commit 256fe34, not of c53c696, which has no run because the two were pushed together. 256fe34 changes only evidence and engineering/state.json, so the tested checker and workflows are those of c53c696.",
+      "recommendation": "Cite raw/github-run-37885183250.log in the Revision 3 section. State that it is the run for 256fe34, which differs from c53c696 only in evidence and engineering/state.json."
+    },
+    {
+      "severity": "note",
+      "path": "tools/README.md",
+      "line": 155,
+      "issue": "The workflowProblems bullet list still says a `uses:` reference needs only 'a full 40-hex commit SHA and a version comment'. The reviewed-commit and tag requirement appears only in the pin-update procedure (:186) and its closing sentence (:191).",
+      "recommendation": "Extend the bullet: 'and it must be the reviewed commit and release tag that REVIEWED_ACTIONS lists for that action.'"
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0033/raw/revision-3-tests-before.log",
+      "line": null,
+      "issue": "The baseline records HEAD 97aa319 and the blob IDs of the staged checker and test. It does not record the command that created out/fp0033-rev3-before or the blob IDs of the staged workflow files that case 1 reads. Revision 2's baseline recorded both.",
+      "recommendation": "For later baselines, record the staging command and hash every staged file."
+    }
+  ],
+  "commands_run": [
+    {
+      "command": "read https://api.github.com/repos/actions/{checkout/git/ref/tags/v7.0.1, setup-node/git/ref/tags/v7.1.0, upload-artifact/git/ref/tags/v7.0.2, upload-pages-artifact/git/ref/tags/v5.0.0, deploy-pages/git/ref/tags/v5.0.1} (read tool, not a shell)",
+      "exit_status": 0,
+      "observation": "Each object is type commit with SHA 3d3c42e5…, 949feb24…, cf430e03…, fc324d35…, and 368f8252… respectively. Each equals REVIEWED_ACTIONS, the recorded lookups, and the workflow pins."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/commits/c53c69690971fa44cafcea64dc0305af33295f3a (read tool)",
+      "exit_status": 0,
+      "observation": "Parent 97aa319. Files: CONTRACT.md, raw/github-run-37884244035.log, raw/revision-3-tests-before.log, reviews/review-3-reject.json, tools/README.md (6b1baa2), tools/workflow-check.mjs (9847774), and tools/workflow-check.test.mjs (5a99a972, equal to the baseline's test blob)."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/commits/256fe34ba4cead01bcb98a0019f1591d0c4be912 (read tool)",
+      "exit_status": 0,
+      "observation": "Parent c53c696. Files: FP-0033 README, the two receipts with their logs, revision-3-binding.log, revision-3-tests-bun.log, and engineering/state.json. The controller-test log shows 149/149, with case 17 as test 58."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/actions/runs?head_sha=c53c696… (read tool)",
+      "exit_status": 0,
+      "observation": "total_count 0. No run exists for c53c696."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/actions/runs/37885183250/jobs (read tool)",
+      "exit_status": 0,
+      "observation": "head_sha 256fe34. 'Linux gates' (ubuntu-24.04) and 'Windows gates' (windows-2025) both completed with conclusion success, and every step succeeded."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/actions/runs/37884244035 (read tool)",
+      "exit_status": 0,
+      "observation": "Gates run for head_sha 586b854, event push, status completed, conclusion success."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/commits?path=engineering/evidence/FP-0033/raw/github-run-37885183250.log (read tool)",
+      "exit_status": 0,
+      "observation": "Added by f53f465 'plan: freeze the FP-0027 contract and start it' at 04:49:19Z. Its message records run 37885183250 for 256fe34."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/commits?path=tools/workflow-check.mjs and ?path=.github/workflows (read tool)",
+      "exit_status": 0,
+      "observation": "The latest checker commit is c53c696, preceded by 98fa147. The latest workflow commit is 24c0c64, so neither workflow changed in revision 3."
+    },
+    {
+      "command": "read .git/logs/HEAD (read tool)",
+      "exit_status": 0,
+      "observation": "Sequence 97aa319 → c53c696 'FP-0033: accept only reviewed action commits' → 256fe34 'FP-0033: record revision 3 evidence' → 574c224 …"
+    }
+  ]
+}
