@@ -1,0 +1,1393 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/test-runner.mjs"]
+0bde36422f21261ca2ebe2f254617b6045f40669
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/test-runner.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:50:23.386Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0107/raw/mutate.mjs","tools/test-runner.mjs","out/fp0107/mutation-1","while (next < cases.length && !exclusive && running < concurrency) {","while (next < cases.length) {","if (cases[next].processWide !== undefined) {","if (false) {"]
+kept out\fp0107\mutation-1\test-runner.mjs; replaced 2 site(s) in tools/test-runner.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0107/raw/mutate.mjs","tools/test-runner.mjs","out/fp0107/mutation-1","while (next < cases.length && !exclusive && running < concurrency) {","while (next < cases.length) {","if (cases[next].processWide !== undefined) {","if (false) {"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:50:23.479Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":52}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/test-runner.mjs"]
+af0aac90adb9cb6f0d5062667d2f7be3c1360cc2
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/test-runner.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:50:23.596Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0107/raw/mutation-1.diff","--","out/fp0107/mutation-1/test-runner.mjs","tools/test-runner.mjs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0107/raw/mutation-1.diff","--","out/fp0107/mutation-1/test-runner.mjs","tools/test-runner.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:50:23.683Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":29}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/selftest.mjs"]
+TAP version 13
+ok 1 - A normal relative file resolves within the repository
+# duration_ms 1 2923
+ok 2 - Traversal, empty components, and dot components fail
+# duration_ms 2 2923
+ok 3 - Absolute paths, backslashes, control bytes, and alternate streams fail
+# duration_ms 3 2923
+ok 4 - A missing path needs explicit permission
+# duration_ms 4 2923
+ok 5 - A symlink cannot redirect an input inventory
+# duration_ms 5 2926
+ok 6 - A dangling directory link is not a new output directory
+# duration_ms 6 2926
+ok 7 - An empty input inventory fails
+# duration_ms 7 2926
+ok 8 - Input hashes change with content
+# duration_ms 8 2926
+ok 9 - Input hashes include relative names
+# duration_ms 9 2928
+ok 10 - Input hashes ignore checkout location and input order
+# duration_ms 10 2930
+ok 11 - Repeated roots do not duplicate files
+# duration_ms 11 2928
+ok 12 - File hashes match the SHA-256 content hash
+# duration_ms 12 2927
+ok 13 - Atomic JSON output supports replacement and BOM input
+# duration_ms 13 2930
+ok 14 - The supplied compiler lock has a valid structure
+# duration_ms 14 2929
+ok 15 - A stable version cannot silently replace Zig master
+# duration_ms 15 2929
+ok 16 - A floating compiler version fails
+# duration_ms 16 2929
+ok 17 - A substituted compiler source fails
+# duration_ms 17 2929
+ok 18 - A substituted artifact URL fails
+# duration_ms 18 2929
+ok 19 - An invalid checksum or archive size fails
+# duration_ms 19 2930
+ok 20 - A checksum mismatch cannot qualify an archive
+# duration_ms 20 2930
+ok 21 - A size mismatch cannot qualify an archive
+# duration_ms 21 2930
+ok 22 - Host selection maps supported platform names explicitly
+# duration_ms 22 2930
+ok 23 - A valid task graph has one initial ready task
+# duration_ms 23 2931
+ok 24 - An accepted prerequisite reveals the next task
+# duration_ms 24 2931
+ok 25 - An active task does not become another ready task
+# duration_ms 25 2931
+ok 26 - A duplicate task ID fails
+# duration_ms 26 2931
+ok 27 - Unknown and duplicate prerequisites fail
+# duration_ms 27 2931
+ok 28 - A cycle in the task graph fails
+# duration_ms 28 2931
+ok 29 - Empty acceptance criteria and unknown gates fail
+# duration_ms 29 2931
+ok 30 - Missing state and unknown workstreams fail
+# duration_ms 30 2931
+ok 31 - Acceptance without evidence and review fails
+# duration_ms 31 2931
+ok 32 - Acceptance with an unaccepted prerequisite fails
+# duration_ms 32 2931
+ok 33 - An empty release profile fails closed
+# duration_ms 33 2931
+ok 34 - The full set of capability families cannot disappear
+# duration_ms 34 2931
+ok 35 - Qualified metadata alone cannot replace a release verifier
+# duration_ms 35 2931
+ok 36 - 1: A forged local receipt passes validateReceipt without gate execution
+# duration_ms 36 2941
+ok 37 - 2: A valid envelope signed by a trusted key verifies
+# duration_ms 37 2933
+ok 38 - 3: RFC 8032 test vector 1 verifies through the same key decoding path
+# duration_ms 38 2932
+ok 39 - 4: A key outside the trust policy fails, whether it names itself or a trusted key
+# duration_ms 39 2933
+ok 40 - 5: One changed payload byte fails as bad-signature
+# duration_ms 40 2933
+ok 41 - 6: A truncated envelope and a truncated payload each fail
+# duration_ms 41 2934
+ok 42 - 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+# duration_ms 42 2935
+ok 43 - 8: A payload for another commit or tree fails as stale-candidate
+# duration_ms 43 2934
+ok 44 - 9: A payload with another policy digest fails as changed-policy
+# duration_ms 44 2935
+ok 45 - 10: Zero discovered and zero selected each fail as zero-denominator
+# duration_ms 45 2935
+ok 46 - 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+# duration_ms 46 2936
+ok 47 - 12: A runner key that differs from the signature key fails as key-mismatch
+# duration_ms 47 2935
+# FP-0052 case 2 took 2803 ms.
+ok 48 - 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+# duration_ms 48 4685
+ok 49 - 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+# duration_ms 49 1797
+ok 50 - 16: A trusted signature over a noncanonical payload fails as malformed
+# duration_ms 50 2936
+ok 51 - FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result
+# duration_ms 51 3783
+ok 52 - FP-0051 2: enclosingGitDirectories collects the common directory of every enclosing .git entry
+# duration_ms 52 3783
+ok 53 - FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+# duration_ms 53 4975
+ok 54 - FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled
+# duration_ms 54 4226
+ok 55 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+# duration_ms 55 3786
+ok 56 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+# duration_ms 56 3787
+ok 57 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+# duration_ms 57 3788
+ok 58 - FP-0033 17: An action commit outside the reviewed set fails, even with a full SHA and a version comment
+# duration_ms 58 3788
+ok 59 - FP-0033 3: A workflow permission other than contents: read fails
+# duration_ms 59 3789
+ok 60 - FP-0033 3: A job permission other than contents: read fails
+# duration_ms 60 3789
+ok 61 - FP-0033 4: continue-on-error on a step or a job fails
+# duration_ms 61 3789
+ok 62 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+# duration_ms 62 3789
+ok 63 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+# duration_ms 63 3790
+ok 64 - FP-0033 4: A workflow_run trigger fails
+# duration_ms 64 3790
+ok 65 - FP-0033 8: An expression outside the allowlist fails
+# duration_ms 65 3791
+ok 66 - FP-0033 9: A gate step that can be skipped or rerouted fails
+# duration_ms 66 3791
+ok 67 - FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+# duration_ms 67 3792
+ok 68 - FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+# duration_ms 68 3793
+ok 69 - FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+# duration_ms 69 3793
+ok 70 - FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+# duration_ms 70 3793
+ok 71 - FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+# duration_ms 71 3794
+ok 72 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+# duration_ms 72 3794
+ok 73 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+# duration_ms 73 3795
+ok 74 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+# duration_ms 74 3795
+ok 75 - FP-0067 1: The committed Gates workflow has no trigger, upload, or Linux-gate problem
+# duration_ms 75 3796
+ok 76 - FP-0067 2: A Gates trigger filter key other than branches is one problem that names the trigger and the key
+# duration_ms 76 3798
+ok 77 - FP-0067 3: Gates branches other than [master] and a workflow_dispatch value are each one problem
+# duration_ms 77 3799
+ok 78 - FP-0067 4: A Gates upload path other than out/evidence/ or an if-no-files-found other than error is one problem
+# duration_ms 78 3799
+ok 79 - FP-0067 5: A Linux job that omits zig-test or runs it after the cross builds is a problem
+# duration_ms 79 3802
+ok 80 - FP-0098 revision 1 case 3: Each zig-test gate step must set env: ZIG_BUILD_SUMMARY: all, and no other step or level may set it
+# duration_ms 80 3807
+ok 81 - FP-0021 case 1: Generating from the committed schema reproduces the committed include/fairpane.h and src/abi_generated.zig byte for byte
+# duration_ms 81 3814
+ok 82 - FP-0021 case 2: Changing one byte of either generated file makes abi-check exit with status 1 and name the file
+# duration_ms 82 4226
+ok 83 - FP-0021 case 3: Generation is deterministic across two runs and across schema key order
+# duration_ms 83 4237
+ok 84 - FP-0021 case 4: The validator rejects an unknown kind, a pointer without ownership or lifetime, an inverted range, a duplicate name, and a structure without struct_size
+# duration_ms 84 4232
+ok 85 - FP-0021 case 5: The schema distinguishes text, web_string, bytes, identifier, handle, ranged integer, and optional values, and the generator maps each one to distinct C and Zig declarations
+# duration_ms 85 4236
+ok 86 - FP-0021 case 6: The generated Zig declarations assert the size and every field offset of every structure
+# duration_ms 86 4248
+ok 87 - FP-0021 case 7: The C smoke test runs every C-expressible failure scenario and names each identifier it covers
+# duration_ms 87 4238
+ok 88 - FP-0021 case 8: The Zig scenario test runs every failure scenario through the generated declarations
+# duration_ms 88 4239
+ok 89 - FP-0021 case 9: Every failure scenario has an identifier, calls, and expected outcomes, and the validator rejects one without them
+# duration_ms 89 4242
+ok 90 - FP-0021 case 10: The validator rejects consumed_on_success on an output parameter, and the generated C and Zig text states the consumption rule for fp_engine_destroy
+# duration_ms 90 4251
+ok 91 - FP-0021 case 11: The validator rejects an unknown reference and an unreferenced function name, and the generated header contains no schema-only name outside a C name
+# duration_ms 91 4256
+ok 92 - FP-0021 case 12: The generated C static assertions check the size and every member offset of every structure, and the C smoke test compiles them
+# duration_ms 92 4262
+ok 93 - FP-0021 case 13: From a foreign thread, the C and Zig scenarios call each owner function with an invalid argument and expect wrong_thread
+# duration_ms 93 4258
+ok 94 - FP-0021 revision 1 status sets: abi_generated.zig carries each function status set, and src/c_api.zig checks every export against it
+# duration_ms 94 4261
+ok 95 - FP-0021 revision 1 export check: abi-exports fails when a library exports an fp_ symbol that the schema does not declare
+# duration_ms 95 4686
+ok 96 - FP-0050 case 8: every byte range is null_when_empty, and the validator rejects any other nullability
+# duration_ms 96 4265
+ok 97 - FP-0050 case 9: fp_document_destroy never returns out_of_memory
+# duration_ms 97 4267
+ok 98 - FP-0050 case 10: the thread lifetime and identifier gaps are documented
+# duration_ms 98 4269
+ok 99 - FP-0050 case 11: the generated layout assertions cover both sides of the ABI
+# duration_ms 99 4287
+ok 100 - FP-0081 case 8: the generated header, the generated Zig declarations, and the layout model agree on engine_options and engine_memory at both pointer widths, and the C smoke test must name allocation-failure
+# duration_ms 100 4291
+ok 101 - FP-0081 case 9: the validator rejects a structure that needs implicit padding at either pointer width, and the committed schema needs none
+# duration_ms 101 4293
+ok 102 - FP-0027 case 1: two source-archive runs on one commit write byte-identical tar and manifest files, and the manifest names the tar digest
+# duration_ms 102 5410
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/UCD.zip: 336 bytes, SHA-256 4556baaf11e4318fef763a517296b7fc79cfadd0f9547ad305bf3690646cdfcb
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-UwulME/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-yaVEpt/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-yaVEpt/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-yaVEpt/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-vKwlak/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-vKwlak/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-vKwlak/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-GLPx0R/UCD.zip: 198 bytes, SHA-256 764769ceca373d4fe149a6a2acb5600e8758c75358c2cf242fdbbc440c0a7b82
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-156WiD/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-156WiD/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-156WiD/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-156WiD/UCD.zip: 35 bytes, SHA-256 1dc83a4d0c719dfd9e45daeb5c0574afb5f10e59a66a1c29df301146cf0432ec
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-fohlPj/UCD.zip: 35 bytes, SHA-256 1dc83a4d0c719dfd9e45daeb5c0574afb5f10e59a66a1c29df301146cf0432ec
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-fohlPj/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Download https://github.com/a
+Redirect to https://github.com/b
+Stored https://github.com/a: 4 bytes, SHA-256 230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5
+Download https://www.unicode.org/a
+Download https://github.com/a
+Download https://example.org/a
+Download https://raw.githubusercontent.com/a
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-GLPx0R/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-S5s3FJ/UCD.zip: 109 bytes, SHA-256 65d40408a9f5b8aa9b193903b93edb7ebbd33d0f15954bf604652a25b6dab090
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-S5s3FJ/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-hD2x7j/UCD.zip: 109 bytes, SHA-256 c0923c0636c78b36d53a19ffca4d95c3f28b32af962ebe5dffa20cb2a4106a03
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-hD2x7j/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-lOGgGZ/UCD.zip: 114 bytes, SHA-256 a9fce91fd00f227dd1d8be2c0c36e44534ca21cd3df6f960348178c2f19f45ea
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-lOGgGZ/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-yribTq/UCD.zip: 114 bytes, SHA-256 05c9c74fadab7c95de958c03ae3ee5e82640c6f070479587c2c25ea860e3da47
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-yribTq/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-H6Cloy/UCD.zip: 109 bytes, SHA-256 dd7763a9cdbebac51bfc05f48175727d1b843c55e0c0b38b987397cb1ac6826f
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-H6Cloy/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-exHP67/UCD.zip: 129 bytes, SHA-256 68c7d1283c9531fbf2e3b85bc8046227148eb2eeb06e9f497ac4091d39de7928
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-exHP67/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-e3Vzi7/UCD.zip: 109 bytes, SHA-256 8b53d0800c31c3d4e80bd074e8ca7b60e7cdde62b35337fb8663890578a928bb
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-e3Vzi7/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Tg9VMq/UCD.zip: 112 bytes, SHA-256 febd63b49b0baeb9de127875e2e2cc97b8bfd7bdfe826125975f68815e2cf7c1
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Tg9VMq/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-XomDVX/UCD.zip: 112 bytes, SHA-256 df60a703781713bc828e4e14106fcdd6f9b49b6667b81bd8d902f64d9895466b
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-XomDVX/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-RTko45/UCD.zip: 208 bytes, SHA-256 6a9d489d56fb45e2ea42ab5ab8e94b19cb3534744286e23fcc2ba491721804e0
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-RTko45/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Foprf7/UCD.zip: 1100452 bytes, SHA-256 9c8371fa4714aef0737dd3729dc70c85ca777fc9e00f0b4cf99ddd7dae651e4c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Foprf7/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-sF2AB7/UCD.zip: 192 bytes, SHA-256 5781e884ef01073687e5d794fcf0f338e486aa2cb9db669907acb432a7346b3d
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-sF2AB7/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-FGLGiV/UCD.zip: 109 bytes, SHA-256 f4ac38fe773c12809f23f77c33457d0abe7a7a1cc52d782724573f84d7e9061e
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-FGLGiV/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-P540Px/UCD.zip: 117 bytes, SHA-256 b6df152a01ebd1ed66e4e8ca05a4556485fc3d7d9ebc512458b23ed87a39a48e
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-P540Px/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-7UpGaj/UCD.zip: 117 bytes, SHA-256 18f6e3f993a59e5c633af11a5669b8b16d5b3343de88d5c689e4fbb5c755ca89
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-7UpGaj/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-DGff70/UCD.zip: 115 bytes, SHA-256 816aebd39773c630b4c982a72e1db04bb2a386e1369d982753b610f13be11df7
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-DGff70/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-AqeAIN/UCD.zip: 113 bytes, SHA-256 e9f6f446256a80c82cdc0eb5a06e38961dd59f09386753e4ec79458a0c8ec3c2
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-AqeAIN/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Verified 4 installed fontTools files against the RECORD of C:\Users\requi\AppData\Local\Temp\fairpane-fileset-EORpLp\.tools\downloads\fonttools-4.66.1-py3-none-any.whl.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-m2Qjhd/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-SEON7X/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-m2Qjhd/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-m2Qjhd/published/Scripts.txt equals member Scripts.txt.
+ok 103 - FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+# duration_ms 103 12248
+ok 104 - FP-0027 case 3: source-archive rejects an abbreviated ID, a ref name, a missing commit, and an output directory inside the repository, and writes nothing
+# duration_ms 104 6070
+ok 105 - FP-0027 case 4: provenance subjects equal the artifact digests, and the build definition names the commit, tree, lock digest, and builder
+# duration_ms 105 6095
+ok 106 - FP-0027 case 5: reproduce-check reports reproducible for a fixed build, and different with the path and exit status 1 for a clock build
+# duration_ms 106 2917
+ok 107 - FP-0027 case 6: reproduce-check removes both work trees, and a forced removal failure appears in the report
+# duration_ms 107 6547
+ok 108 - FP-0027 case 7: ADR 0009 lists exactly the ten owner decisions, each with the status open
+# duration_ms 108 6071
+ok 109 - FP-0027: source-archive fails before any write when an export attribute makes the tar differ from the tree
+# duration_ms 109 7947
+ok 110 - FP-0027: reproduce-check reports a failed build as an error with exit status 1 and still removes both work trees
+# duration_ms 110 7324
+ok 111 - FP-0013 case 1: @missing lines apply in order, then data lines, and every value resolves through PropertyValueAliases.txt
+# duration_ms 111 6549
+ok 112 - FP-0013 case 2: a line without ";", a reversed range, 110000, and an unknown value each fail with a distinct message naming the line
+# duration_ms 112 6553
+ok 113 - FP-0013 case 3: ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input
+# duration_ms 113 6669
+ok 114 - FP-0013 case 4: one changed byte of tables.zig or of a UCD file makes ucd-check exit with status 1 and name the file and line
+# duration_ms 114 7166
+ok 115 - FP-0013 case 41: a zip with two stored members, one deflated member, and one directory yields the hand-computed inventory
+# duration_ms 115 7168
+ok 116 - FP-0013 case 42: the zip reader rejects ZIP64, encryption, "../x", "a\b", duplicate paths, a truncated central directory, and method 12
+# duration_ms 116 7168
+ok 117 - FP-0013 case 43: corpus-fetch of file sources writes the record and extracted files, honors pins, and changes nothing on failure
+# duration_ms 117 7207
+ok 118 - FP-0013 case 44: corpus-verify fails for changed extracted and derived files, a missing source, a license mismatch, a count mismatch, and an upstream mismatch
+# duration_ms 118 7391
+ok 119 - FP-0013 case 45: file-set applicability reports the per-directory breakdown with an explicit denominator, and a zip without file members fails
+# duration_ms 119 7339
+ok 120 - FP-0013 case 46: corpus-repin unicode exits with status 1 and names the contract decision
+# duration_ms 120 7468
+ok 121 - FP-0013 case 47: record validation rejects missing license digests, releases, tool versions, input digests, argv, and reserved font names
+# duration_ms 121 7392
+ok 122 - FP-0013 case 48: every selected, derived, and license path of the committed unicode and opentype-fixtures records matches its size and SHA-256
+# duration_ms 122 7396
+ok 123 - FP-0013 case 49: the committed capability record validates with exactly the frozen obligations and existing owner tasks
+# duration_ms 123 7398
+ok 124 - FP-0013 case 53: overlapping, inconsistent, symbolic-link, case-folded, oversized, corrupt, and drive-letter archives fail before any member is written
+# duration_ms 124 7524
+ok 125 - FP-0013 case 54: a fetch compares every known digest before parsing a source
+# duration_ms 125 7499
+ok 126 - FP-0013 case 54: downloads follow redirects manually on allowlisted HTTPS hosts and stop at their size limit
+# duration_ms 126 7507
+ok 127 - FP-0013 case 54: a failure injected at each write step leaves every previous file, the source directory, and the record unchanged
+# duration_ms 127 7616
+ok 128 - FP-0013 case 55: corpus-derive refuses a fontTools installation with one changed file
+# duration_ms 128 7553
+ok 129 - FP-0013 case 55: the Python child process sees PYTHONSAFEPATH=1, no other PYTHON* variable, and the staging directory
+# duration_ms 129 7602
+ok 130 - FP-0013 case 55: sfntCopyright stops at the first name record and checks the name table header length
+# duration_ms 130 7603
+ok 131 - FP-0052 case 6: of two fetches of one file set started together, one passes and one fails on the lock
+# duration_ms 131 7619
+ok 132 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+# duration_ms 132 7617
+ok 133 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+# duration_ms 133 7620
+ok 134 - FP-0079 case 3: rust-toolchain.toml names the locked version
+# duration_ms 134 7839
+ok 135 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+# duration_ms 135 7684
+ok 136 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+# duration_ms 136 7739
+ok 137 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+# duration_ms 137 7769
+ok 138 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+# duration_ms 138 8044
+ok 139 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+# duration_ms 139 7840
+ok 140 - FP-0079 case 9: the controller documents and exposes the Rust commands
+# duration_ms 140 8248
+ok 141 - FP-0079 case 10: the toolchain documents and declarations record the pin
+# duration_ms 141 7947
+ok 142 - 15: release-check still exits with status 1
+# duration_ms 142 8033
+ok 143 - A successful command records its actual output
+# duration_ms 143 8079
+ok 144 - A nonzero child exit remains a failure
+# duration_ms 144 8089
+ok 145 - A missing executable produces an error record
+# duration_ms 145 8081
+ok 146 - A hung child reaches its watchdog and cannot pass
+# duration_ms 146 9607
+ok 147 - Command arguments do not execute through a shell
+# duration_ms 147 8156
+ok 148 - A real local gate produces a checkable unsigned receipt
+# duration_ms 148 8220
+ok 149 - Changed source makes a previous receipt stale
+# duration_ms 149 8281
+ok 150 - Changed evidence output invalidates a receipt
+# duration_ms 150 8315
+ok 151 - Changed gate definitions invalidate old receipts
+# duration_ms 151 8347
+ok 152 - A local receipt cannot upgrade its own trust label
+# duration_ms 152 8415
+ok 153 - A receipt without command records cannot pass
+# duration_ms 153 8428
+ok 154 - A receipt without output artifacts cannot pass
+# duration_ms 154 8469
+ok 155 - A failed command cannot hide behind a pass label
+# duration_ms 155 8483
+ok 156 - A command failure produces a failed gate receipt
+# duration_ms 156 8525
+ok 157 - A missing compiler produces a failed gate receipt
+# duration_ms 157 8495
+ok 158 - Input changes during execution produce a failed gate receipt
+# duration_ms 158 8556
+ok 159 - A removed input still produces a failed gate receipt
+# duration_ms 159 8572
+ok 160 - Unknown gates fail before execution
+# duration_ms 160 8559
+ok 161 - FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+# duration_ms 161 11936
+ok 162 - FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails
+# duration_ms 162 10941
+ok 163 - FP-0098 case 3: an ordinary pass or fail gate record has no timeout section and is not timed out
+# duration_ms 163 9693
+ok 164 - FP-0098 revision 1 case 2: a command that ends during the timeout listing gets a line that says so, and its descendants stop
+# duration_ms 164 10376
+ok 165 - Evidence paths cannot escape their approved roots
+# duration_ms 165 10421
+ok 166 - A gate writes a checkable receipt under an approved evidence directory
+# duration_ms 166 10469
+ok 167 - An unapproved evidence directory fails before any gate command runs
+# duration_ms 167 10480
+ok 168 - Environment overrides reach the child and its command record
+# duration_ms 168 10514
+ok 169 - Executable resolution follows PATH order
+# duration_ms 169 10516
+ok 170 - A recorded command keeps its output, exit status, and resolved executable
+# duration_ms 170 10557
+ok 171 - Command records carry the working directory and start time
+# duration_ms 171 10590
+ok 172 - An unwritable log yields a failed result instead of an exception
+# duration_ms 172 10591
+not ok 173 - A failed output copy is recorded and its capture directory is removed
+# duration_ms 173 2922
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   'fairpane-controller-meiTGF',\n+   'fairpane-controller-TSS1Rj'\n+ ]\n- []\n"
+  ...
+ok 174 - Standard error output reaches the log
+# duration_ms 174 10625
+not ok 175 - A completed command leaves no capture directory
+# duration_ms 175 2922
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   'fairpane-capture-r4eiSp',\n+   'fairpane-controller-4PJxbH',\n+   'fairpane-controller-88vZsv',\n+   'fairpane-controller-A4vZja',\n+   'fairpane-controller-AILtc4',\n+   'fairpane-controller-GUdOc9',\n+   'fairpane-controller-I1iGhK',\n+   'fairpane-controller-lrjoQ2',\n+   'fairpane-controller-mdEmHJ',\n+   'fairpane-controller-n81KQP',\n+   'fairpane-controller-p3OWQl',\n+   'fairpane-release-0Sqbp2',\n+   'fairpane-release-0w05sd',\n+   'fairpane-release-8sqlfy',\n+   'fairpane-release-daHe1O',\n+   'fairpane-release-DvdV0T',\n+   'fairpane-release-jsMZMC'\n+ ]\n- []\n"
+  ...
+ok 176 - Executable resolution never searches the process working directory
+# duration_ms 176 1797
+ok 177 - A bare executable name is logged as its resolved absolute path
+# duration_ms 177 10662
+ok 178 - A rejected record path writes nothing
+# duration_ms 178 10664
+ok 179 - The controller rejects malformed run and record arguments
+# duration_ms 179 10870
+ok 180 - Only Zig and C ABI gates receive the repository-local compiler cache
+# duration_ms 180 10871
+ok 181 - A capture-start failure writes a RESULT line, closes the log, and returns an error result
+# duration_ms 181 10874
+ok 182 - A failed RESULT write returns an error result instead of throwing
+# duration_ms 182 10924
+ok 183 - A spawn error and a capture error both remain in the result
+# duration_ms 183 10928
+ok 184 - runGate writes nothing when its evidence directory fails validation
+# duration_ms 184 10945
+ok 185 - A short write to the log produces an error result
+# duration_ms 185 11033
+ok 186 - A failed capture-directory removal appears in the command record
+# duration_ms 186 10984
+ok 187 - FP-0054 case 6: A busy capture directory is removed on a later attempt
+# duration_ms 187 11200
+ok 188 - FP-0054 case 6: a capture directory that stays busy records the last failure after waiting between attempts
+# duration_ms 188 11246
+ok 189 - FP-0054 case 6: a capture-directory removal error with a non-transient code gets one attempt
+# duration_ms 189 11238
+ok 190 - FP-0054 revision 1 case 6: a capture-directory removal error without a code gets one attempt
+# duration_ms 190 11278
+ok 191 - FP-0054 case 6: lastResult asserts that a RESULT line exists before it parses one
+# duration_ms 191 11247
+ok 192 - started_at in every command record is a canonical UTC ISO 8601 timestamp
+# duration_ms 192 11383
+ok 193 - The mutation control runs an unmutated baseline first and records each killed test name and message
+# duration_ms 193 11280
+ok 194 - The inventory of a fixture commit equals a hand-computed canonical listing digest
+# duration_ms 194 11599
+ok 195 - The inventory ignores working-tree files and core.autocrlf
+# duration_ms 195 11816
+ok 196 - A changed blob, an added file, a removed file, and a renamed file each change the inventory digest
+# duration_ms 196 13201
+ok 197 - Paths with spaces, non-ASCII bytes, and tabs keep their exact bytes through NUL-separated parsing
+# duration_ms 197 12318
+ok 198 - A symbolic link entry hashes its target text, and a submodule entry records its commit ID
+# duration_ms 198 12200
+ok 199 - corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+# duration_ms 199 14650
+ok 200 - Applicability validation rejects negative counts, non-integer counts, inconsistent sums, and exclusions without reasons
+# duration_ms 200 12249
+ok 201 - Snapshot record validation rejects a non-40-hex commit, a missing license digest, and a missing inventory digest
+# duration_ms 201 12250
+ok 202 - Verification fails when the license digest, the commit date, or an applicability count differs from its record
+# duration_ms 202 14995
+ok 203 - corpus-verify exits with status 1 through the controller command on an inventory digest mismatch
+# duration_ms 203 13708
+ok 204 - A replace ref that substitutes the recorded commit cannot make verification pass
+# duration_ms 204 5285
+ok 205 - A tree path that contains a line feed fails the inventory
+# duration_ms 205 13412
+ok 206 - WPT counting of a fixture manifest reports per-type counts, excludes support, spec, and test262 from discovery, and reports test262 separately
+# duration_ms 206 15103
+Download http://127.0.0.1:55535/api/manifest?sha=4eab98b4627dffd16ff86c9917edc3b4782456fc
+x-wpt-sha 4eab98b4627dffd16ff86c9917edc3b4782456fc, 39 bytes, SHA-256 286b38dc90e1e0bfb32af690dc90614de0e1eb74867910c21913f3079be79789
+Download http://127.0.0.1:55535/api/manifest?sha=4eab98b4627dffd16ff86c9917edc3b4782456fc
+ok 207 - A fixture manifest with a path that the tree lacks, or with a hash that differs from the blob ID, fails binding
+# duration_ms 207 15356
+ok 208 - A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+# duration_ms 208 17714
+ok 209 - Test262 discovery excludes a file named a_FIXTURE_b.js and a file named x_FIXTURE.js
+# duration_ms 209 15355
+ok 210 - A fixture manifest with test262 items under the vendored tests, the vendored harness, and infrastructure/test262/ counts only the infrastructure item and reports the others by path
+# duration_ms 210 17140
+ok 211 - A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation
+# duration_ms 211 17641
+ok 212 - FP-0082 case 18: corpus-extract writes exactly the test/ and harness/ blobs and features.txt, and an EXTRACT.json record
+# duration_ms 212 16675
+ok 213 - FP-0082 case 18: corpus-extract refuses a non-empty output directory, a directory outside out/, and an absent commit
+# duration_ms 213 17592
+ok 214 - FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes
+# duration_ms 214 19560
+ok 215 - FP-0082 case 18: corpus-extract rejects a stored blob whose content does not hash to its tree object ID
+# duration_ms 215 19368
+ok 216 - FP-0082 case 18: the shared path rule gives each reason, and null for ordinary paths
+# duration_ms 216 17643
+ok 217 - FP-0082 case 18: corpus-extract refuses the tree path "test/..\\..\\..\\x.js", which has a backslash, and writes nothing
+# duration_ms 217 18905
+ok 218 - FP-0082 case 18: corpus-extract refuses the tree path "test/a:b.js", which has a colon, and writes nothing
+# duration_ms 218 18961
+ok 219 - FP-0082 case 18: corpus-extract refuses the tree path "test/a\u0001b.js", which has a control character, and writes nothing
+# duration_ms 219 20037
+ok 220 - FP-0082 case 18: corpus-extract refuses the tree path "test/dir./x.js", which has a path component that ends in "." or a space, and writes nothing
+# duration_ms 220 20152
+ok 221 - FP-0082 case 18: corpus-extract refuses the tree path "test/x.js ", which has a path component that ends in "." or a space, and writes nothing
+# duration_ms 221 20551
+ok 222 - FP-0082 case 18: corpus-extract refuses the tree path "test/CON.js", which has a reserved Windows device name, and writes nothing
+# duration_ms 222 20791
+ok 223 - FP-0082 case 18: corpus-extract refuses the tree path "test/aux/x.js", which has a reserved Windows device name, and writes nothing
+# duration_ms 223 21406
+ok 224 - FP-0082 case 18: corpus-extract refuses the tree path "test/Com1.txt.js", which has a reserved Windows device name, and writes nothing
+# duration_ms 224 21509
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-ynyGZU","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-GqFXnF\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-GqFXnF\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-ynyGZU","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-ynyGZU
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-h3ztW5","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-q9OYB4\\test262.fetch\\repository.git"]
+ok 225 - FP-0082 case 18: corpus-extract refuses an altered tree object through the inventory and writes nothing
+# duration_ms 225 23203
+ok 226 - FP-0082 case 18: corpus-extract refuses a snapshot record whose tree differs from the commit and writes nothing
+# duration_ms 226 22380
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-q9OYB4\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-h3ztW5","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-gvxNj9","HEAD"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-ynyGZU","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-h3ztW5
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-zOqF6H\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-zOqF6H\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-gvxNj9","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-GqFXnF\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-GqFXnF\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-ynyGZU","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-gvxNj9
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-ynyGZU
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","HEAD"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-ynyGZU","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-GqFXnF\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-GqFXnF\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-ynyGZU","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-ynyGZU
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-gvxNj9","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-zOqF6H\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-zOqF6H\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-gvxNj9","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/snapshots/test262.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-h3ztW5","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-q9OYB4\\test262.fetch\\repository.git"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-gvxNj9
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-q9OYB4\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-h3ztW5","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-h3ztW5
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","HEAD"]
+ok 227 - corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+# duration_ms 227 25313
+ok 228 - A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+# duration_ms 228 24818
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-jtTuCZ","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-TbKPIn\\test262.fetch\\repository.git"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-TbKPIn\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-jtTuCZ","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-jtTuCZ
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-OzrmL3","HEAD"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-OzrmL3","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-LMIyXa\\test262.fetch\\repository.git"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-jtTuCZ","HEAD"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-LMIyXa\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-OzrmL3","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-OzrmL3
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+ok 229 - corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+# duration_ms 229 26420
+ok 230 - FP-0052 case 1: the system-directory resolver returns the System32 path and names SystemRoot when it cannot
+# duration_ms 230 23203
+ok 231 - FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command
+# duration_ms 231 4229
+ok 232 - FP-0052 case 2, amendment 2: a host other than Node builds the stand-in from the Node on PATH and fails without one
+# duration_ms 232 23205
+ok 233 - FP-0052: a SystemRoot that cannot locate taskkill.exe fails runProcess on Windows before its command starts
+# duration_ms 233 1797
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-X2pxqI\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-86fJhy
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+ok 234 - FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+# duration_ms 234 28622
+not ok 235 - FP-0052 case 4: a fetch that cannot remove the old snapshot after it replaces the record fails, and the new snapshot and record stay
+# duration_ms 235 1797
+  ---
+  message: "SystemRoot is not an absolute Windows path: \"Windows\", so taskkill.exe cannot be located in the Windows system directory."
+  ...
+ok 236 - FP-0052 case 5: a fetch fails while test262.lock exists and changes nothing
+# duration_ms 236 26279
+ok 237 - FP-0052 case 6: of two Git corpus fetches started together, one passes and one fails on the lock
+# duration_ms 237 27292
+ok 238 - The actual bootstrap repository passes its integrity check
+# duration_ms 238 26657
+ok 239 - FP-0107 case 1: the runner writes a duration line after each result line, the summary, the slowest cases, and the total
+# duration_ms 239 26557
+not ok 240 - FP-0107 case 2: the runner runs no case that declares a process-wide change while another case runs
+# duration_ms 240 26634
+  ---
+  message: "\"declared 1\" ran from 26630.4578 to 26705.1017 ms while \"ordinary 1\" ran from 26630.4293 to 26705.0582 ms."
+  ...
+1..240
+# tests 240
+# pass 236
+# fail 4
+# slowest 1 28622 234 FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+# slowest 2 27292 237 FP-0052 case 6: of two Git corpus fetches started together, one passes and one fails on the lock
+# slowest 3 26657 238 The actual bootstrap repository passes its integrity check
+# slowest 4 26634 240 FP-0107 case 2: the runner runs no case that declares a process-wide change while another case runs
+# slowest 5 26557 239 FP-0107 case 1: the runner writes a duration line after each result line, the summary, the slowest cases, and the total
+# slowest 6 26420 229 corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+# slowest 7 26279 236 FP-0052 case 5: a fetch fails while test262.lock exists and changes nothing
+# slowest 8 25313 227 corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+# slowest 9 24818 228 A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+# slowest 10 23205 232 FP-0052 case 2, amendment 2: a host other than Node builds the stand-in from the Node on PATH and fails without one
+# duration_ms total 29195
+# Scope: controller behavior only. No renderer or JavaScript conformance claim.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/selftest.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:50:23.776Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":29307}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);if(!fs.readFileSync(keep).equals(fs.readFileSync(f)))throw new Error('restore failed');console.log('restored '+f+' from '+keep);","out/fp0107/mutation-1/test-runner.mjs","tools/test-runner.mjs"]
+restored tools/test-runner.mjs from out/fp0107/mutation-1/test-runner.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);if(!fs.readFileSync(keep).equals(fs.readFileSync(f)))throw new Error('restore failed');console.log('restored '+f+' from '+keep);","out/fp0107/mutation-1/test-runner.mjs","tools/test-runner.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:50:53.166Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/test-runner.mjs"]
+0bde36422f21261ca2ebe2f254617b6045f40669
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/test-runner.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:50:53.271Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/test-runner.mjs"]
+0bde36422f21261ca2ebe2f254617b6045f40669
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/test-runner.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:51:00.631Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0107/raw/mutate.mjs","tools/test-runner.mjs","out/fp0107/mutation-2","      write(`# duration_ms ${n} ${outcome.ms}`);",""]
+kept out\fp0107\mutation-2\test-runner.mjs; replaced 1 site(s) in tools/test-runner.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0107/raw/mutate.mjs","tools/test-runner.mjs","out/fp0107/mutation-2","      write(`# duration_ms ${n} ${outcome.ms}`);",""],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:51:00.764Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":65}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/test-runner.mjs"]
+fd27726eb7f8cb7a058c76de7b89ead4ff8f4e38
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/test-runner.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:51:00.921Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0107/raw/mutation-2.diff","--","out/fp0107/mutation-2/test-runner.mjs","tools/test-runner.mjs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0107/raw/mutation-2.diff","--","out/fp0107/mutation-2/test-runner.mjs","tools/test-runner.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:51:01.040Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/selftest.mjs"]
+TAP version 13
+ok 1 - A normal relative file resolves within the repository
+ok 2 - Traversal, empty components, and dot components fail
+ok 3 - Absolute paths, backslashes, control bytes, and alternate streams fail
+ok 4 - A missing path needs explicit permission
+ok 5 - A symlink cannot redirect an input inventory
+ok 6 - A dangling directory link is not a new output directory
+ok 7 - An empty input inventory fails
+ok 8 - Input hashes change with content
+ok 9 - Input hashes include relative names
+ok 10 - Input hashes ignore checkout location and input order
+ok 11 - Repeated roots do not duplicate files
+ok 12 - File hashes match the SHA-256 content hash
+ok 13 - Atomic JSON output supports replacement and BOM input
+ok 14 - The supplied compiler lock has a valid structure
+ok 15 - A stable version cannot silently replace Zig master
+ok 16 - A floating compiler version fails
+ok 17 - A substituted compiler source fails
+ok 18 - A substituted artifact URL fails
+ok 19 - An invalid checksum or archive size fails
+ok 20 - A checksum mismatch cannot qualify an archive
+ok 21 - A size mismatch cannot qualify an archive
+ok 22 - Host selection maps supported platform names explicitly
+ok 23 - A valid task graph has one initial ready task
+ok 24 - An accepted prerequisite reveals the next task
+ok 25 - An active task does not become another ready task
+ok 26 - A duplicate task ID fails
+ok 27 - Unknown and duplicate prerequisites fail
+ok 28 - A cycle in the task graph fails
+ok 29 - Empty acceptance criteria and unknown gates fail
+ok 30 - Missing state and unknown workstreams fail
+ok 31 - Acceptance without evidence and review fails
+ok 32 - Acceptance with an unaccepted prerequisite fails
+ok 33 - An empty release profile fails closed
+ok 34 - The full set of capability families cannot disappear
+ok 35 - Qualified metadata alone cannot replace a release verifier
+ok 36 - 1: A forged local receipt passes validateReceipt without gate execution
+ok 37 - 2: A valid envelope signed by a trusted key verifies
+ok 38 - 3: RFC 8032 test vector 1 verifies through the same key decoding path
+ok 39 - 4: A key outside the trust policy fails, whether it names itself or a trusted key
+ok 40 - 5: One changed payload byte fails as bad-signature
+ok 41 - 6: A truncated envelope and a truncated payload each fail
+ok 42 - 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+ok 43 - 8: A payload for another commit or tree fails as stale-candidate
+ok 44 - 9: A payload with another policy digest fails as changed-policy
+ok 45 - 10: Zero discovered and zero selected each fail as zero-denominator
+ok 46 - 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+ok 47 - 12: A runner key that differs from the signature key fails as key-mismatch
+ok 48 - 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+ok 49 - 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+ok 50 - 16: A trusted signature over a noncanonical payload fails as malformed
+ok 51 - FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result
+ok 52 - FP-0051 2: enclosingGitDirectories collects the common directory of every enclosing .git entry
+ok 53 - FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+ok 54 - FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled
+ok 55 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+ok 56 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+ok 57 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+ok 58 - FP-0033 17: An action commit outside the reviewed set fails, even with a full SHA and a version comment
+ok 59 - FP-0033 3: A workflow permission other than contents: read fails
+ok 60 - FP-0033 3: A job permission other than contents: read fails
+ok 61 - FP-0033 4: continue-on-error on a step or a job fails
+ok 62 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+ok 63 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+ok 64 - FP-0033 4: A workflow_run trigger fails
+ok 65 - FP-0033 8: An expression outside the allowlist fails
+ok 66 - FP-0033 9: A gate step that can be skipped or rerouted fails
+ok 67 - FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+ok 68 - FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+ok 69 - FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+ok 70 - FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+ok 71 - FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+ok 72 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+ok 73 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+ok 74 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+ok 75 - FP-0067 1: The committed Gates workflow has no trigger, upload, or Linux-gate problem
+ok 76 - FP-0067 2: A Gates trigger filter key other than branches is one problem that names the trigger and the key
+ok 77 - FP-0067 3: Gates branches other than [master] and a workflow_dispatch value are each one problem
+ok 78 - FP-0067 4: A Gates upload path other than out/evidence/ or an if-no-files-found other than error is one problem
+ok 79 - FP-0067 5: A Linux job that omits zig-test or runs it after the cross builds is a problem
+ok 80 - FP-0098 revision 1 case 3: Each zig-test gate step must set env: ZIG_BUILD_SUMMARY: all, and no other step or level may set it
+ok 81 - FP-0021 case 1: Generating from the committed schema reproduces the committed include/fairpane.h and src/abi_generated.zig byte for byte
+ok 82 - FP-0021 case 2: Changing one byte of either generated file makes abi-check exit with status 1 and name the file
+ok 83 - FP-0021 case 3: Generation is deterministic across two runs and across schema key order
+ok 84 - FP-0021 case 4: The validator rejects an unknown kind, a pointer without ownership or lifetime, an inverted range, a duplicate name, and a structure without struct_size
+ok 85 - FP-0021 case 5: The schema distinguishes text, web_string, bytes, identifier, handle, ranged integer, and optional values, and the generator maps each one to distinct C and Zig declarations
+ok 86 - FP-0021 case 6: The generated Zig declarations assert the size and every field offset of every structure
+ok 87 - FP-0021 case 7: The C smoke test runs every C-expressible failure scenario and names each identifier it covers
+ok 88 - FP-0021 case 8: The Zig scenario test runs every failure scenario through the generated declarations
+ok 89 - FP-0021 case 9: Every failure scenario has an identifier, calls, and expected outcomes, and the validator rejects one without them
+ok 90 - FP-0021 case 10: The validator rejects consumed_on_success on an output parameter, and the generated C and Zig text states the consumption rule for fp_engine_destroy
+ok 91 - FP-0021 case 11: The validator rejects an unknown reference and an unreferenced function name, and the generated header contains no schema-only name outside a C name
+ok 92 - FP-0021 case 12: The generated C static assertions check the size and every member offset of every structure, and the C smoke test compiles them
+ok 93 - FP-0021 case 13: From a foreign thread, the C and Zig scenarios call each owner function with an invalid argument and expect wrong_thread
+ok 94 - FP-0021 revision 1 status sets: abi_generated.zig carries each function status set, and src/c_api.zig checks every export against it
+ok 95 - FP-0021 revision 1 export check: abi-exports fails when a library exports an fp_ symbol that the schema does not declare
+ok 96 - FP-0050 case 8: every byte range is null_when_empty, and the validator rejects any other nullability
+ok 97 - FP-0050 case 9: fp_document_destroy never returns out_of_memory
+ok 98 - FP-0050 case 10: the thread lifetime and identifier gaps are documented
+ok 99 - FP-0050 case 11: the generated layout assertions cover both sides of the ABI
+ok 100 - FP-0081 case 8: the generated header, the generated Zig declarations, and the layout model agree on engine_options and engine_memory at both pointer widths, and the C smoke test must name allocation-failure
+ok 101 - FP-0081 case 9: the validator rejects a structure that needs implicit padding at either pointer width, and the committed schema needs none
+ok 102 - FP-0027 case 1: two source-archive runs on one commit write byte-identical tar and manifest files, and the manifest names the tar digest
+ok 103 - FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+ok 104 - FP-0027 case 3: source-archive rejects an abbreviated ID, a ref name, a missing commit, and an output directory inside the repository, and writes nothing
+ok 105 - FP-0027 case 4: provenance subjects equal the artifact digests, and the build definition names the commit, tree, lock digest, and builder
+ok 106 - FP-0027 case 5: reproduce-check reports reproducible for a fixed build, and different with the path and exit status 1 for a clock build
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/UCD.zip: 336 bytes, SHA-256 4556baaf11e4318fef763a517296b7fc79cfadd0f9547ad305bf3690646cdfcb
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-juSdwr/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-TOFS2g/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-TOFS2g/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-TOFS2g/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-MDXzyV/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-MDXzyV/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-MDXzyV/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Qxq0Jk/UCD.zip: 198 bytes, SHA-256 764769ceca373d4fe149a6a2acb5600e8758c75358c2cf242fdbbc440c0a7b82
+ok 107 - FP-0027 case 6: reproduce-check removes both work trees, and a forced removal failure appears in the report
+ok 108 - FP-0027 case 7: ADR 0009 lists exactly the ten owner decisions, each with the status open
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Ljdm9y/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Qxq0Jk/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Z9CXkY/UCD.zip: 109 bytes, SHA-256 65d40408a9f5b8aa9b193903b93edb7ebbd33d0f15954bf604652a25b6dab090
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Z9CXkY/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-fSXYcZ/UCD.zip: 109 bytes, SHA-256 c0923c0636c78b36d53a19ffca4d95c3f28b32af962ebe5dffa20cb2a4106a03
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-fSXYcZ/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-XIvIg7/UCD.zip: 114 bytes, SHA-256 a9fce91fd00f227dd1d8be2c0c36e44534ca21cd3df6f960348178c2f19f45ea
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-XIvIg7/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-t5jmyK/UCD.zip: 114 bytes, SHA-256 05c9c74fadab7c95de958c03ae3ee5e82640c6f070479587c2c25ea860e3da47
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-t5jmyK/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-vKcsuP/UCD.zip: 109 bytes, SHA-256 dd7763a9cdbebac51bfc05f48175727d1b843c55e0c0b38b987397cb1ac6826f
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-vKcsuP/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-YRVhBE/UCD.zip: 129 bytes, SHA-256 68c7d1283c9531fbf2e3b85bc8046227148eb2eeb06e9f497ac4091d39de7928
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-YRVhBE/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-i7QOb7/UCD.zip: 109 bytes, SHA-256 8b53d0800c31c3d4e80bd074e8ca7b60e7cdde62b35337fb8663890578a928bb
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-i7QOb7/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-D5zBvm/UCD.zip: 112 bytes, SHA-256 febd63b49b0baeb9de127875e2e2cc97b8bfd7bdfe826125975f68815e2cf7c1
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-D5zBvm/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-QdRbiR/UCD.zip: 112 bytes, SHA-256 df60a703781713bc828e4e14106fcdd6f9b49b6667b81bd8d902f64d9895466b
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-QdRbiR/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-u1l8TV/UCD.zip: 208 bytes, SHA-256 6a9d489d56fb45e2ea42ab5ab8e94b19cb3534744286e23fcc2ba491721804e0
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-u1l8TV/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-pBL0AD/UCD.zip: 1100452 bytes, SHA-256 0a156aee7668d856c05282779f50a43868ba224510ddcc912fcf9c50ef2d290f
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-pBL0AD/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-hxAH14/UCD.zip: 192 bytes, SHA-256 5781e884ef01073687e5d794fcf0f338e486aa2cb9db669907acb432a7346b3d
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-hxAH14/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-LxFida/UCD.zip: 109 bytes, SHA-256 f4ac38fe773c12809f23f77c33457d0abe7a7a1cc52d782724573f84d7e9061e
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-LxFida/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-4nUKoC/UCD.zip: 117 bytes, SHA-256 b6df152a01ebd1ed66e4e8ca05a4556485fc3d7d9ebc512458b23ed87a39a48e
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-4nUKoC/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-M48itg/UCD.zip: 117 bytes, SHA-256 18f6e3f993a59e5c633af11a5669b8b16d5b3343de88d5c689e4fbb5c755ca89
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-M48itg/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-TNzrr1/UCD.zip: 115 bytes, SHA-256 816aebd39773c630b4c982a72e1db04bb2a386e1369d982753b610f13be11df7
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-TNzrr1/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-gfCNLP/UCD.zip: 113 bytes, SHA-256 e9f6f446256a80c82cdc0eb5a06e38961dd59f09386753e4ec79458a0c8ec3c2
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-gfCNLP/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Download https://github.com/a
+Redirect to https://github.com/b
+Stored https://github.com/a: 4 bytes, SHA-256 230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5
+Download https://www.unicode.org/a
+Download https://github.com/a
+Download https://example.org/a
+Download https://raw.githubusercontent.com/a
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Ljdm9y/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Ljdm9y/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Ljdm9y/UCD.zip: 35 bytes, SHA-256 1dc83a4d0c719dfd9e45daeb5c0574afb5f10e59a66a1c29df301146cf0432ec
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-rhdiM7/UCD.zip: 35 bytes, SHA-256 1dc83a4d0c719dfd9e45daeb5c0574afb5f10e59a66a1c29df301146cf0432ec
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-rhdiM7/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Verified 4 installed fontTools files against the RECORD of C:\Users\requi\AppData\Local\Temp\fairpane-fileset-bxpE0j\.tools\downloads\fonttools-4.66.1-py3-none-any.whl.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-rfeb6j/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-rfeb6j/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-rfeb6j/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Bg2tne/published/Scripts.txt equals member Scripts.txt.
+ok 109 - FP-0027: source-archive fails before any write when an export attribute makes the tar differ from the tree
+ok 110 - FP-0027: reproduce-check reports a failed build as an error with exit status 1 and still removes both work trees
+ok 111 - FP-0013 case 1: @missing lines apply in order, then data lines, and every value resolves through PropertyValueAliases.txt
+ok 112 - FP-0013 case 2: a line without ";", a reversed range, 110000, and an unknown value each fail with a distinct message naming the line
+ok 113 - FP-0013 case 3: ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input
+ok 114 - FP-0013 case 4: one changed byte of tables.zig or of a UCD file makes ucd-check exit with status 1 and name the file and line
+ok 115 - FP-0013 case 41: a zip with two stored members, one deflated member, and one directory yields the hand-computed inventory
+ok 116 - FP-0013 case 42: the zip reader rejects ZIP64, encryption, "../x", "a\b", duplicate paths, a truncated central directory, and method 12
+ok 117 - FP-0013 case 43: corpus-fetch of file sources writes the record and extracted files, honors pins, and changes nothing on failure
+ok 118 - FP-0013 case 44: corpus-verify fails for changed extracted and derived files, a missing source, a license mismatch, a count mismatch, and an upstream mismatch
+ok 119 - FP-0013 case 45: file-set applicability reports the per-directory breakdown with an explicit denominator, and a zip without file members fails
+ok 120 - FP-0013 case 46: corpus-repin unicode exits with status 1 and names the contract decision
+ok 121 - FP-0013 case 47: record validation rejects missing license digests, releases, tool versions, input digests, argv, and reserved font names
+ok 122 - FP-0013 case 48: every selected, derived, and license path of the committed unicode and opentype-fixtures records matches its size and SHA-256
+ok 123 - FP-0013 case 49: the committed capability record validates with exactly the frozen obligations and existing owner tasks
+ok 124 - FP-0013 case 53: overlapping, inconsistent, symbolic-link, case-folded, oversized, corrupt, and drive-letter archives fail before any member is written
+ok 125 - FP-0013 case 54: a fetch compares every known digest before parsing a source
+ok 126 - FP-0013 case 54: downloads follow redirects manually on allowlisted HTTPS hosts and stop at their size limit
+ok 127 - FP-0013 case 54: a failure injected at each write step leaves every previous file, the source directory, and the record unchanged
+ok 128 - FP-0013 case 55: corpus-derive refuses a fontTools installation with one changed file
+ok 129 - FP-0013 case 55: the Python child process sees PYTHONSAFEPATH=1, no other PYTHON* variable, and the staging directory
+ok 130 - FP-0013 case 55: sfntCopyright stops at the first name record and checks the name table header length
+ok 131 - FP-0052 case 6: of two fetches of one file set started together, one passes and one fails on the lock
+ok 132 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 133 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 134 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 135 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 136 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 137 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 138 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 139 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 140 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 141 - FP-0079 case 10: the toolchain documents and declarations record the pin
+ok 142 - 15: release-check still exits with status 1
+ok 143 - A successful command records its actual output
+ok 144 - A nonzero child exit remains a failure
+ok 145 - A missing executable produces an error record
+ok 146 - A hung child reaches its watchdog and cannot pass
+ok 147 - Command arguments do not execute through a shell
+ok 148 - A real local gate produces a checkable unsigned receipt
+ok 149 - Changed source makes a previous receipt stale
+ok 150 - Changed evidence output invalidates a receipt
+ok 151 - Changed gate definitions invalidate old receipts
+ok 152 - A local receipt cannot upgrade its own trust label
+ok 153 - A receipt without command records cannot pass
+ok 154 - A receipt without output artifacts cannot pass
+ok 155 - A failed command cannot hide behind a pass label
+ok 156 - A command failure produces a failed gate receipt
+ok 157 - A missing compiler produces a failed gate receipt
+ok 158 - Input changes during execution produce a failed gate receipt
+ok 159 - A removed input still produces a failed gate receipt
+ok 160 - Unknown gates fail before execution
+ok 161 - FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+ok 162 - FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails
+ok 163 - FP-0098 case 3: an ordinary pass or fail gate record has no timeout section and is not timed out
+ok 164 - FP-0098 revision 1 case 2: a command that ends during the timeout listing gets a line that says so, and its descendants stop
+ok 165 - Evidence paths cannot escape their approved roots
+ok 166 - A gate writes a checkable receipt under an approved evidence directory
+ok 167 - An unapproved evidence directory fails before any gate command runs
+ok 168 - Environment overrides reach the child and its command record
+ok 169 - Executable resolution follows PATH order
+ok 170 - A recorded command keeps its output, exit status, and resolved executable
+ok 171 - Command records carry the working directory and start time
+ok 172 - An unwritable log yields a failed result instead of an exception
+ok 173 - A failed output copy is recorded and its capture directory is removed
+ok 174 - Standard error output reaches the log
+ok 175 - A completed command leaves no capture directory
+ok 176 - Executable resolution never searches the process working directory
+ok 177 - A bare executable name is logged as its resolved absolute path
+ok 178 - A rejected record path writes nothing
+ok 179 - The controller rejects malformed run and record arguments
+ok 180 - Only Zig and C ABI gates receive the repository-local compiler cache
+ok 181 - A capture-start failure writes a RESULT line, closes the log, and returns an error result
+ok 182 - A failed RESULT write returns an error result instead of throwing
+ok 183 - A spawn error and a capture error both remain in the result
+ok 184 - runGate writes nothing when its evidence directory fails validation
+ok 185 - A short write to the log produces an error result
+ok 186 - A failed capture-directory removal appears in the command record
+ok 187 - FP-0054 case 6: A busy capture directory is removed on a later attempt
+ok 188 - FP-0054 case 6: a capture directory that stays busy records the last failure after waiting between attempts
+ok 189 - FP-0054 case 6: a capture-directory removal error with a non-transient code gets one attempt
+ok 190 - FP-0054 revision 1 case 6: a capture-directory removal error without a code gets one attempt
+ok 191 - FP-0054 case 6: lastResult asserts that a RESULT line exists before it parses one
+ok 192 - started_at in every command record is a canonical UTC ISO 8601 timestamp
+ok 193 - The mutation control runs an unmutated baseline first and records each killed test name and message
+ok 194 - The inventory of a fixture commit equals a hand-computed canonical listing digest
+ok 195 - The inventory ignores working-tree files and core.autocrlf
+ok 196 - A changed blob, an added file, a removed file, and a renamed file each change the inventory digest
+ok 197 - Paths with spaces, non-ASCII bytes, and tabs keep their exact bytes through NUL-separated parsing
+ok 198 - A symbolic link entry hashes its target text, and a submodule entry records its commit ID
+ok 199 - corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+ok 200 - Applicability validation rejects negative counts, non-integer counts, inconsistent sums, and exclusions without reasons
+ok 201 - Snapshot record validation rejects a non-40-hex commit, a missing license digest, and a missing inventory digest
+ok 202 - Verification fails when the license digest, the commit date, or an applicability count differs from its record
+ok 203 - corpus-verify exits with status 1 through the controller command on an inventory digest mismatch
+ok 204 - A replace ref that substitutes the recorded commit cannot make verification pass
+ok 205 - A tree path that contains a line feed fails the inventory
+Download http://127.0.0.1:55557/api/manifest?sha=4eab98b4627dffd16ff86c9917edc3b4782456fc
+x-wpt-sha 4eab98b4627dffd16ff86c9917edc3b4782456fc, 39 bytes, SHA-256 286b38dc90e1e0bfb32af690dc90614de0e1eb74867910c21913f3079be79789
+Download http://127.0.0.1:55557/api/manifest?sha=4eab98b4627dffd16ff86c9917edc3b4782456fc
+ok 206 - WPT counting of a fixture manifest reports per-type counts, excludes support, spec, and test262 from discovery, and reports test262 separately
+ok 207 - A fixture manifest with a path that the tree lacks, or with a hash that differs from the blob ID, fails binding
+ok 208 - A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+ok 209 - Test262 discovery excludes a file named a_FIXTURE_b.js and a file named x_FIXTURE.js
+ok 210 - A fixture manifest with test262 items under the vendored tests, the vendored harness, and infrastructure/test262/ counts only the infrastructure item and reports the others by path
+ok 211 - A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation
+ok 212 - FP-0082 case 18: corpus-extract writes exactly the test/ and harness/ blobs and features.txt, and an EXTRACT.json record
+ok 213 - FP-0082 case 18: corpus-extract refuses a non-empty output directory, a directory outside out/, and an absent commit
+ok 214 - FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes
+ok 215 - FP-0082 case 18: corpus-extract rejects a stored blob whose content does not hash to its tree object ID
+ok 216 - FP-0082 case 18: the shared path rule gives each reason, and null for ordinary paths
+ok 217 - FP-0082 case 18: corpus-extract refuses the tree path "test/..\\..\\..\\x.js", which has a backslash, and writes nothing
+ok 218 - FP-0082 case 18: corpus-extract refuses the tree path "test/a:b.js", which has a colon, and writes nothing
+ok 219 - FP-0082 case 18: corpus-extract refuses the tree path "test/a\u0001b.js", which has a control character, and writes nothing
+ok 220 - FP-0082 case 18: corpus-extract refuses the tree path "test/dir./x.js", which has a path component that ends in "." or a space, and writes nothing
+ok 221 - FP-0082 case 18: corpus-extract refuses the tree path "test/x.js ", which has a path component that ends in "." or a space, and writes nothing
+ok 222 - FP-0082 case 18: corpus-extract refuses the tree path "test/CON.js", which has a reserved Windows device name, and writes nothing
+ok 223 - FP-0082 case 18: corpus-extract refuses the tree path "test/aux/x.js", which has a reserved Windows device name, and writes nothing
+ok 224 - FP-0082 case 18: corpus-extract refuses the tree path "test/Com1.txt.js", which has a reserved Windows device name, and writes nothing
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-HE3sAi","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-l5Nl1Q\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-l5Nl1Q\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-HE3sAi","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-HE3sAi
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+ok 225 - FP-0082 case 18: corpus-extract refuses an altered tree object through the inventory and writes nothing
+ok 226 - FP-0082 case 18: corpus-extract refuses a snapshot record whose tree differs from the commit and writes nothing
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-x6u808","HEAD"]
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-KtsfXG","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-amkyce\\test262.fetch\\repository.git"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-LElPYa\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-amkyce\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-x6u808","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-LElPYa\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-KtsfXG","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-x6u808
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-KtsfXG
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-HE3sAi","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-l5Nl1Q\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-l5Nl1Q\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-HE3sAi","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-HE3sAi
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-HE3sAi","HEAD"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-x6u808","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-l5Nl1Q\\test262.fetch\\repository.git"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-amkyce\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-l5Nl1Q\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-HE3sAi","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-amkyce\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-x6u808","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-HE3sAi
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/snapshots/test262.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-KtsfXG","HEAD"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-x6u808
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-LElPYa\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-LElPYa\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-KtsfXG","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-KtsfXG
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+ok 227 - corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+ok 228 - A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+ok 229 - corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+ok 230 - FP-0052 case 1: the system-directory resolver returns the System32 path and names SystemRoot when it cannot
+# FP-0052 case 2 took 2708 ms.
+ok 231 - FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command
+ok 232 - FP-0052 case 2, amendment 2: a host other than Node builds the stand-in from the Node on PATH and fails without one
+ok 233 - FP-0052: a SystemRoot that cannot locate taskkill.exe fails runProcess on Windows before its command starts
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-6sSnmY\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-BmgDYA
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+ok 234 - FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-dSzivt","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-Tbo4Ne\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-Tbo4Ne\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-dSzivt","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-dSzivt
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit 8895bafe72a888c3b313a5445f281a68f01b1822 from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-dSzivt","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-Tbo4Ne\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-Tbo4Ne\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-dSzivt","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-dSzivt
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+ok 235 - FP-0052 case 4: a fetch that cannot remove the old snapshot after it replaces the record fails, and the new snapshot and record stay
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-F1Aczj","HEAD"]
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-a3QDnq","HEAD"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-a3QDnq","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-YFbFDR\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-iaIeGU\\test262.fetch\\repository.git"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-YFbFDR\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-F1Aczj","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-iaIeGU\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-a3QDnq","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-F1Aczj
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-a3QDnq
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-F1Aczj","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+ok 236 - FP-0052 case 5: a fetch fails while test262.lock exists and changes nothing
+ok 237 - FP-0052 case 6: of two Git corpus fetches started together, one passes and one fails on the lock
+ok 238 - The actual bootstrap repository passes its integrity check
+not ok 239 - FP-0107 case 1: the runner writes a duration line after each result line, the summary, the slowest cases, and the total
+  ---
+  message: "Result line 1 lacks its duration line:\nTAP version 13\nok 1 - waits 0 ms\nok 2 - waits 60 ms\nok 3 - waits 120 ms\nnot ok 4 - throws\n  ---\n  message: \"fixture failure\"\n  ...\n1..4\n# tests 4\n# pass 3\n# fail 1\n# slowest 1 124 3 waits 120 ms\n# slowest 2 62 2 waits 60 ms\n# slowest 3 0 1 waits 0 ms\n# slowest 4 0 4 throws\n# duration_ms total 124"
+  ...
+ok 240 - FP-0107 case 2: the runner runs no case that declares a process-wide change while another case runs
+1..240
+# tests 240
+# pass 239
+# fail 1
+# slowest 1 5334 208 A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+# slowest 2 5155 234 FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+# slowest 3 4830 103 FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+# slowest 4 3886 229 corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+# slowest 5 3667 227 corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+# slowest 6 3573 161 FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+# slowest 7 3547 214 FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes
+# slowest 8 3545 210 A fixture manifest with test262 items under the vendored tests, the vendored harness, and infrastructure/test262/ counts only the infrastructure item and reports the others by path
+# slowest 9 3469 202 Verification fails when the license digest, the commit date, or an applicability count differs from its record
+# slowest 10 3343 211 A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation
+# duration_ms total 52195
+# Scope: controller behavior only. No renderer or JavaScript conformance claim.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/selftest.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:51:01.146Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":52299}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);if(!fs.readFileSync(keep).equals(fs.readFileSync(f)))throw new Error('restore failed');console.log('restored '+f+' from '+keep);","out/fp0107/mutation-2/test-runner.mjs","tools/test-runner.mjs"]
+restored tools/test-runner.mjs from out/fp0107/mutation-2/test-runner.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);if(!fs.readFileSync(keep).equals(fs.readFileSync(f)))throw new Error('restore failed');console.log('restored '+f+' from '+keep);","out/fp0107/mutation-2/test-runner.mjs","tools/test-runner.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:51:53.542Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":59}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/test-runner.mjs"]
+0bde36422f21261ca2ebe2f254617b6045f40669
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/test-runner.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:51:53.704Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}

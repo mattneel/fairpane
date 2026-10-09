@@ -361,6 +361,25 @@ It is not part of `zig build test`, which keeps the default runner.
 3. Read the `TEST` line of each test, the `RANK` lines of the 25 slowest tests, and the `TOTAL` line.
 4. Run `zig build test --summary all` with a fresh `--cache-dir` for the duration of every other step.
 
+## Run the controller tests
+
+`node tools/fairpane.mjs test` runs `tools/selftest.mjs`, which registers its own cases and those of the `tools/*.test.mjs` modules.
+`runCases` in `tools/test-runner.mjs` runs them and writes TAP lines.
+After each result line, it writes `# duration_ms <n> <ms>`, the case's wall time in whole milliseconds, measured with `performance.now()` around the case's function.
+A failure's message follows as a YAML block.
+After the `# tests`, `# pass`, and `# fail` lines, it writes `# slowest <rank> <ms> <n> <name>` for the ten slowest cases, in descending order of time with ties in ascending case number, and then `# duration_ms total <ms>` for the whole run.
+
+Ordinary cases run on four worker threads, which `casePool` starts and which load `tools/selftest.mjs` again.
+A case that blocks its thread on a child process therefore delays no case on another thread.
+Result lines keep the order of case numbers, and the output that a case prints can appear between the result lines of other cases.
+
+A case that changes process-wide state declares it when it is registered.
+In `tools/selftest.mjs`, pass `{ processWide: '<the state>' }` as the third argument of `test`.
+In a case module, add the same object as the third element of the case's array.
+Examples of such state are the working directory, a `process.env` variable, and a module-level function such as `fs.rmSync`.
+The runner starts a declared case on the main thread only when no other case runs, and it starts no other case until the declared case ends.
+A worker thread cannot change the working directory, so a case that changes it must declare it.
+
 ## Extend the controller
 
 1. Add failing tests for the new gate behavior.

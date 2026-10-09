@@ -1,0 +1,196 @@
+# FP-0107 evidence
+
+## Scope
+
+Task `FP-0107` keeps the `controller-test` gate within its timeout on Windows.
+The frozen contract is `engineering/evidence/FP-0107/CONTRACT.md`, frozen at `01d7e39`.
+The worker implemented it in an isolated working tree whose `HEAD` was `0276268879438531745c63ab497e80c0a1e69aa5`, which holds the FP-0052, FP-0082, and FP-0098 revisions of `tools/selftest.mjs`.
+The Windows host was Windows 10.0.26200 on x64 with Node v26.7.0.
+The Linux host was WSL Ubuntu on `Linux 7.2.6-locietta-WSL2-xanmod1 x86_64` with Node v26.7.0 at `$HOME/fairpane-linux/node/bin/node`.
+`engineering/gates.json`, `.github/workflows/gates.yml`, and every other protected path are unchanged, so the gate keeps its arguments and its 120000 ms timeout.
+[INFERENCE] Other agents ran builds on the same host, so every local duration includes some contention; no log records those builds.
+[INFERENCE] The worker did not commit, push, or dispatch a workflow run; no log records that.
+
+## Changes
+
+- `tools/test-runner.mjs` (new): `runCases(cases, { write, concurrency, cleanup })` runs a list of cases, writes TAP lines through `write`, and returns `{ tests, pass, fail }`.
+  It writes the duration report that "Duration report" describes.
+  Up to `concurrency` ordinary cases run at once, 4 by default, and cases start in the order of their numbers.
+  A case that declares `processWide` starts only when no other case runs, and no case starts until it ends.
+  `casePool(moduleUrl, size)` starts worker threads that load `moduleUrl`, and `serveCases(cases, cleanup)` answers their requests in each worker.
+- `tools/selftest.mjs`: `test(name, fn, { processWide })` records the declaration, and the case-module loops pass each module case's declaration on.
+  The final loop is now a call of `runCases`: ordinary cases run on four worker threads through `casePool`, and declared cases run on the main thread.
+  Each thread removes its own temporary fixtures, and each cleanup problem still counts as a failure.
+  Seven existing cases declare their process-wide change, and FP-0107 cases 1 and 2 are new.
+- `tools/attest.test.mjs` and `tools/release.test.mjs`: one case each declares its process-wide change as the third element of its array.
+- `tools/README.md`: the new section "Run the controller tests".
+- `engineering/decisions/0011-concurrent-controller-tests.md`: the decision to run the cases on worker threads, with its evidence and reversal condition.
+- `raw/process-probe.mjs`, `raw/names.mjs`, `raw/cost.mjs`, and `raw/mutate.mjs`: evidence scripts, described under "Records".
+
+## Criterion mapping
+
+| Criterion | Evidence |
+| --- | --- |
+| The runner is an exported function that runs a list of cases with a writer and returns the counts, and `tools/selftest.mjs` calls it with its cases. | `runCases` in `tools/test-runner.mjs`; the call at the end of `tools/selftest.mjs`; `raw/baseline-test-diff.log`. |
+| `# duration_ms <n> <ms>` after each result line, measured with `performance.now()` around the case's function and rounded down. | `runCases` measures from just before it calls the function to its settlement and writes `Math.floor` of the difference. Every profile log shows the line after each result line. |
+| `# slowest` lines for the ten slowest cases, ties in ascending case number, after the summary lines, then `# duration_ms total`. | Every profile log ends with them; case 1 checks the order and the tie rule. |
+| Case 1. | Fails in `raw/tests-before.log`, because `tools/test-runner.mjs` does not exist. Passes in `raw/profile-after.log`, `raw/profile-linux-after.log`, `raw/controller-tests-after.log`, and `raw/bun-selftest.log`. Fails under mutation control 2. |
+| Case 2. | Cannot run on the base, and fails in `raw/tests-before.log` for the same reason as case 1. Passes in the four after logs. Fails under mutation control 1. |
+| Each existing case that changes process-wide state declares it, and the runner never runs it beside another case. | See "Process-wide declarations". |
+| Result lines keep the order of case numbers. | `raw/names.log` checks that every result line's number is its position in each log. |
+| Every case on both hosts, before and after. | `raw/profile-before.log`, `raw/profile-after.log`, `raw/profile-linux-before.log`, and `raw/profile-linux-after.log`. |
+| The cases that take most of the Windows time, their causes, and a cost reduction that keeps every assertion. | See "Test cost". |
+| No case is removed, skipped, narrowed, merged, moved, or renamed. | `raw/names.log` and `raw/baseline-test-diff.log`; see "Every case and assertion kept". |
+| Both mutation controls. | `raw/mutation.log`, `raw/mutation-1.diff`, and `raw/mutation-2.diff`; see "Mutation controls". |
+| `node tools/fairpane.mjs test` passes. | `raw/controller-tests-after.log`. |
+| Criterion 3: ten dispatched `Gates` runs pass, and the slowest Windows `controller-test` step takes at most 80 seconds. | Open; see "Open items". |
+
+## Duration report
+
+`runCases` writes `TAP version 13`, then each case's result line followed directly by `# duration_ms <n> <ms>`.
+A failure's YAML block with its message follows the duration line.
+After the last case, the runner runs `cleanup`, writes `1..<tests>` and the `# tests`, `# pass`, and `# fail` lines, then `# slowest <rank> <ms> <n> <name>` for the ten slowest cases, or for every case when there are fewer.
+The order is descending by the printed `<ms>`, with ties in ascending case number.
+The last line is `# duration_ms total <ms>`, from the start of `runCases` to the end of the slowest list.
+`tools/selftest.mjs` then writes its scope line, as before.
+A case's `<ms>` includes the time that it waits for a free worker or shares the processor with the cases beside it.
+`tools/mutation-harness.mjs` still reads the message of a failed case, because `parseTap` skips the duration line.
+
+## Process-wide declarations
+
+These existing cases change process-wide state and declare it.
+The numbers are the case numbers in the changed suite, which equal those in the base suite.
+
+| Case | Declared state |
+| --- | --- |
+| 49, `14: Candidate identity comes from Git objects, ...` in `tools/attest.test.mjs` | `GIT_DIR and PATH in process.env` |
+| 106, `FP-0027 case 5: reproduce-check reports reproducible ...` in `tools/release.test.mjs` | `ZIG_GLOBAL_CACHE_DIR and ZIG_LIB_DIR in process.env` |
+| 173, `A failed output copy is recorded and its capture directory is removed` | `TMPDIR, TMP, and TEMP in process.env` |
+| 175, `A completed command leaves no capture directory` | `TMPDIR, TMP, and TEMP in process.env` |
+| 176, `Executable resolution never searches the process working directory` | `the working directory` |
+| 204, `A replace ref that substitutes the recorded commit cannot make verification pass` | `GIT_OBJECT_DIRECTORY in process.env` |
+| 231, `FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog ...` | `NODE_OPTIONS in process.env on Windows, and the working directory` |
+| 233, `FP-0052: a SystemRoot that cannot locate taskkill.exe fails runProcess ...` | `SystemRoot in process.env` |
+| 235, `FP-0052 case 4: a fetch that cannot remove the old snapshot ...` | `the fs.rmSync function of the node:fs module` |
+
+The worker found them by searching `tools/selftest.mjs` and the seven case modules for assignments to `process.env`, `Object.assign(process.env, ...)`, `process.chdir`, and assignments to members of `fs`, `console`, `os`, `child_process`, `globalThis`, and prototypes.
+A search of the same files for `??=` and cache variables found no fixture that one case builds and another case reuses.
+A declared case runs on the main thread while no worker runs a case.
+A worker thread cannot change the working directory: `raw/probe-worker-chdir.log` shows `ERR_WORKER_UNSUPPORTED_OPERATION` for `process.chdir` in a worker.
+[INFERENCE] Each worker gets its own copy of `process.env` and its own module instances when it starts, before any case runs, as the Node.js `worker_threads` documentation states; no log tests it.
+
+## Test cost
+
+### Before
+
+`raw/profile-before.log` runs the base cases one at a time with only the duration report applied.
+`raw/profile-before.diff` is that change: `tools/test-runner.mjs`, with the final blob `0bde36422f21261ca2ebe2f254617b6045f40669`, and a final loop that calls `runCases` with `concurrency: 1` and the base cleanup.
+On Windows, the 238 cases took 79426 ms, and their durations sum to 78728 ms.
+On WSL Ubuntu, they took 17690 ms in `raw/profile-linux-before.log`.
+`raw/cost.log` lists the ten slowest base cases on Windows.
+
+| Rank | Case | Windows ms | Linux ms | Child processes in the probe | Cause |
+| --- | --- | ---: | ---: | --- | --- |
+| 1 | 103, FP-0027 case 2 | 3274 | 284 | 110 `git` | Git fixture processes |
+| 2 | 161, FP-0098 case 1 | 3154 | 2211 | `node`, `powershell`, `taskkill` | 2-second gate timeout and the process listing |
+| 3 | 234, FP-0052 case 3 | 3010 | 405 | 79 `git` | Git fixture and corpus processes |
+| 4 | 208, a pinned revision in a fixture `corpora.json` | 2636 | 245 | 73 `git` | Git fixture and corpus processes |
+| 5 | 202, verification fails when the license digest ... differs | 2479 | 264 | 67 `git` | Git fixture and corpus processes |
+| 6 | 162, FP-0098 case 2 | 2358 | 2012 | `node`, `powershell`, `taskkill` | 2-second gate timeout and the listing attempt |
+| 7 | 204, a replace ref | 2277 | 222 | 66 `git` | Git fixture and corpus processes |
+| 8 | 229, corpus-repin against a local fixture upstream | 2246 | 259 | 57 `git` | Git fixture and corpus processes |
+| 9 | 231, FP-0052 case 2 | 2201 | 1146 | 2 `taskkill`, `node`, `powershell` | 1-second watchdog timeout and the stop |
+| 10 | 199, corpus-verify fails for a missing snapshot ... | 2019 | 297 | 56 `git`, 1 `node` | Git fixture and corpus processes |
+
+### Cause
+
+`raw/probe-process-starts.log` runs the same base tree with `raw/process-probe.mjs`, which counts each case's child processes through `node:child_process` and the time that synchronous calls block the thread.
+The probe counted 1857 child processes, 1756 of them `git`, and 49295 ms in synchronous calls.
+The 51 cases that start `git` took 63984 of the 78728 ms in the Windows base profile, or 81.3%; the 137 cases that start no child process took 971 ms.
+On Linux, the seven Git cases of the table take 9% to 15% of their Windows time.
+[INFERENCE] Their Windows cost is therefore mostly the start of each Git process, times the fixture's process count; no log times a single Git start.
+The four cases with a process listing wait for a watchdog timeout of 250 ms, 1 second, or 2 seconds, and then for Windows PowerShell or `taskkill.exe`; their cost is the wait that they assert.
+Synchronous calls, such as `spawnSync`, block the thread until the process ends.
+[INFERENCE] Asynchronous concurrency within one thread therefore cannot overlap that time, so the change uses worker threads; no run measured concurrency within one thread.
+
+### Change
+
+The change runs independent cases concurrently, which the contract allows, and changes no case's function, fixture, or assertion.
+Ordinary cases run on four worker threads, so a case that waits for a child process or a timeout no longer delays the cases on the other threads.
+The nine declared cases run alone on the main thread, which keeps their process-wide changes from reaching other cases.
+
+### After
+
+On Windows, the 240 cases took 37968 ms in `raw/profile-after.log`, 48% of the 79426 ms before; their durations sum to 91755 ms, because the cases overlap.
+`node tools/fairpane.mjs test` took 47936 ms in `raw/controller-tests-after.log`.
+On WSL Ubuntu, the 240 cases took 11414 ms in `raw/profile-linux-after.log`, 65% of the 17690 ms before.
+The slowest single case on Windows is case 208, at 3834 ms, so no single case approaches the timeout.
+Eight of the ten slowest base cases took longer on their own than before, and cases 162 and 204 took about 3% less, as `raw/cost.log` shows.
+[INFERENCE] The rise comes from sharing the processor with up to three other cases.
+
+### Every case and assertion kept
+
+- `raw/names.log` prints the ordered names of the base suite (238) and the changed suite (240).
+  The first 238 names of the changed suite equal the base names in order, and the two added names are FP-0107 cases 1 and 2.
+  The changed suite also equals the red baseline of `raw/tests-before.log`, and each suite has the same names on Windows and on WSL Ubuntu.
+- `raw/baseline-test-diff.log` compares the staged red-baseline `tools/selftest.mjs`, `ebc67a1f`, with the final one, `5a12bf80`.
+  The only changes are the runner import, the `test` signature, the third argument of the module loops, a declaration on the closing line of each of seven cases, and the final loop.
+  No case function, fixture function, or assertion changed, and FP-0107 cases 1 and 2 are byte for byte those of the red baseline.
+- In `tools/attest.test.mjs` and `tools/release.test.mjs`, only the closing line of the declared case and the `map` that builds the case objects changed.
+
+## Mutation controls
+
+`raw/mutation.log` records each control on `tools/test-runner.mjs`: `git hash-object` before, the mutation through `raw/mutate.mjs`, `git hash-object` during, `git diff --no-index` into the diff file, `node tools/selftest.mjs`, the restoration, and `git hash-object` after.
+
+| Control | Diff | Blob before, during, after | Result |
+| --- | --- | --- | --- |
+| 1: ignore the declaration and run every case concurrently. The launch loop drops its limit and its exclusive check, and the declaration test becomes `if (false)`. | `raw/mutation-1.diff` | `0bde3642`, `af0aac90`, `0bde3642` | `node tools/selftest.mjs` exits with 1: 236 of 240 pass. FP-0107 case 2 fails with ""declared 1" ran from 26630.4578 to 26705.1017 ms while "ordinary 1" ran from 26630.4293 to 26705.0582 ms." Cases 173 and 175 fail, because other cases' fixture directories appear in their private temporary directory, and case 235 fails with the SystemRoot error of case 233. |
+| 2: omit the `# duration_ms` line. | `raw/mutation-2.diff` | `0bde3642`, `fd27726e`, `0bde3642` | `node tools/selftest.mjs` exits with 1: 239 of 240 pass, and FP-0107 case 1 fails with "Result line 1 lacks its duration line". |
+
+The `git diff --no-index` commands exit with 1, because the files differ, and each restoration exits with 0.
+
+## Records
+
+Every listed command ran through `node tools/fairpane.mjs record`, and the worker deleted or overwrote no log.
+
+| Log | RESULT |
+| --- | --- |
+| `raw/tests-before.log` | See "Red baseline". |
+| `raw/profile-before.log` | `git rev-parse HEAD` (0); `git archive` of `0276268` into `out/fp0107/base.tar` and `out/fp0107/before.tar` (0 each); `tar -xf` of both (0 each); the copy of `tools/test-runner.mjs` into the before tree (0); `git hash-object` (0): `0bde3642` for both runner copies, `56855970` for the base `tools/selftest.mjs`, and `07e4a243` for the before tree's; `git diff --no-index --output=raw/profile-before.diff` (1, because the trees differ); `git diff --no-index --stat` (1): 2 files, 196 insertions, 21 deletions; `git init`, `git add -A`, `git commit`, and `git rev-parse` in the before tree (0 each), with tree `d11ba662`; `node --version` (0), v26.7.0; `node tools/selftest.mjs` in the before tree (0): 238 of 238 pass in 79426 ms. |
+| `raw/probe-process-starts.log` | `node --import=.../process-probe.mjs tools/selftest.mjs` in the before tree (0): 238 of 238 pass, with a `# probe` line after each duration line. |
+| `raw/profile-linux-before.log` | `git archive HEAD` of the before tree into `out/fp0107/before-linux.tar` (0); under WSL, the extraction into `$HOME/fairpane-linux/work/FP-0107/before`, `git init`, `git add -A`, and `git commit` (0), with the copied tree `d11ba662`, which equals the Windows before tree, and the same two blobs; then `node tools/selftest.mjs` (0): 238 of 238 pass in 17690 ms. |
+| `raw/profile-after.log` | `git rev-parse HEAD` (0), `0276268`; `git hash-object` (0): `tools/test-runner.mjs` `0bde3642`, `tools/selftest.mjs` `5a12bf80`, `tools/attest.test.mjs` `e92b75db`, `tools/release.test.mjs` `9f0d0882`; `node --version` (0); `node tools/selftest.mjs` (0): 240 of 240 pass in 37968 ms. |
+| `raw/profile-linux-after.log` | `git add -A -- tools engineering/evidence/FP-0107` (0); `git write-tree` (0), `a0e2d041`; `git archive` of that tree (0); under WSL, the extraction into `$HOME/fairpane-linux/work/FP-0107/after` and a commit whose tree is `a0e2d041`, with the same four tool blobs (0); then `node tools/selftest.mjs` (0): 240 of 240 pass in 11414 ms. |
+| `raw/names.log` | `node raw/names.mjs` (0); see "Every case and assertion kept". |
+| `raw/mutation.log` | See "Mutation controls". |
+| `raw/controller-tests-after.log` | `git rev-parse HEAD` (0); `git hash-object` (0) of the four tool files and `tools/README.md` `f6c2f8d3`; `node --version` (0); `node tools/fairpane.mjs test` (0): 240 of 240 pass in 47936 ms; `node tools/fairpane.mjs check` (0, `pass`). |
+| `raw/bun-selftest.log` | `bun --version` (0), 1.4.2; `bun tools/selftest.mjs` (0): 240 of 240 pass in 45811 ms, so the worker threads also run under Bun. |
+| `raw/baseline-test-diff.log` | `git diff --stat` and `git diff` of the two `tools/selftest.mjs` blobs (0 each). |
+| `raw/cost.log` | `node raw/cost.mjs` (0): the profile totals, the probe totals, and the slowest base cases. |
+| `raw/probe-worker-chdir.log` | `node -e` (0): a worker's `process.chdir` throws `ERR_WORKER_UNSUPPORTED_OPERATION`. |
+
+Two runs of the changed suite were not recorded, because they preceded the profiles and served only to check the implementation.
+The first stopped before any case with `ERR_WORKER_PATH`, because `new Worker` needs a `URL` object, not a URL string; `casePool` now passes `new URL(moduleUrl)`.
+The second passed 240 of 240 cases.
+Neither run supports a claim in this README.
+
+### Red baseline
+
+`raw/tests-before.log` runs these commands in order, after FP-0107 cases 1 and 2 were added to `tools/selftest.mjs` and before any other change.
+
+1. `git rev-parse HEAD HEAD:tools/selftest.mjs HEAD:tools/lib.mjs`, `exit_code` 0: `HEAD` `0276268879438531745c63ab497e80c0a1e69aa5`, `tools/selftest.mjs` `56855970669e245ef1bd9dc71f746da4cc768f5d`, and `tools/lib.mjs` `7a2bd74a9c1e7477d769d5ed82d4dea26c3d04cd`.
+2. `git status --short`, `exit_code` 0: only `tools/selftest.mjs` is modified, and `raw/` is new.
+3. The staging command `git add -- tools/selftest.mjs`, `exit_code` 0.
+4. `git ls-files --stage -- tools`, `exit_code` 0: the blob ID of every staged file under `tools`, with `tools/selftest.mjs` at `ebc67a1f083f11f6239d598970f5cacb5da55bd0`; the status of step 2 shows no other changed file under `tools`.
+5. `git diff --cached --stat`, `exit_code` 0: 50 insertions in `tools/selftest.mjs`.
+6. `node --version`, `exit_code` 0, v26.7.0.
+7. `node tools/selftest.mjs`, `exit_code` 1: 238 of 240 pass, and FP-0107 cases 1 and 2 fail with "Cannot find module ...\tools\test-runner.mjs".
+8. `git reset -q -- tools/selftest.mjs` and `git diff --cached --stat`, `exit_code` 0 each, which leave the index at `HEAD`.
+
+## Open items
+
+- The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs `repo-check` and `controller-test`.
+- After the push, the integrator starts the `Gates` workflow on `master` at least ten times, records each run, and downloads both jobs' receipts.
+  `ci/README.md` then reports each run's Windows and Linux `controller-test` duration and the ten slowest cases of each job from the `# slowest` lines of the receipt logs.
+  The task is accepted only when every run passes and the slowest Windows `controller-test` step takes at most 80 seconds.
+- [INFERENCE] The hosted Windows runner has fewer processors than the development host, so its gain from four worker threads may be smaller than the 52% measured here; the dispatched runs decide criterion 3.

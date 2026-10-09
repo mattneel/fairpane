@@ -1,0 +1,15 @@
+diff --git a/out/fp0107/mutation-1/test-runner.mjs b/tools/test-runner.mjs
+index 0bde364..af0aac9 100644
+--- a/out/fp0107/mutation-1/test-runner.mjs
++++ b/tools/test-runner.mjs
+@@ -54,8 +54,8 @@ export async function runCases(cases, { write = line => console.log(line), concu
+   await new Promise(resolve => {
+     let next = 0, running = 0, exclusive = false;
+     const launch = () => {
+-      while (next < cases.length && !exclusive && running < concurrency) {
+-        if (cases[next].processWide !== undefined) {
++      while (next < cases.length) {
++        if (false) {
+           if (running > 0) break;
+           exclusive = true;
+         }

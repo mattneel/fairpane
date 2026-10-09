@@ -1,0 +1,25 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0107/raw/cost.mjs"]
+PROFILE windows before: 238 cases, total 79426 ms, sum of case durations 78728 ms
+PROFILE windows after: 240 cases, total 37968 ms, sum of case durations 91755 ms
+PROFILE linux before: 238 cases, total 17690 ms, sum of case durations 17447 ms
+PROFILE linux after: 240 cases, total 11414 ms, sum of case durations 28980 ms
+PROBE 1857 child processes, 1756 of them git, 49295 ms in synchronous calls
+GIT 51 cases start git: 63984 of 78728 ms in the Windows base profile (81.3%)
+NONE 137 cases start no child process: 971 ms
+LISTING 146 1357 ms A hung child reaches its watchdog and cannot pass
+LISTING 161 3154 ms FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+LISTING 162 2358 ms FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails
+LISTING 231 2201 ms FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command
+RANK | case | Windows before | Windows after | Linux before | Linux after | starts | sync ms | programs | name
+1 | 103 | 3274 | 3607 | 284 | 541 | 110 | 3239 | git=110 | FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+2 | 161 | 3154 | 3248 | 2211 | 2214 | 3 | 460 | node=1,powershell=1,taskkill=1 | FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+3 | 234 | 3010 | 3265 | 405 | 616 | 79 | 586 | git=79 | FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+4 | 208 | 2636 | 3834 | 245 | 740 | 73 | 807 | git=73 | A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+5 | 202 | 2479 | 2594 | 264 | 526 | 67 | 362 | git=67 | Verification fails when the license digest, the commit date, or an applicability count differs from its record
+6 | 162 | 2358 | 2296 | 2012 | 2032 | 3 | 266 | node=1,powershell=1,taskkill=1 | FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails
+7 | 204 | 2277 | 2210 | 222 | 372 | 66 | 969 | git=66 | A replace ref that substitutes the recorded commit cannot make verification pass
+8 | 229 | 2246 | 2327 | 259 | 479 | 57 | 704 | git=57 | corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+9 | 231 | 2201 | 2238 | 1146 | 1224 | 4 | 301 | taskkill=2,node=1,powershell=1 | FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command
+10 | 199 | 2019 | 2291 | 297 | 553 | 57 | 718 | git=56,node=1 | corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0107/raw/cost.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:54:44.284Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":63}

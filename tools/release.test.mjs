@@ -278,7 +278,7 @@ export const releaseCases = [
     assert.equal(differs.result, 'different', JSON.stringify(differs, null, 2));
     assert.deepEqual(differs.differing, ['bin/stamp.txt']);
     assert.equal(reproduceExitCode(differs), 1);
-  }],
+  }, { processWide: 'ZIG_GLOBAL_CACHE_DIR and ZIG_LIB_DIR in process.env' }],
   ['FP-0027 case 6: reproduce-check removes both work trees, and a forced removal failure appears in the report', async () => {
     const { reproduceCheck, reproduceExitCode } = await release();
     const fixed = buildFixture(FIXED_BUILD);
@@ -350,7 +350,7 @@ export const releaseCases = [
     assert.match(nothing.error, /installed no files/);
     assert.equal(reproduceExitCode(nothing), 1);
   }],
-].map(([name, fn]) => ({ name, fn }));
+].map(([name, fn, declaration]) => ({ name, fn, ...declaration }));
 
 export function removeReleaseFixtures() {
   const failures = [];

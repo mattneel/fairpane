@@ -1,0 +1,168 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","ebc67a1f083f11f6239d598970f5cacb5da55bd0","5a12bf80daaad3f9ae2cf9228c87236535b374b4"]
+ ...bd0 => 5a12bf80daaad3f9ae2cf9228c87236535b374b4 | 78 ++++++++++++----------
+ 1 file changed, 42 insertions(+), 36 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","ebc67a1f083f11f6239d598970f5cacb5da55bd0","5a12bf80daaad3f9ae2cf9228c87236535b374b4"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:54:20.966Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","ebc67a1f083f11f6239d598970f5cacb5da55bd0","5a12bf80daaad3f9ae2cf9228c87236535b374b4"]
+diff --git a/ebc67a1f083f11f6239d598970f5cacb5da55bd0 b/5a12bf80daaad3f9ae2cf9228c87236535b374b4
+index ebc67a1..5a12bf8 100644
+--- a/ebc67a1f083f11f6239d598970f5cacb5da55bd0
++++ b/5a12bf80daaad3f9ae2cf9228c87236535b374b4
+@@ -7,6 +7,7 @@ import path from 'node:path';
+ import http from 'node:http';
+ import { fileURLToPath, pathToFileURL } from 'node:url';
+ import { spawnSync } from 'node:child_process';
++import { isMainThread } from 'node:worker_threads';
+ import {
+   readJson, writeJson, sha256, fileHash, safePath, collectFiles, hashInputs,
+   validateLock, hostPlatform, verifyArchive, validatePlan, readyTasks,
+@@ -28,10 +29,12 @@ import { ucdCases, removeUcdFixtures } from './ucd.test.mjs';
+ import { fileSetCases, removeFileSetFixtures } from './fileset.test.mjs';
+ import { rustCases, removeRustFixtures } from './rust.test.mjs';
+ import { FILE_SET_IDS } from './fileset.mjs';
++import { casePool, runCases, serveCases } from './test-runner.mjs';
+ 
+ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+ const cases = [], temporary = [];
+-function test(name, fn) { cases.push({ name, fn }); }
++/** Register a case. `processWide` names the process-wide state that the case changes, so the runner runs it alone. */
++function test(name, fn, { processWide } = {}) { cases.push(processWide === undefined ? { name, fn } : { name, fn, processWide }); }
+ function temp() {
+   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fairpane-controller-'));
+   temporary.push(dir); return dir;
+@@ -226,13 +229,13 @@ test('1: A forged local receipt passes validateReceipt without gate execution',
+   assert.equal(validateReceipt(dir, 'out/evidence/forged.json').result, 'pass');
+   assert.equal(fs.existsSync(path.join(dir, 'executed.txt')), false);
+ });
+-for (const c of attestationCases) test(c.name, c.fn);
+-for (const c of workflowCases) test(c.name, c.fn);
+-for (const c of abiCases) test(c.name, c.fn);
+-for (const c of releaseCases) test(c.name, c.fn);
+-for (const c of ucdCases) test(c.name, c.fn);
+-for (const c of fileSetCases) test(c.name, c.fn);
+-for (const c of rustCases) test(c.name, c.fn);
++for (const c of attestationCases) test(c.name, c.fn, c);
++for (const c of workflowCases) test(c.name, c.fn, c);
++for (const c of abiCases) test(c.name, c.fn, c);
++for (const c of releaseCases) test(c.name, c.fn, c);
++for (const c of ucdCases) test(c.name, c.fn, c);
++for (const c of fileSetCases) test(c.name, c.fn, c);
++for (const c of rustCases) test(c.name, c.fn, c);
+ test('15: release-check still exits with status 1', () => {
+   const r = spawnSync(process.execPath, [path.join(root, 'tools/fairpane.mjs'), 'release-check'], { cwd: root, encoding: 'utf8', windowsHide: true });
+   assert.equal(r.status, 1, r.stderr);
+@@ -495,7 +498,7 @@ test('A failed output copy is recorded and its capture directory is removed', as
+   });
+   assert.match(fs.readFileSync(logPath, 'utf8'), /^RESULT .*forced copy failure/m);
+   assert.deepEqual(fs.readdirSync(tmp), []);
+-});
++}, { processWide: 'TMPDIR, TMP, and TEMP in process.env' });
+ test('Standard error output reaches the log', async () => {
+   const dir = temp(), logPath = path.join(dir, 'log');
+   const r = await runProcess(process.execPath, ['-e', 'console.error("to-standard-error")'], { cwd: dir, logPath });
+@@ -509,14 +512,14 @@ test('A completed command leaves no capture directory', async () => {
+   });
+   assert.deepEqual(fs.readdirSync(tmp), []);
+   assert.match(fs.readFileSync(path.join(dir, 'log'), 'utf8'), /captured/);
+-});
++}, { processWide: 'TMPDIR, TMP, and TEMP in process.env' });
+ test('Executable resolution never searches the process working directory', () => {
+   const cwd = temp(), other = temp(), name = 'fixture-cwd-tool', saved = process.cwd();
+   fs.chmodSync(put(cwd, process.platform === 'win32' ? `${name}.exe` : name, 'fixture'), 0o755);
+   process.chdir(cwd);
+   try { assert.throws(() => resolveExecutable(other, name, { pathEnv: '' }), /not on PATH/); }
+   finally { process.chdir(saved); }
+-});
++}, { processWide: 'the working directory' });
+ test('A bare executable name is logged as its resolved absolute path', async () => {
+   const dir = gateFixture(), log = 'out/evidence/bare.log';
+   const bare = path.basename(process.execPath, process.platform === 'win32' ? '.exe' : '');
+@@ -1002,7 +1005,7 @@ test('A replace ref that substitutes the recorded commit cannot make verificatio
+   const objectFile = id => path.join(g.g, 'objects', id.slice(0, 2), id.slice(2));
+   fs.mkdirSync(path.dirname(objectFile(forged)), { recursive: true }); fs.copyFileSync(objectFile(g.commit), objectFile(forged));
+   await assert.rejects(g.verify, e => /fsck: git fsck exited with status/.test(e.message) && !/tree:|commit_date:|inventory\.|applicability/.test(e.message));
+-});
++}, { processWide: 'GIT_OBJECT_DIRECTORY in process.env' });
+ test('A tree path that contains a line feed fails the inventory', async () => {
+   const g = bareRepo(), c = fixtureCommit(g, [{ path: 'a\nb.txt', text: 'x\n' }, { path: 'ok.txt', text: 'y\n' }]);
+   await assert.rejects(() => inventoryOf(g, c), /line feed/);
+@@ -1391,7 +1394,7 @@ test('FP-0052 case 2: a taskkill.exe in the working directory does not stop the
+     if (fs.existsSync(pidFile)) try { process.kill(Number(fs.readFileSync(pidFile, 'utf8')), 'SIGKILL'); } catch { /* It has ended. */ }
+     console.log(`# FP-0052 case 2 took ${Date.now() - started} ms.`);
+   }
+-});
++}, { processWide: 'NODE_OPTIONS in process.env on Windows, and the working directory' });
+ test('FP-0052 case 2, amendment 2: a host other than Node builds the stand-in from the Node on PATH and fails without one', () => {
+   assert.equal(taskkillStandInSource({ nodeHost: true, pathEnv: '' }), process.execPath);
+   const dir = temp(), node = path.join(dir, process.platform === 'win32' ? 'node.exe' : 'node');
+@@ -1415,7 +1418,7 @@ test('FP-0052: a SystemRoot that cannot locate taskkill.exe fails runProcess on
+     // Only Windows needs a system program to stop a process tree.
+     assert.equal(r.exit_code, 0); assert.equal(r.error, null); assert.equal(fs.existsSync(marker), true);
+   }
+-});
++}, { processWide: 'SystemRoot in process.env' });
+ const GIT_WRITE_STEPS = ['stage the record', 'back up the sources', 'replace the sources', 'replace the record'];
+ test('FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged', async () => {
+   const u = upstreamFixture(), policyFile = u.policy({ revision: u.first });
+@@ -1456,7 +1459,7 @@ test('FP-0052 case 4: a fetch that cannot remove the old snapshot after it repla
+   assert.equal(readJson(u.recordFile).commit, moved);
+   assert.equal(fixtureGit(u.snapshot, ['rev-parse', 'refs/heads/main']), moved);
+   assert.equal(fs.existsSync(path.join(u.corporaDir, 'test262.lock')), false);
+-});
++}, { processWide: 'the fs.rmSync function of the node:fs module' });
+ test('FP-0052 case 5: a fetch fails while test262.lock exists and changes nothing', async () => {
+   const u = upstreamFixture(), policyFile = u.policy({ revision: u.first });
+   await u.fetch(policyFile);
+@@ -1536,26 +1539,29 @@ test('FP-0107 case 2: the runner runs no case that declares a process-wide chang
+   }
+ });
+ 
+-console.log('TAP version 13');
+-let failures = 0;
+-for (let i = 0; i < cases.length; i++) {
+-  try { await cases[i].fn(); console.log(`ok ${i + 1} - ${cases[i].name}`); }
+-  catch (e) {
+-    failures++; console.log(`not ok ${i + 1} - ${cases[i].name}`);
+-    console.log(`  ---\n  message: ${JSON.stringify(e.message)}\n  ...`);
++/** Remove this thread's temporary fixtures and return the problems. */
++function removeFixtures() {
++  const problems = [];
++  for (const dir of temporary.reverse()) {
++    try { fs.rmSync(dir, { recursive: true, force: true }); }
++    catch (e) { problems.push(e.message); }
+   }
++  for (const remove of [removeAttestationFixtures, removeAbiFixtures, removeReleaseFixtures, removeUcdFixtures, removeFileSetFixtures, removeRustFixtures])
++    problems.push(...remove());
++  return problems;
+ }
+-for (const dir of temporary.reverse()) {
+-  try { fs.rmSync(dir, { recursive: true, force: true }); }
+-  catch (e) { failures++; console.error(`Temporary fixture cleanup failed: ${e.message}`); }
+-}
+-for (const problem of removeAttestationFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+-for (const problem of removeAbiFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+-for (const problem of removeReleaseFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+-for (const problem of removeUcdFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+-for (const problem of removeFileSetFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+-for (const problem of removeRustFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+-console.log(`1..${cases.length}`);
+-console.log(`# tests ${cases.length}\n# pass ${cases.length - failures}\n# fail ${failures}`);
+-console.log('# Scope: controller behavior only. No renderer or JavaScript conformance claim.');
+-process.exitCode = failures ? 1 : 0;
++// Ordinary cases run on worker threads that load this module, so a case that blocks its thread on a child process
++// does not delay the others. A case that declares a process-wide change runs alone on the main thread.
++if (isMainThread) {
++  const pool = casePool(import.meta.url);
++  const counts = await runCases(cases.map((c, i) => c.processWide === undefined ? { ...c, fn: () => pool.run(i, c.name) } : c), {
++    concurrency: pool.size,
++    cleanup: async () => {
++      const problems = [...await pool.close(), ...removeFixtures()];
++      for (const problem of problems) console.error(`Temporary fixture cleanup failed: ${problem}`);
++      return problems.length;
++    },
++  });
++  console.log('# Scope: controller behavior only. No renderer or JavaScript conformance claim.');
++  process.exitCode = counts.fail ? 1 : 0;
++} else serveCases(cases, removeFixtures);
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","ebc67a1f083f11f6239d598970f5cacb5da55bd0","5a12bf80daaad3f9ae2cf9228c87236535b374b4"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t818f62be9\\m","started_at":"2026-10-09T17:54:21.108Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":46}

@@ -205,7 +205,7 @@ export const attestationCases = [
     process.env.PATH = '';
     try { assert.match(codeOf(() => candidateIdentity(candidate.dir, candidate.first)), /^error: No git executable exists on PATH/); }
     finally { process.env.PATH = searchPath; }
-  }],
+  }, { processWide: 'GIT_DIR and PATH in process.env' }],
   ['16: A trusted signature over a noncanonical payload fails as malformed', () => {
     const canonical = JSON.stringify(record());
     const replacement = canonical.replace('fixture-suite', 'fixture-\uFFFDsuite');
@@ -292,7 +292,7 @@ export const attestationCases = [
     rejects(() => loadTrustPolicy(path.join(alias, 'link', 'trust-policy.json'), locations), 'unprotected-policy');
     assert.equal(loadTrustPolicy(path.join(outside, 'trust-policy.json'), locations).keys.size, 1);
   }],
-].map(([name, fn]) => ({ name, fn }));
+].map(([name, fn, declaration]) => ({ name, fn, ...declaration }));
 
 export function removeAttestationFixtures() {
   const failures = [];

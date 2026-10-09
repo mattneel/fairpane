@@ -1,0 +1,180 @@
+/**
+ * The controller-test runner. It runs registered cases, writes TAP lines with each case's duration, and can run
+ * ordinary cases on worker threads, so that a case that blocks its thread on a child process does not delay the others.
+ *
+ * A case is `{ name, fn, processWide }`. `processWide`, when present, is a nonempty description of the process-wide state
+ * that the case changes, such as the working directory, a `process.env` variable, or a module-level hook. Such a case
+ * starts only when no other case runs, and no other case starts until it ends.
+ */
+import { Worker, parentPort } from 'node:worker_threads';
+
+/** The number of cases that run at the same time, unless the caller names another number. */
+export const DEFAULT_CONCURRENCY = 4;
+/** The number of `# slowest` lines. */
+const SLOWEST = 10;
+
+function validateCases(cases) {
+  if (!Array.isArray(cases)) throw new TypeError('The runner needs an array of cases.');
+  cases.forEach((c, i) => {
+    if (typeof c?.name !== 'string' || c.name === '') throw new TypeError(`Case ${i + 1} has no name.`);
+    if (typeof c.fn !== 'function') throw new TypeError(`Case ${i + 1} "${c.name}" has no function.`);
+    if (c.processWide !== undefined && (typeof c.processWide !== 'string' || c.processWide === ''))
+      throw new TypeError(`Case ${i + 1} "${c.name}" must describe its process-wide change as a nonempty string.`);
+  });
+}
+
+/**
+ * Run `cases` and write TAP lines through `write`. Return `{ tests, pass, fail }`, the counts of the summary lines.
+ *
+ * Up to `concurrency` ordinary cases run at once; a case that declares `processWide` runs alone.
+ * Cases start in the order of their numbers, and result lines keep that order.
+ * After each result line, the runner writes `# duration_ms <n> <ms>`: the case's wall time around its function,
+ * measured with `performance.now()` and rounded down to whole milliseconds. A failure's message follows as a YAML block.
+ * After the last case, `cleanup` runs and returns the number of cleanup failures, which count as failures.
+ * The summary lines follow, then `# slowest <rank> <ms> <n> <name>` for the ten slowest cases in descending order
+ * of `<ms>` with ties in ascending case number, then `# duration_ms total <ms>` for the whole run.
+ */
+export async function runCases(cases, { write = line => console.log(line), concurrency = DEFAULT_CONCURRENCY, cleanup = async () => 0 } = {}) {
+  validateCases(cases);
+  if (!Number.isInteger(concurrency) || concurrency < 1) throw new TypeError('The runner needs a positive integer concurrency.');
+  const runStarted = performance.now(), outcomes = new Array(cases.length);
+  let written = 0, failures = 0;
+  write('TAP version 13');
+  const writeReady = () => {
+    for (; written < cases.length && outcomes[written]; written++) {
+      const n = written + 1, outcome = outcomes[written];
+      write(`${outcome.failed ? 'not ok' : 'ok'} ${n} - ${cases[written].name}`);
+      write(`# duration_ms ${n} ${outcome.ms}`);
+      if (outcome.failed) {
+        failures++;
+        write('  ---'); write(`  message: ${JSON.stringify(outcome.message)}`); write('  ...');
+      }
+    }
+  };
+  await new Promise(resolve => {
+    let next = 0, running = 0, exclusive = false;
+    const launch = () => {
+      while (next < cases.length && !exclusive && running < concurrency) {
+        if (cases[next].processWide !== undefined) {
+          if (running > 0) break;
+          exclusive = true;
+        }
+        start(next++);
+      }
+      if (next === cases.length && running === 0) resolve();
+    };
+    const start = i => {
+      running++;
+      const started = performance.now();
+      Promise.resolve().then(() => cases[i].fn()).then(() => ({ failed: false }), e => ({ failed: true, message: e?.message }))
+        .then(outcome => {
+          outcomes[i] = { ...outcome, ms: Math.floor(performance.now() - started) };
+          running--;
+          if (cases[i].processWide !== undefined) exclusive = false;
+          writeReady();
+          launch();
+        });
+    };
+    launch();
+  });
+  failures += await cleanup();
+  const tests = cases.length, ms = outcomes.map(o => o.ms);
+  write(`1..${tests}`);
+  write(`# tests ${tests}`); write(`# pass ${tests - failures}`); write(`# fail ${failures}`);
+  const ranked = ms.map((_, i) => i).sort((a, b) => ms[b] - ms[a] || a - b).slice(0, SLOWEST);
+  ranked.forEach((i, rank) => write(`# slowest ${rank + 1} ${ms[i]} ${i + 1} ${cases[i].name}`));
+  write(`# duration_ms total ${Math.floor(performance.now() - runStarted)}`);
+  return { tests, pass: tests - failures, fail: failures };
+}
+
+/**
+ * Start `size` worker threads that each load the module at `moduleUrl`. In a worker thread, that module must register
+ * the same cases in the same order as in the main thread and then call `serveCases`.
+ * `run(index, name)` runs that case on an idle worker and rejects with the case's error message when the case fails.
+ * A worker that stops fails the case that it runs and is not replaced; when no worker remains, every later case fails.
+ * `close()` asks each remaining worker to remove its fixtures, stops it, and returns the cleanup problems,
+ * with one problem for each worker that stopped early, because nothing removed its fixtures.
+ */
+export function casePool(moduleUrl, size = DEFAULT_CONCURRENCY) {
+  if (!Number.isInteger(size) || size < 1) throw new TypeError('A case pool needs a positive integer size.');
+  const idle = [], waiting = [], problems = [];
+  let live = size, lastStop = null;
+  const start = () => {
+    const state = { worker: new Worker(new URL(moduleUrl)), pending: null, stopped: false, closing: false };
+    state.worker.on('message', message => {
+      const pending = state.pending;
+      state.pending = null;
+      pending?.resolve(message);
+    });
+    const stop = reason => {
+      if (state.stopped) return;
+      state.stopped = true; live--; lastStop = reason;
+      const pending = state.pending;
+      state.pending = null;
+      if (state.closing) { pending?.resolve({ problems: [`A test worker stopped during its cleanup: ${reason}`] }); return; }
+      problems.push(`A test worker stopped before its cleanup, so its temporary fixtures remain: ${reason}`);
+      pending?.reject(new Error(`The test worker stopped: ${reason}`));
+      const at = idle.indexOf(state);
+      if (at >= 0) idle.splice(at, 1);
+      if (live === 0) for (const w of waiting.splice(0)) w.reject(new Error(`No test worker remains; the last one stopped: ${reason}`));
+    };
+    state.worker.on('error', e => stop(e?.message ?? String(e)));
+    state.worker.on('exit', code => stop(`exit code ${code}`));
+    return state;
+  };
+  const acquire = () => {
+    if (idle.length) return Promise.resolve(idle.pop());
+    if (live === 0) return Promise.reject(new Error(`No test worker remains; the last one stopped: ${lastStop}`));
+    return new Promise((resolve, reject) => waiting.push({ resolve, reject }));
+  };
+  const release = state => {
+    const w = waiting.shift();
+    if (w) w.resolve(state); else idle.push(state);
+  };
+  const request = (state, message) => new Promise((resolve, reject) => {
+    state.pending = { resolve, reject };
+    state.worker.postMessage(message);
+  });
+  idle.push(...Array.from({ length: size }, start));
+  return {
+    size,
+    async run(index, name) {
+      const state = await acquire();
+      const result = await request(state, { type: 'run', index, name });
+      release(state);
+      if (result.failed) throw Object.assign(new Error(), { message: result.message });
+    },
+    async close() {
+      const results = await Promise.all(idle.splice(0).map(async state => {
+        state.closing = true;
+        const result = await request(state, { type: 'cleanup' });
+        await state.worker.terminate();
+        return result.problems;
+      }));
+      return [...problems, ...results.flat()];
+    },
+  };
+}
+
+/**
+ * Serve the requests of a `casePool` in a worker thread: run the case with the requested number after checking its name,
+ * and at the end run `cleanup`, which returns the cleanup problems of this thread.
+ */
+export function serveCases(cases, cleanup) {
+  validateCases(cases);
+  parentPort.on('message', async message => {
+    if (message.type === 'cleanup') {
+      let problems;
+      try { problems = cleanup(); } catch (e) { problems = [`The worker cleanup failed: ${e?.message}`]; }
+      parentPort.postMessage({ problems });
+      return;
+    }
+    const c = cases[message.index];
+    if (c?.name !== message.name) {
+      parentPort.postMessage({ failed: true, message: `The worker registered "${c?.name}" as case ${message.index + 1}, not "${message.name}".` });
+      return;
+    }
+    try { await c.fn(); parentPort.postMessage({ failed: false }); }
+    catch (e) { parentPort.postMessage({ failed: true, message: e?.message }); }
+  });
+}

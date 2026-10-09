@@ -7,6 +7,7 @@ import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { isMainThread } from 'node:worker_threads';
 import {
   readJson, writeJson, sha256, fileHash, safePath, collectFiles, hashInputs,
   validateLock, hostPlatform, verifyArchive, validatePlan, readyTasks,
@@ -28,10 +29,12 @@ import { ucdCases, removeUcdFixtures } from './ucd.test.mjs';
 import { fileSetCases, removeFileSetFixtures } from './fileset.test.mjs';
 import { rustCases, removeRustFixtures } from './rust.test.mjs';
 import { FILE_SET_IDS } from './fileset.mjs';
+import { casePool, runCases, serveCases } from './test-runner.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cases = [], temporary = [];
-function test(name, fn) { cases.push({ name, fn }); }
+/** Register a case. `processWide` names the process-wide state that the case changes, so the runner runs it alone. */
+function test(name, fn, { processWide } = {}) { cases.push(processWide === undefined ? { name, fn } : { name, fn, processWide }); }
 function temp() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fairpane-controller-'));
   temporary.push(dir); return dir;
@@ -226,13 +229,13 @@ test('1: A forged local receipt passes validateReceipt without gate execution', 
   assert.equal(validateReceipt(dir, 'out/evidence/forged.json').result, 'pass');
   assert.equal(fs.existsSync(path.join(dir, 'executed.txt')), false);
 });
-for (const c of attestationCases) test(c.name, c.fn);
-for (const c of workflowCases) test(c.name, c.fn);
-for (const c of abiCases) test(c.name, c.fn);
-for (const c of releaseCases) test(c.name, c.fn);
-for (const c of ucdCases) test(c.name, c.fn);
-for (const c of fileSetCases) test(c.name, c.fn);
-for (const c of rustCases) test(c.name, c.fn);
+for (const c of attestationCases) test(c.name, c.fn, c);
+for (const c of workflowCases) test(c.name, c.fn, c);
+for (const c of abiCases) test(c.name, c.fn, c);
+for (const c of releaseCases) test(c.name, c.fn, c);
+for (const c of ucdCases) test(c.name, c.fn, c);
+for (const c of fileSetCases) test(c.name, c.fn, c);
+for (const c of rustCases) test(c.name, c.fn, c);
 test('15: release-check still exits with status 1', () => {
   const r = spawnSync(process.execPath, [path.join(root, 'tools/fairpane.mjs'), 'release-check'], { cwd: root, encoding: 'utf8', windowsHide: true });
   assert.equal(r.status, 1, r.stderr);
@@ -495,7 +498,7 @@ test('A failed output copy is recorded and its capture directory is removed', as
   });
   assert.match(fs.readFileSync(logPath, 'utf8'), /^RESULT .*forced copy failure/m);
   assert.deepEqual(fs.readdirSync(tmp), []);
-});
+}, { processWide: 'TMPDIR, TMP, and TEMP in process.env' });
 test('Standard error output reaches the log', async () => {
   const dir = temp(), logPath = path.join(dir, 'log');
   const r = await runProcess(process.execPath, ['-e', 'console.error("to-standard-error")'], { cwd: dir, logPath });
@@ -509,14 +512,14 @@ test('A completed command leaves no capture directory', async () => {
   });
   assert.deepEqual(fs.readdirSync(tmp), []);
   assert.match(fs.readFileSync(path.join(dir, 'log'), 'utf8'), /captured/);
-});
+}, { processWide: 'TMPDIR, TMP, and TEMP in process.env' });
 test('Executable resolution never searches the process working directory', () => {
   const cwd = temp(), other = temp(), name = 'fixture-cwd-tool', saved = process.cwd();
   fs.chmodSync(put(cwd, process.platform === 'win32' ? `${name}.exe` : name, 'fixture'), 0o755);
   process.chdir(cwd);
   try { assert.throws(() => resolveExecutable(other, name, { pathEnv: '' }), /not on PATH/); }
   finally { process.chdir(saved); }
-});
+}, { processWide: 'the working directory' });
 test('A bare executable name is logged as its resolved absolute path', async () => {
   const dir = gateFixture(), log = 'out/evidence/bare.log';
   const bare = path.basename(process.execPath, process.platform === 'win32' ? '.exe' : '');
@@ -1002,7 +1005,7 @@ test('A replace ref that substitutes the recorded commit cannot make verificatio
   const objectFile = id => path.join(g.g, 'objects', id.slice(0, 2), id.slice(2));
   fs.mkdirSync(path.dirname(objectFile(forged)), { recursive: true }); fs.copyFileSync(objectFile(g.commit), objectFile(forged));
   await assert.rejects(g.verify, e => /fsck: git fsck exited with status/.test(e.message) && !/tree:|commit_date:|inventory\.|applicability/.test(e.message));
-});
+}, { processWide: 'GIT_OBJECT_DIRECTORY in process.env' });
 test('A tree path that contains a line feed fails the inventory', async () => {
   const g = bareRepo(), c = fixtureCommit(g, [{ path: 'a\nb.txt', text: 'x\n' }, { path: 'ok.txt', text: 'y\n' }]);
   await assert.rejects(() => inventoryOf(g, c), /line feed/);
@@ -1391,7 +1394,7 @@ test('FP-0052 case 2: a taskkill.exe in the working directory does not stop the 
     if (fs.existsSync(pidFile)) try { process.kill(Number(fs.readFileSync(pidFile, 'utf8')), 'SIGKILL'); } catch { /* It has ended. */ }
     console.log(`# FP-0052 case 2 took ${Date.now() - started} ms.`);
   }
-});
+}, { processWide: 'NODE_OPTIONS in process.env on Windows, and the working directory' });
 test('FP-0052 case 2, amendment 2: a host other than Node builds the stand-in from the Node on PATH and fails without one', () => {
   assert.equal(taskkillStandInSource({ nodeHost: true, pathEnv: '' }), process.execPath);
   const dir = temp(), node = path.join(dir, process.platform === 'win32' ? 'node.exe' : 'node');
@@ -1415,7 +1418,7 @@ test('FP-0052: a SystemRoot that cannot locate taskkill.exe fails runProcess on 
     // Only Windows needs a system program to stop a process tree.
     assert.equal(r.exit_code, 0); assert.equal(r.error, null); assert.equal(fs.existsSync(marker), true);
   }
-});
+}, { processWide: 'SystemRoot in process.env' });
 const GIT_WRITE_STEPS = ['stage the record', 'back up the sources', 'replace the sources', 'replace the record'];
 test('FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged', async () => {
   const u = upstreamFixture(), policyFile = u.policy({ revision: u.first });
@@ -1456,7 +1459,7 @@ test('FP-0052 case 4: a fetch that cannot remove the old snapshot after it repla
   assert.equal(readJson(u.recordFile).commit, moved);
   assert.equal(fixtureGit(u.snapshot, ['rev-parse', 'refs/heads/main']), moved);
   assert.equal(fs.existsSync(path.join(u.corporaDir, 'test262.lock')), false);
-});
+}, { processWide: 'the fs.rmSync function of the node:fs module' });
 test('FP-0052 case 5: a fetch fails while test262.lock exists and changes nothing', async () => {
   const u = upstreamFixture(), policyFile = u.policy({ revision: u.first });
   await u.fetch(policyFile);
@@ -1485,27 +1488,80 @@ test('FP-0052 case 6: of two Git corpus fetches started together, one passes and
 test('The actual bootstrap repository passes its integrity check', () => {
   const r = checkRepository(root); assert.equal(r.result, 'pass'); assert.equal(r.level, 'bootstrap-integrity-only');
 });
-
-console.log('TAP version 13');
-let failures = 0;
-for (let i = 0; i < cases.length; i++) {
-  try { await cases[i].fn(); console.log(`ok ${i + 1} - ${cases[i].name}`); }
-  catch (e) {
-    failures++; console.log(`not ok ${i + 1} - ${cases[i].name}`);
-    console.log(`  ---\n  message: ${JSON.stringify(e.message)}\n  ...`);
+/** Wait until at least `ms` milliseconds of `performance.now()` time have passed, since a timer may fire slightly early on that clock. */
+async function waitAtLeast(ms) {
+  const until = performance.now() + ms;
+  while (performance.now() < until) await new Promise(r => setTimeout(r, Math.max(1, Math.ceil(until - performance.now()))));
+}
+test('FP-0107 case 1: the runner writes a duration line after each result line, the summary, the slowest cases, and the total', async () => {
+  const { runCases } = await import('./test-runner.mjs');
+  const waits = [0, 60, 120], lines = [];
+  const fixtures = [...waits.map(ms => ({ name: `waits ${ms} ms`, fn: () => waitAtLeast(ms) })),
+    { name: 'throws', fn: () => { throw new Error('fixture failure'); } }];
+  const counts = await runCases(fixtures, { write: line => lines.push(line) });
+  const text = lines.join('\n'), durations = new Map();
+  let at = 0;
+  const next = () => { assert.ok(at < lines.length, `The output ended early:\n${text}`); return lines[at++]; };
+  assert.equal(next(), 'TAP version 13', text);
+  fixtures.forEach((c, i) => {
+    assert.equal(next(), `${i < 3 ? 'ok' : 'not ok'} ${i + 1} - ${c.name}`, text);
+    const m = /^# duration_ms (\d+) (\d+)$/.exec(next());
+    assert.ok(m && Number(m[1]) === i + 1, `Result line ${i + 1} lacks its duration line:\n${text}`);
+    const ms = Number(m[2]); durations.set(i + 1, ms);
+    if (i < 3) assert.ok(ms >= waits[i], `Case ${i + 1} waited ${waits[i]} ms but reports ${ms} ms.`);
+    else {
+      assert.deepEqual([next(), next(), next()], ['  ---', `  message: ${JSON.stringify('fixture failure')}`, '  ...'], text);
+    }
+  });
+  assert.deepEqual([next(), next(), next(), next()], ['1..4', '# tests 4', '# pass 3', '# fail 1'], text);
+  const ranked = [...durations].sort((a, b) => b[1] - a[1] || a[0] - b[0]);
+  assert.equal(ranked[0][0], 3, text);
+  ranked.forEach(([n, ms], i) => assert.equal(next(), `# slowest ${i + 1} ${ms} ${n} ${fixtures[n - 1].name}`, text));
+  assert.match(next(), /^# duration_ms total \d+$/, text);
+  assert.equal(at, lines.length, text);
+  assert.deepEqual(counts, { tests: 4, pass: 3, fail: 1 });
+});
+test('FP-0107 case 2: the runner runs no case that declares a process-wide change while another case runs', async () => {
+  const { runCases } = await import('./test-runner.mjs');
+  const intervals = [], lines = [];
+  const fixture = (name, processWide) => ({ name, ...(processWide ? { processWide } : {}), fn: async () => {
+    const start = performance.now(); await waitAtLeast(60); intervals.push({ name, processWide: !!processWide, start, end: performance.now() });
+  } });
+  const fixtures = [fixture('ordinary 1'), fixture('declared 1', 'a fixture change'), fixture('ordinary 2'), fixture('declared 2', 'a fixture change')];
+  const counts = await runCases(fixtures, { write: line => lines.push(line) });
+  assert.deepEqual(counts, { tests: 4, pass: 4, fail: 0 }, lines.join('\n'));
+  assert.equal(intervals.length, 4);
+  for (const declared of intervals.filter(i => i.processWide)) {
+    for (const other of intervals.filter(i => i !== declared)) {
+      assert.ok(declared.end <= other.start || other.end <= declared.start,
+        `"${declared.name}" ran from ${declared.start} to ${declared.end} ms while "${other.name}" ran from ${other.start} to ${other.end} ms.`);
+    }
   }
+});
+
+/** Remove this thread's temporary fixtures and return the problems. */
+function removeFixtures() {
+  const problems = [];
+  for (const dir of temporary.reverse()) {
+    try { fs.rmSync(dir, { recursive: true, force: true }); }
+    catch (e) { problems.push(e.message); }
+  }
+  for (const remove of [removeAttestationFixtures, removeAbiFixtures, removeReleaseFixtures, removeUcdFixtures, removeFileSetFixtures, removeRustFixtures])
+    problems.push(...remove());
+  return problems;
 }
-for (const dir of temporary.reverse()) {
-  try { fs.rmSync(dir, { recursive: true, force: true }); }
-  catch (e) { failures++; console.error(`Temporary fixture cleanup failed: ${e.message}`); }
-}
-for (const problem of removeAttestationFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
-for (const problem of removeAbiFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
-for (const problem of removeReleaseFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
-for (const problem of removeUcdFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
-for (const problem of removeFileSetFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
-for (const problem of removeRustFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
-console.log(`1..${cases.length}`);
-console.log(`# tests ${cases.length}\n# pass ${cases.length - failures}\n# fail ${failures}`);
-console.log('# Scope: controller behavior only. No renderer or JavaScript conformance claim.');
-process.exitCode = failures ? 1 : 0;
+// Ordinary cases run on worker threads that load this module, so a case that blocks its thread on a child process
+// does not delay the others. A case that declares a process-wide change runs alone on the main thread.
+if (isMainThread) {
+  const pool = casePool(import.meta.url);
+  const counts = await runCases(cases.map((c, i) => c.processWide === undefined ? { ...c, fn: () => pool.run(i, c.name) } : c), {
+    concurrency: pool.size,
+    cleanup: async () => {
+      const problems = [...await pool.close(), ...removeFixtures()];
+      for (const problem of problems) console.error(`Temporary fixture cleanup failed: ${problem}`);
+      return problems.length;
+    },
+  });
+  console.log('# Scope: controller behavior only. No renderer or JavaScript conformance claim.');
+  process.exitCode = counts.fail ? 1 : 0;
+} else serveCases(cases, removeFixtures);

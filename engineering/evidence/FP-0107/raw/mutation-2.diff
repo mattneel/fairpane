@@ -1,0 +1,13 @@
+diff --git a/out/fp0107/mutation-2/test-runner.mjs b/tools/test-runner.mjs
+index 0bde364..fd27726 100644
+--- a/out/fp0107/mutation-2/test-runner.mjs
++++ b/tools/test-runner.mjs
+@@ -44,7 +44,7 @@ export async function runCases(cases, { write = line => console.log(line), concu
+     for (; written < cases.length && outcomes[written]; written++) {
+       const n = written + 1, outcome = outcomes[written];
+       write(`${outcome.failed ? 'not ok' : 'ok'} ${n} - ${cases[written].name}`);
+-      write(`# duration_ms ${n} ${outcome.ms}`);
++
+       if (outcome.failed) {
+         failures++;
+         write('  ---'); write(`  message: ${JSON.stringify(outcome.message)}`); write('  ...');
