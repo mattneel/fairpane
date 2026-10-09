@@ -1,0 +1,48 @@
+{
+  "verdict": "accept",
+  "summary": "I accept FP-0123 at b68eebf. I checked `src/encoding/` against the pinned `encoding.bs` (blob 684c72d8, SHA-256 90bd4f43…1c55). I found no blocker or major finding. The label table matches §4.2 entry for entry: 40 names and 228 labels in table order. Three logs confirm this: `labels-vs-spec.log`, `integrator-label-count.log`, and the comptime tag check in `root.zig`. `getEncoding` follows §4.2: it trims Infra ASCII whitespace and matches ASCII case-insensitively for both u8 and u16. Any unit above 0x7F fails to match, as the standard requires. `outputEncoding` matches §4.3. The UTF-8 handler follows §8.1.1 step by step. That covers the lead ranges, the E0/ED/F0/F4 boundaries, the reset after each continuation byte, restoring an out-of-range byte as an error, and the end-of-queue error that sets bytes needed to 0. It implements restore as \"unread the current byte\", as Implementation considerations allows. The shared UTF-16 handler matches §14.2.1. It merges the two-byte restore into an error plus either the leading-surrogate state or the scalar value. For both byte orders, that gives the same output, error count, and state as the standard. The replacement decoder (§14.1.1) and the x-user-defined decoder (§14.5.1) are exact. `bomSniff`, `Decode`, and `Utf8Decode` follow §6 and §6.1. They decide only on 3 peeked bytes or at end-of-queue, as \"peek\" requires. They replay the held bytes after the byte order mark, and \"without BOM or fail\" maps to fatal mode. The fatal and finished rules, the `read` and `written` accounting, and the 2-unit progress rule match the contract's Rules section. I traced every derivation and spot-checked rows A16–A36, B7–B15, C4–C8, F2–F8, G6–G18, H2, and T1–T3 against the spec text. None contradicts it. The evidence logs record actual commands with exit statuses: base, before, after, fmt, controller, all nine mutation controls with apply and revert hashes, the integration run (101/101 steps, 378/378 tests), and the four gate receipts bound to b68eebf.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0123/README.md",
+      "line": null,
+      "issue": "The Stop rules section says the worker read each frozen row against §8.1.1, §14.1.1, §14.2.1, §14.5.1, §6, and §6.1. It also admits that no log records that reading, so this is a claim without a recorded command. I checked the derivations and the listed rows against the pinned text myself and found no contradiction, so I do not consider this blocking."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0123/raw/encoding-standard-pin.log",
+      "line": null,
+      "issue": "The contract says to fetch into `out/fp0123-encoding/` and hash with `certutil -hashfile`. The log fetches into `out/fp0123-pin/` and hashes with `sha256sum`. The blob IDs and SHA-256 values still match the contract, so the deviation is procedural only."
+    },
+    {
+      "severity": "note",
+      "path": "src/encoding/root.zig",
+      "line": null,
+      "issue": "In replacement mode, a byte that the UTF-8 handler restores is not counted in `read`. If `output_full` follows, the caller must pass that byte again. The contract instead says the decoder keeps restored bytes. The results are the same when the caller resumes at `input[read..]`, and the case 12 2-unit-buffer runs exercise that path. This behavior is not documented on `Result.read`."
+    },
+    {
+      "severity": "note",
+      "path": "src/encoding/utf16.zig",
+      "line": null,
+      "issue": "The handler does not literally restore the two bytes as §14.2.1 describes. It returns an error together with either the leading-surrogate state or a `failure_then_scalar` value. This is equivalent because re-reading those bytes forms the same code unit with no leading surrogate, and that unit cannot be a trailing surrogate. B7, B13, C4, and M3 cover this path."
+    },
+    {
+      "severity": "note",
+      "path": "src/encoding/root.zig",
+      "line": null,
+      "issue": "`bomSniff` and `Bom` are public additions that the contract interface does not list. README ambiguity 9 justifies them as the §6.1 hook that `Decode` and the laboratory share."
+    },
+    {
+      "severity": "note",
+      "path": "src/encoding/tests.zig",
+      "line": null,
+      "issue": "The unpaired-surrogate check runs on every single-call row of cases 5 to 10 and on the sweep, but not on the hand-written D5, X2, F6, F7, and T1–T3 outputs. None of those outputs can contain a surrogate, so coverage is not reduced in practice."
+    },
+    {
+      "severity": "note",
+      "path": "specs/sources.json",
+      "line": 824,
+      "issue": "S102 pins `encoding.bs` by its commit URL, but `snapshot_sha256` is null even though `encoding-standard-pin.log` records the SHA-256. The contract does not require the field."
+    }
+  ]
+}

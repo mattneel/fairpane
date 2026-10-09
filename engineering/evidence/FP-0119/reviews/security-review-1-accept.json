@@ -1,0 +1,36 @@
+{
+  "verdict": "accept",
+  "summary": "I found no exploitable panic, out-of-bounds read, unbounded loop, or unbounded allocation in FP-0119 at 077ad63. Every read of hostile bytes goes through `Reader`, which checks 64-bit offsets. Each `.?` comes after a `fits` check, a length check, or a read of a later entry in the same call. `glyphData` rejects a `loca` range that reverses or no longer fits inside `glyf`. The decoder checks the points budget against `last + 1` in u64 before it reserves storage. A valid glyph has no more contours than points, so every capacity stays at or below `max_points`. Coordinates are i64 prefix sums with |sum| ≤ 2^31, and the f64 transforms stay finite, so neither can overflow. Point-matching indices are bounded against the parent and child slices, and phantom indices are rejected before any slice access. Composite traversal uses a fixed array of 8 frames, and no function in glyf.zig recurses. The decoder checks cycles against the active chain and checks depth before it pushes a frame. The u64 `components` counter is checked against `max_components` before each record's work. Each record moves the cursor forward at least 6 bytes, or the read fails. Total CPU work is linear in `max_points` and `max_components`, because each point is transformed at most once per ancestor level (at most 8). OOM paths in `reserve`, `finish`, and `path` release everything through `defer` and `errdefer`. Case 12 tests these paths with `checkAllAllocationFailures`. The evidence records real commands with exit statuses: tests-before failed with exit 1, tests-after and integration-tests exited 0, and the four gate receipts passed with exit 0. All of these are local integrity records, not independent enforcement. The remaining items below are notes and minor gaps that do not block acceptance.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "src/font/glyf.zig",
+      "line": 466,
+      "issue": "The second pass reads the endPtsOfContours entries, the packed flags, and numberOfContours (line 427, via `@intCast`) from the font bytes again instead of reusing the values it checked. This is safe for single-threaded use, which is the model FP-0013 case 52 adopted for changes after parse. But if an embedder ever shares font memory that another thread or process can write during a decode, the reread values may no longer be strictly increasing or in range. `path()` could then slice out of bounds, which panics in safe builds and is undefined behavior in ReleaseFast. The `@intCast` of a now-negative i16 is the same kind of risk. Keeping the checked values, or documenting that font bytes must not change during a call, would close this."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/glyf.zig",
+      "line": 58,
+      "issue": "`TrueTypeGlyph.path` relies on invariants of public, mutable fields: `contour_ends` strictly increasing, the last end equal to `points.len - 1`, and `on_curve.len == points.len`. The decoder always produces these, but a caller that builds or edits a `TrueTypeGlyph` by hand can make `path` slice out of bounds. If this type reaches a less trusted boundary, path should validate the fields or the type should hide them."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/glyf.zig",
+      "line": 274,
+      "issue": "The test-only `work` counter does not count the endPts validation loop, the first flag pass, or the per-ancestor transform loop in `place`. Each is linear in the budgets, so the real work is at most about 9·max_points + 8·max_components plus one failed glyph's 32767-entry endPts check. The contract's bound `work ≤ max_points + 2·max_components + 2` is therefore a proxy, not a measure of CPU work."
+    },
+    {
+      "severity": "note",
+      "path": "tests/text/glyf_test.zig",
+      "line": 529,
+      "issue": "Case 12 measures the peak allocation only for E7, which has 38400 points. No case measures a decode that fills the default 65536-point budget. The claimed bound of `64·max_points + 65536` bytes at saturation rests on the README's reasoning about how capacity grows: roughly 37 bytes per point at most, during `toOwnedSlice`. This matches the frozen contract, but no measurement backs it at saturation."
+    },
+    {
+      "severity": "note",
+      "path": "tests/text/glyf_test.zig",
+      "line": 438,
+      "issue": "The evidence for hostile-input containment is local and deterministic. It consists of every prefix plus three single-byte substitutions for T1, C6, and C7, run in a Debug build with safety checks. No fuzzer and no ReleaseSafe or ReleaseFast run covers other inputs. The code review above found no unchecked path, but the tests do not establish containment independently."
+    }
+  ]
+}

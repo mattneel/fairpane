@@ -1,0 +1,48 @@
+{
+  "verdict": "accept",
+  "summary": "I found no blocker or major defect in b68eebf. I checked the label table against the pinned encoding.bs (out/fp0123-pin/encoding.bs, lines 446-768), and all 40 names and 228 labels match in order. I also read the spec text for the UTF-8, shared UTF-16, replacement, and x-user-defined handlers, BOM sniff, decode, and the three UTF-8 hooks, and the handlers in src/encoding implement them faithfully. The UTF-16 handler shortcuts the restore step (it errors and then treats the restored code unit directly). In every case this gives the same output, error count, and state as the standard. Streaming state is held across calls, and the decoders never allocate. Fatal and replacement semantics, BOM timing, and the unsupported-encoding owners (FP-0124 and FP-0125) follow the frozen Rules. The tests cover cases 1 to 16 with the frozen rows unchanged. Case 12 runs every chunk partition, with and without a trailing empty call, plus a 2-unit output buffer. src/web_string.zig now runs utf8.Scalars over the shared utf8.Handler, so one UTF-8 decoder remains, and no other UTF-8 decoder exists in src. The laboratory completes decode for all three byte order marks. The evidence records each command with its exit status. tests-before.log fails with the required compile error. tests-before-lab.log shows 7 expected failures plus the Lab-7 step failure. tests-after.log passes 350/350 with a unit-test run step of 33 s against 36 s on the base. Each of M1 to M9 fails exactly the required cases, and every file returns to its original blob. On b68eebf the four gates pass, the integration run passes 378/378, and the integrator label count reports 40 and 228. The remaining findings are evidence-binding and maintainability notes, and none blocks acceptance.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0123/raw/integration-tests.log",
+      "line": 2,
+      "issue": "The log records no HEAD, no git status, and no deletion of out/fp0123-integration before the run. It started at 18:37:11, before the first HEAD record in integration-binding.log at 18:39:08. Its link to b68eebf and its uncached state therefore rest on timing and the fresh cache directory name. The zig-test gate receipt independently binds the source digest."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0123/raw/encoding-standard-pin.log",
+      "line": 9,
+      "issue": "Integrator step 1.3 requires `certutil -hashfile`, but the pin log uses sha256sum. The recorded SHA-256 values and blob IDs match the frozen contract, so this is a procedural deviation only."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0123/README.md",
+      "line": 157,
+      "issue": "The Integration section, integration-binding.log, integration-tests.log, integrator-label-count.log, bun-selftest.log, and gates/ are present in the working tree but are not shown as committed at b68eebf. Commit them before recording acceptance."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0123/README.md",
+      "line": 151,
+      "issue": "The stop-rule claim that the worker read each row against encoding.bs has no recorded command. I made the check independently and found no contradiction between the frozen rows and the pinned algorithm text."
+    },
+    {
+      "severity": "note",
+      "path": "src/lab.zig",
+      "line": 1100,
+      "issue": "The laboratory runs its own copy of the §6.1 decode logic (bomSniff plus Decoder) and does not use encoding.Decode, so one hook has two code paths. The contract allows this, and resolved ambiguity 10 records it. FP-0126 should merge the two paths when it adds sniffing after the byte order mark."
+    },
+    {
+      "severity": "note",
+      "path": "specs/sources.json",
+      "line": 823,
+      "issue": "specs/ is a policy root, so the S102 entry changes the policy digest. It was aca895… in the FP-0119 receipts at 18:28 and is 29d333… in the FP-0123 receipts. The frozen contract authorizes the entry, and it touches no protected path."
+    },
+    {
+      "severity": "note",
+      "path": "src/encoding/root.zig",
+      "line": 446,
+      "issue": "Decode returns error.UnsupportedEncoding without reporting the bytes it has already taken into its peek buffer. This is acceptable because the error is terminal and every later call repeats it. FP-0124 and FP-0125 should keep that terminal behavior when they shrink the unsupported set."
+    }
+  ]
+}

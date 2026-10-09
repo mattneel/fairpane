@@ -1,0 +1,48 @@
+{
+  "verdict": "accept",
+  "summary": "I found no blocker or major defect, so FP-0119 at 077ad63 (bound in 246e6de) can be accepted. The code matches the frozen contract. outline.zig defines exactly the frozen Point, Verb, Path, Limits, max_composite_depth = 8, and OutlineError. glyf.zig follows the frozen check order: GlyphOutOfRange, then NotTrueType, then a zero-length range is an empty glyph. Simple glyphs check the length, the last end point, the points budget, strictly increasing end points, the instructions, exactly p logical flags, and both coordinate arrays, in that order. Coordinates are i64 prefix sums. Composite records are checked in this order: record bytes, transform conflict, child index, component budget, cycle, then depth. The matrix is applied before point alignment. SCALED_COMPONENT_OFFSET is used only without UNSCALED_COMPONENT_OFFSET. Point numbers are unsigned. Phantom indices [n, n+4) and [m, m+4) return UnsupportedPhantomPoint. Instructions are checked after the last record. Traversal uses a fixed [8]Frame array, and no function in glyf.zig calls itself. The contour-to-path rule and every row of the strictness table are implemented as frozen. All 14 cases exist under their frozen names and match the contract rows. The 13 mutation diffs apply at the line positions of the committed glyf.zig. Each control is recorded with sha256 values before and after, apply and reverse-apply exit statuses of 0, and a zig build test exit status of 1 that fails the named case. The logs back each criterion: tests-before has exit status 1 and compile errors for the missing interface, tests-after has exit status 0 with 336 of 336 tests, and integration-tests has exit status 0 with 348 of 348. The fmt, controller, and observation runs exit with status 0. The four gate receipts pass with unchanged source and policy digests. The tests/text run step went from 325 ms to 1 s. The capability text matches the frozen string, and nothing under include, api, tools, or c_api references the new names. The added glyf_decoder.decode has to be public because opentype.zig calls it from another file. Source is harmless. Neither name collides with the parse locals outline and glyf, and every read through a Source is bounds-checked. My findings are below. They are minor or notes and do not block acceptance.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tests/text/README.md",
+      "line": 89,
+      "issue": "The Stop rules section lists the case 14, UnsupportedPhantomPoint, and F_GLYF contradiction rules but leaves out the contract's fourth rule. That rule says to stop when the tests/text run step grows by more than 10 seconds over the base. The contract requires this README to describe the stop rules."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0119/README.md",
+      "line": 75,
+      "issue": "Contract evidence steps 2 and 3 require deleting out/fp0119-base and out/fp0119-after before the runs, but no recorded command shows either deletion. The README's claim that out/fp0119-after did not exist before the run has no recorded command behind it. The uncached compile steps in both logs support the claim [INFERENCE], but they are not a record."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0119/README.md",
+      "line": 144,
+      "issue": "The worker departed from the contract's evidence order, as resolved ambiguities 1 and 2 disclose. The implementation was drafted before cases 1 to 14 were written. The base duration ran in the dirty worker worktree, not in a clean worktree at the base. tests-before.log still shows the cases failing against the base sources, and the base log counts only the 45 earlier tests/text tests, so the evidence still holds."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/glyf.zig",
+      "line": 456,
+      "issue": "The second pass of appendSimple reads endPtsOfContours and the flags from the borrowed bytes again instead of reusing the values the first pass checked. If the bytes change during one decode, contour_ends could stop increasing or point past the decoded points, and TrueTypeGlyph.path would then slice out of range. A concurrent write during a decode is already a data race. Changes between parse and the decode are fully checked again, so this is a hardening note only."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/glyf.zig",
+      "line": 23,
+      "issue": "glyf_decoder.work is a process-global mutable counter in test builds. Every decode resets it to 0 and then increments it. Decodes running at the same time in a test build would race on it. The current tests decode on only one thread at a time."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/glyf.zig",
+      "line": 126,
+      "issue": "The worker added glyf_decoder.Source and glyf_decoder.decode beside the frozen names. decode must be public because Font.trueTypeGlyph in opentype.zig calls it. Source could stay private, because the anonymous struct literal at opentype.zig:313 coerces without naming it. Both names are reachable only through the Zig module, not through the C ABI, and a Source a caller builds can only produce errors, never out-of-bounds reads."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0119/raw/integration-tests.log",
+      "line": 2,
+      "issue": "The uncached integration run at 18:25:31 does not record HEAD. integration-binding.log records HEAD 077ad63 and a clean status about two minutes later, and the gate receipts bind the source digest 1be01a92…, so the binding rests on those later records."
+    }
+  ]
+}

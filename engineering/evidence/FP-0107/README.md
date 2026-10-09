@@ -279,3 +279,6 @@ Each revision 2 log first records `HEAD` `0f187af` and the blob IDs of `tools/te
 
 The two withheld recordings of `tests-before-r1.log` are kept outside the repository; their SHA-256 values are `289ee96ba12288c058f8bc340e97552f7948e167b0441386db20f7df9ac0f872` (80,932 bytes) and `4bc612e3fc717ec6ed3f567fc558fc0e99fbdfce1bc68ad23444902d78019b05` (77,349 bytes).
 The "Test cost" figures predate revision 1; the dispatched runs decide criterion 3.
+
+`raw/integration-binding-r2-binding.log` records `HEAD` `0cf7c95` and a status that includes ignored files before and after the four gates: `gates/2026-10-09T19-25-13-723Z-repo-check-c959d987.json`, `gates/2026-10-09T19-25-14-189Z-controller-test-0fd69255.json` (248 of 248), `gates/2026-10-09T19-26-01-852Z-zig-fmt-b7f6edc6.json`, and `gates/2026-10-09T19-26-02-233Z-zig-test-4d4218dc.json` pass.
+`raw/bun-selftest-r2-binding.log` records Bun 1.4.2 with 248 of 248 cases.
