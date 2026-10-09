@@ -1,0 +1,13 @@
+diff --git a/tools/attest.mjs b/tools/attest.mjs
+index 550473f..b94b193 100644
+--- a/tools/attest.mjs
++++ b/tools/attest.mjs
+@@ -153,7 +153,7 @@ export function verifyResult(envelopeText, trustPolicy, expectedCandidate) {
+ 
+   const record = parseJson(envelope.payload, 'The payload');
+   // Re-serialization rejects unpaired surrogates, duplicate keys, and other spellings, so signed bytes carry one meaning.
+-  if (JSON.stringify(record) !== envelope.payload) fail('malformed', 'The payload is not in canonical JSON form.');
++  // MUTATION: canonical check removed.
+   exactKeys(record, ['schema', 'version', 'candidate', 'acceptance_policy_sha256', 'suite', 'counts', 'runner', 'issued_at'], 'The payload');
+   if (record.schema !== 'fairpane-result' || record.version !== 1) fail('malformed', 'The payload schema is unsupported.');
+   exactKeys(record.candidate, ['commit', 'tree'], 'The candidate');

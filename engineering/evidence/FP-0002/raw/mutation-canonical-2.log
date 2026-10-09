@@ -1,0 +1,47 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+9e9a0bf0bce55ab70a36374c5536f444de2e57cb
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T01:57:48.776Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat"]
+ tools/attest.mjs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T01:57:48.845Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","fingerprint"]
+{
+  "source": {
+    "sha256": "101e7c6a3405d4874fdc779073791fc3d4c290ca3f8558cd95dff1eba995dbe3",
+    "file_count": 95
+  },
+  "policy": {
+    "sha256": "366776e09af8c5f000b5f2b8f85795ca4bb8f2098e9f7bc20e34ea97cb58c425",
+    "file_count": 17
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","fingerprint"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T01:57:48.925Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/attest.test.mjs"]
+TAP version 13
+ok 1 - 2: A valid envelope signed by a trusted key verifies
+ok 2 - 3: RFC 8032 test vector 1 verifies through the same key decoding path
+ok 3 - 4: A key outside the trust policy fails, whether it names itself or a trusted key
+ok 4 - 5: One changed payload byte fails as bad-signature
+ok 5 - 6: A truncated envelope and a truncated payload each fail
+ok 6 - 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+ok 7 - 8: A payload for another commit or tree fails as stale-candidate
+ok 8 - 9: A payload with another policy digest fails as changed-policy
+ok 9 - 10: Zero discovered and zero selected each fail as zero-denominator
+ok 10 - 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+ok 11 - 12: A runner key that differs from the signature key fails as key-mismatch
+ok 12 - 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+ok 13 - 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+not ok 14 - 16: A trusted signature over a noncanonical payload fails as malformed
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n+   'verified',\n+   'verified',\n+   'verified'\n-   'malformed',\n-   'malformed',\n-   'malformed'\n  ]\n"
+  ...
+1..14
+# tests 14
+# pass 13
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/attest.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T01:57:49.059Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":1343}
