@@ -114,12 +114,9 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    const lib = b.addLibrary(.{
-        .name = "fairpane",
-        .linkage = .static,
-        .root_module = module,
-    });
-    b.installArtifact(lib);
+    // The installed library follows ADR 0009's library rules; `libraryArchive` builds it.
+    const lib = libraryArchive(b, target, optimize, b.path("src/root.zig"));
+    b.getInstallStep().dependOn(&b.addInstallLibFile(lib.archive, lib.basename).step);
     b.installFile("include/fairpane.h", "include/fairpane.h");
 
     const unit_tests = b.addTest(.{ .root_module = module });
@@ -190,8 +187,10 @@ pub fn build(b: *std.Build) void {
         test_step.dependOn(&run.step);
     }
 
+    addLibraryCases(b, test_step, target);
+
     const check_step = b.step("check", "Compile the library, the laboratory, and unit tests without execution");
-    check_step.dependOn(&lib.step);
+    check_step.dependOn(&lib.object.step);
     check_step.dependOn(&unit_tests.step);
     check_step.dependOn(&text_tests.step);
     check_step.dependOn(&lab_exe.step);
@@ -217,6 +216,118 @@ pub fn build(b: *std.Build) void {
         });
         measure_step.dependOn(&b.addInstallArtifact(exe, .{}).step);
     }
+}
+
+/// A static library that `zig build` installs: the compiled object, the archive that holds it, and the archive's file name.
+const Library = struct {
+    object: *std.Build.Step.Compile,
+    archive: std.Build.LazyPath,
+    basename: []const u8,
+};
+
+/// Builds the static library from `root_source_file` in `optimize` mode under the library rules of ADR 0009.
+/// A mode other than Debug omits debug information, because the locked compiler's debug information names
+/// the absolute paths of the sources and of its own `lib` directory, and it has no option that maps those paths.
+/// The locked compiler's archiver then writes the one object in deterministic mode, as a member named by the object's
+/// base name, because the compiler's own archive names that member by its path in the cache directory.
+fn libraryArchive(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.lang.Optimize, root_source_file: std.Build.LazyPath) Library {
+    const object = b.addObject(.{
+        .name = "fairpane_zcu",
+        .root_module = b.createModule(.{
+            .root_source_file = root_source_file,
+            .target = target,
+            .optimize = optimize,
+            .strip = optimize != .debug,
+        }),
+    });
+    const result = &target.result;
+    const basename = std.zig.binNameAlloc(b.allocator, .{
+        .root_name = "fairpane",
+        .cpu_arch = result.cpu.arch,
+        .os_tag = result.os.tag,
+        .ofmt = result.ofmt,
+        .abi = result.abi,
+        .output_mode = .Lib,
+        .link_mode = .static,
+    }) catch @panic("OOM");
+    // COFF targets get the COFF layout with its second linker member, as the compiler's own Windows archive has; Mach-O targets get the Darwin layout.
+    const format = switch (result.ofmt) {
+        .coff => "coff",
+        .macho => "darwin",
+        else => "gnu",
+    };
+    // `r` inserts the object, `c` creates the archive silently, `s` writes the symbol table, and `D` zeroes every time stamp, owner, and group.
+    const archive = b.addSystemCommand(&.{ b.graph.zig_exe, "ar", b.fmt("--format={s}", .{format}), "rcsD" });
+    archive.setName(b.fmt("archive {s} {s}", .{ basename, @tagName(optimize) }));
+    const output = archive.addOutputFileArg2(basename, .{});
+    archive.addFileArg(object.getEmittedBin());
+    return .{ .object = object, .archive = output, .basename = basename };
+}
+
+/// Adds the `library-test` step, which `zig build test` runs: FP-0066 contract cases 1, 2, 4, and 5,
+/// which check the library that `zig build` installs, and the tests of their check tool.
+/// Case 3, `abi-exports` on the ReleaseSafe library, runs through the controller.
+fn addLibraryCases(b: *std.Build, test_step: *std.Build.Step, target: std.Build.ResolvedTarget) void {
+    const step = b.step("library-test", "Run the FP-0066 cases on the libraries that zig build installs");
+    test_step.dependOn(step);
+    const check_module = b.createModule(.{
+        .root_source_file = b.path("tools/zig/library_check.zig"),
+        .target = b.graph.host,
+        .optimize = .debug,
+    });
+    const check = b.addExecutable(.{ .name = "fairpane-library-check", .root_module = check_module });
+    const check_tests = b.addRunArtifact(b.addTest(.{ .root_module = check_module }));
+    step.dependOn(&check_tests.step);
+
+    // Two copies of `src` in two directories, so any path of a copy that enters a library makes the two libraries differ.
+    const trees = b.addWriteFiles();
+    const tree_names = [2][]const u8{ "fp0066-tree-a", "fp0066-tree-b" };
+    var sources: [2]std.Build.LazyPath = undefined;
+    var release: [2]std.Build.LazyPath = undefined;
+    for (tree_names, &sources, &release) |name, *source, *library| {
+        source.* = trees.addCopyDirectory(b.path("src"), b.fmt("{s}/src", .{name}), .{});
+        library.* = libraryArchive(b, target, .safe, source.path(b, "root.zig")).archive;
+    }
+
+    const same = libraryCheck(b, step, check, "FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical");
+    same.addArg("same");
+    same.addFileArg(release[0]);
+    same.addFileArg(release[1]);
+
+    const absent = libraryCheck(b, step, check, "FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory");
+    absent.addArg("absent");
+    absent.addFileArg(release[0]);
+    absent.addArgs(&.{ "--name", tree_names[0], "--dir" });
+    absent.addDirectoryArg2(sources[0].dirname(), .{});
+    absent.addArg("--dir");
+    absent.addDirectoryArg2(b.path("."), .{});
+    absent.addArg("--dir");
+    absent.addDirectoryArg2(.cache_root, .{});
+    absent.addArgs(&.{ "--dir", std.fs.path.dirname(b.graph.zig_exe).?, "--dir" });
+    absent.addDirectoryArg2(.zig_lib, .{});
+
+    const names = libraryCheck(b, step, check, "FP-0066 case 4: the Debug library keeps debug information that names the absolute source directory");
+    names.addArg("names");
+    names.addFileArg(libraryArchive(b, target, .debug, b.path("src/root.zig")).archive);
+    names.addDirectoryArg2(b.path("src"), .{});
+
+    const members = libraryCheck(b, step, check, "FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory");
+    members.addArg("members");
+    members.addFileArg(release[0]);
+    members.addArg(if (target.result.os.tag == .windows) "fairpane_zcu.obj" else "fairpane_zcu.o");
+
+    const metadata = libraryCheck(b, step, check, "FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group");
+    metadata.addArg("metadata");
+    metadata.addFileArg(release[0]);
+}
+
+/// Runs the library check tool as a step of `library-test`, expecting exit status 0.
+fn libraryCheck(b: *std.Build, step: *std.Build.Step, check: *std.Build.Step.Compile, name: []const u8) *std.Build.Step.Run {
+    const run = b.addRunArtifact(check);
+    run.setName(name);
+    run.expectExitCode(0);
+    step.dependOn(&run.step);
+    return run;
 }
 
 /// Adds FP-0007 contract cases 13 and 14, FP-0054 contract case 5 and revision 1 cases 1 to 5, and FP-0008 contract case 26,

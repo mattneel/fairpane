@@ -1,0 +1,59 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","library-test","--summary","all","--cache-dir","out/fp0066-before-attempt-1"]
+library-test
++- FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group failure
+.\out\fp0066-before-attempt-1\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib: the header of // has time stamp , owner , and group 
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-before-attempt-1\\o\\47838a6799f46936a14df8ec3e60761a\\fairpane-library-check.exe" metadata ".\\out\\fp0066-before-attempt-1\\o\\e23c4dee94332a61c6d8557154433e88\\fairpane.lib"
+
+library-test
++- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory failure
+.\out\fp0066-before-attempt-1\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib has 1 members, not only fairpane_zcu.obj:
+  out\fp0066-before-attempt-1\o\e23c4dee94332a61c6d8557154433e88\fairpane_zcu.obj
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-before-attempt-1\\o\\47838a6799f46936a14df8ec3e60761a\\fairpane-library-check.exe" members ".\\out\\fp0066-before-attempt-1\\o\\e23c4dee94332a61c6d8557154433e88\\fairpane.lib" fairpane_zcu.obj
+
+library-test
++- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical failure
+.\out\fp0066-before-attempt-1\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib (3054178 bytes) and .\out\fp0066-before-attempt-1\o\09ec8c5b5b24ee4abd8615459d24cc59\fairpane.lib (3054178 bytes) differ
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-before-attempt-1\\o\\47838a6799f46936a14df8ec3e60761a\\fairpane-library-check.exe" same ".\\out\\fp0066-before-attempt-1\\o\\e23c4dee94332a61c6d8557154433e88\\fairpane.lib" ".\\out\\fp0066-before-attempt-1\\o\\09ec8c5b5b24ee4abd8615459d24cc59\\fairpane.lib"
+
+library-test
++- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory failure
+.\out\fp0066-before-attempt-1\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains fp0066-tree-a at byte 2148658
+.\out\fp0066-before-attempt-1\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains C:\Users\requi\.omp\wt\t93143ef4f\m\out\fp0066-before-attempt-1\o\56632101a8fdf0b38cbe48a5d8586147\fp0066-tree-a at byte 2995756
+.\out\fp0066-before-attempt-1\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains C:\Users\requi\.omp\wt\t93143ef4f\m at byte 2995756
+.\out\fp0066-before-attempt-1\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains C:\Users\requi\.omp\wt\t93143ef4f\m\out\fp0066-before-attempt-1 at byte 2995756
+.\out\fp0066-before-attempt-1\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows at byte 2148778
+.\out\fp0066-before-attempt-1\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib at byte 2148778
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-before-attempt-1\\o\\47838a6799f46936a14df8ec3e60761a\\fairpane-library-check.exe" absent ".\\out\\fp0066-before-attempt-1\\o\\e23c4dee94332a61c6d8557154433e88\\fairpane.lib" --name fp0066-tree-a --dir ".\\out\\fp0066-before-attempt-1\\o\\56632101a8fdf0b38cbe48a5d8586147\\fp0066-tree-a" --dir ".\\." --dir ".\\out\\fp0066-before-attempt-1" --dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows" --dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib"
+
+Build Summary: 8/13 steps succeeded (4 failed); 6/6 tests passed
+library-test transitive failure
++- run test 6 pass (6 total) 30ms MaxRSS:4M
+|  +- compile test debug native success 1s MaxRSS:286M
++- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical failure
+|  +- compile exe fairpane-library-check debug native success 1s MaxRSS:280M
+|  +- compile lib fairpane safe native success 7s MaxRSS:300M
+|  |  +- WriteFile fp0066-tree-a/src success
+|  +- compile lib fairpane safe native success 7s MaxRSS:301M
+|     +- WriteFile fp0066-tree-a/src (reused)
++- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory failure
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- compile lib fairpane safe native (+1 more reused dependencies)
+|  +- WriteFile fp0066-tree-a/src (reused)
++- FP-0066 case 4: the Debug library keeps debug information that names the absolute source directory success 55ms
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- compile lib fairpane debug native success 1s MaxRSS:278M
++- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory failure
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- compile lib fairpane safe native (+1 more reused dependencies)
++- FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group failure
+   +- compile exe fairpane-library-check debug native (reused)
+   +- compile lib fairpane safe native (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x470a77cf library-test --summary all --cache-dir out/fp0066-before-attempt-1
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","library-test","--summary","all","--cache-dir","out/fp0066-before-attempt-1"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:26:49.126Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":11190,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

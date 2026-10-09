@@ -1,0 +1,94 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+f31eb22b72588b095e3b031ecf7606665c37fd6e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:27:30.959Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--short"]
+ M build.zig
+?? engineering/evidence/FP-0066/raw/tests-before-attempt-1.log
+?? engineering/evidence/FP-0066/raw/tests-before.log
+?? tools/zig/library_check.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:27:31.030Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":28}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","add","--","build.zig","tools/zig/library_check.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["add","--","build.zig","tools/zig/library_check.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:27:31.127Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","ls-files","--stage","--","build.zig","tools/zig/library_check.zig"]
+100644 4957dbc268efd030ec96001f7665585e84e09090 0	build.zig
+100644 42ead8e42ec6d2c99c4141ffacc3bd488fc68dbc 0	tools/zig/library_check.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["ls-files","--stage","--","build.zig","tools/zig/library_check.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:27:31.220Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--cached","--stat"]
+ build.zig                   |  82 +++++++++++
+ tools/zig/library_check.zig | 328 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 410 insertions(+)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--cached","--stat"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:27:31.298Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","library-test","--summary","all","--cache-dir","out/fp0066-before"]
+library-test
++- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory failure
+.\out\fp0066-before\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib has 1 members, not only fairpane_zcu.obj:
+  out\fp0066-before\o\e23c4dee94332a61c6d8557154433e88\fairpane_zcu.obj
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-before\\o\\f9093bbdb4a1b05abcb23b509a7f49d7\\fairpane-library-check.exe" members ".\\out\\fp0066-before\\o\\e23c4dee94332a61c6d8557154433e88\\fairpane.lib" fairpane_zcu.obj
+
+library-test
++- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical failure
+.\out\fp0066-before\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib (3054072 bytes) and .\out\fp0066-before\o\09ec8c5b5b24ee4abd8615459d24cc59\fairpane.lib (3054072 bytes) differ
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-before\\o\\f9093bbdb4a1b05abcb23b509a7f49d7\\fairpane-library-check.exe" same ".\\out\\fp0066-before\\o\\e23c4dee94332a61c6d8557154433e88\\fairpane.lib" ".\\out\\fp0066-before\\o\\09ec8c5b5b24ee4abd8615459d24cc59\\fairpane.lib"
+
+library-test
++- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory failure
+.\out\fp0066-before\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains fp0066-tree-a at byte 2148638
+.\out\fp0066-before\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains C:\Users\requi\.omp\wt\t93143ef4f\m\out\fp0066-before\o\56632101a8fdf0b38cbe48a5d8586147\fp0066-tree-a at byte 2995662
+.\out\fp0066-before\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains C:\Users\requi\.omp\wt\t93143ef4f\m at byte 2995662
+.\out\fp0066-before\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains C:\Users\requi\.omp\wt\t93143ef4f\m\out\fp0066-before at byte 2995662
+.\out\fp0066-before\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows at byte 2148748
+.\out\fp0066-before\o\e23c4dee94332a61c6d8557154433e88\fairpane.lib contains C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib at byte 2148748
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-before\\o\\f9093bbdb4a1b05abcb23b509a7f49d7\\fairpane-library-check.exe" absent ".\\out\\fp0066-before\\o\\e23c4dee94332a61c6d8557154433e88\\fairpane.lib" --name fp0066-tree-a --dir ".\\out\\fp0066-before\\o\\56632101a8fdf0b38cbe48a5d8586147\\fp0066-tree-a" --dir ".\\." --dir ".\\out\\fp0066-before" --dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows" --dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib"
+
+Build Summary: 9/13 steps succeeded (3 failed); 6/6 tests passed
+library-test transitive failure
++- run test 6 pass (6 total) 32ms MaxRSS:4M
+|  +- compile test debug native success 1s MaxRSS:286M
++- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical failure
+|  +- compile exe fairpane-library-check debug native success 2s MaxRSS:281M
+|  +- compile lib fairpane safe native success 7s MaxRSS:300M
+|  |  +- WriteFile fp0066-tree-a/src success
+|  +- compile lib fairpane safe native success 7s MaxRSS:300M
+|     +- WriteFile fp0066-tree-a/src (reused)
++- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory failure
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- compile lib fairpane safe native (+1 more reused dependencies)
+|  +- WriteFile fp0066-tree-a/src (reused)
++- FP-0066 case 4: the Debug library keeps debug information that names the absolute source directory success 55ms
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- compile lib fairpane debug native success 1s MaxRSS:277M
++- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory failure
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- compile lib fairpane safe native (+1 more reused dependencies)
++- FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group success 30ms
+   +- compile exe fairpane-library-check debug native (reused)
+   +- compile lib fairpane safe native (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xf38aa252 library-test --summary all --cache-dir out/fp0066-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","library-test","--summary","all","--cache-dir","out/fp0066-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:27:36.501Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":12234,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","-Doptimize=ReleaseSafe","--prefix","out/fp0066-before-release","--cache-dir","out/fp0066-before-release-cache"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","-Doptimize=ReleaseSafe","--prefix","out/fp0066-before-release","--cache-dir","out/fp0066-before-release-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:27:58.132Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":9077,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","abi-exports","out/fp0066-before-release/lib/fairpane.lib"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "library": "out/fp0066-before-release/lib/fairpane.lib",
+  "exports": 15
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","abi-exports","out/fp0066-before-release/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:28:07.262Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":50}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","ar","t","out/fp0066-before-release/lib/fairpane.lib"]
+out\fp0066-before-release-cache\o\b57abc32c89c5ecb0b35695e8b2f97d1\fairpane_zcu.obj
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["ar","t","out/fp0066-before-release/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:28:07.363Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":14,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

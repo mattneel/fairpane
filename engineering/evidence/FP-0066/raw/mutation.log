@@ -1,0 +1,127 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","build.zig"]
+31c7fd204e45c2a6b071a7c77ed0a7bcae87aa55
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:36:57.511Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0066/raw/mutation-strip.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0066/raw/mutation-strip.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:36:57.580Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","build.zig"]
+dffc7ea308d63c91735885c6ecc4605e79b93cac
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:36:57.654Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","library-test","--summary","all","--cache-dir","out/fp0066-mutation-strip"]
+library-test
++- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory failure
+.\out\fp0066-mutation-strip\o\517631bdc2f74145f46862420334d6f6\fairpane.lib contains fp0066-tree-a at byte 2148594
+.\out\fp0066-mutation-strip\o\517631bdc2f74145f46862420334d6f6\fairpane.lib contains C:\Users\requi\.omp\wt\t93143ef4f\m\out\fp0066-mutation-strip\o\56632101a8fdf0b38cbe48a5d8586147\fp0066-tree-a at byte 2995682
+.\out\fp0066-mutation-strip\o\517631bdc2f74145f46862420334d6f6\fairpane.lib contains C:\Users\requi\.omp\wt\t93143ef4f\m at byte 2995682
+.\out\fp0066-mutation-strip\o\517631bdc2f74145f46862420334d6f6\fairpane.lib contains C:\Users\requi\.omp\wt\t93143ef4f\m\out\fp0066-mutation-strip at byte 2995682
+.\out\fp0066-mutation-strip\o\517631bdc2f74145f46862420334d6f6\fairpane.lib contains C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows at byte 2148712
+.\out\fp0066-mutation-strip\o\517631bdc2f74145f46862420334d6f6\fairpane.lib contains C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib at byte 2148712
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-mutation-strip\\o\\b62835fe9f21fad80de2829f50a67b22\\fairpane-library-check.exe" absent ".\\out\\fp0066-mutation-strip\\o\\517631bdc2f74145f46862420334d6f6\\fairpane.lib" --name fp0066-tree-a --dir ".\\out\\fp0066-mutation-strip\\o\\56632101a8fdf0b38cbe48a5d8586147\\fp0066-tree-a" --dir ".\\." --dir ".\\out\\fp0066-mutation-strip" --dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows" --dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib"
+
+library-test
++- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical failure
+.\out\fp0066-mutation-strip\o\517631bdc2f74145f46862420334d6f6\fairpane.lib (3054104 bytes) and .\out\fp0066-mutation-strip\o\7f2eec8357c3109b8b6533393fc1089e\fairpane.lib (3054104 bytes) differ
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-mutation-strip\\o\\b62835fe9f21fad80de2829f50a67b22\\fairpane-library-check.exe" same ".\\out\\fp0066-mutation-strip\\o\\517631bdc2f74145f46862420334d6f6\\fairpane.lib" ".\\out\\fp0066-mutation-strip\\o\\7f2eec8357c3109b8b6533393fc1089e\\fairpane.lib"
+
+Build Summary: 13/16 steps succeeded (2 failed); 6/6 tests passed
+library-test transitive failure
++- run test 6 pass (6 total) 30ms MaxRSS:4M
+|  +- compile test debug native success 2s MaxRSS:288M
++- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical failure
+|  +- compile exe fairpane-library-check debug native success 2s MaxRSS:281M
+|  +- archive fairpane.lib safe success 26ms
+|  |  +- compile obj fairpane_zcu safe native success 7s MaxRSS:301M
+|  |     +- WriteFile fp0066-tree-a/src success
+|  +- archive fairpane.lib safe success 13ms
+|     +- compile obj fairpane_zcu safe native success 7s MaxRSS:302M
+|        +- WriteFile fp0066-tree-a/src (reused)
++- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory failure
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- archive fairpane.lib safe (+1 more reused dependencies)
+|  +- WriteFile fp0066-tree-a/src (reused)
++- FP-0066 case 4: the Debug library keeps debug information that names the absolute source directory success 60ms
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- archive fairpane.lib debug success 17ms
+|     +- compile obj fairpane_zcu debug native success 1s MaxRSS:279M
++- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory success 5ms
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- archive fairpane.lib safe (+1 more reused dependencies)
++- FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group success 6ms
+   +- compile exe fairpane-library-check debug native (reused)
+   +- archive fairpane.lib safe (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xf791c1b2 library-test --summary all --cache-dir out/fp0066-mutation-strip
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","library-test","--summary","all","--cache-dir","out/fp0066-mutation-strip"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:36:57.739Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":11129,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0066/raw/mutation-strip.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0066/raw/mutation-strip.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:37:08.917Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","build.zig"]
+31c7fd204e45c2a6b071a7c77ed0a7bcae87aa55
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:37:08.989Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","build.zig"]
+31c7fd204e45c2a6b071a7c77ed0a7bcae87aa55
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:37:09.057Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0066/raw/mutation-member.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0066/raw/mutation-member.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:37:09.124Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","build.zig"]
+655a9503ff213ba56b2a44e9cc659206233c90fe
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:37:09.200Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","library-test","--summary","all","--cache-dir","out/fp0066-mutation-member"]
+library-test
++- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory failure
+.\out\fp0066-mutation-member\o\0ba5992f36e476f549d1d6b7d2853ea0\fairpane.lib has 1 members, not only fairpane_zcu.obj:
+  out\fp0066-mutation-member\o\0ba5992f36e476f549d1d6b7d2853ea0\fairpane_zcu.obj
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-mutation-member\\o\\16df436e7662002a33997f727f454b27\\fairpane-library-check.exe" members ".\\out\\fp0066-mutation-member\\o\\0ba5992f36e476f549d1d6b7d2853ea0\\fairpane.lib" fairpane_zcu.obj
+
+library-test
++- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical failure
+.\out\fp0066-mutation-member\o\0ba5992f36e476f549d1d6b7d2853ea0\fairpane.lib (706474 bytes) and .\out\fp0066-mutation-member\o\82e2e894859224e86052e6c9151f55ed\fairpane.lib (706474 bytes) differ
+error: process exited with code 1 (expected exited with code 0)
+failed command: ".\\out\\fp0066-mutation-member\\o\\16df436e7662002a33997f727f454b27\\fairpane-library-check.exe" same ".\\out\\fp0066-mutation-member\\o\\0ba5992f36e476f549d1d6b7d2853ea0\\fairpane.lib" ".\\out\\fp0066-mutation-member\\o\\82e2e894859224e86052e6c9151f55ed\\fairpane.lib"
+
+Build Summary: 10/13 steps succeeded (2 failed); 6/6 tests passed
+library-test transitive failure
++- run test 6 pass (6 total) 32ms MaxRSS:4M
+|  +- compile test debug native success 1s MaxRSS:286M
++- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical failure
+|  +- compile exe fairpane-library-check debug native success 1s MaxRSS:280M
+|  +- compile lib fairpane safe native success 3s MaxRSS:171M
+|  |  +- WriteFile fp0066-tree-a/src success
+|  +- compile lib fairpane safe native success 3s MaxRSS:170M
+|     +- WriteFile fp0066-tree-a/src (reused)
++- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory success 58ms
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- compile lib fairpane safe native (+1 more reused dependencies)
+|  +- WriteFile fp0066-tree-a/src (reused)
++- FP-0066 case 4: the Debug library keeps debug information that names the absolute source directory success 76ms
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- compile lib fairpane debug native success 1s MaxRSS:278M
++- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory failure
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- compile lib fairpane safe native (+1 more reused dependencies)
++- FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group success 29ms
+   +- compile exe fairpane-library-check debug native (reused)
+   +- compile lib fairpane safe native (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x864ad2eb library-test --summary all --cache-dir out/fp0066-mutation-member
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","library-test","--summary","all","--cache-dir","out/fp0066-mutation-member"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:37:09.276Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":6766,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0066/raw/mutation-member.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0066/raw/mutation-member.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:37:16.094Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","build.zig"]
+31c7fd204e45c2a6b071a7c77ed0a7bcae87aa55
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:37:16.178Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}

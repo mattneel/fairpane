@@ -1,0 +1,11 @@
+diff --git a/build.zig b/build.zig
+--- a/build.zig
++++ b/build.zig
+@@ -237,7 +237,6 @@
+             .root_source_file = root_source_file,
+             .target = target,
+             .optimize = optimize,
+-            .strip = optimize != .debug,
+         }),
+     });
+     const result = &target.result;

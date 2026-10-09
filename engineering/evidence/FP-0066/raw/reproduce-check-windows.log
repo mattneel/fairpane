@@ -1,0 +1,82 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","reproduce-check","00803cff8da2db46a3d58c8fa360f65fc3896cd5"]
+{
+  "result": "reproducible",
+  "commit": "00803cff8da2db46a3d58c8fa360f65fc3896cd5",
+  "tree": "de875c235527838fcc1f9d387cfc0141ed1ceb3c",
+  "source_tar_sha256": "51588238ac75f11534a1c055abc89c0957b19e29f6cc2bbc5df5c0c3488897c1",
+  "build_type_command": [
+    "zig",
+    "build",
+    "-Doptimize=ReleaseSafe",
+    "--prefix",
+    "zig-out"
+  ],
+  "work_trees": [
+    "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\out\\reproduce\\00803cff8da2-OZ6Lv7\\a",
+    "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\out\\reproduce\\00803cff8da2-OZ6Lv7\\b"
+  ],
+  "builds": [
+    {
+      "work_tree": "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\out\\reproduce\\00803cff8da2-OZ6Lv7\\a",
+      "executable": "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "-Doptimize=ReleaseSafe",
+        "--prefix",
+        "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\out\\reproduce\\00803cff8da2-OZ6Lv7\\a\\zig-out"
+      ],
+      "environment": {
+        "ZIG_LOCAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\out\\reproduce\\00803cff8da2-OZ6Lv7\\a\\.zig-cache",
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\out\\reproduce\\00803cff8da2-OZ6Lv7\\a\\.zig-global-cache"
+      },
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 62744,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "work_tree": "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\out\\reproduce\\00803cff8da2-OZ6Lv7\\b",
+      "executable": "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "-Doptimize=ReleaseSafe",
+        "--prefix",
+        "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\out\\reproduce\\00803cff8da2-OZ6Lv7\\b\\zig-out"
+      ],
+      "environment": {
+        "ZIG_LOCAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\out\\reproduce\\00803cff8da2-OZ6Lv7\\b\\.zig-cache",
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch\\out\\reproduce\\00803cff8da2-OZ6Lv7\\b\\.zig-global-cache"
+      },
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 61485,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "files": [
+    {
+      "path": "include/fairpane.h",
+      "a": "32298a3ead8fa1f20af8beb52a31525d82c002a0538a625f52361b3ad34f76dc",
+      "b": "32298a3ead8fa1f20af8beb52a31525d82c002a0538a625f52361b3ad34f76dc"
+    },
+    {
+      "path": "lib/fairpane.lib",
+      "a": "249d63f2dc832ffed237a63269ba0ce4edbde603d73625c68b07db9ccadc4f48",
+      "b": "249d63f2dc832ffed237a63269ba0ce4edbde603d73625c68b07db9ccadc4f48"
+    }
+  ],
+  "differing": [],
+  "error": null,
+  "removal": {
+    "removed": true,
+    "errors": []
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","reproduce-check","00803cff8da2db46a3d58c8fa360f65fc3896cd5"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:33:08.062Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":126030}

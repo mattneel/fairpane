@@ -1,0 +1,91 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","-Doptimize=ReleaseSafe","--prefix","out/fp0066-ReleaseSafe","--cache-dir","out/fp0066-ReleaseSafe-cache"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","-Doptimize=ReleaseSafe","--prefix","out/fp0066-ReleaseSafe","--cache-dir","out/fp0066-ReleaseSafe-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:24.253Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":6400,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","abi-exports","out/fp0066-ReleaseSafe/lib/fairpane.lib"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "library": "out/fp0066-ReleaseSafe/lib/fairpane.lib",
+  "exports": 15
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","abi-exports","out/fp0066-ReleaseSafe/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:30.714Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":53}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","ar","t","out/fp0066-ReleaseSafe/lib/fairpane.lib"]
+fairpane_zcu.obj
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["ar","t","out/fp0066-ReleaseSafe/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:30.832Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","absent","out/fp0066-ReleaseSafe/lib/fairpane.lib","--dir",".","--dir","C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","absent","out/fp0066-ReleaseSafe/lib/fairpane.lib","--dir",".","--dir","C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:30.900Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1960,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","members","out/fp0066-ReleaseSafe/lib/fairpane.lib","fairpane_zcu.obj"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","members","out/fp0066-ReleaseSafe/lib/fairpane.lib","fairpane_zcu.obj"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:32.921Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","-Doptimize=ReleaseFast","--prefix","out/fp0066-ReleaseFast","--cache-dir","out/fp0066-ReleaseFast-cache"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","-Doptimize=ReleaseFast","--prefix","out/fp0066-ReleaseFast","--cache-dir","out/fp0066-ReleaseFast-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:33.011Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":4350,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","abi-exports","out/fp0066-ReleaseFast/lib/fairpane.lib"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "library": "out/fp0066-ReleaseFast/lib/fairpane.lib",
+  "exports": 15
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","abi-exports","out/fp0066-ReleaseFast/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:37.415Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":49}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","ar","t","out/fp0066-ReleaseFast/lib/fairpane.lib"]
+fairpane_zcu.obj
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["ar","t","out/fp0066-ReleaseFast/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:37.516Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","absent","out/fp0066-ReleaseFast/lib/fairpane.lib","--dir",".","--dir","C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","absent","out/fp0066-ReleaseFast/lib/fairpane.lib","--dir",".","--dir","C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:37.600Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":67,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","members","out/fp0066-ReleaseFast/lib/fairpane.lib","fairpane_zcu.obj"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","members","out/fp0066-ReleaseFast/lib/fairpane.lib","fairpane_zcu.obj"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:37.718Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","-Doptimize=ReleaseSmall","--prefix","out/fp0066-ReleaseSmall","--cache-dir","out/fp0066-ReleaseSmall-cache"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","-Doptimize=ReleaseSmall","--prefix","out/fp0066-ReleaseSmall","--cache-dir","out/fp0066-ReleaseSmall-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:37.811Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":4416,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","abi-exports","out/fp0066-ReleaseSmall/lib/fairpane.lib"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "library": "out/fp0066-ReleaseSmall/lib/fairpane.lib",
+  "exports": 15
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","abi-exports","out/fp0066-ReleaseSmall/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:42.278Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":56}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","ar","t","out/fp0066-ReleaseSmall/lib/fairpane.lib"]
+fairpane_zcu.obj
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["ar","t","out/fp0066-ReleaseSmall/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:42.386Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","absent","out/fp0066-ReleaseSmall/lib/fairpane.lib","--dir",".","--dir","C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","absent","out/fp0066-ReleaseSmall/lib/fairpane.lib","--dir",".","--dir","C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:42.458Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":40,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","members","out/fp0066-ReleaseSmall/lib/fairpane.lib","fairpane_zcu.obj"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["run","--cache-dir","out/fp0066-check-cache","tools/zig/library_check.zig","--","members","out/fp0066-ReleaseSmall/lib/fairpane.lib","fairpane_zcu.obj"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:42.552Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),c=require('crypto');for(const f of process.argv.slice(1)){const b=fs.readFileSync(f);console.log(c.createHash('sha256').update(b).digest('hex'),b.length,f)}","out/fp0066-before-release/lib/fairpane.lib","out/fp0066-ReleaseSafe/lib/fairpane.lib","out/fp0066-ReleaseFast/lib/fairpane.lib","out/fp0066-ReleaseSmall/lib/fairpane.lib"]
+30dd4f10d48652cbffb6637ca45fb0e654d47770b9d91f42f61f7b3a3cca31e6 3053734 out/fp0066-before-release/lib/fairpane.lib
+249d63f2dc832ffed237a63269ba0ce4edbde603d73625c68b07db9ccadc4f48 706412 out/fp0066-ReleaseSafe/lib/fairpane.lib
+5da5ec16db0cfcd916eb5656f7dbdcdef3ec4b452fccdbfcd21ac978c2c5a78a 25708 out/fp0066-ReleaseFast/lib/fairpane.lib
+a77911016983a41c2a5d96569c8dcb860b06488eeee5685fe096ff420ed6e4a8 25514 out/fp0066-ReleaseSmall/lib/fairpane.lib
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),c=require('crypto');for(const f of process.argv.slice(1)){const b=fs.readFileSync(f);console.log(c.createHash('sha256').update(b).digest('hex'),b.length,f)}","out/fp0066-before-release/lib/fairpane.lib","out/fp0066-ReleaseSafe/lib/fairpane.lib","out/fp0066-ReleaseFast/lib/fairpane.lib","out/fp0066-ReleaseSmall/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:42.655Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","out/fp0066-ReleaseSafe/lib/fairpane.lib","-o","out/fp0066-ReleaseSafe/abi-smoke.exe"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","out/fp0066-ReleaseSafe/lib/fairpane.lib","-o","out/fp0066-ReleaseSafe/abi-smoke.exe"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:51.139Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":364,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-ReleaseSafe\\abi-smoke.exe"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-ReleaseSafe\\abi-smoke.exe","arguments":[],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:51.554Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","out/fp0066-ReleaseFast/lib/fairpane.lib","-o","out/fp0066-ReleaseFast/abi-smoke.exe"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","out/fp0066-ReleaseFast/lib/fairpane.lib","-o","out/fp0066-ReleaseFast/abi-smoke.exe"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:51.630Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":90,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-ReleaseFast\\abi-smoke.exe"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-ReleaseFast\\abi-smoke.exe","arguments":[],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:51.771Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","out/fp0066-ReleaseSmall/lib/fairpane.lib","-o","out/fp0066-ReleaseSmall/abi-smoke.exe"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","out/fp0066-ReleaseSmall/lib/fairpane.lib","-o","out/fp0066-ReleaseSmall/abi-smoke.exe"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:51.845Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":89,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-ReleaseSmall\\abi-smoke.exe"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-ReleaseSmall\\abi-smoke.exe","arguments":[],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:30:51.983Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}

@@ -1,0 +1,60 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","build.zig","tools/zig/library_check.zig"]
+31c7fd204e45c2a6b071a7c77ed0a7bcae87aa55
+42ead8e42ec6d2c99c4141ffacc3bd488fc68dbc
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","build.zig","tools/zig/library_check.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:41:48.075Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","build.zig","tools/zig/library_check.zig"]
+31c7fd204e45c2a6b071a7c77ed0a7bcae87aa55
+42ead8e42ec6d2c99c4141ffacc3bd488fc68dbc
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","build.zig","tools/zig/library_check.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:41:48.156Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","zig-build"]
+Execute gate zig-build.
+{
+  "gate": "zig-build",
+  "status": "pass",
+  "receipt": "out/evidence/2026-10-09T14-41-48-361Z-zig-build-89ac727f.json",
+  "error": null
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","zig-build"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:41:48.228Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":57591}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","c-abi"]
+Execute gate c-abi.
+{
+  "gate": "c-abi",
+  "status": "pass",
+  "receipt": "out/evidence/2026-10-09T14-42-46-040Z-c-abi-6be04238.json",
+  "error": null
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","c-abi"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:42:45.896Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":10012}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","cross-windows-x86_64"]
+Execute gate cross-windows-x86_64.
+{
+  "gate": "cross-windows-x86_64",
+  "status": "pass",
+  "receipt": "out/evidence/2026-10-09T14-42-56-094Z-cross-windows-x86_64-b48c2dde.json",
+  "error": null
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","cross-windows-x86_64"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:42:55.964Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":9858}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","cross-linux-aarch64"]
+Execute gate cross-linux-aarch64.
+{
+  "gate": "cross-linux-aarch64",
+  "status": "pass",
+  "receipt": "out/evidence/2026-10-09T14-43-05-993Z-cross-linux-aarch64-735a1e3b.json",
+  "error": null
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","cross-linux-aarch64"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:43:05.882Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":10145}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","cross-macos-aarch64"]
+Execute gate cross-macos-aarch64.
+{
+  "gate": "cross-macos-aarch64",
+  "status": "pass",
+  "receipt": "out/evidence/2026-10-09T14-43-16-214Z-cross-macos-aarch64-67147cbc.json",
+  "error": null
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","cross-macos-aarch64"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:43:16.094Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":10461}

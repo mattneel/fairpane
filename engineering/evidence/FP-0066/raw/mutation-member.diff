@@ -1,0 +1,14 @@
+diff --git a/build.zig b/build.zig
+--- a/build.zig
++++ b/build.zig
+@@ -259,7 +259,8 @@
+     // `r` inserts the object, `c` creates the archive silently, `s` writes the symbol table, and `D` zeroes every time stamp, owner, and group.
+     const archive = b.addSystemCommand(&.{ b.graph.zig_exe, "ar", b.fmt("--format={s}", .{format}), "rcsD" });
+     archive.setName(b.fmt("archive {s} {s}", .{ basename, @tagName(optimize) }));
+-    const output = archive.addOutputFileArg2(basename, .{});
++    _ = archive.addOutputFileArg2(basename, .{});
+     archive.addFileArg(object.getEmittedBin());
+-    return .{ .object = object, .archive = output, .basename = basename };
++    const compiler_archive = b.addLibrary(.{ .name = "fairpane", .linkage = .static, .root_module = object.root_module });
++    return .{ .object = object, .archive = compiler_archive.getEmittedBin(), .basename = basename };
+ }

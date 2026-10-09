@@ -1,0 +1,30 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","library-test","--summary","all","--cache-dir","out/fp0066-after-attempt-2"]
+Build Summary: 16/16 steps succeeded; 6/6 tests passed
+library-test success
++- run test 6 pass (6 total) 31ms MaxRSS:4M
+|  +- compile test debug native success 2s MaxRSS:297M
++- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical success 35ms
+|  +- compile exe fairpane-library-check debug native success 1s MaxRSS:291M
+|  +- archive fairpane.lib safe success 15ms
+|  |  +- compile obj fairpane_zcu safe native success 3s MaxRSS:172M
+|  |     +- WriteFile fp0066-tree-a/src success
+|  +- archive fairpane.lib safe success 15ms
+|     +- compile obj fairpane_zcu safe native success 3s MaxRSS:172M
+|        +- WriteFile fp0066-tree-a/src (reused)
++- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory success 58ms
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- archive fairpane.lib safe (+1 more reused dependencies)
+|  +- WriteFile fp0066-tree-a/src (reused)
++- FP-0066 case 4: the Debug library keeps debug information that names the absolute source directory success 58ms
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- archive fairpane.lib debug success 18ms
+|     +- compile obj fairpane_zcu debug native success 1s MaxRSS:288M
++- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory success 29ms
+|  +- compile exe fairpane-library-check debug native (reused)
+|  +- archive fairpane.lib safe (+1 more reused dependencies)
++- FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group success 30ms
+   +- compile exe fairpane-library-check debug native (reused)
+   +- archive fairpane.lib safe (+1 more reused dependencies)
+
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","library-test","--summary","all","--cache-dir","out/fp0066-after-attempt-2"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:29:58.823Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":6666,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

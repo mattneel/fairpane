@@ -1,0 +1,14 @@
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","-e","sh","-c","set -e; \"$HOME/fairpane-linux/tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig\" version; \"$HOME/fairpane-linux/node/bin/node\" --version; uname -sr"]
+sh: 1: /home/autark/fairpane-linux/tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig: not found
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","-e","sh","-c","set -e; \"$HOME/fairpane-linux/tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig\" version; \"$HOME/fairpane-linux/node/bin/node\" --version; uname -sr"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:32:07.852Z","exit_code":127,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","-e","sh","-c","set -e; Z=\"$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/zig\"; \"$Z\" version; \"$Z\" env | grep -E \"zig_exe|lib_dir|version\"; \"$HOME/fairpane-linux/node/bin/node\" --version; \"$HOME/fairpane-linux/node/bin/node\" -p \"process.platform + \\\" \\\" + process.arch\"; uname -sr"]
+0.18.0-dev.120+9fe22a29b
+    .zig_exe = "/home/autark/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/zig",
+    .lib_dir = "/home/autark/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/lib",
+    .version = "0.18.0-dev.120+9fe22a29b",
+v26.7.0
+linux x64
+Linux 7.2.6-locietta-WSL2-xanmod1
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","-e","sh","-c","set -e; Z=\"$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/zig\"; \"$Z\" version; \"$Z\" env | grep -E \"zig_exe|lib_dir|version\"; \"$HOME/fairpane-linux/node/bin/node\" --version; \"$HOME/fairpane-linux/node/bin/node\" -p \"process.platform + \\\" \\\" + process.arch\"; uname -sr"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:32:25.189Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":240}

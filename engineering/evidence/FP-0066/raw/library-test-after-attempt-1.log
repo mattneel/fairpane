@@ -1,0 +1,16 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","library-test","--summary","all","--cache-dir","out/fp0066-after-attempt-1"]
+build.zig:240:35: error: no field named 'Debug' in enum 'lang.Optimize'
+            .strip = optimize != .Debug,
+                                 ~^~~~~
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\lang.zig:113:22: note: enum declared here
+pub const Optimize = enum {
+                     ^~~~
+referenced by:
+    build: build.zig:118:31
+    runPackageScript [inlined]: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\Build.zig:2144:50
+    main: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\configurer.zig:138:29
+    3 reference(s) hidden; use '-freference-trace=6' to see all references
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xf3dec2ee library-test --summary all --cache-dir out/fp0066-after-attempt-1
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","library-test","--summary","all","--cache-dir","out/fp0066-after-attempt-1"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:29:24.652Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":1014,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

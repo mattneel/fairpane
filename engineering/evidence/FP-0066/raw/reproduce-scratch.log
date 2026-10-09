@@ -1,0 +1,35 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","clone","--no-local","-q",".","out/fp0066-scratch"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["clone","--no-local","-q",".","out/fp0066-scratch"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:33:00.415Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1229}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","HEAD","--binary","--output=out/fp0066-implementation.patch","--","build.zig","tools","engineering/decisions"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","HEAD","--binary","--output=out/fp0066-implementation.patch","--","build.zig","tools","engineering/decisions"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:33:01.693Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","--stat","../fp0066-implementation.patch"]
+ build.zig                                          |  125 +++++++-
+ .../decisions/0009-release-and-stewardship.md      |   39 ++
+ tools/README.md                                    |    9 +
+ tools/zig/library_check.zig                        |  328 ++++++++++++++++++++
+ 4 files changed, 493 insertions(+), 8 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","--stat","../fp0066-implementation.patch"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:33:01.776Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","../fp0066-implementation.patch"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","../fp0066-implementation.patch"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:33:01.843Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","add","-A"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["add","-A"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:33:01.924Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":114}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-c","user.name=FP-0066-scratch","-c","user.email=fp0066-scratch@example.invalid","-c","commit.gpgsign=false","commit","-q","-m","FP-0066 scratch: deterministic release library"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-c","user.name=FP-0066-scratch","-c","user.email=fp0066-scratch@example.invalid","-c","commit.gpgsign=false","commit","-q","-m","FP-0066 scratch: deterministic release library"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:33:02.100Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":77}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD","HEAD^"]
+00803cff8da2db46a3d58c8fa360f65fc3896cd5
+f31eb22b72588b095e3b031ecf7606665c37fd6e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD","HEAD^"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:33:02.232Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--short"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m\\out\\fp0066-scratch","started_at":"2026-10-09T14:33:02.306Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Windows\\system32\\cmd.exe","/c","mklink","/J","out\\fp0066-scratch\\.tools","C:\\src\\fairpane\\.tools"]
+Junction created for out\fp0066-scratch\.tools <<===>> C:\src\fairpane\.tools
+RESULT {"executable":"C:\\Windows\\system32\\cmd.exe","arguments":["/c","mklink","/J","out\\fp0066-scratch\\.tools","C:\\src\\fairpane\\.tools"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t93143ef4f\\m","started_at":"2026-10-09T14:33:02.380Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":11}

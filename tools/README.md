@@ -273,6 +273,15 @@ The two trees have different paths, so an output that embeds its build path repo
 `node tools/release.test.mjs` runs those cases without the rest of the controller.
 They run `reproduce-check` with a stand-in compiler that runs the fixture commit's own `build.mjs`, so they need no Zig installation.
 
+`build.zig` installs the static library under the library rules of ADR 0009.
+A mode other than Debug builds the object without debug information, and `zig ar` writes the library in deterministic mode with one member named by the object's base name.
+`zig build library-test`, which `zig build test` runs, holds FP-0066 cases 1, 2, 4, and 5.
+It builds a ReleaseSafe library from each of two copies of `src` in different directories, and a Debug library from `src`.
+`tools/zig/library_check.zig` then compares the two ReleaseSafe libraries byte for byte, searches one for the paths of its build directory and of the compiler installation, and lists its members.
+It also confirms that the Debug library's object names the absolute path of `src`.
+The search ignores ASCII letter case and treats `/` and `\` as the same byte.
+FP-0066 case 3 is `node tools/fairpane.mjs abi-exports` on the installed ReleaseSafe library.
+
 ## Generate the Unicode property tables
 
 `tools/ucd.mjs` reads the eight Unicode 18.0.0 files under `src/unicode/ucd/` and generates `src/unicode/tables.zig`.
