@@ -1,0 +1,67 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","add","--detach","out/check-617d2cd","617d2cd"]
+Preparing worktree (detached HEAD 617d2cd)
+HEAD is now at 617d2cd FP-0002: anchor candidate checks on the Git top-level directory
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","add","--detach","out/check-617d2cd","617d2cd"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:18.737Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":166}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/check-617d2cd","status","--porcelain","--untracked-files=all","--ignored"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/check-617d2cd","status","--porcelain","--untracked-files=all","--ignored"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:18.952Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/check-617d2cd/tools/fairpane.mjs","evidence-check","C:\\src\\fairpane/engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-099Z-repo-check-8287c88c.json"]
+Fairpane: The evidence path is outside an allowed directory.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/check-617d2cd/tools/fairpane.mjs","evidence-check","C:\\src\\fairpane/engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-099Z-repo-check-8287c88c.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:19.039Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":40}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/check-617d2cd/tools/fairpane.mjs","evidence-check","C:\\src\\fairpane/engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-289Z-controller-test-a135c7e3.json"]
+Fairpane: The evidence path is outside an allowed directory.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/check-617d2cd/tools/fairpane.mjs","evidence-check","C:\\src\\fairpane/engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-289Z-controller-test-a135c7e3.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:19.141Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":41}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","remove","--force","out/check-617d2cd"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","remove","--force","out/check-617d2cd"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:19.236Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":53}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","add","--detach","out/check-a90597a","a90597a"]
+Preparing worktree (detached HEAD a90597a)
+HEAD is now at a90597a FP-0002: record revision 3 evidence from a fresh work tree
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","add","--detach","out/check-a90597a","a90597a"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:38.518Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":147}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/check-a90597a","status","--porcelain","--untracked-files=all","--ignored"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/check-a90597a","status","--porcelain","--untracked-files=all","--ignored"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:38.717Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","C:\\src\\fairpane\\out\\check-a90597a\\tools\\fairpane.mjs","evidence-check","C:\\src\\fairpane\\out\\check-a90597a\\engineering\\evidence\\FP-0002\\gates\\2026-10-09T02-12-59-099Z-repo-check-8287c88c.json"]
+Fairpane: The evidence path is outside an allowed directory.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["C:\\src\\fairpane\\out\\check-a90597a\\tools\\fairpane.mjs","evidence-check","C:\\src\\fairpane\\out\\check-a90597a\\engineering\\evidence\\FP-0002\\gates\\2026-10-09T02-12-59-099Z-repo-check-8287c88c.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:38.843Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":54}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","C:\\src\\fairpane\\out\\check-a90597a\\tools\\fairpane.mjs","evidence-check","C:\\src\\fairpane\\out\\check-a90597a\\engineering\\evidence\\FP-0002\\gates\\2026-10-09T02-12-59-289Z-controller-test-a135c7e3.json"]
+Fairpane: The evidence path is outside an allowed directory.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["C:\\src\\fairpane\\out\\check-a90597a\\tools\\fairpane.mjs","evidence-check","C:\\src\\fairpane\\out\\check-a90597a\\engineering\\evidence\\FP-0002\\gates\\2026-10-09T02-12-59-289Z-controller-test-a135c7e3.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:38.950Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","remove","--force","out/check-a90597a"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","remove","--force","out/check-a90597a"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:39.041Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":60}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","add","--detach","out/check-a90597a","a90597a"]
+Preparing worktree (detached HEAD a90597a)
+HEAD is now at a90597a FP-0002: record revision 3 evidence from a fresh work tree
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","add","--detach","out/check-a90597a","a90597a"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:50.928Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":123}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/check-a90597a","status","--porcelain","--untracked-files=all","--ignored"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/check-a90597a","status","--porcelain","--untracked-files=all","--ignored"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:51.098Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/check-a90597a/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-099Z-repo-check-8287c88c.json"]
+{
+  "result": "pass",
+  "gate": "repo-check",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/check-a90597a/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-099Z-repo-check-8287c88c.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:51.173Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":70}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/check-a90597a/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-289Z-controller-test-a135c7e3.json"]
+{
+  "result": "pass",
+  "gate": "controller-test",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/check-a90597a/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-289Z-controller-test-a135c7e3.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:51.289Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":72}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","remove","--force","out/check-a90597a"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","remove","--force","out/check-a90597a"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:25:51.411Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":58}

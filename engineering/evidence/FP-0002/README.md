@@ -60,9 +60,13 @@ The gates ran with source digest `3f673fd7598a670284882bf8efc263ff7ffec565e00af1
 ## Revision 3 records
 
 Review 2 rejected commit `9e9a0bf`, and commit `617d2cd` implements contract revision 3.
-`raw/revision-3-binding.log` records a fresh `git worktree add` of `617d2cd`, its `HEAD`, and a status with untracked and ignored files, before the gates ran there.
-The gate receipts were copied from that work tree, and `evidence-check` reports them current against the main checkout.
-The gates ran with source digest `0f7e082d17ef228f5a2340e490421618f6b78da55d75cbd66531c9c61db334f0`.
+`raw/revision-3-binding.log` records a fresh `git worktree add` of `617d2cd`, its `HEAD`, and an empty status that included untracked and ignored files, before the gates ran there.
+The gate receipts were copied from that work tree into commit `a90597a`.
+`raw/revision-3-evidence-check.log` checks both receipts with `evidence-check` inside a fresh work tree of `a90597a`, whose source files equal those of `617d2cd`.
+Its first four attempts failed because they named the receipts by absolute paths, and its last two report `pass` with `current_source` true.
+The gates ran with source digest `0f7e082d17ef228f5a2340e490421618f6b78da55d75cbd66531c9c61db334f0` and policy digest `782bc4031600ed76e12e503135470bfd71c6b65e6fdf3fafc00880989f5f6d53`.
+That policy digest comes from the separate `policy:` commits before `617d2cd`, and `617d2cd` changes no protected file.
+The suite has 118 tests: the 102 that revision 2 counted, plus the `FP-0003` corpus cases and the `FP-0033` workflow cases that landed in between.
 
 - `gates/2026-10-09T02-12-59-099Z-repo-check-8287c88c.json`
 - `gates/2026-10-09T02-12-59-289Z-controller-test-a135c7e3.json`, with 118 of 118 controller tests passing on Node.
@@ -74,3 +78,9 @@ The gates ran with source digest `0f7e082d17ef228f5a2340e490421618f6b78da55d75cb
 | `raw/revision-3-controller-test-bun.log` | Bun 1.4.2, then exit status 0 with 118 of 118 controller tests passing. |
 
 The canonical payload rule did not change in revision 3, so `raw/mutation-canonical-2.log` remains its mutation control.
+
+## Review 3
+
+`reviews/review-3-accept.json` accepts commits `617d2cd` and `a90597a` with four minor findings and three notes.
+This section answers the minor finding about the unrecorded `evidence-check` run.
+Task `FP-0051` carries the remaining findings.

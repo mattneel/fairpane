@@ -2558,6 +2558,52 @@
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0051",
+      "title": "Close the FP-0002 review findings",
+      "workstream": "laboratory",
+      "depends_on": [
+        "FP-0002"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "tools",
+        "tests",
+        "engineering/decisions",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Report a verifier that runs from a linked work tree of the candidate repository as advisory, with a test.",
+        "Reserve unknown-candidate for a missing commit object, and report any other Git failure of the commit lookup as a tool error, with a corrupted-object fixture.",
+        "Reject a trust-policy path whose lexical form or resolved form lies inside the candidate repository or its Git directory, and read the same resolved path that was checked.",
+        "Document that path comparison cannot detect a UNC or administrative-share alias of the candidate.",
+        "Make the outside-repository test independent of whether the temporary directory lies inside a Git work tree."
+      ],
+      "read": [
+        "engineering/evidence/FP-0002/reviews/review-3-accept.json",
+        "engineering/evidence/FP-0002/CONTRACT.md",
+        "engineering/decisions/0002-qualification-boundary.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
   ]
 }

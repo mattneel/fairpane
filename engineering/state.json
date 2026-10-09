@@ -25,7 +25,7 @@
       ]
     },
     "FP-0002": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "root-integrator",
       "evidence": [
         "engineering/evidence/FP-0002/README.md",
@@ -33,14 +33,16 @@
         "engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-289Z-controller-test-a135c7e3.json",
         "engineering/evidence/FP-0002/raw/revision-3-release-check.log",
         "engineering/evidence/FP-0002/raw/revision-3-attest-standalone.log",
+        "engineering/evidence/FP-0002/raw/revision-3-evidence-check.log",
         "engineering/evidence/FP-0002/raw/mutation-canonical-2.log"
       ],
-      "review": "engineering/evidence/FP-0002/reviews/review-2-reject.json",
+      "review": "engineering/evidence/FP-0002/reviews/review-3-accept.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0002/CONTRACT.md, including revisions 1, 2, and 3.",
         "Review 1 rejected commit e2eaace for the verifier's own location and unhardened candidate Git calls.",
         "Review 2 rejected commit 9e9a0bf because a subdirectory path split the guard from the repository that Git used.",
-        "Commit 617d2cd implements revision 3 with source digest 0f7e082d17ef228f5a2340e490421618f6b78da55d75cbd66531c9c61db334f0. Awaiting fairpane-review."
+        "Commit 617d2cd implements revision 3 with source digest 0f7e082d17ef228f5a2340e490421618f6b78da55d75cbd66531c9c61db334f0.",
+        "Review 3 accepted 617d2cd and a90597a with four minor findings and three notes; FP-0051 carries them."
       ]
     },
     "FP-0003": {
@@ -511,6 +513,15 @@
       "review": null,
       "notes": [
         "Created from the minor findings in engineering/evidence/FP-0006/reviews/review-1-accept.json."
+      ]
+    },
+    "FP-0051": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": [
+        "Created from the minor findings and notes in engineering/evidence/FP-0002/reviews/review-3-accept.json."
       ]
     }
   }
