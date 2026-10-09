@@ -1,0 +1,41 @@
+{
+  "verdict": "reject",
+  "summary": "Revision 1's code and local evidence hold up, but I still reject because the CI phase durations required by plan criteria 1 and 3 have not been recorded. Once the CI record exists and meets the items listed below, I expect to accept.\n\n**Implementation**\n- `ZIG_BUILD_SUMMARY` works as the contract says. The locked runner reads it before the command-line arguments and accepts `all` (Maker.zig:261, 296-300, and the Summary enum at 127).\n- The gate passes the inherited environment through (`runProcess` merges `process.env`). Both `Run gate zig-test` steps set only `ZIG_BUILD_SUMMARY: all` (gates.yml:47-50, 93-96).\n- The workflow checker accepts `env:` only on a step whose run line is exactly `node tools/fairpane.mjs run zig-test`, and only with that one key and value (workflow-check.mjs:453-469). Case 3 covers all 19 other steps, a job, and the workflow.\n- A command that ends during the listing is handled correctly (tools/lib.mjs:640-673). An exit that arrives during the listing is held in `listing.exit`. The section is written before the output, `TIMEOUT The command ended during the listing.` replaces the stop line, `stopDescendants` stops the listed descendants, and `finish` runs afterward.\n- The ended check is right on Windows: Node's signal-0 probe reports an exited process as gone even before its exit event arrives.\n- No gate argument, gate timeout, test, or threshold changed.\n\n**Local evidence**\n- `raw/tests-before-r1.log`: 224 of 226 pass. Only revision 1 cases 2 and 3 fail, as the contract requires.\n- `raw/mutation-r1.log`: control 1 (skip the output copy) fails cases 1 and 2. Control 2 (drop the new line) fails revision 1 case 2. Each restoration returns `tools/lib.mjs` to blob `22e78868`.\n- `raw/controller-tests-after-r1.log`: 226 of 226 pass, `check` passes, and the per-case durations are there.\n- `raw/linux-controller-tests-r1.log`: 225 of 226 pass on Linux. The one failure is attestation case 13, which has nothing to do with this task.\n- `raw/probe-build-summary-r1.log`: run through the gate with no `--summary` argument, `zig build test` prints `Build Summary: 100/100 steps succeeded; 321/321 tests passed` with a duration for each step.\n- `raw/test-count-r1.log`: the 7-test difference checks out (2 + 3 + 2).\n- All README corrections from review 1 are in, at lines 9, 11, 90, 134-135, 170-171, and 186-187.\n\n**What I need from the CI record**\n1. At least ten `workflow_dispatch` runs of a head that contains `0276268`. Re-record `ci/dispatched-runs.log` so each run shows `headBranch` `master`, `event`, `headSha`, `attempt`, and its conclusion. Every run must conclude `success`.\n2. For each run and each job (Windows and Linux): the `zig-test` step duration, and the slowest one per host at most 400 s. The local gate went from 27-36 s at `9d5638b` to 113 s at the revision base, so the earlier 191 s and 188 s figures no longer stand in for this.\n3. Both jobs' receipts for every run, downloaded with a recorded `gh run download`.\n4. From each downloaded `zig-test` gate log, copied verbatim:\n   - the `Build Summary` line;\n   - the `compile test debug native` and `run test` durations for the unit-test binary and the text-test binary;\n   - the slowest of the remaining steps, or all of them.\n   The summary's presence in both jobs' logs is the only proof that the variable reached `zig build` on CI, because the receipt's `environment_overrides` does not list it.\n5. A statement of the summary's precision. The runner prints whole minutes at or above 60 s and whole seconds at or above 1 s (Maker.zig:3028-3031), so \"2m\" means 120 to 179 s. Report the ranges as ranges.\n6. The step and test counts in each summary should match across runs, or the README should explain any difference.\n7. The integration binding for `0276268`: `HEAD`, and a status that includes ignored files, before and after `repo-check` and `controller-test`, with their receipts.\n8. The run ledger required by `docs/AGENT_OPERATIONS.md` lines 85-104 for every pushed head from `9d5638b` through the head before the acceptance commit. Each run must pass, or be recorded with its cause and a passing rerun.",
+  "findings": [
+    {
+      "severity": "major",
+      "path": "engineering/evidence/FP-0098/ci/README.md",
+      "line": 10,
+      "issue": "Plan criteria 1 and 3 (engineering/plan.json:3443-3445) are still unmet: no CI record yet gives the compile and run phase durations of `zig-test` on both jobs over at least ten runs. Revision 1 supplies the means, `ZIG_BUILD_SUMMARY: all` on both steps, and the local probe (`raw/probe-build-summary-r1.log`) shows it works through the gate. But `ci/README.md` still covers only the runs of `29a9f8e`, which predate the change, and README lines 280-282 list the dispatch as open.",
+      "recommendation": "Dispatch and record the runs as items 1-8 of the summary describe, then request review 3."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0098/raw/probe-build-summary-r1.log",
+      "line": 218,
+      "issue": "Carried over from review 1 without a ruling: the new logs again contain user-profile paths, such as the worktree `C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m` and its `.zig-cache\\global`, and `C:\\Users\\requi\\AppData\\Local\\Temp\\...` in the case 2 failure message of `raw/tests-before-r1.log`. No log lists the contents of a home directory.",
+      "recommendation": "Get the owner or `fairpane-spec` to rule on profile paths in raw logs, or normalize them in future records."
+    },
+    {
+      "severity": "note",
+      "path": "tools/selftest.mjs",
+      "line": 384,
+      "issue": "In the red baseline, revision 1 case 2 fails because the base code did not accept a function as `processListing`. The base ran a real listing, so the case never reached the command-ended path. Only mutation control 2 shows that the case depends on the new line. No control removes `stopDescendants`; [INFERENCE] `expectStopped` would catch that, because the orphaned 60-second child would survive.",
+      "recommendation": "No change is required. A third control that skips `stopDescendants` would close the gap."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0098/README.md",
+      "line": 219,
+      "issue": "The probe's `zig build test` took 113328 ms locally at the revision base: 100 steps and 321 tests, with the unit run step at 30 s and its compile at 13 s. At `9d5638b` it took 27-36 s. The CI margin from the `29a9f8e` runs does not carry over to the new head.",
+      "recommendation": "Judge the 400 s criterion only on the new dispatched runs. Name the head they ran on and the step and test counts in `ci/README.md`."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0098/README.md",
+      "line": 213,
+      "issue": "On Windows, the ended path stops each listed descendant by PID with `taskkill /T`. A PID reused between the snapshot and the stop could name an unrelated process. The README marks this [INFERENCE] and notes that a live stop has the same exposure.",
+      "recommendation": "No change is required."
+    }
+  ]
+}
