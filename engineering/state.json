@@ -938,7 +938,7 @@
       "review": null,
       "notes": ["Created because the C ABI takes no allocator, so no foreign consumer could induce the allocation-failure scenario that FP-0029 criterion 16 lists."]
     },
-    "FP-0082": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0012 by fairpane-js worker FP0012Contract as the parser part. It carries no FP-0012 criterion word for word and feeds criteria 1 and 4."] },
+    "FP-0082": { "status": "active", "owner": "fairpane-js worker FP0082Parser, integrated by root-integrator", "evidence": ["engineering/evidence/FP-0082/CONTRACT.md"], "review": null, "notes": ["Split from FP-0012 by fairpane-js worker FP0012Contract as the parser part. It carries no FP-0012 criterion word for word and feeds criteria 1 and 4.", "The integrator froze the contract with a measured 1 MiB stack requirement for the depth cases, after plan reviews 1 and 2 approved the split."] },
     "FP-0083": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0012. It carries FP-0012 criteria 1, 3, and 7 word for word."] },
     "FP-0084": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0012. It carries FP-0012 criterion 2 word for word."] },
     "FP-0085": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0012. It carries FP-0012 criteria 5 and 6 word for word, and it follows FP-0087 so that its workloads can use arrays."] },

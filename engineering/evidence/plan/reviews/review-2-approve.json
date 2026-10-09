@@ -1,0 +1,51 @@
+{
+  "verdict": "approve",
+  "summary": "Plan review 2: I approve all three commits. There is no blocker and no major finding; two minor wording problems should be fixed before the affected contracts are frozen.\n\nI read each commit's diff from GitHub (`github.com/mattneel/fairpane/commit/<sha>.diff`) and checked it against the working tree at master `ed95bc5`. I ran no commands, so `node tools/fairpane.mjs check` is unverified; that it passes is [INFERENCE] from reading validatePlan (tools/lib.mjs:134-169) against the new dependencies.\n\n**789ad50 fixes the major finding from review 1.**\n- FP-0084 now precedes FP-0086, FP-0087, FP-0089, FP-0091, FP-0093, and FP-0094 (plan.json:3417-3427). FP-0088 and FP-0090 inherit it through FP-0087, and FP-0096 and FP-0097 through FP-0086. Every task whose criteria name the FP-0084 runner now waits for it.\n- FP-0084 depends only on FP-0083 and FP-0003, so no cycle forms.\n- FP-0080 now depends on FP-0021, FP-0010 gains `tools`, and the FP-0080 state note is correct.\n\n**b0e8e33: FP-0067, FP-0070, and FP-0071 hunks.** No hunk removes or weakens a criterion.\n- FP-0067 gains criterion 5, which is concrete, and `.github`, which is a source root and not a protected path.\n- FP-0071 criterion 3 is a strict superset of the old text, and criterion 4 is new.\n- FP-0070 adds two criteria. One of them (plan.json:3072) is ambiguous and needs rewording before FP-0070's contract freeze (finding 1).\n\n**49f2a81: FP-0070 criteria 7-9 and FP-0098.**\n- FP-0070 criteria 7-9 match FP-0014 review 2's findings 2, 3, and the import-cycle note.\n- FP-0098 has a state entry and depends on FP-0067. Its criteria 1, 2, and 4 are concrete, and criterion 4 routes any timeout increase through a separate reviewed change, as AGENTS.md:61-62 requires.\n- FP-0098 criterion 3 asks for a determination that, by the CI record's own account, the existing records cannot make (finding 2).\n\nThe deferrals you listed stand: the obligation tasks' specs/tools paths are decided in FP-0084's contract, and the FP-0029 lock paths are fixed with P1. Review 1's minor about read paths that name the unfrozen FP-0082 and FP-0083 contracts also stays open until those contracts are committed.",
+  "commits": [
+    {
+      "commit": "789ad50",
+      "verdict": "approve",
+      "notes": "Review 1's major finding is resolved. The diff adds \"FP-0084\" to depends_on of FP-0086 (3417), FP-0087 (3418), FP-0089 (3420), FP-0091 (3422), FP-0093 (3424, as [\"FP-0083\", \"FP-0084\", \"FP-0055\"]), and FP-0094 (3425). FP-0088, FP-0090, FP-0096, and FP-0097 inherit it. No acceptance text changed. FP-0080 now depends on [\"FP-0021\", \"FP-0079\"], and FP-0021 is accepted. FP-0010's allowed_paths gain \"tools\", which answers review 1's FP-0010 minor. The FP-0080 state note now says criteria 2-5 and 17-20 are carried word for word, plus a narrowed form of 14, which matches plan.json. The commit also adds engineering/evidence/plan/reviews/review-1-reject.json, a verbatim copy of my review 1 output. The commit is plan, state, and the review record only, as AGENTS.md:62 asks. The graph is acyclic."
+    },
+    {
+      "commit": "b0e8e33",
+      "verdict": "approve",
+      "notes": "**FP-0067.** Gains \".github\" in allowed_paths. .github is a source root (policy.json:34), not a policy root or a protected path. Criterion 5 (plan.json:3008) is new and concrete: zig-fmt and zig-test in the Linux job, plus a record of the first passing run. engineering/evidence/FP-0067/raw/linux-baseline.log, added in the same commit, backs it with a WSL run of 272/272 tests at 8d945fe.\n\n**FP-0070.** Gains two criteria.\n- 3073, 'Classify invalid and unsupported selector forms precisely': this traces to FP-0014 review 1's over-approximation note.\n- 3072, the ancestor-filter criterion: ambiguous (finding 1).\n\n**FP-0071.** Criterion 3 (3096) is rewritten as a strict superset; the spread syntax plus if(), inherit(), attr(), ident(), and random-item() keep the same 'once stable enough to test, or record why' condition. The added criterion 4 (3097) traces to the same review 1 note.\n\nNo hunk removes or weakens a criterion. The FP-0012 hunks of this commit were approved in review 1."
+    },
+    {
+      "commit": "49f2a81",
+      "verdict": "approve",
+      "notes": "**FP-0070 criteria 7-9 (3074-3076)** carry FP-0014 review 2 faithfully.\n- Criterion 7 lists the exact cases from finding 2: x > a b against x>a>a>b and y>a>x>a>b, a + b c, a ~ b c, and a > b ~ c 'under a parent that is not an element', which matches the issue's 'no parent element'.\n- Criterion 8 takes the memoized-failure option of finding 3.\n- Criterion 9 takes the import-cycle note, with its 'or record why it stays' alternative.\n\nThese tests of FP-0014's matcher now wait for FP-0070, which depends on FP-0010. That routing is the integrator's choice and is consistent with review 2's acceptance.\n\n**FP-0098 (3431-3450).** It has a state entry, depends on FP-0067, which provides the Linux zig-test job its criterion 1 measures, and adds no cycle. Criteria 1, 2, and 4 are concrete and testable.\n- On current records criterion 4 does not yet hold: the slowest Windows step took 7m36s, against a 400 s two-thirds bound.\n- Criterion 4 routes a timeout change to a separate reviewed gates.json change and forbids removing or weakening tests, consistent with AGENTS.md:61-62.\n- Criterion 3 is not decidable as written (finding 2).\n\nThe read paths engineering/evidence/FP-0014/ci/README.md and FP-0014/reviews/review-2-accept.json landed one commit later, in d526219; both exist at HEAD."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3072,
+      "issue": "FP-0070's criterion 'Reject a selector whose ancestor compounds cannot match in constant time per element on deep trees, for example with an ancestor filter' has two readings.\n- Grammatically, 'cannot match in constant time' can describe the selector, as if selectors whose matching is slow should be rejected. That would mean parse-time or cascade-time refusal of valid selectors, which contradicts Selectors 4 and FP-0070's own criterion 6 (classify forms precisely).\n- The intended reading comes from FP-0014's revision 1 contract ('Task FP-0070 owns a constant-time ancestor filter for deep trees') and README:114 ('A constant-time ancestor filter for selector matching in deep trees'). It is a fast-reject: before walking ancestors, rule out in O(1) per element a selector whose ancestor compounds' keys are absent from the element's ancestor chain.\n\nEven under the intended reading, 'constant time' cannot hold for every selector. A Bloom-style filter only rules out selectors whose keys are absent; a selector that passes the filter, or whose ancestor compounds have no keys (`* x`, `:hover x`), still walks the ancestors.",
+      "recommendation": "Replace the criterion in a plan commit before FP-0070's contract freeze. Suggested text: 'Before walking an element's ancestors, rule out in constant time per element a selector whose ancestor compounds require a type, ID, class, or attribute name that no ancestor has, for example with an ancestor Bloom filter, and report the share of selectors ruled out and the remaining ancestor walk on the FP-0014 case 46 and case 53 deep trees.' This keeps the obligation, stays testable, and cannot be read as refusing valid selectors."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3444,
+      "issue": "FP-0098 criterion 3 says 'Show whether the timeout of run 37931192952 was runner slowness or a hang'. The CI record it reads says 'The record cannot tell a slow runner from an intermittent hang, because the gate kept no output from the stopped build' (engineering/evidence/FP-0014/ci/README.md, final paragraph). The receipt of that run captured no build output (600164 ms, timed_out true), and the runner is gone. No later work can produce a record that decides that particular run. The criterion either cannot be met or invites an unrecorded claim, which AGENTS.md forbids.",
+      "recommendation": "Reword to a decidable obligation, for example: 'Rerun the 9cc81ea tree's zig-test gate on the Windows CI runner at least ten times with criterion 2's output capture, report each step's duration, fix any hang that a run shows, and state the cause of run 37931192952 only as [INFERENCE] unless a record decides it.' Land the rewording in a separate plan commit before FP-0098's contract freeze."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3097,
+      "issue": "FP-0070 criterion 6 (3073) and FP-0071 criterion 4 (3097) say 'as the FP-0014 review notes'. That note is the over-approximation note at src/css/values.zig:370 in engineering/evidence/FP-0014/reviews/review-1-reject.json. Neither task's read list includes that review, or review-2-accept.json for FP-0070 criteria 7-9; both read only engineering/evidence/FP-0014/CONTRACT.md (3079 and 3100). 'The FP-0014 review' is also ambiguous now that two reviews exist.",
+      "recommendation": "Name the review in the criteria ('as FP-0014 review 1 notes'), and add review-1-reject.json to FP-0070's and FP-0071's read lists, plus review-2-accept.json to FP-0070's, in the next plan commit."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3447,
+      "issue": "49f2a81 makes FP-0098 read engineering/evidence/FP-0014/ci/README.md, and makes FP-0070 criteria 7-9 cite FP-0014 review 2. Both files were committed only in the next commit, d526219, so they were missing at 49f2a81 itself. Both exist at HEAD ed95bc5, and check does not validate read paths.",
+      "recommendation": "No change is needed at HEAD. In future, commit the evidence that a plan change cites before or with that plan change, so every plan commit is self-consistent."
+    }
+  ]
+}
