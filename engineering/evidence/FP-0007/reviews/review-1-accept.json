@@ -1,0 +1,186 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "39ef90a34dde379b12d7f9378ce3b0eafc1c2f85",
+    "a033de3c7f93d31e10b7c53e56abbaea0bc78a9a"
+  ],
+  "summary": "I found no blocker or major defect, so the verdict is accept. I reviewed the working-tree files, not the commit objects, because I had no shell for git. The line numbers in src/lab.zig match the worker's mutation log: stageStatus is at 971, and the case 1 assertion is at 1922, one line before the mutated file's 1923. That suggests the reviewed file is the committed one, but I did not hash it. The implementation matches the frozen contract on these points: (1) Parsing is strict. (2) Every stage except fetch is hard-wired to unsupported. (3) Results use ordinals instead of process-wide identifiers. (4) Replay compares the error of each action, every drained event, and the final document states. (5) ddmin is the Zeller–Hildebrandt algorithm with an empty-input check at length 1, and its result is 1-minimal. (6) minimize's predicate compares (result, stage, check) and re-verifies the written case. (7) Every allocation failure maps to harness-error. lab.zig, engine.zig and handles.zig use no Io, net, fs or posix outside tests. lab_main.zig reads only the paths given on the command line, with a size check before reading. The raw logs support each claim in the evidence README: tests-before fails to compile, tests-after passes 87/87 with a fresh cache, the mutation fails cases 1, 2, 4 and 8, and integration passes 101/101 with 17/17 steps. All five gate receipts record the same source digest before and after. The policy digest matches the FP-0021, FP-0033 and FP-0051 receipts. The minor findings are: the integrator's binding record lacks the per-file hashes the contract requires; HANDOFF.md is stale; and the 64 MiB size bound has no test.",
+  "criteria": [
+    {
+      "criterion": "Plan: Accept explicit document bytes and environmental inputs without direct network access.",
+      "met": true,
+      "evidence": "src/lab.zig:178-209 (parseCase) and the Parser at 211-660 accept document and resource bytes as canonical base64 and validate every environment field. Case.answer (lines 160-166) answers requests only from the case, by exact URL equality. The only non-test Io in lab.zig is in the test helpers (line 1798) and the case 6 test (lines 2059-2101). engine.zig:17-18 and handles.zig:7-8 import only std, handles.zig and builtin, and grep finds no Io, net, fs or posix use in them. Cases 1, 5 and 6 cover this."
+    },
+    {
+      "criterion": "Plan: Emit structured pipeline state with source and corpus identifiers.",
+      "met": true,
+      "evidence": "Run.writeResult (lab.zig ~985-1030) emits the case SHA-256, the corpus unchanged, input URL, length and SHA-256 for each input, the environment, environment consumers, eight stages, ordinal events, steps and the outcome. Cases 2, 7 and 9 assert these. Here 'source' means the case and input digests, as the frozen contract defines; the engine's source digest is bound by the gate receipts, not the result."
+    },
+    {
+      "criterion": "Plan: Distinguish unsupported behavior from failures and harness errors.",
+      "met": true,
+      "evidence": "The Result enum and exitStatus (lab.zig:53-75), conclude (lab.zig:903-939) and stageStatus (lab.zig:971-974) separate the outcomes. Cases 2, 3, 4, 8 and 13 cover them, and build.zig:95-116 checks exit statuses 0, 1, 2, 3, 4 and 64. integration-tests.log shows all of these steps succeeded."
+    },
+    {
+      "criterion": "Plan: Add replay and fixture-minimization entry points without success stubs.",
+      "met": true,
+      "evidence": "replay and replayOutcome (lab.zig ~1214-1276), ddmin (lab.zig:1323-1368), and minimize and minimizeOutcome (lab.zig ~1455-1530) are real implementations, reachable through the CLI at lab_main.zig:84-127. Cases 10, 11 and 14 pass in integration-tests.log."
+    },
+    {
+      "criterion": "Case 1: a valid case parses; ten invalid fixtures each give harness-error with a distinct message",
+      "met": true,
+      "evidence": "The test at lab.zig ~1875-1926 checks all ten listed conditions and asserts pairwise-distinct messages, exit status 3, and fetch 'not-reached'. It passes in integration-tests.log. The mutation log shows it fails when stages are forced to completed."
+    },
+    {
+      "criterion": "Case 2: pass; fetch completed with length and SHA-256; other stages unsupported; empty consumer lists",
+      "met": true,
+      "evidence": "The case 2 test at lab.zig ~1928-1972 asserts each of these. It fails under the mutation (mutation-stages.log)."
+    },
+    {
+      "criterion": "Case 3: body_sha256 and document_state mismatches fail with the check and both values",
+      "met": true,
+      "evidence": "The case 3 test at lab.zig ~1974-2011 uses both fixtures and asserts check, expected and observed in the rendered JSON."
+    },
+    {
+      "criterion": "Case 4: a tree expectation reports unsupported with stage tree",
+      "met": true,
+      "evidence": "The case 4 test at lab.zig ~2013-2031 asserts this. The fixture carries uninterpreted members. It fails under the mutation."
+    },
+    {
+      "criterion": "Case 5: a null body cancels as unavailable and fails the document; a failed expectation passes",
+      "met": true,
+      "evidence": "The case 5 test at lab.zig ~2033-2057 asserts the action sequence (create, load, cancel, step), four events, the answer 'unavailable' and body_sha256 null."
+    },
+    {
+      "criterion": "Case 6: a loopback URL loads the case bytes and the listener accepts no connection",
+      "met": true,
+      "evidence": "The case 6 test at lab.zig:2059-2101 queues a sentinel connection after the run, accepts the first queued connection, and expects the sentinel's marker byte. Any earlier connection from the laboratory would be accepted first and fail the test. This is a smoke test limited to one port. The stronger proof is static: no I/O exists in lab.zig, engine.zig or handles.zig."
+    },
+    {
+      "criterion": "Case 7: two runs give byte-identical results without process-wide identifiers",
+      "met": true,
+      "evidence": "The case 7 test at lab.zig ~2103-2131 creates a probe engine and document between the runs to advance the identifier sequence. It then compares the result bytes and asserts ordinal 1 for the document and request."
+    },
+    {
+      "criterion": "Case 8: max_steps 0 reports timeout",
+      "met": true,
+      "evidence": "The case 8 test at lab.zig ~2133-2147 asserts timeout, exit status 4, 0 steps and state loading."
+    },
+    {
+      "criterion": "Case 9: the result's case digest equals SHA-256 of the case bytes; corpus is equal",
+      "met": true,
+      "evidence": "The case 9 test at lab.zig ~2149-2163 checks both fixtures, one with a non-null corpus and one with a null corpus, using structural JSON equality."
+    },
+    {
+      "criterion": "Case 10: replay passes; a changed event fails at its action index; a truncated transcript is harness-error",
+      "met": true,
+      "evidence": "The case 10 test at lab.zig ~2165-2209 asserts action 3, the expected and observed states, and harness-error with exit status 3 for a half-length transcript."
+    },
+    {
+      "criterion": "Case 11: ddmin reduces xxaxxbxx to ab, the result is 1-minimal, and a false input is an error",
+      "met": true,
+      "evidence": "The case 11 test at lab.zig ~2219-2231 asserts all three. Reading ddmin at lab.zig:1323-1368: it breaks only when every part is a single byte, after testing every single-byte subset and every single-byte complement (with two parts, the complements are the subsets). Length 1 is checked against the empty input. The result is therefore 1-minimal for any deterministic predicate."
+    },
+    {
+      "criterion": "Case 12: checkAllAllocationFailures over parsing and a complete run; harness-error with no leak",
+      "met": true,
+      "evidence": "The case 12 test at lab.zig ~2233-2258 requires the detail 'out of memory' and a rendered harness-error, and returns OutOfMemory so the swallowed-error check applies. It runs on two fixtures through testing.allocator. By inspection, replay (lab.zig ~1214) and minimize (~1455) also map OutOfMemory to harness-error, and their arenas and engines are freed by defer."
+    },
+    {
+      "criterion": "Case 13: exit statuses 0, 1, 2, 3 and 4 for cases 2, 3, 4, 1 and 8, and 64 for an unknown command",
+      "met": true,
+      "evidence": "build.zig:95-116 sets exit-code and stdout expectations, plus empty stdout and a usage message on stderr for status 64. integration-tests.log lines 7-19 show these steps succeeded."
+    },
+    {
+      "criterion": "Case 14: minimize gives a 1-minimal body that fails the same check, and refuses a passing case",
+      "met": true,
+      "evidence": "build.zig:118-155 and tests/lab/check.zig:19-60 cover this. The fixture body is exactly 4096 bytes (I matched a 5462-character base64 body ending in '=='). check.zig requires a body of limit+1 bytes, no resources, and that removing any single byte changes the signature. The refused run exits 3, and its output directory is empty."
+    },
+    {
+      "criterion": "Unsupported stages can never report success",
+      "met": true,
+      "evidence": "stageStatus returns unsupported for every stage except fetch (lab.zig:971-974). Parser.expectation returns .unsupported before reading other fields. conclude maps it to the result unsupported. Neither path can produce pass. The mutation control fails cases 2 and 4."
+    },
+    {
+      "criterion": "Replay compares every drained event and the final document state",
+      "met": true,
+      "evidence": "For each action, replayOutcome compares the error name with optionalBytesEql and then compares all drained events with eventsEql (every Event field). After the last action it compares the state of every document with the recorded document_states (lab.zig:1271)."
+    },
+    {
+      "criterion": "minimize predicate matches the contract (same result, stage and check)",
+      "met": true,
+      "evidence": "Signature (result, stage, check) and Signature.of, near lab.zig:885-901. BodyPredicate.holds and the resource-removal loop compare against the original signature. Only fail and timeout originals proceed. The written case is re-parsed and re-verified."
+    },
+    {
+      "criterion": "Evidence binds to the reviewed commit",
+      "met": true,
+      "evidence": "integration-binding.log records HEAD 39ef90a at 04:23:06.9Z and an empty porcelain status, including ignored files, for src, tools, tests, build.zig, include and api. The reflog places the 39ef90a commit at 04:23:02Z, and the gates at 04:23:07–04:23:42Z. All five receipts record source digest 6770a750… before and after. integration-tests.log runs with a fresh local cache at 04:23:43Z. The per-file hashes the contract requires are absent; see the minor finding."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0007/raw/integration-binding.log",
+      "line": null,
+      "issue": "Contract line 136 requires the integrator to record HEAD, the staged diff, and file hashes before it runs the gates. The binding log records only `git rev-parse HEAD` and `git status --porcelain`, with no per-file hashes. The gate receipts' aggregate source digest is the only content hash.",
+      "recommendation": "Add a file-hash listing for src/lab.zig, src/lab_main.zig, build.zig and tests/lab/* at 39ef90a, or state in the README that the receipts' source digest stands in for the file hashes."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/HANDOFF.md",
+      "line": 10,
+      "issue": "After evidence commit a033de3, the handoff still says FP-0007 is 'active in the isolated worker FP0007Lab'. Next action 2 (line 32) still says 'Integrate the FP-0007 worker patch, run its gates'. state.json marks FP-0007 as implemented and awaiting review. This conflicts with the invariant that the next executable action is kept in the repository.",
+      "recommendation": "Update HANDOFF.md to say FP-0007 is implemented in 39ef90a, its evidence is in a033de3, and it awaits fairpane-review."
+    },
+    {
+      "severity": "minor",
+      "path": "src/lab_main.zig",
+      "line": 131,
+      "issue": "The contract says a case file larger than 64 MiB is a harness error and that no byte beyond the bound is read. readBounded implements this, but no test exercises it, and case 13 does not cover a file-size failure. The behavior has no mechanical evidence.",
+      "recommendation": "Add a build-step or unit test that creates a sparse file of 64 MiB + 1 bytes and asserts exit status 3 with the detail 'case file: exceeds the size limit'."
+    },
+    {
+      "severity": "note",
+      "path": "src/lab.zig",
+      "line": 905,
+      "issue": "conclude checks timeout before an unsupported expectation. A tree expectation whose document is still loading reports timeout (exit 4), not unsupported (exit 2). The contract does not set an order between the two, so this is not a violation, but the order is undocumented.",
+      "recommendation": "Document the order (harness-error, then timeout, then unsupported, then fail or pass) in the contract or the laboratory's doc comment."
+    },
+    {
+      "severity": "note",
+      "path": "src/lab.zig",
+      "line": 829,
+      "issue": "The fetch stage reports 'failed' on a timeout or an engine harness error, but 'completed' when the document itself fails (line 862, case 5). This meaning of the stage status is only implicit.",
+      "recommendation": "State in the result documentation that fetch 'failed' means the stage did not finish, as distinct from a document_state of 'failed'."
+    },
+    {
+      "severity": "note",
+      "path": "src/lab.zig",
+      "line": 1271,
+      "issue": "A transcript can be valid JSON but have trailing actions removed. Replay of such a transcript reports 'fail' with action null, from the document_states mismatch, rather than 'harness-error'. The transcript records no action count or digest, so semantic truncation looks like divergence. Byte truncation is correctly a harness error.",
+      "recommendation": "Optionally record an action count or a content digest in the transcript so that semantic truncation also reports harness-error."
+    },
+    {
+      "severity": "note",
+      "path": "src/lab.zig",
+      "line": 1547,
+      "issue": "A minimized case keeps the original corpus identifier, including the blob ID, even though its document body no longer matches that blob.",
+      "recommendation": "Consider marking minimized cases as derived (for example, keeping the original case digest in the minimize report or the case) so that corpus provenance is not misread."
+    },
+    {
+      "severity": "note",
+      "path": "src/lab_main.zig",
+      "line": 89,
+      "issue": "The guard that the output path is not the input file compares path strings only. Different spellings of the same file (relative and absolute, or case variants on Windows) bypass it. The input is fully read first, so only the input file is lost, not result integrity.",
+      "recommendation": "Optionally compare file identities, or document that the guard is a textual check."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0007/gates/2026-10-09T04-23-30-734Z-zig-fmt-d5363388.log",
+      "line": 4,
+      "issue": "The zig-fmt gate and raw/fmt.log check only build.zig and src. tests/lab/check.zig is not format-checked. The gate definition is protected, so FP-0007 cannot change it.",
+      "recommendation": "Raise a separate policy task to extend the zig-fmt gate to tests/**/*.zig."
+    }
+  ],
+  "commands_run": []
+}

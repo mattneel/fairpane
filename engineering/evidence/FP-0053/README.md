@@ -30,3 +30,11 @@ The second follows the unchanged move of the harness: the retry test still fails
 
 - `gates/2026-10-09T02-56-24-373Z-repo-check-5bca9917.json`
 - `gates/2026-10-09T02-56-24-558Z-controller-test-d8c85c29.json`, with 143 of 143 controller tests.
+
+## Review 1
+
+`reviews/review-1-accept.json` accepts commits `8af0f20` and `75cf3eb` with three minor findings.
+`raw/tests-after.log` was missing from the first evidence commit.
+It now records `HEAD` `586b854`, an empty `git diff --stat 8af0f20 HEAD` over `tools/lib.mjs`, `tools/mutation-harness.mjs`, and the mutant list, then 148 of 148 controller tests on Node and Bun 1.4.2.
+In `raw/tests-before.log`, cases 1 through 3 share one test, so the case 1 failure masks cases 2 and 3, and case 3 matches the base behavior.
+Task `FP-0054` splits those cases and checks the last error, a non-listed error code, and the waits.

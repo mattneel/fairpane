@@ -121,7 +121,7 @@
       ]
     },
     "FP-0007": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0007Lab, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0007/README.md",
@@ -133,10 +133,11 @@
         "engineering/evidence/FP-0007/raw/integration-tests.log",
         "engineering/evidence/FP-0007/raw/mutation-stages.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0007/reviews/review-1-accept.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0007/CONTRACT.md, based on commit c9c243f.",
-        "Commit 39ef90a implements it with 101 of 101 Zig tests. Awaiting fairpane-review."
+        "Commit 39ef90a implements it with 101 of 101 Zig tests.",
+        "fairpane-review accepted 39ef90a and a033de3 with three minor findings and six notes; FP-0054 carries them."
       ]
     },
     "FP-0008": {
@@ -192,11 +193,14 @@
       "notes": []
     },
     "FP-0013": {
-      "status": "planned",
-      "owner": null,
+      "status": "active",
+      "owner": "fairpane-text worker FP0013Text",
       "evidence": [],
       "review": null,
-      "notes": []
+      "notes": [
+        "The frozen contract is engineering/evidence/FP-0013/CONTRACT.md, drafted by worker FP0013Contract and frozen on commit 28e2195.",
+        "The owner approved Unicode data and OFL fonts in the repository; engineering/evidence/FP-0013/owner-answers.log records it."
+      ]
     },
     "FP-0014": {
       "status": "planned",
@@ -583,21 +587,93 @@
       ]
     },
     "FP-0053": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "root-integrator",
       "evidence": [
         "engineering/evidence/FP-0053/README.md",
         "engineering/evidence/FP-0053/gates/2026-10-09T02-56-24-373Z-repo-check-5bca9917.json",
         "engineering/evidence/FP-0053/gates/2026-10-09T02-56-24-558Z-controller-test-d8c85c29.json",
         "engineering/evidence/FP-0053/raw/tests-before.log",
+        "engineering/evidence/FP-0053/raw/tests-after.log",
         "engineering/evidence/FP-0053/raw/mutation-control.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0053/reviews/review-1-accept.json",
       "notes": [
         "Created from the minor finding and notes in engineering/evidence/FP-0031/reviews/review-1-accept.json.",
         "The frozen contract is engineering/evidence/FP-0053/CONTRACT.md, based on commit 101ba28.",
-        "Commit 8af0f20 implements it with 143 of 143 controller tests and 15 of 15 mutants killed. Awaiting fairpane-review."
+        "Commit 8af0f20 implements it with 143 of 143 controller tests and 15 of 15 mutants killed.",
+        "fairpane-review accepted 8af0f20 and 75cf3eb with three minor findings; FP-0054 carries them."
       ]
+    },
+    "FP-0054": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created from the minor findings and notes in the FP-0007 and FP-0053 review-1 records."]
+    },
+    "FP-0055": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created to own the remaining Unicode data imports that the FP-0013 capability record lists."]
+    },
+    "FP-0056": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created to own glyph outline decoding and rasterization from the FP-0013 capability record."]
+    },
+    "FP-0057": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created to own the glyph hinting decision from the FP-0013 capability record."]
+    },
+    "FP-0058": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created to own WOFF, WOFF2, and the first-party Brotli decoder from the FP-0013 capability record."]
+    },
+    "FP-0059": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created to own font collections, CFF2, and variations from the FP-0013 capability record."]
+    },
+    "FP-0060": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created to own color and bitmap glyphs from the FP-0013 capability record."]
+    },
+    "FP-0061": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created to own vertical metrics and the remaining cmap formats from the FP-0013 capability record."]
+    },
+    "FP-0062": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created to own the auxiliary OpenType layout tables from the FP-0013 capability record."]
+    },
+    "FP-0063": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created to own platform font discovery from the FP-0013 capability record."]
     }
   }
 }

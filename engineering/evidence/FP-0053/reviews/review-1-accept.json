@@ -1,0 +1,97 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "8af0f20fd980007a8f22e8d2e02bbea733956936",
+    "75cf3eb945255747fc5c71fd2db12ce9045ceb1f"
+  ],
+  "summary": "Accept, with three minor findings and several notes. Commit 8af0f20 (parent 101ba28) meets all five FP-0053 plan criteria. Commit 75cf3eb (parent 8af0f20) changes only engineering/evidence/FP-0053/** and engineering/state.json. I read the full diffs of both commits from the public mirror (commit .diff files and the commits API), along with the working-tree files and every FP-0053 log and receipt. I ran no shell commands.\n\n- Retry loop: removeCapture (tools/lib.mjs:313-321) retries only codes in TRANSIENT_REMOVAL (lib.mjs:306): EBUSY, EPERM, ENOTEMPTY, EMFILE, ENFILE. It calls pause(50*attempt) after failed attempts 1 and 2, so it waits 50 ms then 100 ms and never waits after attempt 3. It records the error from the final attempt.\n- Synchronous wait: pause (lib.mjs:308) uses Atomics.wait on a fresh SharedArrayBuffer whose value equals the expected value, so it times out after the given ms. Node allows that on the main thread. Under Bun, test 119 passed (raw/tests-bun.log, 143/143, exit 0). That test runs pause four times inside a child 'close' handler, so a throw there would have crashed the run. Neither runtime has any evidence of how long the wait lasts.\n- Literal replacement: source.replace(from, () => to) (tools/mutation-harness.mjs:39) inserts the replacer's return value without interpreting $$, $&, $`, $', $n, or $<name>. The site count also uses a literal split(from). The second tests-before run shows the old code turning '$&$&' into 'X1X1'.\n- Mutants: raw/mutation-control.log records a baseline of 143 tests with 0 failing and 15 of 15 KILLED, each by its own target test. Mutants 13 and 14 (new) and 11 (new message) fail through the intended assertions: `r.error === null`, 'The log descriptor stayed open.', and 'COMMAND: null'. Two older FP-0031 mutants are killed by non-assertion failures that the mutation itself causes, not by unrelated failures (see notes).\n- Binding: raw/binding.log records HEAD 8af0f20 at 02:56:24.203Z with only that log untracked. Both receipts start at 02:56:24.375Z and 02:56:24.561Z, with identical source_before and source_after (4597e7ab…) and identical policy digests. tools is a source root (engineering/policy.json:13), so the harness is now covered.\n\nGaps: the contract's tests-after.log is missing, and the tests do not check the stated wait times, the full retryable-code list, or that the recorded error is the last one rather than the first.",
+  "criteria": [
+    {
+      "criterion": "Move the mutation-control harness into the controller source inventory, so a controller-test receipt binds the code that its test exercises.",
+      "met": true,
+      "evidence": "8af0f20 renames engineering/evidence/FP-0028/controls/harness.mjs to tools/mutation-harness.mjs (86% similarity; the only logic change is line 39). tools/selftest.mjs:577 imports it, and engineering/evidence/FP-0028/controls/mutants.mjs:8 imports '../../../../tools/mutation-harness.mjs'. 'tools' is in source_roots (engineering/policy.json:13). The controller-test receipt (gates/…controller-test-d8c85c29.json) has source_before == source_after == 4597e7ab… with 106 files. A repository grep finds no live reference to the old path; the only mentions are historical README lines."
+    },
+    {
+      "criterion": "Retry a failed capture-directory removal a bounded number of times before the record reports the failure.",
+      "met": true,
+      "evidence": "tools/lib.mjs:313-321 makes at most three attempts and retries only TRANSIENT_REMOVAL codes (lib.mjs:306), with pause(50*attempt) between attempts. selftest.mjs:538-557 covers case 1 (546: two EBUSY failures, then success, error null, 3 calls), case 2 (550: always EBUSY, 3 calls, error recorded), and case 3 (554: no code, 1 call). Results: tests-before 'not ok 119' (null expected), gate log 'ok 119', Bun 'ok 119'. The mutant 'a busy capture directory gets no second attempt' is KILLED on the r.error === null assertion."
+    },
+    {
+      "criterion": "Add a mutant that removes the log close in finishRecord and is killed by the log-close assertions alone.",
+      "met": true,
+      "evidence": "mutants.mjs:66-69 replaces '  finally { closeQuietly(io, fd); }\\n  return result;' (lib.mjs:342-343, the only site) with '  finally { }'. The RESULT line is still written, so lastResult and the error assertions at selftest.mjs:456-457 pass. mutation-control.log: 'KILLED the log stays open after the RESULT line: not ok 113 … message: \"The log descriptor stayed open.\"' That is the trackingFs logClosed assertion."
+    },
+    {
+      "criterion": "Include the command record's error in the short-write assertion message.",
+      "met": true,
+      "evidence": "selftest.mjs:517 uses the message `${kind}: ${r.error}`. The recordCommand assertions at 521 use assert.match's default message, which already includes the actual value. mutation-control.log: 'KILLED a short log write is ignored … message: \"COMMAND: null\"' shows the error value in the message."
+    },
+    {
+      "criterion": "Apply each mutant's replacement text literally, without replacement-pattern interpretation.",
+      "met": true,
+      "evidence": "tools/mutation-harness.mjs:39 calls source.replace(from, () => to). A function replacer's return value is inserted verbatim for every $ pattern. selftest.mjs:601-606 asserts that runSuite receives [null, '$&$&']. tests-before.log, second run (line 352), shows the failure before the fix: 'X1X1' vs '$&$&'. Gate and Bun runs: 'ok 121'."
+    },
+    {
+      "criterion": "Contract case 5: the mutation control runs its unmutated baseline and kills every mutant, including the new log-close mutant.",
+      "met": true,
+      "evidence": "raw/mutation-control.log: 'BASELINE exit 0: 143 tests, 0 failing', 15 KILLED lines each with a message, 'mutants: 15, killed: 15, survived: 0', RESULT exit_code 0 at 02:57:09Z."
+    },
+    {
+      "criterion": "Contract evidence: tests-before.log with cases 1-4 failing, tests-after.log, mutation-control.log, and HEAD plus status before the gates.",
+      "met": false,
+      "evidence": "tests-before.log and mutation-control.log exist, and binding.log precedes both gates. tests-after.log does not exist in raw/, and neither the README nor state.json mentions it. tests-before shows case 1 failing (line 124) and case 4 failing (lines 129 and 352). Cases 2 and 3 are hidden behind case 1's assertion in the same test, and case 3 cannot fail against the base code. See findings."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0053/CONTRACT.md",
+      "line": 44,
+      "issue": "The frozen contract requires `tests-after.log` under raw/. No such file exists: raw/ holds only binding.log, mutation-control.log, tests-before.log, and tests-bun.log. Neither README.md nor engineering/state.json discloses the deviation. The gate log …controller-test-d8c85c29.log is an equivalent Node run (143/143, exit 0, digest-bound), so evidence exists, but the stated contract is not followed.",
+      "recommendation": "Either record tests-after.log, or add a README line saying that the controller-test gate log replaces it."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/selftest.mjs",
+      "line": 538,
+      "issue": "The contract says removeCapture waits 50 then 100 ms, retries only EBUSY, EPERM, ENOTEMPTY, EMFILE, and ENFILE, and reports the *last* error. The test does not check any of these three properties. Every injected EBUSY error has the same message ('forced busy removal', line 539), so recording the first error instead of the last would pass. Only EBUSY and a code-less error are exercised, so a mutant `!TRANSIENT_REMOVAL.has(e.code)` → `e.code === undefined`, which retries every coded error such as EACCES, would pass. Deleting `pause(50 * attempt)` (lib.mjs:319) would also pass. Minimal reproduction: add the mutant ['removal never waits', 'pause(50 * attempt);', '', /busy capture directory/] to mutants.mjs and run it. [INFERENCE: not executed; the test has no timing or distinct-message assertion that could fail.] The code itself matches the contract (lib.mjs:306-320).",
+      "recommendation": "Give each injected error a distinct message (for example 'busy 1', 'busy 2', 'busy 3') and assert the third. Add a coded non-listed error such as EACCES that is called once. Assert a lower bound on elapsed time for the stuck case, for example duration_ms >= 150, or inject the pause."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0053/raw/tests-before.log",
+      "line": 124,
+      "issue": "The contract requires tests-before.log to show cases 1 through 4 failing. Cases 1-3 share one test, and the first assertion failure (case 1, line 546) masks cases 2 and 3. Case 3 (a code-less error, called once and recorded) matches the base behavior and could not fail before the change. The README states only that 'the retry test fails' and does not disclose that cases 2 and 3 were never observed failing.",
+      "recommendation": "Disclose this in the README, or split cases 1-3 into separate tests so each pre-change result is visible."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0053/CONTRACT.md",
+      "line": 1,
+      "issue": "CONTRACT.md first appears in implementation commit 8af0f20, next to tests-before.log and the code change. Its parent 101ba28 is a handoff commit at 02:52:46Z, and 8af0f20 was committed at 02:56:18Z. Git history therefore cannot show that the scope was frozen before implementation, as AGENTS.md work procedure step 3 requires. FP-0031, by contrast, froze its contract in a separate earlier commit (fad1af2).",
+      "recommendation": "Commit the contract on its own before implementation in future tasks."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0053/raw/mutation-control.log",
+      "line": 17,
+      "issue": "Two older FP-0031 mutants are not killed by an assertion. 'capture-start failure skips the RESULT line and leaves the log open' dies on a TypeError in the lastResult helper (selftest.mjs:447) because no RESULT line exists. 'a failed RESULT write throws' dies on the injected exception propagating out of recordCommand. Both failures come directly from the mutated behavior, not from anything unrelated, and the new log-close mutant now covers the close separately. All other kills come from assert.* failures; the copy-failure kill message is assert.match's message for a null input.",
+      "recommendation": "Optionally assert that a RESULT line exists before parsing it, so this kill becomes an assertion failure."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0053/raw/tests-bun.log",
+      "line": 2,
+      "issue": "The Bun run and the mutation-control run (02:56:47Z and 02:57:09Z) have no source digest and no Bun version. They are tied to 8af0f20 only by timing: both come after the binding.log status at 02:56:24Z, and 75cf3eb adds only evidence. The Bun log shows that Atomics.wait does not throw on Bun's main thread. It does not show that the call actually blocks for 50 and 100 ms.",
+      "recommendation": "Record `bun --version` and a git status after the last raw run, or run the Bun suite through a receipt-producing command."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/policy.json",
+      "line": 78,
+      "issue": "tools/selftest.mjs is a policy root, so 8af0f20 changes the policy digest. The diff only adds a test, adds an assertion to the harness test, and expands one assertion message. It weakens no gate, threshold, or exclusion, and the task's protected_paths are untouched.",
+      "recommendation": "None. This is recorded only for the protected-policy audit."
+    }
+  ],
+  "commands_run": []
+}

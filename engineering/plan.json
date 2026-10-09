@@ -2697,6 +2697,217 @@
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0054",
+      "title": "Close the FP-0007 and FP-0053 review findings",
+      "workstream": "laboratory",
+      "depends_on": ["FP-0007", "FP-0053"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tools", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Test that a case file one byte above 64 MiB is a harness error that names the size limit, with exit status 3.",
+        "Document the outcome precedence and the meaning of the fetch stage status in the laboratory.",
+        "Record an action count in each transcript, so a transcript with removed actions replays as a harness error.",
+        "Mark a minimized case as derived from the original case digest.",
+        "Compare file identities, not path spellings, when the laboratory refuses to overwrite its input.",
+        "Split the capture-removal retry cases, and test the last error, a non-listed error code, and the waits.",
+        "Assert that a RESULT line exists before a test parses it."
+      ],
+      "read": ["engineering/evidence/FP-0007/reviews/review-1-accept.json", "engineering/evidence/FP-0053/reviews/review-1-accept.json"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0055",
+      "title": "Import the remaining Unicode data",
+      "workstream": "text",
+      "depends_on": ["FP-0013"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Import every remaining file of the specs/IMPORT_REQUIREMENTS.md table at the pinned Unicode version, with per-file provenance.",
+        "Generate lookup tables for each consumer with a staleness check and an independent reference test.",
+        "Run the Unicode conformance test files that the import requirements list against the generated data.",
+        "Keep one Unicode version for every consumer."
+      ],
+      "read": ["specs/IMPORT_REQUIREMENTS.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0056",
+      "title": "Decode glyph outlines and rasterize glyphs",
+      "workstream": "text",
+      "depends_on": ["FP-0013"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Decode simple and composite TrueType outlines with checked bounds and a bounded composite depth.",
+        "Interpret CFF Type 2 charstrings with bounded stacks, subroutine depth, and operand counts.",
+        "Scan-convert outlines into coverage masks in a scalar reference rasterizer with recorded antialiasing rules.",
+        "Compare rasterized glyphs with reference fixtures under a tolerance whose rationale is recorded before the run.",
+        "Reject malformed outlines without unbounded work or allocation."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0057",
+      "title": "Decide and qualify glyph hinting",
+      "workstream": "text",
+      "depends_on": ["FP-0056"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/decisions"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Record a decision on TrueType bytecode hinting and CFF hinting with measured rendering evidence.",
+        "Implement the decided behavior, with a bounded interpreter if hinting programs run.",
+        "Test malformed and hostile hinting programs for bounded execution."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0058",
+      "title": "Decode WOFF and WOFF2 with a first-party Brotli decoder",
+      "workstream": "text",
+      "depends_on": ["FP-0013"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Decode WOFF 1.0 with checked table lengths and zlib streams.",
+        "Implement a first-party Brotli decoder that passes the RFC 7932 test vectors.",
+        "Decode WOFF2, including the glyf and loca transforms, with checked sizes.",
+        "Reject malformed or oversized inputs within declared memory bounds."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0059",
+      "title": "Support font collections, CFF2, and variable fonts",
+      "workstream": "text",
+      "depends_on": ["FP-0013", "FP-0056"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Parse TrueType and OpenType collections with checked offsets.",
+        "Parse CFF2 and its item variation store.",
+        "Apply variations through fvar, avar, gvar, HVAR, and MVAR with checked tables.",
+        "Test named instances and axis values against reference fixtures."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0060",
+      "title": "Render color and bitmap glyphs",
+      "workstream": "text",
+      "depends_on": ["FP-0056"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Render COLR version 0 and version 1 glyphs with CPAL palettes.",
+        "Render sbix, CBDT and CBLC, and SVG glyphs, or report each unsupported format honestly.",
+        "Compare color glyph fixtures with references under recorded tolerances."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0061",
+      "title": "Support vertical metrics and the remaining cmap formats",
+      "workstream": "text",
+      "depends_on": ["FP-0013"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Parse vhea, vmtx, and VORG with checked bounds.",
+        "Look up cmap format 14 variation sequences.",
+        "Look up the legacy and symbol cmap formats that web fonts use.",
+        "Test each format with fixtures and malformed variants."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0062",
+      "title": "Parse the auxiliary OpenType layout tables",
+      "workstream": "text",
+      "depends_on": ["FP-0013", "FP-0015"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Parse kern, BASE, JSTF, and MATH tables with checked offsets.",
+        "Expose each table's data to layout and shaping.",
+        "Report every unsupported table version honestly."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0063",
+      "title": "Discover platform fonts through narrow adapters",
+      "workstream": "ports",
+      "depends_on": ["FP-0015", "FP-0017"],
+      "role": "fairpane-platform",
+      "allowed_paths": ["ports", "apps", "src", "tests", "build.zig"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Enumerate installed fonts on Windows, Linux, and macOS through narrow platform adapters.",
+        "Pass discovered font bytes through the engine's own parser.",
+        "Keep the engine's text behavior independent of the platform adapter.",
+        "Test discovery with fixtures instead of assumptions about installed fonts."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "docs/SECURITY.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
   ]
 }

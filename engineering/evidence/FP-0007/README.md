@@ -36,6 +36,13 @@ The root integrator applied the patch without conflicts and committed it as `39e
 - `gates/2026-10-09T04-23-33-336Z-zig-test-05176252.json`
 - `gates/2026-10-09T04-23-41-439Z-zig-build-9b49add1.json`
 
+## Review 1
+
+`reviews/review-1-accept.json` accepts commits `39ef90a` and `a033de3` with three minor findings and six notes.
+The integration binding has no per-file hashes, so the receipts' source digest stands in for them; every receipt records the same digest before and after its gate.
+A separate policy commit extends the `zig-fmt` gate to `tests`, which covers `tests/lab/check.zig`.
+Task `FP-0054` adds the 64 MiB bound test and answers the notes.
+
 ## Limits
 
 Only the `fetch` stage exists, so every other stage reports `unsupported`.
