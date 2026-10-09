@@ -1,0 +1,8 @@
+--- tools/attest.mjs
++++ tools/attest.mjs (mutation recorded in mutation-canonical.log)
+@@ verifyResult @@
+   const record = parseJson(envelope.payload, 'The payload');
+   // Re-serialization rejects unpaired surrogates, duplicate keys, and other spellings, so signed bytes carry one meaning.
+-  if (JSON.stringify(record) !== envelope.payload) fail('malformed', 'The payload is not in canonical JSON form.');
++  // MUTATION: canonical check removed.
+   exactKeys(record, ['schema', 'version', 'candidate', 'acceptance_policy_sha256', 'suite', 'counts', 'runner', 'issued_at'], 'The payload');

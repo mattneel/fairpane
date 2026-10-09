@@ -11,13 +11,14 @@ import {
   readJson, writeJson, sha256, fileHash, safePath, collectFiles, hashInputs,
   validateLock, hostPlatform, verifyArchive, validatePlan, readyTasks,
   qualificationProblems, checkRepository, validateReceipt, runProcess, runGate,
-  resolveExecutable, recordCommand, gateEnvironment, REQUIRED_CAPABILITIES,
+  resolveExecutable, recordCommand, gateEnvironment, REQUIRED_CAPABILITIES, fingerprints,
 } from './lib.mjs';
 import {
   listTree, computeInventory, buildSnapshotRecord, validateSnapshotRecord, validateApplicability,
   verifyCorpus, classifyCorpus, snapshotGitDir, test262Applicability,
 } from './corpus.mjs';
 import * as corpus from './corpus.mjs';
+import { attestationCases, removeAttestationFixtures } from './attest.test.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cases = [], temporary = [];
@@ -199,7 +200,30 @@ test('Qualified metadata alone cannot replace a release verifier', () => {
     capabilities: REQUIRED_CAPABILITIES.map(id => ({ id, required: true, status: 'qualified', manifest: 'fixture', evidence: ['fixture'] })),
     standards_baseline: 'fixture', target_matrix: 'fixture', performance_budgets: 'fixture',
     applicability_review: 'fixture', release_authority: 'fixture', license_decision: 'fixture' };
-  assert.ok(qualificationProblems(p).some(e => e.includes('not implemented')));
+  assert.ok(qualificationProblems(p).some(e => e.includes('No protected runner')));
+});
+
+// The qualification boundary. A workspace writer can forge local receipts, so release evidence needs signed results.
+test('1: A forged local receipt passes validateReceipt without gate execution', () => {
+  const dir = gateFixture('import fs from "node:fs"; fs.writeFileSync("executed.txt", "the gate ran");');
+  const gate = readJson(path.join(dir, 'engineering/gates.json')).gates[0];
+  const log = put(dir, 'out/evidence/forged.log', 'No gate ran.\n');
+  const inputs = fingerprints(dir);
+  writeJson(path.join(dir, 'out/evidence/forged.json'), { schema_version: 1, kind: 'fairpane-local-gate',
+    trust: 'unsigned-local-integrity-only', gate_id: gate.id, gate_sha256: sha256(JSON.stringify(gate)), status: 'pass',
+    source_before: inputs.source, source_after: inputs.source, policy_before: inputs.policy, policy_after: inputs.policy,
+    commands: [{ executable: 'never-run', arguments: [], exit_code: 0 }],
+    outputs: [{ path: 'out/evidence/forged.log', size: fs.statSync(log).size, sha256: fileHash(log) }] });
+  assert.equal(validateReceipt(dir, 'out/evidence/forged.json').result, 'pass');
+  assert.equal(fs.existsSync(path.join(dir, 'executed.txt')), false);
+});
+for (const c of attestationCases) test(c.name, c.fn);
+test('15: release-check still exits with status 1', () => {
+  const r = spawnSync(process.execPath, [path.join(root, 'tools/fairpane.mjs'), 'release-check'], { cwd: root, encoding: 'utf8', windowsHide: true });
+  assert.equal(r.status, 1, r.stderr);
+  const report = JSON.parse(r.stdout);
+  assert.equal(report.result, 'not-qualified');
+  assert.ok(report.problems.some(problem => problem.includes('No protected runner')));
 });
 
 // Actual command execution and evidence integrity.
@@ -608,7 +632,7 @@ test('Verification fails when the license digest, the commit date, or an applica
 });
 test('corpus-verify exits with status 1 through the controller command on an inventory digest mismatch', async () => {
   const f = await corpusFixture('test262', T262_FILES);
-  for (const file of ['fairpane.mjs', 'lib.mjs', 'corpus.mjs']) put(f.dir, `tools/${file}`, fs.readFileSync(path.join(root, 'tools', file)));
+  for (const file of ['fairpane.mjs', 'lib.mjs', 'corpus.mjs', 'attest.mjs']) put(f.dir, `tools/${file}`, fs.readFileSync(path.join(root, 'tools', file)));
   const cli = () => spawnSync(process.execPath, [path.join(f.dir, 'tools/fairpane.mjs'), 'corpus-verify', 'test262'],
     { cwd: f.dir, encoding: 'utf8', env: { ...process.env, FAIRPANE_CORPORA_DIR: f.corporaDir }, windowsHide: true });
   const pass = cli();
@@ -723,6 +747,7 @@ for (const dir of temporary.reverse()) {
   try { fs.rmSync(dir, { recursive: true, force: true }); }
   catch (e) { failures++; console.error(`Temporary fixture cleanup failed: ${e.message}`); }
 }
+for (const problem of removeAttestationFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
 console.log(`1..${cases.length}`);
 console.log(`# tests ${cases.length}\n# pass ${cases.length - failures}\n# fail ${failures}`);
 console.log('# Scope: controller behavior only. No renderer or JavaScript conformance claim.');

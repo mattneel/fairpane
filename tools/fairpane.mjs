@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { readJson, checkRepository, readyTasks, qualificationProblems, fingerprints,
   validateReceipt, runGate, recordCommand, installZig, compilerPath, checkCompiler, safePath } from './lib.mjs';
 import { corpusCommand } from './corpus.mjs';
+import { AttestationError, candidateIdentity, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command = 'help', ...args] = process.argv.slice(2);
@@ -37,6 +38,9 @@ function help() {
   corpus-repin <id>           Move a snapshot to the upstream branch head and write its record.
   corpus-applicability <id>   Count discovered tests in a local snapshot.
   corpus-verify <id>          Recompute a local snapshot and compare its records and pins.
+  attest-verify --trust-policy <path> --candidate <commit> <envelope>
+                              Verify a signed result against protected trust
+                              input outside the repository and a Git commit.
   release-check               Check release prerequisites and fail closed.
   help                        Print these commands.
 
@@ -103,6 +107,26 @@ try {
     output(validateReceipt(root, args[0]));
   } else if (command.startsWith('corpus-')) {
     const r = await corpusCommand(root, command, args); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
+  } else if (command === 'attest-verify') {
+    const usage = 'Usage: attest-verify --trust-policy <path> --candidate <commit> <envelope>';
+    const options = {}, files = [];
+    for (let i = 0; i < args.length; i++) {
+      const flag = { '--trust-policy': 'policy', '--candidate': 'candidate' }[args[i]];
+      if (!flag) { files.push(args[i]); continue; }
+      if (options[flag] !== undefined || args[i + 1] === undefined) throw new Error(usage);
+      options[flag] = args[++i];
+    }
+    if (!options.policy || !options.candidate || files.length !== 1) throw new Error(usage);
+    try {
+      const trust = loadTrustPolicy(path.resolve(options.policy), root);
+      const candidate = candidateIdentity(root, options.candidate);
+      output({ ...verifyResult(readEnvelope(path.resolve(files[0])), trust, candidate), candidate,
+        note: 'A verified result authenticates one record. It is not release qualification.' });
+    } catch (e) {
+      if (!(e instanceof AttestationError)) throw e;
+      output({ result: 'rejected', code: e.code, message: e.message });
+      process.exitCode = 1;
+    }
   } else if (command === 'release-check') {
     output({ result: 'not-qualified', problems: qualificationProblems(load('engineering/qualification.json')), browser_complete: false });
     process.exitCode = 1;

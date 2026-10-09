@@ -79,8 +79,24 @@ It does not validate signatures or prove that a reviewer is independent.
 
 An unsigned receipt is forgeable by anyone who can write repository files.
 A passing local check is not a trusted attestation.
-Task `FP-0002` defines and tests the protected acceptance boundary.
-The release command has no success path until that implementation qualifies.
+ADR 0002 records the protected acceptance boundary that replaces it.
+
+## Verify a signed result
+
+1. Obtain the trust policy from protected storage outside the repository.
+2. Run `node tools/fairpane.mjs attest-verify --trust-policy <path> --candidate <commit> <envelope>`.
+3. Read the verified record, or the rejection code on exit status 1.
+
+The verifier in `tools/attest.mjs` imports nothing from the local receipt code.
+It accepts only an Ed25519 signature from a key in the trust policy over the exact payload bytes.
+It requires a canonical payload, the expected commit and tree, the trust policy's acceptance-policy digest, and consistent nonzero counts.
+It reads the candidate identity from Git objects, never from the working tree.
+A trust policy inside the repository fails as `unprotected-policy`, because a workspace writer can edit it.
+That location check is a guard, not a security boundary; operating-system permissions on a separate runner supply the boundary.
+`node tools/attest.test.mjs` runs the verifier's own tests without the rest of the controller.
+
+A verified result authenticates one record and is not release qualification.
+No protected runner, trust policy, or signed result set exists yet, so `release-check` still fails closed.
 A metadata edit alone cannot enable release success.
 
 ## Gate safety

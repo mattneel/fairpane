@@ -191,8 +191,8 @@ export function qualificationProblems(profile) {
     if (!profile[field]) problems.push(`Release field ${field} is unset.`);
   }
   if (!profile.license_decision || profile.license_decision === 'pending-owner') problems.push('The owner did not ratify an outbound license.');
-  // A metadata edit cannot implement independent attestation verification.
-  problems.push('Independent release-attestation verification is not implemented in this bootstrap. Task FP-0002 must qualify that code.');
+  // No metadata edit can satisfy this: release evidence needs signed results from a protected runner that tools/attest.mjs verifies.
+  problems.push('No protected runner, trust policy, or signed result set exists. Release qualification needs signed results that tools/attest.mjs verifies against protected trust input.');
   return problems;
 }
 export function checkRepository(root) {

@@ -51,6 +51,8 @@ It records resource limits, seeds, and the complete test denominator.
 The local controller writes unsigned integrity receipts.
 It does not produce trusted external attestations.
 `evidence-check` detects stale source and altered logs, but it cannot prove an honest worker.
+Release evidence therefore consists of signed result records from a protected runner.
+`attest-verify` checks each record against trust input outside the repository and an immutable Git commit, as ADR 0002 records.
 Independent execution and protected policy remain release requirements.
 
 ## Performance

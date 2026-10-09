@@ -1,0 +1,25 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/attest.test.mjs"]
+TAP version 13
+ok 1 - 2: A valid envelope signed by a trusted key verifies
+ok 2 - 3: RFC 8032 test vector 1 verifies through the same key decoding path
+ok 3 - 4: A key outside the trust policy fails, whether it names itself or a trusted key
+ok 4 - 5: One changed payload byte fails as bad-signature
+ok 5 - 6: A truncated envelope and a truncated payload each fail
+ok 6 - 7: A trusted signature over a payload with a missing or unknown field fails as malformed
+ok 7 - 8: A payload for another commit or tree fails as stale-candidate
+ok 8 - 9: A payload with another policy digest fails as changed-policy
+ok 9 - 10: Zero discovered and zero selected each fail as zero-denominator
+ok 10 - 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+ok 11 - 12: A runner key that differs from the signature key fails as key-mismatch
+ok 12 - 13: attest-verify rejects a trust policy inside the repository and verifies one outside it
+ok 13 - 14: Candidate identity comes from Git objects and rejects an unknown commit
+not ok 14 - 16: A trusted signature over a noncanonical payload fails as malformed
+  ---
+  message: "Expected rejection malformed, got success"
+  ...
+1..14
+# tests 14
+# pass 13
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/attest.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T01:35:16.666Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":607}

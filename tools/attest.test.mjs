@@ -1,0 +1,182 @@
+#!/usr/bin/env node
+/**
+ * Attestation verifier tests. They import nothing from the local receipt code, so a defect there cannot hide here.
+ * Run standalone with `node tools/attest.test.mjs`, or through `node tools/fairpane.mjs test`.
+ */
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { AttestationError, candidateIdentity, decodePublicKey, signResult, verifyBytes, verifyResult } from './attest.mjs';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const SPKI_ED25519_PREFIX = '302a300506032b6570032100';
+const POLICY_DIGEST = sha256Hex('fixture acceptance policy');
+const CANDIDATE = Object.freeze({ commit: '1'.repeat(40), tree: '2'.repeat(40) });
+
+function sha256Hex(text) { return crypto.createHash('sha256').update(text).digest('hex'); }
+function keyPair() {
+  const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+  return { privateKey, publicKey: publicKey.export({ type: 'spki', format: 'der' }).toString('base64') };
+}
+const runner = keyPair(), second = keyPair(), outsider = keyPair();
+function trustPolicy(keys = [['runner-1', runner]]) {
+  return { schema: 'fairpane-trust-policy', version: 1, acceptance_policy_sha256: POLICY_DIGEST,
+    keys: keys.map(([key_id, pair]) => ({ key_id, algorithm: 'ed25519', public_key: pair.publicKey })) };
+}
+function record(changes = {}) {
+  return { schema: 'fairpane-result', version: 1, candidate: { ...CANDIDATE }, acceptance_policy_sha256: POLICY_DIGEST,
+    suite: { id: 'fixture-suite', manifest_sha256: sha256Hex('fixture manifest') },
+    counts: { discovered: 10, selected: 8, pass: 5, fail: 1, unsupported: 1, excluded: 0, crash: 1, timeout: 0, harness_error: 0 },
+    runner: { key_id: 'runner-1' }, issued_at: '2026-10-09T01:00:00.000Z', ...changes };
+}
+function withCounts(changes) { const r = record(); return { ...r, counts: { ...r.counts, ...changes } }; }
+/** Sign exact payload text, which lets a test sign text that `signResult` would never produce. */
+function signText(payload, privateKey, keyId = 'runner-1') {
+  const value = crypto.sign(null, Buffer.from(payload, 'utf8'), privateKey).toString('base64');
+  return JSON.stringify({ payload, signature: { key_id: keyId, algorithm: 'ed25519', value } });
+}
+function rejects(fn, code) {
+  let error = null;
+  try { fn(); } catch (e) { error = e; }
+  assert.ok(error instanceof AttestationError, `Expected rejection ${code}, got ${error ? error.message : 'success'}`);
+  assert.equal(error.code, code, error.message);
+}
+const temporary = [];
+function temp() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fairpane-attest-'));
+  temporary.push(dir);
+  return dir;
+}
+function runGit(dir, args) {
+  const r = spawnSync('git', ['-C', dir, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
+    '-c', 'commit.gpgsign=false', '-c', 'core.autocrlf=false', ...args], { encoding: 'utf8', windowsHide: true });
+  assert.equal(r.status, 0, `git ${args.join(' ')} failed: ${r.stderr}`);
+  return r.stdout.trim();
+}
+function controller(args) {
+  return spawnSync(process.execPath, [path.join(root, 'tools/fairpane.mjs'), ...args], { cwd: root, encoding: 'utf8', windowsHide: true });
+}
+
+export const attestationCases = [
+  ['2: A valid envelope signed by a trusted key verifies', () => {
+    const verified = verifyResult(signResult(record(), runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE);
+    assert.equal(verified.result, 'verified');
+    assert.equal(verified.key_id, 'runner-1');
+    assert.deepEqual(verified.record, record());
+  }],
+  ['3: RFC 8032 test vector 1 verifies through the same key decoding path', () => {
+    const publicKey = Buffer.from(SPKI_ED25519_PREFIX + 'd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a', 'hex');
+    const signature = Buffer.from('e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b', 'hex');
+    const key = decodePublicKey(publicKey.toString('base64'));
+    assert.equal(verifyBytes(key, Buffer.alloc(0), signature.toString('base64')), true);
+    assert.equal(verifyBytes(key, Buffer.from([0x72]), signature.toString('base64')), false);
+  }],
+  ['4: A key outside the trust policy fails, whether it names itself or a trusted key', () => {
+    rejects(() => verifyResult(signResult(record({ runner: { key_id: 'outsider' } }), outsider.privateKey, 'outsider'), trustPolicy(), CANDIDATE), 'untrusted-key');
+    rejects(() => verifyResult(signResult(record(), outsider.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'bad-signature');
+  }],
+  ['5: One changed payload byte fails as bad-signature', () => {
+    const envelope = JSON.parse(signResult(record(), runner.privateKey, 'runner-1'));
+    const changed = envelope.payload.replace('"pass":5', '"pass":6');
+    assert.notEqual(changed, envelope.payload);
+    rejects(() => verifyResult(JSON.stringify({ ...envelope, payload: changed }), trustPolicy(), CANDIDATE), 'bad-signature');
+  }],
+  ['6: A truncated envelope and a truncated payload each fail', () => {
+    const text = signResult(record(), runner.privateKey, 'runner-1'), envelope = JSON.parse(text);
+    rejects(() => verifyResult(text.slice(0, -1), trustPolicy(), CANDIDATE), 'malformed');
+    rejects(() => verifyResult(JSON.stringify({ ...envelope, payload: envelope.payload.slice(0, -1) }), trustPolicy(), CANDIDATE), 'bad-signature');
+    rejects(() => verifyResult(signText(envelope.payload.slice(0, -1), runner.privateKey), trustPolicy(), CANDIDATE), 'malformed');
+  }],
+  ['7: A trusted signature over a payload with a missing or unknown field fails as malformed', () => {
+    const { suite: _suite, ...missingSuite } = record();
+    rejects(() => verifyResult(signResult(missingSuite, runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'malformed');
+    const { harness_error: _harness, ...missingCount } = record().counts;
+    rejects(() => verifyResult(signResult(record({ counts: missingCount }), runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'malformed');
+    rejects(() => verifyResult(signResult(record({ note: 'unchecked' }), runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'malformed');
+  }],
+  ['8: A payload for another commit or tree fails as stale-candidate', () => {
+    for (const candidate of [{ commit: '3'.repeat(40), tree: CANDIDATE.tree }, { commit: CANDIDATE.commit, tree: '4'.repeat(40) }]) {
+      rejects(() => verifyResult(signResult(record({ candidate }), runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'stale-candidate');
+    }
+  }],
+  ['9: A payload with another policy digest fails as changed-policy', () => {
+    const changed = record({ acceptance_policy_sha256: sha256Hex('another policy') });
+    rejects(() => verifyResult(signResult(changed, runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'changed-policy');
+  }],
+  ['10: Zero discovered and zero selected each fail as zero-denominator', () => {
+    const zero = { discovered: 0, selected: 0, pass: 0, fail: 0, unsupported: 0, excluded: 0, crash: 0, timeout: 0, harness_error: 0 };
+    rejects(() => verifyResult(signResult(withCounts(zero), runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'zero-denominator');
+    rejects(() => verifyResult(signResult(withCounts({ ...zero, discovered: 5 }), runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'zero-denominator');
+  }],
+  ['11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts', () => {
+    for (const changes of [{ pass: -1, fail: 2 }, { pass: 4.5, fail: 1.5 }, { discovered: 2 ** 53 }, { pass: 6 }, { discovered: 7 }, { pass: '5' }]) {
+      rejects(() => verifyResult(signResult(withCounts(changes), runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'inconsistent-counts');
+    }
+  }],
+  ['12: A runner key that differs from the signature key fails as key-mismatch', () => {
+    const policy = trustPolicy([['runner-1', runner], ['runner-2', second]]);
+    rejects(() => verifyResult(signResult(record({ runner: { key_id: 'runner-2' } }), runner.privateKey, 'runner-1'), policy, CANDIDATE), 'key-mismatch');
+  }],
+  ['13: attest-verify rejects a trust policy inside the repository and verifies one outside it', () => {
+    const dir = temp(), envelopeFile = path.join(dir, 'result.json'), outsidePolicy = path.join(dir, 'trust-policy.json');
+    const head = candidateIdentity(root, 'HEAD');
+    fs.writeFileSync(envelopeFile, signResult(record({ candidate: head }), runner.privateKey, 'runner-1'));
+    fs.writeFileSync(outsidePolicy, JSON.stringify(trustPolicy()));
+    const inside = controller(['attest-verify', '--trust-policy', path.join(root, 'engineering/policy.json'), '--candidate', 'HEAD', envelopeFile]);
+    assert.equal(inside.status, 1, inside.stderr);
+    assert.equal(JSON.parse(inside.stdout).code, 'unprotected-policy');
+    const outside = controller(['attest-verify', '--trust-policy', outsidePolicy, '--candidate', 'HEAD', envelopeFile]);
+    assert.equal(outside.status, 0, outside.stdout + outside.stderr);
+    const verified = JSON.parse(outside.stdout);
+    assert.equal(verified.result, 'verified');
+    assert.deepEqual(verified.candidate, head);
+  }],
+  ['14: Candidate identity comes from Git objects and rejects an unknown commit', () => {
+    const dir = temp();
+    runGit(dir, ['init', '-q']);
+    fs.writeFileSync(path.join(dir, 'file.txt'), 'committed\n');
+    runGit(dir, ['add', 'file.txt']);
+    runGit(dir, ['commit', '-q', '-m', 'fixture']);
+    const expected = { commit: runGit(dir, ['rev-parse', 'HEAD']), tree: runGit(dir, ['rev-parse', 'HEAD^{tree}']) };
+    assert.deepEqual(candidateIdentity(dir, 'HEAD'), expected);
+    assert.deepEqual(candidateIdentity(dir, expected.commit), expected);
+    fs.writeFileSync(path.join(dir, 'file.txt'), 'uncommitted change\n');
+    assert.deepEqual(candidateIdentity(dir, 'HEAD'), expected);
+    for (const name of ['f'.repeat(40), '-h', 'HEAD~1', '']) rejects(() => candidateIdentity(dir, name), 'unknown-candidate');
+  }],
+  ['16: A trusted signature over a noncanonical payload fails as malformed', () => {
+    const canonical = JSON.stringify(record());
+    const replacement = canonical.replace('fixture-suite', 'fixture-\uFFFDsuite');
+    const unpaired = canonical.replace('fixture-suite', 'fixture-\uD800suite');
+    assert.equal(Buffer.from(unpaired, 'utf8').equals(Buffer.from(replacement, 'utf8')), true);
+    const signedReplacement = JSON.parse(signText(replacement, runner.privateKey));
+    assert.equal(verifyResult(JSON.stringify(signedReplacement), trustPolicy(), CANDIDATE).record.suite.id, 'fixture-\uFFFDsuite');
+    rejects(() => verifyResult(JSON.stringify({ ...signedReplacement, payload: unpaired }), trustPolicy(), CANDIDATE), 'malformed');
+    rejects(() => verifyResult(signText(canonical.replace('"version":1,', '"version":1,"version":1,'), runner.privateKey), trustPolicy(), CANDIDATE), 'malformed');
+    rejects(() => verifyResult(signText(JSON.stringify(record(), null, 1), runner.privateKey), trustPolicy(), CANDIDATE), 'malformed');
+  }],
+].map(([name, fn]) => ({ name, fn }));
+
+export function removeAttestationFixtures() {
+  const failures = [];
+  for (const dir of temporary.splice(0).reverse()) {
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) { failures.push(`${dir}: ${e.message}`); }
+  }
+  return failures;
+}
+
+if (process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))) {
+  console.log('TAP version 13');
+  let failures = 0;
+  for (const [i, c] of attestationCases.entries()) {
+    try { await c.fn(); console.log(`ok ${i + 1} - ${c.name}`); }
+    catch (e) { failures++; console.log(`not ok ${i + 1} - ${c.name}\n  ---\n  message: ${JSON.stringify(e.message)}\n  ...`); }
+  }
+  for (const problem of removeAttestationFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+  console.log(`1..${attestationCases.length}\n# tests ${attestationCases.length}\n# pass ${attestationCases.length - failures}\n# fail ${failures}`);
+  process.exitCode = failures ? 1 : 0;
+}
