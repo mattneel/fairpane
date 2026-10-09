@@ -1,0 +1,34 @@
+{
+  "verdict": "approve",
+  "summary": "I approve P2. It only adds protection, no tool or gate reads `protected_paths`, and together with P1 it completes FP-0079 criterion 6. I only read files; I ran no command, test, or git operation.\n\n**It only adds protection.** engineering/policy.json:48-57 now lists 8 protected paths, with `toolchains/rust.lock.json` at line 55. P1 already added `rust-toolchain.toml` to `source_roots` (line 9), `policy_roots` (line 44), and `required_files`. P2 only inserts one entry into `protected_paths`. It removes no entry, and it changes no root, evidence root, required file, or the acceptance authority.\n\n**No tool or gate breaks.** I searched `tools/`, `.github/`, `.omp/`, and `scripts/`, and nothing reads `policy.protected_paths`:\n- `checkRepository` (tools/lib.mjs:289-) reads only `schema_version` and `required_files`, which must exist through `safePath`.\n- `fingerprints` (lib.mjs:88-91) reads only `source_roots` and `policy_roots`.\n- `validatePlan` (lib.mjs:226-) checks only that each task's `allowed_paths` is non-empty. It does not compare it with policy.\n- The selftest policy fixture (tools/selftest.mjs:57-60) builds its own policy with no `protected_paths`.\n- No test asserts the repository's `protected_paths` list.\n- `.github/` holds only gates.yml and pages.yml; there is no CODEOWNERS file.\n\nA file that is both required and protected already exists twice, `toolchains/zig.lock.json` and `toolchains/rust.lock.json`, and `check` passes with both. So `protected_paths` is a declaration that reviewers enforce under AGENTS.md:61-62. P2 gives `rust-toolchain.toml` the same standing as the lock.\n\n**Criterion 6.** The criterion is \"Protect the lock and the selection file through a separate reviewed policy change\" (plan.json:3268). P1 (9fb8d8f) protected the lock and only inventoried the selection file. P2 adds the selection file to the same protected list. Two more facts complete the picture:\n- The only task whose `allowed_paths` names `rust-toolchain.toml` is FP-0079 (plan.json:3257), which the planned plan commit fixes.\n- No task allows the repository root as a whole.\n\nFP-0029 (1387), FP-0099 (3459), and two later tasks (3482 and 3503) already list it as protected, so P2 makes policy.json agree with them. That resolves the first minor finding of plan review 3.\n\nFour notes follow. None blocks P2.",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "engineering/policy.json",
+      "line": 48,
+      "issue": "policy.json is both a source root and a policy root. P2 therefore changes the policy fingerprint (tools/lib.mjs:88-91), and the FP-0079 receipts from the P1 head (gates/2026-10-09T13-58-47-*) become stale under current-receipt validation. This is expected for any policy change.",
+      "recommendation": "After P2 lands, run `repo-check` and `controller-test` on the P2 head. Record `HEAD` and the ignored-inclusive status before and after the runs, as the P1 binding did. Do this before FP-0079 is accepted or before any later task binds to the new head."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0079/README.md",
+      "line": 21,
+      "issue": "The criterion-mapping row \"Protect the lock and the selection file\" cites only P1. The contract's mapping also names P1 only (CONTRACT.md criterion mapping; integrator decision \"P1 protects the lock and inventories rust-toolchain.toml\"). After P2, criterion 6 rests on P1 and P2 together.",
+      "recommendation": "When the integrator records P2, add it, with its commit and the gates on its head, to the FP-0079 integration record. Also cite it in the row for criterion 6."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3258,
+      "issue": "FP-0079's own `protected_paths` lists neither `toolchains/rust.lock.json` nor `rust-toolchain.toml`. Removing both pin paths from `allowed_paths` (line 3257) alone would leave FP-0079's entry less explicit than FP-0099, FP-0106, and FP-0107.",
+      "recommendation": "In the same plan commit, add both paths to FP-0079's `protected_paths`, after `toolchains/zig.lock.json`, to match the other tasks."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/policy.json",
+      "line": 48,
+      "issue": "No tool enforces `protected_paths`; enforcement rests on review and on owner branch protection. What blocks the selection file from drifting is `checkRepository`'s binding of `rust-toolchain.toml` to the lock (lib.mjs:313-315) and its policy-root fingerprint. P2 does not add a mechanical check, and the criterion does not require one.",
+      "recommendation": "None for P2. Do not describe P2 as adding enforcement beyond the declared review boundary."
+    }
+  ]
+}
