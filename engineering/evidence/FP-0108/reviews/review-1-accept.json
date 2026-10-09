@@ -1,0 +1,30 @@
+{
+  "verdict": "accept",
+  "summary": "FP-0108 meets its frozen contract and amendment 1. GraphemeBoundaries in src/text/grapheme.zig applies GB3, GB4, GB5, GB6 to GB8, GB9, GB9a, GB9b, GB9c (InCB=Linker InCB=Extend* × InCB=Consonant, with no Consonant required first), GB11, GB12/GB13, and GB999 in the UAX #29 order. Its state is a fixed set of fields: the previous GCB value and four booleans. Every code-unit read goes through unitAt, and each unit is read at most twice, so the work is linear. It does not allocate or recurse. The generator adds the field and binary parse modes, and ucd-check regenerates the tables in memory and compares them byte for byte. Under M7 it reports the table stale at line 11310. The independent reference test, the hard-coded rows, and the count totals all pass. The rows and totals match the cited GBP, DCP, and emoji-data lines, which I spot-checked. Case 11 checks line 1, the trailer value 853, and 853 parsed test lines, and it passes in tests-after, integration-tests, and the zig-test gate. Each of M1 to M8 applies, fails its required cases with assertion failures rather than crashes, and reverses to the recorded hash. For amendment 1, I worked out which lines change from the rules, without using the mutation output. As Other, with InCB None and no Extended_Pictographic, U+0903 changes nothing when it is on the left of a boundary, because no rule tests SpacingMark or Other there. On the right, SpacingMark joins except after Control, CR, or LF, while Other joins only after Prepend (GB9b). So a line changes exactly when U+0903 follows anything other than Control, CR, LF, or Prepend. That gives 37 lines: 46, 86, 126, 165, 166, 205, 206, 245, 246, 285, 286, 325, 326, 366, 405, 406, 445, 446, 485, 486, 525, 526, 565, 566, 605, 606, 645, 646, 685, 686, 725, 726, 765, 766, 805, 806, and 841. This set equals the 37 lines that M7 fails in raw/mutation.log and that M5 fails, apart from M5's extra line 868. The 42 unchanged lines are 45, 85, 125, 365, and the 38 lines from 387 to 426 other than 405 and 406. The before and after logs, the controller logs, the corpus logs, the gate receipts, and the Bun run all record commands with exit statuses. The gate definition digests match FP-0107's receipts. The change touches no shell code and no embedding-contract surface.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0108/raw/integration-tests.log",
+      "line": 204,
+      "issue": "The uncached integration test ran from 18:16:25 to about 18:17:25, before the first HEAD and status record at 18:18:46 in raw/integration-binding.log. The binding therefore does not bracket it, although the contract orders the integration run after the bound gates. The bound zig-test gate receipt covers the same tests, so the impact is limited."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0108/CONTRACT.md",
+      "line": 379,
+      "issue": "Amendment 1's explanation of the 42 unchanged lines is imprecise, but its operative rule on line 380 is correct. It omits line 365, which is unchanged because GB9b joins after a Prepend. It also implies that every line that begins with U+0903 is unchanged, yet lines 405 and 406 begin with U+0903 and do change. My independent recomputation gives the same 37 lines as the worker's list."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0108/README.md",
+      "line": 74,
+      "issue": "No recorded command supports the claim that out/fp0108-after did not exist before the run. The non-cached compile durations in raw/tests-after.log, 12 s and 4 s, support it only indirectly."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0108/README.md",
+      "line": 180,
+      "issue": "The README says the worker read the cited file lines, but no log records those reads. I spot-checked GBP lines 37 to 1517, DCP lines 13319 to 13855, emoji-data lines 1 to 1303, and GraphemeBreakTest lines 1 to 879 independently. All of them match the contract's citations."
+    }
+  ]
+}

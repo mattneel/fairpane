@@ -376,7 +376,9 @@ Required reviewers: `fairpane-review` and `fairpane-spec`. Both check the capabi
 ## Amendments
 
 1. Worker `FP0108Graphemes` showed that the M7 row overstates case 11's failures, and the README section "Contract discrepancy" records the evidence.
-   `GraphemeBreakTest.txt` has 79 test lines that contain U+0903, and at 42 of them UAX #29 gives the same boundaries whether U+0903 is SpacingMark or Other: U+0903 follows CR, LF, or Control, where GB4 breaks, or begins its line, or is followed only by a code point whose own rule decides the boundary.
+   `GraphemeBreakTest.txt` has 79 test lines that contain U+0903, and at 42 of them UAX #29 gives the same boundaries whether U+0903 is SpacingMark or Other.
+   No rule tests SpacingMark or Other on the left of a boundary, while on the right SpacingMark joins after anything but Control, CR, or LF (GB9a), and Other joins only after Prepend (GB9b).
+   A line therefore changes exactly when U+0903 follows a code point other than Control, CR, LF, or Prepend; review 1 corrected this sentence's first wording, which omitted Prepend and wrongly exempted lines that begin with U+0903.
    M7 therefore must fail case 11 at line 841 and at every other line whose expected boundaries change when U+0903 is Other instead of SpacingMark.
    The worker's `raw/mutation.log` lists 37 such lines, and the reviewers recompute that set from the rules, independently of the mutation's output.
    Every other part of the M7 row stays as frozen.
