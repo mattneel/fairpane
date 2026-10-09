@@ -1,0 +1,24 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","66d71bd","f5be48f","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","66d71bd","f5be48f","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:44:33.176Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","66d71bd","f5be48f"]
+ engineering/plan.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","66d71bd","f5be48f"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:44:33.257Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","66d71bd","f5be48f"]
+diff --git a/engineering/plan.json b/engineering/plan.json
+index 591062f..946d7f3 100644
+--- a/engineering/plan.json
++++ b/engineering/plan.json
+@@ -3508,7 +3508,7 @@
+       "acceptance": [
+         "Make the controller suite report each test's duration, and record the controller-test gate's per-test durations on the Windows and Linux CI jobs over at least ten runs.",
+         "Name the tests that dominate the Windows duration and the cause of each from those records.",
+-        "Keep the slowest Windows gate duration of the criterion 4 runs at most two thirds of its timeout by reducing test time, or through a separate reviewed change to the timeout, without removing, skipping, excluding, or weakening any test."
++        "Keep the slowest Windows gate duration of the criterion 4 runs at most two thirds of its timeout by reducing test time, or through a separate reviewed change to the timeout, without removing, skipping, excluding, or weakening any test.",
+         "Rerun the gate on the Windows CI runner at least ten times after the change and report each duration."
+       ],
+       "read": ["engineering/evidence/FP-0098/ci/README.md", "engineering/evidence/ci/runs-2026-10-09.log", "engineering/evidence/ci/run-37952850522-attempt-1/README.md", "engineering/gates.json", "tools/selftest.mjs"],
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","66d71bd","f5be48f"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:44:33.334Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}

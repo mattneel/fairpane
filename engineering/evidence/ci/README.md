@@ -371,3 +371,51 @@ They are collection errors, not additional Gates failures.
 Before an affected task is accepted, record FP-0098's earlier acceptance or the rule's predating-review alternative, then record the conclusions of the four snapshot-pending runs and every later pushed head through the actual pre-acceptance head.
 Any newly failed or cancelled attempt needs its own cause and permitted disposition.
 This record preserves the nine open replacement conditions rather than silently treating them as satisfied.
+
+## Extension through `0276268`
+
+The integrator extended this ledger on 2026-10-09 after the run of `0276268` concluded.
+`0276268` is the latest pushed head, so it is the pre-acceptance head of every acceptance commit that the next push carries; no later commit had been pushed.
+
+### Runs after the snapshot
+
+[runs-2026-10-09-extension.log](runs-2026-10-09-extension.log) records every `Gates` run created from 16:30 to 17:40 UTC with `gh run view` of each attempt and each gate step's duration.
+It holds 15 runs, from `4d11e84` to `0276268`, one attempt each.
+The four runs that were in progress at the snapshot, 37959730629 (`2982ab1`), 37960105177 (`7861102`), 37960447300 (`1682d32`), and 37960610495 (`a1b28f6`), concluded `success`.
+Every other run concluded `success` except run 37962020941 of `66d71bd`.
+
+### Run 37962020941 of `66d71bd`
+
+- Failed gate and step: `Run gate repo-check` failed in both jobs after about a second, and every later gate step was skipped, as the job record in the extension log shows.
+- Cause: plan commit `66d71bd` replaced the third criterion of `FP-0107` without its trailing comma, so `engineering/plan.json` did not parse and `node tools/fairpane.mjs check` failed.
+  The integrator's check before that commit reported `Expected ',' or ']' after array element in JSON at position 170636 (line 3512 column 9)`, but the commit command did not stop on it; that output was not recorded with the record tool, and the failed `repo-check` step of this run is the recorded evidence.
+  The cause is deterministic, so no repeated runs are needed.
+- Fix: `f5be48f` restores the comma and changes nothing else.
+  [ranges/66d71bd-to-f5be48f.log](ranges/66d71bd-to-f5be48f.log) shows that the diff of `engineering/gates.json`, `.github/workflows`, `toolchains`, `tools/lib.mjs`, and `build.zig` over the range is empty, and that the whole range diff is that one line of `engineering/plan.json`.
+- Review record: plan review 4, [../plan/reviews/review-4-reject.json](../plan/reviews/review-4-reject.json), approves `f5be48f` as only restoring the comma, and calls itself the `fairpane-review` record that the rule needs for this fixing commit.
+- Disposition: the passing run 37962198818 of `f5be48f` replaces a rerun of `66d71bd`.
+
+### The nine zig-test replacements
+
+The condition that this ledger left open is now met by the rule's review alternative.
+[../FP-0098/reviews/fix-review-approve.json](../FP-0098/reviews/fix-review-approve.json) is a `fairpane-review` verdict, `approve`, scoped to the fixing commits `9d5638b` and `29a9f8e`.
+It finds that they fix the recorded cause and remove, skip, exclude, or weaken no test, gate, timeout, or threshold.
+It predates every acceptance that relies on it.
+[fix-commits-name-status.log](fix-commits-name-status.log) records the complete file list of both commits, as that review asked: `9d5638b` changes `src/dom.zig`, `tools/README.md`, `tools/lib.mjs`, `tools/selftest.mjs`, `tools/zig/test_profile_runner.zig`, and evidence files, and `29a9f8e` changes evidence files only.
+The ten dispatched runs of `29a9f8e` remain the repeated-run evidence that the cause no longer fails the gate.
+The nine replacements at `29a9f8e` therefore cover their failures for every task whose window holds them.
+
+### Windows through `0276268`
+
+| Task | Implementation | Failed attempts in its window | Disposition |
+| --- | --- | --- | --- |
+| `FP-0079` | `04342e2` | `d526219` attempt 1; the nine zig-test failures; `a2dd9ed` attempt 1; `66d71bd` | Same-head attempt 2; replacement at `29a9f8e`; same-head attempt 2; replacement at `f5be48f` |
+| `FP-0064` | `cb8427d` | The same as `FP-0079` | The same |
+| `FP-0067` | `152ed53` | The zig-test failures from `152ed53` on, `a2dd9ed` attempt 1, and `66d71bd` | Replacement at `29a9f8e`; same-head attempt 2; replacement at `f5be48f` |
+| `FP-0081` | `f40a902` | The zig-test failures from `f40a902` on, `a2dd9ed` attempt 1, and `66d71bd` | The same |
+| `FP-0052` | `775d988` | `a2dd9ed` attempt 1 and `66d71bd` | Same-head attempt 2; replacement at `f5be48f` |
+| `FP-0066` | `81481a3` | The same as `FP-0052` | The same |
+| `FP-0076` | `d56bc5f` | `66d71bd` | Replacement at `f5be48f` |
+
+Every other run of every window concluded `success`.
+`FP-0098` and `FP-0082` are not in this table: `FP-0098` still needs its revision's ten dispatched runs, and `FP-0082` waits for revision 2.
