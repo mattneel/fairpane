@@ -1,0 +1,149 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "2995bd0"
+  ],
+  "summary": "I found no blocker or major defect. All six FP-0047 tests in src/web_string.zig (lines 587-625) use exactly the inputs the contract specifies and expect exactly the outputs it specifies. I traced each one by hand through Utf8Decoder.next (src/web_string.zig:238-285), and each expected value matches the WHATWG UTF-8 decoder. F0 sets the lower boundary to 0x90, so F0 80 80 80 and F0 8F BF BF each give four U+FFFD in lossy decoding and InvalidUtf8 in strict decoding. E0 A0 80 decodes to U+0800, ED 9F BF to U+D7FF, and F0 90 80 80 to U+10000, which is D800 DC00 in UTF-16. F5 and C1 are not valid lead bytes, so F5 80 80 80 gives four U+FFFD and C1 BF gives two. codeUnitIndexForUtf8Offset returns InvalidUtf8 inside its loop (line 199), before the OutOfBounds check (line 202), so case 6 holds at offset 1 and at offset 5. Each mutation diff makes exactly the change its description names. Each mutation fails exactly its target tests and nothing else: 61/63 with cases 1 and 2 failing, 61/63 with cases 4 and 5 failing, and 62/63 with only case 6 failing, each with exit status 1. The values the logs report are what the hand trace predicts: {0} for F0 80 80 80, {0xDCC0, 0xDC00} for F5 80 80 80, and index 1 for the offset case. The line numbers in the logs also match the current file once each diff's line shift is applied. The restore log shows the source hashing to the saved baseline after each of the three reverts. tests-after then ran 63/63 with a fresh cache directory, after the last revert. All four gate receipts report status pass. Their source digest before and after is 9cb7896de3e485b008ad1db04c811e3dada027c335684623165bbee644c866d4, and their policy digest is 366776e0…c425, the same policy digest as the FP-0002 and FP-0006 receipts, so no protected policy changed. The test total rose from 57 (FP-0006) to 63, which is the six added tests. No change touches the shell or the embedding contract. The new cases passing before any change is acceptable. The FP-0005 findings were coverage gaps, not defects, and the contract says this task adds tests only unless a test exposes a defect. For a coverage-only task, the three mutation controls are the right stand-in for a failing-first test. They show that each new test fails when the guard it targets is removed. What remains is two minor evidence and handoff gaps and some notes. I had no shell. I did not recompute the digests, decompress git objects, or confirm that commit 2995bd0's tree equals the gated working tree.",
+  "criteria": [
+    {
+      "criterion": "Reject F0 80 80 80 and F0 8F BF BF in strict UTF-8 decoding.",
+      "met": true,
+      "evidence": "src/web_string.zig:587-591 expects error.InvalidUtf8 for both inputs. Trace: F0 sets lower_boundary=0x90 (line 265), and 0x80 and 0x8F are below it, so line 275 returns .failure and fromUtf8 returns InvalidUtf8 (line 64). This matches the WHATWG rule for F0. tests-after.log and integration-tests.log show 63/63 passing with exit 0."
+    },
+    {
+      "criterion": "Replace each maximal subpart of F0 80 80 80 and F0 8F BF BF with U+FFFD in lossy decoding.",
+      "met": true,
+      "evidence": "src/web_string.zig:593-596 expects four 0xFFFD for each input. Trace: F0 is a one-byte maximal subpart and the offending byte goes back to the stream (line 275). Each later 80/8F/BF byte is an invalid lead byte, so the result is 4×FFFD. This matches WHATWG."
+    },
+    {
+      "criterion": "Decode E0 A0 80, ED 9F BF, and F0 90 80 80 to U+0800, U+D7FF, and U+10000.",
+      "met": true,
+      "evidence": "src/web_string.zig:598-609 expects {0x0800}, {0xD7FF} and {0xD800,0xDC00}. Trace: E0: 0 → 0x20 → 0x800. ED: 0xD → 0x35F → 0xD7FF. F0 90 80 80: 0x10 → 0x400 → 0x10000, which writeUtf16 writes as D800 DC00."
+    },
+    {
+      "criterion": "Reject F5 80 80 80 and C1 BF in strict decoding.",
+      "met": true,
+      "evidence": "src/web_string.zig:611-615. F5 and C1 fall in the `else => return .failure` arm (line 270), because the valid lead ranges are C2..DF, E0..EF and F0..F4. This matches WHATWG."
+    },
+    {
+      "criterion": "Replace F5 80 80 80 with four U+FFFD units and C1 BF with two in lossy decoding.",
+      "met": true,
+      "evidence": "src/web_string.zig:617-620 expects 4×FFFD and 2×FFFD. Each byte is its own error. That gives 4 and 2, as WHATWG requires."
+    },
+    {
+      "criterion": "Test that codeUnitIndexForUtf8Offset returns InvalidUtf8 for ill-formed input before it reports OutOfBounds.",
+      "met": true,
+      "evidence": "src/web_string.zig:622-625 checks \"a\\x80\" at offset 1, which is a valid scalar boundary, and at offset 5, which is out of range. Both expect InvalidUtf8. The code returns at line 199 before the `target > bytes.len` check at line 202."
+    },
+    {
+      "criterion": "Store the source diff of each mutation control beside its log.",
+      "met": true,
+      "evidence": "raw/mutation-f0-lower-boundary.diff, raw/mutation-four-byte-lead-range.diff and raw/mutation-offset-failure-unit.diff each sit beside their .log. Each diff applies to the current file: the hunks at -262, -261 and -196 match lines 265, 264 and 199. Every log's line numbers are consistent with its diff. Mutation 1 shifts later lines by -1, so case 1 is at 588, expectUnits at 371 and expectLossyUnits at 377. Mutations 2 and 3 do not shift lines, so the references are 613/618/372/378 and 623."
+    },
+    {
+      "criterion": "Show through a mutation control that removing the F0 lower boundary fails a test.",
+      "met": true,
+      "evidence": "raw/mutation-f0-lower-boundary.log has exit_code 1 and 61/63 passing. Case 1 found `.{ .units = { 0 } }` and case 2 found len 1 [0]. That is the overlong U+0000 the FP-0005 review predicted."
+    },
+    {
+      "criterion": "Contract mutation: widening the four-byte lead range to 0xF0...0xF7 fails case 4 or case 5.",
+      "met": true,
+      "evidence": "raw/mutation-four-byte-lead-range.diff changes only `0xF0...0xF4` to `0xF0...0xF7`. The log has exit 1 and 61/63 passing, with only cases 4 and 5 failing. Both found {56512, 56320}, that is {0xDCC0, 0xDC00}, which is 0x140000 split by writeUtf16, as the hand trace predicts."
+    },
+    {
+      "criterion": "Contract mutation: counting a strict decoder failure as one code unit fails case 6.",
+      "met": true,
+      "evidence": "raw/mutation-offset-failure-unit.diff changes only line 199 to `.failure => units += 1`. The log has exit 1 and 62/63 passing, with only case 6 failing (found @fromBackingInt(1) at offset 1)."
+    },
+    {
+      "criterion": "Source restored after each mutation.",
+      "met": true,
+      "evidence": "raw/mutation-restore.log contains three sha256sum runs, at 01:57:48, 01:58:07 and 01:58:30. Each run follows its mutation run (01:57:22, 01:57:54, 01:58:14), exits 0, and shows src/web_string.zig equal to out/fp0047-baseline/web_string.zig (bc4ca67b…ba59). All three diffs name baseline blob 124be09, and a loose object .git/objects/12/4be098124b64bda433de846ac7be3acfb6a2da exists. tests-after.log (01:58:35) ran after the last restore and passed 63/63."
+    },
+    {
+      "criterion": "tests-before.log and an uncached tests-after.log with `zig build test --summary all`.",
+      "met": true,
+      "evidence": "tests-before.log uses --cache-dir out/fp0047-before and tests-after.log uses out/fp0047-after. Both run `build test --summary all`, report 63/63 passing and exit with status 0. The compile step ran in both (3s), so the results were not cached."
+    },
+    {
+      "criterion": "Receipts for repo-check, controller-test, and zig-test bind source digest 9cb7896…66d4.",
+      "met": true,
+      "evidence": "In all four receipts in gates/ (repo-check, controller-test, zig-fmt, zig-test), status is pass, every command has exit_code 0, and source_before and source_after are both 9cb7896de3e485b008ad1db04c811e3dada027c335684623165bbee644c866d4 with 95 files. The repo-check log prints the same fingerprint, and the controller-test log shows 102/102. engineering/policy.json:4-34 excludes engineering/evidence from source_roots, so the README and logs added after the gates do not change the digest."
+    },
+    {
+      "criterion": "Behavior unchanged; tests added only; protected paths unchanged.",
+      "met": true,
+      "evidence": "integration-binding.log shows the only staged change outside engineering/evidence as `M src/web_string.zig`. The policy digest, 366776e0…c425, matches the FP-0002 and FP-0006 receipts. The FP-0005 review's line references (265 for the F0 boundary, 199 for the offset failure) still point to the same code, so no line before the tests moved. I infer from this, without proof, that production code is unchanged."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "FP-0005 minor: no test exercised the F0 lower boundary (F0 80 80 80 → U+0000 if the line were removed); add F0 80 80 80, F0 8F BF BF and the positive edges E0 A0 80, ED 9F BF, F0 90 80 80.",
+      "resolved": true,
+      "evidence": "Cases 1-3 (src/web_string.zig:587-609). The mutation-f0-lower-boundary control fails cases 1 and 2."
+    },
+    {
+      "finding": "FP-0005 minor: no test rejected lead bytes F5–FE; add F5 80 80 80 and C1 BF.",
+      "resolved": true,
+      "evidence": "Cases 4-5 (src/web_string.zig:611-620). The mutation-four-byte-lead-range control fails cases 4 and 5. The FP-0005 review predicted an @intCast panic in writeUtf16 under this regression. The log shows the regression produces wrong output (two low surrogates) without a panic, which is consistent with 0x1FFFFF-0x10000 >> 10 = 0x7BF fitting in u16."
+    },
+    {
+      "finding": "FP-0005 minor: no test covered codeUnitIndexForUtf8Offset's InvalidUtf8 path or its precedence over OutOfBounds.",
+      "resolved": true,
+      "evidence": "Case 6 (src/web_string.zig:622-625). The mutation-offset-failure-unit control fails it."
+    },
+    {
+      "finding": "FP-0005 note: mutation logs lacked the mutated source or a diff.",
+      "resolved": true,
+      "evidence": "Each FP-0047 mutation log has its .diff beside it, and each diff applies to the current file."
+    },
+    {
+      "finding": "FP-0005 note: the test count comes from a raw record, not a digest-bound gate receipt.",
+      "resolved": false,
+      "evidence": "Unchanged. The zig-test gate log still prints no count, and the 63/63 figure appears only in raw/integration-tests.log (01:59:48.756, C:\\src\\fairpane). Fixing this means changing the protected engineering/gates.json, which is outside FP-0047's scope and was not in its acceptance criteria. Not resolving it here is correct."
+    },
+    {
+      "finding": "FP-0005 note: unchecked `a.len + b.len` in joinUnits.",
+      "resolved": false,
+      "evidence": "src/web_string.zig:141 is unchanged. The FP-0005 review required no change, and FP-0047 is tests-only, so leaving it is acceptable."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0047/README.md",
+      "line": 25,
+      "issue": "The README says raw/integration-binding.log records `HEAD` and the applied patch. It records only `git rev-parse HEAD` (0553728) and a `git status --porcelain` listing. The listing has no patch text, no file hash and no `git diff --cached`. So nothing directly links the worker's baseline (sha256 bc4ca67b… in the worktree C:\\Users\\requi\\.omp\\wt\\te43a1484d\\m) to the file the gates hashed in C:\\src\\fairpane. The link holds only by inference, through the blob ID 124be09 in the diff headers.",
+      "recommendation": "Record `git diff --cached --stat`, `git hash-object src/web_string.zig` (or sha256sum) in the integration binding log, so the worker's logs are bound to the gated tree. Alternatively, correct the README sentence to say that the log records HEAD and the staged file list."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/HANDOFF.md",
+      "line": 34,
+      "issue": "Next action 6 still says \"Start the ready tasks `FP-0031`, `FP-0033`, and `FP-0047`\", but engineering/state.json:449-465 records FP-0047 as implemented and awaiting fairpane-review. No next action asks for that review. Line 9 still says FP-0006 awaits review, although reflog commit ce23e49 accepted it. The repository's next executable action is therefore stale.",
+      "recommendation": "Replace item 6 with an action to request fairpane-review on FP-0047 at 2995bd0. When this review is recorded, update FP-0047's state.json `review` field."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0047/raw/mutation-f0-lower-boundary.log",
+      "line": null,
+      "issue": "Each mutated test stops at its first failing input, so the logs show only the first input of each pair failing (F0 80 80 80, F5 80 80 80, offset 1). By hand trace, the second inputs would also fail under their mutations: F0 8F BF BF decodes to overlong U+FFFF, and offset 5 returns OutOfBounds. The logs do not show this.",
+      "recommendation": "No change is required. If per-input sensitivity matters later, use separate expectations that report every input."
+    },
+    {
+      "severity": "note",
+      "path": "src/web_string.zig",
+      "line": 589,
+      "issue": "Under the F0 and F5 mutations the strict tests leak the unexpectedly successful WebString (`1 leaks` in both logs), because expectError never frees a success value. This affects only mutated runs; the passing runs report no leaks.",
+      "recommendation": "Optional: on unexpected success, free the result before failing, so mutation logs show only the assertion failure."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0047/README.md",
+      "line": 13,
+      "issue": "\"so no defect existed\" claims more than the evidence shows. The passing cases show the decoder behaves correctly for these inputs, and the mutation controls show the tests are sensitive. Together they justify adding tests only, which is acceptable under CONTRACT.md's \"adds tests and evidence only, unless a new test exposes a defect\". The README also does not explain the gap between contract base 7bc9ace and integration HEAD 0553728. The reflog shows fad1af2, 9e9a0bf and 0553728 in between, which are the contract freeze and two FP-0002 commits.",
+      "recommendation": "Reword to \"no new case exposed a defect\". Add one sentence naming the integration base commit."
+    }
+  ],
+  "commands_run": []
+}
