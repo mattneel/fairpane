@@ -1,0 +1,121 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0009-cache-before"]
+test
++- run test
+   +- compile test debug native 35 errors
+src\dom.zig:27:29: error: use of undeclared identifier 'Store'
+fn expectInvariants(store: *Store) !void {
+                            ^~~~~
+src\dom.zig:107:31: error: use of undeclared identifier 'Kind'
+fn expectAllowedChild(parent: Kind, child: Kind, doctypes: *usize, elements: *usize) !void {
+                              ^~~~
+src\dom.zig:131:24: error: use of undeclared identifier 'Store'
+fn fingerprint(store: *Store) u64 {
+                       ^~~~~
+src\dom.zig:143:24: error: use of undeclared identifier 'Store'
+fn newDocument(store: *Store) !NodeHandle {
+                       ^~~~~
+src\dom.zig:149:24: error: use of undeclared identifier 'Store'
+fn newFragment(store: *Store, document: NodeHandle) !NodeHandle {
+                       ^~~~~
+src\dom.zig:155:23: error: use of undeclared identifier 'Store'
+fn newDoctype(store: *Store, document: NodeHandle) !NodeHandle {
+                      ^~~~~
+src\dom.zig:161:23: error: use of undeclared identifier 'Store'
+fn newElement(store: *Store, document: NodeHandle, comptime local_name: []const u8) !NodeHandle {
+                      ^~~~~
+src\dom.zig:167:20: error: use of undeclared identifier 'Store'
+fn newText(store: *Store, document: NodeHandle, comptime text: []const u8) !NodeHandle {
+                   ^~~~~
+src\dom.zig:173:23: error: use of undeclared identifier 'Store'
+fn newComment(store: *Store, document: NodeHandle, comptime text: []const u8) !NodeHandle {
+                      ^~~~~
+src\dom.zig:179:37: error: use of undeclared identifier 'Store'
+fn newProcessingInstruction(store: *Store, document: NodeHandle, comptime text: []const u8) !NodeHandle {
+                                    ^~~~~
+src\dom.zig:185:26: error: use of undeclared identifier 'Store'
+fn appendChecked(store: *Store, parent: NodeHandle, node: NodeHandle) !void {
+                         ^~~~~
+src\dom.zig:190:26: error: use of undeclared identifier 'Store'
+fn insertChecked(store: *Store, parent: NodeHandle, node: NodeHandle, child: ?NodeHandle) !void {
+                         ^~~~~
+src\dom.zig:195:27: error: use of undeclared identifier 'Store'
+fn replaceChecked(store: *Store, parent: NodeHandle, node: NodeHandle, child: NodeHandle) !void {
+                          ^~~~~
+src\dom.zig:200:26: error: use of undeclared identifier 'Store'
+fn removeChecked(store: *Store, parent: NodeHandle, child: NodeHandle) !void {
+                         ^~~~~
+src\dom.zig:205:25: error: use of undeclared identifier 'Store'
+fn adoptChecked(store: *Store, node: NodeHandle, document: NodeHandle) !void {
+                        ^~~~~
+src\dom.zig:210:26: error: use of undeclared identifier 'Store'
+fn retainChecked(store: *Store, node: NodeHandle) !void {
+                         ^~~~~
+src\dom.zig:215:27: error: use of undeclared identifier 'Store'
+fn releaseChecked(store: *Store, node: NodeHandle) !void {
+                          ^~~~~
+src\dom.zig:220:25: error: use of undeclared identifier 'Store'
+fn sweepChecked(store: *Store) !usize {
+                        ^~~~~
+src\dom.zig:227:27: error: use of undeclared identifier 'Store'
+fn expectRejected(store: *Store, expected: anyerror, comptime operation: anytype, args: anytype) !void {
+                          ^~~~~
+src\dom.zig:235:27: error: use of undeclared identifier 'Store'
+fn expectChildren(store: *Store, parent: NodeHandle, expected: []const NodeHandle) !void {
+                          ^~~~~
+src\dom.zig:256:27: error: use of undeclared identifier 'Store'
+fn expectDetached(store: *Store, node: NodeHandle) !void {
+                          ^~~~~
+src\dom.zig:263:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(testing.allocator);
+                    ^~~~~
+src\dom.zig:314:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(testing.allocator);
+                    ^~~~~
+src\dom.zig:496:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(testing.allocator);
+                    ^~~~~
+src\dom.zig:688:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(testing.allocator);
+                    ^~~~~
+src\dom.zig:737:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(testing.allocator);
+                    ^~~~~
+src\dom.zig:811:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(testing.allocator);
+                    ^~~~~
+src\dom.zig:864:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(testing.allocator);
+                    ^~~~~
+src\dom.zig:911:15: error: use of undeclared identifier 'NodeHandle'
+    seen: [16]NodeHandle = undefined,
+              ^~~~~~~~~~
+src\dom.zig:938:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(testing.allocator);
+                    ^~~~~
+src\dom.zig:1011:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(testing.allocator);
+                    ^~~~~
+src\dom.zig:1066:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(counting.allocator());
+                    ^~~~~
+src\dom.zig:1099:20: error: use of undeclared identifier 'Store'
+fn guarded(store: *Store, comptime operation: anytype, args: anytype) !OperationPayload(operation) {
+                   ^~~~~
+src\dom.zig:1112:21: error: use of undeclared identifier 'Store'
+    var store = try Store.init(gpa);
+                    ^~~~~
+src\dom.zig:1165:20: error: use of undeclared identifier 'Store'
+    var mine = try Store.init(testing.allocator);
+                   ^~~~~
+error: 35 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0009-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+test transitive failure
++- run test transitive failure
+   +- compile test debug native 35 errors
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x617e924d test --summary all --cache-dir out/fp0009-cache-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0009-cache-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9595b6f21\\m","started_at":"2026-10-09T02:21:38.476Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":4265,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}

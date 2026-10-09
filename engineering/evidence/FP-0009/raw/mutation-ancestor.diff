@@ -1,0 +1,12 @@
+diff --git a/out/fp0009-mutation/dom.zig b/src/dom.zig
+index 2beeb73..c7525cd 100644
+--- a/out/fp0009-mutation/dom.zig
++++ b/src/dom.zig
+@@ -402,7 +402,6 @@ pub const Store = struct {
+         // Step 2: if node is a host-including inclusive ancestor of parent,
+         // then throw a "HierarchyRequestError" DOMException.
+         // No fragment has a host yet, so the host-including inclusive ancestors are the inclusive ancestors.
+-        if (store.isInclusiveAncestor(node, parent)) return error.HierarchyRequest;
+         // Step 3: if child is non-null and its parent is not parent, then throw a "NotFoundError" DOMException.
+         if (child) |reference| {
+             if (!sameNode(store.at(reference).parent, parent)) return error.NotFound;
