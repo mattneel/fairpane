@@ -76,6 +76,8 @@ The integrator alone commits to `master` and pushes it to `origin`.
 Workers leave their changes in isolated worktrees for review.
 Each checkpoint is committed and pushed as soon as its checks pass.
 `docs/GIT_OPERATIONS.md` defines the complete procedure and history rules.
+The integrator checks the `Gates` run of each pushed head.
+A failed run blocks acceptance of every task whose implementation it contains, and the failure is recorded in that task's evidence with its run ID.
 
 ## Stop and continuation rules
 
