@@ -230,3 +230,10 @@ Commit `0484339` applies the worker's `out/fp0111.patch`, blob `178e84c033867b8f
 | Bun 1.4.2 | `raw/bun-selftest.log` | 253 of 253 |
 
 The master base holds FP-0106's three laboratory tests, so the uncached count is 422, three more than the worker's 419 at `ca026e8`.
+The `zig-test` receipt ran on a warm cache and records no build summary, so the test evidence for `0484339` is the uncached `raw/integration-tests.log`, as review 1 notes.
+
+## Review dispositions
+
+- Review 1's contract notes on the M22 row and the fontTools line citations are recorded as errata 1 and 2 at the end of `CONTRACT.md`.
+- Review 1's provenance note: `raw/font-expectations-main-checkout.log` installs fontTools 4.66.1 in the main checkout from the pinned wheel (SHA-256 `7234ae9e…`), as `tools/README.md` describes, and runs `node tools/fairpane.mjs font-expectations --check`, which verifies 350 installed files and finds all four expectation files byte-identical.
+- Security review 1's notes go to their owners in a plan change: shared lookup, subtable, and coverage structures to `FP-0112` and `FP-0113`, which must bound validation work per run and add a hostile shared-structure case; NULL list offsets to `FP-0058`'s strictness comparison; and the extension header read at open time to the same immutable-bytes model that FP-0013 case 52 adopted.

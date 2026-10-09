@@ -867,3 +867,10 @@ This task does none of the following:
 - Mapping Unicode scripts or BCP 47 languages to OpenType tags.
 - Changing `parse`, the C ABI, `include`, `api`, `tools/fileset.mjs`, or any gate.
 - Making performance claims.
+
+## Errata
+
+Review 1 (`reviews/review-1-accept.json`) found two errors in this contract's text; neither changes a test, an expectation, or a criterion.
+
+1. The M22 row's expected value is wrong. Read as Offset16, the first MarkGlyphSets offset is `0x0000`, so `set(0)` is rejected with `null_offset` (`raw/mutation.log` lines 5615-5636), not `[0, 12]`. Case 18 still fails at `set(0)`, so M22 still fails its named case, as README item 11 reports.
+2. The fontTools 4.66.1 line citations in "Sources" count another source tree. In the installed files, which `raw/fonttools-lines.log` prints, `otBase.py` lines 989 and 1221-1222 are 1003 and 1237, and `otTables.py` lines 927, 950, 1182, 1250, 1344, 1430, and 1498 are 947, 970, 1207, 1276, 1371, 1458, and 1527. The cited behavior is the same at those lines.
