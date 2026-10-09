@@ -37,7 +37,7 @@ The archive has no enclosing directory.
 - Zig master, with an exact compiler pin and isolated upgrades.
 - A first-party Zig-native JavaScript runtime with full observable JavaScript semantics.
 - A C ABI at the embedding boundary, with qualified idiomatic wrappers across languages.
-- Rust as the first-party wrapper language, maintained with the engine.
+- Rust as the first-party wrapper and browser-shell language, with a wrapper that stays free of third-party dependencies.
 - A native browser with minimal chrome, an address bar, and the page.
 - A browser shell written in Rust on the public embedding contract, with chrome that Fairpane itself renders, so Fairpane's own browser dogfoods what every embedder uses.
 - Open development, reproducible evidence, and maintainable public infrastructure.
@@ -68,8 +68,8 @@ The engine does not hide Chromium, WebKit, or another renderer behind host callb
 Node or Bun runs the development controller. Neither ships inside the portable engine.
 OMP and external conformance harnesses are development tools, not renderer dependencies.
 The portable engine uses the pinned Zig standard library and compiler runtime.
-The Rust wrapper and browser shell use pinned, audited crates for work outside the engine.
-No crate renders, scripts, or makes security decisions for web content or chrome.
+The canonical Rust wrapper has no third-party dependency.
+The Rust browser shell welcomes qualified crates for application work, but no crate renders, scripts, or makes security decisions for web content or chrome.
 Host adapters can use declared operating-system facilities.
 
 No domain, package namespace, or trademark is reserved by this archive.

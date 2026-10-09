@@ -745,12 +745,13 @@
     },
     {
       "id": "FP-0017",
-      "title": "Create the first Rust browser window with engine-rendered chrome",
+      "title": "Create the first Rust browser window, hosted in GPUI, with engine-rendered chrome",
       "workstream": "browser",
       "depends_on": [
         "FP-0006",
         "FP-0016",
-        "FP-0029"
+        "FP-0029",
+        "FP-0032"
       ],
       "role": "fairpane-platform",
       "allowed_paths": [
@@ -779,14 +780,15 @@
         "fairpane-review"
       ],
       "acceptance": [
-        "Create a native Windows window from the Rust shell that presents an engine-rendered chrome document and a page surface.",
+        "Create a native Windows window from the Rust shell, hosted in GPUI, that presents an engine-rendered chrome document and a page surface.",
         "Write the shell in Rust and reach the engine only through the Rust wrapper and the public embedding contract.",
-        "Render the chrome as a trusted document under its own engine owner, separate from every page document.",
+        "Render the chrome as a trusted document in its own renderer, separate from every page renderer, and never let GPUI render the chrome.",
+        "Run each renderer as a Rust renderer host that calls the wrapper and exchanges only validated messages with the shell.",
         "Record each capability that the shell needs and the public contract lacks as a contract task, never as a private shortcut.",
         "Implement keyboard focus movement between chrome and page, resize, close, and explicit unsupported states rendered in the chrome document.",
         "Display origin identity from broker-validated state, never from page-controlled content.",
         "Keep the OS window frame title and close control available, and restart the chrome when its renderer fails.",
-        "Use crates only for responsibilities that engineering/dependencies.json allows, and pass the required crate checks.",
+        "Use crates only in the shell, only for uses that engineering/dependencies.json accepts, and pass the dependency checks on the resolved graph.",
         "Do not embed a system WebView or external browser engine.",
         "Execute the shell on Windows and record actual results."
       ],
@@ -937,7 +939,8 @@
         "Implement explicit origin and redirect policy tests.",
         "Demonstrate a denied request and a contained renderer failure.",
         "Declare the actual operating-system isolation boundary.",
-        "Expose broker decisions to the shell only through the public embedding contract, so every embedder receives the same containment."
+        "Expose broker decisions to the shell only through the public embedding contract, so every embedder receives the same containment.",
+        "Keep any transport crate from consuming redirects, storing cookies, or transforming responses, and return those responses through the public resource contract."
       ],
       "read": [
         "docs/SECURITY.md",
@@ -1321,7 +1324,7 @@
     },
     {
       "id": "FP-0029",
-      "title": "Build and qualify the first-party Rust wrapper",
+      "title": "Build and qualify the canonical Rust wrapper crates",
       "workstream": "wrappers",
       "depends_on": [
         "FP-0021"
@@ -1361,15 +1364,14 @@
         "fairpane-review"
       ],
       "acceptance": [
-        "Pin the Rust toolchain to an exact version and verified official artifact digests in toolchains/rust.lock.json, through a reviewed change separate from the wrapper implementation.",
-        "Generate a raw Rust declaration crate from the FP-0021 metadata, and extend that metadata through a reviewed schema change where it falls short.",
-        "Implement an idiomatic Rust crate for engine and document lifecycle with non-cloneable owners, Result statuses, and cancellation.",
-        "Claim Send and Sync bounds only where the C contract grants them, and keep unsafe code inside a narrow, separately reviewed perimeter.",
-        "Execute the wrapper against the actual native library on Windows and run the shared foreign-runtime failure scenarios.",
-        "Keep generated declarations separate from the idiomatic layer and detect stale generated files.",
-        "Pin every crate in a committed Cargo.lock and pass license, advisory, and banned-crate checks.",
-        "Record each crate's responsibility in engineering/dependencies.json through a reviewed change separate from the wrapper implementation.",
-        "Extend the source inventory and gate registry to cover the Rust workspace through separate reviewed policy changes.",
+        "Pin stable Rust 1.99.0 with verified official artifact digests in toolchains/rust.lock.json, through a reviewed change separate from the wrapper implementation.",
+        "Generate fairpane-sys from the FP-0021 metadata, ship the generated declarations with their source schema, and keep regeneration a separate development operation.",
+        "Implement fairpane with owned engine and document types, explicit destruction, typed Result errors without an error-library dependency, scoped buffer views, typed input and host-request batches, and explicit thread restrictions and cancellation.",
+        "Give the initial Engine type neither Send nor Sync, and keep unsafe code inside a narrow, separately reviewed perimeter.",
+        "Prove that fairpane-sys and fairpane resolve no third-party crate in any declared target configuration, including build dependencies.",
+        "Build and execute a minimal Rust consumer outside any browser workspace against the actual native library on Windows, and run the shared foreign-runtime failure scenarios.",
+        "Keep generated declarations separate from the idiomatic layer and detect stale generated files mechanically.",
+        "Extend the source inventory and gate registry to cover the Rust crates through separate reviewed policy changes.",
         "Do not call generated source alone qualified support."
       ],
       "read": [
@@ -1477,6 +1479,153 @@
       "read": [
         "engineering/evidence/FP-0028/reviews/review-1-accept.json",
         "tools/README.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0032",
+      "title": "Qualify GPUI as the shell framework with a prototype",
+      "workstream": "browser",
+      "depends_on": [
+        "FP-0016",
+        "FP-0029"
+      ],
+      "role": "fairpane-platform",
+      "allowed_paths": [
+        "apps",
+        "tests",
+        "tools",
+        "engineering/decisions",
+        "engineering/dependencies.json"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review",
+        "fairpane-security"
+      ],
+      "acceptance": [
+        "Display changing engine-produced pixels obtained through the Rust wrapper in a GPUI window.",
+        "Preserve correct viewport geometry and frame resource lifetimes across resize and scale changes.",
+        "Define and test the frame protocol that separates a borrowed CPU view from presentation ownership and its explicit release.",
+        "Deliver keyboard, pointer, and IME composition events from GPUI to the engine through the public contract.",
+        "Keep distinct identity for multiple windows and recover a window after a renderer failure.",
+        "Measure idle CPU use and interaction latency against budgets recorded before the run.",
+        "Use the newest qualified, compatible GPUI and GPUI Kit pairing, and record the exact versions and snapshot.",
+        "Prove that the resolved dependency graph contains no GPUI Kit WebView or JavaScript-extension package and no other web or script engine.",
+        "Record whether GPUI qualifies, with the evidence for each area, in an architecture decision record."
+      ],
+      "read": [
+        "engineering/decisions/0004-first-party-wrapper-language.md",
+        "docs/PRODUCT.md",
+        "docs/SECURITY.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0033",
+      "title": "Run the repository gates in GitHub Actions",
+      "workstream": "laboratory",
+      "depends_on": [
+        "FP-0001"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        ".github/workflows",
+        "tools",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review",
+        "fairpane-security"
+      ],
+      "acceptance": [
+        "Install the locked Zig compiler on a Windows runner through the existing installer, with its size and digest checks.",
+        "Run check, test, zig-fmt, zig-test, zig-build, and c-abi on Windows, and the controller tests and cross-compile gates on Linux.",
+        "Pin every action to a full commit SHA, grant least-privilege permissions, and expose no secret to pull requests.",
+        "Upload each gate receipt and log as a workflow artifact without treating it as an attestation.",
+        "Fail the workflow on any failed, skipped, or timed-out gate."
+      ],
+      "read": [
+        "docs/GIT_OPERATIONS.md",
+        "tools/README.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0034",
+      "title": "Build the C-only, minimal Rust, and browser-shell consumers in continuous integration",
+      "workstream": "wrappers",
+      "depends_on": [
+        "FP-0017",
+        "FP-0033"
+      ],
+      "role": "fairpane-bindings",
+      "allowed_paths": [
+        ".github/workflows",
+        "tests",
+        "tools",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Build and run a C-only consumer against the public header and engine artifact.",
+        "Build and run a minimal Rust consumer against the distributed wrapper outside the browser workspace.",
+        "Build the browser shell and execute its application workflows through the same wrapper.",
+        "Check the dependency graph of every consumer across every declared target configuration, including build dependencies.",
+        "Show that a shell-only workaround cannot satisfy a wrapper test and that a private export cannot satisfy a public-ABI test."
+      ],
+      "read": [
+        "docs/ABI_AND_WRAPPERS.md",
+        "engineering/decisions/0004-first-party-wrapper-language.md"
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."

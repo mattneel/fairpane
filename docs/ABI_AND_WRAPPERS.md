@@ -69,7 +69,7 @@ Node native adapters can use Node-API rather than expose V8 internals. [S18]
 
 ## First-party Rust wrapper
 
-Rust is the first-party wrapper language, as ADR 0004 records.
+Rust is the first-party wrapper language and the browser-shell language, as ADR 0004 records.
 The project maintains the Rust wrapper with the engine and qualifies it before any other wrapper.
 The browser shell is written in Rust, so Fairpane's own application is the wrapper's first and heaviest user.
 Zig builds the engine, and Rust builds the application on top of it.
@@ -83,21 +83,41 @@ The direct Zig API is not part of that contract, because it sits over internal i
 When the shell needs a capability that the contract lacks, the contract gains that capability through the normal review path.
 Other embedders then receive the same capability.
 
-The wrapper has two layers.
-A raw crate holds declarations generated from the interface metadata.
-An idiomatic crate maps opaque owners to non-cloneable owner types, borrowed frames to scoped borrows, statuses to `Result`, and thread rules to `Send` and `Sync` bounds.
-The idiomatic crate claims no `Send` or `Sync` bound that the C contract does not grant.
-Its unsafe code stays inside a narrow, separately reviewed perimeter.
+The wrapper has two crates.
+`fairpane-sys` holds the exact declarations of the public C ABI, generated from the interface schema.
+`fairpane` provides safe, idiomatic ownership and operations over `fairpane-sys` and the Rust standard library.
 
-The Rust wrapper and the shell embrace the Rust ecosystem.
-They use the current stable release of the best-maintained crate for each responsibility outside the engine.
-No crate parses, styles, lays out, paints, or scripts web content or chrome, and no crate makes a security decision that the engine owns.
-`engineering/dependencies.json` lists the allowed and forbidden responsibilities and the required crate checks.
+- `fairpane` exposes owned engine and document types with explicit destruction behavior.
+- It reports typed errors through `Result`, without a mandatory error-library dependency.
+- It provides scoped buffer views and retained frames with documented lifetime rules.
+- It accepts typed input and host-request batches.
+- It states thread restrictions and cancellation behavior explicitly.
+- The initial `Engine` type implements neither `Send` nor `Sync`, and a later transfer needs a qualified design.
+- Its unsafe code stays inside a narrow, separately reviewed perimeter.
+
+A borrowed CPU frame view expires at its documented boundary.
+An asynchronous presentation operation retains the frame resource until its consumer completes.
+A scope ending does not establish GPU completion, so presentation follows an explicit release protocol.
+
+The canonical wrapper keeps a first-party dependency policy.
+It has no third-party runtime or build dependency, so a consumer needs neither bindgen nor any GUI stack.
+Generated declarations ship with their source schema, and regeneration is a separate development operation.
+The wrapper implements standard-library traits and needs no async runtime.
+Framework-specific integrations, such as GPUI adapters, belong to the applications that use them.
+
+The browser shell, not the wrapper, welcomes qualified third-party crates.
+Shell code never handles raw engine pointers and never imports `fairpane-sys` directly.
+`engineering/dependencies.json` lists the shell's acceptable uses, exclusions, and required checks.
 
 ## Qualification
 
 The wrapper suite covers cancellation, stale handles, teardown, and allocation failure.
 It also covers foreign exceptions and callbacks from unexpected threads.
-The first-party wrapper also runs the browser shell's own workflows as qualification scenarios.
+
+Continuous integration builds three separate consumers.
+A C-only consumer builds against the public header and engine artifact.
+A minimal Rust consumer builds against the distributed wrapper outside the browser workspace, because Cargo unifies features inside a workspace.
+The browser shell executes its application workflows through the same wrapper.
+The dependency check covers every declared target configuration and every build dependency.
 Each supported language requires real execution on its declared runtime and targets.
 The phrase "every language" expresses an extensible public contract, not an unsupported list of generated files.

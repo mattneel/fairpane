@@ -14,17 +14,25 @@ The host supplies explicit platform capabilities.
 Adapters declare operating-system calls, system libraries, and security assumptions.
 A callback that secretly delegates shaping or rendering to another engine violates the canonical zero-dependency profile.
 
-The Rust wrapper and the browser shell sit outside the portable engine.
-They can use pinned, audited crates for responsibilities outside the engine, such as windowing, OS input delivery, accessibility bridging, frame presentation, and IPC transport.
-No crate parses, styles, lays out, paints, or scripts web content or chrome, and no crate makes a security decision that the engine owns.
-`engineering/dependencies.json` records the allowed and forbidden crate responsibilities.
+| Layer | Dependency policy | Responsibility |
+| --- | --- | --- |
+| Zig engine | First-party code and the pinned Zig toolchain. | Web semantics and document execution. |
+| `fairpane-sys` | First-party bindings and Rust toolchain facilities. | Exact declarations of the public C ABI. |
+| `fairpane` | First-party wrapper code, `fairpane-sys`, and the Rust standard library. | Safe, idiomatic Rust ownership and operations. |
+| Rust browser shell | Qualified third-party dependencies are welcome. | User interface and application services. |
+
+Dependencies belong to the application that needs them and never migrate into the reusable contract.
+No shell dependency lays out, shapes, paints, or scripts web content or chrome, or makes a security decision that the engine or broker owns.
+`engineering/dependencies.json` and ADR 0004 record the acceptable uses and the exclusions.
 
 ## Components
 
 ```text
-Rust browser shell: windows, OS input, accessibility bridge, frame presentation
+Privileged Rust browser shell (GPUI hosts windows, input, IME, AccessKit, presentation)
                   |
-     Rust wrapper -> public embedding contract (C ABI and process protocol)
+     validated messages over the process protocol
+                  |
+Rust renderer host -> fairpane (Rust wrapper) -> fairpane-sys -> public C ABI
                   |
                   v
 Host capabilities and resource broker
@@ -50,14 +58,20 @@ The compositor does not traverse mutable DOM objects.
 ## Application boundary
 
 The browser shell is an ordinary embedder.
-It is written in Rust and calls the engine through the Rust wrapper and the public embedding contract.
+It is written in Rust and reaches the engine through the Rust wrapper and the public embedding contract.
 It has no access to internal Zig interfaces.
 A capability that the shell needs becomes part of the public contract, or the shell does not have it.
 The engine never depends on the shell.
 
-The engine renders the browser chrome as a trusted document through the same contract.
-The shell hosts the chrome document and each page document under separate engine owners.
-It routes OS input to the focused document, presents each document's frames, and bridges each accessibility tree to the platform.
+The production browser isolates renderers in separate processes.
+Each renderer process runs a small Rust renderer host that calls the Rust wrapper and services the process protocol.
+The privileged shell exchanges only validated messages with renderer hosts.
+The C ABI stays a local boundary inside each renderer process, and no native pointer crosses a process boundary.
+A direct in-process embedding qualifies a separate deployment profile.
+
+The engine renders the browser chrome as a trusted document, in its own renderer, separate from every page renderer.
+GPUI hosts the chrome document and each page document in the shell's windows.
+The shell routes OS input to the focused document, presents each document's frames, and bridges each accessibility tree to the platform.
 The chrome and page documents never share an authority boundary, and broker-validated state supplies the displayed origin.
 
 ## Execution model

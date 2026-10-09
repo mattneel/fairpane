@@ -55,7 +55,12 @@ The address bar, navigation controls, permission prompts, and download surfaces 
 The shell renders that document through the same public contract as page content.
 The engine's text, editing, focus, input, and accessibility therefore serve the chrome before they serve web pages.
 
-The chrome document and page documents run under separate engine owners and never share an authority boundary.
+GPUI hosts the chrome and page documents in the shell's windows.
+It supplies windows, input and IME delivery, AccessKit accessibility, and frame presentation.
+It does not render the chrome, and a qualification prototype must confirm it before the shell depends on it.
+
+The chrome document runs in its own renderer, separate from every page renderer.
+The chrome and page documents never share an authority boundary.
 Broker-validated state supplies the displayed origin and permission decisions.
 A page cannot navigate, script, restyle, or overlay the chrome.
 If the chrome renderer fails, the OS window frame keeps its title and close control, and the shell restarts the chrome.

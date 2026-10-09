@@ -14,18 +14,25 @@ Input validation and memory safety remain required in both profiles.
 ## Trusted chrome
 
 The engine renders the browser chrome as a trusted document.
-The chrome document runs under its own engine owner, separate from every page document.
-Process isolation between chrome and page renderers remains the default direction.
+The chrome document runs in its own renderer process, separate from every page renderer.
+Each renderer process runs a Rust renderer host that calls the Rust wrapper and services the process protocol.
+The privileged shell exchanges only validated messages with renderer hosts, and no native pointer crosses a process boundary.
 Broker-validated state supplies the displayed origin, permission requests, and download identity.
 A page cannot navigate, script, restyle, overlay, or inject content into the chrome.
 If the chrome renderer fails, the OS window frame keeps its title and close control, and the shell restarts the chrome.
 
 ## Rust shell dependencies
 
-The Rust wrapper and the browser shell can use crates for responsibilities outside the engine.
-Each crate is pinned, license-checked, advisory-checked, and reviewed on addition and upgrade.
-No crate parses, styles, lays out, paints, or scripts web content or chrome.
+The canonical Rust wrapper has no third-party runtime or build dependency.
+The browser shell can use qualified crates for user interface and application services.
+Each shell crate is pinned, license-checked, advisory-checked, source-checked, and reviewed on addition and upgrade.
+No crate lays out, shapes, paints, or scripts web content or chrome.
 No crate makes an origin, URL, or permission decision that the engine or broker owns.
+
+A transport crate serves only as the broker's authorized transport.
+It returns redirect responses unconsumed, so the engine evaluates every redirect.
+It keeps no cookie store and transforms no response.
+The engine applies web semantics, and the broker independently authorizes privileged operations.
 
 ## Engine requirements
 

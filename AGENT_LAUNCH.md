@@ -37,7 +37,7 @@ Implement a real native browser shell during the early vertical-slice work.
 Write the shell in Rust, the first-party wrapper language, against the public embedding contract only.
 Render the browser chrome with Fairpane itself, as a trusted document under its own engine owner.
 Treat any capability that the shell needs and the contract lacks as a contract defect, not a private shortcut.
-Use pinned, audited crates for shell work outside the engine, as `engineering/dependencies.json` allows.
+Use qualified, pinned crates only in the browser shell, as `engineering/dependencies.json` allows, and keep the wrapper crates first-party.
 Preserve address-bar identity, accessibility, permissions, and application workflows.
 Do not end with only a headless library or static HTML demonstration.
 

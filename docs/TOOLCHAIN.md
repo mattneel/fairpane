@@ -38,16 +38,18 @@ External conformance harness dependencies remain isolated from the renderer pack
 
 ## Rust toolchain
 
-Rust is the first-party wrapper language, as ADR 0004 records.
-The Rust wrapper and the browser shell use the current stable Rust release.
+Rust is the first-party wrapper language and the browser-shell language, as ADR 0004 records.
+The initial pin is stable Rust 1.99.0, released on October 1, 2026.
 `toolchains/rust.lock.json` records the exact toolchain version and the digests of its official artifacts.
 A `rust-toolchain.toml` file selects that exact version for every Cargo command.
+Rust nightly needs a specific feature and its own qualification case.
 A Rust toolchain upgrade follows the same separate-branch procedure as a Zig compiler upgrade.
 
-A committed `Cargo.lock` pins every crate.
-Each crate addition or upgrade passes a license check, a security advisory check, and a banned or duplicate crate check.
-Each addition names the responsibility it serves from the allowed list in `engineering/dependencies.json`.
-The project prefers the current stable release of the best-maintained crate for each responsibility.
+The canonical wrapper crates use only the Rust standard library and toolchain facilities.
+The browser shell commits its `Cargo.lock` and upgrades crates through reviewed changes.
+Each shell crate addition or upgrade passes license, advisory, source, and ban checks across every declared target configuration, including build dependencies.
+The shell adopts the newest qualified, compatible stack, not the independently newest version of every package.
+A minimal Rust consumer builds the wrapper outside the browser workspace, so workspace feature unification cannot hide a wrapper defect.
 
 ## Upgrade procedure
 
