@@ -65,7 +65,14 @@ The Gates test now also asserts each job's full step sequence, including the `us
 | Red baseline | `raw/revision-2-tests-before.log` records `HEAD` `acd7a5a` and the old checker blob `ef953b17`. It records the `node -e` command that stages the old checker, the new tests, and both workflows under `out/fp0033-rev2-before`, and that appends the stub `export { gateStepProblems as gateWorkflowProblems };`. It records the staged blob IDs and the run, which passes 13 of 19 cases and fails 6. Cases 12 through 16 fail on the new checks. Case 1 and case 15 fail at their reviewed-list assertion, because the old `pages.yml` problem did not name its grants. |
 | 12-16 | `raw/revision-2-tests-after.log` records `git hash-object` of both workflows and the changed checker files. `node tools/workflow-check.test.mjs` passes 19 of 19, and `node tools/fairpane.mjs test` passes 148 of 148, both with exit status 0. |
 
-The integrator still records `git show --stat` of the revision 2 commit, `git hash-object` of each workflow file at that commit, the gate receipts, `actionlint`, and the GitHub run.
+The integrator applied the patch and committed it as `98fa147`.
+`raw/revision-2-binding.log` records `HEAD` `98fa147`, an empty status that includes ignored files for every source root, `git show --stat` of `7bbe196`, `29f2135`, and `98fa147`, and the blob IDs of both workflow files, which equal those at `HEAD`.
+The workflow files are byte-identical to the files that `raw/revision-1-actionlint.log` linted, so actionlint was not run again.
+
+- `gates/2026-10-09T04-29-43-239Z-repo-check-32405546.json`
+- `gates/2026-10-09T04-29-43-442Z-controller-test-5ea3d49a.json`, with 148 of 148 controller tests.
+
+`raw/revision-2-tests-bun.log` records Bun with 148 of 148 controller tests.
 
 ## Limits
 

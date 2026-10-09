@@ -372,22 +372,22 @@
       ]
     },
     "FP-0033": {
-      "status": "active",
-      "owner": "fairpane-core worker FP0033Actions, integrated by root-integrator",
+      "status": "implemented",
+      "owner": "fairpane-core workers FP0033Actions and FP0033Revision2, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0033/README.md",
-        "engineering/evidence/FP-0033/gates/2026-10-09T02-41-12-231Z-repo-check-cde06900.json",
-        "engineering/evidence/FP-0033/gates/2026-10-09T02-41-12-409Z-controller-test-574028d3.json",
+        "engineering/evidence/FP-0033/gates/2026-10-09T04-29-43-239Z-repo-check-32405546.json",
+        "engineering/evidence/FP-0033/gates/2026-10-09T04-29-43-442Z-controller-test-5ea3d49a.json",
+        "engineering/evidence/FP-0033/raw/revision-2-tests-before.log",
         "engineering/evidence/FP-0033/raw/revision-1-actionlint.log",
-        "engineering/evidence/FP-0033/raw/revision-1-tests-before.log",
-        "engineering/evidence/FP-0033/raw/github-run-37873082602.log"
+        "engineering/evidence/FP-0033/raw/github-run-37875841603.log"
       ],
       "review": "engineering/evidence/FP-0033/reviews/review-2-reject.json",
       "notes": [
         "Created so continuous integration runs the controller and Zig checks that docs/GIT_OPERATIONS.md names for branch protection.",
         "The frozen contract is engineering/evidence/FP-0033/CONTRACT.md, based on commit 7bc9ace, with revisions 1 and 2.",
         "GitHub run 37873082602 succeeded for commit 24c0c64 in both jobs, and run 37875841603 for 94c96ed.",
-        "fairpane-security accepted revision 1 (security-review-2-accept.json). fairpane-review rejected it because the gate-step check missed defaults, env, working-directory, and extra steps. Revision 2 is active in worker FP0033Revision2."
+        "fairpane-security accepted revision 1. fairpane-review rejected it. Commit 98fa147 implements revision 2 with 148 of 148 controller tests. Awaiting both reviews."
       ]
     },
     "FP-0034": {

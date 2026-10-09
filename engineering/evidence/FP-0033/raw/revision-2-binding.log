@@ -1,0 +1,46 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+98fa147490758a263c9a2427e244b519f7cafd8f
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:29:42.830Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--porcelain","--untracked-files=all","--ignored","--","AGENTS.md","AGENT_LAUNCH.md","README.md","build.zig","src","include","api","tests","tools","scripts","toolchains","specs",".omp","docs","engineering/plan.json","engineering/workstreams.json","engineering/gates.json","engineering/qualification.json","engineering/policy.json","engineering/dependencies.json","START_HERE.md","LICENSE-DECISION.md","CONTRIBUTING.md","SECURITY.md",".gitignore",".gitattributes",".editorconfig","engineering/decisions","engineering/templates",".github"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--porcelain","--untracked-files=all","--ignored","--","AGENTS.md","AGENT_LAUNCH.md","README.md","build.zig","src","include","api","tests","tools","scripts","toolchains","specs",".omp","docs","engineering/plan.json","engineering/workstreams.json","engineering/gates.json","engineering/qualification.json","engineering/policy.json","engineering/dependencies.json","START_HERE.md","LICENSE-DECISION.md","CONTRIBUTING.md","SECURITY.md",".gitignore",".gitattributes",".editorconfig","engineering/decisions","engineering/templates",".github"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:29:42.896Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","show","--stat","--format=%H%n%s","7bbe196","29f2135","98fa147"]
+7bbe1964b7638e63471fcd6433160f1c9f516c0c
+FP-0033: close the workflow checker bypasses that reviews found
+
+ engineering/evidence/FP-0033/CONTRACT.md           |  34 +++++
+ .../FP-0033/raw/revision-1-tests-before.log        |  50 +++++++
+ .../evidence/FP-0033/reviews/review-1-reject.json  | 160 +++++++++++++++++++++
+ .../FP-0033/reviews/security-review-1-reject.json  | 148 +++++++++++++++++++
+ tools/README.md                                    |  14 +-
+ tools/workflow-check.mjs                           | 103 +++++++++++--
+ tools/workflow-check.test.mjs                      |  61 ++++++--
+ 7 files changed, 546 insertions(+), 24 deletions(-)
+29f213561171808e859bafb5380f5491f5b9f5b2
+policy: bind gate receipts to the workflow files
+
+ engineering/policy.json | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+98fa147490758a263c9a2427e244b519f7cafd8f
+FP-0033: check the Gates workflow against allowlists
+
+ engineering/evidence/FP-0033/README.md             |  21 ++
+ .../FP-0033/raw/revision-2-tests-after.log         | 268 +++++++++++++++++++++
+ .../FP-0033/raw/revision-2-tests-before.log        |  73 ++++++
+ tools/README.md                                    |  35 ++-
+ tools/workflow-check.mjs                           | 105 ++++++--
+ tools/workflow-check.test.mjs                      |  85 ++++++-
+ 6 files changed, 552 insertions(+), 35 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["show","--stat","--format=%H%n%s","7bbe196","29f2135","98fa147"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:29:42.976Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object",".github/workflows/gates.yml",".github/workflows/pages.yml"]
+ccbd330eb01756973b71fc9464cec7a2043d0a00
+a70741af57639e29f6646c5d0308959f39991843
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object",".github/workflows/gates.yml",".github/workflows/pages.yml"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:29:43.053Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD:.github/workflows/gates.yml","HEAD:.github/workflows/pages.yml"]
+ccbd330eb01756973b71fc9464cec7a2043d0a00
+a70741af57639e29f6646c5d0308959f39991843
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD:.github/workflows/gates.yml","HEAD:.github/workflows/pages.yml"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:29:43.124Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
