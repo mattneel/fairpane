@@ -100,12 +100,13 @@ The worker installed nothing.
 
 ## Open items
 
-- The integrator runs `reproduce-check` on the implementation commit on Windows and on WSL Ubuntu, as the contract requires.
+- Closed: the integrator ran `reproduce-check` on the implementation commit on Windows and on WSL Ubuntu; see `raw/integration-reproduce-windows.log` and `raw/integration-reproduce-linux.log`.
 - The Linux compiler path in the assignment differs from the installed path; see "Linux tools".
 
 ## Integration
 
-The integrator applied the worker's patch, checked that `build.zig` and `tools/zig/library_check.zig` had the worker's final blobs `31c7fd20` and `42ead8e4`, and committed it alone as `81481a3`.
+The integrator applied the worker's patch and committed it alone as `81481a3`.
+`raw/integration-commit.log` records `git ls-tree` for that commit, with the worker's final blobs `31c7fd20` for `build.zig` and `42ead8e4` for `tools/zig/library_check.zig`, and `git show --stat` with parent `775d988` and the 24 files of the patch.
 The worker's report was right about the Linux compiler path: the integrator's assignment named a directory layout that does not exist, and the installed compiler is the one the worker used.
 
 - `raw/integration-binding.log` records `HEAD` `81481a3` and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
@@ -113,5 +114,18 @@ The worker's report was right about the Linux compiler path: the integrator's as
 - `raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0066-integration`: 81 of 81 build steps and 306 of 306 tests pass.
 - `raw/bun-selftest.log` records Bun 1.4.2 and `tools/selftest.mjs` with 220 of 220 tests.
 - `raw/integration-reproduce-windows.log` runs `reproduce-check` for `81481a373eed462a345fdd640870abd5743bb179` on Windows: `reproducible`, exit status 0, with `lib/fairpane.lib` `249d63f2…` in both builds and both work trees removed.
-  An earlier attempt with the abbreviated ID failed with "The candidate must be a full 40-hex commit ID." and is appended to `raw/reproduce-check-windows.log`, after the worker's own run.
+  An earlier attempt with the abbreviated ID failed with "The candidate must be a full 40-hex commit ID." and exit status 1; `raw/integration-reproduce-windows-attempt-1.log` keeps it.
+  The integrator had first appended that attempt to the worker's `raw/reproduce-check-windows.log` in `7744e42`; review 1 found this, so the integrator moved the record byte for byte to its own log and restored the worker's log to its content at `81481a3`.
 - `raw/integration-reproduce-linux.log` clones the repository at that commit in WSL Ubuntu with no status lines, links the locked Linux compiler into the clone's `.tools`, and runs `reproduce-check` with Node v26.7.0: `reproducible`, exit status 0, with `lib/libfairpane.a` `30a44076…` in both builds and both work trees removed.
+
+## Review 1 findings
+
+`reviews/review-1-accept.json` accepts with four minor findings and three notes.
+
+- The integrator's blob check and the failed attempt's log are fixed above, and "Open items" now records the closed `reproduce-check` item.
+- Case 3, `abi-exports` on the ReleaseSafe library, runs in no gate, so a later export regression in release builds alone would go unnoticed.
+  The integrator proposes this for FP-0099 in a reviewed plan change.
+- `find` in `tools/zig/library_check.zig` folds a copy of the whole library once for each needle, which is avoidable allocation and copying.
+  The integrator proposes this for FP-0099 as well.
+- Case 1's two builds share the build root and cache root; case 2's search and `reproduce-check` cover a dependence on them, so no change is needed.
+- The contract names the workstream `laboratory`, while the plan gives `stewardship`; the plan is authoritative, and the contract text stays frozen.

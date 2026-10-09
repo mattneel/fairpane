@@ -1,0 +1,37 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","ls-tree","81481a373eed462a345fdd640870abd5743bb179","--","build.zig","tools/zig/library_check.zig"]
+100644 blob 31c7fd204e45c2a6b071a7c77ed0a7bcae87aa55	build.zig
+100644 blob 42ead8e42ec6d2c99c4141ffacc3bd488fc68dbc	tools/zig/library_check.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["ls-tree","81481a373eed462a345fdd640870abd5743bb179","--","build.zig","tools/zig/library_check.zig"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T15:50:27.657Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","show","--stat","--format=commit %H%nparent %P%nsubject %s","81481a373eed462a345fdd640870abd5743bb179"]
+commit 81481a373eed462a345fdd640870abd5743bb179
+parent 775d988c75435779d4bab06b978391204d86e216
+subject FP-0066: make release builds independent of the build directory
+
+ build.zig                                          | 125 +++++-
+ .../decisions/0009-release-and-stewardship.md      |  40 +-
+ engineering/evidence/FP-0066/README.md             | 104 +++++
+ .../evidence/FP-0066/raw/archive-format.log        |   7 +
+ .../FP-0066/raw/controller-tests-after.log         | 441 +++++++++++++++++++++
+ .../evidence/FP-0066/raw/cross-libraries.log       |  63 +++
+ engineering/evidence/FP-0066/raw/fmt.log           |   6 +
+ engineering/evidence/FP-0066/raw/gates-scratch.log |  60 +++
+ engineering/evidence/FP-0066/raw/gates.log         |  50 +++
+ .../FP-0066/raw/library-test-after-attempt-1.log   |  16 +
+ .../FP-0066/raw/library-test-after-attempt-2.log   |  30 ++
+ engineering/evidence/FP-0066/raw/linux-run.log     | 265 +++++++++++++
+ engineering/evidence/FP-0066/raw/linux-tools.log   |  14 +
+ .../evidence/FP-0066/raw/mutation-member.diff      |  14 +
+ .../evidence/FP-0066/raw/mutation-strip.diff       |  11 +
+ engineering/evidence/FP-0066/raw/mutation.log      | 127 ++++++
+ .../evidence/FP-0066/raw/release-libraries.log     |  91 +++++
+ .../FP-0066/raw/reproduce-check-windows.log        |  82 ++++
+ .../evidence/FP-0066/raw/reproduce-scratch.log     |  35 ++
+ engineering/evidence/FP-0066/raw/tests-after.log   | 145 +++++++
+ .../FP-0066/raw/tests-before-attempt-1.log         |  59 +++
+ engineering/evidence/FP-0066/raw/tests-before.log  |  94 +++++
+ tools/README.md                                    |   9 +
+ tools/zig/library_check.zig                        | 328 +++++++++++++++
+ 24 files changed, 2208 insertions(+), 8 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["show","--stat","--format=commit %H%nparent %P%nsubject %s","81481a373eed462a345fdd640870abd5743bb179"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T15:50:27.745Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}

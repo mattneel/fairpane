@@ -1,0 +1,55 @@
+{
+  "verdict": "accept",
+  "summary": "I found no blocker or major finding, so FP-0066 at 81481a3 is accepted. I ran no commands. I read the source and logs in the working tree, and I could not decompress Git objects, so I did not see the diff of 81481a3 directly. [INFERENCE] The working-tree build.zig and tools/zig/library_check.zig are the 81481a3 content. integration-binding.log records HEAD 81481a3 with empty status for every source root, and gates-scratch.log records the blobs 31c7fd20 and 42ead8e4.\n\n(1) libraryArchive (build.zig:233-265) sets `.strip = optimize != .debug` and runs `zig ar --format=coff|darwin|gnu rcsD` from `b.graph.zig_exe`, the locked compiler's archiver. The installed file is that archive (build.zig:118-119). release-libraries.log shows that ReleaseSafe, ReleaseFast, and ReleaseSmall each list only `fairpane_zcu.obj`, pass `abi-exports` with 15 exports, contain neither path, and link and run abi_smoke.c; all 22 commands exit 0. cross-libraries.log shows the same for aarch64-macos (`.o`), aarch64-linux (`.o`), and x86_64-windows-msvc (`.obj`). linux-run.log shows Linux ReleaseSafe with the one member `fairpane_zcu.o` and 15 exports.\n\n(2) The `library-test` step holds cases 1, 2, 4, and 5, and `zig build test` depends on it (build.zig:270-272). Its assertions match the frozen text: byte equality of two ReleaseSafe builds from two copies of `src`; a search for the tree name, the tree, build-root, and cache paths, the compiler directory, and its `lib` directory; a Debug object that names the absolute path of `src`; and a member list of exactly `.obj` or `.o`. integration-tests.log (fresh cache) passes 81/81 steps and 306/306 tests, with each FP-0066 step listed. I checked the parser for GNU, COFF, and BSD layouts, the name table, `#1/N` names, and the symbol tables and found no defect. Its 6 unit tests include the failure paths NotAnArchive, TruncatedHeader, TruncatedMember, MalformedHeader, MissingNameTable, MalformedName (twice), EmptyNeedle, and a nonzero time stamp.\n\n(3) tests-before.log records base HEAD f31eb22, the staging command, and the staged blobs. Cases 1, 2, and 5 fail, and case 4 passes. mutation.log records the build.zig hash before, during, and after each mutation. The strip mutation fails case 2 (and case 1). The member mutation fails case 5 (and case 1), and case 2 still passes.\n\n(4) integration-reproduce-windows.log and integration-reproduce-linux.log each report `reproducible` with exit 0 for 81481a373eed462a345fdd640870abd5743bb179, with identical lib hashes (249d63f2… on Windows, 30a44076… on Linux) and both work trees removed. ADR 0009's \"Library rules\" section states both rules and the probe and strip measurements, which match probe.log and strip-experiment.log. It also gives the FP-0066 sizes and says release debug information is out of scope.\n\n(5) The policy fingerprint ea066910… (24 files) is the same before and after in all three gate receipts and equals FP-0052's check.log value. policy_roots covers every protected path, so no protected path changed. Every README claim has a log except the integrator's blob comparison (finding below).",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0066/README.md",
+      "line": 108,
+      "issue": "The Integration section says the integrator checked that 81481a3 holds the worker's final blobs 31c7fd20 and 42ead8e4 and committed the patch alone. No integrator log records either fact. integration-binding.log has only `rev-parse HEAD` and status. The only blob records are the worker's, in gates-scratch.log and mutation.log.",
+      "recommendation": "Record `git ls-tree 81481a3 -- build.zig tools/zig/library_check.zig` and `git show --stat 81481a3` with `node tools/fairpane.mjs record`, or reword the claim to cite only what is logged."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0066/raw/reproduce-check-windows.log",
+      "line": 84,
+      "issue": "The integrator's failed attempt with the abbreviated ID (exit 1) is appended to the worker's log. The contract says to keep each failed attempt as its own log, and this also mixes integrator and worker records in one file.",
+      "recommendation": "Move the failed attempt to its own log, for example raw/integration-reproduce-windows-attempt-1.log, and update README line 116."
+    },
+    {
+      "severity": "minor",
+      "path": "build.zig",
+      "line": 269,
+      "issue": "Case 3 (`abi-exports` on the ReleaseSafe library) is not part of `zig build test` or any gate. The c-abi gate runs `abi-exports` only on the Debug build (tools/lib.mjs:694-698). The contract defines case 3 as a controller command, and logs show it passing, but nothing automated catches a later ReleaseSafe-only export regression. This falls short of the check that cases 1 to 5 run inside `zig build test`.",
+      "recommendation": "Accept as the contract allows. A later task could add a ReleaseSafe `abi-exports` step to a gate or to `reproduce-check`."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/zig/library_check.zig",
+      "line": 127,
+      "issue": "`find` allocates a case-folded copy of the whole haystack for every needle. `absent` passes 6 needles, so a library of up to 3 MB is copied and folded 6 times. The engineering rule forbids avoidable allocation and copying in compiled code.",
+      "recommendation": "Fold the haystack once in reportAbsent and pass the folded slice to the search, or compare folded bytes on the fly without allocating."
+    },
+    {
+      "severity": "note",
+      "path": "build.zig",
+      "line": 283,
+      "issue": "Case 1's two ReleaseSafe builds differ in source directory and output cache directory but share the build root and cache root. A dependence on the build root alone would be caught by case 2's `--dir .` search and by `reproduce-check`, not by case 1.",
+      "recommendation": "No change required. Case 2 and reproduce-check together cover it."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0066/README.md",
+      "line": 101,
+      "issue": "\"Open items\" still lists the integrator's `reproduce-check` runs as open, though the Integration section and the two integration-reproduce logs show they are done.",
+      "recommendation": "Mark the item closed and point to integration-reproduce-windows.log and integration-reproduce-linux.log."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0066/CONTRACT.md",
+      "line": 6,
+      "issue": "The contract names workstream `laboratory`, but engineering/plan.json:2975 gives FP-0066 workstream `stewardship`. This was frozen in 3640a79 and does not come from the patch.",
+      "recommendation": "Reconcile it in a later contract or plan update."
+    }
+  ]
+}
