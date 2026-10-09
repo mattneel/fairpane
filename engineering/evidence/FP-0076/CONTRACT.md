@@ -65,7 +65,7 @@ Each case works in a directory that `check fresh` creates for its run, with `cas
 6. Every host: FP-0054 case 5 and its unchanged-input check pass in a fresh directory.
 7. Every host: the revision 1 case 5 helper reports every check, and no oversized file remains in its directory after a run in which a check fails.
 
-Cases 1 to 4 must fail before the change, each on the hosts where it is added.
+Cases 1 to 3 must fail before the change, each on the hosts where it is added; amendment 1 exempts case 4.
 Case 5 passes before the change, so a mutation control that identifies the output without following symbolic links must fail it.
 Case 7 needs a mutation control: change the `run` command's case-file subject to `transcript file`, and record a directory listing after the failed build that shows no oversized file.
 
@@ -94,3 +94,14 @@ Required reviewer: `fairpane-review`.
 - No change to the laboratory's case, transcript, or result formats.
 - No change to the guard's decisions apart from identification without reading.
 - No macOS or other non-Linux POSIX run; those targets compile in the cross-build gates only.
+
+## Amendments
+
+1. Worker `FP0076Guard` showed that case 4 cannot fail before the change.
+   `probe.log` records that the base laboratory already reports `output file: BadPathName` on Windows and `output file: NotDir` on WSL Ubuntu, with exit status 3 and no new file.
+   The base `fileIdentity` fails with the same error names when it opens these paths for reading.
+   Criterion 2 asks for a test of this detail, not a change to it, so case 4 is exempt from the rule that it fail before the change.
+   Case 4 instead needs a mutation control: the guard reports an output path that it cannot identify with the input's subject, `case file`.
+   Case 4 must fail under that control on Windows and on WSL Ubuntu.
+   A guard that treated such a failure as a missing file would still pass case 4, because the write that follows fails with the same detail.
+   No case can distinguish the two while the write fails for the same reason, so this contract asks for no such control.
