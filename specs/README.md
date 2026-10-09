@@ -67,7 +67,7 @@ An existing record acts as a pin for each source and file digest.
 The first fetch trusted the UCD files and the `noto-sans` archive on first use.
 `UCD.zip` and `license.txt` had no published digest, and the `noto-sans` archive had only a size pin, so TLS alone authenticated their bytes.
 The other fixture sources matched a published GitHub digest or a Git blob ID.
-Every later fetch compares each source with the SHA-256 that the existing record holds, and the proposed `specs/corpora.json` pins, once the integrator applies them, check the source listing independently of that record.
+Every later fetch compares each source with the SHA-256 that the existing record holds, and the `specs/corpora.json` pins, applied in commit `67935cc`, check the source listing independently of that record.
 
 A file-set record has `kind` `"file-set"`, a `version`, `sources`, `selected`, and `derived`.
 Each zip source records an inventory: one `<sha256>\t<size>\t<path>\n` line per file member, sorted by the UTF-8 bytes of the path.
