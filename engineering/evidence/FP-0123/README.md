@@ -49,7 +49,7 @@ The unit-test run step changed by −3 seconds, which is within the stop rule's 
 Both runs used a fresh `--cache-dir` and the shared `ZIG_GLOBAL_CACHE_DIR`.
 The 28 added unit tests are 19 in `src/encoding/tests.zig`, the unnamed `test` block of `src/encoding/root.zig`, 1 in `src/web_string.zig`, and 7 in `src/lab.zig`.
 The extra build step is the Lab-7 exit-status case.
-The integrator reports the `zig-test` gate duration from its receipt.
+The `zig-test` gate at `b68eebf` took 46,060 ms, as its receipt `gates/2026-10-09T18-39-59-489Z-zig-test-0569155d.json` records; "Integration" lists every receipt.
 
 ## Before the change
 
@@ -154,7 +154,20 @@ The worker deleted and overwrote no log.
 - Removing `Utf8Decoder` changed no `web_string` result: every existing `web_string` test passes unchanged in `raw/tests-after.log`.
 - The unit-test run step took 33 seconds, 3 seconds less than in `raw/tests-base.log`.
 
-## Open items for the integrator
+## Integration
 
-- Record `raw/integration-binding.log`, run the four gates with `--evidence-dir engineering/evidence/FP-0123/gates`, record `raw/integration-tests.log`, and record `integrator-label-count.log`, as the contract's "Evidence" section assigns.
-- Report the `zig-test` gate duration next to criterion 7.
+Commit `b68eebf` applies the worker's `out/fp0123.patch`, blob `82dfab363b248c80ae667491587ee7e542c4b6d8`, on `3400a38`, and all 40 files apply cleanly.
+That head holds `FP-0107`'s four-worker controller runner, `FP-0108`, `FP-0119`, and FP-0082 revision 2; `S102` was free in `specs/sources.json`.
+
+- `raw/integrator-label-count.log` fetches `encodings.json` at `a985b62a9b45c17da3e17a9f0a0b4e30c34c4a8a` to `out/`, which is not committed (SHA-256 `078212b3…c9e7`, 8,913 bytes), and counts 40 names and 228 labels.
+- `raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache directory `out/fp0123-integration`: `Build Summary: 101/101 steps succeeded; 378/378 tests passed`.
+- `raw/integration-binding.log` records `HEAD` `b68eebf` and a status that includes ignored files before and after the four gates, which pass:
+
+| Gate | Receipt | Duration |
+| --- | --- | --- |
+| `repo-check` | `gates/2026-10-09T18-39-08-910Z-repo-check-c733b89e.json` | 352 ms |
+| `controller-test` | `gates/2026-10-09T18-39-09-702Z-controller-test-1685435d.json`, 247 of 247 | 49,148 ms |
+| `zig-fmt` | `gates/2026-10-09T18-39-59-093Z-zig-fmt-0a369dd7.json` | 79 ms |
+| `zig-test` | `gates/2026-10-09T18-39-59-489Z-zig-test-0569155d.json` | 46,060 ms |
+
+- `raw/bun-selftest.log` records Bun 1.4.2 with 247 of 247 controller cases.
