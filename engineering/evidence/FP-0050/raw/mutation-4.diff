@@ -1,0 +1,64 @@
+diff --git a/out/fp0050-mutation/engine.zig.orig b/src/engine.zig
+index 6f319a6..95c05d7 100644
+--- a/out/fp0050-mutation/engine.zig.orig
++++ b/src/engine.zig
+@@ -387,7 +387,20 @@ pub const Engine = struct {
+         // Each applied answer ends its request, whose reserved slot covers one announcement.
+         // The other outstanding requests keep their reserved slots, so only a host cancellation's second announcement needs storage.
+         try engine.events.ensureUnusedCapacity(engine.gpa, engine.requests.count() - applied + announcements);
+-        for (0..applied) |_| engine.applyInput(engine.inputs.popFront().?);
++        // MUTATION CONTROL 4: apply the queued input with the smallest request identifier first.
++        for (0..applied) |_| {
++            var smallest: usize = 0;
++            for (1..engine.inputs.len) |position| {
++                const candidate = (engine.requests.get(engine.inputs.at(position).request) catch unreachable).id;
++                const best = (engine.requests.get(engine.inputs.at(smallest).request) catch unreachable).id;
++                if (@backingInt(candidate) < @backingInt(best)) smallest = position;
++            }
++            const chosen = engine.inputs.at(smallest);
++            var position = smallest;
++            while (position > 0) : (position -= 1) engine.inputs.atPtr(position).* = engine.inputs.at(position - 1);
++            engine.inputs.atPtr(0).* = chosen;
++            engine.applyInput(engine.inputs.popFront().?);
++        }
+         return .{
+             .applied = applied,
+             .work_remaining = engine.inputs.len != 0,
+@@ -942,6 +955,37 @@ test "FP-0006 case 13: a budget of two applies two of three queued responses in
+     try expectNextEvent(engine, changed(documents[1], requests[1], .loaded, null));
+ }
+ 
++test "FP-0050 control 4: the base FP-0006 case 13 with responses in the order 1, 0, 2" {
++    const engine = try Engine.create(testing.allocator, test_options);
++    defer engine.destroy() catch unreachable;
++
++    var documents: [3]DocumentId = undefined;
++    var requests: [3]RequestId = undefined;
++    for (&documents, &requests) |*document, *request| {
++        document.* = try engine.createDocument();
++        request.* = try engine.load(document.*, "https://example.test/case-13");
++    }
++    try engine.respond(requests[1], 1, "one");
++    try engine.respond(requests[0], 1, "zero");
++    try engine.respond(requests[2], 1, "two");
++
++    const first = try engine.step(2);
++    try testing.expectEqual(2, first.applied);
++    try testing.expect(first.work_remaining);
++    try testing.expectEqual(8, first.events_ready);
++    try testing.expectEqual(Deadline.none, first.next_deadline);
++    try testing.expectEqualStrings("one", (try engine.document(documents[1])).body);
++    try testing.expectEqualStrings("zero", (try engine.document(documents[0])).body);
++    try expectState(engine, documents[2], .loading);
++
++    const second = try engine.step(2);
++    try testing.expectEqual(1, second.applied);
++    try testing.expect(!second.work_remaining);
++    try testing.expectEqual(9, second.events_ready);
++    try testing.expectEqual(Deadline.none, second.next_deadline);
++    try testing.expectEqualStrings("two", (try engine.document(documents[2])).body);
++}
++
+ fn errorOf(result: anytype) ?anyerror {
+     if (result) |_| return null else |err| return err;
+ }

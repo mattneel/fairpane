@@ -13,7 +13,7 @@
     },
     {
       "name": "becomes_owner",
-      "description": "The calling thread becomes the owner of the engine that the call creates."
+      "description": "The calling thread becomes the owner of the engine that the call creates. The host must destroy the engine before that thread exits."
     },
     {
       "name": "owner",
@@ -122,19 +122,19 @@
   "handles": [
     {
       "name": "engine",
-      "description": "An engine. It belongs to the thread that created it.",
+      "description": "An engine. It belongs to the thread that created it. The host must destroy it before that thread exits, because the system can reuse the identifier of an exited thread.",
       "thread": "owner"
     }
   ],
   "identifiers": [
     {
       "name": "document",
-      "description": "A document identifier. It is nonzero, unique within the process, and never reused.",
+      "description": "A document identifier. It is nonzero, unique within the process, and never reused. A call that fails after it takes an identifier skips that identifier.",
       "lifetime": "document_destroy"
     },
     {
       "name": "request",
-      "description": "A request identifier. It is nonzero, unique within the process, and never reused. Document and request identifiers come from one sequence, so they never coincide.",
+      "description": "A request identifier. It is nonzero, unique within the process, and never reused. Document and request identifiers come from one sequence, so they never coincide. A call that fails after it takes an identifier skips that identifier.",
       "lifetime": "request_end"
     }
   ],
@@ -217,10 +217,10 @@
         { "name": "reject_reason", "description": "The rejection reason when an applied rejection failed the document.", "type": { "kind": "optional", "absent": "zero", "value": { "kind": "enumeration", "enumeration": "reject_reason" } } },
         {
           "name": "url",
-          "description": "For a {event:request_issued} event, the request URL while the request is live, otherwise null.",
+          "description": "For a {event:request_issued} event, the request URL while the request is live. It is null when the URL is empty, when the request has ended, and for every other kind.",
           "type": { "kind": "bytes" },
           "direction": "out",
-          "nullability": "nullable",
+          "nullability": "null_when_empty",
           "ownership": "owned_by_engine",
           "lifetime": "request_end"
         }
@@ -288,10 +288,10 @@
     },
     {
       "name": "document_destroy",
-      "description": "Releases the document. An outstanding request is cancelled and announced, and its queued answer is discarded.",
+      "description": "Releases the document. An outstanding request is cancelled and announced, and its queued answer is discarded. The call never allocates, because the load that issued the request reserved its cancellation event.",
       "thread": "owner",
       "returns": "status",
-      "statuses": ["ok", "invalid_argument", "wrong_thread", "unknown_id", "out_of_memory"],
+      "statuses": ["ok", "invalid_argument", "wrong_thread", "unknown_id"],
       "parameters": [
         { "name": "engine", "type": { "kind": "handle", "handle": "engine" }, "direction": "in", "nullability": "non_null", "ownership": "borrowed", "lifetime": "call" },
         { "name": "document", "type": { "kind": "identifier", "family": "document" }, "direction": "in" }
@@ -311,14 +311,14 @@
     },
     {
       "name": "document_load",
-      "description": "Issues a {enumeration:request_kind.resource} request with version {constant:resource_request_version} for a copy of url and stores its identifier in the output. The url buffer is borrowed for the call only and must not be null. A load while the document is loading cancels the earlier request.",
+      "description": "Issues a {enumeration:request_kind.resource} request with version {constant:resource_request_version} for a copy of url and stores its identifier in the output. The url may be null when url_len is zero, and the engine copies it during the call. A load while the document is loading cancels the earlier request. The load reserves the storage of the request's cancellation event, so {function:document_destroy} never allocates.",
       "thread": "owner",
       "returns": "status",
       "statuses": ["ok", "invalid_argument", "wrong_thread", "unknown_id", "limit_exceeded", "out_of_memory"],
       "parameters": [
         { "name": "engine", "type": { "kind": "handle", "handle": "engine" }, "direction": "in", "nullability": "non_null", "ownership": "borrowed", "lifetime": "call" },
         { "name": "document", "type": { "kind": "identifier", "family": "document" }, "direction": "in" },
-        { "name": "url", "type": { "kind": "bytes" }, "direction": "in", "nullability": "non_null", "ownership": "borrowed", "lifetime": "call" },
+        { "name": "url", "type": { "kind": "bytes" }, "direction": "in", "nullability": "null_when_empty", "ownership": "borrowed", "lifetime": "call" },
         { "name": "out_request", "type": { "kind": "identifier", "family": "request" }, "direction": "out", "nullability": "non_null", "ownership": "borrowed", "lifetime": "call" }
       ]
     },
@@ -384,7 +384,7 @@
     {
       "kind": "request_issued",
       "structure": "event",
-      "description": "A load issued a request. The URL is present while the request is live and null after the request ends.",
+      "description": "A load issued a request. The URL is present while the request is live and the URL is not empty, and null otherwise.",
       "fields": [
         { "name": "document_id", "presence": "always" },
         { "name": "request_id", "presence": "always" },

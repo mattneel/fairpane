@@ -79,15 +79,15 @@ extern "C" {
 /* The next deadline when no deadline exists. No timer exists yet, so every step reports it. */
 #define FP_DEADLINE_NONE UINT64_C(0xFFFFFFFFFFFFFFFF)
 
-/* An engine. It belongs to the thread that created it. */
+/* An engine. It belongs to the thread that created it. The host must destroy it before that thread exits, because the system can reuse the identifier of an exited thread. */
 typedef struct fp_engine fp_engine;
 
-/* A document identifier. It is nonzero, unique within the process, and never reused.
+/* A document identifier. It is nonzero, unique within the process, and never reused. A call that fails after it takes an identifier skips that identifier.
  * Ends when fp_document_destroy destroys the document or fp_engine_destroy destroys its engine.
  */
 typedef uint64_t fp_document_id;
 
-/* A request identifier. It is nonzero, unique within the process, and never reused. Document and request identifiers come from one sequence, so they never coincide.
+/* A request identifier. It is nonzero, unique within the process, and never reused. Document and request identifiers come from one sequence, so they never coincide. A call that fails after it takes an identifier skips that identifier.
  * Ends when the request ends. A step ends a request when it applies the request's response, rejection, or cancellation. The engine ends a request when a new load, a document destruction, or an engine destruction cancels it.
  */
 typedef uint64_t fp_request_id;
@@ -168,8 +168,8 @@ typedef struct fp_event {
      * A FP_REJECT_* value, or zero when absent.
      */
     FP_OPTIONAL(uint32_t) reject_reason;
-    /* For a FP_EVENT_REQUEST_ISSUED event, the request URL while the request is live, otherwise null.
-     * Output, nullable, owned by the engine. Ends when the request ends. A step ends a request when it applies the request's response, rejection, or cancellation. The engine ends a request when a new load, a document destruction, or an engine destruction cancels it.
+    /* For a FP_EVENT_REQUEST_ISSUED event, the request URL while the request is live. It is null when the URL is empty, when the request has ended, and for every other kind.
+     * Output, null when empty, owned by the engine. Ends when the request ends. A step ends a request when it applies the request's response, rejection, or cancellation. The engine ends a request when a new load, a document destruction, or an engine destruction cancels it.
      */
     const uint8_t *url;
     size_t url_len;
@@ -188,7 +188,7 @@ FP_API uint32_t fp_abi_revision(void);
 FP_API uint32_t fp_query_capabilities(fp_capabilities *out, size_t out_size);
 
 /* Creates an engine on the calling thread and stores it in the output.
- * Thread: The calling thread becomes the owner of the engine that the call creates.
+ * Thread: The calling thread becomes the owner of the engine that the call creates. The host must destroy the engine before that thread exits.
  * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_LIMIT_EXCEEDED, FP_STATUS_OUT_OF_MEMORY.
  * options: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
  * out_engine: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
@@ -211,9 +211,9 @@ FP_API uint32_t fp_engine_destroy(fp_engine *engine);
  */
 FP_API uint32_t fp_document_create(fp_engine *engine, fp_document_id *out_document);
 
-/* Releases the document. An outstanding request is cancelled and announced, and its queued answer is discarded.
+/* Releases the document. An outstanding request is cancelled and announced, and its queued answer is discarded. The call never allocates, because the load that issued the request reserved its cancellation event.
  * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
- * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_UNKNOWN_ID, FP_STATUS_OUT_OF_MEMORY.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_UNKNOWN_ID.
  * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
  */
 FP_API uint32_t fp_document_destroy(fp_engine *engine, fp_document_id document);
@@ -226,11 +226,11 @@ FP_API uint32_t fp_document_destroy(fp_engine *engine, fp_document_id document);
  */
 FP_API uint32_t fp_document_get(fp_engine *engine, fp_document_id document, fp_document_info *out, size_t out_size);
 
-/* Issues a FP_REQUEST_RESOURCE request with version FP_RESOURCE_REQUEST_VERSION for a copy of url and stores its identifier in the output. The url buffer is borrowed for the call only and must not be null. A load while the document is loading cancels the earlier request.
+/* Issues a FP_REQUEST_RESOURCE request with version FP_RESOURCE_REQUEST_VERSION for a copy of url and stores its identifier in the output. The url may be null when url_len is zero, and the engine copies it during the call. A load while the document is loading cancels the earlier request. The load reserves the storage of the request's cancellation event, so fp_document_destroy never allocates.
  * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
  * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_UNKNOWN_ID, FP_STATUS_LIMIT_EXCEEDED, FP_STATUS_OUT_OF_MEMORY.
  * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
- * url: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * url: input, null when empty, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
  * out_request: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
  */
 FP_API uint32_t fp_document_load(fp_engine *engine, fp_document_id document, const uint8_t *url, size_t url_len, fp_request_id *out_request);

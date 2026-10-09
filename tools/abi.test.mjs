@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ABI schema, generator, and failure-scenario tests for FP-0021.
+ * ABI schema, generator, and failure-scenario tests for FP-0021 and FP-0050.
  * Run standalone with `node tools/abi.test.mjs`, or through `node tools/fairpane.mjs test`.
  * Cases 6, 7, 8, 12, and 13 also run in Zig and C through the `zig-test` and `c-abi` gates.
  * Their controller parts check that those sources cover the schema and every scenario.
@@ -191,14 +191,15 @@ export const abiCases = [
   ['FP-0021 case 5: The schema distinguishes text, web_string, bytes, identifier, handle, ranged integer, and optional values, and the generator maps each one to distinct C and Zig declarations', () => {
     const fixture = schema();
     const pointer = { direction: 'out', nullability: 'nullable', ownership: 'owned_by_engine', lifetime: 'engine_destroy' };
+    const range = { ...pointer, nullability: 'null_when_empty' };
     fixture.structures.push({ name: 'kind_fixture', description: 'A fixture with one value of each kind.', fields: [
       { name: 'struct_size', type: u32 },
       { name: 'count', type: { kind: 'integer', bits: 32, signed: true, range: [-5, 5] } },
       { name: 'document', type: { kind: 'identifier', family: 'document' } },
       { name: 'engine', type: { kind: 'handle', handle: 'engine' }, ...pointer },
-      { name: 'payload', type: { kind: 'bytes' }, ...pointer },
-      { name: 'label', type: { kind: 'text' }, ...pointer },
-      { name: 'title', type: { kind: 'web_string' }, ...pointer },
+      { name: 'payload', type: { kind: 'bytes' }, ...range },
+      { name: 'label', type: { kind: 'text' }, ...range },
+      { name: 'title', type: { kind: 'web_string' }, ...range },
       { name: 'request', type: { kind: 'optional', absent: 'zero', value: { kind: 'identifier', family: 'request' } } },
     ] });
     validateSchema(fixture);
@@ -424,6 +425,72 @@ export const abiCases = [
     fs.writeFileSync(library, archive([...declared, ...others], 'gnu'));
     const exact = exportsIn();
     assert.equal(exact.status, 0, exact.stdout + exact.stderr);
+  }],
+  ['FP-0050 case 8: every byte range is null_when_empty, and the validator rejects any other nullability', () => {
+    const s = schema();
+    const ranges = [
+      ...s.structures.flatMap(st => st.fields.map(f => [`${st.name}.${f.name}`, f])),
+      ...s.functions.flatMap(fn => fn.parameters.map(p => [`${fn.name}.${p.name}`, p])),
+    ].filter(([, holder]) => ['bytes', 'text', 'web_string'].includes(holder.type.kind));
+    assert.ok(ranges.length > 0);
+    for (const [where, holder] of ranges) assert.equal(holder.nullability, 'null_when_empty', where);
+    const loadUrl = schema();
+    named(named(loadUrl.functions, 'document_load').parameters, 'url').nullability = 'non_null';
+    rejects(() => validateSchema(loadUrl), /document_load\.url.*null_when_empty/);
+    const eventUrl = schema();
+    named(named(eventUrl.structures, 'event').fields, 'url').nullability = 'nullable';
+    rejects(() => validateSchema(eventUrl), /event\.url.*null_when_empty/);
+    const responseBody = schema();
+    named(named(responseBody.structures, 'response').fields, 'body').nullability = 'non_null';
+    rejects(() => validateSchema(responseBody), /response\.body.*null_when_empty/);
+    const comment = cComment(generate(s)['include/fairpane.h'], 'fp_document_load');
+    assert.ok(comment.includes(' * url: input, null when empty, borrowed.'), comment);
+  }],
+  ['FP-0050 case 9: fp_document_destroy never returns out_of_memory', () => {
+    const s = schema(), committed = scenarios();
+    assert.deepEqual(named(s.functions, 'document_destroy').statuses, ['ok', 'invalid_argument', 'wrong_thread', 'unknown_id']);
+    const comment = cComment(generate(s)['include/fairpane.h'], 'fp_document_destroy');
+    assert.ok(comment.includes(' * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_UNKNOWN_ID.'), comment);
+    const destroys = committed.scenarios.find(item => item.id === 'allocation-failure').calls.filter(call => call.function === 'fp_document_destroy');
+    assert.ok(destroys.some(call => call.status === 'ok'));
+    assert.ok(!destroys.some(call => call.status === 'out_of_memory'));
+    const copy = structuredClone(committed);
+    copy.scenarios.find(item => item.id === 'allocation-failure').calls.find(call => call.function === 'fp_document_destroy').status = 'out_of_memory';
+    rejects(() => validateScenarios(copy, s), /fp_document_destroy cannot return status "out_of_memory"/);
+  }],
+  ['FP-0050 case 10: the thread lifetime and identifier gaps are documented', () => {
+    const generated = generate(schema()), header = generated['include/fairpane.h'], zig = generated['src/abi_generated.zig'];
+    const handle = 'An engine. It belongs to the thread that created it. The host must destroy it before that thread exits, because the system can reuse the identifier of an exited thread.';
+    assert.ok(header.includes(`/* ${handle} */\ntypedef struct fp_engine fp_engine;`), 'The header lacks the engine handle description.');
+    assert.ok(cComment(header, 'fp_engine_create').includes(' * Thread: The calling thread becomes the owner of the engine that the call creates. The host must destroy the engine before that thread exits.'));
+    assert.ok(zig.includes(`/// ${handle}\npub const Engine = opaque {};`), 'The Zig file lacks the engine handle description.');
+    for (const typedef of ['typedef uint64_t fp_document_id;', 'typedef uint64_t fp_request_id;']) {
+      const at = header.indexOf(typedef);
+      assert.ok(at >= 0, `The header lacks ${typedef}`);
+      const before = header.slice(0, at);
+      assert.ok(before.slice(before.lastIndexOf('/*')).includes('A call that fails after it takes an identifier skips that identifier.'), typedef);
+    }
+    const readme = readText('api/README.md').split('\n');
+    for (const sentence of [
+      'The host must destroy an engine before the thread that created it exits.',
+      "The engine identifies its owner by the operating system's thread identifier, which the system can reuse after the thread exits.",
+      'A call from a thread that receives a reused identifier would pass the thread check.',
+      'A call that fails after it takes an identifier skips that identifier.',
+      'The sequence can therefore have gaps, but no identifier is ever reused.',
+    ]) assert.ok(readme.includes(sentence), `api/README.md lacks the line "${sentence}"`);
+  }],
+  ['FP-0050 case 11: the generated layout assertions cover both sides of the ABI', () => {
+    for (const prefix of ['FP-0021 case 6: ', 'FP-0021 case 12: ']) abiCases.find(c => c.name.startsWith(prefix)).fn();
+    const api = readText('src/c_api.zig');
+    assert.match(api, /@import\("abi_generated\.zig"\)/);
+    assert.doesNotMatch(api, /extern struct/);
+    assert.ok(readText('src/root.zig').includes('comptime {\n    _ = c_api;\n}'), 'src/root.zig does not analyze c_api in every build.');
+    const layout = readText('tests/c/abi_layout.h'), zig = readText('src/abi_generated.zig');
+    const count = (source, text) => source.split(text).length - 1;
+    for (const structure of schema().structures) {
+      assert.equal(count(layout, `_Static_assert(sizeof(fp_${structure.name}) == `), 1, `fp_${structure.name} size assertion`);
+      assert.equal(count(zig, `if (@sizeOf(${zigTypeName(structure.name)}) != `), 1, `${zigTypeName(structure.name)} size check`);
+    }
   }],
 ].map(([name, fn]) => ({ name, fn }));
 

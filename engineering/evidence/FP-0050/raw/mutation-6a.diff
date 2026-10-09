@@ -1,0 +1,12 @@
+diff --git a/out/fp0050-mutation/c_api.zig.orig b/src/c_api.zig
+index 7683146..42a3607 100644
+--- a/out/fp0050-mutation/c_api.zig.orig
++++ b/src/c_api.zig
+@@ -160,7 +160,6 @@ fn eventToC(event: ?native.Event) abi.Event {
+             result.request_kind = .of(convert(abi.RequestKind, change.kind));
+             result.request_version = .of(change.version);
+             result.document_state = .of(convert(abi.DocumentState, change.state));
+-            if (change.reject_reason) |reason| result.reject_reason = .of(convert(abi.RejectReason, reason));
+         },
+     }
+     result.kind = @backingInt(@as(abi.EventKind, switch (event.?) {

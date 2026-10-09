@@ -57,7 +57,7 @@ An output parameter that receives a pointer states the facts of that pointer in 
 | Fact | Values |
 | --- | --- |
 | Direction | `in` or `out`. |
-| Nullability | `non_null`, `null_when_empty`, or `nullable`. An input range that is `null_when_empty` may be null only when its length is zero. An output range that is `null_when_empty` is null exactly when its length is zero. |
+| Nullability | `non_null`, `null_when_empty`, or `nullable`. An input range that is `null_when_empty` may be null only when its length is zero. An output range that is `null_when_empty` is null exactly when its length is zero. Every byte, text, and web string range in the ABI is `null_when_empty`. |
 | Ownership | `borrowed`, `owned_by_engine`, `transferred_to_caller`, or `consumed_on_success`. |
 | Lifetime | A lifetime that the schema defines: `call`, `request_end`, `next_load_or_destroy`, `document_destroy`, or `engine_destroy`. Each lifetime lists the functions that end it. |
 
@@ -121,6 +121,7 @@ Each generated file starts with a comment that names the schema and states that 
 The validator rejects an unknown kind, a pointer without ownership or lifetime, an inverted integer range, and a duplicate name.
 It also rejects a structure without `struct_size` as its first field and a generated C or Zig name that collides with another.
 It rejects an optional value that can be zero and a function status that the status enumeration lacks.
+It rejects a byte, text, or web string range that is not `null_when_empty`.
 
 To change the ABI, follow these steps.
 
@@ -177,6 +178,7 @@ A function writes output only when it returns `FP_STATUS_OK`.
 On success, a function initializes the declared output structure only.
 Bytes beyond that structure remain the caller's property.
 Every non-null pointer must reference a readable or writable, correctly aligned object, as its role requires.
+An input range may be null only when its length is zero, and an output range is null exactly when its length is zero.
 
 ## Status codes
 
@@ -200,6 +202,9 @@ A call that returns any status other than `FP_STATUS_OK` changes no engine, docu
 An engine owns its documents, host requests, queued host input, and events.
 An engine belongs to the thread that created it.
 A call from another thread returns `FP_STATUS_WRONG_THREAD`.
+The host must destroy an engine before the thread that created it exits.
+The engine identifies its owner by the operating system's thread identifier, which the system can reuse after the thread exits.
+A call from a thread that receives a reused identifier would pass the thread check.
 Creating an engine issues a fresh owner identity for the engine and for each handle table it creates.
 The engine never calls host code, so no host callback can reenter it.
 
@@ -220,6 +225,8 @@ A call that returns any other status leaves the engine valid and with the caller
 The C API identifies documents and requests by opaque 64-bit identifiers.
 Zero is never a valid identifier.
 Identifiers are unique within the process and never reused.
+A call that fails after it takes an identifier skips that identifier.
+The sequence can therefore have gaps, but no identifier is ever reused.
 Document and request identifiers come from one sequence, so they never coincide.
 An identifier that is not live in the receiving engine returns `FP_STATUS_UNKNOWN_ID`.
 That includes zero and an identifier from another engine.
@@ -240,6 +247,7 @@ A document has one of four states.
 `fp_document_destroy` releases the document and its body.
 It cancels the document's outstanding request and announces that cancellation.
 It discards the request's queued answer, so a later step applies nothing for it.
+It never allocates, so it never returns `FP_STATUS_OUT_OF_MEMORY`.
 
 `fp_document_get` writes an `fp_document_info` structure with the document state and body.
 The `body` field is null when `body_len` is zero.
@@ -247,7 +255,7 @@ The body bytes stay readable until the document's next load or its destruction.
 
 `fp_document_load` issues a version 1 `FP_REQUEST_RESOURCE` request and stores its identifier in `*out_request`.
 It moves the document to `FP_DOCUMENT_LOADING`.
-It requires a non-null `url` pointer, even when `url_len` is zero.
+The `url` pointer may be null only when `url_len` is zero.
 The engine copies the URL bytes, so the caller's buffer is borrowed only for the call.
 A load discards the body of a loaded document.
 A load while the document is loading cancels the earlier request and announces that cancellation.
@@ -313,12 +321,15 @@ A state change names the new state in `document_state`.
 A state change caused by a rejection names the reason in `reject_reason`.
 An issuance event carries the request URL in `url` and `url_len` while the request is live.
 The URL bytes stay readable until the request ends.
-An issuance event drained after its request ended has a null `url`.
+An issuance event has a null `url` when the URL is empty or when its request has ended.
 
 ## Storage and failure
 
 Each operation reserves its storage, including event capacity, before it changes any state.
 Allocation failure returns `FP_STATUS_OUT_OF_MEMORY` and leaves every engine, document, and request unchanged.
+A load also reserves one event slot for the eventual cancellation of its request.
+Destroying a document uses that slot, so it never allocates.
+A step that applies a host cancellation announces two events but ends one request, so it can still need storage.
 
 ## Internal handles
 

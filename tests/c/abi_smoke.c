@@ -1,5 +1,6 @@
 /* The C smoke test. It runs every failure scenario of api/failure-scenarios.json that C can express.
  * Each scenario function names its identifier, and main runs every one.
+ * Before the scenarios, main runs the FP-0006 lifecycle check and the FP-0050 reject, cancel, and empty-range checks.
  */
 #if !defined(_WIN32)
 #  define _POSIX_C_SOURCE 200809L
@@ -241,6 +242,82 @@ static void expect_unknown_request(fp_engine *engine, fp_request_id request) {
     assert(fp_request_cancel(engine, request) == FP_STATUS_UNKNOWN_ID);
 }
 
+/* FP-0050 case 6: a host rejection and a host cancellation succeed for live requests, and a step applies both. */
+static void check_reject_and_cancel(void) {
+    fp_engine *engine = create_engine(4, 16);
+    fp_document_id rejected_doc = create_document(engine);
+    fp_document_id cancelled_doc = create_document(engine);
+    fp_request_id rejected = load(engine, rejected_doc, "https://example.test/rejected");
+    fp_request_id cancelled = load(engine, cancelled_doc, "https://example.test/cancelled");
+    drain(engine);
+
+    assert(fp_request_reject(engine, rejected, FP_REJECT_UNSUPPORTED_VERSION) == FP_STATUS_OK);
+    assert(fp_request_cancel(engine, cancelled) == FP_STATUS_OK);
+    assert(document_state(engine, rejected_doc) == FP_DOCUMENT_LOADING);
+    assert(document_state(engine, cancelled_doc) == FP_DOCUMENT_LOADING);
+    expect_queues(engine, 0, 1);
+
+    fp_step_outcome outcome = step(engine, 8);
+    assert(outcome.applied == 2 && outcome.work_remaining == 0 && outcome.events_ready == 3);
+    fp_event event = next_event(engine);
+    assert(event.kind == FP_EVENT_DOCUMENT_STATE_CHANGED && event.document_id == rejected_doc && event.request_id == rejected);
+    assert(event.document_state == FP_DOCUMENT_FAILED && event.reject_reason == FP_REJECT_UNSUPPORTED_VERSION);
+    assert(event.url == NULL && event.url_len == 0);
+    event = next_event(engine);
+    assert(event.kind == FP_EVENT_REQUEST_CANCELLED && event.document_id == cancelled_doc && event.request_id == cancelled);
+    assert(event.document_state == 0 && event.reject_reason == 0);
+    assert(event.url == NULL && event.url_len == 0);
+    event = next_event(engine);
+    assert(event.kind == FP_EVENT_DOCUMENT_STATE_CHANGED && event.document_id == cancelled_doc && event.request_id == cancelled);
+    assert(event.document_state == FP_DOCUMENT_FAILED && event.reject_reason == 0);
+    expect_no_event(engine);
+
+    const fp_document_id documents[] = {rejected_doc, cancelled_doc};
+    for (size_t index = 0; index < sizeof(documents) / sizeof(documents[0]); index += 1) {
+        fp_document_info info = document_info(engine, documents[index]);
+        assert(info.state == FP_DOCUMENT_FAILED && info.body == NULL && info.body_len == 0);
+    }
+    expect_unknown_request(engine, rejected);
+    expect_unknown_request(engine, cancelled);
+    destroy_engine(engine);
+}
+
+/* FP-0050 case 7: a URL range is null only when it is empty, and an empty live URL drains as null. */
+static void check_empty_ranges(void) {
+    fp_engine *engine = create_engine(4, 16);
+    fp_document_id null_url = create_document(engine);
+    fp_document_id empty_url = create_document(engine);
+
+    fp_request_id out = 0x5E0;
+    assert(fp_document_load(engine, null_url, NULL, 1, &out) == FP_STATUS_INVALID_ARGUMENT);
+    assert(out == 0x5E0);
+    assert(document_state(engine, null_url) == FP_DOCUMENT_EMPTY);
+    expect_queues(engine, 0, 0);
+
+    assert(fp_document_load(engine, null_url, NULL, 0, &out) == FP_STATUS_OK);
+    const fp_request_id first = out;
+    assert(first != 0);
+    fp_event event = expect_event(engine, FP_EVENT_REQUEST_ISSUED, null_url, first);
+    assert(event.url == NULL && event.url_len == 0);
+    event = expect_event(engine, FP_EVENT_DOCUMENT_STATE_CHANGED, null_url, first);
+    assert(event.document_state == FP_DOCUMENT_LOADING);
+
+    fp_request_id second = 0;
+    assert(fp_document_load(engine, empty_url, (const uint8_t *)"", 0, &second) == FP_STATUS_OK);
+    event = expect_event(engine, FP_EVENT_REQUEST_ISSUED, empty_url, second);
+    assert(event.url == NULL && event.url_len == 0);
+    event = expect_event(engine, FP_EVENT_DOCUMENT_STATE_CHANGED, empty_url, second);
+    assert(event.document_state == FP_DOCUMENT_LOADING);
+    expect_no_event(engine);
+
+    fp_response answer = {sizeof(fp_response), FP_RESOURCE_REQUEST_VERSION, first, NULL, 0};
+    assert(fp_request_respond(engine, &answer) == FP_STATUS_OK);
+    assert(step(engine, 8).applied == 1);
+    fp_document_info info = document_info(engine, null_url);
+    assert(info.state == FP_DOCUMENT_LOADED && info.body == NULL && info.body_len == 0);
+    destroy_engine(engine);
+}
+
 /* Scenario unknown-identifier: zero, never-issued, and other-family identifiers return FP_STATUS_UNKNOWN_ID. */
 static void scenario_unknown_identifier(void) {
     fp_engine *engine = create_engine(4, 16);
@@ -329,7 +406,7 @@ static void run_foreign_calls(struct foreign_calls *calls) {
     calls->invalid_statuses[1] = fp_document_destroy(engine, 0);
     calls->invalid_statuses[2] = fp_document_get(engine, calls->document, NULL, sizeof(calls->info));
     calls->invalid_statuses[3] = fp_document_get(engine, calls->document, &calls->info, sizeof(calls->info) - 1);
-    calls->invalid_statuses[4] = fp_document_load(engine, calls->document, NULL, 0, &calls->request_out);
+    calls->invalid_statuses[4] = fp_document_load(engine, calls->document, NULL, 1, &calls->request_out);
     calls->invalid_statuses[5] = fp_document_load(engine, calls->document, (const uint8_t *)"u", 1, NULL);
     calls->invalid_statuses[6] = fp_request_respond(engine, NULL);
     calls->invalid_statuses[7] = fp_request_respond(engine, &short_answer);
@@ -538,7 +615,7 @@ static void scenario_null_required_pointer(void) {
         fp_engine_next_event(NULL, &event, sizeof(event)),
         fp_document_create(engine, NULL),
         fp_document_get(engine, document, NULL, sizeof(info)),
-        fp_document_load(engine, document, NULL, 0, &request_out),
+        fp_document_load(engine, document, NULL, 1, &request_out),
         fp_document_load(engine, document, (const uint8_t *)"u", 1, NULL),
         fp_request_respond(engine, NULL),
         fp_request_respond(engine, &null_body),
@@ -644,6 +721,8 @@ static void scenario_load_bound(void) {
 int main(void) {
     check_capabilities();
     check_document_lifecycle();
+    check_reject_and_cancel();
+    check_empty_ranges();
     scenario_unknown_identifier();
     scenario_foreign_identifier();
     scenario_retired_identifier();

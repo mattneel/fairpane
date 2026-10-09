@@ -265,7 +265,7 @@ const ForeignThread = struct {
             fp_document_destroy(engine, @fromBackingInt(0)),
             fp_document_get(engine, calls.document, null, @sizeOf(abi.DocumentInfo)),
             fp_document_get(engine, calls.document, &calls.info, @sizeOf(abi.DocumentInfo) - 1),
-            fp_document_load(engine, calls.document, null, 0, &calls.request_out),
+            fp_document_load(engine, calls.document, null, 1, &calls.request_out),
             fp_document_load(engine, calls.document, "u", 1, null),
             fp_request_respond(engine, null),
             fp_request_respond(engine, &short_answer),
@@ -443,11 +443,12 @@ fn fillInputs(engine: *abi.Engine) !void {
     }
 }
 
-/// Reloads a spare document until the event queue has no free slot, so the next announcement must allocate.
+/// Reloads a spare document until only the event slots that the outstanding requests reserve are free.
+/// A reload announces two events, so it drains one event first when exactly one slot beyond that floor is free.
 fn fillEvents(engine: *abi.Engine, spare: abi.DocumentId) !void {
     const inner = nativeOf(engine);
-    while (inner.events.buffer.len != inner.events.len) {
-        if (inner.events.buffer.len - inner.events.len == 1) _ = try nextEvent(engine);
+    while (inner.events.buffer.len - inner.events.len > inner.requests.count()) {
+        if (inner.events.buffer.len - inner.events.len == inner.requests.count() + 1) _ = try nextEvent(engine);
         _ = try load(engine, spare, "https://example.test/event");
     }
 }
@@ -498,15 +499,6 @@ const Step = struct {
     }
 };
 
-const DestroyDocument = struct {
-    document: abi.DocumentId,
-    fn attempt(self: *DestroyDocument, engine: *abi.Engine) !u32 {
-        const result = fp_document_destroy(engine, self.document);
-        if (result != ok) try testing.expectEqual(abi.DocumentState.loading, try state(engine, self.document));
-        return result;
-    }
-};
-
 test "Scenario allocation-failure: each allocating operation returns FP_STATUS_OUT_OF_MEMORY at every allocation and changes nothing" {
     // Fail every remap, so that each growth step is an allocation that the test can induce.
     var failing: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
@@ -550,10 +542,21 @@ test "Scenario allocation-failure: each allocating operation returns FP_STATUS_O
     try testing.expectEqual(abi.DocumentState.failed, try state(engine, cancelled));
 
     const doomed = try createDocument(engine);
-    _ = try load(engine, doomed, "https://example.test/doomed");
+    const doomed_request = try load(engine, doomed, "https://example.test/doomed");
     try fillEvents(engine, spare);
-    var destroy: DestroyDocument = .{ .document = doomed };
-    try failEachAllocation(&failing, engine, &destroy);
+    // The load reserved the cancellation event, so the destruction succeeds while every allocation fails.
+    failing.fail_index = failing.alloc_index;
+    try testing.expectEqual(ok, fp_document_destroy(engine, doomed));
+    failing.fail_index = never;
+    var last = try nextEvent(engine);
+    while (true) {
+        const event = try nextEvent(engine);
+        if (event.kind == @backingInt(abi.EventKind.none)) break;
+        last = event;
+    }
+    try testing.expectEqual(@backingInt(abi.EventKind.request_cancelled), last.kind);
+    try testing.expectEqual(@as(?abi.DocumentId, doomed), last.document_id.get());
+    try testing.expectEqual(@as(?abi.RequestId, doomed_request), last.request_id.get());
     try expectUnknownDocument(engine, doomed);
 
     try testing.expectEqual(ok, fp_engine_destroy(engine));
@@ -596,7 +599,7 @@ test "Scenario null-required-pointer: a null required pointer returns FP_STATUS_
         fp_engine_next_event(null, &event, @sizeOf(abi.Event)),
         fp_document_create(engine, null),
         fp_document_get(engine, document, null, @sizeOf(abi.DocumentInfo)),
-        fp_document_load(engine, document, null, 0, &request_out),
+        fp_document_load(engine, document, null, 1, &request_out),
         fp_document_load(engine, document, "u", 1, null),
         fp_request_respond(engine, null),
         fp_request_respond(engine, &.{ .struct_size = @sizeOf(abi.Response), .version = abi.resource_request_version, .request_id = request, .body = null, .body_len = 1 }),

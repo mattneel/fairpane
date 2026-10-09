@@ -1,0 +1,11 @@
+diff --git a/out/fp0050-mutation/abi_generated.zig.orig b/src/abi_generated.zig
+index f23f69d..f0a2b34 100644
+--- a/out/fp0050-mutation/abi_generated.zig.orig
++++ b/src/abi_generated.zig
+@@ -322,5 +322,5 @@ comptime {
+     if (@offsetOf(Event, "document_state") != 32) @compileError("Event.document_state differs from the offset that the schema implies.");
+     if (@offsetOf(Event, "reject_reason") != 36) @compileError("Event.reject_reason differs from the offset that the schema implies.");
+     if (@offsetOf(Event, "url") != 40) @compileError("Event.url differs from the offset that the schema implies.");
+-    if (@offsetOf(Event, "url_len") != layout(48, 44)) @compileError("Event.url_len differs from the offset that the schema implies.");
++    if (@offsetOf(Event, "url_len") != layout(52, 44)) @compileError("Event.url_len differs from the offset that the schema implies.");
+ }

@@ -80,7 +80,7 @@
         { "function": "fp_document_create", "arguments": "the engine and a null output from another thread", "status": "wrong_thread" },
         { "function": "fp_document_destroy", "arguments": "the engine and document zero from another thread", "status": "wrong_thread" },
         { "function": "fp_document_get", "arguments": "the engine, a live document, and a null output, then an output size one byte short, from another thread", "status": "wrong_thread" },
-        { "function": "fp_document_load", "arguments": "the engine, a live document, and a null URL, then a null output, from another thread", "status": "wrong_thread" },
+        { "function": "fp_document_load", "arguments": "the engine, a live document, and a null URL with a nonzero length, then a null output, from another thread", "status": "wrong_thread" },
         { "function": "fp_request_respond", "arguments": "the engine and a null response, then a response whose struct_size is one byte short, from another thread", "status": "wrong_thread" },
         { "function": "fp_request_reject", "arguments": "the engine, a live request, and the unknown reason zero from another thread", "status": "wrong_thread" },
         { "function": "fp_request_cancel", "arguments": "the engine and request zero from another thread", "status": "wrong_thread" },
@@ -178,13 +178,14 @@
         { "function": "fp_request_respond", "arguments": "an engine whose input queue must grow", "status": "out_of_memory" },
         { "function": "fp_request_reject", "arguments": "an engine whose full input queue must grow", "status": "out_of_memory" },
         { "function": "fp_request_cancel", "arguments": "an engine whose full input queue must grow", "status": "out_of_memory" },
-        { "function": "fp_engine_step", "arguments": "an engine whose full event queue must grow", "status": "out_of_memory" },
-        { "function": "fp_document_destroy", "arguments": "a loading document in an engine whose full event queue must grow", "status": "out_of_memory" }
+        { "function": "fp_engine_step", "arguments": "an engine whose event queue must grow to announce an applied host cancellation", "status": "out_of_memory" },
+        { "function": "fp_document_destroy", "arguments": "a loading document in an engine whose every later allocation fails", "status": "ok" }
       ],
       "effects": [
         "No engine handle, identifier, or output byte is written.",
         "The documents, requests, queued inputs, and events stay unchanged.",
-        "The same call succeeds once allocation succeeds, and destroying the engine frees every allocated byte."
+        "The same call succeeds once allocation succeeds, and destroying the engine frees every allocated byte.",
+        "fp_document_destroy allocates nothing, so it succeeds and announces the cancellation while every allocation fails."
       ]
     },
     {
@@ -200,7 +201,7 @@
         { "function": "fp_document_create", "arguments": "a null engine, then a null output", "status": "invalid_argument" },
         { "function": "fp_document_destroy", "arguments": "a null engine", "status": "invalid_argument" },
         { "function": "fp_document_get", "arguments": "a null engine, then a null output", "status": "invalid_argument" },
-        { "function": "fp_document_load", "arguments": "a null engine, then a null URL with a zero length, then a null output", "status": "invalid_argument" },
+        { "function": "fp_document_load", "arguments": "a null engine, then a null URL with a nonzero length, then a null output", "status": "invalid_argument" },
         { "function": "fp_request_respond", "arguments": "a null engine, then a null response, then a null body with a nonzero length", "status": "invalid_argument" },
         { "function": "fp_request_reject", "arguments": "a null engine", "status": "invalid_argument" },
         { "function": "fp_request_cancel", "arguments": "a null engine", "status": "invalid_argument" },

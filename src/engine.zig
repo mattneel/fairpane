@@ -10,6 +10,10 @@
 //!
 //! Each operation reserves its storage, including event capacity, before it changes any state.
 //! An allocation failure therefore leaves every engine, document, and request unchanged.
+//! A load also reserves one event slot for the eventual cancellation of its request.
+//! After every operation, the event queue therefore has at least one unused slot for each outstanding request.
+//! Destroying a document uses that slot, so it never allocates.
+//! A step that applies a host cancellation announces two events but ends one request, so it can still need storage.
 //!
 //! Internal generational handles stay inside this module.
 //! Callers identify documents and requests by opaque process-wide identifiers.
@@ -115,7 +119,7 @@ pub const CreateError = error{ OutOfMemory, IdentifiersExhausted };
 pub const LookupError = error{ WrongThread, UnknownId };
 /// `LimitExceeded` reports that the document table ran out of handles.
 pub const CreateDocumentError = error{ WrongThread, OutOfMemory, LimitExceeded, IdentifiersExhausted };
-pub const DestroyDocumentError = error{ WrongThread, UnknownId, OutOfMemory };
+pub const DestroyDocumentError = error{ WrongThread, UnknownId };
 /// `LimitExceeded` reports the outstanding request bound or request table exhaustion.
 pub const LoadError = error{ WrongThread, UnknownId, LimitExceeded, OutOfMemory, IdentifiersExhausted };
 /// `InvalidState` reports that the request already has a queued answer.
@@ -189,6 +193,7 @@ fn announcementsFor(answer: Answer) usize {
 
 /// A single-thread engine.
 /// The thread that creates an engine owns it, and every call from another thread returns `error.WrongThread`.
+/// The host must destroy an engine before the thread that created it exits, because the system can reuse the identifier of an exited thread.
 pub const Engine = struct {
     gpa: Allocator,
     options: Options,
@@ -262,14 +267,12 @@ pub const Engine = struct {
 
     /// Releases the document and its body.
     /// An outstanding request is cancelled, its queued answer is discarded, and the cancellation is announced.
+    /// It never allocates, because the load that issued the request reserved the event slot of its cancellation.
     pub fn destroyDocument(engine: *Engine, id: DocumentId) DestroyDocumentError!void {
         try engine.checkThread();
         const handle = engine.document_ids.get(id) orelse return error.UnknownId;
         const record = engine.documents.get(handle) catch unreachable;
-        if (record.request) |request| {
-            try engine.events.ensureUnusedCapacity(engine.gpa, 1);
-            engine.withdrawRequest(request);
-        }
+        if (record.request) |request| engine.withdrawRequest(request);
         _ = engine.documents.remove(handle) catch unreachable;
         const removed = engine.document_ids.remove(id);
         assert(removed);
@@ -287,6 +290,7 @@ pub const Engine = struct {
     /// A load while the document is loading cancels the earlier request and announces that cancellation.
     /// A load discards the body of a loaded document.
     /// Only a load that adds an outstanding request counts against the request bound.
+    /// A load reserves one event slot for the eventual cancellation of the request it issues, so `destroyDocument` never allocates.
     pub fn load(engine: *Engine, id: DocumentId, url: []const u8) LoadError!RequestId {
         try engine.checkThread();
         const gpa = engine.gpa;
@@ -296,7 +300,10 @@ pub const Engine = struct {
             return error.LimitExceeded;
         }
         // A load announces at most two events: a cancellation or a state change, and an issuance.
-        try engine.events.ensureUnusedCapacity(gpa, 2);
+        // Afterward, each outstanding request, including the one that the load issues, keeps one reserved slot.
+        // A reload ends the request that it replaces, so it adds no outstanding request.
+        const added: usize = @intFromBool(previous == null);
+        try engine.events.ensureUnusedCapacity(gpa, engine.requests.count() + added + 2);
         try engine.request_ids.ensureUnusedCapacity(gpa, 1);
         const url_copy = try gpa.dupe(u8, url);
         errdefer gpa.free(url_copy);
@@ -377,7 +384,9 @@ pub const Engine = struct {
         const applied = @min(budget, engine.inputs.len);
         var announcements: usize = 0;
         for (0..applied) |position| announcements += announcementsFor(engine.inputs.at(position).answer);
-        try engine.events.ensureUnusedCapacity(engine.gpa, announcements);
+        // Each applied answer ends its request, whose reserved slot covers one announcement.
+        // The other outstanding requests keep their reserved slots, so only a host cancellation's second announcement needs storage.
+        try engine.events.ensureUnusedCapacity(engine.gpa, engine.requests.count() - applied + announcements);
         for (0..applied) |_| engine.applyInput(engine.inputs.popFront().?);
         return .{
             .applied = applied,
@@ -425,7 +434,7 @@ pub const Engine = struct {
     }
 
     /// Cancels a request for the engine, discards its queued answer, and announces the cancellation.
-    /// Requires one reserved event slot.
+    /// Uses the event slot that the load of the request reserved.
     fn withdrawRequest(engine: *Engine, handle: RequestTable.Handle) void {
         if ((engine.requests.get(handle) catch unreachable).answered) engine.discardQueuedAnswer(handle);
         const ended = engine.releaseRequest(handle);
@@ -900,25 +909,37 @@ test "FP-0006 case 13: a budget of two applies two of three queued responses in 
         document.* = try engine.createDocument();
         request.* = try engine.load(document.*, "https://example.test/case-13");
     }
-    try engine.respond(requests[1], 1, "one");
-    try engine.respond(requests[0], 1, "zero");
     try engine.respond(requests[2], 1, "two");
+    try engine.respond(requests[0], 1, "zero");
+    try engine.respond(requests[1], 1, "one");
 
     const first = try engine.step(2);
     try testing.expectEqual(2, first.applied);
     try testing.expect(first.work_remaining);
     try testing.expectEqual(8, first.events_ready);
     try testing.expectEqual(Deadline.none, first.next_deadline);
-    try testing.expectEqualStrings("one", (try engine.document(documents[1])).body);
+    try testing.expectEqualStrings("two", (try engine.document(documents[2])).body);
     try testing.expectEqualStrings("zero", (try engine.document(documents[0])).body);
-    try expectState(engine, documents[2], .loading);
+    const waiting = try engine.document(documents[1]);
+    try testing.expectEqual(DocumentState.loading, waiting.state);
+    try testing.expectEqual(0, waiting.body.len);
+    // Only the request of documents[1] is still live, so only its issuance keeps its URL.
+    try expectNextEvent(engine, issued(documents[0], requests[0], null));
+    try expectNextEvent(engine, changed(documents[0], requests[0], .loading, null));
+    try expectNextEvent(engine, issued(documents[1], requests[1], "https://example.test/case-13"));
+    try expectNextEvent(engine, changed(documents[1], requests[1], .loading, null));
+    try expectNextEvent(engine, issued(documents[2], requests[2], null));
+    try expectNextEvent(engine, changed(documents[2], requests[2], .loading, null));
+    try expectNextEvent(engine, changed(documents[2], requests[2], .loaded, null));
+    try expectNextEvent(engine, changed(documents[0], requests[0], .loaded, null));
+    try expectNoEvent(engine);
 
     const second = try engine.step(2);
     try testing.expectEqual(1, second.applied);
     try testing.expect(!second.work_remaining);
-    try testing.expectEqual(9, second.events_ready);
-    try testing.expectEqual(Deadline.none, second.next_deadline);
-    try testing.expectEqualStrings("two", (try engine.document(documents[2])).body);
+    try testing.expectEqual(1, second.events_ready);
+    try testing.expectEqualStrings("one", (try engine.document(documents[1])).body);
+    try expectNextEvent(engine, changed(documents[1], requests[1], .loaded, null));
 }
 
 fn errorOf(result: anytype) ?anyerror {
@@ -981,10 +1002,11 @@ fn guarded(engine: *Engine, comptime operation: anytype, args: anytype) !Operati
     };
 }
 
-/// Reloads `document` until the event queue has no free slot, so the next announcement must grow it.
+/// Reloads `document` until the event queue has no free slot beyond the slots that the outstanding requests reserve.
+/// A reload announces two events, so it drains one event first when exactly one slot beyond that floor is free.
 fn fillEventQueue(engine: *Engine, document: DocumentId) !void {
-    while (freeEventSlots(engine) != 0) {
-        if (freeEventSlots(engine) == 1) _ = (try engine.nextEvent()).?;
+    while (freeEventSlots(engine) > engine.requests.count()) {
+        if (freeEventSlots(engine) == engine.requests.count() + 1) _ = (try engine.nextEvent()).?;
         _ = try guarded(engine, Engine.load, .{ engine, document, "https://example.test/fill" });
     }
 }
@@ -1007,8 +1029,8 @@ fn lifecycleScenario(gpa: Allocator) !void {
     try guarded(engine, Engine.respond, .{ engine, requests[0], 1, "<p>case 15</p>" });
     try guarded(engine, Engine.reject, .{ engine, requests[1], .unsupported_version });
     try guarded(engine, Engine.cancel, .{ engine, requests[2] });
-    // The step needs four announcements and no slot is free, so it must reserve new storage.
-    try testing.expectEqual(0, freeEventSlots(engine));
+    // Only the reserved slots are free, and the step's host cancellation needs one slot beyond that floor, so it must reserve new storage.
+    try testing.expectEqual(engine.requests.count(), freeEventSlots(engine));
     const outcome = try guarded(engine, Engine.step, .{ engine, 8 });
     try testing.expectEqual(3, outcome.applied);
     try testing.expectEqualStrings("<p>case 15</p>", (try engine.document(documents[0])).body);
@@ -1032,4 +1054,137 @@ test "FP-0006 case 15: every induced allocation failure returns OutOfMemory, cha
     try testing.expect(probe.allocations >= 10);
     try testing.checkAllAllocationFailures(no_remap.allocator(), lifecycleScenario, .{});
     try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
+}
+
+/// Runs `body` with an engine whose allocator fails every remap, so each growth step is an allocation that the body can fail.
+/// It then restores allocation, destroys the engine, and checks that no byte leaked.
+fn withFailingAllocator(comptime body: anytype, args: anytype) !void {
+    var failing: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+    const engine = try Engine.create(failing.allocator(), test_options);
+    const result = @call(.auto, body, .{ engine, &failing } ++ args);
+    failing.fail_index = std.math.maxInt(usize);
+    try engine.destroy();
+    try result;
+    try testing.expectEqual(failing.allocated_bytes, failing.freed_bytes);
+}
+
+fn destroyWhileAllocationFails(engine: *Engine, failing: *testing.FailingAllocator, reloads: usize, extra: bool, answered: bool) !void {
+    const d = try engine.createDocument();
+    const rd = try engine.load(d, "https://example.test/doomed");
+    const s = try engine.createDocument();
+    var spare = try engine.load(s, "https://example.test/spare");
+    for (0..reloads) |_| spare = try engine.load(s, "https://example.test/spare");
+    if (extra) {
+        try engine.respond(spare, 1, "spare");
+        _ = try engine.step(8);
+    }
+    if (answered) try engine.respond(rd, 1, "doomed");
+    try testing.expect(freeEventSlots(engine) >= engine.requests.count());
+
+    failing.fail_index = failing.alloc_index;
+    try engine.destroyDocument(d);
+    try testing.expectEqualDeep(@as(?Event, cancelled(d, rd)), engine.events.back());
+    try testing.expectError(error.UnknownId, engine.document(d));
+    try testing.expectError(error.UnknownId, engine.respond(rd, 1, "x"));
+    try testing.expectEqual(0, engine.inputs.len);
+    const view = try engine.document(s);
+    if (extra) {
+        try testing.expectEqual(DocumentState.loaded, view.state);
+        try testing.expectEqualStrings("spare", view.body);
+    } else {
+        try testing.expectEqual(DocumentState.loading, view.state);
+    }
+}
+
+test "FP-0050 case 1: destroying a loading document allocates nothing" {
+    for (0..49) |reloads| {
+        for ([_]bool{ false, true }) |extra| {
+            for ([_]bool{ false, true }) |answered| try withFailingAllocator(destroyWhileAllocationFails, .{ reloads, extra, answered });
+        }
+    }
+}
+
+fn loadWithoutCancellationSlot(engine: *Engine, failing: *testing.FailingAllocator) !void {
+    const t = try engine.createDocument();
+    const s = try engine.createDocument();
+    _ = try engine.load(s, "https://example.test/spare");
+    while (engine.events.buffer.len < 8) _ = try engine.load(s, "https://example.test/spare");
+    // Leave free exactly the reserved slots and the two announcements of a load, so only the new request's slot is missing.
+    while (freeEventSlots(engine) != engine.requests.count() + 2) {
+        if (freeEventSlots(engine) < engine.requests.count() + 2) {
+            _ = (try engine.nextEvent()).?;
+        } else {
+            _ = try engine.load(s, "https://example.test/spare");
+        }
+    }
+
+    const before = fingerprint(engine);
+    failing.fail_index = failing.alloc_index;
+    try testing.expectError(error.OutOfMemory, engine.load(t, ""));
+    try testing.expectEqual(before, fingerprint(engine));
+    try expectState(engine, t, .empty);
+
+    failing.fail_index = std.math.maxInt(usize);
+    _ = try engine.load(t, "");
+    try expectState(engine, t, .loading);
+    try testing.expect(freeEventSlots(engine) >= engine.requests.count());
+}
+
+test "FP-0050 case 2: a load that cannot reserve its cancellation slot returns OutOfMemory and changes nothing" {
+    try withFailingAllocator(loadWithoutCancellationSlot, .{});
+}
+
+fn removeMiddleOfWrappedQueue(offset: usize) !void {
+    const engine = try Engine.create(testing.allocator, test_options);
+    defer engine.destroy() catch unreachable;
+
+    var warm: [3]DocumentId = undefined;
+    for (&warm) |*document| document.* = try engine.createDocument();
+    for (warm) |document| try engine.respond(try engine.load(document, "https://example.test/warm"), 1, "warm");
+    _ = try engine.step(3);
+    const cap = engine.inputs.buffer.len;
+    try testing.expect(cap >= 3);
+
+    const a = try engine.createDocument();
+    const b = try engine.createDocument();
+    const c = try engine.createDocument();
+    const p = try engine.createDocument();
+    const ra = try engine.load(a, "https://example.test/first");
+    const rb = try engine.load(b, "https://example.test/middle");
+    const rc = try engine.load(c, "https://example.test/last");
+    // Each applied pump answer advances the head of the input queue by one slot.
+    while (engine.inputs.head != cap - offset) {
+        try engine.respond(try engine.load(p, "https://example.test/pump"), 1, "pump");
+        _ = try engine.step(1);
+        try testing.expectEqual(cap, engine.inputs.buffer.len);
+    }
+    while (try engine.nextEvent()) |_| {}
+
+    try engine.respond(ra, 1, "first");
+    try engine.respond(rb, 1, "middle");
+    try engine.respond(rc, 1, "last");
+    try testing.expectEqual(3, engine.inputs.len);
+    try testing.expectEqual(cap - offset, engine.inputs.head);
+    try testing.expect(engine.inputs.head + engine.inputs.len > cap);
+
+    try engine.destroyDocument(b);
+    try testing.expectEqual(2, engine.inputs.len);
+    try testing.expectEqual(cap - offset, engine.inputs.head);
+    try expectNextEvent(engine, cancelled(b, rb));
+    try expectNoEvent(engine);
+    try testing.expectError(error.UnknownId, engine.document(b));
+    try testing.expectError(error.UnknownId, engine.respond(rb, 1, "x"));
+
+    const outcome = try engine.step(8);
+    try testing.expectEqual(2, outcome.applied);
+    try testing.expect(!outcome.work_remaining);
+    try testing.expectEqual(2, outcome.events_ready);
+    try testing.expectEqualStrings("first", (try engine.document(a)).body);
+    try testing.expectEqualStrings("last", (try engine.document(c)).body);
+    try expectNextEvent(engine, changed(a, ra, .loaded, null));
+    try expectNextEvent(engine, changed(c, rc, .loaded, null));
+}
+
+test "FP-0050 case 5: removing the middle answer of a wrapped queue keeps the other answers in order" {
+    for ([_]usize{ 1, 2 }) |offset| try removeMiddleOfWrappedQueue(offset);
 }

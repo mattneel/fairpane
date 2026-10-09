@@ -1,0 +1,26 @@
+diff --git a/out/fp0050-mutation/engine.zig.orig b/src/engine.zig
+index 6f319a6..c172b3f 100644
+--- a/out/fp0050-mutation/engine.zig.orig
++++ b/src/engine.zig
+@@ -449,18 +449,12 @@ pub const Engine = struct {
+ 
+     /// Removes the queued answer for `handle` and keeps the order of the other inputs.
+     fn discardQueuedAnswer(engine: *Engine, handle: RequestTable.Handle) void {
+-        var kept: usize = 0;
++        // MUTATION CONTROL 5a: free the matching answer and shorten the queue without moving any input.
+         for (0..engine.inputs.len) |position| {
+             const input = engine.inputs.at(position);
+-            if (std.meta.eql(input.request, handle)) {
+-                freeAnswer(engine.gpa, input.answer);
+-            } else {
+-                engine.inputs.atPtr(kept).* = input;
+-                kept += 1;
+-            }
++            if (std.meta.eql(input.request, handle)) freeAnswer(engine.gpa, input.answer);
+         }
+-        assert(kept + 1 == engine.inputs.len);
+-        engine.inputs.len = kept;
++        engine.inputs.len -= 1;
+     }
+ 
+     /// Applies one answer to its document. Requires reserved event slots for its announcements.

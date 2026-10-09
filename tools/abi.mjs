@@ -149,6 +149,8 @@ function validateType(ctx, type, where, { allowStructure = false } = {}) {
 function validatePointer(ctx, holder, where, { kind }, consumer = null) {
   check(NULLABILITIES.includes(holder.nullability), `${where}: a pointer needs a nullability of ${NULLABILITIES.join(', ')}.`);
   check(holder.nullability !== 'null_when_empty' || RANGE_KINDS.has(kind), `${where}: only a byte, text, or web string range can be null when empty.`);
+  // One convention covers every range, so an empty range is always a null pointer with a zero length.
+  check(!RANGE_KINDS.has(kind) || holder.nullability === 'null_when_empty', `${where}: a byte, text, or web string range must be null_when_empty.`);
   check(OWNERSHIPS.includes(holder.ownership), `${where}: a pointer needs an ownership of ${OWNERSHIPS.join(', ')}.`);
   check(ctx.lifetimes.has(holder.lifetime), `${where}: a pointer needs a lifetime that the schema defines, not "${holder.lifetime}".`);
   if (holder.ownership === 'consumed_on_success') {

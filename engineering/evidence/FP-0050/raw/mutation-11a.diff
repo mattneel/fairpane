@@ -1,0 +1,12 @@
+diff --git a/out/fp0050-mutation/c_api.zig.orig b/src/c_api.zig
+index 7683146..24e7a6f 100644
+--- a/out/fp0050-mutation/c_api.zig.orig
++++ b/src/c_api.zig
+@@ -8,6 +8,7 @@ const abi = @import("abi_generated.zig");
+ const native = @import("engine.zig");
+ const Allocator = std.mem.Allocator;
+ const testing = std.testing;
++const Shadow = extern struct { struct_size: u32 };
+ 
+ pub const abi_revision = abi.abi_revision;
+ 

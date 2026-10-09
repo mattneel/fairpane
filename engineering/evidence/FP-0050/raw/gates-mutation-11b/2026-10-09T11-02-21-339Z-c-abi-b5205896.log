@@ -1,0 +1,26 @@
+Fairpane local gate: c-abi
+Trust: unsigned-local-integrity-only
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-build"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-build"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:21.363Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1656,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\tools\\fairpane.mjs","abi-exports","out/c-abi-build/lib/fairpane.lib"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "library": "out/c-abi-build/lib/fairpane.lib",
+  "exports": 13
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\tools\\fairpane.mjs","abi-exports","out/c-abi-build/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:23.019Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":47,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-smoke.exe"]
+In file included from tests/c/abi_smoke.c:24:
+tests/c/abi_layout.h:45:16: error: static assertion failed due to requirement 'sizeof(struct fp_event) == (sizeof(void *) == 8 ? 64 : 48)': fp_event differs from the size that the schema implies.
+   45 | _Static_assert(sizeof(fp_event) == (sizeof(void *) == 8 ? 64 : 48), "fp_event differs from the size that the schema implies.");
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests/c/abi_layout.h:45:33: note: expression evaluates to '56 == 64'
+   45 | _Static_assert(sizeof(fp_event) == (sizeof(void *) == 8 ? 64 : 48), "fp_event differs from the size that the schema implies.");
+      |                ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 error generated.
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-smoke.exe"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:23.066Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":273,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.zig-cache\\global"}}
+GATE ERROR Gate command failed: ["C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-smoke.exe"]

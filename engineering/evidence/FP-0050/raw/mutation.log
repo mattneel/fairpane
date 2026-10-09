@@ -1,0 +1,268 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","src/engine.zig","--cache-dir","out/fp0050-mutation-cache","--test-filter","case 13"]
+1/2 engine.test.FP-0006 case 13: a budget of two applies two of three queued responses in arrival order...
+====== expected this output: =========
+two␃
+
+======== instead found this: =========
+␃
+
+======================================
+First difference occurs on line 1:
+expected:
+two
+^ ('\x74')
+found:
+
+^ (end of string)
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:696:9: 0x7ff73ac02f1b in expectEqualStrings (test_zcu.obj)
+        return error.TestExpectedEqual;
+        ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:934:5: 0x7ff73ac14c7c in test.FP-0006 case 13: a budget of two applies two of three queued responses in arrival order (test_zcu.obj)
+    try testing.expectEqualStrings("two", (try engine.document(documents[2])).body);
+    ^
+2/2 engine.test.FP-0050 control 4: the base FP-0006 case 13 with responses in the order 1, 0, 2...OK
+1 passed; 0 skipped; 1 failed.
+error: the following test command failed with exit code 1:
+out\fp0050-mutation-cache\o\b1892c45d74e9522836bfb64660d0bab\test.exe --seed=0xb48bc936
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","src/engine.zig","--cache-dir","out/fp0050-mutation-cache","--test-filter","case 13"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:00:22.579Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":1992,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","src/engine.zig","--cache-dir","out/fp0050-mutation-cache","--test-filter","FP-0050 case 5"]
+1/1 engine.test.FP-0050 case 5: removing the middle answer of a wrapped queue keeps the other answers in order...thread 57116 panic: attempt to unwrap error: StaleHandle
+error return context:
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\handles.zig:229:36: 0x7ff7e8ef5d03 in liveSlot (test_zcu.obj)
+                .free, .retired => return error.StaleHandle,
+                                   ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\handles.zig:171:26: 0x7ff7e8ef5808 in remove (test_zcu.obj)
+            const slot = try self.liveSlot(handle);
+                         ^
+
+stack trace:
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:429:60: 0x7ff7e8ef4a51 in releaseRequest (test_zcu.obj)
+        const ended = engine.requests.remove(handle) catch unreachable;
+                                                           ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:462:44: 0x7ff7e8ef70f2 in applyInput (test_zcu.obj)
+        const ended = engine.releaseRequest(input.request);
+                                           ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:390:47: 0x7ff7e8ef6d86 in step (test_zcu.obj)
+        for (0..applied) |_| engine.applyInput(engine.inputs.popFront().?);
+                                              ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:1172:36: 0x7ff7e8ee4aad in removeMiddleOfWrappedQueue (test_zcu.obj)
+    const outcome = try engine.step(8);
+                                   ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:1183:67: 0x7ff7e8ee5249 in test.FP-0050 case 5: removing the middle answer of a wrapped queue keeps the other answers in order (test_zcu.obj)
+    for ([_]usize{ 1, 2 }) |offset| try removeMiddleOfWrappedQueue(offset);
+                                                                  ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:295:25: 0x7ff7e8ebbdc9 in mainTerminal (test_zcu.obj)
+        if (test_fn.func()) |_| {
+                        ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:74:28: 0x7ff7e8ebb8b4 in main (test_zcu.obj)
+        return mainTerminal(init);
+                           ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff7e8eb980d in callMain (test_zcu.obj)
+    if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff7e8eb980d in WinStartup (test_zcu.obj)
+        callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                ^
+???:?:?: 0x7ff862a1cd86 in ??? (KERNEL32.DLL)
+???:?:?: 0x7ff863d6caeb in ??? (ntdll.dll)
+error: the following test command failed with exit code 3:
+out\fp0050-mutation-cache\o\2146bfc7687dff6f6c6e6766b4f561d1\test.exe --seed=0x8cf371a7
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","src/engine.zig","--cache-dir","out/fp0050-mutation-cache","--test-filter","FP-0050 case 5"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:00:47.327Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":1964,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","src/engine.zig","--cache-dir","out/fp0050-mutation-cache","--test-filter","FP-0050 case 5"]
+1/1 engine.test.FP-0050 case 5: removing the middle answer of a wrapped queue keeps the other answers in order...thread 43776 panic: reached unreachable code
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\debug.zig:439:14: 0x7ff75f60513d in assert (test_zcu.obj)
+    if (!ok) unreachable; // assertion failure
+             ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:463:15: 0x7ff75f764c73 in discardQueuedAnswer (test_zcu.obj)
+        assert(kept + 1 == engine.inputs.len);
+              ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:439:97: 0x7ff75f764568 in withdrawRequest (test_zcu.obj)
+        if ((engine.requests.get(handle) catch unreachable).answered) engine.discardQueuedAnswer(handle);
+                                                                                                ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:275:61: 0x7ff75f763ee8 in destroyDocument (test_zcu.obj)
+        if (record.request) |request| engine.withdrawRequest(request);
+                                                            ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:1171:31: 0x7ff75f7545d9 in removeMiddleOfWrappedQueue (test_zcu.obj)
+    try engine.destroyDocument(b);
+                              ^
+C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:1190:67: 0x7ff75f755249 in test.FP-0050 case 5: removing the middle answer of a wrapped queue keeps the other answers in order (test_zcu.obj)
+    for ([_]usize{ 1, 2 }) |offset| try removeMiddleOfWrappedQueue(offset);
+                                                                  ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:295:25: 0x7ff75f72bdc9 in mainTerminal (test_zcu.obj)
+        if (test_fn.func()) |_| {
+                        ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:74:28: 0x7ff75f72b8b4 in main (test_zcu.obj)
+        return mainTerminal(init);
+                           ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff75f72980d in callMain (test_zcu.obj)
+    if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff75f72980d in WinStartup (test_zcu.obj)
+        callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                ^
+???:?:?: 0x7ff862a1cd86 in ??? (KERNEL32.DLL)
+???:?:?: 0x7ff863d6caeb in ??? (ntdll.dll)
+error: the following test command failed with exit code 3:
+out\fp0050-mutation-cache\o\4a0bf03053e9c5ffdbf4bcbb9d185338\test.exe --seed=0x39edca2d
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","src/engine.zig","--cache-dir","out/fp0050-mutation-cache","--test-filter","FP-0050 case 5"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:01:15.918Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":1935,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","c-abi","--evidence-dir","engineering/evidence/FP-0050/raw/gates-mutation-6a"]
+Execute gate c-abi.
+{
+  "gate": "c-abi",
+  "status": "fail",
+  "receipt": "engineering/evidence/FP-0050/raw/gates-mutation-6a/2026-10-09T11-01-37-182Z-c-abi-23f5802b.json",
+  "error": "Gate command failed: [\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\tc1a4abe99\\\\m\\\\out\\\\c-abi-smoke.exe\"]"
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","c-abi","--evidence-dir","engineering/evidence/FP-0050/raw/gates-mutation-6a"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:01:37.068Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":2367}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","c-abi","--evidence-dir","engineering/evidence/FP-0050/raw/gates-mutation-6b"]
+Execute gate c-abi.
+{
+  "gate": "c-abi",
+  "status": "fail",
+  "receipt": "engineering/evidence/FP-0050/raw/gates-mutation-6b/2026-10-09T11-01-55-758Z-c-abi-39233f69.json",
+  "error": "Gate command failed: [\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\tc1a4abe99\\\\m\\\\out\\\\c-abi-smoke.exe\"]"
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","c-abi","--evidence-dir","engineering/evidence/FP-0050/raw/gates-mutation-6b"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:01:55.657Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":1936}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/abi.test.mjs"]
+TAP version 13
+ok 1 - FP-0021 case 1: Generating from the committed schema reproduces the committed include/fairpane.h and src/abi_generated.zig byte for byte
+ok 2 - FP-0021 case 2: Changing one byte of either generated file makes abi-check exit with status 1 and name the file
+ok 3 - FP-0021 case 3: Generation is deterministic across two runs and across schema key order
+ok 4 - FP-0021 case 4: The validator rejects an unknown kind, a pointer without ownership or lifetime, an inverted range, a duplicate name, and a structure without struct_size
+ok 5 - FP-0021 case 5: The schema distinguishes text, web_string, bytes, identifier, handle, ranged integer, and optional values, and the generator maps each one to distinct C and Zig declarations
+ok 6 - FP-0021 case 6: The generated Zig declarations assert the size and every field offset of every structure
+ok 7 - FP-0021 case 7: The C smoke test runs every C-expressible failure scenario and names each identifier it covers
+ok 8 - FP-0021 case 8: The Zig scenario test runs every failure scenario through the generated declarations
+ok 9 - FP-0021 case 9: Every failure scenario has an identifier, calls, and expected outcomes, and the validator rejects one without them
+ok 10 - FP-0021 case 10: The validator rejects consumed_on_success on an output parameter, and the generated C and Zig text states the consumption rule for fp_engine_destroy
+ok 11 - FP-0021 case 11: The validator rejects an unknown reference and an unreferenced function name, and the generated header contains no schema-only name outside a C name
+ok 12 - FP-0021 case 12: The generated C static assertions check the size and every member offset of every structure, and the C smoke test compiles them
+ok 13 - FP-0021 case 13: From a foreign thread, the C and Zig scenarios call each owner function with an invalid argument and expect wrong_thread
+ok 14 - FP-0021 revision 1 status sets: abi_generated.zig carries each function status set, and src/c_api.zig checks every export against it
+ok 15 - FP-0021 revision 1 export check: abi-exports fails when a library exports an fp_ symbol that the schema does not declare
+ok 16 - FP-0050 case 8: every byte range is null_when_empty, and the validator rejects any other nullability
+ok 17 - FP-0050 case 9: fp_document_destroy never returns out_of_memory
+ok 18 - FP-0050 case 10: the thread lifetime and identifier gaps are documented
+not ok 19 - FP-0050 case 11: the generated layout assertions cover both sides of the ABI
+  ---
+  message: "The input was expected to not match the regular expression /extern struct/. Input:\n\n'//! The public C ABI. It maps opaque 64-bit identifiers to the native engine and never exposes internal handles.\\n' +\n  '//! `abi_generated.zig` declares every ABI type and C function type from `api/fairpane.schema.json`.\\n' +\n  '//! Each export returns through `finish`, which checks at compile time that every status it can return is in its generated status set.\\n' +\n  '\\n' +\n  'const std = @import(\"std\");\\n' +\n  'const builtin = @import(\"builtin\");\\n' +\n  'const abi = @import(\"abi_generated.zig\");\\n' +\n  'const native = @import(\"engine.zig\");\\n' +\n  'const Allocator = std.mem.Allocator;\\n' +\n  'const testing = std.testing;\\n' +\n  'const Shadow = extern struct { struct_size: u32 };\\n' +\n  '\\n' +\n  'pub const abi_revision = abi.abi_revision;\\n' +\n  '\\n' +\n  'const ok = @backingInt(abi.Status.ok);\\n' +\n  'const invalid_argument = @backingInt(abi.Status.invalid_argument);\\n' +\n  'const unknown_id = @backingInt(abi.Status.unknown_id);\\n' +\n  'const out_of_memory = @backingInt(abi.Status.out_of_memory);\\n' +\n  'const wrong_thread = @backingInt(abi.Status.wrong_thread);\\n' +\n  '\\n' +\n  'const document_empty = @backingInt(abi.DocumentState.empty);\\n' +\n  'const document_loading = @backingInt(abi.DocumentState.loading);\\n' +\n  'const document_loaded = @backingInt(abi.DocumentState.loaded);\\n' +\n  'const document_failed = @backingInt(abi.DocumentState.failed);\\n' +\n  'const reject_unsupported_version = @backingInt(abi.RejectReason.unsupported_version);\\n' +\n  '\\n' +\n  '/// Checks that a native enumeration has exactly the members and values of its schema enumeration.\\n' +\n  'fn expectSameEnum(comptime Native: type, comptime Abi: type) void {\\n' +\n  '    const native_names = @typeInfo(Native).@\"enum\".field_names;\\n' +\n  '    const abi_info = @typeInfo(Abi).@\"enum\";\\n' +\n  '    if (native_names.len != abi_info.field_names.len) @compileError(@typeName(Native) ++ \" and the schema have different members.\");\\n' +\n  '    for (abi_info.field_names, abi_info.field_values) |name, value| {\\n' +\n  '        if (!@hasField(Native, name) or @backingInt(@field(Native, name)) != value) @compileError(@typeName(Native) ++ \".\" ++ name ++ \" differs from the schema.\");\\n' +\n  '    }\\n' +\n  '}\\n' +\n  '\\n' +\n  '// The native engine and the schema agree on every value that crosses the ABI,\\n' +\n  '// and every exported function has exactly its generated C function type.\\n' +\n  'comptime {\\n' +\n  '    expectSameEnum(native.DocumentState, abi.DocumentState);\\n' +\n  '    expectSameEnum(native.RequestKind, abi.RequestKind);\\n' +\n  '    expectSameEnum(native.RejectReason, abi.RejectReason);\\n' +\n  '    if (native.resource_request_version != abi.resource_request_version) @compileError(\"The native resource request version differs from the schema.\");\\n' +\n  '    for (@typeInfo(abi.functions).@\"struct\".decl_names) |name| {\\n' +\n  '        if (@TypeOf(@field(@This(), name)) != @field(abi.functions, name)) @compileError(name ++ \" differs from its generated function type.\");\\n' +\n  '    }\\n' +\n  '}\\n' +\n  '\\n' +\n  '/// Converts between a schema identifier or enumeration and its native counterpart, which share their values.\\n' +\n  'fn convert(comptime T: type, value: anytype) T {\\n' +\n  '    return @fromBackingInt(@backingInt(value));\\n' +\n  '}\\n' +\n  '\\n' +\n  '/// The allocator behind every engine that `fp_engine_create` creates.\\n' +\n  'const process_allocator: Allocator = if (builtin.single_threaded) std.heap.page_allocator else std.heap.smp_allocator;\\n' +\n  '\\n' +\n  '/// The status that represents an error of an export.\\n' +\n  '/// An error without a status fails compilation, so a new native error cannot surface silently.\\n' +\n  'fn statusOf(comptime err: anyerror) abi.Status {\\n' +\n  '    return switch (err) {\\n' +\n  '        error.InvalidArgument => .invalid_argument,\\n' +\n  '        error.WrongThread => .wrong_thread,\\n' +\n  '        error.UnknownId => .unknown_id,\\n' +\n  '        error.InvalidState => .invalid_state,\\n' +\n  '        error.UnsupportedVersion => .unsupported_version,\\n' +\n  '        error.LimitExceeded, error.IdentifiersExhausted => .limit_exceeded,\\n' +\n  '        error.OutOfMemory => .out_of_memory,\\n' +\n  '        else => @compileError(\"No status represents error.\" ++ @errorName(err) ++ \".\"),\\n' +\n  '    };\\n' +\n  '}\\n' +\n  '\\n' +\n  \"/// Checks at compile time that the schema's status set for the export `symbol` contains `status`.\\n\" +\n  'fn expectAllowed(comptime symbol: []const u8, comptime status: abi.Status) void {\\n' +\n  '    for (@field(abi.statuses, symbol)) |allowed| {\\n' +\n  '        if (allowed == status) return;\\n' +\n  '    }\\n' +\n  '    @compileError(symbol ++ \" can return \" ++ @tagName(status) ++ \", which its schema status set lacks.\");\\n' +\n  '}\\n' +\n  '\\n' +\n  '/// Converts the result of the export `symbol` to its status.\\n' +\n  \"/// Success and every error in the result's error set must map into the schema's status set for `symbol` at compile time.\\n\" +\n  'fn finish(comptime symbol: []const u8, result: anytype) u32 {\\n' +\n  '    comptime expectAllowed(symbol, .ok);\\n' +\n  '    result catch |err| switch (err) {\\n' +\n  '        inline else => |known| {\\n' +\n  '            const status = comptime statusOf(known);\\n' +\n  '            comptime expectAllowed(symbol, status);\\n' +\n  '            return @backingInt(status);\\n' +\n  '        },\\n' +\n  '    };\\n' +\n  '    return ok;\\n' +\n  '}\\n' +\n  '\\n' +\n  'fn nativeEngine(handle: *abi.Engine) *native.Engine {\\n' +\n  '    return @ptrCast(@alignCast(handle));\\n' +\n  '}\\n' +\n  '\\n' +\n  '/// Resolves the engine argument and checks the calling thread before any other argument.\\n' +\n  'fn enter(handle: ?*abi.Engine) error{ InvalidArgument, WrongThread }!*native.Engine {\\n' +\n  '    const resolved = nativeEngine(handle orelse return error.InvalidArgument);\\n' +\n  '    try resolved.checkThread();\\n' +\n  '    return resolved;\\n' +\n  '}\\n' +\n  '\\n' +\n  '/// Converts an input byte range, which may be null only when its length is zero.\\n' +\n  '/// Every range of the ABI is `null_when_empty`, so every input range converts through this function.\\n' +\n  'fn inputRange(bytes: ?[*]const u8, len: usize) error{InvalidArgument}![]const u8 {\\n' +\n  '    if (bytes) |pointer| return pointer[0..len];\\n' +\n  '    if (len == 0) return &.{};\\n' +\n  '    return error.InvalidArgument;\\n' +\n  '}\\n' +\n  '\\n' +\n  '/// `fp_engine_create` with an explicit allocator.\\n' +\n  '/// Zig tests use it to inject allocation failure and to detect leaked engine storage.\\n' +\n  'pub fn createEngine(gpa: Allocator, options: ?*const abi.EngineOptions, out_engine: ?*?*abi.Engine) u32 {\\n' +\n  '    return finish(\"fp_engine_create\", engineCreate(gpa, options, out_engine));\\n' +\n  '}\\n' +\n  '\\n' +\n  'fn engineCreate(gpa: Allocator, options: ?*const abi.EngineOptions, out_engine: ?*?*abi.Engine) !void {\\n' +\n  '    const input = options orelse return error.InvalidArgument;\\n' +\n  '    const out = out_engine orelse return error.InvalidArgument;\\n' +\n  '    if (input.struct_size < @sizeOf(abi.EngineOptions)) return error.InvalidArgument;\\n' +\n  '    const created = try native.Engine.create(gpa, .{\\n' +\n  '        .max_outstanding_requests = input.max_outstanding_requests,\\n' +\n  '        // A bound beyond the address space admits every body that the host can present.\\n' +\n  '        .max_response_body_bytes = std.math.cast(usize, input.max_response_body_bytes) orelse std.math.maxInt(usize),\\n' +\n  '    });\\n' +\n  '    out.* = @ptrCast(created);\\n' +\n  '}\\n' +\n  '\\n' +\n  'fn eventToC(event: ?native.Event) abi.Event {\\n' +\n  '    var result: abi.Event = .{\\n' +\n  '        .struct_size = @sizeOf(abi.Event),\\n' +\n  '        .kind = @backingInt(abi.EventKind.none),\\n' +\n  '        .document_id = .absent,\\n' +\n  '        .request_id = .absent,\\n' +\n  '        .request_kind = .absent,\\n' +\n  '        .request_version = .absent,\\n' +\n  '        .document_state = .absent,\\n' +\n  '        .reject_reason = .absent,\\n' +\n  '        .url = null,\\n' +\n  '        .url_len = 0,\\n' +\n  '    };\\n' +\n  '    switch (event orelse return result) {\\n' +\n  '        .request_issued, .request_cancelled => |notice| {\\n' +\n  '            result.document_id = .of(convert(abi.DocumentId, notice.document));\\n' +\n  '            result.request_id = .of(convert(abi.RequestId, notice.request));\\n' +\n  '            result.request_kind = .of(convert(abi.RequestKind, notice.kind));\\n' +\n  '            result.request_version = .of(notice.version);\\n' +\n  '            // Every range of the ABI is null exactly when it is empty, including an empty live URL.\\n' +\n  '            if (notice.url) |bytes| {\\n' +\n  '                if (bytes.len != 0) {\\n' +\n  '                    result.url = bytes.ptr;\\n' +\n  '                    result.url_len = bytes.len;\\n' +\n  '                }\\n' +\n  '            }\\n' +\n  '        },\\n' +\n  '        .document_state_changed => |change| {\\n' +\n  '            result.document_id = .of(convert(abi.DocumentId, change.document));\\n' +\n  '            result.request_id = .of(convert(abi.RequestId, change.request));\\n' +\n  '            result.request_kind = .of(convert(abi.RequestKind, change.kind));\\n' +\n  '            result.request_version = .of(change.version);\\n' +\n  '            result.document_state = .of(convert(abi.DocumentState, change.state));\\n' +\n  '            if (change.reject_reason) |reason| result.reject_reason = .of(convert(abi.RejectReason, reason));\\n' +\n  '        },\\n' +\n  '    }\\n' +\n  '    result.kind = @backingInt(@as(abi.EventKind, switch (event.?) {\\n' +\n  '        .request_issued => .request_issued,\\n' +\n  '        .request_cancelled => .request_cancelled,\\n' +\n  '        .document_state_changed => .document_state_changed,\\n' +\n  '    }));\\n' +\n  '    return result;\\n' +\n  '}\\n' +\n  '\\n' +\n  'export fn fp_abi_revision() callconv(.c) u32 {\\n' +\n  '    return abi_revision;\\n' +\n  '}\\n' +\n  '\\n' +\n  'export fn fp_query_capabilities(out: ?*abi.Capabilities, out_size: usize) callconv(.c) u32 {\\n' +\n  '    return finish(\"fp_query_capabilities\", queryCapabilities(out, out_size));\\n' +\n  '}\\n' +\n  '\\n' +\n  'fn queryCapabilities(out: ?*abi.Capabilities, out_size: usize) !void {\\n' +\n  '    const result = out orelse return error.InvalidArgument;\\n' +\n  '    if (out_size < @sizeOf(abi.Capabilities)) return error.InvalidArgument;\\n' +\n  '    result.* = .{\\n' +\n  '        .struct_size = @sizeOf(abi.Capabilities),\\n' +\n  '        .abi_revision = abi_revision,\\n' +\n  '        .feature_bits = 0,\\n' +\n  '    };\\n' +\n  '}\\n' +\n  '\\n' +\n  'export fn fp_engine_create(options: ?*const abi.EngineOptions, out_engine: ?*?*abi.Engine) callconv(.c) u32 {\\n' +\n  '    return createEngine(process_allocator, options, out_engine);\\n' +\n  '}\\n' +\n  '\\n' +\n  'export fn fp_engine_destroy(handle: ?*abi.Engine) callconv(.c) u32 {\\n' +\n  '    return finish(\"fp_engine_destroy\", engineDestroy(handle));\\n' +\n  '}\\n' +\n  '\\n' +\n  'fn engineDestroy(handle: ?*abi.Engine) !void {\\n' +\n  '    const engine = try enter(handle);\\n' +\n  '    try engine.destroy();\\n' +\n  '}\\n' +\n  '\\n' +\n  'export fn fp_document_create(handle: ?*abi.Engine, out_document: ?*abi.DocumentId) callconv(.c) u32 {\\n' +\n  '    return finish(\"fp_document_create\", documentCreate(handle, out_document));\\n' +\n  '}\\n' +\n  '\\n' +\n  'fn documentCreate(handle: ?*abi.Engine, out_document: ?*abi.DocumentId) !void {\\n' +\n  '    const engine = try enter(handle);\\n' +\n  '    const out = out_document orelse return error.InvalidArgument;\\n' +\n  '    out.* = convert(abi.DocumentId, try engine.createDocument());\\n' +\n  '}\\n' +\n  '\\n' +\n  'export fn fp_document_destroy(handle: ?*abi.Engine, document: abi.DocumentId) callconv(.c) u32 {\\n' +\n  '    return finish(\"fp_document_destroy\", documentDestroy'... 17268 more characters\n"
+  ...
+1..19
+# tests 19
+# pass 18
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/abi.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:07.244Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":493}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","c-abi","--evidence-dir","engineering/evidence/FP-0050/raw/gates-mutation-11b"]
+Execute gate c-abi.
+{
+  "gate": "c-abi",
+  "status": "fail",
+  "receipt": "engineering/evidence/FP-0050/raw/gates-mutation-11b/2026-10-09T11-02-21-339Z-c-abi-b5205896.json",
+  "error": "Gate command failed: [\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\tc1a4abe99\\\\m\\\\.tools\\\\zig\\\\0.18.0-dev.120+9fe22a29b\\\\x86_64-windows\\\\zig.exe\",\"cc\",\"-std=c11\",\"-Wall\",\"-Wextra\",\"-Werror\",\"tests/c/abi_smoke.c\",\"-Iinclude\",\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\tc1a4abe99\\\\m\\\\out\\\\c-abi-build\\\\lib\\\\fairpane.lib\",\"-o\",\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\tc1a4abe99\\\\m\\\\out\\\\c-abi-smoke.exe\"]"
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","c-abi","--evidence-dir","engineering/evidence/FP-0050/raw/gates-mutation-11b"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:21.238Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":2175}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","abi-check"]
+{
+  "result": "stale",
+  "schema": "api/fairpane.schema.json",
+  "differences": [
+    {
+      "file": "tests/c/abi_layout.h",
+      "line": 45,
+      "problem": "differs from the generator output"
+    }
+  ],
+  "instruction": "Run node tools/fairpane.mjs abi-generate and review the change."
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","abi-check"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:23.467Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":51}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","abi-check"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "files": [
+    "include/fairpane.h",
+    "src/abi_generated.zig",
+    "tests/c/abi_layout.h"
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","abi-check"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:28.485Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":52}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","out/fp0050-mutation-build","--cache-dir","out/fp0050-mutation-cache"]
+install
++- install fairpane
+   +- compile lib fairpane debug native 1 errors
+src\abi_generated.zig:315:43: error: Event differs from the size that the schema implies.
+    if (@sizeOf(Event) != layout(64, 48)) @compileError("Event differs from the size that the schema implies.");
+                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    abi: src\c_api.zig:7:21
+    comptime: src\c_api.zig:39:45
+    6 reference(s) hidden; use '-freference-trace=8' to see all references
+error: 1 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-lib -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0050-mutation-cache" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane -static --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 1/4 steps succeeded (1 failed)
+install transitive failure
++- install fairpane transitive failure
+   +- compile lib fairpane debug native 1 errors
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x1fb31224 --prefix out/fp0050-mutation-build --cache-dir out/fp0050-mutation-cache
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","out/fp0050-mutation-build","--cache-dir","out/fp0050-mutation-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:34.525Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3508,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","abi-check"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "files": [
+    "include/fairpane.h",
+    "src/abi_generated.zig",
+    "tests/c/abi_layout.h"
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","abi-check"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:42.856Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":51}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","out/fp0050-mutation-build","--cache-dir","out/fp0050-mutation-cache"]
+install
++- install fairpane
+   +- compile lib fairpane debug native 1 errors
+src\abi_generated.zig:325:56: error: Event.url_len differs from the offset that the schema implies.
+    if (@offsetOf(Event, "url_len") != layout(52, 44)) @compileError("Event.url_len differs from the offset that the schema implies.");
+                                                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    abi: src\c_api.zig:7:21
+    comptime: src\c_api.zig:39:45
+    6 reference(s) hidden; use '-freference-trace=8' to see all references
+error: 1 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-lib -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0050-mutation-cache" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane -static --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 1/4 steps succeeded (1 failed)
+install transitive failure
++- install fairpane transitive failure
+   +- compile lib fairpane debug native 1 errors
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x3a56cb86 --prefix out/fp0050-mutation-build --cache-dir out/fp0050-mutation-cache
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","out/fp0050-mutation-build","--cache-dir","out/fp0050-mutation-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:56.655Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":392,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","abi-check"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "files": [
+    "include/fairpane.h",
+    "src/abi_generated.zig",
+    "tests/c/abi_layout.h"
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","abi-check"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T11:02:57.125Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":52}

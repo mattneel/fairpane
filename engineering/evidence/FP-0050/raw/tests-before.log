@@ -1,0 +1,173 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0050-before"]
+test
++- run test 146 pass, 3 fail (149 total)
+error: 'c_api.test.FP-0050 case 3: fp_document_destroy cannot return FP_STATUS_OUT_OF_MEMORY' failed:
+       slices differ. first difference occurs at index 4 (0x4)
+       
+       ============ expected this output: =============  len: 4 (0x4)
+       
+       [0]: .ok
+       [1]: .invalid_argument
+       [2]: .wrong_thread
+       [3]: .unknown_id
+       
+       ============= instead found this: ==============  len: 5 (0x5)
+       
+       [0]: .ok
+       [1]: .invalid_argument
+       [2]: .wrong_thread
+       [3]: .unknown_id
+       [4]: .out_of_memory
+       
+       ================================================
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:346:5: 0x7ff7a71a03e8 in expectEqualSlices__func_4249 (test_zcu.obj)
+           return error.TestExpectedEqual;
+           ^
+       C:\Users\requi\.omp\wt\tc1a4abe99\m\src\c_api.zig:537:5: 0x7ff7a71a04af in test.FP-0050 case 3: fp_document_destroy cannot return FP_STATUS_OUT_OF_MEMORY (test_zcu.obj)
+           try testing.expectEqualSlices(abi.Status, &expected, abi.statuses.fp_document_destroy);
+           ^
+error: 'engine.test.FP-0050 case 1: destroying a loading document allocates nothing' failed:
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:584:14: 0x7ff7a6ef3bbf in expect (test_zcu.obj)
+           if (!ok) return error.TestUnexpectedResult;
+                    ^
+       C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:1072:5: 0x7ff7a715420b in destroyWhileAllocationFails (test_zcu.obj)
+           try testing.expect(freeEventSlots(engine) >= engine.requests.count());
+           ^
+       C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:1057:5: 0x7ff7a71548d6 in withFailingAllocator__func_3922 (test_zcu.obj)
+           try result;
+           ^
+       C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:1092:53: 0x7ff7a7154a6c in test.FP-0050 case 1: destroying a loading document allocates nothing (test_zcu.obj)
+                   for ([_]bool{ false, true }) |answered| try withFailingAllocator(destroyWhileAllocationFails, .{ reloads, extra, answered });
+                                                           ^
+error: 'engine.test.FP-0050 case 2: a load that cannot reserve its cancellation slot returns OutOfMemory and changes nothing' failed:
+       expected error.OutOfMemory, found @fromBackingInt(380)
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:634:9: 0x7ff7a71416ee in expectError__func_3879 (test_zcu.obj)
+               return error.TestExpectedError;
+               ^
+       C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:1113:5: 0x7ff7a7141cd2 in loadWithoutCancellationSlot (test_zcu.obj)
+           try testing.expectError(error.OutOfMemory, engine.load(t, ""));
+           ^
+       C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:1057:5: 0x7ff7a7142047 in withFailingAllocator__func_3878 (test_zcu.obj)
+           try result;
+           ^
+       C:\Users\requi\.omp\wt\tc1a4abe99\m\src\engine.zig:1124:5: 0x7ff7a71420f5 in test.FP-0050 case 2: a load that cannot reserve its cancellation slot returns OutOfMemory and changes nothing (test_zcu.obj)
+           try withFailingAllocator(loadWithoutCancellationSlot, .{});
+           ^
+failed command: cd . && ".\\out\\fp0050-before\\o\\48a5f5b21afa9328191240efc28ea07f\\test.exe" "--cache-dir=.\\out\\fp0050-before" --seed=0xa20ce36 --listen=-
+
+Build Summary: 60/62 steps succeeded (1 failed); 179/182 tests passed (3 failed)
+test transitive failure
++- run test 146 pass, 3 fail (149 total)
+|  +- compile test debug native success 7s MaxRSS:682M
++- run test 33 pass (33 total) 215ms MaxRSS:15M
+|  +- compile test debug native success 3s MaxRSS:407M
++- FP-0007 case 13: case 2 passes with exit status 0 success 49ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 3s MaxRSS:334M
++- FP-0007 case 13: case 3 fails with exit status 1 success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 48ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 49ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 78ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 7ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 12ms
+|  +- compile exe fairpane-lab-check debug native success 3s MaxRSS:319M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 51ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 33ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 40ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 49ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 41ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 44ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 40ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 45ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 48ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 38ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 44ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 39ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 44ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 7ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 39ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 45ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 45ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 46ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 50ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 687ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 720ms
++- FP-0011 case 4: allocation_invokes_call.zig success 711ms
++- FP-0011 case 4: leaf_allocates.zig success 660ms
++- FP-0011 case 4: mutation_throws.zig success 708ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 624ms
++- FP-0011 case 4: leaf_positive.zig success 669ms
++- FP-0011 case 5: catalog_callback_alone.zig success 652ms
++- FP-0011 case 5: catalog_exception_alone.zig success 697ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 695ms
++- FP-0011 case 5: kernel_wider_context.zig success 716ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 653ms
++- FP-0011 case 8: layout_undescribed_field.zig success 714ms
++- FP-0011 case 8: layout_plain_reference.zig success 673ms
++- FP-0011 case 8: layout_missing_field.zig success 716ms
++- FP-0011 case 20: abi_reference_value.zig success 633ms
++- FP-0011 case 20: abi_nan_box_value.zig success 701ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 691ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 696ms
++- FP-0011 case 35: leaf_widens_context.zig success 684ms
++- FP-0011 case 36: binding_missing_kernel.zig success 648ms
++- FP-0011 case 36: binding_stray_kernel.zig success 673ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xa20ce36 test --summary all --cache-dir out/fp0050-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0050-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m","started_at":"2026-10-09T10:52:44.793Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":16384,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

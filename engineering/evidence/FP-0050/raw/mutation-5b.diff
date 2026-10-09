@@ -1,0 +1,20 @@
+diff --git a/out/fp0050-mutation/engine.zig.orig b/src/engine.zig
+index 6f319a6..08258e0 100644
+--- a/out/fp0050-mutation/engine.zig.orig
++++ b/src/engine.zig
+@@ -450,12 +450,13 @@ pub const Engine = struct {
+     /// Removes the queued answer for `handle` and keeps the order of the other inputs.
+     fn discardQueuedAnswer(engine: *Engine, handle: RequestTable.Handle) void {
+         var kept: usize = 0;
++        // MUTATION CONTROL 5b: index the physical buffer instead of the logical queue positions.
+         for (0..engine.inputs.len) |position| {
+-            const input = engine.inputs.at(position);
++            const input = engine.inputs.buffer[position];
+             if (std.meta.eql(input.request, handle)) {
+                 freeAnswer(engine.gpa, input.answer);
+             } else {
+-                engine.inputs.atPtr(kept).* = input;
++                engine.inputs.buffer[kept] = input;
+                 kept += 1;
+             }
+         }

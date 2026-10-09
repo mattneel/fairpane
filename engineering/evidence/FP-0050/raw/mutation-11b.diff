@@ -1,0 +1,13 @@
+diff --git a/out/fp0050-mutation/abi_layout.h.orig b/tests/c/abi_layout.h
+index 3168025..d4b8486 100644
+--- a/out/fp0050-mutation/abi_layout.h.orig
++++ b/tests/c/abi_layout.h
+@@ -42,7 +42,7 @@ _Static_assert(offsetof(fp_step_outcome, applied) == 8, "fp_step_outcome.applied
+ _Static_assert(offsetof(fp_step_outcome, events_ready) == 16, "fp_step_outcome.events_ready differs from the offset that the schema implies.");
+ _Static_assert(offsetof(fp_step_outcome, next_deadline) == 24, "fp_step_outcome.next_deadline differs from the offset that the schema implies.");
+ 
+-_Static_assert(sizeof(fp_event) == (sizeof(void *) == 8 ? 56 : 48), "fp_event differs from the size that the schema implies.");
++_Static_assert(sizeof(fp_event) == (sizeof(void *) == 8 ? 64 : 48), "fp_event differs from the size that the schema implies.");
+ _Static_assert(offsetof(fp_event, struct_size) == 0, "fp_event.struct_size differs from the offset that the schema implies.");
+ _Static_assert(offsetof(fp_event, kind) == 4, "fp_event.kind differs from the offset that the schema implies.");
+ _Static_assert(offsetof(fp_event, document_id) == 8, "fp_event.document_id differs from the offset that the schema implies.");

@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "c-abi",
+  "gate_sha256": "e768491e01cf324d0d163fba767c72f1cd9dbbb6659ca81541e62bb01e5e6184",
+  "status": "fail",
+  "started_at": "2026-10-09T11:01:55.759Z",
+  "finished_at": "2026-10-09T11:01:57.582Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "os_release": "10.0.26200",
+    "runtime": "v26.7.0",
+    "bun_version": null,
+    "zig_version": "0.18.0-dev.120+9fe22a29b"
+  },
+  "source_before": {
+    "sha256": "c7ad08cddadb00913f87505a11b607354665314f1e8e7fe962800f18453d4c32",
+    "file_count": 235
+  },
+  "source_after": {
+    "sha256": "c7ad08cddadb00913f87505a11b607354665314f1e8e7fe962800f18453d4c32",
+    "file_count": 235
+  },
+  "policy_before": {
+    "sha256": "020a784a88c0d7e5e855f975c9f7722121b36e8e21b578b5c46100ccafafdb51",
+    "file_count": 22
+  },
+  "policy_after": {
+    "sha256": "020a784a88c0d7e5e855f975c9f7722121b36e8e21b578b5c46100ccafafdb51",
+    "file_count": 22
+  },
+  "commands": [
+    {
+      "executable": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "--prefix",
+        "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-build"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m",
+      "started_at": "2026-10-09T11:01:55.782Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 1426,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\nvm4w\\nodejs\\node.exe",
+      "arguments": [
+        "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\tools\\fairpane.mjs",
+        "abi-exports",
+        "out/c-abi-build/lib/fairpane.lib"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m",
+      "started_at": "2026-10-09T11:01:57.209Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 47,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "cc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "tests/c/abi_smoke.c",
+        "-Iinclude",
+        "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-build\\lib\\fairpane.lib",
+        "-o",
+        "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-smoke.exe"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m",
+      "started_at": "2026-10-09T11:01:57.256Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 95,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\out\\c-abi-smoke.exe",
+      "arguments": [],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m",
+      "started_at": "2026-10-09T11:01:57.351Z",
+      "exit_code": 3221226505,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 170,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\tc1a4abe99\\m\\.zig-cache\\global"
+      }
+    }
+  ],
+  "error": "Gate command failed: [\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\tc1a4abe99\\\\m\\\\out\\\\c-abi-smoke.exe\"]",
+  "outputs": [
+    {
+      "path": "engineering/evidence/FP-0050/raw/gates-mutation-6b/2026-10-09T11-01-55-758Z-c-abi-39233f69.log",
+      "size": 3251,
+      "sha256": "e18060ddd11b6618e4ff9b63303266e446805e71e899995504b23c3e9ca995d6"
+    }
+  ]
+}

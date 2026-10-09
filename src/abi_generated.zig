@@ -68,14 +68,14 @@ pub const resource_request_version: u32 = 1;
 /// The next deadline when no deadline exists. No timer exists yet, so every step reports it.
 pub const deadline_none: u64 = 0xFFFFFFFFFFFFFFFF;
 
-/// An engine. It belongs to the thread that created it.
+/// An engine. It belongs to the thread that created it. The host must destroy it before that thread exits, because the system can reuse the identifier of an exited thread.
 pub const Engine = opaque {};
 
-/// A document identifier. It is nonzero, unique within the process, and never reused.
+/// A document identifier. It is nonzero, unique within the process, and never reused. A call that fails after it takes an identifier skips that identifier.
 /// Ends when `functions.fp_document_destroy` destroys the document or `functions.fp_engine_destroy` destroys its engine.
 pub const DocumentId = enum(u64) { _ };
 
-/// A request identifier. It is nonzero, unique within the process, and never reused. Document and request identifiers come from one sequence, so they never coincide.
+/// A request identifier. It is nonzero, unique within the process, and never reused. Document and request identifiers come from one sequence, so they never coincide. A call that fails after it takes an identifier skips that identifier.
 /// Ends when the request ends. A step ends a request when it applies the request's response, rejection, or cancellation. The engine ends a request when a new load, a document destruction, or an engine destruction cancels it.
 pub const RequestId = enum(u64) { _ };
 
@@ -178,8 +178,8 @@ pub const Event = extern struct {
     /// The rejection reason when an applied rejection failed the document.
     /// A `RejectReason` value, or zero when absent.
     reject_reason: Optional(RejectReason),
-    /// For a `EventKind.request_issued` event, the request URL while the request is live, otherwise null.
-    /// Output, nullable, owned by the engine. Ends when the request ends. A step ends a request when it applies the request's response, rejection, or cancellation. The engine ends a request when a new load, a document destruction, or an engine destruction cancels it.
+    /// For a `EventKind.request_issued` event, the request URL while the request is live. It is null when the URL is empty, when the request has ended, and for every other kind.
+    /// Output, null when empty, owned by the engine. Ends when the request ends. A step ends a request when it applies the request's response, rejection, or cancellation. The engine ends a request when a new load, a document destruction, or an engine destruction cancels it.
     url: ?[*]const u8,
     url_len: usize,
 };
@@ -195,7 +195,7 @@ pub const functions = struct {
     /// out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
     pub const fp_query_capabilities = fn (out: ?*Capabilities, out_size: usize) callconv(.c) u32;
     /// Creates an engine on the calling thread and stores it in the output.
-    /// Thread: The calling thread becomes the owner of the engine that the call creates.
+    /// Thread: The calling thread becomes the owner of the engine that the call creates. The host must destroy the engine before that thread exits.
     /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.limit_exceeded`, `Status.out_of_memory`.
     /// options: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
     /// out_engine: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
@@ -212,9 +212,9 @@ pub const functions = struct {
     /// engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
     /// out_document: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
     pub const fp_document_create = fn (engine: ?*Engine, out_document: ?*DocumentId) callconv(.c) u32;
-    /// Releases the document. An outstanding request is cancelled and announced, and its queued answer is discarded.
+    /// Releases the document. An outstanding request is cancelled and announced, and its queued answer is discarded. The call never allocates, because the load that issued the request reserved its cancellation event.
     /// Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns `Status.wrong_thread`.
-    /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`, `Status.unknown_id`, `Status.out_of_memory`.
+    /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`, `Status.unknown_id`.
     /// engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
     pub const fp_document_destroy = fn (engine: ?*Engine, document: DocumentId) callconv(.c) u32;
     /// Initializes the declared document information structure with the document state and body.
@@ -223,11 +223,11 @@ pub const functions = struct {
     /// engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
     /// out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
     pub const fp_document_get = fn (engine: ?*Engine, document: DocumentId, out: ?*DocumentInfo, out_size: usize) callconv(.c) u32;
-    /// Issues a `RequestKind.resource` request with version `resource_request_version` for a copy of url and stores its identifier in the output. The url buffer is borrowed for the call only and must not be null. A load while the document is loading cancels the earlier request.
+    /// Issues a `RequestKind.resource` request with version `resource_request_version` for a copy of url and stores its identifier in the output. The url may be null when url_len is zero, and the engine copies it during the call. A load while the document is loading cancels the earlier request. The load reserves the storage of the request's cancellation event, so `functions.fp_document_destroy` never allocates.
     /// Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns `Status.wrong_thread`.
     /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`, `Status.unknown_id`, `Status.limit_exceeded`, `Status.out_of_memory`.
     /// engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
-    /// url: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+    /// url: input, null when empty, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
     /// out_request: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
     pub const fp_document_load = fn (engine: ?*Engine, document: DocumentId, url: ?[*]const u8, url_len: usize, out_request: ?*RequestId) callconv(.c) u32;
     /// Queues a response. The engine copies the body during the call.
@@ -269,7 +269,7 @@ pub const statuses = struct {
     pub const fp_engine_create: []const Status = &.{ .ok, .invalid_argument, .limit_exceeded, .out_of_memory };
     pub const fp_engine_destroy: []const Status = &.{ .ok, .invalid_argument, .wrong_thread };
     pub const fp_document_create: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .limit_exceeded, .out_of_memory };
-    pub const fp_document_destroy: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .unknown_id, .out_of_memory };
+    pub const fp_document_destroy: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .unknown_id };
     pub const fp_document_get: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .unknown_id };
     pub const fp_document_load: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .unknown_id, .limit_exceeded, .out_of_memory };
     pub const fp_request_respond: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .unknown_id, .invalid_state, .unsupported_version, .limit_exceeded, .out_of_memory };

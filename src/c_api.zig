@@ -20,6 +20,7 @@ const wrong_thread = @backingInt(abi.Status.wrong_thread);
 const document_empty = @backingInt(abi.DocumentState.empty);
 const document_loading = @backingInt(abi.DocumentState.loading);
 const document_loaded = @backingInt(abi.DocumentState.loaded);
+const document_failed = @backingInt(abi.DocumentState.failed);
 const reject_unsupported_version = @backingInt(abi.RejectReason.unsupported_version);
 
 /// Checks that a native enumeration has exactly the members and values of its schema enumeration.
@@ -100,6 +101,14 @@ fn enter(handle: ?*abi.Engine) error{ InvalidArgument, WrongThread }!*native.Eng
     return resolved;
 }
 
+/// Converts an input byte range, which may be null only when its length is zero.
+/// Every range of the ABI is `null_when_empty`, so every input range converts through this function.
+fn inputRange(bytes: ?[*]const u8, len: usize) error{InvalidArgument}![]const u8 {
+    if (bytes) |pointer| return pointer[0..len];
+    if (len == 0) return &.{};
+    return error.InvalidArgument;
+}
+
 /// `fp_engine_create` with an explicit allocator.
 /// Zig tests use it to inject allocation failure and to detect leaked engine storage.
 pub fn createEngine(gpa: Allocator, options: ?*const abi.EngineOptions, out_engine: ?*?*abi.Engine) u32 {
@@ -137,9 +146,12 @@ fn eventToC(event: ?native.Event) abi.Event {
             result.request_id = .of(convert(abi.RequestId, notice.request));
             result.request_kind = .of(convert(abi.RequestKind, notice.kind));
             result.request_version = .of(notice.version);
+            // Every range of the ABI is null exactly when it is empty, including an empty live URL.
             if (notice.url) |bytes| {
-                result.url = bytes.ptr;
-                result.url_len = bytes.len;
+                if (bytes.len != 0) {
+                    result.url = bytes.ptr;
+                    result.url_len = bytes.len;
+                }
             }
         },
         .document_state_changed => |change| {
@@ -232,9 +244,9 @@ export fn fp_document_load(handle: ?*abi.Engine, document: abi.DocumentId, url: 
 
 fn documentLoad(handle: ?*abi.Engine, document: abi.DocumentId, url: ?[*]const u8, url_len: usize, out_request: ?*abi.RequestId) !void {
     const engine = try enter(handle);
-    const bytes = url orelse return error.InvalidArgument;
+    const bytes = try inputRange(url, url_len);
     const out = out_request orelse return error.InvalidArgument;
-    const request = try engine.load(convert(native.DocumentId, document), bytes[0..url_len]);
+    const request = try engine.load(convert(native.DocumentId, document), bytes);
     out.* = convert(abi.RequestId, request);
 }
 
@@ -246,12 +258,7 @@ fn requestRespond(handle: ?*abi.Engine, response: ?*const abi.Response) !void {
     const engine = try enter(handle);
     const input = response orelse return error.InvalidArgument;
     if (input.struct_size < @sizeOf(abi.Response)) return error.InvalidArgument;
-    const body: []const u8 = if (input.body) |bytes|
-        bytes[0..input.body_len]
-    else if (input.body_len == 0)
-        &.{}
-    else
-        return error.InvalidArgument;
+    const body = try inputRange(input.body, input.body_len);
     try engine.respond(convert(native.RequestId, input.request_id), input.version, body);
 }
 
@@ -479,28 +486,32 @@ test "FP-0006 case 16: injected allocation failure through the C entry points re
     failing.fail_index = never;
     try testing.expectEqual(ok, fp_request_respond(engine, &response));
 
-    // Reload a second document until no event slot is free, so the step must grow the event queue.
+    // Reload a second document until only the slots that the outstanding requests reserve are free.
+    // A response ends its request and uses that request's slot, so only the spare's host cancellation, which announces two events, needs storage.
     var spare: abi.DocumentId = @fromBackingInt(0);
     try testing.expectEqual(ok, fp_document_create(engine, &spare));
-    while (native_engine.events.buffer.len - native_engine.events.len != 0) {
-        if (native_engine.events.buffer.len - native_engine.events.len == 1) {
+    var spare_request = try loadUrl(engine, spare, "https://example.test/spare");
+    while (native_engine.events.buffer.len - native_engine.events.len > native_engine.requests.count()) {
+        if (native_engine.events.buffer.len - native_engine.events.len == native_engine.requests.count() + 1) {
             var event: abi.Event = undefined;
             try testing.expectEqual(ok, fp_engine_next_event(engine, &event, @sizeOf(abi.Event)));
         }
-        _ = try loadUrl(engine, spare, "https://example.test/spare");
+        spare_request = try loadUrl(engine, spare, "https://example.test/spare");
     }
+    try testing.expectEqual(ok, fp_request_cancel(engine, spare_request));
     const events = native_engine.events.len;
     var outcome: abi.StepOutcome = .{ .struct_size = 1, .work_remaining = 2, .applied = 3, .events_ready = 4, .next_deadline = 5 };
     failing.fail_index = failing.alloc_index;
     try testing.expectEqual(out_of_memory, fp_engine_step(engine, 8, &outcome, @sizeOf(abi.StepOutcome)));
     try testing.expectEqual(3, outcome.applied);
-    try testing.expectEqual(1, native_engine.inputs.len);
+    try testing.expectEqual(2, native_engine.inputs.len);
     try testing.expectEqual(events, native_engine.events.len);
     try testing.expectEqual(document_loading, try documentState(engine, document));
     failing.fail_index = never;
     try testing.expectEqual(ok, fp_engine_step(engine, 8, &outcome, @sizeOf(abi.StepOutcome)));
-    try testing.expectEqual(1, outcome.applied);
+    try testing.expectEqual(2, outcome.applied);
     try testing.expectEqual(document_loaded, try documentState(engine, document));
+    try testing.expectEqual(document_failed, try documentState(engine, spare));
 
     try testing.expectEqual(ok, fp_engine_destroy(engine));
     try testing.expectEqual(failing.allocated_bytes, failing.freed_bytes);
@@ -530,4 +541,16 @@ test "FP-0006 case 17: a document identifier from one engine is unknown in anoth
 
     try testing.expectEqual(document_loading, try documentState(a, document));
     try testing.expectEqual(ok, fp_request_respond(a, &response));
+}
+
+test "FP-0050 case 3: fp_document_destroy cannot return FP_STATUS_OUT_OF_MEMORY" {
+    const expected = [_]abi.Status{ .ok, .invalid_argument, .wrong_thread, .unknown_id };
+    try testing.expectEqualSlices(abi.Status, &expected, abi.statuses.fp_document_destroy);
+    const names = @typeInfo(native.DestroyDocumentError).error_set.error_names.?;
+    try testing.expectEqual(2, names.len);
+    for ([_][]const u8{ "WrongThread", "UnknownId" }) |wanted| {
+        var found = false;
+        for (names) |name| found = found or std.mem.eql(u8, name, wanted);
+        try testing.expect(found);
+    }
 }

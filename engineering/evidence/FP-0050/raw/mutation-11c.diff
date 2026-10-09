@@ -1,0 +1,13 @@
+diff --git a/out/fp0050-mutation/abi_generated.zig.orig b/src/abi_generated.zig
+index f23f69d..5d74eea 100644
+--- a/out/fp0050-mutation/abi_generated.zig.orig
++++ b/src/abi_generated.zig
+@@ -312,7 +312,7 @@ comptime {
+     if (@offsetOf(StepOutcome, "applied") != 8) @compileError("StepOutcome.applied differs from the offset that the schema implies.");
+     if (@offsetOf(StepOutcome, "events_ready") != 16) @compileError("StepOutcome.events_ready differs from the offset that the schema implies.");
+     if (@offsetOf(StepOutcome, "next_deadline") != 24) @compileError("StepOutcome.next_deadline differs from the offset that the schema implies.");
+-    if (@sizeOf(Event) != layout(56, 48)) @compileError("Event differs from the size that the schema implies.");
++    if (@sizeOf(Event) != layout(64, 48)) @compileError("Event differs from the size that the schema implies.");
+     if (@offsetOf(Event, "struct_size") != 0) @compileError("Event.struct_size differs from the offset that the schema implies.");
+     if (@offsetOf(Event, "kind") != 4) @compileError("Event.kind differs from the offset that the schema implies.");
+     if (@offsetOf(Event, "document_id") != 8) @compileError("Event.document_id differs from the offset that the schema implies.");
