@@ -79,6 +79,19 @@ A declared case runs on the main thread while no worker runs a case.
 A worker thread cannot change the working directory: `raw/probe-worker-chdir.log` shows `ERR_WORKER_UNSUPPORTED_OPERATION` for `process.chdir` in a worker.
 [INFERENCE] Each worker gets its own copy of `process.env` and its own module instances when it starts, before any case runs, as the Node.js `worker_threads` documentation states; no log tests it.
 
+Revision 2 declares five more cases that change `TMPDIR`, `TMP`, and `TEMP` in `process.env` through `withPrivateTemp`, which the worker's search missed because the helper makes the assignment.
+Review 1 found them, and their numbers are those of the 248-case suite in `raw/tests-after-r2.log`.
+
+| Case | Declared state |
+| --- | --- |
+| 185, `A capture-start failure writes a RESULT line, closes the log, and returns an error result` | `TMPDIR, TMP, and TEMP in process.env` |
+| 190, `A failed capture-directory removal appears in the command record` | `TMPDIR, TMP, and TEMP in process.env` |
+| 192, `FP-0054 case 6: a capture directory that stays busy ...` | `TMPDIR, TMP, and TEMP in process.env` |
+| 193, `FP-0054 case 6: a capture-directory removal error with a non-transient code gets one attempt` | `TMPDIR, TMP, and TEMP in process.env` |
+| 194, `FP-0054 revision 1 case 6: a capture-directory removal error without a code gets one attempt` | `TMPDIR, TMP, and TEMP in process.env` |
+
+Revision 2 also lets `abi.test.mjs`, `fileset.test.mjs`, `rust.test.mjs`, `ucd.test.mjs`, and `workflow-check.test.mjs` pass a case's declaration through, as `attest.test.mjs` and `release.test.mjs` already did.
+
 ## Test cost
 
 ### Before
@@ -241,5 +254,28 @@ The integrator implemented revision 1 and its amendment 1, as `CONTRACT.md` reco
 Two earlier recordings of `tests-before-r1.log` printed the host's whole search path in case 3's failure message, first through the message and then through `assert.equal`'s value diff.
 They are withheld from the repository, and case 3 now reports only whether each value is present and its length, through `assert.ok`.
 
-`raw/integration-binding-r1-binding.log` records `HEAD` `d4de685` and a status that includes ignored files before and after the four gates: `gates/2026-10-09T19-07-24-699Z-repo-check-e98f573b.json`, `gates/2026-10-09T19-07-25-511Z-controller-test-4c916c75.json` (248 of 248, 61,330 ms beside running workers' builds), `gates/2026-10-09T19-08-27-291Z-zig-fmt-bbe5c452.json`, and `gates/2026-10-09T19-08-27-841Z-zig-test-5e6b3d66.json` pass.
+`raw/integration-binding-r1-binding.log` records `HEAD` `d4de685` and a status that includes ignored files before and after the four gates: `gates/2026-10-09T19-07-24-699Z-repo-check-e98f573b.json`, `gates/2026-10-09T19-07-25-511Z-controller-test-4c916c75.json` (248 of 248 in 61,330 ms), `gates/2026-10-09T19-08-27-291Z-zig-fmt-bbe5c452.json`, and `gates/2026-10-09T19-08-27-841Z-zig-test-5e6b3d66.json` pass.
+[INFERENCE] Worker builds ran on the host during that gate, which explains its slower time.
 `raw/bun-selftest-r1-binding.log` records Bun 1.4.2 with 248 of 248 cases.
+
+## Revision 2
+
+Review 1 (`reviews/review-1-reject.json`) rejects revision 1, because five `withPrivateTemp` cases change `process.env` without a declaration; revision 2 declares them, as "Process-wide declarations" lists, and closes the minor findings.
+
+`engineering/evidence/ci/runs-3e7128c.log` records `gh run view` of every run created from 18:10 to 18:40 UTC: the push run 37971989978 and the ten dispatched runs of `3e7128c`.
+In each of the 11, the Linux job passed, and the Windows job failed in `controller-test` after 31 to 47 seconds.
+`engineering/evidence/ci/run-37971989978-attempt-1/` and `run-37972006869-attempt-1/` hold the Windows receipts, each with 43 failures of 240 cases that name the missing `git`.
+[INFERENCE] The hosted Windows runner gives a worker its search path as `Path`: a local run with that spelling fails the same cases, and the fix that names it `PATH` passes on the runner in push run 37978329724 of `96bad1c`.
+
+Each revision 2 log first records `HEAD` `0f187af` and the blob IDs of `tools/test-runner.mjs`, `tools/selftest.mjs`, and the five changed case modules.
+
+| Log | Command | Exit status and result |
+| --- | --- | --- |
+| `raw/tests-after-r2.log` | `node tools/fairpane.mjs test` | 0; 248 of 248 |
+| `raw/r2-repro-after.log` | Node with the search path named `Path` | 0; 248 of 248 |
+| `raw/bun-selftest-r2.log` | Bun 1.4.2 | 0; 248 of 248 |
+| `raw/bun-r2-repro-after.log` | Bun with the search path named `Path` | 0; 248 of 248 |
+| `raw/mutation-r2.log`, `raw/mutation-r2-M3.diff` | M3 against the committed blob `02fc9919` | 1; only case 3 fails, and the file is `02fc9919` before and after and `81adfe43` during |
+
+The two withheld recordings of `tests-before-r1.log` are kept outside the repository; their SHA-256 values are `289ee96ba12288c058f8bc340e97552f7948e167b0441386db20f7df9ac0f872` (80,932 bytes) and `4bc612e3fc717ec6ed3f567fc558fc0e99fbdfce1bc68ad23444902d78019b05` (77,349 bytes).
+The "Test cost" figures predate revision 1; the dispatched runs decide criterion 3.

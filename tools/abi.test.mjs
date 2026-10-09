@@ -556,7 +556,7 @@ export const abiCases = [
       fields: [u32Field('struct_size'), u32Field('reserved'), u64Field('value'), u32Field('last'), u32Field('spare')] });
     validateSchema(filled);
   }],
-].map(([name, fn]) => ({ name, fn }));
+].map(([name, fn, declaration]) => ({ name, fn, ...declaration }));
 
 export function removeAbiFixtures() {
   const failures = [];

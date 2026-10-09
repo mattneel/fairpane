@@ -583,7 +583,7 @@ export const rustCases = [
     assert.ok(decision >= 0 && next > decision);
     assert.ok(adr.slice(decision, next).includes('On Windows, Fairpane\'s Rust toolchain uses the `x86_64-pc-windows-gnu` host.'));
   }],
-].map(([name, fn]) => ({ name, fn }));
+].map(([name, fn, declaration]) => ({ name, fn, ...declaration }));
 
 export function removeRustFixtures() {
   const failures = [];

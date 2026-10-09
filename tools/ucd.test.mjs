@@ -194,7 +194,7 @@ export const ucdCases = [
     assert.equal(new Set(messages).size, messages.length, JSON.stringify(messages));
     rejects(() => ucd.parseFieldProperty('# @missing: 0000..10FFFF; InCB\n', { file: 'Fixture.txt', aliases, property: 'InCB' }), /^Fixture\.txt line 1: /);
   }],
-].map(([name, fn]) => ({ name, fn }));
+].map(([name, fn, declaration]) => ({ name, fn, ...declaration }));
 
 export function removeUcdFixtures() {
   const failures = [];

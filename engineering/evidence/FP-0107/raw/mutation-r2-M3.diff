@@ -1,0 +1,13 @@
+diff --git a/tools/test-runner.mjs b/tools/test-runner.mjs
+index 02fc991..81adfe4 100644
+--- a/tools/test-runner.mjs
++++ b/tools/test-runner.mjs
+@@ -119,7 +119,7 @@ export function casePool(moduleUrl, size = DEFAULT_CONCURRENCY) {
+   const idle = [], waiting = [], problems = [];
+   let live = size, lastStop = null;
+   const start = () => {
+-    const state = { worker: new Worker(new URL(moduleUrl), { env: workerEnvironment() }), pending: null, stopped: false, closing: false };
++    const state = { worker: new Worker(new URL(moduleUrl)), pending: null, stopped: false, closing: false };
+     state.worker.on('message', message => {
+       const pending = state.pending;
+       state.pending = null;

@@ -384,7 +384,7 @@ export const workflowCases = [
     onlyProblem(gatesVariant('    timeout-minutes: 90\n', `    timeout-minutes: 90\n    env:\n      ZIG_BUILD_SUMMARY: all\n`), /^Line \d+: Job windows sets env:\./);
     onlyProblem(gatesVariant('\njobs:\n', '\nenv:\n  ZIG_BUILD_SUMMARY: all\n\njobs:\n'), /^Line \d+: The Gates workflow sets env:\./);
   }],
-].map(([name, fn]) => ({ name, fn }));
+].map(([name, fn, declaration]) => ({ name, fn, ...declaration }));
 
 if (process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))) {
   console.log('TAP version 13');

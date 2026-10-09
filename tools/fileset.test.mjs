@@ -654,7 +654,7 @@ export const fileSetCases = [
     await f.classify();
     assert.equal((await f.verify()).result, 'pass');
   }],
-].map(([name, fn]) => ({ name, fn }));
+].map(([name, fn, declaration]) => ({ name, fn, ...declaration }));
 
 /** Archives that the zip reader must reject, each with its label, error pattern, and whether readZip rejects it without inflating. */
 function rejectedArchives() {

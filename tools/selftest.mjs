@@ -581,7 +581,7 @@ test('A capture-start failure writes a RESULT line, closes the log, and returns 
     assert.equal(lastResult(second).error, s.error); assert.ok(u.logClosed(second), 'The log descriptor stayed open.');
   });
   assert.deepEqual(fs.readdirSync(tmp), []);
-});
+}, { processWide: 'TMPDIR, TMP, and TEMP in process.env' });
 test('A failed RESULT write returns an error result instead of throwing', async () => {
   const failResult = (fd, data, ...rest) => {
     if (String(data).startsWith('RESULT ')) throw new Error('forced result write failure');
@@ -652,7 +652,7 @@ test('A failed capture-directory removal appears in the command record', async (
     assert.equal(lastResult(second).error, s.error);
   });
   assert.equal(fs.readdirSync(tmp).length, 2, 'Both capture directories survive, as their records state.');
-});
+}, { processWide: 'TMPDIR, TMP, and TEMP in process.env' });
 // Each injected removal failure has a distinct message, so a record that names an earlier failure is caught.
 function failingRemoval(failures) {
   const times = [];
@@ -683,7 +683,7 @@ test('FP-0054 case 6: a capture directory that stays busy records the last failu
   const elapsed = removal.times[2] - removal.times[0];
   assert.ok(elapsed >= 140, `The three removal attempts took ${elapsed} ms.`);
   assert.equal(fs.readdirSync(tmp).length, 1, 'The failed capture directory survives, as its record states.');
-});
+}, { processWide: 'TMPDIR, TMP, and TEMP in process.env' });
 test('FP-0054 case 6: a capture-directory removal error with a non-transient code gets one attempt', async () => {
   const dir = temp(), logPath = path.join(dir, 'denied.log');
   const removal = failingRemoval([{ code: 'EACCES', message: 'EACCES: forced access failure' }]);
@@ -693,7 +693,7 @@ test('FP-0054 case 6: a capture-directory removal error with a non-transient cod
     assert.equal(lastResult(logPath).error, r.error);
   });
   assert.equal(fs.readdirSync(tmp).length, 1, 'The failed capture directory survives, as its record states.');
-});
+}, { processWide: 'TMPDIR, TMP, and TEMP in process.env' });
 test('FP-0054 revision 1 case 6: a capture-directory removal error without a code gets one attempt', async () => {
   const dir = temp(), logPath = path.join(dir, 'uncoded.log');
   const removal = failingRemoval([{ message: 'forced removal failure without a code' }]);
@@ -703,7 +703,7 @@ test('FP-0054 revision 1 case 6: a capture-directory removal error without a cod
     assert.equal(lastResult(logPath).error, r.error);
   });
   assert.equal(fs.readdirSync(tmp).length, 1, 'The failed capture directory survives, as its record states.');
-});
+}, { processWide: 'TMPDIR, TMP, and TEMP in process.env' });
 test('FP-0054 case 6: lastResult asserts that a RESULT line exists before it parses one', () => {
   const logPath = path.join(temp(), 'no-result.log');
   fs.writeFileSync(logPath, '\nCOMMAND ["absent"]\noutput without a result\n');

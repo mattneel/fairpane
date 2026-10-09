@@ -11,6 +11,9 @@ Related tasks: `FP-0098`, `FP-0107`.
 A case that changes process-wide state declares it when it is registered, and it runs on the main thread while no other case runs.
 The runner prints each case's duration, the ten slowest cases, and the total duration.
 The `controller-test` gate keeps its arguments and its 120000 ms timeout.
+Each worker thread gets its own copy of the environment from `workerEnvironment`, which on Windows names the search path `PATH` and the system root `SystemRoot`, the spellings that the tools read.
+A worker's copy matches names with regard to letter case, while the main thread's `process.env` on Windows does not, and the hosted Windows runner's search path reaches a worker as `Path` [INFERENCE: the runs of `3e7128c` failed as a local run with that spelling fails].
+The runner does not share the main thread's environment through `SHARE_ENV`: with it, Bun 1.4.2's main-thread `os.tmpdir()` stops following `process.env`, and a declared case that changes `TMP` reaches concurrent workers.
 
 ## Evidence
 
@@ -20,6 +23,7 @@ A child-process probe of the base suite counted 1857 child processes, 1756 of th
 [INFERENCE] A synchronous child-process call blocks every case that shares its thread, so concurrency within one thread would not remove that wait, and worker threads do; no run measured concurrency within one thread.
 On WSL Ubuntu, the suite took 17690 ms before and 11414 ms after, and the base case with 110 `git` starts took 284 ms there and 3274 ms on Windows.
 A mutation control that ignores the declaration fails three existing cases besides `FP-0107` case 2.
+FP-0107 revision 1 reproduces the hosted-runner failure locally with the search path named `Path` and records the `SHARE_ENV` probe, and revision 2 declares the five `withPrivateTemp` cases that revision 1 left undeclared.
 
 ## Consequences
 
