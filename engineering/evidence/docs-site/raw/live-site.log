@@ -1,0 +1,20 @@
+
+COMMAND ["C:\\Program Files\\GitHub CLI\\gh.exe","run","view","37863686220","--repo","mattneel/fairpane","--json","conclusion,status,headSha,event,workflowName,url,jobs","--jq","{conclusion,status,headSha,event,workflowName,url,jobs:[.jobs[]|{name,conclusion}]}"]
+{"conclusion":"success","event":"push","headSha":"f75021e4b365d2c611922c22387011d5a1d797a9","jobs":[{"conclusion":"success","name":"build"},{"conclusion":"success","name":"deploy"}],"status":"completed","url":"https://github.com/mattneel/fairpane/actions/runs/37863686220","workflowName":"Pages"}
+RESULT {"executable":"C:\\Program Files\\GitHub CLI\\gh.exe","arguments":["run","view","37863686220","--repo","mattneel/fairpane","--json","conclusion,status,headSha,event,workflowName,url,jobs","--jq","{conclusion,status,headSha,event,workflowName,url,jobs:[.jobs[]|{name,conclusion}]}"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1233}
+
+COMMAND ["C:\\Windows\\system32\\curl.exe","--fail","--silent","--show-error","--location","--write-out","\\nHTTP %{http_code} %{url_effective} %{size_download} bytes\\n","--output","out/live-index.html","https://mattneel.github.io/fairpane/"]
+
+HTTP 200 https://mattneel.github.io/fairpane/ 22295 bytes
+RESULT {"executable":"C:\\Windows\\system32\\curl.exe","arguments":["--fail","--silent","--show-error","--location","--write-out","\\nHTTP %{http_code} %{url_effective} %{size_download} bytes\\n","--output","out/live-index.html","https://mattneel.github.io/fairpane/"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":608}
+
+COMMAND ["C:\\Windows\\system32\\curl.exe","--fail","--silent","--show-error","--location","--write-out","\\nHTTP %{http_code} %{url_effective} %{size_download} bytes\\n","--output","out/live-status.html","https://mattneel.github.io/fairpane/status.html"]
+
+HTTP 200 https://mattneel.github.io/fairpane/status.html 25400 bytes
+RESULT {"executable":"C:\\Windows\\system32\\curl.exe","arguments":["--fail","--silent","--show-error","--location","--write-out","\\nHTTP %{http_code} %{url_effective} %{size_download} bytes\\n","--output","out/live-status.html","https://mattneel.github.io/fairpane/status.html"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":255}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'); const i=fs.readFileSync('out/live-index.html','utf8'), s=fs.readFileSync('out/live-status.html','utf8'); console.log('index title:', (i.match(/<title>([^<]*)<\\/title>/)||[])[1]); console.log('index states bootstrap:', i.includes('Fairpane is a development bootstrap, not a browser release.')); console.log('status includes handoff:', s.includes('Current handoff')); process.exitCode = i.includes('development bootstrap') && s.includes('Current handoff') ? 0 : 1;"]
+index title: Introduction - Fairpane
+index states bootstrap: true
+status includes handoff: true
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'); const i=fs.readFileSync('out/live-index.html','utf8'), s=fs.readFileSync('out/live-status.html','utf8'); console.log('index title:', (i.match(/<title>([^<]*)<\\/title>/)||[])[1]); console.log('index states bootstrap:', i.includes('Fairpane is a development bootstrap, not a browser release.')); console.log('status includes handoff:', s.includes('Current handoff')); process.exitCode = i.includes('development bootstrap') && s.includes('Current handoff') ? 0 : 1;"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
