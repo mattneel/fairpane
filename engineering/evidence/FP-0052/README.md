@@ -177,9 +177,75 @@ The base before `775d988` is `44b083c8f5fc367bb9843bd588bd7ba886d6857a`; only a 
 The mutation keeps the original at `out/fp0052-a1/mutation/lib.mjs`, and the restoration compares the bytes.
 The "before" and "after" blobs equal `tools/lib.mjs` in `raw/controller-tests-after-a1.log`.
 
+## Amendment 2
+
+Contract amendment 2, frozen at `0954a37`, makes the Windows stand-in of case 2 follow the host that runs the suite.
+The worker implemented it in an isolated working tree whose `HEAD` was `0954a372771219d7ba124ffd41c705cc87be2c76`.
+The host was Windows 10.0.26200 on x64 with Node v26.7.0 and Bun 1.4.2.
+
+### Bun preload probe
+
+`raw/probe-bun-preload-a2.log` runs these commands in order.
+
+1. `bun --version`, `exit_code` 0: `1.4.2`.
+2. A `bun -e` setup, `exit_code` 0.
+   It creates `out/fp0052-a2/probe-bun-preload`, hard-links Bun's `process.execPath` there as `taskkill.exe` (link count 2), and writes `preload.cjs` and `bunfig.toml`.
+   The preload writes the marker `taskkill.ran` with the base name of `process.execPath` and calls `process.exit(0)`.
+   `bunfig.toml` holds `preload = ["<absolute path of preload.cjs>"]`.
+3. `taskkill.exe /PID 1 /T /F` with that directory as its working directory, `exit_code` 1, with the output `error: Module not found "/PID"`.
+4. A `node -e` check, `exit_code` 0: "Marker exists after the run: false."
+
+Bun does not run the `bunfig.toml` preload before it resolves `/PID`, so case 2 does not use one.
+
+### Revised case 2 under amendment 2
+
+- `taskkillStandInSource` in `tools/selftest.mjs` names the program that case 2 hard-links or copies as `taskkill.exe`.
+  Under Node, which it detects by the absence of `process.versions.bun` and `process.versions.deno`, it returns `process.execPath`, so amendment 1's stand-in is unchanged.
+  Under any other host, it resolves `node` through `PATH` with `resolveExecutable` and returns its real path, so the hard link names the file and not a symbolic link.
+  Without a Node executable on `PATH`, it throws `FP-0052 case 2 needs Node on PATH to build its stand-in.`
+- Case 2 calls it before it creates the stand-in, so a failure changes no process-wide state.
+  The preload, `NODE_OPTIONS`, the direct check of the stand-in, the marker checks, and the `finally` block that restores `NODE_OPTIONS` and the working directory and stops the sleeping command are as amendment 1 defines them.
+  The case directory comes from `temp()`, which the suite removes at the end, as before.
+- A new case, "FP-0052 case 2, amendment 2", checks the three outcomes of `taskkillStandInSource`: `process.execPath` under Node, the real path of a `node` file on a fixture `PATH` under another host, and the exact error with an empty `PATH`.
+
+### Amendment 2 records
+
+| Log | RESULT |
+| --- | --- |
+| `raw/probe-bun-preload-a2.log` | The probe above: the stand-in exits with status 1, and no marker exists. |
+| `raw/bun-selftest-after-a2.log` | `bun --version` (0) prints `1.4.2`. `bun tools/selftest.mjs` exits with status 0, 236 of 236 pass, and case 2 prints "took 2417 ms" and passes. `git hash-object` (0) prints `tools/selftest.mjs` `6a70718ebc26e7d61edc9697ab4ab80562aa5b42` and `tools/lib.mjs` `921c9cfd3c460bb02ab0638e51c03086b2235002`. |
+| `raw/controller-tests-after-a2.log` | `git rev-parse HEAD` (0) prints `0954a372771219d7ba124ffd41c705cc87be2c76`. `node tools/fairpane.mjs test` exits with status 0, 236 of 236 pass, and case 2 prints "took 2050 ms" and passes. `git hash-object` (0) prints the same two blobs as the Bun log, and `node --version` (0) prints `v26.7.0`. |
+| `raw/mutation-a2.log` | The bare-name control under both hosts; see "Amendment 2 mutation". |
+| `raw/check-a2.log` | `node tools/fairpane.mjs check` exits with status 0 on the final `tools/selftest.mjs`; it ran before this table row was added. |
+
+`raw/bun-selftest.log` is the failure that amendment 2 cites; the contract places it at `a342961`, and the log does not record `HEAD`.
+It records `bun tools/selftest.mjs` with `exit_code` 1: 234 of 235 pass, and case 2 fails with "error: Module not found "/PID"" after 23 ms.
+
+### Amendment 2 mutation
+
+`raw/mutation-a2.log` runs these commands in order.
+
+1. `git hash-object tools/lib.mjs`, `exit_code` 0: `921c9cfd3c460bb02ab0638e51c03086b2235002`.
+2. The mutation, `exit_code` 0.
+   It keeps the original at `out/fp0052-a2/mutation/lib.mjs` and makes `treeStopProgram` return the bare name `taskkill.exe` on Windows.
+3. `git hash-object tools/lib.mjs`, `exit_code` 0: `35da1e1f4285835d2e6a133c692db727cd63a75b`.
+4. `git diff --no-index` of the original against the mutated file, `exit_code` 1 because the files differ; the log holds the one-line hunk.
+5. `node tools/selftest.mjs`, `exit_code` 1, with 234 of 236 passing.
+   Case 2 fails with "runProcess did not return within 15 seconds, so the watchdog did not stop its command." after 15070 ms, and the `SystemRoot` case fails with "134 !== null".
+6. `bun tools/selftest.mjs`, `exit_code` 1, with 234 of 236 passing.
+   Case 2 fails with the same message after 15054 ms, and the `SystemRoot` case fails with "0 !== null".
+7. The restoration, `exit_code` 0, which compares the restored bytes with the original.
+8. `git hash-object tools/lib.mjs`, `exit_code` 0: `921c9cfd3c460bb02ab0638e51c03086b2235002`.
+
+| Control | File | Before | During | After |
+| --- | --- | --- | --- | --- |
+| Bare name | `tools/lib.mjs` | `921c9cfd3c460bb02ab0638e51c03086b2235002` | `35da1e1f4285835d2e6a133c692db727cd63a75b` | `921c9cfd3c460bb02ab0638e51c03086b2235002` |
+
+The "before" and "after" blobs equal `tools/lib.mjs` in both "after" logs.
+
 ## Open items
 
-- Amendment 1 resolves the case 2 defect on Windows; see "Amendment 1".
+- Amendment 1 resolves the case 2 defect on Windows under Node, and amendment 2 under Bun; see "Amendment 1" and "Amendment 2".
   The revised case has not run on Linux.
 - The integrator records `HEAD` and a status that includes ignored files for every source root before and after `repo-check` and `controller-test`.
 - The integrator runs and records `corpus-verify test262` and `corpus-verify wpt` at the integration commit.

@@ -1288,15 +1288,31 @@ test('FP-0052 case 1: the system-directory resolver returns the System32 path an
   for (const env of [{}, { SystemRoot: '' }, { SystemRoot: 'Windows' }])
     assert.throws(() => lib.windowsSystemProgram('taskkill.exe', env), /SystemRoot/, JSON.stringify(env));
 });
+/**
+ * The program that case 2 hard-links or copies as its Windows stand-in for taskkill.exe, under contract amendments 1 and 2.
+ * The stand-in needs a host that honors NODE_OPTIONS, so under Node it is the running executable.
+ * Bun ignores NODE_OPTIONS, and `raw/probe-bun-preload-a2.log` shows that a bunfig.toml preload does not run before Bun
+ * fails on "/PID", so any other host uses the Node executable that PATH resolves.
+ */
+function taskkillStandInSource({ nodeHost = process.versions.bun === undefined && process.versions.deno === undefined,
+  pathEnv = process.env.PATH ?? '' } = {}) {
+  if (nodeHost) return process.execPath;
+  let node;
+  try { node = resolveExecutable(root, 'node', { pathEnv }); }
+  catch { throw new Error('FP-0052 case 2 needs Node on PATH to build its stand-in.'); }
+  // A hard link to a symbolic link would link the link itself, so link the file that it names.
+  return fs.realpathSync(node);
+}
 test('FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command', async () => {
   const dir = temp(), saved = process.cwd(), fake = path.join(dir, 'taskkill.exe'), pidFile = path.join(dir, 'child.pid');
   const windows = process.platform === 'win32', preload = path.join(dir, 'preload.cjs'), marker = path.join(dir, 'taskkill.ran');
   const savedOptions = process.env.NODE_OPTIONS, started = Date.now();
   if (windows) {
-    // Contract amendment 1: the stand-in must exit with status 0 for taskkill's arguments, or the watchdog's direct-child
-    // fallback hides a watchdog that runs it. It is the running Node executable under the name taskkill.exe, and the
+    // Contract amendments 1 and 2: the stand-in must exit with status 0 for taskkill's arguments, or the watchdog's
+    // direct-child fallback hides a watchdog that runs it. It is a Node executable under the name taskkill.exe, and the
     // preload makes it write the marker and exit with status 0 before Node reads its script argument.
-    try { fs.linkSync(process.execPath, fake); } catch { fs.copyFileSync(process.execPath, fake); }
+    const source = taskkillStandInSource();
+    try { fs.linkSync(source, fake); } catch { fs.copyFileSync(source, fake); }
     fs.writeFileSync(preload, `if (require('node:path').basename(process.execPath).toLowerCase() === 'taskkill.exe') {\n`
       + `  require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'ran');\n  process.exit(0);\n}\n`);
   } else { fs.writeFileSync(fake, '#!/bin/sh\nexit 0\n'); fs.chmodSync(fake, 0o755); }
@@ -1328,6 +1344,14 @@ test('FP-0052 case 2: a taskkill.exe in the working directory does not stop the 
     if (fs.existsSync(pidFile)) try { process.kill(Number(fs.readFileSync(pidFile, 'utf8')), 'SIGKILL'); } catch { /* It has ended. */ }
     console.log(`# FP-0052 case 2 took ${Date.now() - started} ms.`);
   }
+});
+test('FP-0052 case 2, amendment 2: a host other than Node builds the stand-in from the Node on PATH and fails without one', () => {
+  assert.equal(taskkillStandInSource({ nodeHost: true, pathEnv: '' }), process.execPath);
+  const dir = temp(), node = path.join(dir, process.platform === 'win32' ? 'node.exe' : 'node');
+  fs.writeFileSync(node, ''); fs.chmodSync(node, 0o755);
+  assert.equal(taskkillStandInSource({ nodeHost: false, pathEnv: dir }), fs.realpathSync(node));
+  assert.throws(() => taskkillStandInSource({ nodeHost: false, pathEnv: '' }),
+    e => e.message === 'FP-0052 case 2 needs Node on PATH to build its stand-in.');
 });
 test('FP-0052: a SystemRoot that cannot locate taskkill.exe fails runProcess on Windows before its command starts', async () => {
   const dir = temp(), marker = path.join(dir, 'started'), saved = process.env.SystemRoot;
