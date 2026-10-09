@@ -316,6 +316,59 @@ test('A removed input still produces a failed gate receipt', async () => {
 test('Unknown gates fail before execution', async () => {
   const dir = gateFixture(); await assert.rejects(() => runGate(dir, 'unknown'), /Unknown gate/);
 });
+/** A gate command that starts a child with `marker` in its command line, records the child's PID, and then hangs. */
+function hungGateFixture(marker) {
+  return gateFixture(`import { spawn } from 'node:child_process'; import fs from 'node:fs';
+const child = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)', ${JSON.stringify(marker)}], { stdio: 'ignore', windowsHide: true });
+fs.writeFileSync('child.pid', String(child.pid));
+setInterval(() => {}, 1000);`);
+}
+function processAlive(pid) {
+  try { process.kill(pid, 0); return true; } catch (e) { if (e.code === 'ESRCH') return false; throw e; }
+}
+/** Wait up to five seconds for `pid` to end. A survivor is stopped so that it cannot outlive the test, and the check fails. */
+async function expectStopped(pid) {
+  for (let waited = 0; waited < 5000 && processAlive(pid); waited += 100) await new Promise(r => setTimeout(r, 100));
+  if (!processAlive(pid)) return;
+  try { process.kill(pid, 'SIGKILL'); } catch { /* It ended after the last check. */ }
+  assert.fail(`Process ${pid} kept running after the gate stopped its command.`);
+}
+const timeoutLines = log => log.split(/\r?\n/).filter(l => l.startsWith('TIMEOUT ') || l.startsWith('PROCESS '));
+test('FP-0098 case 1: a timed-out gate lists its live descendants before it stops them', async () => {
+  const marker = `fp0098-marker-${process.pid}-${Date.now()}`, dir = hungGateFixture(marker);
+  const r = await runGate(dir, 'fixture');
+  const childPid = Number(fs.readFileSync(path.join(dir, 'child.pid'), 'utf8'));
+  await expectStopped(childPid);
+  assert.equal(r.status, 'fail'); assert.equal(r.commands.length, 1); assert.equal(r.commands[0].timed_out, true);
+  const log = fs.readFileSync(path.join(dir, r.outputs[0].path), 'utf8');
+  const processes = log.split(/\r?\n/).filter(l => l.startsWith('PROCESS ')).map(l => JSON.parse(l.slice('PROCESS '.length)));
+  const child = processes.find(p => p.pid === childPid);
+  assert.ok(child, `The log lists no process with the child's PID ${childPid}:\n${timeoutLines(log).join('\n')}`);
+  assert.ok(JSON.stringify(child.command_line).includes(marker), `The child's command line lacks its marker: ${JSON.stringify(child)}`);
+  assert.ok(processes.some(p => p.pid === child.ppid), 'The log lists the child\'s parent, the gate command.');
+  assert.match(log, /^TIMEOUT after 2000 ms: the live process tree of PID \d+ follows\.$/m);
+  assert.match(log, /^TIMEOUT Stopping PID \d+ and its descendants\.$/m);
+});
+test('FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails', async () => {
+  const marker = `fp0098-marker-${process.pid}-${Date.now()}`, dir = hungGateFixture(marker);
+  const absent = path.join(dir, 'absent');
+  const r = await runGate(dir, 'fixture', { processListing: { powershell: path.join(absent, 'powershell.exe'), procRoot: absent } });
+  const childPid = Number(fs.readFileSync(path.join(dir, 'child.pid'), 'utf8'));
+  await expectStopped(childPid);
+  assert.equal(r.status, 'fail'); assert.equal(r.commands.length, 1); assert.equal(r.commands[0].timed_out, true);
+  const log = fs.readFileSync(path.join(dir, r.outputs[0].path), 'utf8');
+  assert.match(log, /^TIMEOUT after 2000 ms: the process listing failed: .*ENOENT.*$/m);
+  assert.equal(log.split(/\r?\n/).filter(l => l.startsWith('PROCESS ')).length, 0);
+  assert.match(log, /^TIMEOUT Stopping PID \d+ and its descendants\.$/m);
+});
+test('FP-0098 case 3: an ordinary pass or fail gate record has no timeout section and is not timed out', async () => {
+  for (const [script, status, code] of [['console.log("Fixture command ran.");', 'pass', 0], ['process.exit(8);', 'fail', 8]]) {
+    const dir = gateFixture(script), r = await runGate(dir, 'fixture');
+    assert.equal(r.status, status); assert.equal(r.commands.length, 1);
+    assert.equal(r.commands[0].exit_code, code); assert.equal(r.commands[0].timed_out, false);
+    assert.deepEqual(timeoutLines(fs.readFileSync(path.join(dir, r.outputs[0].path), 'utf8')), []);
+  }
+});
 test('Evidence paths cannot escape their approved roots', async () => {
   const { dir } = await goodReceipt(); assert.throws(() => validateReceipt(dir, 'input.txt'), /outside an allowed directory/);
   assert.throws(() => validateReceipt(dir, 'out/evidence/../../input.txt'), /traversal/);

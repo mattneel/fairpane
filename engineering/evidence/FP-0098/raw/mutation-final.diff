@@ -1,0 +1,13 @@
+diff --git a/out/fp0098/mutation-final/lib.mjs b/tools/lib.mjs
+index ef00cf6..3499e8a 100644
+--- a/out/fp0098/mutation-final/lib.mjs
++++ b/tools/lib.mjs
+@@ -586,7 +586,7 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000,
+       timer = setTimeout(async () => {
+         timedOut = true;
+         if (child.pid) {
+-          const section = await timeoutSection(child.pid, timeoutMs, processListing);
++          const section = ''; // FP-0098 mutation control: skip the listing.
+           // A command that ended during the listing has already closed its log and needs no stop.
+           if (settled) return;
+           try { writeLog(io, fd, Buffer.from(section)); }

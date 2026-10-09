@@ -1,0 +1,21 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--test-runner","tools/zig/test_profile_runner.zig","--test-filter","case 46","--cache-dir","out/fp0098-probe","src/root.zig"]
+TEST 1/8 0.001 ms pass root.test_0
+TEST 2/8 0.000 ms pass css.css.test_0
+TEST 3/8 0.000 ms pass font.opentype.test_0
+TEST 4/8 0.000 ms pass html.root.test_0
+TEST 5/8 0.000 ms pass js.runtime.test_0
+TEST 6/8 36.474 ms pass css.tests.test.FP-0014 case 46: nesting depth is bounded only by memory
+TEST 7/8 177806.055 ms pass css.tests.test.FP-0014 case 46 PROBE part 2
+TEST 8/8 1246.378 ms pass css.tests.test.FP-0014 case 46 PROBE part 3
+SLOWEST (rank, ms, share of the total, test)
+RANK 1 177806.055 ms 99.2% css.tests.test.FP-0014 case 46 PROBE part 2
+RANK 2 1246.378 ms 0.6% css.tests.test.FP-0014 case 46 PROBE part 3
+RANK 3 36.474 ms 0.0% css.tests.test.FP-0014 case 46: nesting depth is bounded only by memory
+RANK 4 0.001 ms 0.0% root.test_0
+RANK 5 0.000 ms 0.0% css.css.test_0
+RANK 6 0.000 ms 0.0% font.opentype.test_0
+RANK 7 0.000 ms 0.0% js.runtime.test_0
+RANK 8 0.000 ms 0.0% html.root.test_0
+TOTAL 8 tests, 179088.910 ms; 0 failed, 0 skipped, 0 leaked, 0 logged errors
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--test-runner","tools/zig/test_profile_runner.zig","--test-filter","case 46","--cache-dir","out/fp0098-probe","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t63eac3001\\m","started_at":"2026-10-09T13:45:22.747Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":182243,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

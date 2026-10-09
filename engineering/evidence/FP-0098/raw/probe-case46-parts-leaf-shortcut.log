@@ -1,0 +1,23 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--test-runner","tools/zig/test_profile_runner.zig","--test-filter","case 46","--test-filter","FP-0098","--cache-dir","out/fp0098-probe","src/root.zig"]
+TEST 1/9 0.001 ms pass root.test_0
+TEST 2/9 0.000 ms pass css.css.test_0
+TEST 3/9 0.200 ms pass dom.test.FP-0098: the leaf shortcut of the inclusive-ancestor check agrees with the ancestor walk for every pair of nodes
+TEST 4/9 0.000 ms pass font.opentype.test_0
+TEST 5/9 0.000 ms pass html.root.test_0
+TEST 6/9 0.000 ms pass js.runtime.test_0
+TEST 7/9 36.187 ms pass css.tests.test.FP-0014 case 46: nesting depth is bounded only by memory
+TEST 8/9 2164.506 ms pass css.tests.test.FP-0014 case 46 PROBE part 2
+TEST 9/9 1592.112 ms pass css.tests.test.FP-0014 case 46 PROBE part 3
+SLOWEST (rank, ms, share of the total, test)
+RANK 1 2164.506 ms 57.0% css.tests.test.FP-0014 case 46 PROBE part 2
+RANK 2 1592.112 ms 41.9% css.tests.test.FP-0014 case 46 PROBE part 3
+RANK 3 36.187 ms 0.9% css.tests.test.FP-0014 case 46: nesting depth is bounded only by memory
+RANK 4 0.200 ms 0.0% dom.test.FP-0098: the leaf shortcut of the inclusive-ancestor check agrees with the ancestor walk for every pair of nodes
+RANK 5 0.001 ms 0.0% root.test_0
+RANK 6 0.000 ms 0.0% css.css.test_0
+RANK 7 0.000 ms 0.0% font.opentype.test_0
+RANK 8 0.000 ms 0.0% html.root.test_0
+RANK 9 0.000 ms 0.0% js.runtime.test_0
+TOTAL 9 tests, 3793.009 ms; 0 failed, 0 skipped, 0 leaked, 0 logged errors
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--test-runner","tools/zig/test_profile_runner.zig","--test-filter","case 46","--test-filter","FP-0098","--cache-dir","out/fp0098-probe","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t63eac3001\\m","started_at":"2026-10-09T13:49:54.462Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":6479,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

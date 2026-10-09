@@ -130,6 +130,13 @@ Child commands receive argument arrays without shell interpolation.
 Each child writes its output to a file in a new private temporary directory, which the controller copies into the log and removes.
 If the removal fails, the command record carries that error, and the command fails.
 A watchdog terminates a hung process group on POSIX or a process tree on Windows.
+Before it stops a timed-out command, it writes a timeout section to the log.
+The section lists the command and each live descendant as a `PROCESS` line with the process ID, the parent process ID, and the command line.
+On Windows, the list comes from `Win32_Process` through Windows PowerShell, which the controller starts by its full path under `%SystemRoot%\System32`.
+On Linux, it comes from `/proc/<pid>/stat` and `/proc/<pid>/cmdline`, and the command line is an argument array.
+The listing has a 10-second limit.
+If it fails, the section names the reason, and the watchdog still stops the command, which still fails with `timed_out: true`.
+The section precedes the command's output in the log, because the output is copied in when the command ends.
 The caller still needs operating-system isolation and resource quotas for hostile inputs.
 The tool does not enforce disk quotas or a network policy.
 Zig and C ABI gates set `ZIG_GLOBAL_CACHE_DIR` to `.zig-cache/global` inside the repository.
@@ -321,6 +328,18 @@ Do not run `font_expectations.py` directly, because a direct run keeps the inher
 The script's own usage line, which runs it from the repository root, predates this procedure.
 It stays unchanged, because each expectation file records the script's SHA-256 and case 12 compares that digest with the committed script.
 `tools/fileset.test.mjs` holds FP-0013 cases 41 through 49 and 53 through 55, which read `file://` or in-memory fixture sources and never use the network.
+
+## Profile the Zig tests
+
+`tools/zig/test_profile_runner.zig` is a test runner that prints the wall time of each test.
+Before each test, it prepares `std.testing` as the default runner does: a fresh `SafeAllocator` over the page allocator with the same canary and write-after-free check, and a fresh `Io.Threaded`.
+A failed test, a leak, or an error log fails the run.
+It is not part of `zig build test`, which keeps the default runner.
+
+1. Run `node tools/fairpane.mjs record --env ZIG_GLOBAL_CACHE_DIR=<repository>\.zig-cache\global <log> <locked zig> test -ODebug --test-runner tools/zig/test_profile_runner.zig --cache-dir out/test-profile src/root.zig` from the repository root.
+2. Run the same command with `--dep fairpane -Mroot=tests/text/root.zig -Mfairpane=src/root.zig` in place of `src/root.zig` to profile the text tests.
+3. Read the `TEST` line of each test, the `RANK` lines of the 25 slowest tests, and the `TOTAL` line.
+4. Run `zig build test --summary all` with a fresh `--cache-dir` for the duration of every other step.
 
 ## Extend the controller
 

@@ -751,7 +751,19 @@ pub const Store = struct {
         return null;
     }
 
+    /// Whether `ancestor` is an inclusive ancestor of `node`.
+    /// Every ancestor has a child, so a node without children is an inclusive ancestor only of itself.
+    /// That shortcut answers the insertion of a new leaf without walking the ancestors of `node`,
+    /// which made building a chain of n elements take time quadratic in n.
+    /// `isInclusiveAncestorByWalk` is the reference that the shortcut must agree with.
     fn isInclusiveAncestor(store: *Store, ancestor: NodeHandle, node: NodeHandle) bool {
+        if (sameNode(ancestor, node)) return true;
+        if (store.at(ancestor).first_child == null) return false;
+        return store.isInclusiveAncestorByWalk(ancestor, node);
+    }
+
+    /// The definition: walk the inclusive ancestors of `node`, looking for `ancestor`.
+    fn isInclusiveAncestorByWalk(store: *Store, ancestor: NodeHandle, node: NodeHandle) bool {
         var cursor: ?NodeHandle = node;
         while (cursor) |current| : (cursor = store.at(current).parent) {
             if (sameNode(current, ancestor)) return true;
@@ -1364,6 +1376,49 @@ test "FP-0009 case 2: every condition of ensure pre-insert validity returns its 
         const target = try newDocument(s);
         try expectRejected(s, error.NotFound, Store.insertBefore, .{ s, target, try newText(s, target, "t"), detached });
     }
+}
+
+test "FP-0098: the leaf shortcut of the inclusive-ancestor check agrees with the ancestor walk for every pair of nodes" {
+    var store = try Store.init(testing.allocator);
+    defer store.deinit();
+    const s = &store;
+    const document = try newDocument(s);
+    const html = try newElement(s, document, "html");
+    const body = try newElement(s, document, "body");
+    const div = try newElement(s, document, "div");
+    const text = try newText(s, document, "t");
+    const p = try newElement(s, document, "p");
+    const fragment = try newFragment(s, document);
+    const span = try newElement(s, document, "span");
+    const em = try newElement(s, document, "em");
+    const lone = try newElement(s, document, "x");
+    const y = try newElement(s, document, "y");
+    const z = try newComment(s, document, "z");
+    try appendChecked(s, document, html);
+    try appendChecked(s, html, body);
+    try appendChecked(s, body, div);
+    try appendChecked(s, div, text);
+    try appendChecked(s, body, p);
+    try appendChecked(s, fragment, span);
+    try appendChecked(s, span, em);
+    try appendChecked(s, y, z);
+    const nodes = [_]NodeHandle{ document, html, body, div, text, p, fragment, span, em, lone, y, z };
+    var related: usize = 0;
+    for (nodes) |ancestor| {
+        for (nodes) |node| {
+            const expected = s.isInclusiveAncestorByWalk(ancestor, node);
+            try testing.expectEqual(expected, s.isInclusiveAncestor(ancestor, node));
+            related += @intFromBool(expected);
+        }
+    }
+    // Each node is its own inclusive ancestor, and the proper ancestor pairs are
+    // document over 5, html over 4, body over 3, div over 1, fragment over 2, span over 1, and y over 1.
+    try testing.expectEqual(nodes.len + 17, related);
+    try testing.expect(s.isInclusiveAncestor(html, text));
+    try testing.expect(s.isInclusiveAncestor(text, text));
+    try testing.expect(!s.isInclusiveAncestor(p, body));
+    try testing.expect(!s.isInclusiveAncestor(em, fragment));
+    try testing.expect(s.isInclusiveAncestor(fragment, em));
 }
 
 test "FP-0009 case 3: every condition of the replace validity checks returns its standard error and changes nothing" {

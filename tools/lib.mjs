@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn, spawnSync, execFile } from 'node:child_process';
 
 export const STATES = new Set(['planned', 'active', 'blocked', 'implemented', 'accepted']);
 export const REQUIRED_CAPABILITIES = Object.freeze([
@@ -437,8 +437,108 @@ function finishRecord(io, fd, result) {
   finally { closeQuietly(io, fd); }
   return result;
 }
-/** Execute without a shell. OS sandboxing and disk quotas remain separate. Never rejects after argument validation. */
-export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env, copyOutput, fileSystem } = {}) {
+/** The limit on the process listing that precedes a timeout's stop, so that a failed listing cannot delay the stop much. */
+export const PROCESS_LISTING_LIMIT_MS = 10000;
+// Windows PowerShell 5.1 prints every process as UTF-8 JSON. Creation times are strings of 100-nanosecond ticks.
+const PROCESS_TABLE_SCRIPT = '[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false); '
+  + 'ConvertTo-Json -Compress -InputObject @(Get-CimInstance -ClassName Win32_Process | ForEach-Object { '
+  + '[pscustomobject]@{ pid = [long]$_.ProcessId; ppid = [long]$_.ParentProcessId; '
+  + 'created = $(if ($_.CreationDate) { [string]$_.CreationDate.ToFileTimeUtc() } else { "0" }); command_line = $_.CommandLine } })';
+/** Windows PowerShell by its full path under the system directory, never through PATH. */
+function windowsPowerShellPath() {
+  const systemRoot = process.env.SystemRoot;
+  if (!systemRoot) throw new Error('SystemRoot is not set, so Windows PowerShell cannot be located.');
+  return path.join(systemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+}
+function windowsProcessTable(powershell, limitMs) {
+  return new Promise((resolve, reject) => {
+    execFile(powershell, ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', PROCESS_TABLE_SCRIPT],
+      { encoding: 'utf8', windowsHide: true, timeout: limitMs, maxBuffer: 64 * 1024 * 1024 }, (error, stdout, stderr) => {
+        if (error) {
+          const detail = String(stderr ?? '').trim().split(/\r?\n/).slice(0, 5).join(' ');
+          reject(new Error(error.killed ? `Windows PowerShell did not finish within ${limitMs} ms.` : `${error.message}${detail ? ` ${detail}` : ''}`));
+          return;
+        }
+        try {
+          resolve(JSON.parse(stdout).map(p => ({ pid: p.pid, ppid: p.ppid, created: BigInt(p.created), command_line: p.command_line })));
+        } catch (e) { reject(new Error(`Windows PowerShell printed no process table: ${e.message}`)); }
+      });
+  });
+}
+/**
+ * Read `/proc/<pid>/stat` and `/proc/<pid>/cmdline` for every process.
+ * A process that ends during the scan is skipped, and so is one that permissions hide, because a descendant has the same user.
+ */
+async function linuxProcessTable(procRoot) {
+  const table = [];
+  for (const name of await fs.promises.readdir(procRoot)) {
+    if (!/^[1-9]\d*$/.test(name)) continue;
+    let stat, cmdline;
+    try {
+      stat = await fs.promises.readFile(path.join(procRoot, name, 'stat'), 'utf8');
+      cmdline = await fs.promises.readFile(path.join(procRoot, name, 'cmdline'));
+    } catch (e) {
+      if (['ENOENT', 'ESRCH', 'EACCES', 'EPERM'].includes(e.code)) continue;
+      throw e;
+    }
+    // The command name in parentheses can contain spaces and parentheses, so the fields start after the last parenthesis.
+    const close = stat.lastIndexOf(')'), fields = stat.slice(close + 2).split(' ');
+    // Field 3 is the state, field 4 the parent process ID, and field 22 the start time.
+    if (fields[0] === 'Z' || fields[0] === 'X') continue;
+    const argv = cmdline.length ? cmdline.toString('utf8').replace(/\0$/, '').split('\0') : [];
+    table.push({ pid: Number(name), ppid: Number(fields[1]), created: BigInt(fields[19]),
+      command_line: argv.length ? argv : `[${stat.slice(stat.indexOf('(') + 1, close)}]` });
+  }
+  return table;
+}
+/**
+ * List `rootPid` and each live descendant: its process ID, parent process ID, and command line.
+ * A process counts as a child only if it started no earlier than its parent, so a reused parent ID adds no stranger.
+ * The command line is a string on Windows and an argument array on Linux. Rejects with the reason when the listing fails.
+ */
+export async function listProcessTree(rootPid, { platform = process.platform, powershell, procRoot = '/proc', limitMs = PROCESS_LISTING_LIMIT_MS } = {}) {
+  let timer;
+  const limit = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`The process listing did not finish within ${limitMs} ms.`)), limitMs); });
+  try {
+    const read = platform === 'win32' ? windowsProcessTable(powershell ?? windowsPowerShellPath(), limitMs)
+      : platform === 'linux' ? linuxProcessTable(procRoot)
+      : Promise.reject(new Error(`No process listing exists for platform ${platform}.`));
+    const table = await Promise.race([read, limit]);
+    const tree = table.filter(p => p.pid === rootPid), seen = new Set([rootPid]);
+    for (let i = 0; i < tree.length; i++) {
+      for (const p of table) {
+        if (p.ppid === tree[i].pid && !seen.has(p.pid) && p.created >= tree[i].created) { seen.add(p.pid); tree.push(p); }
+      }
+    }
+    return tree.map(({ pid, ppid, command_line }) => ({ pid, ppid, command_line }));
+  } finally { clearTimeout(timer); }
+}
+/** The timeout section of a command log: the live process tree, or the reason that the listing failed. */
+async function timeoutSection(pid, timeoutMs, processListing) {
+  let lines;
+  try {
+    const tree = await listProcessTree(pid, processListing);
+    lines = [`TIMEOUT after ${timeoutMs} ms: the live process tree of PID ${pid} follows.`,
+      ...tree.map(p => `PROCESS ${JSON.stringify(p)}`)];
+    if (!tree.some(p => p.pid === pid)) lines.push(`TIMEOUT PID ${pid} is no longer running.`);
+  } catch (e) { lines = [`TIMEOUT after ${timeoutMs} ms: the process listing failed: ${e.message}`]; }
+  return [...lines, `TIMEOUT Stopping PID ${pid} and its descendants.`].join('\n') + '\n';
+}
+/** Stop a command and its descendants. */
+function stopProcessTree(child) {
+  if (process.platform === 'win32' && child.pid) {
+    const k = spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 10000 });
+    if (k.error || k.status !== 0) child.kill('SIGKILL');
+  } else if (child.pid) {
+    try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
+  }
+}
+/**
+ * Execute without a shell. OS sandboxing and disk quotas remain separate. Never rejects after argument validation.
+ * At the timeout, the log first receives the command's live process tree, and then the command and its descendants stop.
+ * `processListing` passes `powershell` or `procRoot` to `listProcessTree`.
+ */
+export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env, copyOutput, fileSystem, processListing } = {}) {
   invariant(typeof executable === 'string' && Array.isArray(args), 'An executable and argument array are required.');
   invariant(typeof logPath === 'string' && logPath.length > 0, 'A log path is required.');
   const io = recordFs(fileSystem), copy = copyOutput ?? ((file, out) => copyFileToDescriptor(io, file, out));
@@ -483,14 +583,16 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, 
         env: env ? { ...process.env, ...env } : process.env, windowsHide: true, detached: process.platform !== 'win32' });
       child.on('error', error => { errors.push(error.message); finish(null, null); });
       child.on('close', (code, signal) => finish(code, signal));
-      timer = setTimeout(() => {
+      timer = setTimeout(async () => {
         timedOut = true;
-        if (process.platform === 'win32' && child.pid) {
-          const k = spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 10000 });
-          if (k.error || k.status !== 0) child.kill('SIGKILL');
-        } else if (child.pid) {
-          try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
+        if (child.pid) {
+          const section = await timeoutSection(child.pid, timeoutMs, processListing);
+          // A command that ended during the listing has already closed its log and needs no stop.
+          if (settled) return;
+          try { writeLog(io, fd, Buffer.from(section)); }
+          catch (e) { errors.push(`Log write failed: ${e.message}`); }
         }
+        stopProcessTree(child);
       }, timeoutMs);
     } catch (e) { errors.push(e.message); finish(null, null); }
   });
@@ -538,7 +640,8 @@ export function gateEnvironment(root, gate) {
   // Keep compiler caches inside the repository's ignored build directory, not the user's global cache.
   return gate.kind === 'zig' || gate.kind === 'c-abi' ? { ZIG_GLOBAL_CACHE_DIR: path.join(root, '.zig-cache', 'global') } : undefined;
 }
-export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
+/** Run one gate. `processListing` reaches `runProcess` for each command, so a test can make the timeout listing fail. */
+export async function runGate(root, id, { evidenceDir = 'out/evidence', processListing } = {}) {
   const gate = readJson(safePath(root, 'engineering/gates.json')).gates.find(g => g.id === id);
   invariant(gate, `Unknown gate: ${id}`);
   const before = fingerprints(root);
@@ -554,7 +657,7 @@ export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
   let error = null, zigVersion = null;
   const env = gateEnvironment(root, gate);
   async function run(exe, argv) {
-    const r = await runProcess(exe, argv, { cwd: root, logPath, timeoutMs: gate.timeout_ms, env });
+    const r = await runProcess(exe, argv, { cwd: root, logPath, timeoutMs: gate.timeout_ms, env, processListing });
     commands.push(r);
     invariant(r.exit_code === 0 && !r.signal && !r.timed_out && !r.error, `Gate command failed: ${JSON.stringify([exe, ...argv])}`);
   }
