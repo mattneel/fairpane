@@ -2139,8 +2139,9 @@ const Parser = struct {
         p.returnExpression(try p.newExpression(l.start, 1 + inner.height, .{ .paren = inner }));
     }
 
-    /// At the `)` of `( )` or `( Expression , )`, which the full grammar continues only with `=>`
-    /// (13.2): the error is at the next token, or at the end of the input.
+    /// At the `)` of `( )` or `( Expression , )`, which covers no ParenthesizedExpression (5.1.4), so as a
+    /// PrimaryExpression it fails the early error of 13.2.9.1 and only arrow parameters remain: the error is at
+    /// the first token after `)` that is not `=>`, or at the end of the input.
     fn arrowParametersOnly(p: *Parser) Error!void {
         try p.advance();
         if (p.tok.tag == .arrow) return p.unsupported(.arrow_function, p.tok.start);
@@ -2622,7 +2623,8 @@ const e_cases = [_]Case{
     .{ .name = "E93", .source = "if (a)\nelse b", .expected = "syntax-error unexpected_token @7" },
     .{ .name = "E94", .source = "a\n++", .expected = "syntax-error unexpected_end @4" },
     .{ .name = "E95", .source = "function () {}", .expected = "syntax-error unexpected_token @9" },
-    // Revision 1: `( )` and `( Expression , )` continue only with `=>` (13.2), so the error is at the next token.
+    // Revision 1: `( )` and `( Expression , )` cover no ParenthesizedExpression (5.1.4), so as a PrimaryExpression
+    // they fail the early error of 13.2.9.1; the error is at the first token after `)` that is not `=>`, or at the end.
     .{ .name = "E96", .source = "()", .expected = "syntax-error unexpected_end @2" },
     .{ .name = "E96a", .source = "() + 1", .expected = "syntax-error unexpected_token @3" },
     .{ .name = "E96b", .source = "(a,)", .expected = "syntax-error unexpected_end @4" },

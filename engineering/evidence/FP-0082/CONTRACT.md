@@ -1040,3 +1040,8 @@ Record each command with `node tools/fairpane.mjs record` under `engineering/evi
    The integrator accepts the worker's change outside the list above: the parser's `Limiter` refuses every resize and remap, so that its allocation count does not depend on the backing allocator's state.
    A new test asserts that determinism, and control M17, which restores resize and remap, must fail case 13 and that test.
    Evidence item 3 names M1 to M13, but this contract defines no M13; the recorded `git apply --check` covers M1 to M12 and M7-r1, and M6-r2 and M11-r2 replace the two controls that no longer apply to the revised parser.
+3. Spec review 2 (`reviews/spec-review-2-accept.json`) found that revision 1 and two code comments state the basis of the E96 rows imprecisely.
+   The context-free grammar accepts `( )` and `( Expression , )` as PrimaryExpression : CoverParenthesizedExpressionAndArrowParameterList (13.2).
+   The early error of 13.2.9.1 rejects them there, because that production must cover a ParenthesizedExpression, and by 5.1.4 neither form does.
+   The parser therefore reports such a cover with `unexpected_token` at the first token after `)` that is not `=>`, or with `unexpected_end` at the end of the input.
+   This decision changes no behavior and no frozen row; the two comments in `src/js/parser.zig` at `arrowParametersOnly` and above row E96 now state this basis.
