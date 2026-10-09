@@ -1,0 +1,48 @@
+{
+  "verdict": "accept",
+  "summary": "FP-0064 at cb8427d meets its frozen contract. I found no blocker or major defect.\n\n(1) All 30 new states match the pinned text (whatwg/html efc54f7, local copy) branch by branch. I checked every state against its source lines:\n- RCDATA, RAWTEXT, script data and PLAINTEXT: tokenizer.zig:709-783 against source 142605-142700.\n- RCDATA and RAWTEXT less-than sign, end tag open and end tag name: textLessThanSign 2200-2210, textEndTagOpen 2214-2229, textEndTagName and abandonEndTag 2232-2276, against 142805-142970.\n- Script data less-than sign through the double escape end state: tokenizer.zig:880-1130 and doubleEscapeBoundary 2280-2308, against 142973-143462.\n- CDATA section, bracket and end states: tokenizer.zig:1932-1976 against 144657-144716, with the markup declaration open branch at 2416-2419.\n\nWithin those states, the details are correct:\n- The appropriate end tag check (2194-2197) compares the name built so far with `last_start_tag`. The record is set only when a start tag is emitted (emitTag 547-550), so no end tag is appropriate before the first start tag.\n- The temporary buffer gets the original-case character in the end tag name states and the lowercase character in the double escape states.\n- Every \"anything else\" branch reconsumes in the right state. At EOF, the less-than sign, end tag open and end tag name states take \"anything else\" with no eof-before-tag-name error, and the escaped states then raise eof-in-script-html-comment-like-text through eofInScriptComment.\n- U+0000 becomes U+FFFD with unexpected-null-character in every text state, and passes through unchanged with no error in CDATA.\n- The CDATA `]` spans follow `bracket_start` as the contract freezes them.\n- states.zig has the 118 new branches, and the per-state counts match the frozen table.\n\n(2) `switchTo` follows the call rules (tokenizer.zig:223-255):\n- `switch_allowed` starts true. `next` clears it on every call and sets it again only when it returns a start tag token. `run` stops as soon as one action queues something, and a start tag is always the last step of its action, so the queue is empty and nothing is waiting to be reconsumed when the switch happens.\n- `switchTo` checks the sticky `failed` flag before anything else and allocates nothing.\n- It is refused after characters, parse errors, end tags, comments, DOCTYPEs, processing instructions, `need_input`, the end-of-file token and `null`. Case 14 E3 to E9 exercise these.\n\n(3) I compared every row of cases 3 to 10, Q1 to Q16 and SP1 to SP5, plus E1 to E9, case 15 and case 16, against the contract text: well over 25 rows. All match exactly, and Q11 uses Units 14 from amendment 1. Set B lists the 20 frozen IDs. The content driver's table (tokenizer_test.zig:507-518) is the contract's 10-element table.\n\n(4) The removals are complete. `implemented`, `owner`, `unimplementedState`, the `unimplemented` field and `UnimplementedState` appear in src, tests, build.zig, include and api only as negative `@hasDecl`/`@hasField` assertions (tokenizer_test.zig:660-663). `tokenizeChunksForeign` is gone, and I found no dead helpers.\n\n(5) The logs support the README:\n- Before-run 1 fails to compile (62/65 steps) on ContentState, SwitchError and switchTo.\n- Before-run 2 fails 272/274 tests with UnimplementedState on all 11 inputs and on case 15.\n- Attempts 1 and 2 fail only on Q11's unit count, and tests-after passes 286/286.\n- The mutation run fails 271/286 tests. Q2 fails on partition [0,8) [8,12): the reference dump has `</xmpa>`, the partition dump `</mpa>`, and the 1-minimal input is `<xmp></a>`. Every other failure the README lists appears in the log.\n- The restored file is byte-identical to the saved one (b148d4a), checks-after passes (fmt, and 192/192 controller tests), all four gates pass, and the integration run passes 292/292.\n\n(6) Chunk independence holds. No new state peeks ahead: each consumes one character per action. Their progress lives only in tokenizer fields (`temp`, `markup_start`, `bracket_start`, `last_start_tag` and the tag buffer). The every-partition set P check covers all 30 new states, and the mutation control shows the check catches a lost `temp`.\n\nI ran no commands. I reviewed the working-tree sources as the version of cb8427d; that they are identical is [INFERENCE] (line numbers match the mutation diff). The remaining findings are notes only.",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0064/README.md",
+      "line": null,
+      "issue": "The README says the first implementation edit came after run 2 and that the last write of that edit sequence was at 12:47:01Z. No log records this. The before-runs are still valid without it: both ran in fresh `git worktree` checkouts of dfa6563, and their `git hash-object` records in tests-before.log show the base sources.",
+      "recommendation": "Remove the unlogged timestamp, or add a record such as a timestamped hash-object of src/html/states.zig. Otherwise, rest the before claim on the worktree hashes alone."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0064/README.md",
+      "line": null,
+      "issue": "No log records the file list or blobs of cb8427d. So nothing logged shows directly that the commit holds the tested blobs (b148d4a, 9097834, de45539) and leaves the protected paths unchanged. integration-head-diff.log covers only cb8427d..ed95bc5. integration-tests.log does exercise the committed sources at ed95bc5, and repo-check passed. [INFERENCE] The protected paths are unchanged.",
+      "recommendation": "In later integration bindings, record `git show --stat cb8427d` (or `git diff --stat 493143b cb8427d`) and `git ls-tree` blobs for the changed files."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0064/raw/tests-after.log",
+      "line": 122,
+      "issue": "The `git hash-object` in tests-after.log ran at 13:04:55, after the mutation run and the restore. The README's claim that tests-after ran on blob b148d4a therefore rests on the hash in mutation-temp-release.log at 13:00:25, about 9 seconds after tests-after ended. [INFERENCE] The file did not change during the run.",
+      "recommendation": "Record the source hashes before the after-run as well as after it."
+    },
+    {
+      "severity": "note",
+      "path": "src/html/tokenizer.zig",
+      "line": 264,
+      "issue": "The contract says no token is emitted between the `!` and the `[CDATA[` decision. That is not literally true. When the markup declaration open state waits for input, `run` flushes pending characters from before the `<` (lines 264-272 and 2381-2386), so `next` returns a characters step before the decision. This does not affect FP-0064: the flag is constant in every case. [INFERENCE] Processing a character token cannot change whether the adjusted current node is foreign.",
+      "recommendation": "Have FP-0010 confirm that a character token can never change the adjusted current node's namespace before it relies on the flag being stable across a `need_input`. Optionally, correct the contract sentence."
+    },
+    {
+      "severity": "note",
+      "path": "src/html/tokenizer.zig",
+      "line": 31,
+      "issue": "The contract's reason for `SwitchError` says the error set of `next`, `feed` and `finish` names no error they cannot return. `next` and `finish` still return the shared `Error`, which includes ChunkPending and InputFinished, and they never return those. The frozen signatures require this, so the implementation is compliant; only the contract's reason is imprecise.",
+      "recommendation": "No change in this task. A later interface task could narrow the error sets of `next` and `finish`."
+    },
+    {
+      "severity": "note",
+      "path": "src/html/tokenizer_test.zig",
+      "line": 594,
+      "issue": "`checkCase` gets its `Setup` from the `setup` field of `Case`, not from a parameter as the amendment's wording (\"take a `Setup`\") suggests. The README records this as a resolved ambiguity, and every FP-0008 row uses the default.",
+      "recommendation": "Acceptable as is. No action needed."
+    }
+  ]
+}

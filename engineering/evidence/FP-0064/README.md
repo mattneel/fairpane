@@ -78,10 +78,9 @@ The new `consumeMatched` comment is exactly this line:
 ### tests-before
 
 Both runs used a checkout of `HEAD` `dfa6563` that `git worktree add` created under `out/`.
-Both runs finished before the first implementation edit.
+The runs show base behavior because the `git hash-object` records in `tests-before.log` show the base sources in those checkouts, not because of when the first implementation edit happened; no log records that time.
 Run 1 started at 12:43:13Z and took 7 seconds.
 Run 2 started at 12:43:32Z and ended at 12:46:42Z.
-The first implementation edit, to `src/html/states.zig`, came after that, and the last write of that first edit sequence is at 12:47:01Z.
 
 1. Run 1 adds the new `tokenizer_test.zig` (blob `9097834`) and `partition_test.zig` (blob `669dc6b`) to the base sources.
    It fails to compile with three errors, as expected: `tokenizer.ContentState`, `tokenizer.SwitchError`, and `Tokenizer.switchTo` do not exist.
@@ -192,3 +191,13 @@ The binding ran at `HEAD` `ed95bc5`; `raw/integration-head-diff.log` shows that 
 - `gates/2026-10-09T13-12-29-122Z-repo-check-f57f5dcd.json`, `gates/2026-10-09T13-12-29-520Z-controller-test-4fc456f4.json`, `gates/2026-10-09T13-13-10-018Z-zig-fmt-825ad6f2.json`, and `gates/2026-10-09T13-13-10-278Z-zig-test-261a8ecf.json` all pass.
 - `raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0064-integration`: 65 of 65 build steps and 292 of 292 tests pass, which adds this task's 14 tests to the 278 of the integrated tree.
 - `raw/bun-selftest.log` records Bun 1.4.2 and `tools/selftest.mjs` with 202 of 202 tests.
+
+## Review 1
+
+`reviews/review-1-accept.json` accepts the task with six notes.
+
+- The integrator replaced the README's unlogged edit time with the recorded checkout hashes, and added `raw/integration-commit.log`, which records the files and blob IDs of `cb8427d` and an empty diff of the protected paths against `493143b`.
+  The committed blobs equal the tested ones: `tokenizer.zig` `b148d4a`, `tokenizer_test.zig` `9097834`, and `partition_test.zig` `de45539`.
+- Contract amendment 2 corrects two sentences: a pending characters step can come between the `!` and the `[CDATA[` decision, and `next` and `finish` keep the shared `Error` set as frozen.
+  `FP-0010` must confirm that no character token can change the adjusted current node's namespace before it relies on that flag across `need_input`.
+- Later workers record source hashes before and after an after-run, as review 1 asks; `checkCase` takes its `Setup` from a field, as the resolved ambiguities record.

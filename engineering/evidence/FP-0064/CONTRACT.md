@@ -653,4 +653,10 @@ Required reviewer: `fairpane-review`.
    The input is `<![CDATA[` (9 code units), the surrogate pair (2), and `]]>` (3).
    Worker `FP0064States` found the frozen value wrong when the units assertion reported "expected 13, found 14", and kept that run as `raw/tests-attempt-1.log`.
    The expected token sequence is unchanged.
+2. Two sentences of this contract were imprecise, and review 1 found both; no requirement changes.
+   Section "State switches by tree construction" says that no token is emitted between the `!` and the `[CDATA[` decision.
+   When the markup declaration open state waits for more input, the tokenizer first returns the pending characters from before the `<`, so a `characters` step can come between them.
+   The integrator decision on `SwitchError` says that the error set of `next`, `feed`, and `finish` names no error that they cannot return.
+   The frozen signatures keep the shared `Error` set for all three, and `next` and `finish` never return `ChunkPending` or `InputFinished`; only `switchTo` has its own set.
+   `FP-0010` must confirm that no character token can change the adjusted current node's namespace before it relies on `adjusted_current_node_is_foreign` across `need_input`.
 

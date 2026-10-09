@@ -1,0 +1,37 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","show","--stat","--format=%H %P%n%s","cb8427d"]
+cb8427dd974b096a409f88eddb9993dbaab9ba1b 493143bbe2d2df508029e3444eae86e859d29276
+FP-0064: implement the text-content and CDATA tokenizer states
+
+ engineering/evidence/FP-0064/README.md             | 184 ++++
+ engineering/evidence/FP-0064/raw/checks-after.log  | 399 +++++++++
+ engineering/evidence/FP-0064/raw/fmt-attempt-1.log |   3 +
+ .../evidence/FP-0064/raw/html-standard-text.log    | 169 ++++
+ .../FP-0064/raw/mutation-temp-release.diff         |  12 +
+ .../evidence/FP-0064/raw/mutation-temp-release.log | 991 +++++++++++++++++++++
+ engineering/evidence/FP-0064/raw/tests-after.log   | 131 +++
+ .../evidence/FP-0064/raw/tests-attempt-1.log       | 203 +++++
+ .../evidence/FP-0064/raw/tests-attempt-2.log       | 194 ++++
+ engineering/evidence/FP-0064/raw/tests-before.log  | 501 +++++++++++
+ src/html/errors.zig                                |  11 +-
+ src/html/partition_test.zig                        | 194 +++-
+ src/html/root.zig                                  |   2 +
+ src/html/states.zig                                |  70 +-
+ src/html/tokenizer.zig                             | 628 +++++++++++--
+ src/html/tokenizer_test.zig                        | 756 +++++++++++++---
+ src/lab.zig                                        |   5 +-
+ 17 files changed, 4209 insertions(+), 244 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["show","--stat","--format=%H %P%n%s","cb8427d"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T13:28:43.558Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","ls-tree","cb8427d","src/html/tokenizer.zig","src/html/states.zig","src/html/errors.zig","src/html/root.zig","src/html/tokenizer_test.zig","src/html/partition_test.zig","src/lab.zig"]
+100644 blob 24b1f1432a1185f60bff662d1cfaa4b2ce48c8f4	src/html/errors.zig
+100644 blob de45539e1f198c6cd08fa64a38f4699e1022ca72	src/html/partition_test.zig
+100644 blob 6f920ff31c9c0dbdb8f7dc281914fdfeef195a10	src/html/root.zig
+100644 blob a737a85b7213139b25104e01c4d2a5b679a255e0	src/html/states.zig
+100644 blob b148d4ad2f7fbe109aeeab002d8cd90620cc05e7	src/html/tokenizer.zig
+100644 blob 90978341eafc0e544ced9b187f287921e20b369b	src/html/tokenizer_test.zig
+100644 blob 7e3957ad0446772185278f732e95852086d45f8e	src/lab.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["ls-tree","cb8427d","src/html/tokenizer.zig","src/html/states.zig","src/html/errors.zig","src/html/root.zig","src/html/tokenizer_test.zig","src/html/partition_test.zig","src/lab.zig"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T13:28:43.630Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","493143b","cb8427d","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains/zig.lock.json","specs/corpora.json"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","493143b","cb8427d","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains/zig.lock.json","specs/corpora.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T13:28:43.699Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
