@@ -15,6 +15,10 @@ The root integrator applied the patch, ran the gates, pushed commit `24c0c64`, a
 | 2-4. The checker rejects unpinned actions, wider permissions, `continue-on-error`, persisted checkout credentials, and `pull_request_target`. | The eleven `workflow-check` cases in the controller suite, which passes 118 of 118 in the integration gate. |
 | 5. Both jobs succeed on GitHub for the integration commit. | `raw/github-run-37873082602.log`: run 37873082602 for `24c0c648`, conclusion `success`, with the Windows job's 14 steps and the Linux job's 13 steps all successful. |
 
+The worker's `raw/tests-after.log` exited with status 1, because two FP-0002 cases failed in the worker's work tree with "The candidate must be a full 40-hex commit ID."
+Those failures came from that work tree's Git state, not from FP-0033, and the integration receipt is the authoritative run.
+`raw/tests-before.log` is a baseline without the new cases, not a failing run of them.
+
 `raw/action-releases.log` and `raw/action-tag-refs.log` record how each action's release tag resolved to its pinned commit.
 `raw/zig-archive-head.log` records the worker's check of the locked Zig archive URL that the runners download.
 
@@ -25,7 +29,27 @@ The root integrator applied the patch, ran the gates, pushed commit `24c0c64`, a
 - `gates/2026-10-09T02-07-08-831Z-repo-check-bb98454c.json`
 - `gates/2026-10-09T02-07-09-019Z-controller-test-bc5b0cfe.json`
 
+## Revision 1
+
+`reviews/review-1-reject.json` found that the checker split lines only at LF, so NEL, LS, or PS after a comment could hide a key that YAML parsers read.
+`reviews/security-review-1-reject.json` found that gate receipts did not bind `.github`, which the controller tests read.
+Commit `7bbe196` implements contract revision 1, and policy commit `29f2135` adds `.github` to `source_roots`.
+
+| Check | Evidence |
+| --- | --- |
+| Red baseline | `raw/revision-1-tests-before.log` runs the new test file against the old checker, with a stub `gateStepProblems` that reports nothing: 9 of 14 pass, and the workflow_run, expression, gate-step, tab, and line-break cases fail. |
+| 6-10 | The fourteen `workflow-check` cases pass in the controller suite: 129 of 129 on Node in the receipts below, and 129 of 129 on Bun in `raw/revision-1-tests-bun.log`. |
+| 11 | `raw/revision-1-actionlint.log` downloads actionlint 1.7.12, matches digest `6e7241b5…f6e9` to the release checksum file, records `HEAD` `29f2135` and the SHA-256 of both workflow files, and reports 0 errors in 2 files. The shellcheck and pyflakes rules were disabled, because those tools are absent. |
+
+`raw/revision-1-binding.log` records `HEAD` `29f2135` and a status whose untracked files lie outside every source root.
+
+- `gates/2026-10-09T02-41-12-231Z-repo-check-cde06900.json`
+- `gates/2026-10-09T02-41-12-409Z-controller-test-574028d3.json`
+
 ## Limits
 
 Workflow receipts are unsigned local integrity records, as their artifact names state.
+A pull request runs its own workflow, checker, and controller, so its green check enforces nothing independently of that pull request.
+`install-zig` accepts an existing compiler directory after only a version check.
+Receipts do not record the runner image version, so later runs on the same commit can use different host tools.
 Branch protection that requires these checks remains an owner action outside the repository.

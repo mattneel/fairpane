@@ -1,0 +1,55 @@
+
+COMMAND ["C:\\Windows\\System32\\curl.exe","-sS","--fail","--location","--output","out/actionlint/actionlint_1.7.12_checksums.txt","https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_checksums.txt","--output","out/actionlint/actionlint_1.7.12_windows_amd64.zip","https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_windows_amd64.zip"]
+RESULT {"executable":"C:\\Windows\\System32\\curl.exe","arguments":["-sS","--fail","--location","--output","out/actionlint/actionlint_1.7.12_checksums.txt","https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_checksums.txt","--output","out/actionlint/actionlint_1.7.12_windows_amd64.zip","https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_windows_amd64.zip"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:40:57.311Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1389}
+
+COMMAND ["C:\\Windows\\System32\\findstr.exe","windows_amd64","out\\actionlint\\actionlint_1.7.12_checksums.txt"]
+6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9  actionlint_1.7.12_windows_amd64.zip
+RESULT {"executable":"C:\\Windows\\System32\\findstr.exe","arguments":["windows_amd64","out\\actionlint\\actionlint_1.7.12_checksums.txt"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:40:58.750Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":11}
+
+COMMAND ["C:\\Windows\\System32\\certutil.exe","-hashfile","out\\actionlint\\actionlint_1.7.12_windows_amd64.zip","SHA256"]
+SHA256 hash of out\actionlint\actionlint_1.7.12_windows_amd64.zip:
+6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9
+CertUtil: -hashfile command completed successfully.
+RESULT {"executable":"C:\\Windows\\System32\\certutil.exe","arguments":["-hashfile","out\\actionlint\\actionlint_1.7.12_windows_amd64.zip","SHA256"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:40:58.817Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":147}
+
+COMMAND ["C:\\Windows\\System32\\tar.exe","-xf","out\\actionlint\\actionlint_1.7.12_windows_amd64.zip","-C","out\\actionlint"]
+RESULT {"executable":"C:\\Windows\\System32\\tar.exe","arguments":["-xf","out\\actionlint\\actionlint_1.7.12_windows_amd64.zip","-C","out\\actionlint"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:41:06.275Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+29f213561171808e859bafb5380f5491f5b9f5b2
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:41:06.379Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Windows\\System32\\certutil.exe","-hashfile",".github\\workflows\\gates.yml","SHA256"]
+SHA256 hash of .github\workflows\gates.yml:
+27c988f8959166e18724de9539df81a9e5946879325f93831c03cf890f1fe75a
+CertUtil: -hashfile command completed successfully.
+RESULT {"executable":"C:\\Windows\\System32\\certutil.exe","arguments":["-hashfile",".github\\workflows\\gates.yml","SHA256"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:41:06.460Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":122}
+
+COMMAND ["C:\\Windows\\System32\\certutil.exe","-hashfile",".github\\workflows\\pages.yml","SHA256"]
+SHA256 hash of .github\workflows\pages.yml:
+8230ec4dc9428c0dd0cebf9eb81ae5b584853e89969566ccc2eb769470e13b28
+CertUtil: -hashfile command completed successfully.
+RESULT {"executable":"C:\\Windows\\System32\\certutil.exe","arguments":["-hashfile",".github\\workflows\\pages.yml","SHA256"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:41:06.646Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":123}
+
+COMMAND ["C:\\src\\fairpane\\out\\actionlint\\actionlint.exe","-version"]
+1.7.12
+installed by downloading from release page
+built with go1.26.1 compiler for windows/amd64
+RESULT {"executable":"C:\\src\\fairpane\\out\\actionlint\\actionlint.exe","arguments":["-version"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:41:06.830Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":85}
+
+COMMAND ["C:\\src\\fairpane\\out\\actionlint\\actionlint.exe","-verbose",".github/workflows/gates.yml",".github/workflows/pages.yml"]
+verbose: Linting 2 files
+verbose: Linting .github/workflows/pages.yml
+verbose: Using project at C:\src\fairpane
+verbose: Linting .github/workflows/gates.yml
+verbose: Using project at C:\src\fairpane
+verbose: Found 0 parse errors in 0 ms for .github/workflows/pages.yml
+verbose: Found 0 parse errors in 0 ms for .github/workflows/gates.yml
+verbose: Rule "shellcheck" was disabled: exec: "shellcheck": executable file not found in %PATH%
+verbose: Rule "shellcheck" was disabled: exec: "shellcheck": executable file not found in %PATH%
+verbose: Rule "pyflakes" was disabled: exec: "pyflakes": executable file not found in %PATH%
+verbose: Rule "pyflakes" was disabled: exec: "pyflakes": executable file not found in %PATH%
+verbose: Found total 0 errors in 33 ms for .github/workflows/gates.yml
+verbose: Found total 0 errors in 33 ms for .github/workflows/pages.yml
+verbose: Found 0 errors in 2 files
+RESULT {"executable":"C:\\src\\fairpane\\out\\actionlint\\actionlint.exe","arguments":["-verbose",".github/workflows/gates.yml",".github/workflows/pages.yml"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:41:06.967Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":46}

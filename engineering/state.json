@@ -348,16 +348,18 @@
       "owner": "fairpane-core worker FP0033Actions, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0033/README.md",
-        "engineering/evidence/FP-0033/gates/2026-10-09T02-07-08-831Z-repo-check-bb98454c.json",
-        "engineering/evidence/FP-0033/gates/2026-10-09T02-07-09-019Z-controller-test-bc5b0cfe.json",
-        "engineering/evidence/FP-0033/raw/actionlint.log",
+        "engineering/evidence/FP-0033/gates/2026-10-09T02-41-12-231Z-repo-check-cde06900.json",
+        "engineering/evidence/FP-0033/gates/2026-10-09T02-41-12-409Z-controller-test-574028d3.json",
+        "engineering/evidence/FP-0033/raw/revision-1-actionlint.log",
+        "engineering/evidence/FP-0033/raw/revision-1-tests-before.log",
         "engineering/evidence/FP-0033/raw/github-run-37873082602.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0033/reviews/security-review-1-reject.json",
       "notes": [
         "Created so continuous integration runs the controller and Zig checks that docs/GIT_OPERATIONS.md names for branch protection.",
-        "The frozen contract is engineering/evidence/FP-0033/CONTRACT.md, based on commit 7bc9ace.",
-        "GitHub run 37873082602 succeeded for commit 24c0c64 in both jobs. Awaiting fairpane-review and fairpane-security."
+        "The frozen contract is engineering/evidence/FP-0033/CONTRACT.md, based on commit 7bc9ace, with revision 1.",
+        "GitHub run 37873082602 succeeded for commit 24c0c64 in both jobs.",
+        "fairpane-review and fairpane-security rejected 24c0c64. Commit 7bbe196 implements revision 1, and policy commit 29f2135 binds .github. Awaiting both re-reviews."
       ]
     },
     "FP-0034": {
