@@ -52,3 +52,67 @@ COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-verify","wpt
   "note": "Verification read Git objects only. It does not qualify any engine behavior."
 }
 RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-verify","wpt"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:48:50.586Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":5332,"environment_overrides":{"FAIRPANE_CORPORA_DIR":"C:\\src\\fairpane\\.tools\\corpora"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-verify","test262"]
+{
+  "result": "pass",
+  "corpus": "test262",
+  "snapshot": "C:\\src\\fairpane\\.tools\\corpora\\test262\\repository.git",
+  "commit": "2e0a56762801e275a9fdf96dc49d90ba0cddcf63",
+  "tree": "6a4268a9354a545d41c3b62efebc478ed8c521f4",
+  "inventory": {
+    "entry_count": 57013,
+    "total_blob_bytes": 90245391,
+    "sha256": "4d86002fe32f66581faa24e4843360ecd148ca44d2adacd31ef08f74d7e8acd8"
+  },
+  "license": {
+    "path": "LICENSE",
+    "size": 2213,
+    "sha256": "4dd9244dfe8197c75348c4b24ab53d29d3b1cfad143ac76b5a3d8942aa354ce0",
+    "name": "BSD License"
+  },
+  "manifest": null,
+  "applicability": {
+    "discovered": 53616,
+    "selected": 0,
+    "excluded": 0,
+    "unclassified": 53616
+  },
+  "missing_denominators": [],
+  "note": "Verification read Git objects and the stored manifest only. It does not qualify any engine behavior."
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-verify","test262"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T01:30:55.818Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1997}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-verify","wpt"]
+{
+  "result": "pass",
+  "corpus": "wpt",
+  "snapshot": "C:\\src\\fairpane\\.tools\\corpora\\wpt\\repository.git",
+  "commit": "b60c4b349d9d167bf354a40bc0d4cbed15174606",
+  "tree": "a499343a14a03239fe23fdb3b183732ddaa6cf4b",
+  "inventory": {
+    "entry_count": 164551,
+    "total_blob_bytes": 505155316,
+    "sha256": "0be4a67e0e13f7fb1f9d82324a118dd3851acbcb50752ecb3615eb1391e395ab"
+  },
+  "license": {
+    "path": "LICENSE.md",
+    "size": 1500,
+    "sha256": "5fac07febb0e2a97fb0d7b0def149ec08b642e1ba4b9c345283ab1cbd2af6570",
+    "name": "The 3-Clause BSD License"
+  },
+  "manifest": {
+    "url": "https://wpt.fyi/api/manifest?sha=b60c4b349d9d167bf354a40bc0d4cbed15174606",
+    "size": 40224677,
+    "sha256": "86d55bee991997a4753d0987397883249a0d6fc94e0901ed3efb84cceed53067"
+  },
+  "applicability": {
+    "discovered": 76600,
+    "selected": 0,
+    "excluded": 0,
+    "unclassified": 76600
+  },
+  "missing_denominators": [],
+  "note": "Verification read Git objects and the stored manifest only. It does not qualify any engine behavior."
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-verify","wpt"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T01:30:57.870Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":8607}

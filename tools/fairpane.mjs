@@ -33,9 +33,10 @@ function help() {
                               Run one command without a shell and append its
                               output and exit status to an evidence log.
   evidence-check <path>       Check a receipt against current inputs.
-  corpus-fetch <id>           Pin the upstream branch head and write its snapshot record.
+  corpus-fetch <id>           Fetch the pinned commit into a fresh snapshot and write its record.
+  corpus-repin <id>           Move a snapshot to the upstream branch head and write its record.
   corpus-applicability <id>   Count discovered tests in a local snapshot.
-  corpus-verify <id>          Recompute a local snapshot and compare its records.
+  corpus-verify <id>          Recompute a local snapshot and compare its records and pins.
   release-check               Check release prerequisites and fail closed.
   help                        Print these commands.
 

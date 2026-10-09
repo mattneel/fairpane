@@ -1,0 +1,45 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-fetch","wpt"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit b60c4b349d9d167bf354a40bc0d4cbed15174606 from specs/snapshots/wpt.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","https://github.com/web-platform-tests/wpt","HEAD"]
+ref: refs/heads/master	HEAD
+acd62d7e8b8e7ad080797555a8ce4dbfa9c75cd8	HEAD
+0acd8f62f12e8ddafea77d57f425e68cc11e16b0	refs/remotes/origin/HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\src\\fairpane\\.tools\\corpora\\wpt.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\src\\fairpane\\.tools\\corpora\\wpt.fetch\\repository.git","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","https://github.com/web-platform-tests/wpt","+b60c4b349d9d167bf354a40bc0d4cbed15174606:refs/heads/master"]
+From https://github.com/web-platform-tests/wpt
+ * [new ref]             b60c4b349d9d167bf354a40bc0d4cbed15174606 -> master
+Download https://wpt.fyi/api/manifest?sha=b60c4b349d9d167bf354a40bc0d4cbed15174606
+x-wpt-sha b60c4b349d9d167bf354a40bc0d4cbed15174606, 40224677 bytes, SHA-256 86d55bee991997a4753d0987397883249a0d6fc94e0901ed3efb84cceed53067
+{
+  "result": "pass",
+  "corpus": "wpt",
+  "snapshot": "C:\\src\\fairpane\\.tools\\corpora\\wpt\\repository.git",
+  "pinned_by": "specs/snapshots/wpt.json",
+  "record": "specs/snapshots/wpt.json",
+  "schema_version": 1,
+  "upstream": "https://github.com/web-platform-tests/wpt",
+  "ref": "refs/heads/master",
+  "commit": "b60c4b349d9d167bf354a40bc0d4cbed15174606",
+  "tree": "a499343a14a03239fe23fdb3b183732ddaa6cf4b",
+  "commit_date": "2026-10-08T23:14:40+02:00",
+  "retrieved_at": "2026-10-09T01:24:08.645Z",
+  "license": {
+    "path": "LICENSE.md",
+    "size": 1500,
+    "sha256": "5fac07febb0e2a97fb0d7b0def149ec08b642e1ba4b9c345283ab1cbd2af6570",
+    "name": "The 3-Clause BSD License"
+  },
+  "inventory": {
+    "entry_count": 164551,
+    "total_blob_bytes": 505155316,
+    "sha256": "0be4a67e0e13f7fb1f9d82324a118dd3851acbcb50752ecb3615eb1391e395ab"
+  },
+  "manifest": {
+    "url": "https://wpt.fyi/api/manifest?sha=b60c4b349d9d167bf354a40bc0d4cbed15174606",
+    "size": 40224677,
+    "sha256": "86d55bee991997a4753d0987397883249a0d6fc94e0901ed3efb84cceed53067"
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-fetch","wpt"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t91d469060\\m","started_at":"2026-10-09T01:20:12.251Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":261577,"environment_overrides":{"FAIRPANE_CORPORA_DIR":"C:\\src\\fairpane\\.tools\\corpora"}}

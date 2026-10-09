@@ -28,9 +28,14 @@ Snapshots live under `.tools/corpora/<corpus>/` unless `FAIRPANE_CORPORA_DIR` na
 
 ```text
 node tools/fairpane.mjs corpus-fetch <corpus>
+node tools/fairpane.mjs corpus-repin <corpus>
 node tools/fairpane.mjs corpus-applicability <corpus>
 node tools/fairpane.mjs corpus-verify <corpus>
 ```
 
-`corpus-fetch` is the only command that uses the network.
-`corpus-verify` exits with status 1 on any mismatch, a missing snapshot, or a missing record.
+`corpus-fetch` fetches only the pinned commit.
+`corpus-repin` moves a snapshot to the upstream branch head, which then needs a protected `corpora.json` change.
+`corpus-fetch` and `corpus-repin` are the only commands that use the network.
+No command runs code from a corpus.
+`corpus-verify` exits with status 1 on any mismatch, a pin difference, a missing snapshot, or a missing record.
+It also exits with status 1 and reports `incomplete` when an applicability record lacks a denominator.

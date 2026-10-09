@@ -24,6 +24,10 @@ It does not publish code, change approval settings, or choose an account identit
 | `run <gate-id> [--evidence-dir <dir>]` | Executes a gate without a command shell and writes its receipt. |
 | `record [--cwd <dir>] [--env NAME=VALUE]... <log> <executable> [arguments...]` | Runs one command without a shell and appends its output and result to an evidence log. |
 | `evidence-check <path>` | Checks a passed receipt against current inputs and output artifacts. |
+| `corpus-fetch <id>` | Fetches the pinned corpus commit into a fresh snapshot and writes its record. |
+| `corpus-repin <id>` | Moves a corpus snapshot to the upstream branch head and writes its record. |
+| `corpus-applicability <id>` | Counts discovered tests in a local snapshot without network access or corpus code. |
+| `corpus-verify <id>` | Recomputes a local snapshot and compares its records and `specs/corpora.json` pins. |
 | `release-check` | Reports unmet obligations and returns a nonzero status. |
 
 Each command uses this repository, independent of the caller's current directory.

@@ -3,12 +3,12 @@
 ## Actual state
 
 Tasks `FP-0001`, `FP-0004`, and `FP-0028` are accepted.
-Task `FP-0003` is active again after `fairpane-review` and `fairpane-spec` rejected commit `ce34ffc`.
-Contract revision 1 requires an explicit WPT denominator from the wpt.fyi manifest bound to the pinned tree.
-An isolated `fairpane-core` worker, `FP0003Rework`, implements that revision.
-Task `FP-0005` has a worker patch with 38 passing Zig tests that awaits integration and review.
+Task `FP-0003` is implemented again after contract revision 1, and it awaits `fairpane-review` and `fairpane-spec` verdicts on the rework.
+The WPT record now has an explicit denominator of 76600 tests at commit `b60c4b34`, from the wpt.fyi manifest bound to the pinned tree.
+Task `FP-0005` is implemented in commit `9e073e2` and awaits `fairpane-review`.
+Task `FP-0006` is active in the isolated `fairpane-core` worker `FP0006Lifecycle`.
 Task `FP-0002` is active in the root session, with an uncommitted verifier draft and contract revision 1.
-The candidate Zig library contains a capability probe, a lossless UTF-16 view, and checked generational handles.
+The candidate Zig library contains a capability probe, lossless owned web strings, and checked generational handles.
 No renderer, JavaScript engine, or native browser window exists yet.
 
 The repository is public at <https://github.com/mattneel/fairpane>.
@@ -26,12 +26,13 @@ ADR 0007 makes the frontend language independent of the renderer and reserves th
 
 ## Next action
 
-1. Obtain an independent review of the policy and plan changes for ADRs 0004 through 0007.
-2. Integrate the `FP-0005` worker patch, run its gates, and request `fairpane-review`.
-3. Finish `FP-0002` and request its review.
-4. Integrate the `FP0003Rework` patch, then request both FP-0003 reviewers again.
-5. Start the ready tasks `FP-0006`, `FP-0031`, and `FP-0033`.
-6. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
+1. Record the verdict of the `DecisionReview` agent on commits `799dcba` and `ec425ea`, and fix any finding.
+2. Record the `FP0005Review` verdict, and accept `FP-0005` only on an accepting review.
+3. Request `fairpane-review` and `fairpane-spec` on the `FP-0003` rework.
+4. Finish `FP-0002` and request its review.
+5. Integrate the `FP0006Lifecycle` patch, run its gates, and request `fairpane-review`.
+6. Start the ready tasks `FP-0031` and `FP-0033`.
+7. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
 
 ```text
 node tools/fairpane.mjs check
