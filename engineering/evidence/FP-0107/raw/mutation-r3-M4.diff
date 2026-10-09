@@ -1,0 +1,13 @@
+diff --git a/out/r3/mutation-M4/git-fixture.mjs b/tools/git-fixture.mjs
+index cdf29df..9eccb61 100644
+--- a/out/r3/mutation-M4/git-fixture.mjs
++++ b/tools/git-fixture.mjs
+@@ -52,7 +52,7 @@ export function writeFixtureTree(git, files) {
+   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'fairpane-blobs-'));
+   let ids;
+   try {
+-    const paths = blobs.map((f, i) => { const file = path.join(scratch, String(i)); fs.writeFileSync(file, Buffer.from(f.text)); return file; });
++    const paths = blobs.map((f, i) => { const file = path.join(scratch, String(i)); fs.writeFileSync(file, Buffer.from(f.path === 'a.txt' ? 'alpha, mutated\n' : f.text)); return file; });
+     ids = paths.length ? git(['hash-object', '-w', '--no-filters', '--stdin-paths'], `${paths.join('\n')}\n`).split('\n') : [];
+   } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
+   if (ids.length !== blobs.length) throw new Error(`git hash-object wrote ${ids.length} blobs, not ${blobs.length}.`);

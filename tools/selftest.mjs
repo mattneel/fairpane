@@ -24,11 +24,12 @@ import * as lib from './lib.mjs';
 import { attestationCases, removeAttestationFixtures } from './attest.test.mjs';
 import { workflowCases } from './workflow-check.test.mjs';
 import { abiCases, removeAbiFixtures } from './abi.test.mjs';
-import { releaseCases, removeReleaseFixtures } from './release.test.mjs';
+import { releaseCases, releaseFixtureBuilder, removeReleaseFixtures } from './release.test.mjs';
 import { ucdCases, removeUcdFixtures } from './ucd.test.mjs';
 import { fileSetCases, removeFileSetFixtures } from './fileset.test.mjs';
 import { rustCases, removeRustFixtures } from './rust.test.mjs';
 import { FILE_SET_IDS } from './fileset.mjs';
+import { writeFixtureTree } from './git-fixture.mjs';
 import { casePool, runCases, serveCases } from './test-runner.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -770,32 +771,23 @@ function fixtureGit(cwd, args, input) {
   assert.equal(r.status, 0, `git ${args.join(' ')} failed: ${r.error?.message ?? r.stderr}`);
   return r.stdout.toString('latin1').trim();
 }
-function bareRepo(dir = temp()) { fs.mkdirSync(dir, { recursive: true }); fixtureGit(dir, ['init', '--bare', '--quiet', '.']); return dir; }
-function splitPath(bytes) {
-  const parts = [];
-  for (let i = 0, start = 0; i <= bytes.length; i++) if (i === bytes.length || bytes[i] === 0x2f) { parts.push(bytes.subarray(start, i)); start = i + 1; }
-  return parts;
+/** A bare repository. `initialBranch` names the branch that HEAD refers to, as `git symbolic-ref HEAD` would set it. */
+function bareRepo(dir = temp(), { initialBranch } = {}) {
+  fs.mkdirSync(dir, { recursive: true });
+  fixtureGit(dir, ['init', '--bare', '--quiet', ...(initialBranch ? [`--initial-branch=${initialBranch}`] : []), '.']);
+  return dir;
 }
-function fixtureTree(gitDir, entries) {
-  const lines = [], dirs = new Map(), nul = Buffer.from([0]);
-  for (const e of entries) {
-    if (e.parts.length === 1) { lines.push(Buffer.concat([Buffer.from(`${e.mode} ${e.type} ${e.oid}\t`), e.parts[0], nul])); continue; }
-    const name = e.parts[0].toString('latin1');
-    if (!dirs.has(name)) dirs.set(name, []);
-    dirs.get(name).push({ ...e, parts: e.parts.slice(1) });
-  }
-  for (const [name, sub] of dirs) lines.push(Buffer.concat([Buffer.from(`040000 tree ${fixtureTree(gitDir, sub)}\t`), Buffer.from(name, 'latin1'), nul]));
-  const missing = entries.some(e => e.parts.length === 1 && e.type === 'commit') ? ['--missing'] : [];
-  return fixtureGit(gitDir, ['mktree', '-z', ...missing], Buffer.concat(lines));
-}
-/** Files: `{ path, text, mode }` for blobs and symbolic links, or `{ path, submodule }` for a submodule commit. */
-function fixtureCommit(gitDir, files, parents = []) {
-  const tree = fixtureTree(gitDir, files.map(f => ({ parts: splitPath(Buffer.from(f.path)),
-    mode: f.submodule ? '160000' : f.mode ?? '100644', type: f.submodule ? 'commit' : 'blob',
-    oid: f.submodule ?? fixtureGit(gitDir, ['hash-object', '-w', '--stdin'], Buffer.from(f.text)) })));
-  return fixtureGit(gitDir, ['-c', 'user.name=Fairpane Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false',
+/**
+ * Commit `files` through plumbing and return `{ commit, blob }`, where `blob(path)` returns the blob or submodule ID of a path.
+ * Files: `{ path, text, mode }` for blobs and symbolic links, or `{ path, submodule }` for a submodule commit.
+ */
+function fixtureObjects(gitDir, files, parents = []) {
+  const { tree, blob } = writeFixtureTree((args, input) => fixtureGit(gitDir, args, input), files);
+  const commit = fixtureGit(gitDir, ['-c', 'user.name=Fairpane Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false',
     'commit-tree', tree, '-m', 'fixture', ...parents.flatMap(p => ['-p', p])]);
+  return { commit, blob };
 }
+function fixtureCommit(gitDir, files, parents = []) { return fixtureObjects(gitDir, files, parents).commit; }
 const inventoryLine = (mode, text, p) =>
   Buffer.concat([Buffer.from(`${mode}\t${sha256(Buffer.from(text))}\t${Buffer.byteLength(text)}\t`), Buffer.from(p), Buffer.from('\n')]);
 async function inventoryOf(gitDir, commit) { return computeInventory(gitDir, await listTree(gitDir, commit), { keepLines: true }); }
@@ -897,12 +889,13 @@ async function corpusFixture(id, files, { manifest } = {}) {
   const dir = temp(), corporaDir = temp(), g = bareRepo(snapshotGitDir(corporaDir, id));
   const policyFile = path.join(dir, 'specs/corpora.json');
   fs.mkdirSync(path.dirname(policyFile)); writeJson(policyFile, unpinnedCorpora());
-  const commit = fixtureCommit(g, files), ref = id === 'wpt' ? 'refs/heads/master' : 'refs/heads/main';
+  const { commit, blob } = fixtureObjects(g, files), ref = id === 'wpt' ? 'refs/heads/master' : 'refs/heads/main';
   fixtureGit(g, ['update-ref', ref, commit]);
   let manifestFile;
   if (manifest) {
     manifestFile = corpus.snapshotManifest(corporaDir, id);
-    fs.writeFileSync(manifestFile, JSON.stringify(manifest(p => fixtureGit(g, ['rev-parse', `${commit}:${p}`]))));
+    const oid = p => { const id = blob(p); assert.ok(id, `The fixture commit has no file ${p}.`); return id; };
+    fs.writeFileSync(manifestFile, JSON.stringify(manifest(oid)));
   }
   const upstream = readJson(policyFile).corpora.find(c => c.id === id).upstream;
   const record = await buildSnapshotRecord(g, { corpus: id, upstream, ref, commit, retrieved_at: '2026-10-08T00:00:00.000Z' }, { manifestFile });
@@ -1281,8 +1274,7 @@ function directoryDigest(dir) {
 }
 /** A local `file://` Test262 upstream whose HEAD is refs/heads/main, with an empty fixture repository root and corpora root. */
 function upstreamFixture() {
-  const upstream = bareRepo(), url = pathToFileURL(upstream).href, dir = temp(), corporaDir = temp();
-  fixtureGit(upstream, ['symbolic-ref', 'HEAD', 'refs/heads/main']);
+  const upstream = bareRepo(temp(), { initialBranch: 'main' }), url = pathToFileURL(upstream).href, dir = temp(), corporaDir = temp();
   const first = fixtureCommit(upstream, T262_FILES);
   fixtureGit(upstream, ['update-ref', 'refs/heads/main', first]);
   const policy = pins => {
@@ -1654,6 +1646,50 @@ test('FP-0107 revision 1 case 3: a case on a worker thread reads process.env as 
   const describe = value => value === null ? 'nothing' : `a value of ${value.length} characters`;
   assert.ok(seen.worker === seen.main, `The worker read ${describe(seen.worker)} as PATH, and the main thread read ${describe(seen.main)}.`);
   if (process.platform === 'win32') assert.ok(seen.main !== null, 'The main thread must read Path as PATH on Windows.');
+});
+// FP-0107 revision 3, case 4: each Git fixture builder that revision 3 changes writes, for one fixed input, the objects that
+// the base builder wrote. The expected IDs are the ones that the base builders printed in raw/tests-before-r3.log.
+const R3_FIXTURE_FILES = [
+  { path: 'a.txt', text: 'alpha\n' }, { path: 'a.b', text: 'dot\n' }, { path: 'a/b.txt', text: 'nested\n' },
+  { path: 'a/c/d.txt', text: 'alpha\n' }, { path: 'empty.txt', text: '' }, { path: 'run.sh', text: '#!/bin/sh\n', mode: '100755' },
+  { path: 'link', text: 'a/b.txt', mode: '120000' }, { path: Buffer.from('caf\u00e9/na\u00efve.txt'), text: 'utf-8\n' },
+  { path: Buffer.from([0x72, 0x61, 0x77, 0xff, 0x2e, 0x62]), text: 'raw\n' }, { path: 'tab\there.txt', text: 'tab\n' },
+  { path: 'test/a:b.js', text: 'colon;\n' }, { path: 'test/x.js ', text: 'space;\n' }, { path: 'test/dir./x.js', text: 'dot;\n' },
+  { path: 'test/..\\x.js', text: 'backslash;\n' }, { path: 'test/CON.js', text: 'device;\n' }];
+const R3_SUBMODULE = { path: 'vendor/lib', submodule: '0123456789abcdef0123456789abcdef01234567' };
+const R3_BASE_IDS = {
+  fixtureCommit: { first: 'abb78d6953553ff4d39b0a95409b2bd508efdc6d', tree: 'a2bc98fe0d6d23d4e598f8003843b2e3792cceff',
+    child: '1c3c1720c1e557adc19ee6d2d8add45cf9d4b259' },
+  corpusFixture: { commit: '4eab98b4627dffd16ff86c9917edc3b4782456fc', tree: '512ed7b995eb1e5abeee4845ed35a5e7f0273b77',
+    inventory: '68dc3aa2cc4e93fe232e90ebd8d2a326901e4002057a772007793780c96c7324',
+    manifest: '040f56d7716f899a4a06f8b2c4d28d5c89110df5952396213efe794b38ea0faf' },
+  upstreamFixture: { first: 'cc0f937227cc7d5ae867e8000069b258e8a4a91d', moved: '8895bafe72a888c3b313a5445f281a68f01b1822',
+    head: 'ref: refs/heads/main\n', main: '8895bafe72a888c3b313a5445f281a68f01b1822' },
+  releaseCommit: { commit: 'de280e9b72acfbf047738fe1d71d8312196ceea1', tree: '5584fde227b246171d4e75277d52d5c56c7ae288' },
+};
+/** Every object that `commit` reaches, other than a submodule commit, must be a loose object file, as the base builders wrote it. */
+function assertLoose(gitDir, commit) {
+  const listing = fixtureGit(gitDir, ['ls-tree', '-r', '-t', '-z', commit]).split('\0').filter(Boolean);
+  const ids = [commit, ...listing.map(line => /^\d+ (\w+) ([0-9a-f]{40})\t/.exec(line)).filter(m => m[1] !== 'commit').map(m => m[2])];
+  for (const id of ids) assert.ok(fs.existsSync(path.join(gitDir, 'objects', id.slice(0, 2), id.slice(2))), `${id} is not a loose object.`);
+}
+test('FP-0107 revision 3 case 4: each changed Git fixture builder writes the objects of the base builder for a fixed input', async () => {
+  const ids = {};
+  const g = bareRepo(), first = fixtureCommit(g, [...R3_FIXTURE_FILES, R3_SUBMODULE]), child = fixtureCommit(g, R3_FIXTURE_FILES.slice(0, 3), [first]);
+  ids.fixtureCommit = { first, tree: fixtureGit(g, ['rev-parse', `${first}^{tree}`]), child };
+  assertLoose(g, first); assertLoose(g, child);
+  const f = await corpusFixture('wpt', WPT_FILES, { manifest: wptManifest });
+  ids.corpusFixture = { commit: f.commit, tree: f.record.tree, inventory: f.record.inventory.sha256, manifest: fileHash(f.manifestFile) };
+  assertLoose(f.g, f.commit);
+  const u = upstreamFixture(), moved = u.move();
+  ids.upstreamFixture = { first: u.first, moved, head: fs.readFileSync(path.join(u.upstream, 'HEAD'), 'latin1'),
+    main: fixtureGit(u.upstream, ['rev-parse', 'refs/heads/main']) };
+  assertLoose(u.upstream, moved);
+  const release = releaseFixtureBuilder.repository(), released = releaseFixtureBuilder.commit(release, R3_FIXTURE_FILES);
+  ids.releaseCommit = { commit: released, tree: fixtureGit(release, ['rev-parse', `${released}^{tree}`]) };
+  assertLoose(path.join(release, '.git'), released);
+  console.log(`FP-0107 revision 3 case 4 IDs ${JSON.stringify(ids)}`);
+  assert.deepEqual(ids, R3_BASE_IDS);
 });
 
 /** Remove this thread's temporary fixtures and return the problems. */

@@ -1,0 +1,520 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0107/raw/names-r3.mjs"]
+BASE 1 A normal relative file resolves within the repository
+BASE 2 Traversal, empty components, and dot components fail
+BASE 3 Absolute paths, backslashes, control bytes, and alternate streams fail
+BASE 4 A missing path needs explicit permission
+BASE 5 A symlink cannot redirect an input inventory
+BASE 6 A dangling directory link is not a new output directory
+BASE 7 An empty input inventory fails
+BASE 8 Input hashes change with content
+BASE 9 Input hashes include relative names
+BASE 10 Input hashes ignore checkout location and input order
+BASE 11 Repeated roots do not duplicate files
+BASE 12 File hashes match the SHA-256 content hash
+BASE 13 Atomic JSON output supports replacement and BOM input
+BASE 14 The supplied compiler lock has a valid structure
+BASE 15 A stable version cannot silently replace Zig master
+BASE 16 A floating compiler version fails
+BASE 17 A substituted compiler source fails
+BASE 18 A substituted artifact URL fails
+BASE 19 An invalid checksum or archive size fails
+BASE 20 A checksum mismatch cannot qualify an archive
+BASE 21 A size mismatch cannot qualify an archive
+BASE 22 Host selection maps supported platform names explicitly
+BASE 23 A valid task graph has one initial ready task
+BASE 24 An accepted prerequisite reveals the next task
+BASE 25 An active task does not become another ready task
+BASE 26 A duplicate task ID fails
+BASE 27 Unknown and duplicate prerequisites fail
+BASE 28 A cycle in the task graph fails
+BASE 29 Empty acceptance criteria and unknown gates fail
+BASE 30 Missing state and unknown workstreams fail
+BASE 31 Acceptance without evidence and review fails
+BASE 32 Acceptance with an unaccepted prerequisite fails
+BASE 33 An empty release profile fails closed
+BASE 34 The full set of capability families cannot disappear
+BASE 35 Qualified metadata alone cannot replace a release verifier
+BASE 36 1: A forged local receipt passes validateReceipt without gate execution
+BASE 37 2: A valid envelope signed by a trusted key verifies
+BASE 38 3: RFC 8032 test vector 1 verifies through the same key decoding path
+BASE 39 4: A key outside the trust policy fails, whether it names itself or a trusted key
+BASE 40 5: One changed payload byte fails as bad-signature
+BASE 41 6: A truncated envelope and a truncated payload each fail
+BASE 42 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+BASE 43 8: A payload for another commit or tree fails as stale-candidate
+BASE 44 9: A payload with another policy digest fails as changed-policy
+BASE 45 10: Zero discovered and zero selected each fail as zero-denominator
+BASE 46 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+BASE 47 12: A runner key that differs from the signature key fails as key-mismatch
+BASE 48 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+BASE 49 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+BASE 50 16: A trusted signature over a noncanonical payload fails as malformed
+BASE 51 FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result
+BASE 52 FP-0051 2: enclosingGitDirectories collects the common directory of every enclosing .git entry
+BASE 53 FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+BASE 54 FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled
+BASE 55 FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+BASE 56 FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+BASE 57 FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+BASE 58 FP-0033 17: An action commit outside the reviewed set fails, even with a full SHA and a version comment
+BASE 59 FP-0033 3: A workflow permission other than contents: read fails
+BASE 60 FP-0033 3: A job permission other than contents: read fails
+BASE 61 FP-0033 4: continue-on-error on a step or a job fails
+BASE 62 FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+BASE 63 FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+BASE 64 FP-0033 4: A workflow_run trigger fails
+BASE 65 FP-0033 8: An expression outside the allowlist fails
+BASE 66 FP-0033 9: A gate step that can be skipped or rerouted fails
+BASE 67 FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+BASE 68 FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+BASE 69 FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+BASE 70 FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+BASE 71 FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+BASE 72 FP-0033: The parser reads the accepted subset and its block scalars exactly
+BASE 73 FP-0033: The parser rejects syntax outside its subset instead of guessing
+BASE 74 FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+BASE 75 FP-0067 1: The committed Gates workflow has no trigger, upload, or Linux-gate problem
+BASE 76 FP-0067 2: A Gates trigger filter key other than branches is one problem that names the trigger and the key
+BASE 77 FP-0067 3: Gates branches other than [master] and a workflow_dispatch value are each one problem
+BASE 78 FP-0067 4: A Gates upload path other than out/evidence/ or an if-no-files-found other than error is one problem
+BASE 79 FP-0067 5: A Linux job that omits zig-test or runs it after the cross builds is a problem
+BASE 80 FP-0098 revision 1 case 3: Each zig-test gate step must set env: ZIG_BUILD_SUMMARY: all, and no other step or level may set it
+BASE 81 FP-0021 case 1: Generating from the committed schema reproduces the committed include/fairpane.h and src/abi_generated.zig byte for byte
+BASE 82 FP-0021 case 2: Changing one byte of either generated file makes abi-check exit with status 1 and name the file
+BASE 83 FP-0021 case 3: Generation is deterministic across two runs and across schema key order
+BASE 84 FP-0021 case 4: The validator rejects an unknown kind, a pointer without ownership or lifetime, an inverted range, a duplicate name, and a structure without struct_size
+BASE 85 FP-0021 case 5: The schema distinguishes text, web_string, bytes, identifier, handle, ranged integer, and optional values, and the generator maps each one to distinct C and Zig declarations
+BASE 86 FP-0021 case 6: The generated Zig declarations assert the size and every field offset of every structure
+BASE 87 FP-0021 case 7: The C smoke test runs every C-expressible failure scenario and names each identifier it covers
+BASE 88 FP-0021 case 8: The Zig scenario test runs every failure scenario through the generated declarations
+BASE 89 FP-0021 case 9: Every failure scenario has an identifier, calls, and expected outcomes, and the validator rejects one without them
+BASE 90 FP-0021 case 10: The validator rejects consumed_on_success on an output parameter, and the generated C and Zig text states the consumption rule for fp_engine_destroy
+BASE 91 FP-0021 case 11: The validator rejects an unknown reference and an unreferenced function name, and the generated header contains no schema-only name outside a C name
+BASE 92 FP-0021 case 12: The generated C static assertions check the size and every member offset of every structure, and the C smoke test compiles them
+BASE 93 FP-0021 case 13: From a foreign thread, the C and Zig scenarios call each owner function with an invalid argument and expect wrong_thread
+BASE 94 FP-0021 revision 1 status sets: abi_generated.zig carries each function status set, and src/c_api.zig checks every export against it
+BASE 95 FP-0021 revision 1 export check: abi-exports fails when a library exports an fp_ symbol that the schema does not declare
+BASE 96 FP-0050 case 8: every byte range is null_when_empty, and the validator rejects any other nullability
+BASE 97 FP-0050 case 9: fp_document_destroy never returns out_of_memory
+BASE 98 FP-0050 case 10: the thread lifetime and identifier gaps are documented
+BASE 99 FP-0050 case 11: the generated layout assertions cover both sides of the ABI
+BASE 100 FP-0081 case 8: the generated header, the generated Zig declarations, and the layout model agree on engine_options and engine_memory at both pointer widths, and the C smoke test must name allocation-failure
+BASE 101 FP-0081 case 9: the validator rejects a structure that needs implicit padding at either pointer width, and the committed schema needs none
+BASE 102 FP-0027 case 1: two source-archive runs on one commit write byte-identical tar and manifest files, and the manifest names the tar digest
+BASE 103 FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+BASE 104 FP-0027 case 3: source-archive rejects an abbreviated ID, a ref name, a missing commit, and an output directory inside the repository, and writes nothing
+BASE 105 FP-0027 case 4: provenance subjects equal the artifact digests, and the build definition names the commit, tree, lock digest, and builder
+BASE 106 FP-0027 case 5: reproduce-check reports reproducible for a fixed build, and different with the path and exit status 1 for a clock build
+BASE 107 FP-0027 case 6: reproduce-check removes both work trees, and a forced removal failure appears in the report
+BASE 108 FP-0027 case 7: ADR 0009 lists exactly the ten owner decisions, each with the status open
+BASE 109 FP-0027: source-archive fails before any write when an export attribute makes the tar differ from the tree
+BASE 110 FP-0027: reproduce-check reports a failed build as an error with exit status 1 and still removes both work trees
+BASE 111 FP-0013 case 1: @missing lines apply in order, then data lines, and every value resolves through PropertyValueAliases.txt
+BASE 112 FP-0013 case 2: a line without ";", a reversed range, 110000, and an unknown value each fail with a distinct message naming the line
+BASE 113 FP-0013 case 3 (amended by FP-0108 case 1): ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input
+BASE 114 FP-0013 case 4: one changed byte of tables.zig or of a UCD file makes ucd-check exit with status 1 and name the file and line
+BASE 115 FP-0108 case 2: parseFieldProperty reads only the InCB lines of a multi-property file and applies the @missing default
+BASE 116 FP-0108 case 3: parseBinaryProperty sets only the lines whose single field is the property, and every other code point is false
+BASE 117 FP-0108 case 4: a missing InCB value, an unknown value, an extra value, and a binary line with a value each fail with a distinct message naming the line
+BASE 118 FP-0013 case 41: a zip with two stored members, one deflated member, and one directory yields the hand-computed inventory
+BASE 119 FP-0013 case 42: the zip reader rejects ZIP64, encryption, "../x", "a\b", duplicate paths, a truncated central directory, and method 12
+BASE 120 FP-0013 case 43: corpus-fetch of file sources writes the record and extracted files, honors pins, and changes nothing on failure
+BASE 121 FP-0013 case 44: corpus-verify fails for changed extracted and derived files, a missing source, a license mismatch, a count mismatch, and an upstream mismatch
+BASE 122 FP-0013 case 45: file-set applicability reports the per-directory breakdown with an explicit denominator, and a zip without file members fails
+BASE 123 FP-0013 case 46: corpus-repin unicode exits with status 1 and names the contract decision
+BASE 124 FP-0013 case 47: record validation rejects missing license digests, releases, tool versions, input digests, argv, and reserved font names
+BASE 125 FP-0013 case 48: every selected, derived, and license path of the committed unicode and opentype-fixtures records matches its size and SHA-256
+BASE 126 FP-0013 case 49 (amended by FP-0108 case 6): the committed capability record validates with exactly the frozen obligations and existing owner tasks
+BASE 127 FP-0108 case 5: the committed unicode records select 12 of 71 members, keep the source digests, and list the four FP-0108 members
+BASE 128 FP-0013 case 53: overlapping, inconsistent, symbolic-link, case-folded, oversized, corrupt, and drive-letter archives fail before any member is written
+BASE 129 FP-0013 case 54: a fetch compares every known digest before parsing a source
+BASE 130 FP-0013 case 54: downloads follow redirects manually on allowlisted HTTPS hosts and stop at their size limit
+BASE 131 FP-0013 case 54: a failure injected at each write step leaves every previous file, the source directory, and the record unchanged
+BASE 132 FP-0013 case 55: corpus-derive refuses a fontTools installation with one changed file
+BASE 133 FP-0013 case 55: the Python child process sees PYTHONSAFEPATH=1, no other PYTHON* variable, and the staging directory
+BASE 134 FP-0013 case 55: sfntCopyright stops at the first name record and checks the name table header length
+BASE 135 FP-0052 case 6: of two fetches of one file set started together, one passes and one fails on the lock
+BASE 136 FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+BASE 137 FP-0079 case 2: the Rust lock validator rejects every malformed field
+BASE 138 FP-0079 case 3: rust-toolchain.toml names the locked version
+BASE 139 FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+BASE 140 FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+BASE 141 FP-0079 case 6: a component installs exactly what its manifest.in lists
+BASE 142 FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+BASE 143 FP-0079 case 8: the version checks accept only the locked release, commit, and host
+BASE 144 FP-0079 case 9: the controller documents and exposes the Rust commands
+BASE 145 FP-0079 case 10: the toolchain documents and declarations record the pin
+BASE 146 15: release-check still exits with status 1
+BASE 147 A successful command records its actual output
+BASE 148 A nonzero child exit remains a failure
+BASE 149 A missing executable produces an error record
+BASE 150 A hung child reaches its watchdog and cannot pass
+BASE 151 Command arguments do not execute through a shell
+BASE 152 A real local gate produces a checkable unsigned receipt
+BASE 153 Changed source makes a previous receipt stale
+BASE 154 Changed evidence output invalidates a receipt
+BASE 155 Changed gate definitions invalidate old receipts
+BASE 156 A local receipt cannot upgrade its own trust label
+BASE 157 A receipt without command records cannot pass
+BASE 158 A receipt without output artifacts cannot pass
+BASE 159 A failed command cannot hide behind a pass label
+BASE 160 A command failure produces a failed gate receipt
+BASE 161 A missing compiler produces a failed gate receipt
+BASE 162 Input changes during execution produce a failed gate receipt
+BASE 163 A removed input still produces a failed gate receipt
+BASE 164 Unknown gates fail before execution
+BASE 165 FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+BASE 166 FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails
+BASE 167 FP-0098 case 3: an ordinary pass or fail gate record has no timeout section and is not timed out
+BASE 168 FP-0098 revision 1 case 2: a command that ends during the timeout listing gets a line that says so, and its descendants stop
+BASE 169 Evidence paths cannot escape their approved roots
+BASE 170 A gate writes a checkable receipt under an approved evidence directory
+BASE 171 An unapproved evidence directory fails before any gate command runs
+BASE 172 Environment overrides reach the child and its command record
+BASE 173 Executable resolution follows PATH order
+BASE 174 A recorded command keeps its output, exit status, and resolved executable
+BASE 175 Command records carry the working directory and start time
+BASE 176 An unwritable log yields a failed result instead of an exception
+BASE 177 A failed output copy is recorded and its capture directory is removed
+BASE 178 Standard error output reaches the log
+BASE 179 A completed command leaves no capture directory
+BASE 180 Executable resolution never searches the process working directory
+BASE 181 A bare executable name is logged as its resolved absolute path
+BASE 182 A rejected record path writes nothing
+BASE 183 The controller rejects malformed run and record arguments
+BASE 184 Only Zig and C ABI gates receive the repository-local compiler cache
+BASE 185 A capture-start failure writes a RESULT line, closes the log, and returns an error result
+BASE 186 A failed RESULT write returns an error result instead of throwing
+BASE 187 A spawn error and a capture error both remain in the result
+BASE 188 runGate writes nothing when its evidence directory fails validation
+BASE 189 A short write to the log produces an error result
+BASE 190 A failed capture-directory removal appears in the command record
+BASE 191 FP-0054 case 6: A busy capture directory is removed on a later attempt
+BASE 192 FP-0054 case 6: a capture directory that stays busy records the last failure after waiting between attempts
+BASE 193 FP-0054 case 6: a capture-directory removal error with a non-transient code gets one attempt
+BASE 194 FP-0054 revision 1 case 6: a capture-directory removal error without a code gets one attempt
+BASE 195 FP-0054 case 6: lastResult asserts that a RESULT line exists before it parses one
+BASE 196 started_at in every command record is a canonical UTC ISO 8601 timestamp
+BASE 197 The mutation control runs an unmutated baseline first and records each killed test name and message
+BASE 198 The inventory of a fixture commit equals a hand-computed canonical listing digest
+BASE 199 The inventory ignores working-tree files and core.autocrlf
+BASE 200 A changed blob, an added file, a removed file, and a renamed file each change the inventory digest
+BASE 201 Paths with spaces, non-ASCII bytes, and tabs keep their exact bytes through NUL-separated parsing
+BASE 202 A symbolic link entry hashes its target text, and a submodule entry records its commit ID
+BASE 203 corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+BASE 204 Applicability validation rejects negative counts, non-integer counts, inconsistent sums, and exclusions without reasons
+BASE 205 Snapshot record validation rejects a non-40-hex commit, a missing license digest, and a missing inventory digest
+BASE 206 Verification fails when the license digest, the commit date, or an applicability count differs from its record
+BASE 207 corpus-verify exits with status 1 through the controller command on an inventory digest mismatch
+BASE 208 A replace ref that substitutes the recorded commit cannot make verification pass
+BASE 209 A tree path that contains a line feed fails the inventory
+BASE 210 WPT counting of a fixture manifest reports per-type counts, excludes support, spec, and test262 from discovery, and reports test262 separately
+BASE 211 A fixture manifest with a path that the tree lacks, or with a hash that differs from the blob ID, fails binding
+BASE 212 A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+BASE 213 Test262 discovery excludes a file named a_FIXTURE_b.js and a file named x_FIXTURE.js
+BASE 214 A fixture manifest with test262 items under the vendored tests, the vendored harness, and infrastructure/test262/ counts only the infrastructure item and reports the others by path
+BASE 215 A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation
+BASE 216 FP-0082 case 18: corpus-extract writes exactly the test/ and harness/ blobs and features.txt, and an EXTRACT.json record
+BASE 217 FP-0082 case 18: corpus-extract refuses a non-empty output directory, a directory outside out/, and an absent commit
+BASE 218 FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes
+BASE 219 FP-0082 case 18: corpus-extract rejects a stored blob whose content does not hash to its tree object ID
+BASE 220 FP-0082 case 18: the shared path rule gives each reason, and null for ordinary paths
+BASE 221 FP-0082 case 18: the shared path rule gives the earlier reason for a path with the defects of two adjacent rules
+BASE 222 FP-0082 case 18: corpus-extract refuses test/language/A.js beside test/language/a.js before it creates the output directory
+BASE 223 FP-0082 case 18: corpus-extract refuses test/Language/b.js beside test/language/a.js before it creates the output directory
+BASE 224 FP-0082 case 18: corpus-extract refuses the tree path "test/..\\..\\..\\x.js", which has a backslash, and writes nothing
+BASE 225 FP-0082 case 18: corpus-extract refuses the tree path "test/a:b.js", which has a colon, and writes nothing
+BASE 226 FP-0082 case 18: corpus-extract refuses the tree path "test/a\u0001b.js", which has a control character, and writes nothing
+BASE 227 FP-0082 case 18: corpus-extract refuses the tree path "test/dir./x.js", which has a path component that ends in "." or a space, and writes nothing
+BASE 228 FP-0082 case 18: corpus-extract refuses the tree path "test/x.js ", which has a path component that ends in "." or a space, and writes nothing
+BASE 229 FP-0082 case 18: corpus-extract refuses the tree path "test/CON.js", which has a reserved Windows device name, and writes nothing
+BASE 230 FP-0082 case 18: corpus-extract refuses the tree path "test/aux/x.js", which has a reserved Windows device name, and writes nothing
+BASE 231 FP-0082 case 18: corpus-extract refuses the tree path "test/Com1.txt.js", which has a reserved Windows device name, and writes nothing
+BASE 232 FP-0082 case 18: corpus-extract refuses an altered tree object through the inventory and writes nothing
+BASE 233 FP-0082 case 18: corpus-extract refuses a snapshot record whose tree differs from the commit and writes nothing
+BASE 234 corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+BASE 235 A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+BASE 236 corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+BASE 237 FP-0052 case 1: the system-directory resolver returns the System32 path and names SystemRoot when it cannot
+BASE 238 FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command
+BASE 239 FP-0052 case 2, amendment 2: a host other than Node builds the stand-in from the Node on PATH and fails without one
+BASE 240 FP-0052: a SystemRoot that cannot locate taskkill.exe fails runProcess on Windows before its command starts
+BASE 241 FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+BASE 242 FP-0052 case 4: a fetch that cannot remove the old snapshot after it replaces the record fails, and the new snapshot and record stay
+BASE 243 FP-0052 case 5: a fetch fails while test262.lock exists and changes nothing
+BASE 244 FP-0052 case 6: of two Git corpus fetches started together, one passes and one fails on the lock
+BASE 245 FP-0131 case 1: the General_Category row and the S37 purpose name UAX #14 rule LB1
+BASE 246 FP-0131 case 2: every copy of the WPT support-item clause names only files that reach the test262 rule, and wpt.json records the rule
+BASE 247 FP-0131 case 3: the Bidi and ContextJ rows and the S41 purpose use the URL Standard algorithm names
+BASE 248 FP-0131 case 4: a fetch honors a repin that finishes between its ref resolution and its lock
+BASE 249 FP-0131 case 5: a fetch with no policy revision and no record fails with the missing-record error and releases the lock
+BASE 250 The actual bootstrap repository passes its integrity check
+BASE 251 FP-0107 case 1: the runner writes a duration line after each result line, the summary, the slowest cases, and the total
+BASE 252 FP-0107 case 2: the runner runs no case that declares a process-wide change while another case runs
+BASE 253 FP-0107 revision 1 case 3: a case on a worker thread reads process.env as the main thread does when the search path is named Path
+CHANGED 1 A normal relative file resolves within the repository
+CHANGED 2 Traversal, empty components, and dot components fail
+CHANGED 3 Absolute paths, backslashes, control bytes, and alternate streams fail
+CHANGED 4 A missing path needs explicit permission
+CHANGED 5 A symlink cannot redirect an input inventory
+CHANGED 6 A dangling directory link is not a new output directory
+CHANGED 7 An empty input inventory fails
+CHANGED 8 Input hashes change with content
+CHANGED 9 Input hashes include relative names
+CHANGED 10 Input hashes ignore checkout location and input order
+CHANGED 11 Repeated roots do not duplicate files
+CHANGED 12 File hashes match the SHA-256 content hash
+CHANGED 13 Atomic JSON output supports replacement and BOM input
+CHANGED 14 The supplied compiler lock has a valid structure
+CHANGED 15 A stable version cannot silently replace Zig master
+CHANGED 16 A floating compiler version fails
+CHANGED 17 A substituted compiler source fails
+CHANGED 18 A substituted artifact URL fails
+CHANGED 19 An invalid checksum or archive size fails
+CHANGED 20 A checksum mismatch cannot qualify an archive
+CHANGED 21 A size mismatch cannot qualify an archive
+CHANGED 22 Host selection maps supported platform names explicitly
+CHANGED 23 A valid task graph has one initial ready task
+CHANGED 24 An accepted prerequisite reveals the next task
+CHANGED 25 An active task does not become another ready task
+CHANGED 26 A duplicate task ID fails
+CHANGED 27 Unknown and duplicate prerequisites fail
+CHANGED 28 A cycle in the task graph fails
+CHANGED 29 Empty acceptance criteria and unknown gates fail
+CHANGED 30 Missing state and unknown workstreams fail
+CHANGED 31 Acceptance without evidence and review fails
+CHANGED 32 Acceptance with an unaccepted prerequisite fails
+CHANGED 33 An empty release profile fails closed
+CHANGED 34 The full set of capability families cannot disappear
+CHANGED 35 Qualified metadata alone cannot replace a release verifier
+CHANGED 36 1: A forged local receipt passes validateReceipt without gate execution
+CHANGED 37 2: A valid envelope signed by a trusted key verifies
+CHANGED 38 3: RFC 8032 test vector 1 verifies through the same key decoding path
+CHANGED 39 4: A key outside the trust policy fails, whether it names itself or a trusted key
+CHANGED 40 5: One changed payload byte fails as bad-signature
+CHANGED 41 6: A truncated envelope and a truncated payload each fail
+CHANGED 42 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+CHANGED 43 8: A payload for another commit or tree fails as stale-candidate
+CHANGED 44 9: A payload with another policy digest fails as changed-policy
+CHANGED 45 10: Zero discovered and zero selected each fail as zero-denominator
+CHANGED 46 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+CHANGED 47 12: A runner key that differs from the signature key fails as key-mismatch
+CHANGED 48 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+CHANGED 49 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+CHANGED 50 16: A trusted signature over a noncanonical payload fails as malformed
+CHANGED 51 FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result
+CHANGED 52 FP-0051 2: enclosingGitDirectories collects the common directory of every enclosing .git entry
+CHANGED 53 FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+CHANGED 54 FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled
+CHANGED 55 FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+CHANGED 56 FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+CHANGED 57 FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+CHANGED 58 FP-0033 17: An action commit outside the reviewed set fails, even with a full SHA and a version comment
+CHANGED 59 FP-0033 3: A workflow permission other than contents: read fails
+CHANGED 60 FP-0033 3: A job permission other than contents: read fails
+CHANGED 61 FP-0033 4: continue-on-error on a step or a job fails
+CHANGED 62 FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+CHANGED 63 FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+CHANGED 64 FP-0033 4: A workflow_run trigger fails
+CHANGED 65 FP-0033 8: An expression outside the allowlist fails
+CHANGED 66 FP-0033 9: A gate step that can be skipped or rerouted fails
+CHANGED 67 FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+CHANGED 68 FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+CHANGED 69 FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+CHANGED 70 FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+CHANGED 71 FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+CHANGED 72 FP-0033: The parser reads the accepted subset and its block scalars exactly
+CHANGED 73 FP-0033: The parser rejects syntax outside its subset instead of guessing
+CHANGED 74 FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+CHANGED 75 FP-0067 1: The committed Gates workflow has no trigger, upload, or Linux-gate problem
+CHANGED 76 FP-0067 2: A Gates trigger filter key other than branches is one problem that names the trigger and the key
+CHANGED 77 FP-0067 3: Gates branches other than [master] and a workflow_dispatch value are each one problem
+CHANGED 78 FP-0067 4: A Gates upload path other than out/evidence/ or an if-no-files-found other than error is one problem
+CHANGED 79 FP-0067 5: A Linux job that omits zig-test or runs it after the cross builds is a problem
+CHANGED 80 FP-0098 revision 1 case 3: Each zig-test gate step must set env: ZIG_BUILD_SUMMARY: all, and no other step or level may set it
+CHANGED 81 FP-0021 case 1: Generating from the committed schema reproduces the committed include/fairpane.h and src/abi_generated.zig byte for byte
+CHANGED 82 FP-0021 case 2: Changing one byte of either generated file makes abi-check exit with status 1 and name the file
+CHANGED 83 FP-0021 case 3: Generation is deterministic across two runs and across schema key order
+CHANGED 84 FP-0021 case 4: The validator rejects an unknown kind, a pointer without ownership or lifetime, an inverted range, a duplicate name, and a structure without struct_size
+CHANGED 85 FP-0021 case 5: The schema distinguishes text, web_string, bytes, identifier, handle, ranged integer, and optional values, and the generator maps each one to distinct C and Zig declarations
+CHANGED 86 FP-0021 case 6: The generated Zig declarations assert the size and every field offset of every structure
+CHANGED 87 FP-0021 case 7: The C smoke test runs every C-expressible failure scenario and names each identifier it covers
+CHANGED 88 FP-0021 case 8: The Zig scenario test runs every failure scenario through the generated declarations
+CHANGED 89 FP-0021 case 9: Every failure scenario has an identifier, calls, and expected outcomes, and the validator rejects one without them
+CHANGED 90 FP-0021 case 10: The validator rejects consumed_on_success on an output parameter, and the generated C and Zig text states the consumption rule for fp_engine_destroy
+CHANGED 91 FP-0021 case 11: The validator rejects an unknown reference and an unreferenced function name, and the generated header contains no schema-only name outside a C name
+CHANGED 92 FP-0021 case 12: The generated C static assertions check the size and every member offset of every structure, and the C smoke test compiles them
+CHANGED 93 FP-0021 case 13: From a foreign thread, the C and Zig scenarios call each owner function with an invalid argument and expect wrong_thread
+CHANGED 94 FP-0021 revision 1 status sets: abi_generated.zig carries each function status set, and src/c_api.zig checks every export against it
+CHANGED 95 FP-0021 revision 1 export check: abi-exports fails when a library exports an fp_ symbol that the schema does not declare
+CHANGED 96 FP-0050 case 8: every byte range is null_when_empty, and the validator rejects any other nullability
+CHANGED 97 FP-0050 case 9: fp_document_destroy never returns out_of_memory
+CHANGED 98 FP-0050 case 10: the thread lifetime and identifier gaps are documented
+CHANGED 99 FP-0050 case 11: the generated layout assertions cover both sides of the ABI
+CHANGED 100 FP-0081 case 8: the generated header, the generated Zig declarations, and the layout model agree on engine_options and engine_memory at both pointer widths, and the C smoke test must name allocation-failure
+CHANGED 101 FP-0081 case 9: the validator rejects a structure that needs implicit padding at either pointer width, and the committed schema needs none
+CHANGED 102 FP-0027 case 1: two source-archive runs on one commit write byte-identical tar and manifest files, and the manifest names the tar digest
+CHANGED 103 FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+CHANGED 104 FP-0027 case 3: source-archive rejects an abbreviated ID, a ref name, a missing commit, and an output directory inside the repository, and writes nothing
+CHANGED 105 FP-0027 case 4: provenance subjects equal the artifact digests, and the build definition names the commit, tree, lock digest, and builder
+CHANGED 106 FP-0027 case 5: reproduce-check reports reproducible for a fixed build, and different with the path and exit status 1 for a clock build
+CHANGED 107 FP-0027 case 6: reproduce-check removes both work trees, and a forced removal failure appears in the report
+CHANGED 108 FP-0027 case 7: ADR 0009 lists exactly the ten owner decisions, each with the status open
+CHANGED 109 FP-0027: source-archive fails before any write when an export attribute makes the tar differ from the tree
+CHANGED 110 FP-0027: reproduce-check reports a failed build as an error with exit status 1 and still removes both work trees
+CHANGED 111 FP-0013 case 1: @missing lines apply in order, then data lines, and every value resolves through PropertyValueAliases.txt
+CHANGED 112 FP-0013 case 2: a line without ";", a reversed range, 110000, and an unknown value each fail with a distinct message naming the line
+CHANGED 113 FP-0013 case 3 (amended by FP-0108 case 1): ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input
+CHANGED 114 FP-0013 case 4: one changed byte of tables.zig or of a UCD file makes ucd-check exit with status 1 and name the file and line
+CHANGED 115 FP-0108 case 2: parseFieldProperty reads only the InCB lines of a multi-property file and applies the @missing default
+CHANGED 116 FP-0108 case 3: parseBinaryProperty sets only the lines whose single field is the property, and every other code point is false
+CHANGED 117 FP-0108 case 4: a missing InCB value, an unknown value, an extra value, and a binary line with a value each fail with a distinct message naming the line
+CHANGED 118 FP-0013 case 41: a zip with two stored members, one deflated member, and one directory yields the hand-computed inventory
+CHANGED 119 FP-0013 case 42: the zip reader rejects ZIP64, encryption, "../x", "a\b", duplicate paths, a truncated central directory, and method 12
+CHANGED 120 FP-0013 case 43: corpus-fetch of file sources writes the record and extracted files, honors pins, and changes nothing on failure
+CHANGED 121 FP-0013 case 44: corpus-verify fails for changed extracted and derived files, a missing source, a license mismatch, a count mismatch, and an upstream mismatch
+CHANGED 122 FP-0013 case 45: file-set applicability reports the per-directory breakdown with an explicit denominator, and a zip without file members fails
+CHANGED 123 FP-0013 case 46: corpus-repin unicode exits with status 1 and names the contract decision
+CHANGED 124 FP-0013 case 47: record validation rejects missing license digests, releases, tool versions, input digests, argv, and reserved font names
+CHANGED 125 FP-0013 case 48: every selected, derived, and license path of the committed unicode and opentype-fixtures records matches its size and SHA-256
+CHANGED 126 FP-0013 case 49 (amended by FP-0108 case 6): the committed capability record validates with exactly the frozen obligations and existing owner tasks
+CHANGED 127 FP-0108 case 5: the committed unicode records select 12 of 71 members, keep the source digests, and list the four FP-0108 members
+CHANGED 128 FP-0013 case 53: overlapping, inconsistent, symbolic-link, case-folded, oversized, corrupt, and drive-letter archives fail before any member is written
+CHANGED 129 FP-0013 case 54: a fetch compares every known digest before parsing a source
+CHANGED 130 FP-0013 case 54: downloads follow redirects manually on allowlisted HTTPS hosts and stop at their size limit
+CHANGED 131 FP-0013 case 54: a failure injected at each write step leaves every previous file, the source directory, and the record unchanged
+CHANGED 132 FP-0013 case 55: corpus-derive refuses a fontTools installation with one changed file
+CHANGED 133 FP-0013 case 55: the Python child process sees PYTHONSAFEPATH=1, no other PYTHON* variable, and the staging directory
+CHANGED 134 FP-0013 case 55: sfntCopyright stops at the first name record and checks the name table header length
+CHANGED 135 FP-0052 case 6: of two fetches of one file set started together, one passes and one fails on the lock
+CHANGED 136 FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+CHANGED 137 FP-0079 case 2: the Rust lock validator rejects every malformed field
+CHANGED 138 FP-0079 case 3: rust-toolchain.toml names the locked version
+CHANGED 139 FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+CHANGED 140 FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+CHANGED 141 FP-0079 case 6: a component installs exactly what its manifest.in lists
+CHANGED 142 FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+CHANGED 143 FP-0079 case 8: the version checks accept only the locked release, commit, and host
+CHANGED 144 FP-0079 case 9: the controller documents and exposes the Rust commands
+CHANGED 145 FP-0079 case 10: the toolchain documents and declarations record the pin
+CHANGED 146 15: release-check still exits with status 1
+CHANGED 147 A successful command records its actual output
+CHANGED 148 A nonzero child exit remains a failure
+CHANGED 149 A missing executable produces an error record
+CHANGED 150 A hung child reaches its watchdog and cannot pass
+CHANGED 151 Command arguments do not execute through a shell
+CHANGED 152 A real local gate produces a checkable unsigned receipt
+CHANGED 153 Changed source makes a previous receipt stale
+CHANGED 154 Changed evidence output invalidates a receipt
+CHANGED 155 Changed gate definitions invalidate old receipts
+CHANGED 156 A local receipt cannot upgrade its own trust label
+CHANGED 157 A receipt without command records cannot pass
+CHANGED 158 A receipt without output artifacts cannot pass
+CHANGED 159 A failed command cannot hide behind a pass label
+CHANGED 160 A command failure produces a failed gate receipt
+CHANGED 161 A missing compiler produces a failed gate receipt
+CHANGED 162 Input changes during execution produce a failed gate receipt
+CHANGED 163 A removed input still produces a failed gate receipt
+CHANGED 164 Unknown gates fail before execution
+CHANGED 165 FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+CHANGED 166 FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails
+CHANGED 167 FP-0098 case 3: an ordinary pass or fail gate record has no timeout section and is not timed out
+CHANGED 168 FP-0098 revision 1 case 2: a command that ends during the timeout listing gets a line that says so, and its descendants stop
+CHANGED 169 Evidence paths cannot escape their approved roots
+CHANGED 170 A gate writes a checkable receipt under an approved evidence directory
+CHANGED 171 An unapproved evidence directory fails before any gate command runs
+CHANGED 172 Environment overrides reach the child and its command record
+CHANGED 173 Executable resolution follows PATH order
+CHANGED 174 A recorded command keeps its output, exit status, and resolved executable
+CHANGED 175 Command records carry the working directory and start time
+CHANGED 176 An unwritable log yields a failed result instead of an exception
+CHANGED 177 A failed output copy is recorded and its capture directory is removed
+CHANGED 178 Standard error output reaches the log
+CHANGED 179 A completed command leaves no capture directory
+CHANGED 180 Executable resolution never searches the process working directory
+CHANGED 181 A bare executable name is logged as its resolved absolute path
+CHANGED 182 A rejected record path writes nothing
+CHANGED 183 The controller rejects malformed run and record arguments
+CHANGED 184 Only Zig and C ABI gates receive the repository-local compiler cache
+CHANGED 185 A capture-start failure writes a RESULT line, closes the log, and returns an error result
+CHANGED 186 A failed RESULT write returns an error result instead of throwing
+CHANGED 187 A spawn error and a capture error both remain in the result
+CHANGED 188 runGate writes nothing when its evidence directory fails validation
+CHANGED 189 A short write to the log produces an error result
+CHANGED 190 A failed capture-directory removal appears in the command record
+CHANGED 191 FP-0054 case 6: A busy capture directory is removed on a later attempt
+CHANGED 192 FP-0054 case 6: a capture directory that stays busy records the last failure after waiting between attempts
+CHANGED 193 FP-0054 case 6: a capture-directory removal error with a non-transient code gets one attempt
+CHANGED 194 FP-0054 revision 1 case 6: a capture-directory removal error without a code gets one attempt
+CHANGED 195 FP-0054 case 6: lastResult asserts that a RESULT line exists before it parses one
+CHANGED 196 started_at in every command record is a canonical UTC ISO 8601 timestamp
+CHANGED 197 The mutation control runs an unmutated baseline first and records each killed test name and message
+CHANGED 198 The inventory of a fixture commit equals a hand-computed canonical listing digest
+CHANGED 199 The inventory ignores working-tree files and core.autocrlf
+CHANGED 200 A changed blob, an added file, a removed file, and a renamed file each change the inventory digest
+CHANGED 201 Paths with spaces, non-ASCII bytes, and tabs keep their exact bytes through NUL-separated parsing
+CHANGED 202 A symbolic link entry hashes its target text, and a submodule entry records its commit ID
+CHANGED 203 corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+CHANGED 204 Applicability validation rejects negative counts, non-integer counts, inconsistent sums, and exclusions without reasons
+CHANGED 205 Snapshot record validation rejects a non-40-hex commit, a missing license digest, and a missing inventory digest
+CHANGED 206 Verification fails when the license digest, the commit date, or an applicability count differs from its record
+CHANGED 207 corpus-verify exits with status 1 through the controller command on an inventory digest mismatch
+CHANGED 208 A replace ref that substitutes the recorded commit cannot make verification pass
+CHANGED 209 A tree path that contains a line feed fails the inventory
+CHANGED 210 WPT counting of a fixture manifest reports per-type counts, excludes support, spec, and test262 from discovery, and reports test262 separately
+CHANGED 211 A fixture manifest with a path that the tree lacks, or with a hash that differs from the blob ID, fails binding
+CHANGED 212 A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+CHANGED 213 Test262 discovery excludes a file named a_FIXTURE_b.js and a file named x_FIXTURE.js
+CHANGED 214 A fixture manifest with test262 items under the vendored tests, the vendored harness, and infrastructure/test262/ counts only the infrastructure item and reports the others by path
+CHANGED 215 A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation
+CHANGED 216 FP-0082 case 18: corpus-extract writes exactly the test/ and harness/ blobs and features.txt, and an EXTRACT.json record
+CHANGED 217 FP-0082 case 18: corpus-extract refuses a non-empty output directory, a directory outside out/, and an absent commit
+CHANGED 218 FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes
+CHANGED 219 FP-0082 case 18: corpus-extract rejects a stored blob whose content does not hash to its tree object ID
+CHANGED 220 FP-0082 case 18: the shared path rule gives each reason, and null for ordinary paths
+CHANGED 221 FP-0082 case 18: the shared path rule gives the earlier reason for a path with the defects of two adjacent rules
+CHANGED 222 FP-0082 case 18: corpus-extract refuses test/language/A.js beside test/language/a.js before it creates the output directory
+CHANGED 223 FP-0082 case 18: corpus-extract refuses test/Language/b.js beside test/language/a.js before it creates the output directory
+CHANGED 224 FP-0082 case 18: corpus-extract refuses the tree path "test/..\\..\\..\\x.js", which has a backslash, and writes nothing
+CHANGED 225 FP-0082 case 18: corpus-extract refuses the tree path "test/a:b.js", which has a colon, and writes nothing
+CHANGED 226 FP-0082 case 18: corpus-extract refuses the tree path "test/a\u0001b.js", which has a control character, and writes nothing
+CHANGED 227 FP-0082 case 18: corpus-extract refuses the tree path "test/dir./x.js", which has a path component that ends in "." or a space, and writes nothing
+CHANGED 228 FP-0082 case 18: corpus-extract refuses the tree path "test/x.js ", which has a path component that ends in "." or a space, and writes nothing
+CHANGED 229 FP-0082 case 18: corpus-extract refuses the tree path "test/CON.js", which has a reserved Windows device name, and writes nothing
+CHANGED 230 FP-0082 case 18: corpus-extract refuses the tree path "test/aux/x.js", which has a reserved Windows device name, and writes nothing
+CHANGED 231 FP-0082 case 18: corpus-extract refuses the tree path "test/Com1.txt.js", which has a reserved Windows device name, and writes nothing
+CHANGED 232 FP-0082 case 18: corpus-extract refuses an altered tree object through the inventory and writes nothing
+CHANGED 233 FP-0082 case 18: corpus-extract refuses a snapshot record whose tree differs from the commit and writes nothing
+CHANGED 234 corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+CHANGED 235 A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+CHANGED 236 corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+CHANGED 237 FP-0052 case 1: the system-directory resolver returns the System32 path and names SystemRoot when it cannot
+CHANGED 238 FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command
+CHANGED 239 FP-0052 case 2, amendment 2: a host other than Node builds the stand-in from the Node on PATH and fails without one
+CHANGED 240 FP-0052: a SystemRoot that cannot locate taskkill.exe fails runProcess on Windows before its command starts
+CHANGED 241 FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+CHANGED 242 FP-0052 case 4: a fetch that cannot remove the old snapshot after it replaces the record fails, and the new snapshot and record stay
+CHANGED 243 FP-0052 case 5: a fetch fails while test262.lock exists and changes nothing
+CHANGED 244 FP-0052 case 6: of two Git corpus fetches started together, one passes and one fails on the lock
+CHANGED 245 FP-0131 case 1: the General_Category row and the S37 purpose name UAX #14 rule LB1
+CHANGED 246 FP-0131 case 2: every copy of the WPT support-item clause names only files that reach the test262 rule, and wpt.json records the rule
+CHANGED 247 FP-0131 case 3: the Bidi and ContextJ rows and the S41 purpose use the URL Standard algorithm names
+CHANGED 248 FP-0131 case 4: a fetch honors a repin that finishes between its ref resolution and its lock
+CHANGED 249 FP-0131 case 5: a fetch with no policy revision and no record fails with the missing-record error and releases the lock
+CHANGED 250 The actual bootstrap repository passes its integrity check
+CHANGED 251 FP-0107 case 1: the runner writes a duration line after each result line, the summary, the slowest cases, and the total
+CHANGED 252 FP-0107 case 2: the runner runs no case that declares a process-wide change while another case runs
+CHANGED 253 FP-0107 revision 1 case 3: a case on a worker thread reads process.env as the main thread does when the search path is named Path
+CHANGED 254 FP-0107 revision 3 case 4: each changed Git fixture builder writes the objects of the base builder for a fixed input
+EQUAL tests-before-r3.log run 1: 254 names
+EQUAL profile-before-r3.log run 1: 254 names
+EQUAL profile-before-r3.log run 2: 254 names
+EQUAL profile-before-r3.log run 3: 254 names
+EQUAL probe-after-r3.log run 1: 254 names
+EQUAL profile-after-r3.log run 1: 254 names
+EQUAL profile-after-r3.log run 2: 254 names
+EQUAL profile-after-r3.log run 3: 254 names
+EQUAL profile-linux-after-r3.log run 1: 254 names
+COUNT base 253, changed 254; the changed suite adds only case 4
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0107/raw/names-r3.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb2af83cc5\\m","started_at":"2026-10-09T20:55:27.369Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":69}

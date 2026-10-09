@@ -410,6 +410,11 @@ Examples of such state are the working directory, a `process.env` variable, and 
 The runner starts a declared case on the main thread only when no other case runs, and it starts no other case until the declared case ends.
 A worker thread cannot change the working directory, so a case that changes it must declare it.
 
+The Git fixtures of `tools/selftest.mjs` and `tools/release.test.mjs` write their blobs and trees through `writeFixtureTree` in `tools/git-fixture.mjs`.
+It starts one `git hash-object --stdin-paths` for the blobs and one `git mktree --batch` for the trees of each commit, and both write loose objects.
+It computes each tree ID itself, and `git mktree` must report the same IDs.
+FP-0107 revision 3 case 4 checks that each builder still writes, for a fixed input, the objects that the earlier one-process-per-object builders wrote.
+
 ## Extend the controller
 
 1. Add failing tests for the new gate behavior.

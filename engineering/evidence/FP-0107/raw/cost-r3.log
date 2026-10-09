@@ -1,0 +1,213 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0107/raw/r3-cost.mjs","--top","25","engineering/evidence/ci/run-37980331388/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-30-12-845Z-controller-test-8010beb9.log","engineering/evidence/ci/run-37980365447/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-30-54-287Z-controller-test-cc32aa20.log","engineering/evidence/ci/run-37981462017/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-40-17-587Z-controller-test-82990477.log","engineering/evidence/ci/run-37981495878/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-40-57-223Z-controller-test-7e3839bf.log","engineering/evidence/ci/run-37982663784/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-50-06-756Z-controller-test-4d5ec039.log","engineering/evidence/ci/run-37982698002/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-51-01-451Z-controller-test-567e402d.log","engineering/evidence/ci/run-37983552427/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-58-39-933Z-controller-test-ac24cb56.log","engineering/evidence/ci/run-37983811379/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T20-00-47-932Z-controller-test-e8538ae1.log","engineering/evidence/ci/run-37984731953/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T20-09-09-602Z-controller-test-349ba304.log","engineering/evidence/ci/run-37984880613/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T20-10-42-168Z-controller-test-15d79c45.log"]
+RUN engineering/evidence/ci/run-37980331388/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-30-12-845Z-controller-test-8010beb9.log: 248 cases, total 59465 ms, sum of case durations 154933 ms
+RUN engineering/evidence/ci/run-37980365447/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-30-54-287Z-controller-test-cc32aa20.log: 248 cases, total 61816 ms, sum of case durations 159300 ms
+RUN engineering/evidence/ci/run-37981462017/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-40-17-587Z-controller-test-82990477.log: 248 cases, total 64054 ms, sum of case durations 166136 ms
+RUN engineering/evidence/ci/run-37981495878/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-40-57-223Z-controller-test-7e3839bf.log: 248 cases, total 102851 ms, sum of case durations 261167 ms
+RUN engineering/evidence/ci/run-37982663784/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-50-06-756Z-controller-test-4d5ec039.log: 248 cases, total 48668 ms, sum of case durations 126897 ms
+RUN engineering/evidence/ci/run-37982698002/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-51-01-451Z-controller-test-567e402d.log: 248 cases, total 69125 ms, sum of case durations 183355 ms
+RUN engineering/evidence/ci/run-37983552427/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-58-39-933Z-controller-test-ac24cb56.log: 248 cases, total 61229 ms, sum of case durations 157827 ms
+RUN engineering/evidence/ci/run-37983811379/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T20-00-47-932Z-controller-test-e8538ae1.log: 248 cases, total 59511 ms, sum of case durations 150045 ms
+RUN engineering/evidence/ci/run-37984731953/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T20-09-09-602Z-controller-test-349ba304.log: 248 cases, total 68717 ms, sum of case durations 187805 ms
+RUN engineering/evidence/ci/run-37984880613/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T20-10-42-168Z-controller-test-15d79c45.log: 248 cases, total 59580 ms, sum of case durations 155981 ms
+MEDIAN SUM 155881 ms over 10 runs of 248 cases
+MEDIAN TOTAL 61522 ms
+TOP 1 | case 103 | 6059 ms | FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+TOP 2 | case 212 | 5698 ms | A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+TOP 3 | case 241 | 4436 ms | FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+TOP 4 | case 206 | 4293 ms | Verification fails when the license digest, the commit date, or an applicability count differs from its record
+TOP 5 | case 218 | 4060 ms | FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes
+TOP 6 | case 203 | 4038 ms | corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+TOP 7 | case 215 | 4005 ms | A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation
+TOP 8 | case 234 | 3894 ms | corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+TOP 9 | case 53 | 3884 ms | FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+TOP 10 | case 236 | 3666 ms | corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+TOP 11 | case 214 | 3654 ms | A fixture manifest with test262 items under the vendored tests, the vendored harness, and infrastructure/test262/ counts only the infrastructure item and reports the others by path
+TOP 12 | case 109 | 3547 ms | FP-0027: source-archive fails before any write when an export attribute makes the tar differ from the tree
+TOP 13 | case 211 | 3522 ms | A fixture manifest with a path that the tree lacks, or with a hash that differs from the blob ID, fails binding
+TOP 14 | case 235 | 3394 ms | A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+TOP 15 | case 208 | 3366 ms | A replace ref that substitutes the recorded commit cannot make verification pass
+TOP 16 | case 210 | 3349 ms | WPT counting of a fixture manifest reports per-type counts, excludes support, spec, and test262 from discovery, and reports test262 separately
+TOP 17 | case 200 | 3033 ms | A changed blob, an added file, a removed file, and a renamed file each change the inventory digest
+TOP 18 | case 232 | 2847 ms | FP-0082 case 18: corpus-extract refuses an altered tree object through the inventory and writes nothing
+TOP 19 | case 104 | 2765 ms | FP-0027 case 3: source-archive rejects an abbreviated ID, a ref name, a missing commit, and an output directory inside the repository, and writes nothing
+TOP 20 | case 207 | 2605 ms | corpus-verify exits with status 1 through the controller command on an inventory digest mismatch
+TOP 21 | case 110 | 2594 ms | FP-0027: reproduce-check reports a failed build as an error with exit status 1 and still removes both work trees
+TOP 22 | case 165 | 2501 ms | FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+TOP 23 | case 102 | 2463 ms | FP-0027 case 1: two source-archive runs on one commit write byte-identical tar and manifest files, and the manifest names the tar digest
+TOP 24 | case 216 | 2382 ms | FP-0082 case 18: corpus-extract writes exactly the test/ and harness/ blobs and features.txt, and an EXTRACT.json record
+TOP 25 | case 107 | 2307 ms | FP-0027 case 6: reproduce-check removes both work trees, and a forced removal failure appears in the report
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0107/raw/r3-cost.mjs","--top","25","engineering/evidence/ci/run-37980331388/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-30-12-845Z-controller-test-8010beb9.log","engineering/evidence/ci/run-37980365447/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-30-54-287Z-controller-test-cc32aa20.log","engineering/evidence/ci/run-37981462017/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-40-17-587Z-controller-test-82990477.log","engineering/evidence/ci/run-37981495878/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-40-57-223Z-controller-test-7e3839bf.log","engineering/evidence/ci/run-37982663784/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-50-06-756Z-controller-test-4d5ec039.log","engineering/evidence/ci/run-37982698002/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-51-01-451Z-controller-test-567e402d.log","engineering/evidence/ci/run-37983552427/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-58-39-933Z-controller-test-ac24cb56.log","engineering/evidence/ci/run-37983811379/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T20-00-47-932Z-controller-test-e8538ae1.log","engineering/evidence/ci/run-37984731953/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T20-09-09-602Z-controller-test-349ba304.log","engineering/evidence/ci/run-37984880613/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T20-10-42-168Z-controller-test-15d79c45.log"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb2af83cc5\\m","started_at":"2026-10-09T20:57:54.051Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":47}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0107/raw/r3-cost.mjs","--top","25","engineering/evidence/FP-0107/raw/profile-before-r3.log"]
+RUN engineering/evidence/FP-0107/raw/profile-before-r3.log: 254 cases, total 50539 ms, sum of case durations 124017 ms
+RUN engineering/evidence/FP-0107/raw/profile-before-r3.log: 254 cases, total 49713 ms, sum of case durations 122147 ms
+RUN engineering/evidence/FP-0107/raw/profile-before-r3.log: 254 cases, total 56239 ms, sum of case durations 139894 ms
+MEDIAN SUM 127290 ms over 3 runs of 254 cases
+MEDIAN TOTAL 50539 ms
+TOP 1 | case 103 | 5034 ms | FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+TOP 2 | case 254 | 4731 ms | FP-0107 revision 3 case 4: each changed Git fixture builder writes the objects of the base builder for a fixed input
+TOP 3 | case 212 | 4397 ms | A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+TOP 4 | case 206 | 3590 ms | Verification fails when the license digest, the commit date, or an applicability count differs from its record
+TOP 5 | case 241 | 3524 ms | FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+TOP 6 | case 165 | 3307 ms | FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+TOP 7 | case 236 | 3164 ms | corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+TOP 8 | case 203 | 3113 ms | corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+TOP 9 | case 234 | 2963 ms | corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+TOP 10 | case 218 | 2882 ms | FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes
+TOP 11 | case 109 | 2848 ms | FP-0027: source-archive fails before any write when an export attribute makes the tar differ from the tree
+TOP 12 | case 215 | 2840 ms | A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation
+TOP 13 | case 248 | 2820 ms | FP-0131 case 4: a fetch honors a repin that finishes between its ref resolution and its lock
+TOP 14 | case 211 | 2647 ms | A fixture manifest with a path that the tree lacks, or with a hash that differs from the blob ID, fails binding
+TOP 15 | case 214 | 2606 ms | A fixture manifest with test262 items under the vendored tests, the vendored harness, and infrastructure/test262/ counts only the infrastructure item and reports the others by path
+TOP 16 | case 104 | 2539 ms | FP-0027 case 3: source-archive rejects an abbreviated ID, a ref name, a missing commit, and an output directory inside the repository, and writes nothing
+TOP 17 | case 235 | 2513 ms | A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+TOP 18 | case 210 | 2484 ms | WPT counting of a fixture manifest reports per-type counts, excludes support, spec, and test262 from discovery, and reports test262 separately
+TOP 19 | case 208 | 2453 ms | A replace ref that substitutes the recorded commit cannot make verification pass
+TOP 20 | case 166 | 2374 ms | FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails
+TOP 21 | case 232 | 2314 ms | FP-0082 case 18: corpus-extract refuses an altered tree object through the inventory and writes nothing
+TOP 22 | case 53 | 2270 ms | FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+TOP 23 | case 238 | 2219 ms | FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command
+TOP 24 | case 200 | 2175 ms | A changed blob, an added file, a removed file, and a renamed file each change the inventory digest
+TOP 25 | case 110 | 2145 ms | FP-0027: reproduce-check reports a failed build as an error with exit status 1 and still removes both work trees
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0107/raw/r3-cost.mjs","--top","25","engineering/evidence/FP-0107/raw/profile-before-r3.log"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb2af83cc5\\m","started_at":"2026-10-09T20:57:54.162Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0107/raw/r3-cost.mjs","--top","25","engineering/evidence/FP-0107/raw/profile-after-r3.log"]
+RUN engineering/evidence/FP-0107/raw/profile-after-r3.log: 254 cases, total 39945 ms, sum of case durations 93411 ms
+RUN engineering/evidence/FP-0107/raw/profile-after-r3.log: 254 cases, total 40548 ms, sum of case durations 96233 ms
+RUN engineering/evidence/FP-0107/raw/profile-after-r3.log: 254 cases, total 37177 ms, sum of case durations 87359 ms
+MEDIAN SUM 90635 ms over 3 runs of 254 cases
+MEDIAN TOTAL 39945 ms
+TOP 1 | case 103 | 3332 ms | FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+TOP 2 | case 165 | 3281 ms | FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+TOP 3 | case 241 | 3271 ms | FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+TOP 4 | case 206 | 3161 ms | Verification fails when the license digest, the commit date, or an applicability count differs from its record
+TOP 5 | case 53 | 2809 ms | FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+TOP 6 | case 248 | 2739 ms | FP-0131 case 4: a fetch honors a repin that finishes between its ref resolution and its lock
+TOP 7 | case 212 | 2566 ms | A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+TOP 8 | case 166 | 2419 ms | FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails
+TOP 9 | case 203 | 2387 ms | corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+TOP 10 | case 238 | 2338 ms | FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command
+TOP 11 | case 236 | 2173 ms | corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+TOP 12 | case 234 | 2158 ms | corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+TOP 13 | case 254 | 2017 ms | FP-0107 revision 3 case 4: each changed Git fixture builder writes the objects of the base builder for a fixed input
+TOP 14 | case 235 | 1876 ms | A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+TOP 15 | case 104 | 1873 ms | FP-0027 case 3: source-archive rejects an abbreviated ID, a ref name, a missing commit, and an output directory inside the repository, and writes nothing
+TOP 16 | case 208 | 1855 ms | A replace ref that substitutes the recorded commit cannot make verification pass
+TOP 17 | case 244 | 1823 ms | FP-0052 case 6: of two Git corpus fetches started together, one passes and one fails on the lock
+TOP 18 | case 110 | 1703 ms | FP-0027: reproduce-check reports a failed build as an error with exit status 1 and still removes both work trees
+TOP 19 | case 243 | 1608 ms | FP-0052 case 5: a fetch fails while test262.lock exists and changes nothing
+TOP 20 | case 150 | 1601 ms | A hung child reaches its watchdog and cannot pass
+TOP 21 | case 218 | 1543 ms | FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes
+TOP 22 | case 207 | 1508 ms | corpus-verify exits with status 1 through the controller command on an inventory digest mismatch
+TOP 23 | case 102 | 1469 ms | FP-0027 case 1: two source-archive runs on one commit write byte-identical tar and manifest files, and the manifest names the tar digest
+TOP 24 | case 107 | 1469 ms | FP-0027 case 6: reproduce-check removes both work trees, and a forced removal failure appears in the report
+TOP 25 | case 200 | 1461 ms | A changed blob, an added file, a removed file, and a renamed file each change the inventory digest
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0107/raw/r3-cost.mjs","--top","25","engineering/evidence/FP-0107/raw/profile-after-r3.log"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb2af83cc5\\m","started_at":"2026-10-09T20:57:54.269Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":44}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0107/raw/r3-cost.mjs","--top","25","engineering/evidence/FP-0107/raw/profile-linux-after-r3.log"]
+RUN engineering/evidence/FP-0107/raw/profile-linux-after-r3.log: 254 cases, total 9512 ms, sum of case durations 22152 ms
+MEDIAN SUM 22152 ms over 1 runs of 254 cases
+MEDIAN TOTAL 9512 ms
+TOP 1 | case 165 | 2246 ms | FP-0098 case 1: a timed-out gate lists its live descendants before it stops them
+TOP 2 | case 166 | 2011 ms | FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails
+TOP 3 | case 238 | 1194 ms | FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command
+TOP 4 | case 168 | 560 ms | FP-0098 revision 1 case 2: a command that ends during the timeout listing gets a line that says so, and its descendants stop
+TOP 5 | case 241 | 473 ms | FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+TOP 6 | case 150 | 451 ms | A hung child reaches its watchdog and cannot pass
+TOP 7 | case 114 | 437 ms | FP-0013 case 4: one changed byte of tables.zig or of a UCD file makes ucd-check exit with status 1 and name the file and line
+TOP 8 | case 212 | 388 ms | A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+TOP 9 | case 248 | 353 ms | FP-0131 case 4: a fetch honors a repin that finishes between its ref resolution and its lock
+TOP 10 | case 211 | 351 ms | A fixture manifest with a path that the tree lacks, or with a hash that differs from the blob ID, fails binding
+TOP 11 | case 203 | 350 ms | corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+TOP 12 | case 206 | 344 ms | Verification fails when the license digest, the commit date, or an applicability count differs from its record
+TOP 13 | case 235 | 342 ms | A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+TOP 14 | case 236 | 333 ms | corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+TOP 15 | case 234 | 332 ms | corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+TOP 16 | case 218 | 312 ms | FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes
+TOP 17 | case 48 | 287 ms | 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+TOP 18 | case 107 | 279 ms | FP-0027 case 6: reproduce-check removes both work trees, and a forced removal failure appears in the report
+TOP 19 | case 103 | 272 ms | FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+TOP 20 | case 82 | 269 ms | FP-0021 case 2: Changing one byte of either generated file makes abi-check exit with status 1 and name the file
+TOP 21 | case 106 | 269 ms | FP-0027 case 5: reproduce-check reports reproducible for a fixed build, and different with the path and exit status 1 for a clock build
+TOP 22 | case 110 | 253 ms | FP-0027: reproduce-check reports a failed build as an error with exit status 1 and still removes both work trees
+TOP 23 | case 254 | 250 ms | FP-0107 revision 3 case 4: each changed Git fixture builder writes the objects of the base builder for a fixed input
+TOP 24 | case 207 | 248 ms | corpus-verify exits with status 1 through the controller command on an inventory digest mismatch
+TOP 25 | case 252 | 245 ms | FP-0107 case 2: the runner runs no case that declares a process-wide change while another case runs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0107/raw/r3-cost.mjs","--top","25","engineering/evidence/FP-0107/raw/profile-linux-after-r3.log"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb2af83cc5\\m","started_at":"2026-10-09T20:57:54.381Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":43}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0107/raw/r3-probe.mjs"]
+CASES before 253, after 254, common 253
+STARTS common cases: before 1975, after 1448, change -527 (-26.7%)
+SYNC_MS common cases: before 68496, after 38935
+PROGRAMS absent-executable: before 4, after 4
+PROGRAMS git: before 1874, after 1346
+PROGRAMS node: before 86, after 86
+PROGRAMS powershell: before 4, after 4
+PROGRAMS rustc: before 1, after 1
+PROGRAMS taskkill: before 6, after 7
+CALLERS abi.test.mjs: before 7, after 7
+CALLERS attest.mjs: before 186, after 186
+CALLERS attest.test.mjs: before 90, after 90
+CALLERS corpus.mjs: before 735, after 735
+CALLERS fileset.mjs: before 1, after 1
+CALLERS fileset.test.mjs: before 4, after 4
+CALLERS lib.mjs: before 54, after 55
+CALLERS release.mjs: before 11, after 11
+CALLERS release.test.mjs: before 176, after 64
+CALLERS rust.test.mjs: before 4, after 4
+CALLERS selftest.mjs: before 702, after 286
+CALLERS ucd.test.mjs: before 5, after 5
+ADDED 254 starts 42 callers selftest.mjs=29,corpus.mjs=9,release.test.mjs=4 | FP-0107 revision 3 case 4: each changed Git fixture builder writes the objects of the base builder for a fixed input
+TOTAL all cases: before 1975, after 1490
+CHANGED case | before | after | before callers | after callers | name
+CHANGED 102 | 32 | 22 | attest.mjs=16,release.test.mjs=16 | attest.mjs=16,release.test.mjs=6 | FP-0027 case 1: two source-archive runs on one commit write byte-identical tar and manifest files, and the manifest names the tar digest
+CHANGED 103 | 110 | 61 | release.test.mjs=70,attest.mjs=40 | attest.mjs=40,release.test.mjs=21 | FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+CHANGED 104 | 39 | 29 | attest.mjs=24,release.test.mjs=15 | attest.mjs=24,release.test.mjs=5 | FP-0027 case 3: source-archive rejects an abbreviated ID, a ref name, a missing commit, and an output directory inside the repository, and writes nothing
+CHANGED 105 | 32 | 20 | release.test.mjs=17,attest.mjs=15 | attest.mjs=15,release.test.mjs=5 | FP-0027 case 4: provenance subjects equal the artifact digests, and the build definition names the commit, tree, lock digest, and builder
+CHANGED 106 | 30 | 28 | attest.mjs=16,release.test.mjs=10,release.mjs=4 | attest.mjs=16,release.test.mjs=8,release.mjs=4 | FP-0027 case 5: reproduce-check reports reproducible for a fixed build, and different with the path and exit status 1 for a clock build
+CHANGED 107 | 25 | 24 | attest.mjs=16,release.test.mjs=5,release.mjs=4 | attest.mjs=16,release.mjs=4,release.test.mjs=4 | FP-0027 case 6: reproduce-check removes both work trees, and a forced removal failure appears in the report
+CHANGED 109 | 47 | 21 | release.test.mjs=33,attest.mjs=14 | attest.mjs=14,release.test.mjs=7 | FP-0027: source-archive fails before any write when an export attribute makes the tar differ from the tree
+CHANGED 110 | 29 | 27 | attest.mjs=16,release.test.mjs=10,release.mjs=3 | attest.mjs=16,release.test.mjs=8,release.mjs=3 | FP-0027: reproduce-check reports a failed build as an error with exit status 1 and still removes both work trees
+CHANGED 198 | 9 | 6 | selftest.mjs=7,corpus.mjs=2 | selftest.mjs=4,corpus.mjs=2 | The inventory of a fixture commit equals a hand-computed canonical listing digest
+CHANGED 199 | 12 | 11 | selftest.mjs=8,corpus.mjs=4 | selftest.mjs=7,corpus.mjs=4 | The inventory ignores working-tree files and core.autocrlf
+CHANGED 200 | 42 | 31 | selftest.mjs=30,corpus.mjs=12 | selftest.mjs=19,corpus.mjs=12 | A changed blob, an added file, a removed file, and a renamed file each change the inventory digest
+CHANGED 201 | 13 | 6 | selftest.mjs=11,corpus.mjs=2 | selftest.mjs=4,corpus.mjs=2 | Paths with spaces, non-ASCII bytes, and tabs keep their exact bytes through NUL-separated parsing
+CHANGED 202 | 7 | 6 | selftest.mjs=5,corpus.mjs=2 | selftest.mjs=4,corpus.mjs=2 | A symbolic link entry hashes its target text, and a submodule entry records its commit ID
+CHANGED 203 | 57 | 49 | corpus.mjs=39,selftest.mjs=18 | corpus.mjs=39,selftest.mjs=10 | corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+CHANGED 206 | 67 | 62 | corpus.mjs=57,selftest.mjs=10 | corpus.mjs=57,selftest.mjs=5 | Verification fails when the license digest, the commit date, or an applicability count differs from its record
+CHANGED 207 | 20 | 15 | selftest.mjs=12,corpus.mjs=8 | corpus.mjs=8,selftest.mjs=7 | corpus-verify exits with status 1 through the controller command on an inventory digest mismatch
+CHANGED 208 | 66 | 53 | corpus.mjs=37,selftest.mjs=29 | corpus.mjs=37,selftest.mjs=16 | A replace ref that substitutes the recorded commit cannot make verification pass
+CHANGED 209 | 6 | 5 | selftest.mjs=5,corpus.mjs=1 | selftest.mjs=4,corpus.mjs=1 | A tree path that contains a line feed fails the inventory
+CHANGED 210 | 41 | 22 | selftest.mjs=24,corpus.mjs=17 | corpus.mjs=17,selftest.mjs=5 | WPT counting of a fixture manifest reports per-type counts, excludes support, spec, and test262 from discovery, and reports test262 separately
+CHANGED 211 | 41 | 22 | selftest.mjs=24,corpus.mjs=17 | corpus.mjs=17,selftest.mjs=5 | A fixture manifest with a path that the tree lacks, or with a hash that differs from the blob ID, fails binding
+CHANGED 212 | 73 | 54 | corpus.mjs=49,selftest.mjs=24 | corpus.mjs=49,selftest.mjs=5 | A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+CHANGED 213 | 9 | 5 | selftest.mjs=8,corpus.mjs=1 | selftest.mjs=4,corpus.mjs=1 | Test262 discovery excludes a file named a_FIXTURE_b.js and a file named x_FIXTURE.js
+CHANGED 214 | 48 | 22 | selftest.mjs=31,corpus.mjs=17 | corpus.mjs=17,selftest.mjs=5 | A fixture manifest with test262 items under the vendored tests, the vendored harness, and infrastructure/test262/ counts only the infrastructure item and reports the others by path
+CHANGED 215 | 52 | 30 | selftest.mjs=31,corpus.mjs=21 | corpus.mjs=21,selftest.mjs=9 | A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation
+CHANGED 216 | 31 | 22 | selftest.mjs=18,corpus.mjs=13 | corpus.mjs=13,selftest.mjs=9 | FP-0082 case 18: corpus-extract writes exactly the test/ and harness/ blobs and features.txt, and an EXTRACT.json record
+CHANGED 217 | 23 | 14 | selftest.mjs=14,corpus.mjs=9 | corpus.mjs=9,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses a non-empty output directory, a directory outside out/, and an absent commit
+CHANGED 218 | 55 | 35 | selftest.mjs=30,corpus.mjs=25 | corpus.mjs=25,selftest.mjs=10 | FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes
+CHANGED 219 | 31 | 23 | selftest.mjs=16,corpus.mjs=15 | corpus.mjs=15,selftest.mjs=7,lib.mjs=1 | FP-0082 case 18: corpus-extract rejects a stored blob whose content does not hash to its tree object ID
+CHANGED 222 | 27 | 17 | selftest.mjs=15,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses test/language/A.js beside test/language/a.js before it creates the output directory
+CHANGED 223 | 28 | 17 | selftest.mjs=16,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses test/Language/b.js beside test/language/a.js before it creates the output directory
+CHANGED 224 | 27 | 17 | selftest.mjs=15,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses the tree path "test/..\\..\\..\\x.js", which has a backslash, and writes nothing
+CHANGED 225 | 27 | 17 | selftest.mjs=15,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses the tree path "test/a:b.js", which has a colon, and writes nothing
+CHANGED 226 | 27 | 17 | selftest.mjs=15,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses the tree path "test/a\u0001b.js", which has a control character, and writes nothing
+CHANGED 227 | 28 | 17 | selftest.mjs=16,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses the tree path "test/dir./x.js", which has a path component that ends in "." or a space, and writes nothing
+CHANGED 228 | 27 | 17 | selftest.mjs=15,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses the tree path "test/x.js ", which has a path component that ends in "." or a space, and writes nothing
+CHANGED 229 | 27 | 17 | selftest.mjs=15,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses the tree path "test/CON.js", which has a reserved Windows device name, and writes nothing
+CHANGED 230 | 28 | 17 | selftest.mjs=16,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses the tree path "test/aux/x.js", which has a reserved Windows device name, and writes nothing
+CHANGED 231 | 27 | 17 | selftest.mjs=15,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses the tree path "test/Com1.txt.js", which has a reserved Windows device name, and writes nothing
+CHANGED 232 | 41 | 22 | selftest.mjs=29,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=10 | FP-0082 case 18: corpus-extract refuses an altered tree object through the inventory and writes nothing
+CHANGED 233 | 26 | 17 | selftest.mjs=14,corpus.mjs=12 | corpus.mjs=12,selftest.mjs=5 | FP-0082 case 18: corpus-extract refuses a snapshot record whose tree differs from the commit and writes nothing
+CHANGED 234 | 52 | 42 | corpus.mjs=30,selftest.mjs=22 | corpus.mjs=30,selftest.mjs=12 | corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+CHANGED 235 | 41 | 35 | corpus.mjs=30,selftest.mjs=11 | corpus.mjs=30,selftest.mjs=5 | A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+CHANGED 236 | 57 | 47 | corpus.mjs=37,selftest.mjs=20 | corpus.mjs=37,selftest.mjs=10 | corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+CHANGED 241 | 79 | 69 | corpus.mjs=60,selftest.mjs=19 | corpus.mjs=60,selftest.mjs=9 | FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged
+CHANGED 242 | 40 | 30 | corpus.mjs=20,selftest.mjs=20 | corpus.mjs=20,selftest.mjs=10 | FP-0052 case 4: a fetch that cannot remove the old snapshot after it replaces the record fails, and the new snapshot and record stay
+CHANGED 243 | 23 | 17 | corpus.mjs=12,selftest.mjs=11 | corpus.mjs=12,selftest.mjs=5 | FP-0052 case 5: a fetch fails while test262.lock exists and changes nothing
+CHANGED 244 | 33 | 27 | corpus.mjs=22,selftest.mjs=11 | corpus.mjs=22,selftest.mjs=5 | FP-0052 case 6: of two Git corpus fetches started together, one passes and one fails on the lock
+CHANGED 248 | 50 | 40 | corpus.mjs=30,selftest.mjs=20 | corpus.mjs=30,selftest.mjs=10 | FP-0131 case 4: a fetch honors a repin that finishes between its ref resolution and its lock
+CHANGED 249 | 13 | 7 | selftest.mjs=11,corpus.mjs=2 | selftest.mjs=5,corpus.mjs=2 | FP-0131 case 5: a fetch with no policy revision and no record fails with the missing-record error and releases the lock
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0107/raw/r3-probe.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb2af83cc5\\m","started_at":"2026-10-09T20:57:54.487Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":46}

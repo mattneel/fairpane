@@ -11,6 +11,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { writeFixtureTree } from './git-fixture.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const release = () => import('./release.mjs');
@@ -38,24 +39,13 @@ function repository() {
   git(dir, ['init', '--quiet', '.']);
   return dir;
 }
-/** Write one tree level through `git mktree`. Entries: `{ parts, mode, oid }` with path components as buffers. */
-function tree(dir, entries) {
-  const lines = [], dirs = new Map(), nul = Buffer.from([0]);
-  for (const e of entries) {
-    if (e.parts.length === 1) { lines.push(Buffer.concat([Buffer.from(`${e.mode} blob ${e.oid}\t`), e.parts[0], nul])); continue; }
-    const name = e.parts[0].toString('latin1');
-    if (!dirs.has(name)) dirs.set(name, []);
-    dirs.get(name).push({ ...e, parts: e.parts.slice(1) });
-  }
-  for (const [name, sub] of dirs) lines.push(Buffer.concat([Buffer.from(`040000 tree ${tree(dir, sub)}\t`), Buffer.from(name, 'latin1'), nul]));
-  return git(dir, ['mktree', '-z'], Buffer.concat(lines));
-}
 /** Commit `files` (`{ path, text, mode }`) through plumbing, so modes and links do not depend on the host file system. */
 function commit(dir, files) {
-  const entries = files.map(f => ({ parts: Buffer.from(f.path).toString('latin1').split('/').map(p => Buffer.from(p, 'latin1')),
-    mode: f.mode ?? '100644', oid: git(dir, ['hash-object', '-w', '--stdin'], Buffer.from(f.text)) }));
-  return git(dir, ['-c', 'commit.gpgsign=false', 'commit-tree', tree(dir, entries), '-m', 'fixture']);
+  const { tree } = writeFixtureTree((args, input) => git(dir, args, input), files);
+  return git(dir, ['-c', 'commit.gpgsign=false', 'commit-tree', tree, '-m', 'fixture']);
 }
+/** The repository and commit builders of these cases, which FP-0107 revision 3 case 4 in `tools/selftest.mjs` checks. */
+export const releaseFixtureBuilder = Object.freeze({ repository, commit });
 /** The manifest file list that a fixture commit must produce: sorted by UTF-8 path bytes. */
 function expectedFiles(files) {
   return [...files].sort((a, b) => Buffer.compare(Buffer.from(a.path), Buffer.from(b.path)))

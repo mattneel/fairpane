@@ -282,3 +282,142 @@ The "Test cost" figures predate revision 1; the dispatched runs decide criterion
 
 `raw/integration-binding-r2-binding.log` records `HEAD` `0cf7c95` and a status that includes ignored files before and after the four gates: `gates/2026-10-09T19-25-13-723Z-repo-check-c959d987.json`, `gates/2026-10-09T19-25-14-189Z-controller-test-0fd69255.json` (248 of 248), `gates/2026-10-09T19-26-01-852Z-zig-fmt-b7f6edc6.json`, and `gates/2026-10-09T19-26-02-233Z-zig-test-4d4218dc.json` pass.
 `raw/bun-selftest-r2-binding.log` records Bun 1.4.2 with 248 of 248 cases.
+
+## Revision 3
+
+Revision 3 reduces the Git work of the controller-test fixture builders.
+The base is `9307a36`, and the worker's patch is `out/fp0107-r3.patch` in its work tree.
+The integrator's revision 3 amendment 1 turns the two local targets, half the child processes and a third less case time, into measurements without a bound, and it allows a tool change only where a tool starts one Git process per object or per query that one batched call can serve.
+The dispatched runs of criterion 3 stay the only bound.
+
+### Cost on the hosted Windows runner
+
+`raw/cost-r3.log` runs `raw/r3-cost.mjs` over the ten Windows `controller-test` receipt logs of the `57df855` series that `engineering/evidence/ci/runs-57df855.log` lists.
+The cases' median `# duration_ms` values sum to 155,881 ms, and the median step total is 61,522 ms.
+The costliest medians are FP-0027 case 2 (case 103, 6,059 ms), the pinned-revision WPT case (212, 5,698 ms), FP-0052 case 3 (241, 4,436 ms), and the license-digest case (206, 4,293 ms).
+Of the 25 costliest cases, 24 build Git fixtures: corpus snapshots, local upstreams, release commits, and, in FP-0051 case 3 (53), three attestation candidates.
+The other one is FP-0098 case 1 (165), which waits for a gate timeout.
+
+### Child processes by case and caller
+
+`raw/process-probe.mjs` counts per case only under a runner that runs one case at a time, as its header states, and the suite now runs ordinary cases on four worker threads.
+`raw/process-probe-r3.mjs` counts the same starts on every thread.
+A worker writes its counts for a case into a shared buffer before it posts the case's result, and the main thread prints them after the case's duration line.
+It also names the file of each start's first stack frame outside Node.js and the probe, so a start from a test file is told apart from a start by a tool under test.
+
+`raw/probe-before-r3.log` runs the unchanged base, 253 of 253 cases passing, and counts 1,975 starts.
+The tools under test start 987 of them: `corpus.mjs` 735, `attest.mjs` 186 (which includes the `git` calls of `release.mjs` through `readGit`), `lib.mjs` 54, `release.mjs` 11, and `fileset.mjs` 1.
+The test files start 988: `selftest.mjs` 702, `release.test.mjs` 176, `attest.test.mjs` 90, and 20 in four other modules.
+So no change to the test files alone can halve the count, which is why the integrator made the local targets measurements.
+
+No tool changes.
+The probe shows no tool that starts one Git process per object: `computeInventory` and `streamBlobs` in `tools/corpus.mjs` read every blob through one `git cat-file --batch`, `listTree` lists a commit with one `git ls-tree -r -z`, and `tools/release.mjs` hashes the tree's blobs with one `git cat-file --batch`.
+The remaining tool calls are separate queries whose distinct failures the corpus and attestation checks report, such as `cat-file -t` before `cat-file commit` in `commitObject` and the `rev-parse` and `cat-file -e` sequence of `candidateIdentity`.
+Folding them into one batched call would change which Git failure each check reports, so revision 3 keeps them.
+
+### Changes
+
+- `tools/git-fixture.mjs` (new): `writeFixtureTree(git, files)` writes the blobs of a fixture commit with one `git hash-object -w --no-filters --stdin-paths` and its trees with one `git mktree -z --batch`, where the base builders started one `git hash-object -w --stdin` per blob and one `git mktree -z` per tree.
+  It writes each blob's bytes to a scratch file under the system temporary directory and removes the directory after `hash-object` returns.
+  `--no-filters` keeps the bytes as `--stdin` did, which applies no filter.
+  It computes each tree ID in Git's tree format and order and feeds the trees to `mktree` with each subtree first; `mktree` must print exactly those IDs, or the builder throws.
+  It passes `--missing` when a file is a submodule, as the base did for the level that held the submodule.
+  It returns the root tree and a lookup of each path's blob or submodule ID.
+- `tools/selftest.mjs`:
+  - `fixtureObjects` (new) calls `writeFixtureTree` and then `git commit-tree` with the base's arguments, and `fixtureCommit` returns its commit; `splitPath` moves into `tools/git-fixture.mjs`, and `addTree` there takes the place of `fixtureTree`.
+  - `corpusFixture` builds the WPT manifest from the builder's blob IDs instead of one `git rev-parse <commit>:<path>` per manifest path; both give the blob ID of the path in the commit, and a missing path fails the fixture.
+  - `bareRepo` takes `{ initialBranch }`, and `upstreamFixture` initializes its upstream with `--initial-branch=main` instead of a following `git symbolic-ref HEAD refs/heads/main`; both write `ref: refs/heads/main` into `HEAD`, which case 4 checks.
+  - Revision 3 case 4 follows FP-0107 revision 1 case 3, so no existing case changes its number.
+- `tools/release.test.mjs`: `commit` calls `writeFixtureTree` and then `git commit-tree` with the base's arguments, and `tree` moves into `tools/git-fixture.mjs`.
+  `releaseFixtureBuilder` exports `repository` and `commit` for case 4.
+- `tools/README.md`: "Run the controller tests" describes the shared builder.
+- `raw/process-probe-r3.mjs`, `raw/r3-cost.mjs`, `raw/r3-probe.mjs`, and `raw/names-r3.mjs`: evidence scripts.
+
+`attest.test.mjs`'s `fixtureRepository` is unchanged.
+It commits through porcelain `git commit` with the host's clock, so its commit IDs differ on every run and case 4 could not hold them, and it starts eight processes per candidate.
+
+### Changed builders and the cases that use them
+
+Case numbers are those of the changed suite, which equal the base's for cases 1 to 253.
+`raw/cost-r3.log` lists every case whose count changed; each one uses a builder below, and no other case changed its count.
+
+| Builder | Cases |
+| --- | --- |
+| `writeFixtureTree` through `fixtureCommit` in `tools/selftest.mjs` | 198, 199, 200, 201, 202, 203, 208, 209, 213, 215, 232, 254 |
+| `corpusFixture`, through `fixtureObjects`, with the manifest change | 203, 206, 207, 208, 210, 211, 212, 214, 215, 216, 217, 218, 219, 222 to 233, 254 |
+| `upstreamFixture`, through `bareRepo` with `initialBranch` and `fixtureCommit` | 234, 235, 236, 241, 242, 243, 244, 248, 249, 254 |
+| `commit` in `tools/release.test.mjs` | 102, 103, 104, 105, 109, and through `buildFixture` 106, 107, 110; 254 |
+
+### Every changed line
+
+`raw/assertions-r3.log` records `git add -N tools/git-fixture.mjs`, then `git diff --stat` and `git diff` of the three test files against `9307a36`: 3 files, 138 insertions, and 43 deletions.
+
+- `tools/git-fixture.mjs`: all 69 lines are the new builder.
+- `tools/release.test.mjs`: the import, the removed `tree`, the two-line body of `commit`, and the `releaseFixtureBuilder` export.
+- `tools/selftest.mjs`: the two imports; `bareRepo`, `fixtureObjects`, and `fixtureCommit` in place of `bareRepo`, `splitPath`, `fixtureTree`, and `fixtureCommit`; the two changed lines and one added line of `corpusFixture`; the first line of `upstreamFixture` in place of its first two; and case 4 with its inputs, expected IDs, and `assertLoose`.
+
+No other line changes, so every existing case keeps its name, its order, and every assertion; only the fixture builders that the cases call change.
+
+### Case 4 and M4
+
+Case 4 builds, from fixed inputs, a `fixtureCommit` commit with modes 100755 and 120000, a submodule, an empty blob, two equal blobs, non-ASCII and raw-byte paths, a tab, the hostile names of the extraction cases, and names that sort differently as trees and files, and a child commit of it.
+It also builds `corpusFixture('wpt', WPT_FILES, { manifest: wptManifest })`, `upstreamFixture()` with one `move()`, and a release `commit` of the same files without the submodule.
+It prints the IDs and asserts the commit and tree IDs, the WPT record's inventory digest, the manifest file's SHA-256, the upstream's `HEAD` text and `refs/heads/main`, and that every object that each commit reaches is a loose object file, which cases 208, 219, and 232 rely on.
+
+`raw/tests-before-r3-attempt-1.log` added case 4 to the base with an empty expectation, so case 4 failed, 253 of 254 passed, and the base builders printed their IDs.
+`raw/tests-before-r3.log` records `HEAD` `9307a36`, the blobs of `tools/selftest.mjs` (`2f1d729c`) and `tools/release.test.mjs` (`523d897a`) with those IDs filled in and no builder changed, and `node tools/fairpane.mjs test` with 254 of 254 passing and the base builders' IDs printed.
+Every later run prints the same IDs and passes case 4.
+
+`raw/mutation-r3.log` records M4: `git hash-object tools/git-fixture.mjs` `cdf29df2` before, `raw/mutate.mjs` makes the builder write `alpha, mutated` for any file named `a.txt` (`raw/mutation-r3-M4.diff`), `9eccb612` during, `node tools/fairpane.mjs test` with exit status 1, the restoration, and `cdf29df2` after.
+Case 4 fails, and so do cases 103, 198, and 200, whose fixtures contain an `a.txt`; 250 of 254 pass.
+
+### Measurements
+
+Child processes, from `raw/cost-r3.log`:
+
+| Count | Before | After | Change |
+| --- | ---: | ---: | ---: |
+| Starts in cases 1 to 253 | 1,975 | 1,448 | -527 (-26.7%) |
+| `git` starts in cases 1 to 253 | 1,874 | 1,346 | -528 |
+| Starts from `selftest.mjs` | 702 | 286 | -416 |
+| Starts from `release.test.mjs` | 176 | 64 | -112 |
+| Starts by the tools under test | 987 | 988 | +1 |
+| Thread time blocked in synchronous starts | 68,496 ms | 38,935 ms | -43.2% |
+| Case 4 | - | 42 | |
+
+The one added tool start is a `taskkill` that `lib.mjs` starts in case 219, where the watchdog stops `git cat-file` after the extraction fails; `raw/probe-process-starts.log` shows the same start for that case, then numbered 215, in an earlier base.
+
+Three runs each of `node tools/fairpane.mjs test` on Windows, from `raw/profile-before-r3.log` (the base with case 4) and `raw/profile-after-r3.log`:
+
+| Run | Before total | Before case sum | After total | After case sum |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 50,539 ms | 124,017 ms | 39,945 ms | 93,411 ms |
+| 2 | 49,713 ms | 122,147 ms | 40,548 ms | 96,233 ms |
+| 3 | 56,239 ms | 139,894 ms | 37,177 ms | 87,359 ms |
+| Median | 50,539 ms | 127,290 ms (sum of case medians) | 39,945 ms | 90,635 ms (sum of case medians) |
+
+The sum of the case medians falls by 36,655 ms, or 28.8%, short of the third that the frozen revision named and that amendment 1 turns into a measurement.
+The runs share the host with other work, which the spread of the before runs shows.
+`raw/profile-linux-after-r3.log` runs the changed suite on WSL Ubuntu: 254 of 254 pass in 9,512 ms, and the case durations sum to 22,152 ms.
+
+### Records
+
+| Log | Commands and result |
+| --- | --- |
+| `raw/probe-before-r3.log` | `node --import=./engineering/evidence/FP-0107/raw/process-probe-r3.mjs tools/selftest.mjs` on the unchanged base (0): 253 of 253, 1,975 starts. |
+| `raw/tests-before-r3-attempt-1.log` | `git rev-parse HEAD`, `git hash-object` of the two test files, and `node tools/fairpane.mjs test` (1): case 4 fails on its empty expectation and prints the base IDs. |
+| `raw/tests-before-r3.log` | The same commands with the expected IDs (0): 254 of 254. |
+| `raw/profile-before-r3.log` | `git rev-parse HEAD`, `git hash-object`, and three runs of `node tools/fairpane.mjs test` on the base with case 4 (0 each): 254 of 254 each. |
+| `raw/probe-after-r3.log` | `git hash-object` of the three test files (`1157318e`, `3390b2a8`, `cdf29df2`) and the probe run on the changed suite (0): 254 of 254, 1,490 starts. |
+| `raw/profile-after-r3.log` | `git rev-parse HEAD`, `git hash-object`, and three runs of `node tools/fairpane.mjs test` (0 each): 254 of 254 each. |
+| `raw/profile-linux-after-r3.log` | With `GIT_INDEX_FILE=out/r3/index`: `git read-tree HEAD`, `git add -A -- tools engineering/evidence/FP-0107`, and `git write-tree` (0 each), tree `5c3d8625`; `git archive` of that tree (0); under WSL, the extraction into `$HOME/fairpane-linux/work/FP-0107-r3/after`, a commit whose tree is `5c3d8625`, the same three blobs, Git 2.43.0, Node.js v26.7.0, and `node tools/selftest.mjs` (0): 254 of 254. |
+| `raw/names-r3.log` | `node raw/names-r3.mjs` (0): every run of the five logs above lists the 253 base names of `raw/probe-before-r3.log` in order, then case 4, and nothing else. |
+| `raw/assertions-r3.log` | See "Every changed line". |
+| `raw/mutation-r3.log`, `raw/mutation-r3-M4.diff` | See "Case 4 and M4". |
+| `raw/bun-selftest-r3.log` | `git rev-parse HEAD`, `git hash-object` of the three test files, `bun --version` (1.4.2), and `bun tools/selftest.mjs` (0): 254 of 254. |
+| `raw/cost-r3.log` | `raw/r3-cost.mjs` over the ten CI receipt logs, the two Windows profiles, and the Linux profile, then `raw/r3-probe.mjs` (0 each). |
+
+### Open items
+
+- The integrator dispatches the ten runs of criterion 3 on a head that contains revision 3 and records them with their receipts.
+- The integrator records `HEAD` and a status that includes ignored files before and after it runs `repo-check` and `controller-test`.
