@@ -1,0 +1,116 @@
+{
+  "verdict": "approve",
+  "summary": "I approve the proposed `specs/corpora.json` values for `unicode` and `opentype-fixtures` (engineering/evidence/FP-0013/README.md:35-66), with one disclosed limit. This session had no shell or code-execution tool, so I could not run SHA-256 myself. Instead I checked check (1) this way: I rebuilt the exact listing bytes from the current records, read the digest code, and confirmed that two separately recorded runs of that code produced the proposed values from those same bytes. The runs are corpus-fetch at 05:09 and 05:16, and proposed-pins.log at 05:25. The current records and the 10:45 integration verify run match the inputs those runs logged, field for field.\n\nThe other checks pass. `revision`, `license_record`, `local_path`, and `status` follow specs/README.md:89-93 and ADR 0003:58-59, 271, and 298. Licenses match LICENSE-DECISION.md:29-32. Both `upstream` values equal the records, so no change is needed. The trust-on-first-use sources are UCD.zip, license.txt, the noto-sans archive, and the CJK tag commit. The README and specs/README.md disclose the first three.\n\nBefore committing, the integrator should apply the values and observe `corpus-verify unicode` and `corpus-verify opentype-fixtures` exit 0. corpus-verify recomputes the listing digest (tools/fileset.mjs:904), so that run independently recomputes the hash. A wrong digest fails closed rather than weakening any gate.",
+  "checked": [
+    {
+      "item": "(1) Digest definition: what `fileSetPinProblems` compares for `inventory_sha256`",
+      "ok": true,
+      "evidence": "tools/fileset.mjs:555-565: check('inventory_sha256', sourceListingDigest(record)). tools/fileset.mjs:377-379: sha256(record.sources.map(s => `${s.sha256}\\t${s.size}\\t${s.id}\\n`).join('')). tools/lib.mjs:27 is crypto sha256 over a UTF-8 (here ASCII) string, as hex. This matches specs/README.md:92 and README.md:37."
+    },
+    {
+      "item": "(1) Exact listing bytes for `unicode`, rebuilt from specs/snapshots/unicode.json sources in record order",
+      "ok": true,
+      "evidence": "There are 167 bytes and two lines, each ending in LF, with TAB separators. Line 1 is 81 bytes: \"7b3e555514060b92290d154f53655c5eb0fa62b16eb04c03434ff72d1a66a0d8\\t5657953\\tucd-zip\\n\". Line 2 is 86 bytes: \"e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96\\t1995\\tunicode-license\\n\". Sources: unicode.json:10,19,20 and 31,40,41. Sizes are decimal without separators, because the code uses a JS template literal."
+    },
+    {
+      "item": "(1) Exact listing bytes for `opentype-fixtures`, rebuilt from specs/snapshots/opentype-fixtures.json sources in record order",
+      "ok": true,
+      "evidence": "There are 445 bytes and five LF-terminated lines.\n1. 85 bytes: \"0c34df072a3fa7efbb7cbf34950e1f971a4447cffe365d3a359e2d4089b958f5\\t117491253\\tnoto-sans\\n\"\n2. 91 bytes: \"1301aceaea84c501cf2e6dcfb3182e2328c8eae5725817fcb239672bda7154f1\\t18777381\\tnoto-sans-arabic\\n\"\n3. 95 bytes: \"820c7da45b1e63562cb41c0a8cac5d9a4202312043a3a040ed1325857ef469b1\\t18449254\\tnoto-sans-devanagari\\n\"\n4. 87 bytes: \"68a3fc98800b2a27b371f2fb79991daf3633bd89309d4ffaa6946fd587f375b5\\t16467736\\tnoto-cjk-otf\\n\"\n5. 87 bytes: \"6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2\\t4301\\tnoto-cjk-license\\n\"\nSources: opentype-fixtures.json:10/19/20, 31/40/41, 52/61/62, 73/82/83, and 89/98/99."
+    },
+    {
+      "item": "(1) Proposed `inventory_sha256` values equal the recorded output of `sourceListingDigest` over exactly those inputs",
+      "ok": true,
+      "evidence": "raw/proposed-pins.log:3-4 logs sourceListingDigest over the records, exit 0. It gives unicode 2511e5384857e35883ec38bd8c0d225d1ea7591f6ee6ba6347c572f6b47a59d7 and opentype-fixtures ce84ce970775ec86b39e1045d1622f2ddc5829df0a05844fd1569595cb150e34. Its logged [id, size, sha256, commit] tuples equal the current records exactly and in the same order. raw/corpus-fetch-unicode.log:98 and raw/corpus-fetch-opentype-fixtures.log:144 report the same source_listing_sha256 values from the fetch-time records. The proposed values (README.md:46 and 58) match character for character. raw/r1-integration-corpus.log (10:45, C:\\src\\fairpane) reports the same per-source sizes and SHA-256 values, so the records did not change after the digest was computed."
+    },
+    {
+      "item": "(1) Reviewer-executed SHA-256 of the listing bytes",
+      "ok": false,
+      "evidence": "Not performed: no execution tool was available in this session. I do not claim to have recomputed the hash. The equality above rests on two recorded executions of the reviewed function over byte-identical inputs. The integrator's post-apply corpus-verify (fileset.mjs:904) is the mechanical recomputation."
+    },
+    {
+      "item": "(2) `revision` equals the record `version`",
+      "ok": true,
+      "evidence": "fileSetPinProblems checks revision against record.version (fileset.mjs:560), and specs/README.md:91 defines it the same way. Proposed \"18.0.0\" equals unicode.json:6 and FILE_SET_RULES (fileset.mjs:46). Proposed \"fixtures-1\" equals opentype-fixtures.json:6 and fileset.mjs:62."
+    },
+    {
+      "item": "(2) `license_record` is `specs/snapshots/<corpus>.json`",
+      "ok": true,
+      "evidence": "fileset.mjs:562 compares it with `specs/snapshots/${id}.json`, and specs/README.md:93 says the same. The proposed values are specs/snapshots/unicode.json and specs/snapshots/opentype-fixtures.json."
+    },
+    {
+      "item": "(2) `local_path` and `status`",
+      "ok": true,
+      "evidence": "Neither field is a pin (ADR 0003:58-59), and no code reads them for file sets. ADR 0003:271 makes local_path relative to <corpora-root>. The proposed <corpora-root>/<id>/sources is the directory that fetch creates (fileset.mjs:613, 650, 691) and the common prefix of every record source local_path (validateFileSetRecord, fileset.mjs:315). Proposed status \"pinned\" matches ADR 0003:298: revision, license, and inventory are recorded and verifiable. It also follows the wpt and test262 convention (corpora.json:14, 24). The file-set entries have no manifest_sha256 key, so fileset.mjs:563 pins nothing there."
+    },
+    {
+      "item": "(2) Pins take effect in fetch and verify",
+      "ok": true,
+      "evidence": "fetchFileSet checks the listing pin before any parse (fileset.mjs:636-638) and again on the full record (686). verifyFileSet checks it at 904. When applied, a later source substitution therefore fails independently of the record."
+    },
+    {
+      "item": "(3) Unicode License v3 provenance",
+      "ok": true,
+      "evidence": "LICENSE-DECISION.md:29-32 approves Unicode data files under the Unicode License v3 with license text and per-file provenance. src/unicode/ucd/license.txt:1 reads \"UNICODE LICENSE V3\" and has the same size and SHA-256 as the selected entry (unicode.json:124-125) and the source (unicode.json:40-41). The generated table carries the notice (src/unicode/tables.zig:16), as specs/IMPORT_REQUIREMENTS.md requires. All eight data members come from the numbered 18.0.0 directory, and each has a published_url equality check (raw/corpus-fetch-unicode.log:7-14)."
+    },
+    {
+      "item": "(3) OFL 1.1 provenance for Noto Sans, Arabic, and Devanagari",
+      "ok": true,
+      "evidence": "Each OFL.txt line 1 has \"Copyright 2022 The Noto Project Authors (https://github.com/notofonts/<repo>)\", and line 3 has \"licensed under the SIL Open Font License, Version 1.1\". This holds for tests/text/fonts/noto-sans/, noto-sans-arabic/, and noto-sans-devanagari/. Each record's font entry has license_name, copyright, and reserved_font_names [] (opentype-fixtures.json:115-117, 137-139, 159-161). It also names license_path to a selected license entry with size and SHA-256 (123-124, 145-146, 167-168). The fonts are extracted unedited, and each directory keeps its own OFL text."
+    },
+    {
+      "item": "(3) Noto CJK subset: OFL 1.1 and reserved-name handling",
+      "ok": true,
+      "evidence": "tests/text/fonts/noto-sans-cjk-jp-subset/LICENSE:1-2 states OFL 1.1, and its size and SHA-256 equal the Git-blob-pinned source (opentype-fixtures.json:98-101, 176-177). Name ID 0 is \"© 2014-2021 Adobe (http://www.adobe.com/).\" (209) and states no Reserved Font Name, so reserved_font_names is [] (210). rfn_resolution (211) still treats \"Source\" as reserved, as CONTRACT.md:115 and 130-137 require. raw/integrator-rfn-search-r1.log finds 0 case-insensitive \"Source\" matches in ASCII and in UTF-16BE, against a NotoSans control count of 1. That satisfies IMPORT_REQUIREMENTS 'A subset ... drops any Reserved Font Name'. Both reviews accepted this (review-2-accept.json, earlier-findings criterion)."
+    },
+    {
+      "item": "(4) `upstream` consistent with the records",
+      "ok": true,
+      "evidence": "corpora.json:28 https://www.unicode.org/Public/ equals unicode.json:5, and corpora.json:48 https://learn.microsoft.com/en-us/typography/opentype/spec/ equals opentype-fixtures.json:5. fetchFileSet copies policy.upstream into the record (fileset.mjs:683), and verifyFileSet requires equality (860). The 10:45 verify passed (r1-integration-corpus.log). No change is needed. A change would require re-running corpus-fetch opentype-fixtures, because the record must not be hand-edited (README.md:63-65; CONTRACT.md:19, 163)."
+    },
+    {
+      "item": "(5) Release, tag, commit, size, and digest evidence, and trust on first use",
+      "ok": true,
+      "evidence": "UCD.zip (unicode.json:19-20) and license.txt (40-41): no size, digest, or commit pin (fileset.mjs:30-33). They were trusted on first use, and published_url is same-origin (README.md:72-73, 81-82; specs/README.md:67-70).\n\nnoto-sans: the size pin 117491253 matched. The contract commit c4a321e1 equals the peeled tag from ls-remote (fetch log lines 4-6), but the tag does not bind the asset. These bytes were trusted on first use (README.md:74).\n\nArabic and Devanagari: the contract pinned size, GitHub digest, and commit (fileset.mjs:49-52). The fetch log shows SHA-256 equal to published_digest (records 40-42 and 61-63) and the peeled tags 1b2b7e5c and e123d230 (fetch log).\n\nCJK font and LICENSE: size and Git blob ID are contract-pinned (fileset.mjs:53-56) and matched (records 82-85, 98-101). Commit 523d033d comes from a lightweight tag recorded on first use (CJK_RELEASE commit null, fileset.mjs:35; fetch log). Nothing checks that the blob is in that commit's tree.\n\nThe corpora pins bind only source sha256, size, and id. Inventories, selected files, and the derived input follow from those bytes. release.commit stays pinned only by the record (recordPinProblems, fileset.mjs:577)."
+    },
+    {
+      "item": "Applicability records consistent with the pinned records",
+      "ok": true,
+      "evidence": "specs/applicability/unicode.json: version 18.0.0, ucd-zip inventory 37761bcf… equal to unicode.json:27. Counts: 71 discovered = 45+11+3+12, 8 selected, 63 unclassified. specs/applicability/opentype-fixtures.json: the inventories equal opentype-fixtures.json:27, 48, and 69 and noto-cjk-otf sha256 83. Counts: 741 = 370+185+185+1, 4 selected, 737 unclassified. corpus-verify recomputed both at 10:45 and reported pass."
+    },
+    {
+      "item": "FP-0013 acceptance prerequisite",
+      "ok": true,
+      "evidence": "reviews/review-2-accept.json and reviews/security-review-2-accept.json both have verdict accept for 4a09ed5 and 24b8a35. Neither raises a finding against the proposed pin values. The security review recommends applying them (finding at fileset.mjs:466)."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0013/raw/proposed-pins.log",
+      "line": 3,
+      "issue": "The proposed digests come only from executions of the worker's code recorded in local logs. I had no execution tool, so I did not recompute SHA-256 over the listing bytes myself.",
+      "recommendation": "After applying the values, run `node tools/fairpane.mjs corpus-verify unicode` and `node tools/fairpane.mjs corpus-verify opentype-fixtures`, recording the FAIRPANE_CORPORA_DIR override, and require exit 0 before committing. Optionally also run `node --input-type=module -e \"import {sourceListingDigest} from './tools/fileset.mjs'; import fs from 'node:fs'; for (const id of ['unicode','opentype-fixtures']) console.log(id, sourceListingDigest(JSON.parse(fs.readFileSync('specs/snapshots/'+id+'.json','utf8'))))\"`."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 14,
+      "issue": "\"The `specs/corpora.json` entries keep their `not-fetched` status until a separate protected commit applies the reviewed pins\" becomes stale once this change lands. specs/README.md:70 and README.md:83 (\"once the integrator applies them\") and engineering/HANDOFF.md:6 (which lists only the Test262 and WPT pins) will also be out of date.",
+      "recommendation": "In the same or the next commit, update these lines to say that `unicode` and `opentype-fixtures` are pinned at 18.0.0 and fixtures-1 with the listing digests above."
+    },
+    {
+      "severity": "note",
+      "path": "specs/corpora.json",
+      "line": 48,
+      "issue": "The `opentype-fixtures` upstream names the OpenType specification, not where any fixture comes from. The fixtures come from the notofonts GitHub repositories. For file sets, `upstream` is descriptive only: corpusPolicy requires HTTPS (tools/corpus.mjs:45), fetch copies it (fileset.mjs:683), and verify compares it (860). The unicode license source, https://www.unicode.org/license.txt, also lies outside https://www.unicode.org/Public/. Both are consistent with the records, so no change is required.",
+      "recommendation": "Keep the value for this change. If a more accurate upstream is wanted later, change it in a protected commit followed by `corpus-fetch opentype-fixtures`, as README.md:63-65 states. Also consider documenting in specs/README.md:89-93 that `upstream` is descriptive for file-set corpora."
+    },
+    {
+      "severity": "note",
+      "path": "specs/snapshots/opentype-fixtures.json",
+      "line": 80,
+      "issue": "The noto-cjk tag Sans2.004 is lightweight, and its commit 523d033d was recorded on first use: CJK_RELEASE.commit is null (tools/fileset.mjs:35). The fetch does not check that Git blobs f5622495… and d952d62c… are in that commit's tree. The bytes are still authenticated by the contract-pinned blob IDs. Neither the commit nor any noto release commit is covered by the corpora.json listing pin, only by the record (recordPinProblems, fileset.mjs:577). README.md:72-83 discloses trust on first use for the UCD and noto-sans bytes but not for this commit.",
+      "recommendation": "State in README.md 'Imported sources' or specs/README.md:67-70 that the CJK tag commit was recorded on first use and that release commits are record-pinned, not corpora-pinned."
+    }
+  ]
+}
