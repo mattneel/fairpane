@@ -15,6 +15,8 @@ test {
     _ = c_api;
     _ = dom;
     _ = engine;
+    // The laboratory drives the engine but is not part of the library's API.
+    _ = @import("lab.zig");
     _ = handles;
     _ = web_string;
 }

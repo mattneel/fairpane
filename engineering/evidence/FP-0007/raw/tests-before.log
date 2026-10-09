@@ -1,0 +1,166 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0007-before"]
+test
++- FP-0007 case 13: case 3 fails with exit status 1
+   +- install fairpane-lab
+      +- compile exe fairpane-lab debug native 1 errors
+src\lab_main.zig:1:1: error: unable to load "lab_main.zig": FileNotFound
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\std.zig:116:22: note: file imported here
+const root = @import("root");
+                     ^~~~~~
+error: 1 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-exe -Odebug "-Mroot=src\\lab_main.zig" --cache-dir "out\\fp0007-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane-lab --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- FP-0007 case 14: the minimized document body is 1-minimal
+   +- compile exe fairpane-lab-check debug native 17 errors
+src\lab.zig:15:89: error: use of undeclared identifier 'case_size_limit'
+    return std.Io.Dir.cwd().readFileAlloc(testing.io, path, testing.allocator, .limited(case_size_limit));
+                                                                                        ^~~~~~~~~~~~~~~
+src\lab.zig:18:34: error: use of undeclared identifier 'Run'
+fn runFixture(name: []const u8) !Run {
+                                 ^~~
+src\lab.zig:25:45: error: use of undeclared identifier 'Run'
+fn resultJson(arena: Allocator, run: *const Run) !std.json.Value {
+                                            ^~~
+src\lab.zig:41:37: error: use of undeclared identifier 'Detail'
+fn detailText(buffer: []u8, detail: Detail) ![]const u8 {
+                                    ^~~~~~
+src\lab.zig:82:21: error: use of undeclared identifier 'Detail'
+    var diagnostic: Detail = undefined;
+                    ^~~~~~
+src\lab.zig:148:29: error: use of undeclared identifier 'Result'
+    try testing.expectEqual(Result.pass, run.outcome.result);
+                            ^~~~~~
+src\lab.zig:190:33: error: use of undeclared identifier 'Result'
+        try testing.expectEqual(Result.fail, run.outcome.result);
+                                ^~~~~~
+src\lab.zig:225:29: error: use of undeclared identifier 'Result'
+    try testing.expectEqual(Result.unsupported, run.outcome.result);
+                            ^~~~~~
+src\lab.zig:245:29: error: use of undeclared identifier 'Result'
+    try testing.expectEqual(Result.pass, run.outcome.result);
+                            ^~~~~~
+src\lab.zig:294:15: error: use of undeclared identifier 'runCase'
+    var run = runCase(testing.allocator, case_bytes);
+              ^~~~~~~
+src\lab.zig:318:17: error: use of undeclared identifier 'runCase'
+    var first = runCase(testing.allocator, bytes);
+                ^~~~~~~
+src\lab.zig:349:29: error: use of undeclared identifier 'Result'
+    try testing.expectEqual(Result.timeout, run.outcome.result);
+                            ^~~~~~
+src\lab.zig:367:19: error: use of undeclared identifier 'runCase'
+        var run = runCase(testing.allocator, bytes);
+                  ^~~~~~~
+src\lab.zig:382:29: error: use of undeclared identifier 'Result'
+    try testing.expectEqual(Result.pass, run.outcome.result);
+                            ^~~~~~
+src\lab.zig:434:25: error: use of undeclared identifier 'ddmin'
+    const reduced = try ddmin(testing.allocator, "xxaxxbxx", &predicate);
+                        ^~~~~
+src\lab.zig:447:15: error: use of undeclared identifier 'runCase'
+    var run = runCase(gpa, bytes);
+              ^~~~~~~
+tests\lab\check.zig:20:77: error: root source file struct 'lab' has no member named 'case_size_limit'
+    const bytes = try Io.Dir.cwd().readFileAlloc(io, path, gpa, .limited(lab.case_size_limit));
+                                                                         ~~~^~~~~~~~~~~~~~~~
+src\lab.zig:1:1: note: struct declared here
+//! The inspectable headless laboratory.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    main: tests\lab\check.zig:13:83
+    callMain [inlined]: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:833:30
+    WinStartup: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17
+    2 reference(s) hidden; use '-freference-trace=5' to see all references
+error: 17 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-exe -Odebug --dep lab "-Mroot=tests\\lab\\check.zig" -Odebug "-Mlab=src\\lab.zig" --cache-dir "out\\fp0007-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane-lab-check --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- run test
+   +- compile test debug native 16 errors
+src\lab.zig:15:89: error: use of undeclared identifier 'case_size_limit'
+    return std.Io.Dir.cwd().readFileAlloc(testing.io, path, testing.allocator, .limited(case_size_limit));
+                                                                                        ^~~~~~~~~~~~~~~
+src\lab.zig:18:34: error: use of undeclared identifier 'Run'
+fn runFixture(name: []const u8) !Run {
+                                 ^~~
+src\lab.zig:25:45: error: use of undeclared identifier 'Run'
+fn resultJson(arena: Allocator, run: *const Run) !std.json.Value {
+                                            ^~~
+src\lab.zig:41:37: error: use of undeclared identifier 'Detail'
+fn detailText(buffer: []u8, detail: Detail) ![]const u8 {
+                                    ^~~~~~
+src\lab.zig:82:21: error: use of undeclared identifier 'Detail'
+    var diagnostic: Detail = undefined;
+                    ^~~~~~
+src\lab.zig:148:29: error: use of undeclared identifier 'Result'
+    try testing.expectEqual(Result.pass, run.outcome.result);
+                            ^~~~~~
+src\lab.zig:190:33: error: use of undeclared identifier 'Result'
+        try testing.expectEqual(Result.fail, run.outcome.result);
+                                ^~~~~~
+src\lab.zig:225:29: error: use of undeclared identifier 'Result'
+    try testing.expectEqual(Result.unsupported, run.outcome.result);
+                            ^~~~~~
+src\lab.zig:245:29: error: use of undeclared identifier 'Result'
+    try testing.expectEqual(Result.pass, run.outcome.result);
+                            ^~~~~~
+src\lab.zig:294:15: error: use of undeclared identifier 'runCase'
+    var run = runCase(testing.allocator, case_bytes);
+              ^~~~~~~
+src\lab.zig:318:17: error: use of undeclared identifier 'runCase'
+    var first = runCase(testing.allocator, bytes);
+                ^~~~~~~
+src\lab.zig:349:29: error: use of undeclared identifier 'Result'
+    try testing.expectEqual(Result.timeout, run.outcome.result);
+                            ^~~~~~
+src\lab.zig:367:19: error: use of undeclared identifier 'runCase'
+        var run = runCase(testing.allocator, bytes);
+                  ^~~~~~~
+src\lab.zig:382:29: error: use of undeclared identifier 'Result'
+    try testing.expectEqual(Result.pass, run.outcome.result);
+                            ^~~~~~
+src\lab.zig:434:25: error: use of undeclared identifier 'ddmin'
+    const reduced = try ddmin(testing.allocator, "xxaxxbxx", &predicate);
+                        ^~~~~
+src\lab.zig:447:15: error: use of undeclared identifier 'runCase'
+    var run = runCase(gpa, bytes);
+              ^~~~~~~
+error: 16 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0007-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 0/17 steps succeeded (3 failed)
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 16 errors
++- FP-0007 case 13: case 2 passes with exit status 0 transitive failure
+|  +- install fairpane-lab transitive failure
+|     +- compile exe fairpane-lab debug native 1 errors
++- FP-0007 case 13: case 3 fails with exit status 1 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal transitive failure
+|  +- compile exe fairpane-lab-check debug native 17 errors
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing transitive failure
+   +- compile exe fairpane-lab-check debug native (reused)
+   +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x8c6d4179 test --summary all --cache-dir out/fp0007-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0007-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t75c243992\\m","started_at":"2026-10-09T03:05:56.920Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3635,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}

@@ -1,0 +1,32 @@
+{
+  "format": "fairpane-lab-case",
+  "version": 1,
+  "corpus": null,
+  "environment": {
+    "time_origin_ms": 0,
+    "random_seed": "0000000000000000000000000000000000000000000000000000000000000000",
+    "viewport": {
+      "width": 1024,
+      "height": 768,
+      "device_pixel_ratio_milli": 1000
+    },
+    "locale": "en-US",
+    "time_zone": "UTC"
+  },
+  "document": {
+    "url": "https://example.test/hello.html",
+    "body_base64": "PCFkb2N0eXBlIGh0bWw+PHRpdGxlPkZQLTAwMDc8L3RpdGxlPjxwPkhlbGxvIGZyb20gdGhlIGxhYm9yYXRvcnkuPC9wPgo="
+  },
+  "resources": [],
+  "limits": {
+    "max_steps": 8,
+    "step_budget": 1,
+    "max_outstanding_requests": 1,
+    "max_response_body_bytes": 4096
+  },
+  "expect": {
+    "stage": "fetch",
+    "document_state": "loaded",
+    "body_sha256": "8419fe426ab1d80867a8d040c385caa42f86f28a1484b5880a03522417b409dc"
+  }
+}

@@ -1,0 +1,16 @@
+diff --git a/out/fp0007-mutation/lab.zig b/src/lab.zig
+index 5226b22..f078586 100644
+--- a/out/fp0007-mutation/lab.zig
++++ b/src/lab.zig
+@@ -969,8 +969,9 @@ pub const Run = struct {
+     }
+ 
+     pub fn stageStatus(run: *const Run, stage: Stage) Status {
+-        if (!implemented(stage)) return .unsupported;
+-        return run.execution.fetch;
++        _ = run;
++        _ = stage;
++        return .completed;
+     }
+ 
+     /// Whether the run has a transcript: the case ran without a harness error.

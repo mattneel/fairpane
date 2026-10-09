@@ -1,0 +1,46 @@
+{
+  "format": "fairpane-lab-case",
+  "version": 1,
+  "corpus": {
+    "name": "wpt",
+    "revision": "0123456789abcdef0123456789abcdef01234567",
+    "path": "html/syntax/parsing/basic.html",
+    "blob": "89abcdef0123456789abcdef0123456789abcdef"
+  },
+  "environment": {
+    "time_origin_ms": 1700000000000,
+    "random_seed": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "viewport": {
+      "width": 1280,
+      "height": 720,
+      "device_pixel_ratio_milli": 2000
+    },
+    "locale": "en-US",
+    "time_zone": "America/New_York"
+  },
+  "document": {
+    "url": "https://example.test/index.html",
+    "body_base64": "PCFkb2N0eXBlIGh0bWw+PHRpdGxlPkZQLTAwMDcgdmFsaWQ8L3RpdGxlPjxwPkZhaXJwYW5lPC9wPgo="
+  },
+  "resources": [
+    {
+      "url": "https://example.test/style.css",
+      "body_base64": "cCB7IGNvbG9yOiBncmVlbiB9Cg=="
+    },
+    {
+      "url": "https://example.test/missing.png",
+      "body_base64": null
+    }
+  ],
+  "limits": {
+    "max_steps": 16,
+    "step_budget": 1,
+    "max_outstanding_requests": 4,
+    "max_response_body_bytes": 65536
+  },
+  "expect": {
+    "stage": "fetch",
+    "document_state": "loaded",
+    "body_sha256": "773daa5b8a762c2fc847254d79908f3b5a57da6cd8b7c96f70c136f4029fc9bc"
+  }
+}

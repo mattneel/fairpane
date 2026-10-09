@@ -1,0 +1,166 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/lab.zig"]
+ef72d5fbf95a12bdc6c271243828b49c02096286952d6932eac293767612b5b3 *src/lab.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/lab.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t75c243992\\m","started_at":"2026-10-09T03:14:57.575Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","out/fp0007-mutation/lab.zig","src/lab.zig"]
+diff --git a/out/fp0007-mutation/lab.zig b/src/lab.zig
+index 5226b22..f078586 100644
+--- a/out/fp0007-mutation/lab.zig
++++ b/src/lab.zig
+@@ -969,8 +969,9 @@ pub const Run = struct {
+     }
+ 
+     pub fn stageStatus(run: *const Run, stage: Stage) Status {
+-        if (!implemented(stage)) return .unsupported;
+-        return run.execution.fetch;
++        _ = run;
++        _ = stage;
++        return .completed;
+     }
+ 
+     /// Whether the run has a transcript: the case ran without a harness error.
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","out/fp0007-mutation/lab.zig","src/lab.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t75c243992\\m","started_at":"2026-10-09T03:15:02.072Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0007-mutation-cache"]
+test
++- run test 83 pass, 4 fail (87 total)
+error: 'lab.test.FP-0007 case 1: a valid case parses, and each invalid fixture reports harness-error with a distinct message' failed:
+       ====== expected this output: =========
+       not-reached␃
+       
+       ======== instead found this: =========
+       completed␃
+       
+       ======================================
+       First difference occurs on line 1:
+       expected:
+       not-reached
+       ^ ('\x6e')
+       found:
+       completed
+       ^ ('\x63')
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:696:9: 0x7ff68b89e6bb in expectEqualStrings (test_zcu.obj)
+               return error.TestExpectedEqual;
+               ^
+       C:\Users\requi\.omp\wt\t75c243992\m\src\lab.zig:1822:5: 0x7ff68b90b80f in expectString (test_zcu.obj)
+           try testing.expectEqualStrings(expected, value.string);
+           ^
+       C:\Users\requi\.omp\wt\t75c243992\m\src\lab.zig:1923:9: 0x7ff68b91e23f in test.FP-0007 case 1: a valid case parses, and each invalid fixture reports harness-error with a distinct message (test_zcu.obj)
+               try expectString("not-reached", try member((try member(result, "stages")).array.items[0], "status"));
+               ^
+error: 'lab.test.FP-0007 case 2: a body with a matching fetch expectation passes, fetch completes, and every other stage is unsupported' failed:
+       ====== expected this output: =========
+       unsupported␃
+       
+       ======== instead found this: =========
+       completed␃
+       
+       ======================================
+       First difference occurs on line 1:
+       expected:
+       unsupported
+       ^ ('\x75')
+       found:
+       completed
+       ^ ('\x63')
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:696:9: 0x7ff68b89e6bb in expectEqualStrings (test_zcu.obj)
+               return error.TestExpectedEqual;
+               ^
+       C:\Users\requi\.omp\wt\t75c243992\m\src\lab.zig:1822:5: 0x7ff68b90b80f in expectString (test_zcu.obj)
+           try testing.expectEqualStrings(expected, value.string);
+           ^
+       C:\Users\requi\.omp\wt\t75c243992\m\src\lab.zig:1944:9: 0x7ff68b9194b6 in test.FP-0007 case 2: a body with a matching fetch expectation passes, fetch completes, and every other stage is unsupported (test_zcu.obj)
+               try expectString(if (stage == .fetch) "completed" else "unsupported", try member(entry, "status"));
+               ^
+error: 'lab.test.FP-0007 case 4: an expectation for the tree stage reports unsupported with stage tree' failed:
+       ====== expected this output: =========
+       unsupported␃
+       
+       ======== instead found this: =========
+       completed␃
+       
+       ======================================
+       First difference occurs on line 1:
+       expected:
+       unsupported
+       ^ ('\x75')
+       found:
+       completed
+       ^ ('\x63')
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:696:9: 0x7ff68b89e6bb in expectEqualStrings (test_zcu.obj)
+               return error.TestExpectedEqual;
+               ^
+       C:\Users\requi\.omp\wt\t75c243992\m\src\lab.zig:1822:5: 0x7ff68b90b80f in expectString (test_zcu.obj)
+           try testing.expectEqualStrings(expected, value.string);
+           ^
+       C:\Users\requi\.omp\wt\t75c243992\m\src\lab.zig:2023:5: 0x7ff68b916a7c in test.FP-0007 case 4: an expectation for the tree stage reports unsupported with stage tree (test_zcu.obj)
+           try expectString("unsupported", try member(stages[@backingInt(Stage.tree)], "status"));
+           ^
+error: 'lab.test.FP-0007 case 8: max_steps 0 reports timeout' failed:
+       ====== expected this output: =========
+       failed␃
+       
+       ======== instead found this: =========
+       completed␃
+       
+       ======================================
+       First difference occurs on line 1:
+       expected:
+       failed
+       ^ ('\x66')
+       found:
+       completed
+       ^ ('\x63')
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:696:9: 0x7ff68b89e6bb in expectEqualStrings (test_zcu.obj)
+               return error.TestExpectedEqual;
+               ^
+       C:\Users\requi\.omp\wt\t75c243992\m\src\lab.zig:1822:5: 0x7ff68b90b80f in expectString (test_zcu.obj)
+           try testing.expectEqualStrings(expected, value.string);
+           ^
+       C:\Users\requi\.omp\wt\t75c243992\m\src\lab.zig:2144:5: 0x7ff68b90d9a0 in test.FP-0007 case 8: max_steps 0 reports timeout (test_zcu.obj)
+           try expectString("failed", try member((try member(result, "stages")).array.items[0], "status"));
+           ^
+failed command: cd . && ".\\out\\fp0007-mutation-cache\\o\\47bc135bb81a3d652bf19cff8365fe34\\test.exe" "--cache-dir=.\\out\\fp0007-mutation-cache" --seed=0x42adb692 --listen=-
+
+Build Summary: 15/17 steps succeeded (1 failed); 83/87 tests passed (4 failed)
+test transitive failure
++- run test 83 pass, 4 fail (87 total)
+|  +- compile test debug native success 3s MaxRSS:445M
++- FP-0007 case 13: case 2 passes with exit status 0 success 36ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:332M
++- FP-0007 case 13: case 3 fails with exit status 1 success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 48ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 77ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 17ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 13ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:314M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 50ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 36ms
+   +- compile exe fairpane-lab-check debug native (reused)
+   +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x42adb692 test --summary all --cache-dir out/fp0007-mutation-cache
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0007-mutation-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t75c243992\\m","started_at":"2026-10-09T03:15:13.040Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":7333,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","out/fp0007-mutation/lab.zig","src/lab.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["out/fp0007-mutation/lab.zig","src/lab.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t75c243992\\m","started_at":"2026-10-09T03:15:25.866Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/lab.zig"]
+ef72d5fbf95a12bdc6c271243828b49c02096286952d6932eac293767612b5b3 *src/lab.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/lab.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t75c243992\\m","started_at":"2026-10-09T03:15:25.942Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
