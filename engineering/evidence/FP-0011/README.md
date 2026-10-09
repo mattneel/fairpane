@@ -158,3 +158,9 @@ Review 2 accepted revision 1 with three minor findings and five notes.
 - ADR 0008 section 3 now marks the statement about the open agent sessions as unrecorded and names the last recorded command of the FP-0014 worker, at 11:23:13Z in `engineering/evidence/FP-0014/raw/fmt.log`.
 - The affinity of each measurement process was not recorded, and the ADR keeps that claim marked as inference; `FP-0012` must record it.
 - `engineering/plan.json` is a source root, not a policy root: `engineering/policy.json` lists the policy roots, and the plan is not among them. The `FP-0012` criterion in `a1b2d1c` only adds requirements, and the `FP-0012` contract freeze confirms it.
+
+### Continuous integration
+
+`ci/README.md` records `Gates` run 37926644057 of `a1b2d1c`.
+Its first attempt failed when the Linux job could not download the locked compiler, and its second attempt passed.
+The integrator accepted the task before the second attempt, and `ci/README.md` records that order.
