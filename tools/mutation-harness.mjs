@@ -1,4 +1,5 @@
-// Mutation-control logic for controls/mutants.mjs. It is separate so the controller tests can exercise it.
+// Mutation-control logic for engineering/evidence/FP-0028/controls/mutants.mjs.
+// It lives in a source root, so a controller-test receipt binds the code that its controller test exercises.
 
 /** Parse the TAP output of tools/selftest.mjs into one entry per test name, with each failure's message. */
 export function parseTap(stdout) {
@@ -17,7 +18,7 @@ export function parseTap(stdout) {
  * Run the unmutated suite first, then each mutant of `source`.
  * A failed baseline stops the control, because a later failure would not be attributable to a mutation.
  * `runSuite(text)` runs the suite with `text` as the mutated module, or unmutated for `null`, and returns `{ status, stdout }`.
- * Each mutant is `[name, from, to, target]`, where `from` occurs once in `source` and `target` matches one test name.
+ * Each mutant is `[name, from, to, target]`, where `from` occurs once in `source`, `to` replaces it literally, and `target` matches one test name.
  */
 export function runControl({ source, mutants, runSuite, log }) {
   const baseline = runSuite(null), base = parseTap(baseline.stdout);
@@ -36,7 +37,7 @@ export function runControl({ source, mutants, runSuite, log }) {
       log(`SETUP-FAILED ${name}: ${sites} mutation sites, ${targets.length} target tests`);
       continue;
     }
-    const run = parseTap(runSuite(source.replace(from, to)).stdout).get(targets[0]);
+    const run = parseTap(runSuite(source.replace(from, () => to)).stdout).get(targets[0]);
     if (run && !run.ok) { killed++; log(`KILLED ${name}: ${run.line}`); log(`  message: ${JSON.stringify(run.message)}`); }
     else { survived++; log(`SURVIVED ${name}: ${run?.line ?? `(target test did not run: ${targets[0]})`}`); }
   }

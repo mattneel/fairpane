@@ -514,7 +514,7 @@ test('A short write to the log produces an error result', async () => {
     const dir = temp();
     const r = await runProcess(process.execPath, ['-e', 'console.log("short-write-output")'],
       { cwd: dir, logPath: path.join(dir, 'log'), fileSystem: shortOn(kind) });
-    assert.match(r.error ?? '', /Short write: \d+ of \d+ bytes/, kind);
+    assert.match(r.error ?? '', /Short write: \d+ of \d+ bytes/, `${kind}: ${r.error}`);
   }
   const dir = gateFixture();
   const missing = await recordCommand(dir, 'out/evidence/short.log', 'fairpane-absent-tool', [], { fileSystem: shortOn('RESULT') });
@@ -535,6 +535,26 @@ test('A failed capture-directory removal appears in the command record', async (
   });
   assert.equal(fs.readdirSync(tmp).length, 2, 'Both capture directories survive, as their records state.');
 });
+test('A busy capture directory is removed on a later attempt, and the last failure is recorded', async () => {
+  const dir = temp(), busy = () => Object.assign(new Error('forced busy removal'), { code: 'EBUSY' });
+  const failing = failures => {
+    let calls = 0;
+    return { calls: () => calls, fileSystem: { rmSync: (...args) => { calls++; if (calls <= failures) throw busy(); return fs.rmSync(...args); } } };
+  };
+  const recovered = failing(2);
+  const r = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: path.join(dir, 'recovered.log'), fileSystem: recovered.fileSystem });
+  assert.equal(r.error, null); assert.equal(recovered.calls(), 3);
+  const tmp = await withPrivateTemp(async () => {
+    const stuck = failing(Infinity);
+    const s = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: path.join(dir, 'stuck.log'), fileSystem: stuck.fileSystem });
+    assert.equal(s.error, 'Capture directory removal failed: forced busy removal'); assert.equal(stuck.calls(), 3);
+    let plainCalls = 0;
+    const plainFs = { rmSync: () => { plainCalls++; throw new Error('forced plain failure'); } };
+    const p = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: path.join(dir, 'plain.log'), fileSystem: plainFs });
+    assert.equal(p.error, 'Capture directory removal failed: forced plain failure'); assert.equal(plainCalls, 1);
+  });
+  assert.equal(fs.readdirSync(tmp).length, 2, 'Both failed capture directories survive, as their records state.');
+});
 test('started_at in every command record is a canonical UTC ISO 8601 timestamp', async () => {
   const dir = gateFixture(), log = 'out/evidence/times.log', logPath = path.join(dir, log);
   put(dir, 'blocker', 'a regular file');
@@ -554,7 +574,7 @@ test('started_at in every command record is a canonical UTC ISO 8601 timestamp',
   }
 });
 test('The mutation control runs an unmutated baseline first and records each killed test name and message', async () => {
-  const { runControl } = await import(pathToFileURL(path.join(root, 'engineering/evidence/FP-0028/controls/harness.mjs')).href);
+  const { runControl } = await import(pathToFileURL(path.join(root, 'tools/mutation-harness.mjs')).href);
   const tap = results => ['TAP version 13', ...results.flatMap(([ok, name, message], i) => ok ? [`ok ${i + 1} - ${name}`]
     : [`not ok ${i + 1} - ${name}`, '  ---', `  message: ${JSON.stringify(message)}`, '  ...'])].join('\n');
   const mutants = [['kills first', 'A1', 'A2', /first target/], ['misses second', 'B1', 'B2', /second target/],
@@ -578,6 +598,12 @@ test('The mutation control runs an unmutated baseline first and records each kil
   } });
   assert.deepEqual(again, [null]); assert.deepEqual(failed, { baseline: false, killed: 0, survived: mutants.length });
   assert.match(failedLines.join('\n'), /^BASELINE-FAILED not ok 1 - first target\n {2}message: "broken baseline"$/m);
+  const literal = [];
+  runControl({ source: 'X1', mutants: [['literal', 'X1', '$&$&', /first target/]], log: () => {}, runSuite: text => {
+    literal.push(text);
+    return { status: text === null ? 0 : 1, stdout: tap([[text === null, 'first target', 'mutated']]) };
+  } });
+  assert.deepEqual(literal, [null, '$&$&']);
 });
 // Corpus snapshots. Fixtures use Git plumbing with no user or system configuration.
 const gitConfigFile = path.join(temp(), 'empty-gitconfig');

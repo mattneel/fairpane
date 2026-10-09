@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { runControl } from './harness.mjs';
+import { runControl } from '../../../../tools/mutation-harness.mjs';
 
 const source = fs.readFileSync('tools/lib.mjs', 'utf8');
 const mutants = [
@@ -56,9 +56,17 @@ const mutants = [
     '',
     /short write to the log produces an error result/],
   ['a failed capture-directory removal is silent',
-    '  catch (e) { errors.push(`Capture directory removal failed: ${e.message}`); }',
-    '  catch { /* Mutant: the failure is dropped. */ }',
+    '{ errors.push(`Capture directory removal failed: ${e.message}`); return; }',
+    '{ return; }',
     /failed capture-directory removal appears in the command record/],
+  ['a busy capture directory gets no second attempt',
+    'if (attempt === 3 || !TRANSIENT_REMOVAL.has(e.code))',
+    'if (true)',
+    /busy capture directory is removed on a later attempt/],
+  ['the log stays open after the RESULT line',
+    '  finally { closeQuietly(io, fd); }\n  return result;',
+    '  finally { }\n  return result;',
+    /capture-start failure writes a RESULT line/],
   ['started_at uses local time text',
     'started_at: new Date(started).toISOString() }',
     'started_at: new Date(started).toString() }',

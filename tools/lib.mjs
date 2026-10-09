@@ -302,10 +302,22 @@ function copyFileToDescriptor(io, file, fd) {
   } finally { io.closeSync(source); }
 }
 function closeQuietly(io, fd) { try { io.closeSync(fd); } catch { /* The descriptor is already unusable. */ } }
-/** Remove a private capture directory. A surviving directory still holds child output, so the record names the failure. */
+/** Error codes after which a removal can succeed later, such as a file that a scanner or indexer holds open briefly. */
+const TRANSIENT_REMOVAL = new Set(['EBUSY', 'EPERM', 'ENOTEMPTY', 'EMFILE', 'ENFILE']);
+/** Wait synchronously, because a command record finishes in one synchronous step. */
+function pause(ms) { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms); }
+/**
+ * Remove a private capture directory in up to three attempts, waiting 50 and then 100 milliseconds after a transient error.
+ * A surviving directory still holds child output, so the record names the last failure.
+ */
 function removeCapture(io, dir, errors) {
-  try { io.rmSync(dir, { recursive: true, force: true }); }
-  catch (e) { errors.push(`Capture directory removal failed: ${e.message}`); }
+  for (let attempt = 1; ; attempt++) {
+    try { io.rmSync(dir, { recursive: true, force: true }); return; }
+    catch (e) {
+      if (attempt === 3 || !TRANSIENT_REMOVAL.has(e.code)) { errors.push(`Capture directory removal failed: ${e.message}`); return; }
+      pause(50 * attempt);
+    }
+  }
 }
 function commandRecord(executable, args, cwd, started) {
   return { executable, arguments: args, cwd: path.resolve(cwd ?? process.cwd()), started_at: new Date(started).toISOString() };

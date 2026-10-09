@@ -18,7 +18,7 @@ It qualifies controller behavior only.
 - `recordCommand` writes the record of an unresolvable executable through the same log path as `runProcess`.
 - `runGate` validates the log path and the receipt path before it creates any file.
   It validates the receipt path again when it writes the receipt.
-- `controls/harness.mjs` in `FP-0028` holds the mutation-control logic.
+- `controls/harness.mjs` in `FP-0028` held the mutation-control logic; task `FP-0053` moved it to `tools/mutation-harness.mjs`.
   `controls/mutants.mjs` copies every tracked or unignored file into a template with its own one-commit Git repository.
   It runs the unmutated suite there first and stops if any test fails.
   For each killed mutant, it logs the failing test line and its message.
