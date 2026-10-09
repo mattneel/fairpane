@@ -1,0 +1,48 @@
+{
+  "verdict": "accept",
+  "summary": "I accept FP-0014 revision 1. I found no blocker or major finding. I ran no shell, git, build, or test commands; every result below comes from reading the committed sources and logs.\n\n(1) Each review-1 finding is resolved.\n- Major: `StyleMap.textStyle` (style.zig:57-62) now returns `ComputedStyle.defaulted(parent)` (compute.zig:91-100). That starts from `initial()`, which computes `display` with `is_root=false` and so gives inline flow with no blockification, and margins of 0. It then copies only the fields whose registry record has `inherited` set (`color` and `font-size`) and the parent's custom slice, with a comptime assert that custom properties inherit. Case 49 (tests.zig:1770) covers this with a root that has non-initial `display` and margins.\n- At-rule diagnostics: the parser has a new hook, `atRuleBlock` (parser.zig:136, 592-596), and the stylesheet validator returns false from it (stylesheet.zig:183). Blocks are therefore consumed silently, and the at-rule's own check stays separate (parser.zig:521, 614). The module doc (stylesheet.zig:8-9) and README:89-91 are corrected. Covered by case 50.\n- Other arbitrary substitution functions: `containsUnsupportedFunction` (substitution.zig:34-53) recognizes `if()`, `inherit()`, `attr()`, `ident()`, and `random-item()`. compute.zig:436-439 runs it on the declared tokens before substitution. The spread check now ends in any arbitrary substitution function (substitution.zig:143-171). Covered by case 51.\n- Display and column-combinator classification: `grid-lanes`, `inline-grid-lanes`, and `math` are added at values.zig:422-426, and `||` reports `unsupported_selector` at selectors.zig:211 and 237/245. Case 22 moves `a||b`, and case 52 covers the rest.\n- Matching cost: early exit is implemented in selectors.zig:427-523, and `hasClass` and the n log n `classes` are in dom.zig:385-428. Covered by case 53.\n- Evidence binding: the selector and cascade mutation logs record digests before, during, and after each control.\n- ButtonBorder–Canvas contrast: case 54 (tests.zig:1937).\n- Import cycle: `cascade.zig` now imports only std, registry, values, and applicable.\n\n(2) Cases 49 to 54 assert the frozen values: every margin, `--k`, exactly one diagnostic, an exact `unsupported_value` reason list, and the bounds 4*2000*2001 and 32*20000.\n- `raw/tests-before-r1.log` shows cases 22 and 49 to 53 failing. It names the parts that already passed, which the README reports correctly. Case 54 passed at the base, which the contract permits.\n- `raw/tests-before-r1.diff` adds only the test-only counters to non-test code.\n- `tests-before-r1-compare.log` shows that the test edits after that run only migrate APIs, with no expectation changes.\n\n(3) Defaulting matches what Cascade 5 §1.1 and §7 require, as the contract and review 1 quote them [INFERENCE: no local copy of the Cascade source exists under `out/`].\n\n(4) The matcher is a faithful translation of Servo's `SelectorMatchingResult` state machine. I traced child, descendant, next-sibling, and subsequent-sibling restarts by hand. Cases 23, 24, and 46 pass on the revised tree (`tests-after-r1.log`, `integration-tests-r1.log`, 278/278).\n- Case 53 is meaningful. Without the early exit, both the base tree and the mutation reach 16,244,657 attempts by depth 140. With it, the work is about N²/2 [INFERENCE from tracing the algorithm].\n\n(5) The mutation logs match the README.\n- `mutation-r1`: only case 53's chain part fails. `selectors.zig` digests are fc630040…, then 33bb64aa…, then fc630040…, and `cascade.zig` stays 830b398d… throughout.\n- `mutation-cascade-origin-r1`: only case 35 fails, \"expected 5, found 4\", with digests 830b398d…, 14a457bd…, 830b398d….\n\n(6) The policy digest 7244083c… is the same in `check-r1`, the ef8ad1c gates, and the ba759f7 gates. The binding log shows clean statuses before and after the gates.\n\n(7) There is no allocation in the hot matching path beyond the retained frame stack, and `hasClass` does not allocate. `ClassIterator` was removed, so no dead code remains. `applicable.zig` is in no import cycle.\n\nThe minor findings below cover README statements of unrecorded checks, missing tests for the restart paths, a deviation from the contract's cost sentence, and no digest binding at the integrated commit.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0014/README.md",
+      "line": 272,
+      "issue": "Contract Revision 1 evidence says the README 'states no check that no log records'. Line 272 reports an unrecorded check: zig fmt, 65/65 steps with 278/278 tests, and 192/192 controller tests at 1409e8b. Line 274 states that ba759f7 differs from 1409e8b only in `engineering/evidence/FP-0064/CONTRACT.md`, and no recorded `git diff` supports that. The recorded gates at ba759f7 cover the same checks, so this is a policy breach, not a missing result.",
+      "recommendation": "Delete the line 272 sentence, or replace it with the recorded ba759f7 gates. Record `git diff --stat 1409e8b ba759f7` to support line 274, or delete that claim."
+    },
+    {
+      "severity": "minor",
+      "path": "src/css/tests.zig",
+      "line": 621,
+      "issue": "No test reaches the paths where the early exit and the frame stack can change a result. Case 23 (`root > * > p.b`, `div p ~ span`, `p.a ~ *`, `section p`), case 24, and case 46 (`root > e`) only exercise a straight match, a sibling retry, or a descendant exhausting its ancestors. Nothing covers a child failure that returns `restart_from_descendant` and then matches at a higher ancestor (the README's own example, `x > a b`). Nothing covers `a + b c` or `a ~ b c`, where a sibling failure resumes an outer descendant combinator. Nothing covers a child combinator with no parent element ending the selector while a subsequent-sibling combinator sits to its right. Hand-tracing shows the code matches Servo and is correct, but no test supports 'results identical'.",
+      "recommendation": "Add matching cases such as `x > a b` against x>a>a>b and against y>a>x>a>b, `a + b c`, `a ~ b c` with the match at a higher ancestor's sibling, and `a > b ~ c` under a detached parent. Assert the exact match sets."
+    },
+    {
+      "severity": "minor",
+      "path": "src/css/selectors.zig",
+      "line": 448,
+      "issue": "The implementation does not follow the frozen Revision 1 text literally. Read as written, 'gives up on a whole selector … as soon as a combinator's left side fails for every candidate' would be wrong for child and sibling combinators. The implementation follows Servo instead, as README:236-240 records. As a result, the frozen bound ('compound count times depth plus preceding sibling count') does not hold when a subsequent-sibling combinator sits left of a descendant combinator: for `a ~ b c`, the work is the sum of the ancestors' sibling counts (README:256-258). The worker recorded this as an open question rather than as a stop-rule report.",
+      "recommendation": "The integrator should record a contract erratum that defines the rule as Servo's restart semantics. That erratum should limit the cost sentence to selectors without a sibling combinator left of a descendant combinator, or add memoized failures to FP-0070's obligations in css.zig and the README."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0014/raw/integration-binding-r1.log",
+      "line": null,
+      "issue": "Every revision 1 control, plus `tests-after-r1`, ran in the worker tree `C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m`. The integration record (HEAD, status, gates, uncached tests at ba759f7) never records the SHA-256 of `src/css/selectors.zig` or `src/css/cascade.zig`. So nothing ties the digests fc630040… and 830b398d… to 1409e8b. Review 1 raised the same gap for ef8ad1c. The 278/278 integration run shows that case 53 passes on the integrated tree, but the mutation controls remain unbound to it.",
+      "recommendation": "Record `sha256sum src/css/selectors.zig src/css/cascade.zig` at ba759f7 (or 1409e8b) in the integration binding log."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0014/README.md",
+      "line": 266,
+      "issue": "Commit 1409e8b holds the revision 1 implementation together with an unrelated FP-0012 plan split, and its message names only the split. The README records this, and pushed history is left unrewritten, as `docs/GIT_OPERATIONS.md` requires. Unchanged policy digests across the gates (7244083c…) show that no policy root changed.",
+      "recommendation": "No code change is needed. In future, keep staging from `git apply --3way` out of unrelated commits."
+    },
+    {
+      "severity": "note",
+      "path": "src/css/stylesheet.zig",
+      "line": 15,
+      "issue": "The new `applicable.zig`, which imports only std, registry, and values, sits in no import cycle, and `cascade.zig` no longer imports `selectors.zig`. Older cycles remain: `stylesheet.zig` ↔ `selectors.zig`, plus the data-table pairs `registry.zig` ↔ `properties.zig` and `values.zig` ↔ `named_colors.zig` from amendment 2. Revision 1 does not require removing them.",
+      "recommendation": "Optionally pass rule lists into the matcher, so that `selectors.zig` stops importing `stylesheet.zig`, or record that the cycle is accepted."
+    }
+  ]
+}

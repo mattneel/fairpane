@@ -269,11 +269,20 @@ The integrator applied the worker's patch with `git apply --3way`, which also st
 The next commit, `1409e8b`, was meant to hold only the FP-0012 plan split, but it also committed every file of this revision.
 Its message names only the plan split.
 Pushed history stays unchanged, as `docs/GIT_OPERATIONS.md` requires, so `1409e8b` is the revision 1 implementation commit, and this record corrects its message.
-An unrecorded check of that tree passed `zig fmt --check`, 65 of 65 build steps with 278 of 278 tests, and 192 of 192 controller tests before the integrator recorded anything.
 
-The integrator then recorded the binding at `HEAD` `ba759f7`, which differs from `1409e8b` only in `engineering/evidence/FP-0064/CONTRACT.md`.
+The integrator then recorded the binding at `HEAD` `ba759f7`.
+`raw/integration-binding-r1-digests.log` shows that `ba759f7` differs from `1409e8b` only in `engineering/evidence/FP-0064/CONTRACT.md`.
+It also records the blob IDs of `src/css/selectors.zig` and `src/css/cascade.zig` at `ba759f7` and their SHA-256 digests, `fc630040…` and `830b398d…`, the digests that the revision 1 mutation logs name, with a `git diff --exit-code` against `ba759f7` that exits with status 0.
 
 - `raw/integration-binding-r1.log` records `HEAD` and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
 - `gates/2026-10-09T12-53-45-256Z-repo-check-b5c5aeb2.json`, `gates/2026-10-09T12-53-45-665Z-controller-test-97c8489f.json`, `gates/2026-10-09T12-54-27-880Z-zig-fmt-511334cc.json`, and `gates/2026-10-09T12-54-28-189Z-zig-test-531423e0.json` all pass.
 - `raw/integration-tests-r1.log` runs `zig build test --summary all` with the fresh cache `out/fp0014-r1-integration`: 65 of 65 build steps and 278 of 278 tests pass.
 - `raw/bun-selftest-r1.log` records Bun 1.4.2 and `tools/selftest.mjs` with 192 of 192 tests.
+
+### Review 2
+
+`reviews/review-2-accept.json` accepts revision 1 with four minor findings and two notes.
+
+- The integrator removed the README's unrecorded check and added `raw/integration-binding-r1-digests.log`, which binds the mutation digests to `ba759f7`.
+- Contract amendment 3 states the matcher's restart rule and limits the cost bound, and `FP-0070` owns the restart-path cases and a bound for sibling combinators left of a descendant combinator.
+- The import cycle between `stylesheet.zig` and `selectors.zig` predates revision 1, which did not require its removal; `FP-0070` owns it.

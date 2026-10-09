@@ -881,3 +881,13 @@ Rerun the cascade mutation control of the original contract on the revised tree,
 Run every Zig command with `--env ZIG_GLOBAL_CACHE_DIR=C:\src\fairpane\.zig-cache\global`, and keep each failed attempt as its own log.
 The README gains a `## Revision 1` section and states no check that no log records.
 The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs the four gates.
+
+## Integrator amendment 3
+
+Review 2 found that the first two sentences of "Selector matching cost", read literally, would give up too early for child and sibling combinators.
+The accepted implementation instead follows the restart rule of `SelectorMatchingResult` in Servo's `selectors` crate, as `README.md` lines 236-240 record.
+A selector matches exactly the elements that plain backtracking over every candidate matches; the restart rule only skips candidates that cannot change the result.
+The cost bound holds for selectors that have no next-sibling or subsequent-sibling combinator to the left of a descendant combinator.
+For a selector such as `a ~ b c`, the work grows with the preceding sibling counts of the element's ancestors.
+`FP-0070` owns a bound for those selectors and the matching cases that reach each restart path.
+No other requirement changes.
