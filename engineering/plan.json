@@ -3455,7 +3455,7 @@
       "workstream": "laboratory",
       "depends_on": ["FP-0052", "FP-0067", "FP-0079"],
       "role": "fairpane-core",
-      "allowed_paths": ["tools", "tests", ".github", "docs", "engineering/evidence"],
+      "allowed_paths": ["tools", "tests", ".github", "docs", "api/README.md", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
       "authority": "routine-local-engineering",
       "required_gates": ["repo-check", "controller-test"],
@@ -3464,9 +3464,10 @@
         "Make the workflow checker report a missing job for each job whose gate list it requires, and test a workflow whose linux job is renamed.",
         "Run the workflow checks in repo-check, or record why only controller-test runs them.",
         "Strip trailing spaces before the reserved device name comparison in the archive reader, and check each component name of an archive's components file with the archive path rules.",
-        "Start doctor's probes of bun, git, omp, and zig so that no probe runs a program from the repository directory, and test it with a marker program in the working directory."
+        "Start doctor's probes of bun, git, omp, and zig so that no probe runs a program from the repository directory, and test it with a marker program in the working directory.",
+        "State in api/README.md that the engine memory limit bounds the bytes the engine requests, not the resident memory of the process, and that it is a local integrity bound, not containment, as the FP-0081 reviews note."
       ],
-      "read": ["engineering/evidence/FP-0067/reviews/review-1-reject.json", "engineering/evidence/FP-0079/reviews/security-review-2-accept.json"],
+      "read": ["engineering/evidence/FP-0067/reviews/review-1-reject.json", "engineering/evidence/FP-0079/reviews/security-review-2-accept.json", "engineering/evidence/FP-0081/reviews/security-review-1-accept.json"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
