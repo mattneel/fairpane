@@ -1,0 +1,89 @@
+
+COMMAND ["C:\\Windows\\System32\\wsl.exe","-d","Ubuntu","-e","sh","-c","set -e; W=\"$HOME/fairpane-linux/work/FP-0066-integration\"; test ! -e \"$W\"; mkdir -p \"$W\"; cd \"$W\"; git -c safe.directory=\"*\" clone -q --no-local /mnt/c/src/fairpane repo; cd repo; git checkout -q --detach 81481a373eed462a345fdd640870abd5743bb179; git rev-parse HEAD; echo \"status lines: $(git status --porcelain --untracked-files=all | wc -l)\"; mkdir -p .tools/zig/0.18.0-dev.120+9fe22a29b; ln -s \"$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b\" .tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux; .tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig version; \"$HOME/fairpane-linux/node/bin/node\" --version"]
+81481a373eed462a345fdd640870abd5743bb179
+status lines: 0
+0.18.0-dev.120+9fe22a29b
+v26.7.0
+RESULT {"executable":"C:\\Windows\\System32\\wsl.exe","arguments":["-d","Ubuntu","-e","sh","-c","set -e; W=\"$HOME/fairpane-linux/work/FP-0066-integration\"; test ! -e \"$W\"; mkdir -p \"$W\"; cd \"$W\"; git -c safe.directory=\"*\" clone -q --no-local /mnt/c/src/fairpane repo; cd repo; git checkout -q --detach 81481a373eed462a345fdd640870abd5743bb179; git rev-parse HEAD; echo \"status lines: $(git status --porcelain --untracked-files=all | wc -l)\"; mkdir -p .tools/zig/0.18.0-dev.120+9fe22a29b; ln -s \"$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b\" .tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux; .tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig version; \"$HOME/fairpane-linux/node/bin/node\" --version"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T14:55:39.168Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1684}
+
+COMMAND ["C:\\Windows\\System32\\wsl.exe","-d","Ubuntu","-e","sh","-c","set -e; cd \"$HOME/fairpane-linux/work/FP-0066-integration/repo\"; \"$HOME/fairpane-linux/node/bin/node\" tools/fairpane.mjs reproduce-check 81481a373eed462a345fdd640870abd5743bb179"]
+{
+  "result": "reproducible",
+  "commit": "81481a373eed462a345fdd640870abd5743bb179",
+  "tree": "60b998ddcf84c99fd6b28fe798770423e101ae83",
+  "source_tar_sha256": "adf390d136b65abb2870f533973f07ff922709fc8bcf93372d3a0b3db174653a",
+  "build_type_command": [
+    "zig",
+    "build",
+    "-Doptimize=ReleaseSafe",
+    "--prefix",
+    "zig-out"
+  ],
+  "work_trees": [
+    "/home/autark/fairpane-linux/work/FP-0066-integration/repo/out/reproduce/81481a373eed-9lKTFa/a",
+    "/home/autark/fairpane-linux/work/FP-0066-integration/repo/out/reproduce/81481a373eed-9lKTFa/b"
+  ],
+  "builds": [
+    {
+      "work_tree": "/home/autark/fairpane-linux/work/FP-0066-integration/repo/out/reproduce/81481a373eed-9lKTFa/a",
+      "executable": "/home/autark/fairpane-linux/work/FP-0066-integration/repo/.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig",
+      "arguments": [
+        "build",
+        "-Doptimize=ReleaseSafe",
+        "--prefix",
+        "/home/autark/fairpane-linux/work/FP-0066-integration/repo/out/reproduce/81481a373eed-9lKTFa/a/zig-out"
+      ],
+      "environment": {
+        "ZIG_LOCAL_CACHE_DIR": "/home/autark/fairpane-linux/work/FP-0066-integration/repo/out/reproduce/81481a373eed-9lKTFa/a/.zig-cache",
+        "ZIG_GLOBAL_CACHE_DIR": "/home/autark/fairpane-linux/work/FP-0066-integration/repo/out/reproduce/81481a373eed-9lKTFa/a/.zig-global-cache"
+      },
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 61579,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "work_tree": "/home/autark/fairpane-linux/work/FP-0066-integration/repo/out/reproduce/81481a373eed-9lKTFa/b",
+      "executable": "/home/autark/fairpane-linux/work/FP-0066-integration/repo/.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig",
+      "arguments": [
+        "build",
+        "-Doptimize=ReleaseSafe",
+        "--prefix",
+        "/home/autark/fairpane-linux/work/FP-0066-integration/repo/out/reproduce/81481a373eed-9lKTFa/b/zig-out"
+      ],
+      "environment": {
+        "ZIG_LOCAL_CACHE_DIR": "/home/autark/fairpane-linux/work/FP-0066-integration/repo/out/reproduce/81481a373eed-9lKTFa/b/.zig-cache",
+        "ZIG_GLOBAL_CACHE_DIR": "/home/autark/fairpane-linux/work/FP-0066-integration/repo/out/reproduce/81481a373eed-9lKTFa/b/.zig-global-cache"
+      },
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 61551,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "files": [
+    {
+      "path": "include/fairpane.h",
+      "a": "32298a3ead8fa1f20af8beb52a31525d82c002a0538a625f52361b3ad34f76dc",
+      "b": "32298a3ead8fa1f20af8beb52a31525d82c002a0538a625f52361b3ad34f76dc"
+    },
+    {
+      "path": "lib/libfairpane.a",
+      "a": "30a44076be407b8647dbe1ce9f9b01eb039a975bfa8f9f90ef776ed0981c43e1",
+      "b": "30a44076be407b8647dbe1ce9f9b01eb039a975bfa8f9f90ef776ed0981c43e1"
+    }
+  ],
+  "differing": [],
+  "error": null,
+  "removal": {
+    "removed": true,
+    "errors": []
+  }
+}
+RESULT {"executable":"C:\\Windows\\System32\\wsl.exe","arguments":["-d","Ubuntu","-e","sh","-c","set -e; cd \"$HOME/fairpane-linux/work/FP-0066-integration/repo\"; \"$HOME/fairpane-linux/node/bin/node\" tools/fairpane.mjs reproduce-check 81481a373eed462a345fdd640870abd5743bb179"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T14:55:40.904Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":123980}

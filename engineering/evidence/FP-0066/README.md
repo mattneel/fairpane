@@ -102,3 +102,16 @@ The worker installed nothing.
 
 - The integrator runs `reproduce-check` on the implementation commit on Windows and on WSL Ubuntu, as the contract requires.
 - The Linux compiler path in the assignment differs from the installed path; see "Linux tools".
+
+## Integration
+
+The integrator applied the worker's patch, checked that `build.zig` and `tools/zig/library_check.zig` had the worker's final blobs `31c7fd20` and `42ead8e4`, and committed it alone as `81481a3`.
+The worker's report was right about the Linux compiler path: the integrator's assignment named a directory layout that does not exist, and the installed compiler is the one the worker used.
+
+- `raw/integration-binding.log` records `HEAD` `81481a3` and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
+- `gates/2026-10-09T14-50-08-364Z-repo-check-2e4e7a2e.json`, `gates/2026-10-09T14-50-08-694Z-controller-test-caaaf587.json`, and `gates/2026-10-09T14-50-58-732Z-zig-test-a7bead4e.json` pass.
+- `raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0066-integration`: 81 of 81 build steps and 306 of 306 tests pass.
+- `raw/bun-selftest.log` records Bun 1.4.2 and `tools/selftest.mjs` with 220 of 220 tests.
+- `raw/integration-reproduce-windows.log` runs `reproduce-check` for `81481a373eed462a345fdd640870abd5743bb179` on Windows: `reproducible`, exit status 0, with `lib/fairpane.lib` `249d63f2…` in both builds and both work trees removed.
+  An earlier attempt with the abbreviated ID failed with "The candidate must be a full 40-hex commit ID." and is appended to `raw/reproduce-check-windows.log`, after the worker's own run.
+- `raw/integration-reproduce-linux.log` clones the repository at that commit in WSL Ubuntu with no status lines, links the locked Linux compiler into the clone's `.tools`, and runs `reproduce-check` with Node v26.7.0: `reproducible`, exit status 0, with `lib/libfairpane.a` `30a44076…` in both builds and both work trees removed.
