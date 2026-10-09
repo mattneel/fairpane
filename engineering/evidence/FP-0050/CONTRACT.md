@@ -10,6 +10,7 @@ Assigned role: `fairpane-core`.
 Authority: `routine-local-engineering`.
 Source findings: `engineering/evidence/FP-0006/reviews/review-1-accept.json`, findings at lines 90-159.
 The `fairpane-spec` worker `FP0050Contract` drafted this contract, and the root integrator froze it on 2026-10-09 with the decisions below, each confirmed by the integrator.
+This contract replaces the version frozen in `1aa4365` on base `93dcaf0`, which predates the FP-0021 schema and generator; no implementation started from that version.
 
 ### Integrator decisions
 
