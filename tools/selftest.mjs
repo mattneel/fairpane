@@ -1558,6 +1558,31 @@ test('FP-0107 case 2: the runner runs no case that declares a process-wide chang
     }
   }
 });
+test('FP-0107 revision 1 case 3: a case on a worker thread reads process.env as the main thread does when the search path is named Path', () => {
+  const dir = temp();
+  const runner = pathToFileURL(path.join(root, 'tools', 'test-runner.mjs')).href;
+  put(dir, 'env-probe.mjs', [
+    "import { isMainThread } from 'node:worker_threads';",
+    `import { casePool, serveCases } from ${JSON.stringify(runner)};`,
+    "const cases = [{ name: 'report PATH', fn: () => { throw new Error(JSON.stringify(process.env.PATH ?? null)); } }];",
+    'if (isMainThread) {',
+    '  const pool = casePool(import.meta.url, 1);',
+    "  let seen = 'no report';",
+    "  try { await pool.run(0, 'report PATH'); } catch (e) { seen = e.message; }",
+    '  await pool.close();',
+    '  console.log(JSON.stringify({ main: process.env.PATH ?? null, worker: JSON.parse(seen) }));',
+    '} else serveCases(cases, () => []);',
+    ''].join('\n'));
+  const env = { ...process.env };
+  const key = Object.keys(env).find(k => k.toUpperCase() === 'PATH');
+  if (key !== undefined) { const value = env[key]; delete env[key]; env.Path = value; }
+  const r = spawnSync(process.execPath, [path.join(dir, 'env-probe.mjs')], { env, encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  const seen = JSON.parse(r.stdout.trim().split('\n').at(-1));
+  const describe = value => value === null ? 'nothing' : `a value of ${value.length} characters`;
+  assert.ok(seen.worker === seen.main, `The worker read ${describe(seen.worker)} as PATH, and the main thread read ${describe(seen.main)}.`);
+  if (process.platform === 'win32') assert.ok(seen.main !== null, 'The main thread must read Path as PATH on Windows.');
+});
 
 /** Remove this thread's temporary fixtures and return the problems. */
 function removeFixtures() {

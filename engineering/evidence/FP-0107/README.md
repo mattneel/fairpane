@@ -216,3 +216,27 @@ The local `controller-test` total is 51,573 ms, against 37,968 ms in `raw/profil
   `ci/README.md` then reports each run's Windows and Linux `controller-test` duration and the ten slowest cases of each job from the `# slowest` lines of the receipt logs.
   The task is accepted only when every run passes and the slowest Windows `controller-test` step takes at most 80 seconds.
 - [INFERENCE] The hosted Windows runner has fewer processors than the development host, so its gain from four worker threads may be smaller than the 52% measured here; the dispatched runs decide criterion 3.
+
+## Revision 1
+
+The `Gates` push run 37971989978 and the ten dispatched runs 37972006869 to 37974347550 on `3e7128c` failed the Windows `controller-test` step, while every Linux job passed.
+In run 37972006869, 43 Windows cases failed with "The executable is not on PATH: git" or "No git executable exists on PATH.".
+A worker thread receives a copy of `process.env` whose names match with regard to letter case, and the hosted Windows runner names the search path `Path`; the development host's shell exports `PATH`, which hid the fault.
+The integrator implemented revision 1 and its amendment 1, as `CONTRACT.md` records.
+`casePool` now passes each worker the copy that `workerEnvironment` returns, which on Windows names the search path `PATH` and the system root `SystemRoot`.
+
+| Log | Command | Exit status and result |
+| --- | --- | --- |
+| `raw/r1-repro-before.log` | The suite at `9dfb13e` with the search path named `Path` | 1; 202 of 247 pass, and the failures name the missing `git`, as in CI |
+| `raw/tests-before-r1.log` | `HEAD` `9dfb13e`, the staged `tools/selftest.mjs` with case 3, and the suite | 1; 247 of 248 pass, and only case 3 fails: "The worker read nothing as PATH, and the main thread read a value of 2709 characters." |
+| `raw/tests-after-r1-attempt-1.log`, `raw/r1-repro-after-attempt-1.log`, `raw/bun-selftest-r1-attempt-1.log` | First attempt, `SHARE_ENV` | 1 each; `withPrivateTemp` cases see concurrent cases' directories |
+| `raw/*-attempt-2.log` | Second attempt, `SHARE_ENV` and five more declarations | Node passes, and Bun fails four `withPrivateTemp` cases |
+| `raw/r1-share-env-probe.log` | `raw/r1-share-env-probe.mjs` under Bun and Node | 0 each; only Bun with `SHARE_ENV` stops following `process.env` in `os.tmpdir()` |
+| `raw/tests-after-r1.log` | `node tools/fairpane.mjs test` | 0; 248 of 248 |
+| `raw/r1-repro-after.log`, `raw/bun-r1-repro-after.log` | Node and Bun with the search path named `Path` | 0 each; 248 of 248 |
+| `raw/bun-selftest-r1.log` | Bun 1.4.2 | 0; 248 of 248 |
+| `raw/tests-after-r1-repeat-1.log` to `-3.log` | Three more Node runs | 0 each; 248 of 248 |
+| `raw/mutation-r1.log`, `raw/mutation-r1-M3.diff` | M3 removes the worker `env` option | 1; only case 3 fails, and `tools/test-runner.mjs` is `02fc9919` before and after and `81adfe43` during |
+
+Two earlier recordings of `tests-before-r1.log` printed the host's whole search path in case 3's failure message, first through the message and then through `assert.equal`'s value diff.
+They are withheld from the repository, and case 3 now reports only whether each value is present and its length, through `assert.ok`.

@@ -388,6 +388,9 @@ After the `# tests`, `# pass`, and `# fail` lines, it writes `# slowest <rank> <
 Ordinary cases run on four worker threads, which `casePool` starts and which load `tools/selftest.mjs` again.
 A case that blocks its thread on a child process therefore delays no case on another thread.
 Result lines keep the order of case numbers, and the output that a case prints can appear between the result lines of other cases.
+Each worker thread gets its own copy of the environment, in which names match with regard to letter case.
+On Windows, where the main thread's `process.env` ignores letter case and a host may name the search path `Path`, the copy names the search path `PATH` and the system root `SystemRoot`, the spellings that the tools read.
+A tool that reads another Windows variable whose name a host may spell in another letter case adds that spelling to `WINDOWS_ENVIRONMENT_NAMES` in `tools/test-runner.mjs`.
 
 A case that changes process-wide state declares it when it is registered.
 In `tools/selftest.mjs`, pass `{ processWide: '<the state>' }` as the third argument of `test`.

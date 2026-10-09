@@ -87,9 +87,28 @@ export async function runCases(cases, { write = line => console.log(line), concu
   return { tests, pass: tests - failures, fail: failures };
 }
 
+/** The spellings under which the tools read Windows environment variables that a host may name in another letter case. */
+const WINDOWS_ENVIRONMENT_NAMES = ['PATH', 'SystemRoot'];
+
+/**
+ * Return the environment for a worker thread: a copy of `env`. A worker's copy matches names with regard to case, while
+ * the main thread's `process.env` on Windows does not, and a Windows host may name the search path `Path`. On Windows,
+ * the copy therefore names each variable of `WINDOWS_ENVIRONMENT_NAMES` with the spelling that the tools read.
+ */
+function workerEnvironment(env = process.env, platform = process.platform) {
+  const copy = { ...env };
+  if (platform !== 'win32') return copy;
+  for (const name of WINDOWS_ENVIRONMENT_NAMES) {
+    const found = Object.keys(copy).find(key => key !== name && key.toUpperCase() === name.toUpperCase());
+    if (found !== undefined && !(name in copy)) { copy[name] = copy[found]; delete copy[found]; }
+  }
+  return copy;
+}
+
 /**
  * Start `size` worker threads that each load the module at `moduleUrl`. In a worker thread, that module must register
  * the same cases in the same order as in the main thread and then call `serveCases`.
+ * Each worker gets a copy of this thread's environment from `workerEnvironment`.
  * `run(index, name)` runs that case on an idle worker and rejects with the case's error message when the case fails.
  * A worker that stops fails the case that it runs and is not replaced; when no worker remains, every later case fails.
  * `close()` asks each remaining worker to remove its fixtures, stops it, and returns the cleanup problems,
@@ -100,7 +119,7 @@ export function casePool(moduleUrl, size = DEFAULT_CONCURRENCY) {
   const idle = [], waiting = [], problems = [];
   let live = size, lastStop = null;
   const start = () => {
-    const state = { worker: new Worker(new URL(moduleUrl)), pending: null, stopped: false, closing: false };
+    const state = { worker: new Worker(new URL(moduleUrl), { env: workerEnvironment() }), pending: null, stopped: false, closing: false };
     state.worker.on('message', message => {
       const pending = state.pending;
       state.pending = null;
