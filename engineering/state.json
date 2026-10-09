@@ -96,7 +96,7 @@
       ]
     },
     "FP-0006": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0006Lifecycle, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0006/README.md",
@@ -108,10 +108,11 @@
         "engineering/evidence/FP-0006/gates/2026-10-09T01-49-16-070Z-c-abi-0afa16c5.json",
         "engineering/evidence/FP-0006/raw/integration-tests.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0006/reviews/review-1-accept.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0006/CONTRACT.md, based on commit 9e073e2, with revision 1 recording the implementation's clarifications.",
-        "Source digest e63b0f6da673743fd1a8920a94dd60b0c399381c94334ab15cb7d054ec5e9565. Awaiting fairpane-review."
+        "Reviewed implementation commit 7bc9ace with source digest e63b0f6da673743fd1a8920a94dd60b0c399381c94334ab15cb7d054ec5e9565.",
+        "Review 1 accepted with five minor findings and five notes. FP-0050 closes them."
       ]
     },
     "FP-0007": {
@@ -479,6 +480,15 @@
       "review": null,
       "notes": [
         "Created because ADR 0006 names C as an officially supported SDK."
+      ]
+    },
+    "FP-0050": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": [
+        "Created from the minor findings in engineering/evidence/FP-0006/reviews/review-1-accept.json."
       ]
     }
   }

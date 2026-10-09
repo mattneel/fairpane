@@ -139,9 +139,11 @@ The integrator also records an uncached `zig build test --summary all` run, beca
 Revision 1 records clarifications that the implementation adopted after the contract froze.
 The reviewer judges each one against the base text and the exact test cases.
 
-- Document operations take effect during the call: creation, destruction, and load.
+- As a design decision, document operations take effect during the call: creation, destruction, and load.
   Only request answers, which are responses, rejections, and cancellations, queue until a step applies them.
-  Cases 3, 9, and 12 expect a synchronous announcement or refusal from a load, so the base sentence "Host operations only queue input" covers request answers only.
+  The base sentence "Host operations only queue input" therefore covers request answers only.
+  Plan criterion 3 still holds, because the engine never calls host code, so no host operation can run during a step.
+  Review 1 found that the cases do not force this choice, and an earlier wording that cases 3 and 9 required it was wrong.
 - A load of a loading document replaces its outstanding request, so it does not count against the request bound.
 - An empty event queue returns `FP_STATUS_OK` with the event kind `FP_EVENT_NONE`.
 - Exhaustion of process-wide identifiers, owner identities, or table handles returns `FP_STATUS_LIMIT_EXCEEDED` through the C API.

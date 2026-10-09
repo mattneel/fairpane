@@ -2496,6 +2496,57 @@
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0050",
+      "title": "Close the FP-0006 review findings",
+      "workstream": "substrate",
+      "depends_on": [
+        "FP-0006"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "api",
+        "include",
+        "tests",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Reserve each request's cancellation event when the request is issued, so destroying a document never fails for lack of memory.",
+        "Check arrival order in case 13 by sending responses in the order 2, 0, 1 and observing which documents a budget of two loads.",
+        "Test the removal of a queued answer from the middle of a wrapped queue of three answers.",
+        "Test the success paths of fp_request_reject and fp_request_cancel, including their event kinds, document states, and reject reasons at the C boundary.",
+        "Assert the size of every C structure in the C smoke test.",
+        "Assert the matching sizes and offsets at compile time in src/c_api.zig.",
+        "Document that the host destroys an engine before its owning thread exits.",
+        "Use one convention for empty borrowed byte ranges across the C API."
+      ],
+      "read": [
+        "engineering/evidence/FP-0006/reviews/review-1-accept.json",
+        "engineering/evidence/FP-0006/CONTRACT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
   ]
 }

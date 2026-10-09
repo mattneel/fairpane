@@ -1,0 +1,162 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "7bc9ace"
+  ],
+  "summary": "I accept FP-0006. I found no blocker and no major finding. I traced every engine operation by reading the source. Each operation reserves its storage before it changes state, and I found no state change before a fallible allocation. Every error path frees what it allocated, and no path frees anything twice. That includes `discardQueuedAnswer`, which sets `inputs.len` directly. This is sound because `std.Deque` stores `buffer`, `head`, and `len`, and the routine keeps `head` and compacts entries in logical order. Identifiers come from one atomic process-wide sequence that never reuses a value and never issues zero. No internal handle appears in the C ABI. Every C entry point that takes an engine checks for null, then checks the thread, then checks the other arguments. The header, the Zig `extern struct` declarations, and `bootstrap.json` describe the same fields in the same order. Every eight-byte field lands on an eight-byte boundary in both, so I found no layout mismatch. The evidence matches every claim. The integration log reports 57 of 57 tests, which matches the 56 test declarations plus the root `test {}` block. Every gate receipt binds source digest `e63b0f6d…5e9565`, and its policy digest matches the earlier 2069b4d and 0c975c9 check logs. The mutation control fails 10 of 57 tests with exit status 1. Revision 1 does not weaken plan criterion 3. The engine never calls host code, so a load or destroy that takes effect during the call happens between steps and cannot reenter one. However, the revision's rationale overstates what cases 3 and 9 require. Destroying a document can now fail with an out-of-memory status, and the public documentation does not say so. Several tests also miss plausible regressions, as the findings below describe. I ran no commands because I have no shell. I read `.git/HEAD`, `.git/refs/heads/master`, and the reflog: HEAD is fad1af2, one commit after 7bc9ace. I reviewed the working tree, not the commit diff.",
+  "criteria": [
+    {
+      "criterion": "Plan 1: Create and destroy an engine and document through native Zig and C APIs.",
+      "met": true,
+      "evidence": "src/engine.zig:562-582 (case 1, Zig) and src/c_api.zig:338-357 (case 1, C). tests/c/abi_smoke.c:41-136 does the same through the header. A destroyed or zero identifier returns UnknownId or FP_STATUS_UNKNOWN_ID."
+    },
+    {
+      "criterion": "Plan 2: Queue host requests with identifiers, cancellation, and bounded ownership.",
+      "met": true,
+      "evidence": "`Engine.load`, `respond`, `reject`, and `cancel` are at engine.zig:292-372. `load` checks the request bound, and `respond` checks the body bound. Cases 8, 9, and 12 (engine.zig:743-891) cover cancellation and both bounds, and compare a state fingerprint before and after each refused call."
+    },
+    {
+      "criterion": "Plan 3: Provide step outcomes without reentrant external mutation.",
+      "met": true,
+      "evidence": "The engine never calls host code. Answers queue and apply only in `step` (engine.zig:375-388). `StepOutcome` reports `applied`, `work_remaining`, `events_ready`, and `next_deadline`, which is always `none`. Revision 1 makes load and destroy take effect during the call. They still run between steps and cannot reenter one, so the criterion holds (see the Revision 1 finding). The mutation control, which applies responses during the respond call, fails cases 3, 4, 5, 6, 9, 10, 11, 13, and 15 and C case 16 (raw/mutation-reentrancy.log)."
+    },
+    {
+      "criterion": "Plan 4: Exercise destruction with outstanding requests and resource responses.",
+      "met": true,
+      "evidence": "Case 10 (engine.zig:801-835) destroys a loading document that has a queued response. It checks the cancellation event and that the step applies nothing, and the leak count stays steady across two cycles. Case 11 (engine.zig:837-860) destroys an engine with outstanding requests, a queued response, a rejection, a cancellation, and undrained events, then checks that allocated bytes equal freed bytes."
+    },
+    {
+      "criterion": "Plan 5: Do not claim that internal pauses create arbitrary JavaScript task boundaries.",
+      "met": true,
+      "evidence": "api/README.md:141-142, include/fairpane.h:176-178, the `fp_engine_step` effect in api/bootstrap.json, and engine.zig:8-9 and 374 all say that a step budget creates no JavaScript task boundary. No text claims the opposite."
+    },
+    {
+      "criterion": "Plan 6: Issue a fresh owner identity for each engine and each handle table instance.",
+      "met": true,
+      "evidence": "`Engine.create` (engine.zig:205-224) issues three identities from the atomic process-wide source in handles.zig. Case 2 (engine.zig:584-602) checks that six owners across two engines are pairwise distinct. It also checks that handles in each engine carry that engine's table owner."
+    },
+    {
+      "criterion": "Plan 7: Version each host request type.",
+      "met": true,
+      "evidence": "`Request.version` is set to `resource_request_version = 1`. Issued, cancelled, and state-change events all carry the kind and version, as the `RequestNotice` and `StateChange` types and the C `fp_event` fields show. The header defines FP_REQUEST_RESOURCE and FP_RESOURCE_REQUEST_VERSION."
+    },
+    {
+      "criterion": "Plan 8: Reject a host request with an unknown version through an explicit error.",
+      "met": true,
+      "evidence": "`respond` returns UnsupportedVersion when the version differs, and the request stays live (engine.zig:346-354). Case 6 checks this and the fingerprint, and abi_smoke.c checks FP_STATUS_UNSUPPORTED_VERSION. A host rejection with FP_REJECT_UNSUPPORTED_VERSION fails the document (case 7). An unknown reason value returns FP_STATUS_INVALID_ARGUMENT (c_api.zig:255)."
+    },
+    {
+      "criterion": "Contract cases 1-18 have tests with exact behavior.",
+      "met": true,
+      "evidence": "Zig cases 1-15 are at engine.zig:562-1035. C-side Zig cases 1, 14, 16, and 17 are at c_api.zig:338-517. Case 18 is in tests/c/abi_smoke.c:41-136. The case 18 test checks null pointers and short sizes against 0xA5, 0x5A, and 0x3C byte patterns to show that nothing is written. Gaps are listed as minor findings for cases 13 and 9/10 and for C reject and cancel."
+    },
+    {
+      "criterion": "Revision 1 is consistent with the base contract and its cases.",
+      "met": true,
+      "evidence": "Bullets 2, 3, 4, and 6 are consistent with the base text. Bullet 1 changes base line 54 but keeps plan criterion 3; its rationale is inaccurate (minor finding). Bullet 5 makes document destruction fallible and is not documented in the public API (minor finding)."
+    },
+    {
+      "criterion": "Reservation before mutation, with no leak or double free on any error path.",
+      "met": true,
+      "evidence": "`createDocument`, `load`, `respond`, `reject`, `cancel`, `step`, and `destroyDocument` each reserve map, deque, and table capacity before they change state. `load` releases its URL copy through an errdefer. Case 15 runs `checkAllAllocationFailures` with remap disabled and compares a fingerprint after each induced failure. C case 16 induces failures through the C entry points. `discardQueuedAnswer` frees the one matching answer and keeps the logical order. Engine `destroy` frees disjoint sets: the queued answers, the document bodies, and the request URLs."
+    },
+    {
+      "criterion": "Identifier safety.",
+      "met": true,
+      "evidence": "The atomic `OwnerIdSource` starts at 1 and never wraps. Document and request identifiers share one sequence. Each engine looks identifiers up in its own maps, so a foreign identifier returns UnknownId (C case 17). An ended identifier is removed and returns UnknownId (cases 4, 7, 8, 9). C exposes only u64 identifiers."
+    },
+    {
+      "criterion": "Thread checks on every entry point and their order.",
+      "met": true,
+      "evidence": "Every native method except `create` calls `checkThread` first. C `enter` (c_api.zig:113-117) resolves a null engine to FP_STATUS_INVALID_ARGUMENT, then checks the thread before any other argument, as api/README.md:42-43 documents. Zig and C case 14 call all ten operations, including destroy, from a foreign thread and check that nothing changed."
+    },
+    {
+      "criterion": "C ABI layout, struct_size, null and short-size checks, lifetimes, and documentation.",
+      "met": true,
+      "evidence": "The header structures match the Zig `extern struct` declarations field for field. abi_smoke.c:6-18 statically asserts the key offsets. Input `struct_size` must be at least the declared size, and output sizes are checked before any write. The URL lives until its request ends, a document body until the next load or destruction, and input buffers only for the call. api/README.md, fairpane.h, and the `lifetimes` section of bootstrap.json document all of these."
+    },
+    {
+      "criterion": "Evidence is complete and bound.",
+      "met": true,
+      "evidence": "All six gate receipts show `status` pass and exit_code 0, with source_before and source_after e63b0f6d…5e9565 and policy 366776e0… unchanged. raw/integration-tests.log reports 57 of 57 tests passed with exit 0. The c-abi gate log shows exit 0 for the build, the compile, and the smoke executable. raw/mutation-reentrancy.log shows 47 pass, 10 fail, and exit 1. raw/tests-before.log shows a compile failure with exit 1."
+    },
+    {
+      "criterion": "Tests catch plausible regressions rather than wiring.",
+      "met": true,
+      "evidence": "The fingerprint comparisons, the exhaustive allocation-failure test, the foreign-thread tests, and the leak accounting catch real regressions, and the mutation control shows it. Three gaps remain and are listed as minor findings: arrival order, multi-entry discard, and the C reject and cancel success paths."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0006/CONTRACT.md",
+      "line": 144,
+      "issue": "Revision 1 says cases 3, 9, and 12 require a load to take effect during the call, but only case 12 requires a refusal during the call. A queued load could also meet case 12 by reserving its storage during the call. Cases 3 and 9 say nothing about timing. So making load and destroy synchronous is a design choice, not something the cases force. It still meets plan criterion 3, because the engine never calls the host and no mutation can reenter a step. However, the record overstates its justification for amending frozen line 54.",
+      "recommendation": "Restate the bullet as a deliberate design decision. Name why it keeps plan criterion 3: no host code runs during a step. Drop the claim that cases 3 and 9 require it."
+    },
+    {
+      "severity": "minor",
+      "path": "src/engine.zig",
+      "line": 270,
+      "issue": "`destroyDocument` reserves its cancellation event during the destroy call. As a result, destroying a loading document can return OutOfMemory and leave the document in place (Revision 1, bullet 5). This is consistent with the reservation rule. But api/README.md:87-89, include/fairpane.h:153-156, and the `fp_document_destroy` effect in api/bootstrap.json never say that this call can return FP_STATUS_OUT_OF_MEMORY. A fallible destroy will also complicate RAII wrappers, such as a Rust `Drop`.",
+      "recommendation": "Reserve the cancellation event slot when the request is issued, which makes destroy infallible. Alternatively, keep the current behavior and document FP_STATUS_OUT_OF_MEMORY on `fp_document_destroy` in all three API documents."
+    },
+    {
+      "severity": "minor",
+      "path": "src/engine.zig",
+      "line": 903,
+      "issue": "Case 13 sends responses in the order 1, 0, 2 and checks only that documents 0 and 1 are loaded after `step(2)`. Applying inputs by request identifier or table index would also apply {0, 1} first. A regression that loses arrival order therefore passes, even though the test name claims to check arrival order.",
+      "recommendation": "Send the responses in an order such as 2, 0, 1. Check that document 2 is loaded and document 1 is still loading after `step(2)`. Alternatively, check the order of the state-change events."
+    },
+    {
+      "severity": "minor",
+      "path": "src/engine.zig",
+      "line": 442,
+      "issue": "Every `discardQueuedAnswer` test has exactly one queued input (cases 9 and 10, and case 15 discards nothing). Suppose the code freed the matching answer and only decremented `len` without compacting. Every test would still pass, yet with several inputs the engine would use freed memory or free it twice. No test removes an answer from the middle of a longer queue or from a wrapped queue.",
+      "recommendation": "Queue answers for three requests and wrap the deque with earlier pops. Destroy the document whose answer sits in the middle. Then check that a step applies the other two answers with their exact bodies and in order."
+    },
+    {
+      "severity": "minor",
+      "path": "src/c_api.zig",
+      "line": 253,
+      "issue": "No test exercises the success paths of `fp_request_reject` and `fp_request_cancel`. No test converts a FP_EVENT_REQUEST_CANCELLED event or a nonzero `reject_reason` through `eventToC` (c_api.zig:136-175). The C tests call these entry points only for the wrong-thread, unknown-identifier, and invalid-reason cases. A regression in reason mapping or event-kind mapping at the C boundary would pass.",
+      "recommendation": "Add a C-level test, in Zig or in abi_smoke.c, that rejects one request and cancels another. Step, then drain the events. Assert FP_EVENT_REQUEST_CANCELLED, FP_DOCUMENT_FAILED, and `reject_reason` FP_REJECT_UNSUPPORTED_VERSION."
+    },
+    {
+      "severity": "note",
+      "path": "src/engine.zig",
+      "line": 247,
+      "issue": "The thread check compares `std.Thread.getCurrentId()`, the operating system's thread identifier. The system can reuse that identifier after the owning thread exits, and a different thread would then pass the check.",
+      "recommendation": "Document that the host must destroy an engine before its owning thread exits."
+    },
+    {
+      "severity": "note",
+      "path": "src/c_api.zig",
+      "line": 232,
+      "issue": "`fp_document_load` rejects a null `url` even when `url_len` is zero. `fp_request_respond` accepts a null body when `body_len` is zero. The behavior is documented in api/README.md and the header, but the two conventions differ.",
+      "recommendation": "Consider one convention for empty borrowed byte ranges before the ABI stabilizes."
+    },
+    {
+      "severity": "note",
+      "path": "src/engine.zig",
+      "line": 254,
+      "issue": "`createDocument`, `load` (line 303), and `Engine.create` take a process-wide identifier before the last fallible allocation. On failure, that identifier is consumed. No engine state changes and uniqueness holds, so this meets the contract.",
+      "recommendation": "No change needed. Optionally state in the API documentation that identifiers can be skipped."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0006/raw/integration-tests.log",
+      "line": null,
+      "issue": "The 57-of-57 count comes from a raw log that no receipt binds to the source digest. Its timing places it right after the c-abi gate in C:\\src\\fairpane: it started at 01:49:16.672Z, and the gate finished at 01:49:16.618Z. The worker logs ran in the worktree C:\\Users\\requi\\.omp\\wt\\tde2de9f5e\\m and carry no digest either.",
+      "recommendation": "Record the counted test run as a gate receipt with the source digest. Alternatively, have the zig-test gate print the summary."
+    },
+    {
+      "severity": "note",
+      "path": "tests/c/abi_smoke.c",
+      "line": 6,
+      "issue": "The static asserts cover only some sizes and offsets. They omit `sizeof(fp_event)`, `sizeof(fp_document_info)`, and `sizeof(fp_response)`, and the Zig side has no comptime check against the header. I compared the layouts by hand and they match.",
+      "recommendation": "Add `sizeof` asserts for every structure in the C test, and matching `@sizeOf` comptime asserts in c_api.zig."
+    }
+  ],
+  "commands_run": []
+}
