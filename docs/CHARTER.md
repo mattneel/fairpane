@@ -15,8 +15,12 @@ The project owns its portable engine and JavaScript implementation.
 The canonical implementation uses Zig master with reproducible pins.
 Applications integrate through a stable C ABI after that ABI qualifies.
 Language wrappers express their host language's ownership and concurrency conventions.
+One wrapper language is first-party, and the project maintains it with the engine.
 
-The public browser presents the page with minimal chrome.
+The public browser is the engine's first embedder.
+Its shell is written in the first-party wrapper language and reaches the engine only through the public embedding contract.
+Every capability the browser needs therefore exists in that contract for every other embedder.
+The browser presents the page with minimal chrome.
 It treats web applications as applications without hiding origin identity or browser security decisions.
 The engine also remains useful independently of the browser application.
 

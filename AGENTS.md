@@ -17,6 +17,7 @@ The result requires mechanically demonstrated behavior and sustained maintainabi
 ## Engineering rules
 
 - Use first-party Zig for the engine and JavaScript runtime.
+- Build the browser shell in the first-party wrapper language, against the public embedding contract only.
 - Use the exact Zig master pin in `toolchains/zig.lock.json`.
 - Keep third-party renderer code and runtime dependencies out of the portable core.
 - Keep the public C ABI separate from internal Zig interfaces and the process protocol.
