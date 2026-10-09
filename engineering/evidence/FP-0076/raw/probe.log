@@ -1,0 +1,125 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+775d988c75435779d4bab06b978391204d86e216
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:09:09.026Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","require('fs').mkdirSync('out/fp0076/probe-windows',{recursive:true});require('fs').copyFileSync('tests/lab/case-03-body-mismatch.json','out/fp0076/probe-windows/case.json');console.log('copied tests/lab/case-03-body-mismatch.json to out/fp0076/probe-windows/case.json')"]
+copied tests/lab/case-03-body-mismatch.json to out/fp0076/probe-windows/case.json
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","require('fs').mkdirSync('out/fp0076/probe-windows',{recursive:true});require('fs').copyFileSync('tests/lab/case-03-body-mismatch.json','out/fp0076/probe-windows/case.json');console.log('copied tests/lab/case-03-body-mismatch.json to out/fp0076/probe-windows/case.json')"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:09:09.096Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","archive","--format=tar","--prefix=base/","-o","out/fp0076/base.tar","HEAD"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["archive","--format=tar","--prefix=base/","-o","out/fp0076/base.tar","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:09:09.196Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":129}
+
+COMMAND ["C:\\Windows\\System32\\tar.exe","-xf","out/fp0076/base.tar","-C","out/fp0076"]
+RESULT {"executable":"C:\\Windows\\System32\\tar.exe","arguments":["-xf","out/fp0076/base.tar","-C","out/fp0076"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:09:09.375Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":254}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","lab","--cache-dir",".zig-cache-probe"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","lab","--cache-dir",".zig-cache-probe"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m\\out\\fp0076\\base","started_at":"2026-10-09T15:09:17.279Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":5185,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","lab","--cache-dir","out/fp0076-dev"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","lab","--cache-dir","out/fp0076-dev"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:09:22.515Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":89,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","out/fp0076/base/src/lab_main.zig","src/lab_main.zig"]
+c78c460b5e0e74cfd3c797fa3fec719ece984b32
+ae3e3ca4a898ac861abccf9bc80df0c8b74cf49d
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","out/fp0076/base/src/lab_main.zig","src/lab_main.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:09:22.671Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m\\out\\fp0076\\base\\zig-out\\bin\\fairpane-lab.exe","minimize","case.json","--out","out|.json"]
+{
+  "format": "fairpane-lab-minimize-result",
+  "version": 1,
+  "case": null,
+  "original": null,
+  "predicate_runs": 0,
+  "resources": null,
+  "document_body_length": null,
+  "output": null,
+  "outcome": {
+    "result": "harness-error",
+    "detail": "output file: BadPathName"
+  }
+}
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m\\out\\fp0076\\base\\zig-out\\bin\\fairpane-lab.exe","arguments":["minimize","case.json","--out","out|.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m\\out\\fp0076\\probe-windows","started_at":"2026-10-09T15:09:22.752Z","exit_code":3,"signal":null,"timed_out":false,"error":null,"duration_ms":44}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m\\zig-out\\bin\\fairpane-lab.exe","minimize","case.json","--out","out|.json"]
+{
+  "format": "fairpane-lab-minimize-result",
+  "version": 1,
+  "case": null,
+  "original": null,
+  "predicate_runs": 0,
+  "resources": null,
+  "document_body_length": null,
+  "output": null,
+  "outcome": {
+    "result": "harness-error",
+    "detail": "output file: BadPathName"
+  }
+}
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m\\zig-out\\bin\\fairpane-lab.exe","arguments":["minimize","case.json","--out","out|.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m\\out\\fp0076\\probe-windows","started_at":"2026-10-09T15:09:22.861Z","exit_code":3,"signal":null,"timed_out":false,"error":null,"duration_ms":47}
+
+COMMAND ["C:\\Windows\\System32\\cmd.exe","/d","/c","dir","/a","/b"]
+case.json
+RESULT {"executable":"C:\\Windows\\System32\\cmd.exe","arguments":["/d","/c","dir","/a","/b"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m\\out\\fp0076\\probe-windows","started_at":"2026-10-09T15:09:22.960Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":13}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","read-tree","HEAD"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["read-tree","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:09:41.783Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42,"environment_overrides":{"GIT_INDEX_FILE":"out/fp0076/probe.index"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","add","build.zig","src/lab_main.zig","tests/lab/check.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["add","build.zig","src/lab_main.zig","tests/lab/check.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:09:41.883Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34,"environment_overrides":{"GIT_INDEX_FILE":"out/fp0076/probe.index"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff-index","--cached","--abbrev=40","HEAD"]
+:100644 100644 efe5659b843e5700b316c6cf09ffed407f4dbdcb c2f422274af00d5e4aaccd9b7377ba86ab3e7bb9 M	build.zig
+:100644 100644 c78c460b5e0e74cfd3c797fa3fec719ece984b32 ae3e3ca4a898ac861abccf9bc80df0c8b74cf49d M	src/lab_main.zig
+:100644 100644 719dad2b3287fc8bb21532d5c2b673256a53087a e4b5e0f5d478f6af0992de5d267e40b3fe6e0c41 M	tests/lab/check.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff-index","--cached","--abbrev=40","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:09:41.980Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33,"environment_overrides":{"GIT_INDEX_FILE":"out/fp0076/probe.index"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","write-tree"]
+8a8db6be0af05a174bc98bc058b0537cfba3bdb5
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["write-tree"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:09:42.068Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":43,"environment_overrides":{"GIT_INDEX_FILE":"out/fp0076/probe.index"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD^{tree}"]
+af8b7456cc8ed391b81c028ccf4238efe10f4d5c
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD^{tree}"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:10:06.034Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","archive","--format=tar","--prefix=new/","-o","out/fp0076/probe-new.tar","8a8db6be0af05a174bc98bc058b0537cfba3bdb5"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["archive","--format=tar","--prefix=new/","-o","out/fp0076/probe-new.tar","8a8db6be0af05a174bc98bc058b0537cfba3bdb5"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:10:06.104Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":130}
+
+COMMAND ["C:\\Windows\\System32\\wsl.exe","-d","Ubuntu","-e","sh","-c","set -e; uname -srmo; W=\"$HOME/fairpane-linux/work/FP-0076\"; rm -rf \"$W\"; mkdir -p \"$W\"; tar -xf out/fp0076/base.tar -C \"$W\"; tar -xf out/fp0076/probe-new.tar -C \"$W\"; for t in base new; do (cd \"$W/$t\" && git init -q && git add -A && echo \"$t tree $(git write-tree), src/lab_main.zig $(git hash-object src/lab_main.zig)\"); done; Z=\"$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/zig\"; export ZIG_GLOBAL_CACHE_DIR=\"$HOME/fairpane-linux/zig-global-cache\"; for t in base new; do (cd \"$W/$t\" && \"$Z\" build lab --cache-dir .zig-cache-probe); done; mkdir \"$W/probe\"; cp \"$W/new/tests/lab/case-03-body-mismatch.json\" \"$W/probe/case.json\"; cd \"$W/probe\"; for t in base new; do echo \"$t laboratory:\"; status=0; \"$W/$t/zig-out/bin/fairpane-lab\" minimize case.json --out case.json/out.json || status=$?; echo \"exit status $status\"; done; echo \"entries: $(ls -A)\""]
+Linux 7.2.6-locietta-WSL2-xanmod1 x86_64 GNU/Linux
+base tree af8b7456cc8ed391b81c028ccf4238efe10f4d5c, src/lab_main.zig c78c460b5e0e74cfd3c797fa3fec719ece984b32
+new tree 8a8db6be0af05a174bc98bc058b0537cfba3bdb5, src/lab_main.zig ae3e3ca4a898ac861abccf9bc80df0c8b74cf49d
+base laboratory:
+{
+  "format": "fairpane-lab-minimize-result",
+  "version": 1,
+  "case": null,
+  "original": null,
+  "predicate_runs": 0,
+  "resources": null,
+  "document_body_length": null,
+  "output": null,
+  "outcome": {
+    "result": "harness-error",
+    "detail": "output file: NotDir"
+  }
+}
+exit status 3
+new laboratory:
+{
+  "format": "fairpane-lab-minimize-result",
+  "version": 1,
+  "case": null,
+  "original": null,
+  "predicate_runs": 0,
+  "resources": null,
+  "document_body_length": null,
+  "output": null,
+  "outcome": {
+    "result": "harness-error",
+    "detail": "output file: NotDir"
+  }
+}
+exit status 3
+entries: case.json
+RESULT {"executable":"C:\\Windows\\System32\\wsl.exe","arguments":["-d","Ubuntu","-e","sh","-c","set -e; uname -srmo; W=\"$HOME/fairpane-linux/work/FP-0076\"; rm -rf \"$W\"; mkdir -p \"$W\"; tar -xf out/fp0076/base.tar -C \"$W\"; tar -xf out/fp0076/probe-new.tar -C \"$W\"; for t in base new; do (cd \"$W/$t\" && git init -q && git add -A && echo \"$t tree $(git write-tree), src/lab_main.zig $(git hash-object src/lab_main.zig)\"); done; Z=\"$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/zig\"; export ZIG_GLOBAL_CACHE_DIR=\"$HOME/fairpane-linux/zig-global-cache\"; for t in base new; do (cd \"$W/$t\" && \"$Z\" build lab --cache-dir .zig-cache-probe); done; mkdir \"$W/probe\"; cp \"$W/new/tests/lab/case-03-body-mismatch.json\" \"$W/probe/case.json\"; cd \"$W/probe\"; for t in base new; do echo \"$t laboratory:\"; status=0; \"$W/$t/zig-out/bin/fairpane-lab\" minimize case.json --out case.json/out.json || status=$?; echo \"exit status $status\"; done; echo \"entries: $(ls -A)\""],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:10:06.299Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":4204}

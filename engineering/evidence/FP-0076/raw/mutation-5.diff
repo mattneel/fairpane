@@ -1,0 +1,13 @@
+diff --git a/out/fp0076/mutation/M5-lab_main.zig b/src/lab_main.zig
+index ae3e3ca..25e9b68 100644
+--- a/out/fp0076/mutation/M5-lab_main.zig
++++ b/src/lab_main.zig
+@@ -225,7 +225,7 @@ fn fileIdentity(path: []const u8) !FileIdentity {
+             while (true) {
+                 var statx = std.mem.zeroes(linux.Statx);
+                 // Flags 0 omit `AT_SYMLINK_NOFOLLOW`, so `statx` follows symbolic links.
+-                switch (linux.errno(linux.statx(linux.AT.FDCWD, &path_z, 0, .{ .INO = true }, &statx))) {
++                switch (linux.errno(linux.statx(linux.AT.FDCWD, &path_z, linux.AT.SYMLINK_NOFOLLOW, .{ .INO = true }, &statx))) {
+                     .SUCCESS => {
+                         if (!statx.mask.INO) return error.Unexpected;
+                         return .{ .dev_major = statx.dev_major, .dev_minor = statx.dev_minor, .ino = statx.ino };

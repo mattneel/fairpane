@@ -89,7 +89,7 @@ fn isOption(arg: []const u8) bool {
 fn runCommand(io: Io, gpa: Allocator, case_path: []const u8, transcript_path: ?[]const u8) u8 {
     var run = start: {
         if (transcript_path) |path| {
-            const refusal = refuseInputAsOutput(io, .{ .path = case_path, .subject = "case file" }, .{ .path = path, .subject = "transcript file" });
+            const refusal = refuseInputAsOutput(.{ .path = case_path, .subject = "case file" }, .{ .path = path, .subject = "transcript file" });
             if (refusal) |detail| break :start lab.Run.initHarnessError(gpa, null, detail);
         }
         const bytes = lab.readInputFile(io, gpa, case_path, lab.case_size_limit) catch |err| {
@@ -121,7 +121,7 @@ fn replayCommand(io: Io, gpa: Allocator, transcript_path: []const u8) u8 {
 
 fn minimizeCommand(io: Io, gpa: Allocator, case_path: []const u8, out_path: []const u8) u8 {
     var minimization = start: {
-        const refusal = refuseInputAsOutput(io, .{ .path = case_path, .subject = "case file" }, .{ .path = out_path, .subject = "output file" });
+        const refusal = refuseInputAsOutput(.{ .path = case_path, .subject = "case file" }, .{ .path = out_path, .subject = "output file" });
         if (refusal) |detail| break :start lab.Minimization.initHarnessError(gpa, null, detail);
         const bytes = lab.readInputFile(io, gpa, case_path, lab.case_size_limit) catch |err| {
             break :start lab.Minimization.initHarnessError(gpa, null, lab.fileFailure("case file", err));
@@ -146,13 +146,13 @@ const NamedFile = struct { path: []const u8, subject: []const u8 };
 /// Equal spellings name one file. When the output file exists, the identities of both files decide,
 /// so a hard link, a symbolic link, or another spelling of the input file is refused.
 /// An output file that does not exist is not the input file.
-fn refuseInputAsOutput(io: Io, input: NamedFile, output: NamedFile) ?lab.Detail {
+fn refuseInputAsOutput(input: NamedFile, output: NamedFile) ?lab.Detail {
     if (std.mem.eql(u8, input.path, output.path)) return same_file;
-    const output_identity = fileIdentity(io, output.path) catch |err| return switch (err) {
+    const output_identity = fileIdentity(output.path) catch |err| return switch (err) {
         error.FileNotFound => null,
         else => lab.fileFailure(output.subject, err),
     };
-    const input_identity = fileIdentity(io, input.path) catch |err| return lab.fileFailure(input.subject, err);
+    const input_identity = fileIdentity(input.path) catch |err| return lab.fileFailure(input.subject, err);
     return if (std.meta.eql(input_identity, output_identity)) same_file else null;
 }
 
@@ -160,7 +160,7 @@ fn refuseInputAsOutput(io: Io, input: NamedFile, output: NamedFile) ?lab.Detail 
 /// Two names of one file, including hard links, have one identity.
 const FileIdentity = switch (builtin.os.tag) {
     .windows => struct { volume_serial_number: u64, file_id: [16]u8 },
-    // `stx_dev_major` and `stx_dev_minor` together are the `st_dev` that `fstat` reports.
+    // `stx_dev_major` and `stx_dev_minor` together are the `st_dev` that `stat` reports.
     .linux => struct { dev_major: u32, dev_minor: u32, ino: u64 },
     else => struct { dev: @FieldType(std.posix.Stat, "dev"), ino: @FieldType(std.posix.Stat, "ino") },
 };
@@ -173,45 +173,91 @@ const FILE_ID_INFORMATION = extern struct {
     FileId: [16]u8,
 };
 
-/// Opens the file at `path`, following symbolic links, and returns its identity.
-fn fileIdentity(io: Io, path: []const u8) !FileIdentity {
-    const file = try Io.Dir.cwd().openFile(io, path, .{});
-    defer file.close(io);
+/// Returns the identity of the file at `path`, relative to the current directory, following symbolic links.
+/// It never opens the file for reading, so a FIFO does not block and a file without read permission still has an identity.
+fn fileIdentity(path: []const u8) !FileIdentity {
     switch (builtin.os.tag) {
         .windows => {
+            // The handle's only data access is `FILE_READ_ATTRIBUTES`, which a read-data denial does not remove.
+            // It shares every mode, so it never conflicts with another open handle.
+            const cwd = Io.Dir.cwd().handle;
+            const path_w = try Io.Threaded.sliceToPrefixedFileW(cwd, path, .{});
+            var object_name = path_w.string();
+            const attributes: windows.OBJECT.ATTRIBUTES = .{
+                .RootDirectory = if (Io.Dir.path.isAbsoluteWindowsWtf16(path_w.span())) null else cwd,
+                .ObjectName = &object_name,
+            };
+            var handle: windows.HANDLE = undefined;
             var io_status_block: windows.IO_STATUS_BLOCK = undefined;
+            switch (windows.ntdll.NtCreateFile(
+                &handle,
+                .{ .STANDARD = .{ .SYNCHRONIZE = true }, .SPECIFIC = .{ .FILE = .{ .READ_ATTRIBUTES = true } } },
+                &attributes,
+                &io_status_block,
+                null,
+                .{ .NORMAL = true },
+                .VALID_FLAGS,
+                .OPEN,
+                .{ .IO = .SYNCHRONOUS_NONALERT },
+                null,
+                0,
+            )) {
+                .SUCCESS => {},
+                .OBJECT_NAME_INVALID => return error.BadPathName,
+                .OBJECT_NAME_NOT_FOUND, .OBJECT_PATH_NOT_FOUND => return error.FileNotFound,
+                .BAD_NETWORK_PATH, .BAD_NETWORK_NAME => return error.NetworkNotFound,
+                .NO_MEDIA_IN_DEVICE => return error.NoDevice,
+                .ACCESS_DENIED => return error.AccessDenied,
+                .NOT_A_DIRECTORY => return error.NotDir,
+                else => |status| return windows.unexpectedStatus(status),
+            }
+            defer windows.CloseHandle(handle);
             var info: FILE_ID_INFORMATION = undefined;
-            return switch (windows.ntdll.NtQueryInformationFile(file.handle, &io_status_block, &info, @sizeOf(FILE_ID_INFORMATION), .Id)) {
+            return switch (windows.ntdll.NtQueryInformationFile(handle, &io_status_block, &info, @sizeOf(FILE_ID_INFORMATION), .Id)) {
                 .SUCCESS => .{ .volume_serial_number = info.VolumeSerialNumber, .file_id = info.FileId },
                 .ACCESS_DENIED => error.AccessDenied,
                 else => |status| windows.unexpectedStatus(status),
             };
         },
-        // The pinned standard library binds no `fstat` on Linux, so `statx` on the open descriptor reports the same fields.
+        // The pinned standard library binds no `stat` on Linux, so `statx` on the path reports the same fields.
         .linux => {
             const linux = std.os.linux;
+            const path_z = try std.posix.toPosixPath(path);
             while (true) {
                 var statx = std.mem.zeroes(linux.Statx);
-                switch (linux.errno(linux.statx(file.handle, "", linux.AT.EMPTY_PATH, .{ .INO = true }, &statx))) {
+                // Flags 0 omit `AT_SYMLINK_NOFOLLOW`, so `statx` follows symbolic links.
+                switch (linux.errno(linux.statx(linux.AT.FDCWD, &path_z, 0, .{ .INO = true }, &statx))) {
                     .SUCCESS => {
                         if (!statx.mask.INO) return error.Unexpected;
                         return .{ .dev_major = statx.dev_major, .dev_minor = statx.dev_minor, .ino = statx.ino };
                     },
                     .INTR => continue,
                     .ACCES => return error.AccessDenied,
+                    .LOOP => return error.SymLinkLoop,
+                    .NAMETOOLONG => return error.NameTooLong,
+                    .NOENT => return error.FileNotFound,
+                    .NOTDIR => return error.NotDir,
                     .NOMEM => return error.SystemResources,
                     else => |err| return std.posix.unexpectedErrno(err),
                 }
             }
         },
-        else => while (true) {
-            var stat: std.posix.Stat = undefined;
-            switch (std.posix.errno(std.posix.system.fstat(file.handle, &stat))) {
-                .SUCCESS => return .{ .dev = stat.dev, .ino = stat.ino },
-                .INTR => continue,
-                .ACCES => return error.AccessDenied,
-                .NOMEM => return error.SystemResources,
-                else => |err| return std.posix.unexpectedErrno(err),
+        else => {
+            const path_z = try std.posix.toPosixPath(path);
+            while (true) {
+                var stat: std.posix.Stat = undefined;
+                // Flags 0 omit `AT_SYMLINK_NOFOLLOW`, so `fstatat` follows symbolic links.
+                switch (std.posix.errno(std.posix.system.fstatat(std.posix.AT.FDCWD, &path_z, &stat, 0))) {
+                    .SUCCESS => return .{ .dev = stat.dev, .ino = stat.ino },
+                    .INTR => continue,
+                    .ACCES => return error.AccessDenied,
+                    .LOOP => return error.SymLinkLoop,
+                    .NAMETOOLONG => return error.NameTooLong,
+                    .NOENT => return error.FileNotFound,
+                    .NOTDIR => return error.NotDir,
+                    .NOMEM => return error.SystemResources,
+                    else => |err| return std.posix.unexpectedErrno(err),
+                }
             }
         },
     }

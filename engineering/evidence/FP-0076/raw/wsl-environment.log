@@ -1,0 +1,9 @@
+
+COMMAND ["C:\\Windows\\System32\\wsl.exe","-d","Ubuntu","-e","sh","-c","set -e; uname -srmo; . /etc/os-release; echo \"$PRETTY_NAME\"; echo \"uid $(id -u)\"; \"$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/zig\" version; git --version; test -f build.zig && echo 'the starting directory holds build.zig'"]
+Linux 7.2.6-locietta-WSL2-xanmod1 x86_64 GNU/Linux
+Ubuntu 24.04.5 LTS
+uid 1000
+0.18.0-dev.120+9fe22a29b
+git version 2.43.0
+the starting directory holds build.zig
+RESULT {"executable":"C:\\Windows\\System32\\wsl.exe","arguments":["-d","Ubuntu","-e","sh","-c","set -e; uname -srmo; . /etc/os-release; echo \"$PRETTY_NAME\"; echo \"uid $(id -u)\"; \"$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/zig\" version; git --version; test -f build.zig && echo 'the starting directory holds build.zig'"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te45f1e897\\m","started_at":"2026-10-09T15:08:25.073Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":133}

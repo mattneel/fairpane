@@ -1,0 +1,13 @@
+diff --git a/out/fp0076/mutation/M7-r2-lab_main.zig b/src/lab_main.zig
+index ce2657d..d040d9c 100644
+--- a/out/fp0076/mutation/M7-r2-lab_main.zig
++++ b/src/lab_main.zig
+@@ -93,7 +93,7 @@ fn runCommand(io: Io, gpa: Allocator, case_path: []const u8, transcript_path: ?[
+             if (refusal) |detail| break :start lab.Run.initHarnessError(gpa, null, detail);
+         }
+         const bytes = lab.readInputFile(io, gpa, case_path, lab.case_size_limit) catch |err| {
+-            break :start lab.Run.initHarnessError(gpa, null, lab.fileFailure("case file", err));
++            break :start lab.Run.initHarnessError(gpa, null, lab.fileFailure("transcript file", err));
+         };
+         defer gpa.free(bytes);
+         break :start lab.runCase(gpa, bytes);
