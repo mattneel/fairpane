@@ -483,3 +483,17 @@ For example, `ecdd343` reached `origin` in the push of `5859de7`.
 
 Every other run of every window concluded `success`.
 `FP-0106` has no pushed head yet, so its window begins with the next push.
+
+## Extension through `a7219f9`
+
+The integrator extended this ledger on 2026-10-09 after the push run of `a7219f9` concluded, under conditions (a) to (d) of FP-0098 review 4 ([../FP-0098/reviews/review-4-accept.json](../FP-0098/reviews/review-4-accept.json)).
+
+- [runs-2026-10-09-extension-3.log](runs-2026-10-09-extension-3.log) records `gh run view` of every `Gates` run created from 20:44:08 to 21:02:54 UTC.
+  It holds one run, push run 37990258390 of `a7219f9`, attempt 1, which concluded `success` in both jobs.
+- [pushes-through-a7219f9.log](pushes-through-a7219f9.log) lists the nine commits that the push of `a7219f9` carried, among them FP-0106's code commit `63e14ca`.
+  It also records `git ls-remote origin refs/heads/master`, which names `a7219f9a73f3b0363a47b995643b006248c2c64f`.
+- The push that carries this section is a fast-forward of `a7219f9`.
+  It carries only this section, in a commit with the review records that the acceptances cite, and the acceptance commit.
+
+Every window of "Windows through `5859de7`" extends to `a7219f9` with no new failed attempt.
+`FP-0106`'s window begins at `a7219f9`, whose run passed.
