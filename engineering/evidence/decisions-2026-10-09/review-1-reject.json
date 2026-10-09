@@ -1,0 +1,176 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "799dcba",
+    "ec425ea"
+  ],
+  "summary": "I reject both commits. They resolve every specific item in review 3. FP-0035 now provides surfaces and input before FP-0032, and FP-0030 now carries the text-input and accessibility evidence. The Send/Sync rule, the metadata-extension rule, and the non-cloneable-owner rule are restored. 'parse', 'style', caching, CORS, and the duplicate check are restored. The ADR 0004 qualifiers, FP-0034, PRODUCT.md, the platform agent, and AGENT_LAUNCH are corrected. All protected-path changes and the REQUIRED_CAPABILITIES change are confined to 799dcba. Both recorded check receipts show the same policy fingerprint (a62931e5...). Four major defects remain. (1) The evidence does not support the 'YES to the recommended option' authority for the two new required families. The only post-01:00 answer in owner-answers.log is 'User provided custom input', and that answer is the SDK memo. Neither the question nor its options were recorded. (2) The new optional-language-host policy lets an optional TypeScript host carry a third-party JavaScript engine. That conflicts with .omp/RULES.md:5. (3) FP-0017 and FP-0032 require recovery from renderer failure, but renderer processes only arrive in FP-0020, which depends on FP-0017. (4) FP-0045 and FP-0046 have no prerequisite that produces GPU-rendered engine surfaces or WebGPU canvases, and FP-0046 cannot write the shell or a service host. I ran no shell commands. To get each commit's contents, I fetched https://github.com/mattneel/fairpane/commit/799dcba.diff and https://github.com/mattneel/fairpane/commit/ec425ea.diff with the read tool. I checked line numbers against the working tree. The working tree has later state and HANDOFF changes (for example, FP-0006 is now 'active'), but the plan.json hunks match their ec425ea positions. I read the check and test receipts in engineering/evidence/decisions-2026-10-09/ but did not re-run them.",
+  "criteria": [
+    {
+      "criterion": "1. Resolution of every finding in engineering/evidence/first-embedder/review-3-reject.json",
+      "met": true,
+      "evidence": "Each item is resolved as follows. [blocker, plan.json:1526] Fixed. FP-0032 depends on FP-0035 (plan.json:1524). FP-0035 exports surfaces and accepts keyboard, pointer, and IME batches through the C ABI and the Rust wrapper (plan.json:1710-1722). FP-0032 leaves text input and accessibility to FP-0030 (plan.json:1564-1565). FP-0030 demonstrates IME in the address bar and in a page field, and focus/actions across the boundary (plan.json:1455-1457). [major, Send/Sync] Fixed at plan.json:1392 and docs/ABI_AND_WRAPPERS.md:95. [major, FP-0029 metadata, non-cloneable, typed input] Fixed. Metadata extension is at plan.json:1386, non-cloneable owners at :1387, and typed input and scoped views moved to FP-0035 at plan.json:1719-1720. [major, parse/style/caching/CORS/duplicate] Fixed at AGENTS.md:25, engineering/dependencies.json:33 and :43-45, docs/ARCHITECTURE.md:26-27, docs/SECURITY.md:29-30, and README.md:75. [major, FP-0032 areas and budgets] Fixed. Budgets are at plan.json:1561, and the text-input and accessibility areas are at :1455-1457 with the ADR 0004:104-106 split. [minor, FP-0034] Fixed at ADR 0004:6 and :185. [minor, chrome renderer label and qualifiers] Fixed. The label is at ADR 0004:144-147. 'bans' is removed at :127, the Cargo unification qualifier is at :160-161, 'Ordinary' is at :68, and the cookie wording is at :131-132. The fix also dropped 'licenses', which the memo states; a separate finding covers it. [minor, FP-0017 protocol and broker ordering] Fixed. The renderer-host, separate chrome process, and broker-origin criteria moved to FP-0020 (plan.json:953-955). A residual restart criterion is reported separately. [minor, PRODUCT.md] Fixed at docs/PRODUCT.md:55 and :60-61. [minor, fairpane-platform.md] Fixed at .omp/agents/fairpane-platform.md:10-14. [minor, AGENT_LAUNCH.md:40] Fixed at AGENT_LAUNCH.md:40-41. [minor, compound criteria at :785, :791, :1368, :1370, :1372, :1529] Fixed by splitting (plan.json:785-801, :1383-1401, :1555-1566, :1609-1613). [minor, dependencies.json fragments] Fixed. The policy and role strings are now complete sentences (dependencies.json:26, :33-40, :55-90). [note, receipts and status] Partly fixed. Receipts exist for both new commits (decisions-2026-10-09/*-check.log and *-test.log, all exit_code 0). ADRs 0005-0007 are again marked 'accepted' before review. [note, 0.7.1, custom controls, first answer] Fixed at ADR 0004:114, :91, and :25-26."
+    },
+    {
+      "criterion": "2. Fidelity of ADRs 0005-0007, EXTENSIONS.md, and FRONTENDS.md to the three memos, including the 'YES.' interpretation",
+      "met": false,
+      "evidence": "ADR 0005 carries the memo's components, parity, asynchronous model, values, containment, qualification, and governing rule accurately (ADR 0005:10-118). ADR 0006 follows the SDK memo almost verbatim (ADR 0006:10-91). ADR 0007 follows the frontend memo, including the surface-bridge boundary, the wgpu/WebGPU/GPUI distinction, the reserved surface contract, and the callback caveat (ADR 0007:10-87). The 'YES.' interpretation is unsupported. engineering/evidence/extensions/owner-answers.log:3 holds exactly one answer after 01:00. Its prefix is 'User provided custom input', unlike the 'User selected: ...' form in wrapper-language/owner-answers.log:4. Its text is the SDK memo: owner-sdk-memo-extraction.log:3 has the same 01:14:26.530Z timestamp. Its 'YES.' sentence affirms SDK-backed first-party extensions, not two capability families. The question and its options appear in no evidence file (a search for 'release-scope' or 'recommended' matches only ADR 0005:132-134). The extension memo does support compatibility as 'a separate qualification target', but it does not make that target or 'extensions' a required release family. There are smaller distortions and additions. ADR 0005:99 and EXTENSIONS.md:99 reinterpret 'Unlimited development resources do not imply unlimited resources for installed code'. ADR 0005:31 and EXTENSIONS.md:28 turn 'can ship' into 'ships'. ADR 0005:128-130 adds authenticated identity and schema types to the memo's pre-baseline list (a reasonable addition). FRONTENDS.md:54 adds 'The first adapter uploads CPU-memory surfaces'. ADR 0004:127 drops the memo's 'licenses'. dependencies.json:55 adds an unsourced 'gpui-pre' claim."
+    },
+    {
+      "criterion": "3. Policy: protected changes and REQUIRED_CAPABILITIES confined to 799dcba, with no weakened protection and every exclusion kept",
+      "met": false,
+      "evidence": "The confinement holds. The 799dcba diff touches AGENTS.md, docs/CHARTER.md, engineering/qualification.json, and tools/lib.mjs, along with ADRs, dependencies.json, workstreams.json, and evidence files. The ec425ea diff touches only .omp/agents, AGENT_LAUNCH, README, book, non-charter docs, HANDOFF, plan.json, and state.json. Both check receipts report the same policy fingerprint, a62931e5769ceee40c268530445a7e0ac967bcd254d638b3b44b665bce355a8f, with 21 capability families. AGENTS.md:24-33 is additive or stricter, CHARTER.md:31-38 is additive, qualification.json:129-151 is additive, and tools/lib.mjs:13 is additive. Every earlier dependencies.json exclusion survives (:43-50, :93-98). The only change is that 'Reconstructing page semantics from pixels' now names 'The shell' (:47). However, the new AGENTS.md:26 and the optional_language_hosts policy (dependencies.json:101-104) let an optional host carry any runtime dependency, including a third-party JavaScript engine. The rust_browser_application exclusion of 'Any JavaScript or WebAssembly engine' (:97) does not reach those hosts. This opens a path that .omp/RULES.md:5 forbids. The cargo-deny role also lost its license and ban checks (dependencies.json:80), although the policy at :33 still requires them."
+    },
+    {
+      "criterion": "4. Plan integrity: no cycle, completable order and paths, no weakened criterion, extensions after the first usable browser, and pre-baseline requirements in baseline tasks",
+      "met": false,
+      "evidence": "I traced every depends_on edge for FP-0001 to FP-0046 and found no cycle. No browser task depends on FP-0036 to FP-0042; only FP-0041 and FP-0042 depend on FP-0039. FP-0036 depends on FP-0018, FP-0019, FP-0020, and FP-0030 (plan.json:1738-1741). The pre-baseline requirements sit in baseline tasks: versioned host requests in FP-0006 (plan.json:281-282), isolated contexts in FP-0019 (:901), authenticated identity in FP-0020 (:956), and schema value types in FP-0021 (:1006). 'First usable browser' names no task or milestone, so the ordering is checkable only through these edges. The plan still has defects. FP-0017 (:795) and FP-0032 (:1560) require recovery from renderer failure before FP-0020 introduces renderer processes. FP-0045 (:2258) and FP-0046 (:2309-2313) have no prerequisite for GPU-rendered engine surfaces or WebGPU, and FP-0046's allowed paths (:2281-2288) exclude apps and ports. FP-0030 must record GPUI qualification (:1457) but cannot write engineering/decisions or engineering/dependencies.json (:1422-1430). FP-0041 and FP-0042 (:2049, :2099) do not require the custom graphics frontend that qualification.json:130 requires. One criterion is weakened: FP-0032 changed 'Use the newest qualified, compatible GPUI and GPUI Kit pairing' into 'Record the exact ... versions' (:1562). The other moved criteria are preserved: renderer hosts, the chrome process, and broker origin in FP-0020; frame protocol, typed input, and scoped views in FP-0035."
+    },
+    {
+      "criterion": "5. Consistency across AGENTS.md, docs, README, AGENT_LAUNCH, .omp/agents, book, engineering JSON, and HANDOFF",
+      "met": false,
+      "evidence": "The book includes EXTENSIONS.md and FRONTENDS.md (book/src/SUMMARY.md, extensions.md, frontends.md). The extension, SDK, and frontend rules appear consistently in AGENTS.md, CHARTER, README:43-45, ARCHITECTURE.md:80-92, SECURITY.md:41-50, PRODUCT.md:69-77, QUALIFICATION.md:26-27, ROADMAP.md:15 and :19, JAVASCRIPT_RUNTIME.md:54-59, and RENDERING_AND_TEXT.md:64-66. There are inconsistencies. HANDOFF.md:75-76 presents one owner answer as two separate decisions, and state.json:353 calls the family 'approved'. AGENTS.md:24 and dependencies.json:28 say 'browser application', while CHARTER.md:20, SECURITY.md:24-28, ARCHITECTURE.md:22, README.md:75, and ADR 0001:21 still say 'browser shell'. SECURITY.md:28 omits the ban and duplicate checks that dependencies.json:33 requires. .omp/agents/fairpane-platform.md:14 forbids fairpane-sys imports from all shell code, while ADR 0004:68 and ABI_AND_WRAPPERS.md:110 restrict only 'ordinary' shell code. qualification.json:130 requires SDKs to expose custom graphics frontends, but no SDK task requires it."
+    },
+    {
+      "criterion": "6. Prose: fragments, non-American spelling, and one instruction per procedure sentence in changed prose and plan criteria",
+      "met": false,
+      "evidence": "I found no British spellings. 'cancellable' (ADR 0005:126, EXTENSIONS.md:163) is an accepted US variant and comes from the memo. Some new criteria combine two prohibitions in one sentence (plan.json:1840, :1895). plan.json:1779 combines three assignments. Some new table cells are sentence fragments: FRONTENDS.md:17-18 and :31-33, ADR 0007:44-46, and ARCHITECTURE.md:23. The other changed procedures (AGENT_LAUNCH.md:40-42, fairpane-platform.md:10-15, fairpane-bindings.md:10-14, and the split plan criteria) use one instruction per sentence."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "engineering/decisions/0005-extension-contract.md",
+      "line": 134,
+      "issue": "The commits claim owner authority that the evidence does not show. 'The owner answered the release-scope question with \"YES\" to the recommended option' is the basis for the protected changes in qualification.json:137-151 and tools/lib.mjs:13. owner-answers.log:3 holds one answer, prefixed 'User provided custom input' rather than 'User selected', so the owner did not pick an offered option. The answer's text is the SDK memo (same timestamp, 2026-10-09T01:14:26.530Z, as owner-sdk-memo-extraction.log:3), and its 'YES.' affirms SDK-backed first-party extensions. The question and the recommended option are recorded nowhere. HANDOFF.md:75-76 then lists this single answer as two owner decisions, and state.json:353 and EXTENSIONS.md:153 repeat the 'approved' claim. To reproduce, read owner-answers.log:3, then search engineering/ for 'release-scope' or 'recommended'; the only match is ADR 0005:132-134.",
+      "recommendation": "Extract the ask question and its options verbatim from the session with the existing extraction method, and store them next to the answer. If the record does not show a selection, obtain an explicit owner answer. Until then, cite the extension memo's 'separate qualification target' sentence as the only authority, and mark the required status of 'extensions' and 'webextensions-compat' as pending owner confirmation in a separate policy commit. Correct HANDOFF.md:75 and state.json:353 to match."
+    },
+    {
+      "severity": "major",
+      "path": "engineering/dependencies.json",
+      "line": 103,
+      "issue": "The optional-language-host policy and AGENTS.md:26 put 'runtime dependencies' in optional hosts without any engine exclusion. The 'Any JavaScript or WebAssembly engine' exclusion (dependencies.json:97) covers only rust_browser_application. FP-0041 asks for a TypeScript runtime host whose dependencies stay 'inside that host' (plan.json:2052). FP-0022's TypeScript SDK is a Node native adapter (plan.json:1047; ABI_AND_WRAPPERS.md:68), so the natural TypeScript host ships V8 or JavaScriptCore behind the Fairpane extension API. That violates .omp/RULES.md:5 ('Do not ship another renderer or JavaScript engine behind a Fairpane API'), and ADR 0004:174 rejected the same engines for the shell. The policy only forbids replacing Fairpane's runtime 'in the JavaScript extension adapter', which leaves a TypeScript adapter open.",
+      "recommendation": "Add exclusions to optional_language_hosts: no host ships a third-party JavaScript or WebAssembly engine, renderer, or WebView. Require TypeScript extensions to run on Fairpane's runtime through the FP-0038 adapter, and state that requirement in FP-0041. If the owner intends a Node-hosted TypeScript integration, escalate that conflict with .omp/RULES.md:5 instead of leaving it implicit."
+    },
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 795,
+      "issue": "FP-0017 still requires 'Restart the chrome when its renderer fails', and FP-0032 requires 'Recover a window after a renderer failure' (plan.json:1560). ec425ea moved the renderer hosts and the separate chrome renderer process to FP-0020 (plan.json:953-954), and FP-0020 depends on FP-0017. Before FP-0020, the chrome runs 'under its own engine owner' in-process (plan.json:787). Internal invariant failures are fail-stop, and the in-process profile accepts process-level failure (docs/ABI_AND_WRAPPERS.md:26 and :28). [INFERENCE] Neither task can therefore show recovery from a renderer failure with what its prerequisites supply. To reproduce, trace FP-0017 -> FP-0032 -> FP-0035; none of them provides a renderer process or a protocol, and FP-0020 comes after FP-0017.",
+      "recommendation": "Move the restart and recovery criteria, and ADR 0004's 'Application behavior' recovery evidence, to FP-0020 or to a follow-up task that depends on FP-0020. Alternatively, define a recoverable in-process renderer failure in FP-0035 with C and Rust lifecycle tests, and limit the earlier criteria to that contract."
+    },
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 2311,
+      "issue": "FP-0046 cannot be completed in dependency order. It must 'Compose each visible WebGPU canvas texture into the page' and keep 'GPU acceleration for ordinary pages and WebGPU support as separate deliverables with separate evidence' (:2311-2313). However, no task implements WebGPU or GPU page painting, and FP-0046 depends only on FP-0020 and FP-0035. With zero canvases, the criterion passes vacuously, which is the success no-op that AGENTS.md forbids. FP-0046 must also 'Route rendered surfaces to the compositor and the shell' (:2310), but its allowed paths (:2281-2288) exclude apps and ports, where the shell and the process hosts live. FP-0045 (:2258) likewise has no prerequisite that produces GPU-resident engine surfaces, so 'without routine CPU readback' can be met trivially by a CPU upload.",
+      "recommendation": "Add or reference prerequisite tasks for GPU page painting and guest WebGPU, and make FP-0045 and FP-0046 depend on them. Alternatively, limit FP-0046 to defining and validating the service boundary, with explicit unsupported results for absent WebGPU. Add apps, and ports if needed, to FP-0046's allowed paths."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0004-first-party-wrapper-language.md",
+      "line": 127,
+      "issue": "The fix for review 3's 'bans' comment overcorrected. The cargo-deny row now reads 'advisories and approved dependency sources', but the memo says cargo-deny 'supports dependency-graph policy checks, including licenses and advisories' (wrapper-language/owner-memo-2026-10-09.md:143). dependencies.json:80 repeats the omission. No candidate tool now covers the license and ban checks that dependencies.json:33 requires.",
+      "recommendation": "Restore 'licenses and advisories' in ADR 0004:127 and dependencies.json:80. Name the tool that performs the ban and duplicate checks, or mark them as unassigned."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/dependencies.json",
+      "line": 55,
+      "issue": "'GPUI Kit publishes its paired GPUI snapshot as the gpui-pre package' has no source in the memo, the answers, or any evidence file. A search for 'gpui-pre' matches only this line.",
+      "recommendation": "Cite a primary source for the claim, or remove it until FP-0032 records the exact packages."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 1457,
+      "issue": "FP-0030 must 'Record whether GPUI qualifies for the text input and accessibility evidence areas of ADR 0004'. ADR 0004:106 and dependencies.json:56 and :61 keep GPUI pending FP-0030. However, FP-0030's allowed paths (plan.json:1422-1430) exclude engineering/decisions and engineering/dependencies.json, so no task is allowed to finalize the selection.",
+      "recommendation": "Add engineering/decisions and engineering/dependencies.json to FP-0030's allowed paths, or assign the final GPUI record to a task that can write both."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 2049,
+      "issue": "qualification.json:130 requires language SDKs 'that expose document and custom graphics frontends'. FP-0041 and FP-0042 require only 'a frontend' (:2049, :2099) and do not depend on FP-0044. FP-0043 promises accessibility behavior for document frontends (:2153) but does not depend on FP-0030.",
+      "recommendation": "Add custom graphics frontend criteria and an FP-0044 dependency to FP-0041 and FP-0042. Add FP-0030 as a dependency of FP-0043, or demonstrate the accessibility claim in a later task."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0006-language-sdk-obligation.md",
+      "line": 94,
+      "issue": "The obligation covers 'every officially supported language SDK', but no record defines that set. ABI_AND_WRAPPERS.md:46-59 lists Zig, C, C++, Rust, and others. The plan creates support packages only for TypeScript and Elixir. No task gives Rust or C the reference extension that the owner's rule requires.",
+      "recommendation": "Record which SDKs are officially supported, and state how Rust's shell integration and the C ABI satisfy the reference-extension obligation. Alternatively, add tasks for them."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 1562,
+      "issue": "A criterion was weakened relative to 09e52d0. 'Use the newest qualified, compatible GPUI and GPUI Kit pairing, and record the exact versions and snapshot' became 'Record the exact GPUI and GPUI Kit versions and snapshot of the newest qualified, compatible pairing', which no longer requires using that pairing.",
+      "recommendation": "Restore 'Use the newest qualified, compatible GPUI and GPUI Kit pairing.' as its own criterion, next to the recording criterion."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0005-extension-contract.md",
+      "line": 99,
+      "issue": "'Development defaults never grant installed code unlimited resources' changes the memo's 'Unlimited development resources do not imply unlimited resources for installed code'. EXTENSIONS.md:99 repeats the change. ADR 0005:31 and EXTENSIONS.md:28 also turn the memo's 'can ship as an optional application component' into 'ships'.",
+      "recommendation": "Use the memo's meaning: the project's development resources never imply unlimited resources for installed code. Keep 'can ship', or record the decision that Rhai support always ships optionally."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 2001,
+      "issue": "FP-0040 implements the existing browser-extension surface 'on the shared extension contract'. ADR 0005:91 forbids 'ambient access to page objects', but existing content-script models access the page DOM directly. No criterion reconciles the two, so FP-0040 must either break compatibility or break the containment rule without a recorded decision.",
+      "recommendation": "Add an FP-0040 criterion that records how content-script page access maps onto the permission-checked document interface, with a security decision for any exception."
+    },
+    {
+      "severity": "minor",
+      "path": "docs/SECURITY.md",
+      "line": 28,
+      "issue": "After the protected rename, the docs use two names. AGENTS.md:24 and dependencies.json:28 say 'browser application', while CHARTER.md:20, SECURITY.md:24-27, ARCHITECTURE.md:22, README.md:75, and ADR 0001:21 still say 'browser shell'. The difference matters now that the optional Rhai component and extension workers sit under the application exception. SECURITY.md:28 also omits the ban and duplicate checks that dependencies.json:33 requires.",
+      "recommendation": "Use one term for the dependency exception across these files, and list every required dependency check in SECURITY.md:28. Change CHARTER.md only through a separate policy commit."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 1840,
+      "issue": "Some new procedure criteria join two prohibitions in one sentence: :1840 ('Never block ... or invoke a Rhai callback ...') and :1895. :1779 combines three assignments.",
+      "recommendation": "Split each criterion into one instruction per sentence."
+    },
+    {
+      "severity": "minor",
+      "path": "docs/FRONTENDS.md",
+      "line": 17,
+      "issue": "Some new table cells are sentence fragments: FRONTENDS.md:17-18 ('Fairpane's HTML and CSS machinery.') and :31-33, ADR 0007:44-46, and ARCHITECTURE.md:23 ('Extension execution for one language.').",
+      "recommendation": "Rewrite each cell as a complete sentence, as dependencies.json now does."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/decisions/0005-extension-contract.md",
+      "line": 3,
+      "issue": "ADRs 0005, 0006, and 0007 are marked 'Status: accepted' and were pushed before independent review. Review 3 noted the same pattern. HANDOFF.md 'Next action' item 1 acknowledges that the review is pending.",
+      "recommendation": "Mark the ADRs 'proposed' until an accepting review is recorded, or record this review's outcome in each ADR."
+    },
+    {
+      "severity": "note",
+      "path": ".omp/agents/fairpane-platform.md",
+      "line": 14,
+      "issue": "The agent instruction forbids fairpane-sys imports from all shell code. ADR 0004:68 and ABI_AND_WRAPPERS.md:110 restrict only 'ordinary' shell code and do not define the exception.",
+      "recommendation": "Define 'ordinary' in ADR 0004 by naming the narrow platform adapters that may use fairpane-sys, and align the agent instruction with that definition."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/decisions/0007-frontend-platform.md",
+      "line": 89,
+      "issue": "At 799dcba, ADRs 0004-0007 and dependencies.json reference FP-0035 to FP-0046, which exist only from ec425ea. The check receipt for 799dcba still passed with 34 tasks.",
+      "recommendation": "Land future task references in the same commit as the tasks, or accept the intermediate gap explicitly."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/decisions-2026-10-09/ec425ea-check.log",
+      "line": 2,
+      "issue": "The receipts ran tools from out/verify-799dcba and out/verify-ec425ea and exited 0. They do not record how those trees were materialized from each commit, so the commit binding rests on directory names. The identical policy fingerprint is consistent with ec425ea touching no policy-fingerprinted file.",
+      "recommendation": "Record the command that materialized each verification tree (for example, git worktree add or git archive with the commit ID) in the same log."
+    }
+  ],
+  "commands_run": []
+}

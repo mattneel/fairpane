@@ -19,12 +19,12 @@ A callback that secretly delegates shaping or rendering to another engine violat
 | Zig engine | First-party code and the pinned Zig toolchain. | Web semantics and document execution. |
 | `fairpane-sys` | First-party bindings and Rust toolchain facilities. | Exact declarations of the public C ABI. |
 | `fairpane` | First-party wrapper code, `fairpane-sys`, and the Rust standard library. | Safe, idiomatic Rust ownership and operations. |
-| Rust browser shell | Qualified third-party dependencies are welcome. | User interface and application services. |
-| Optional language hosts | Each host carries its own runtime dependencies. | Extension execution for one language. |
+| Rust browser application | Qualified third-party dependencies are welcome. | The shell's user interface and application services. |
+| Optional language hosts | Each host carries its own runtime dependencies, but never a third-party JavaScript or WebAssembly engine. | Each host runs extension code for one language. |
 
 Dependencies belong to the application that needs them and never migrate into the reusable contract.
-No shell dependency parses, styles, lays out, shapes, paints, or scripts web content or chrome.
-No shell dependency makes a security decision that the engine or broker owns.
+No application dependency parses, styles, lays out, shapes, paints, or scripts web content or chrome.
+No application dependency makes a security decision that the engine or broker owns.
 `engineering/dependencies.json` and ADR 0004 record the acceptable uses and the exclusions.
 
 ## Components

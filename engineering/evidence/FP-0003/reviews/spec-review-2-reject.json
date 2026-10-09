@@ -1,0 +1,156 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "cc372bf547686ab4a5065911c3054282a19490f6"
+  ],
+  "summary": "I made no repository changes and ran no shell, git, or test commands. I read the working tree at HEAD. The reflog (.git/logs/HEAD) shows two commits after cc372bf, 9949e3c (FP-0005) and e2eaace (FP-0002). [INFERENCE] Going by their messages, neither touches the FP-0003 files. I also ran read-only jq queries with the read tool against the stored manifest at .tools/corpora/wpt/MANIFEST.json.\n\nWhat checks out:\n\n(1) Manifest format. The stored manifest has version 9, url_base \"/\", and the item types aamtest, crashtest, manual, print-reftest, reftest, support, test262, testharness, visual, and wdspec. This matches upstream at b60c4b3: manifest.py sets CURRENT_VERSION = 9 and omits empty types from the output (`if type_paths`). typedata.py `TypeData.to_json` writes each leaf as `[hash] + [test.to_json() ...]`. sourcefile.py `SourceFile.hash` is the Git blob SHA-1 (`b\"blob \" + len + \\0 + content`), so binding manifest hashes to tree blob IDs is the correct check.\n\n(2) Manifest source. wpt.fyi documents /api/manifest as returning \"the JSON of the WPT manifest GitHub release asset\" for a sha, with the full SHA in the `X-WPT-SHA` header (https://github.com/web-platform-tests/wpt.fyi/blob/main/api/README.md#apimanifest). The fetch log shows that header equal to the pinned commit.\n\n(3) Counts. I recomputed the per-type item counts from the stored manifest, and they match specs/applicability/wpt.json exactly. The manifest's 164545 file entries cover all but 6 of the 164551 tree entries. testharness has 31930 files that produce 39050 URLs; that expansion is consistent with `.any.js` and variant URLs. reftest has 28115 files that produce 28489 URLs. All other types have one URL per file. The `spec` type is absent because upstream produces spec items only through the separate `compute_manifest_spec_items` path, so excluding it is harmless.\n\n(4) Test262. The `_FIXTURE` substring rule matches INTERPRETING.md at the pinned commit (\"Files bearing a name which includes the sequence `_FIXTURE` MUST NOT be interpreted as standalone tests\"). The Test262 breakdown sums to 53616.\n\n(5) Import requirements and sources. Every new statement in specs/IMPORT_REQUIREMENTS.md and every entry S35-S48 checks out against its primary source:\n- Every named file exists at the stated path in https://www.unicode.org/Public/18.0.0/.\n- UTS #46 places the IDNA files in the versioned directory since 17.0.\n- ECMA-262 Table 67 matches the emoji sequence file split.\n- ECMA-402 §6.6.2 makes Table 2 a subset of the CLDR 38 unit validity data.\n- The CLDR releases table lists no data directory for 46.1, 44.1, and 43.1.\n- CLDR `LICENSE` at release-48-2 is \"UNICODE LICENSE V3\".\n- OFL 1.1 condition 5 is quoted correctly.\n- The WPT fonts named exist at the pin.\n- The Test262 patent notice is quoted correctly.\n\nWhy I reject:\n\nThe WPT `test262` item type is not the vendored Test262 copy. Upstream assigns that type to any `.js` file with frontmatter whose directory path contains a `test262` component (`SourceFile.name_is_test262`). In the pinned manifest, the 53660 `test262` items are:\n- 53597 vendored tests under third_party/test262/test.\n- 43 vendored harness include files under third_party/test262/harness. Test262 treats these as includes, not tests.\n- 20 WPT-authored smoketests under infrastructure/test262. For example, basic-failure.js says \"A basic Test262 smoketest that fails\".\n\nThe applicability record, the controller's reason string, the ADR, and the evidence README all attribute all 53660 items to the vendored copy at revision 7ab7faf. That is false for 63 items. It also removes 20 WPT-owned tests from the WPT denominator with a reason that does not apply to them. For a task whose purpose is preserving provenance, this is a major finding.\n\nPolicy-root decision under specs/, as review-1 asked:\n- I APPROVE specs/snapshots/test262.json, specs/snapshots/wpt.json, specs/applicability/test262.json, specs/README.md, specs/sources.json S25-S48, and specs/IMPORT_REQUIREMENTS.md. The minor IMPORT_REQUIREMENTS gaps below do not block approval.\n- I do NOT APPROVE specs/applicability/wpt.json as written. Its `reported_separately.test262` attribution and reason, and the rule text behind them, must be corrected first.\n- ADR 0003 proposes adding `manifest_sha256` to specs/corpora.json. I approve that field and the pin values, but only after the wpt.json correction lands. The manifest digest itself is unaffected.",
+  "criteria": [
+    {
+      "criterion": "Record exact WPT and Test262 revisions without inventing hashes.",
+      "met": true,
+      "evidence": "specs/snapshots/test262.json:5-8 and specs/snapshots/wpt.json:5-8 are unchanged from the values spec-review-1 checked against the GitHub commits API (https://api.github.com/repos/tc39/test262/commits/2e0a56762801e275a9fdf96dc49d90ba0cddcf63 and https://api.github.com/repos/web-platform-tests/wpt/commits/b60c4b349d9d167bf354a40bc0d4cbed15174606). raw/corpus-fetch-wpt-manifest.log shows a fresh fetch of exactly b60c4b3 (`+b60c4b3...:refs/heads/master`, `[new ref]`), selected from the pin ('Pinned commit ... from specs/snapshots/wpt.json'), with an identical tree and inventory digest."
+    },
+    {
+      "criterion": "Record license and inventory data before corpus import.",
+      "met": true,
+      "evidence": "Both snapshot records carry the license path, size, sha256, and name, plus the inventory entry_count, total_blob_bytes, and sha256 (specs/snapshots/*.json:10-20). The Test262 LICENSE at the pin says 'made available under the \"BSD License\"' and carries the Ecma patent notice that ADR 0003:127-129 records (https://raw.githubusercontent.com/tc39/test262/2e0a56762801e275a9fdf96dc49d90ba0cddcf63/LICENSE). IMPORT_REQUIREMENTS.md:164-168 now limits the corpus record to the top-level license and local use, and requires each third-party file's own license before any copy or fixture use."
+    },
+    {
+      "criterion": "Create separate local applicability metadata with explicit denominators.",
+      "met": false,
+      "evidence": "Both records validate and recompute. The Test262 record has 53616 discovered tests, all unclassified, and its breakdown sums correctly. The WPT record has 76600 discovered tests, all unclassified, and my jq recomputation from the stored manifest reproduces every per-type count. However, specs/applicability/wpt.json:45-55, tools/corpus.mjs:387-388, ADR 0003:181-183, and the README:33 attribute all 53660 `test262` items to the vendored Test262 copy. 20 of those items are WPT-authored infrastructure/test262 tests, and 43 are vendored harness includes (see the major finding). The denominator therefore leaves out 20 WPT tests under an inaccurate reason."
+    },
+    {
+      "criterion": "Add reproducible snapshot and inventory checks.",
+      "met": true,
+      "evidence": "`corpus-fetch` fetches only the pin (tools/corpus.mjs:464-482). Moving to a new head goes through the separate `corpus-repin` command (corpus.mjs:485-495). `corpus-verify` runs `fsck --full --strict --no-dangling` and checks every pin field (corpus.mjs:410-421, 516, 529). It rebinds the manifest (corpus.mjs:524-527) and recomputes the full applicability record (corpus.mjs:540-552). It returns 'incomplete' (exit status 1) when any denominator is missing (corpus.mjs:497-505, 532-533; fairpane.mjs:109). Gate 2026-10-09T01-30-40-501Z-controller-test-0964454f passed 86 of 86 tests at source 9aedf581..., including cases 78-85. raw/corpus-verify.log ends with both acceptance runs, exit 0, with no environment_overrides."
+    },
+    {
+      "criterion": "Record Unicode, CLDR, and font-fixture import requirements without bundling unauthorized fonts.",
+      "met": true,
+      "evidence": "IMPORT_REQUIREMENTS.md:43-70 names every file listed in spec-review-1. Each one exists at the stated path in https://www.unicode.org/Public/18.0.0/, under ucd/, ucd/auxiliary/, ucd/extracted/, ucd/emoji/, emoji/, and idna/. Lines 118-119 (sanctioned units), 94-96 (the data-directory alternative), 126-128 (the license at the tag), and 146-148 (OFL condition 5) match ECMA-402, the CLDR releases page, CLDR LICENSE@release-48-2, and the OFL text. No font file is tracked. Two minor gaps remain: Joining_Type data, and CLDR collation and plural data."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "blocker specs/applicability/wpt.json:5 — WPT status 'blocked' with null denominator.",
+      "resolved": true,
+      "evidence": "specs/applicability/wpt.json:5 has status 'counted', with discovered 76600, selected 0, excluded [], and unclassified 76600. The breakdown sums to 76600. The record comes from the wpt.fyi manifest bound to the tree (tools/corpus.mjs:224-276). The attribution flaw in the separate test262 report is a new finding."
+    },
+    {
+      "finding": "major tools/corpus.mjs:323 — `test262` items counted as WPT tests; no decision on test262, conformancechecker, manual.",
+      "resolved": false,
+      "evidence": "Partly resolved. `test262` is now outside discovery (corpus.mjs:358), and ADR 0003:180-189 records the conformancechecker and manual decisions. But the separate report assumes every `test262` item is the vendored copy, which is wrong for 20 infrastructure/test262 items and 43 harness includes. Upstream `SourceFile.name_is_test262` (sourcefile.py:434-437 at b60c4b3) selects by any `test262` directory component. See the new major finding."
+    },
+    {
+      "finding": "major tools/corpus.mjs:405 — corpus-fetch ignores pins; corpus-verify ignores pinned fields.",
+      "resolved": true,
+      "evidence": "fetchCorpus fetches pins.revision, taken from corpora.json or else the existing record, and checks the result against pinProblems before replacing the snapshot (corpus.mjs:433-482). repinCorpus is a separate command (corpus.mjs:485-495). verifyCorpus applies pinProblems to revision, inventory_sha256, license_record, and manifest_sha256 (corpus.mjs:410-421, 529). Test case 84 covers this, and it passes in the 86/86 gate."
+    },
+    {
+      "finding": "major specs/IMPORT_REQUIREMENTS.md:37 — UCD table omits algorithm data files (normalization, segmentation, line break, bidi, script, vertical orientation, IDNA).",
+      "resolved": true,
+      "evidence": "IMPORT_REQUIREMENTS.md:48-62 adds CompositionExclusions, DerivedNormalizationProps, the Grapheme/Word/SentenceBreakProperty files, emoji-data, LineBreak, EastAsianWidth, BidiBrackets, BidiMirroring, extracted/DerivedBidiClass, Scripts, ScriptExtensions, VerticalOrientation, and idna/IdnaMappingTable, each with its consumer and its UAX/UTS and spec sources (S14, S35-S42). Every path exists under https://www.unicode.org/Public/18.0.0/. A new minor gap (Joining_Type data) is reported separately."
+    },
+    {
+      "finding": "minor specs/IMPORT_REQUIREMENTS.md:51 — emoji sequence files not reachable through the UAX #44 table.",
+      "resolved": true,
+      "evidence": "Lines 63-64 name emoji/emoji-sequences.txt and emoji/emoji-zwj-sequences.txt for ECMA-262 Table 67. Lines 73-74 state that these files are not formally part of the UCD and come from UTS #51. https://tc39.es/ecma262/multipage/text-processing.html shows 'Table 67: Binary Unicode properties of strings', and https://www.unicode.org/Public/18.0.0/emoji/ lists both files."
+    },
+    {
+      "finding": "minor specs/IMPORT_REQUIREMENTS.md:84 — sanctioned units implied to come from pinned unit.xml.",
+      "resolved": true,
+      "evidence": "Lines 118-119 say ECMA-402 Table 2 defines the set, as a subset of the CLDR release 38 validity data, and that the pinned CLDR release supplies display data only. This matches https://tc39.es/ecma402/ §6.6.2 IsSanctionedSingleUnitIdentifier."
+    },
+    {
+      "finding": "minor specs/IMPORT_REQUIREMENTS.md:70 — Public/cldr alternative unavailable for some dot releases; license should be the LICENSE at the pinned tag.",
+      "resolved": true,
+      "evidence": "Lines 94-96 allow the data-directory alternative only where the releases table links a directory, and name 46.1, 44.1, and 43.1. https://cldr.unicode.org/index/downloads shows 'n/a' data for exactly those releases. Lines 126-128 make the tag's LICENSE the governing text. https://raw.githubusercontent.com/unicode-org/cldr/release-48-2/LICENSE begins 'UNICODE LICENSE V3'."
+    },
+    {
+      "finding": "minor specs/IMPORT_REQUIREMENTS.md:131 — WPT third-party fonts and tools/third_party implied covered by the WPT license record.",
+      "resolved": true,
+      "evidence": "Lines 164-168 limit the record to local use and the top-level license, name fonts/Lato-Bold.ttf, GentiumPlus-R.woff, adobe-fonts/, and tools/third_party/, and require each file's own license plus the admission rule before any copy or fixture use. The stored manifest lists those fonts as support files at the pin."
+    },
+    {
+      "finding": "minor specs/IMPORT_REQUIREMENTS.md:111 — OFL condition 5 missing.",
+      "resolved": true,
+      "evidence": "Line 146 restates condition 5, and line 148 requires OFL fixtures to keep their own license. This matches https://openfontlicense.org/open-font-license-official-text/ condition 5: 'must be distributed entirely under this license, and must not be distributed under any other license.'"
+    },
+    {
+      "finding": "minor tools/corpus.mjs:267 — `_FIXTURE.js` suffix instead of `_FIXTURE` substring.",
+      "resolved": true,
+      "evidence": "tools/corpus.mjs:350 now tests whether the last path component contains `_FIXTURE`, and TEST262_RULE states this. Test case 85 covers a_FIXTURE_b.js and x_FIXTURE.js. The count stayed 53616, which the README states. This matches INTERPRETING.md:141 at 2e0a567 (https://raw.githubusercontent.com/tc39/test262/2e0a56762801e275a9fdf96dc49d90ba0cddcf63/INTERPRETING.md)."
+    },
+    {
+      "finding": "minor engineering/evidence/FP-0003/README.md:29 — tool exit status misreported as 1.",
+      "resolved": true,
+      "evidence": "README.md:41-42 now says the WPT manifest tool exited with status 70 and the controller command with status 1."
+    },
+    {
+      "finding": "minor specs/applicability/wpt.json:33 — local user path in committed record.",
+      "resolved": true,
+      "evidence": "The blocker/output_tail field is gone from wpt.json. A search of specs/, engineering/decisions/, and the evidence README finds no `C:\\\\` or `Users` path. Raw logs still record a worktree cwd, which is acceptable for raw evidence."
+    },
+    {
+      "finding": "note specs/applicability/test262.json:7 — file count is not the execution-scenario denominator.",
+      "resolved": true,
+      "evidence": "ADR 0003:171-172 states that the count is a file count and leaves scenario expansion from frontmatter to the later selection task, as recommended."
+    },
+    {
+      "finding": "note ADR 0003:141 — local_path hard-codes the root; Ecma patent notice not recorded.",
+      "resolved": true,
+      "evidence": "ADR 0003:229, 238, and 251 use `<corpora-root>/...`. ADR 0003:127-129 records the patent notice, which matches the LICENSE text at the pin."
+    },
+    {
+      "finding": "note tools/corpus.mjs:336 — leaf length minus one matches TypeData.to_json.",
+      "resolved": true,
+      "evidence": "No change was needed, and the mechanism is kept (corpus.mjs:240-253, 370). typedata.py at b60c4b3 still writes `[self._hashes.get(full_key)] + [sorted test.to_json()]`. My jq recomputation reproduces every count."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "specs/applicability/wpt.json",
+      "line": 45,
+      "issue": "`reported_separately.test262` says all 53660 `test262` items are 'the vendored WPT copy' at third_party/test262 revision 7ab7faf, and they are kept out of the WPT denominator for that reason. The same claim appears in tools/corpus.mjs:363-367 and 387-388, ADR 0003:181-183 and 225, and README.md:33. Upstream does not assign the type by vendoring. `SourceFile.name_is_test262` is `\"test262\" in self.dir_path.split(os.path.sep) and self.ext == \".js\"` (https://raw.githubusercontent.com/web-platform-tests/wpt/b60c4b349d9d167bf354a40bc0d4cbed15174606/tools/manifest/sourcefile.py, lines 434-437). In the pinned manifest the 53660 items are 53597 under third_party/test262/test, 43 under third_party/test262/harness, and 20 under infrastructure/test262. The last group is WPT-authored, for example https://raw.githubusercontent.com/web-platform-tests/wpt/b60c4b349d9d167bf354a40bc0d4cbed15174606/infrastructure/test262/basic-failure.js: 'A basic Test262 smoketest that fails'. The 43 harness files are Test262 includes, not tests (INTERPRETING.md: harness files 'are located within the harness/ directory'). The record therefore misstates the provenance of 63 items and drops 20 WPT-owned tests from the WPT denominator with a reason that does not apply to them.",
+      "recommendation": "Break `reported_separately.test262` down by path, with counts for third_party/test262/test (53597), third_party/test262/harness (43), and every other path (20, infrastructure/test262). Tie only the third_party/test262 items to vendored.toml. For the infrastructure/test262 items, choose one of two options. Option 1: return them to the discovered WPT count, which needs a contract revision because Revision 1 fixes the type-based rule. Option 2: keep them outside discovery under an accurate recorded reason, for example 'WPT tests of WPT's own Test262 adapter, which Fairpane does not use', approved as a denominator decision. Update WPT_RULE, the reason string, ADR 0003:181-183 and 225, and README.md:33. Add a selftest case with a test262-typed fixture item outside third_party/test262. Then rerun corpus-applicability wpt and corpus-verify wpt."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 62,
+      "issue": "The IDNA row names only IdnaMappingTable.txt as input to URL host parsing. The URL Standard runs Unicode ToASCII and ToUnicode with CheckJoiners set to true (https://url.spec.whatwg.org/, 'domain parser ToASCII' and 'domain to Unicode'). UTS #46 §4.1 validity step 8 then applies the ContextJ rules of RFC 5892 Appendix A (https://www.unicode.org/reports/tr46/). Those rules need Joining_Type (ucd/ArabicShaping.txt, or ucd/extracted/DerivedJoiningType.txt, which exists in 18.0.0) as well as the Virama combining class. Plan tasks FP-0013 and FP-0015 also need Joining_Type for first-party Arabic shaping, and Indic seeds need the USE inputs ucd/IndicSyllabicCategory.txt and ucd/IndicPositionalCategory.txt. The contract's base text says the file names the data files that later tasks need.",
+      "recommendation": "Add rows for the Joining_Type data, citing UTS #46 §4.1, RFC 5892 Appendix A, and the URL Standard. Add rows for the shaping inputs (Joining_Type, IndicSyllabicCategory, IndicPositionalCategory), citing the shaping task's sources."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 116,
+      "issue": "The CLDR data table has no collation data and no plural rules. ECMA-402 recommends UTS #10 with CLDR tailorings for Intl.Collator CompareStrings ('It is recommended that implementations use the tailorings provided by the Common Locale Data Repository'). It also recommends CLDR locale data for Intl.PluralRules (§17) (https://tc39.es/ecma402/). Neither is a 'display string', so the table's last row does not cover them. Collation also needs a root table: the DUCET at https://www.unicode.org/Public/18.0.0/uca/ or the CLDR root collation.",
+      "recommendation": "Add rows for collation (root table plus locale tailorings) and plural and ordinal rules, with their ECMA-402 consumers. Record which of the DUCET or the CLDR root collation is the source, and tie its Unicode version to the UCD import rule at line 98."
+    },
+    {
+      "severity": "note",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 55,
+      "issue": "The EastAsianWidth row says UAX #14 uses East_Asian_Width 'to resolve ambiguous classes'. UAX #14 also uses East_Asian_Width directly in rules LB15a, LB15b, LB19, LB19a, LB21a, and LB30 (https://www.unicode.org/reports/tr14/). Similarly, the DerivedCoreProperties row (line 47) names only ID_Start and ID_Continue, but that file also supplies Indic_Conjunct_Break for UAX #29 rule GB9c (https://www.unicode.org/reports/tr29/).",
+      "recommendation": "Widen both consumer descriptions. The files themselves are already listed."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/decisions/0003-corpus-snapshots.md",
+      "line": 184,
+      "issue": "Applicability notes exist only for `conformancechecker` and `manual`. `wdspec` (648 items, which test a WebDriver implementation), `aamtest` (190, which need platform accessibility APIs), and `visual` (2714, which need screenshot comparison) also have special execution or applicability needs that the selection task must decide.",
+      "recommendation": "Add one line for each of these types so the later selection task inherits them."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0003/README.md",
+      "line": 81,
+      "issue": "Lines 81-83 say gates/ holds only the first patch's receipts and that the integrator will rerun the gates later. Line 74 calls raw/corpus-verify.log history from before revision 1. After integration, gates/ holds the 2026-10-09T01-30-40 receipts (source 9aedf581..., 86/86 passing), and raw/corpus-verify.log ends with the acceptance runs (01:30:55Z and 01:30:57Z, with no overrides).",
+      "recommendation": "Update the Gates and Verification sections to cite the integration receipts and the appended acceptance runs."
+    }
+  ],
+  "commands_run": []
+}

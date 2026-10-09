@@ -10,8 +10,9 @@
 
 The quoted rules are the owner's wording.
 ADR 0005 records the extension contract, and ADR 0006 records the language SDK obligation.
+Fairpane goes polyglot the whole way down: every supported language can write extensions and frontends.
 The Rust shell tests whether the engine is genuinely embeddable.
-Rhai then tests whether Fairpane is genuinely extensible, rather than merely programmable in JavaScript.
+A second extension language tests whether Fairpane is genuinely extensible, rather than merely programmable in JavaScript.
 
 ## One extension system
 
@@ -19,18 +20,19 @@ Rhai then tests whether Fairpane is genuinely extensible, rather than merely pro
 | --- | --- |
 | Extension contract | It defines operations, data types, and lifecycle behavior. |
 | Permission broker | It authorizes requests against the extension's identity and current grants. |
-| Rhai adapter | It maps the contract into Rhai functions and types. |
 | JavaScript adapter | It maps the contract into Fairpane JavaScript host bindings. |
+| Language adapters | They map the contract into each SDK language's functions and types. |
 | Application services | They execute authorized shell operations and route engine operations through the Rust wrapper. |
 
-Rhai and JavaScript are the first two clients of the contract.
-Rhai is not a restricted macro language, and JavaScript receives no private privileges.
-Rhai support ships as an optional application component, outside the Zig engine and the canonical Rust wrapper.
-The JavaScript adapter runs extension code on Fairpane's own JavaScript runtime, through public runtime facilities.
+JavaScript extension code runs on Fairpane's own JavaScript runtime, through public runtime facilities.
+TypeScript extensions run on that same runtime through the TypeScript SDK's extension transport.
 Extension code runs in separate execution contexts, never in a page's existing context.
+A compiled language runs its extensions as compiled extension workers.
+An interpreted language supplies a runtime host.
+No language host ships a third-party JavaScript or WebAssembly engine, a renderer, or a WebView.
 
-Both adapters call the same broker.
-Neither adapter implements its own permission policy.
+Every adapter calls the same broker.
+No adapter implements its own permission policy.
 Shell-only operations stay in Rust, so a command-palette entry needs no trip through Zig.
 Engine operations cross the Rust wrapper and the C ABI.
 
@@ -38,32 +40,26 @@ Engine operations cross the Rust wrapper and the C ABI.
 
 | Area | Required equivalence |
 | --- | --- |
-| Capabilities | Both languages can perform every operation in the supported extension API. |
+| Capabilities | Every language can perform every operation in the supported extension API. |
 | Permissions | Equivalent requests receive equivalent authorization decisions. |
-| Lifecycle | Both support activation, cancellation, shutdown, and recovery. |
-| Errors | Both expose the same error categories and recovery information. |
-| User interface | Both can contribute commands and declarative interface elements without code in the other language. |
-| Developer experience | Both receive API documentation, inspection facilities, and useful source locations. |
+| Lifecycle | Every language supports activation, cancellation, shutdown, and recovery. |
+| Errors | Every language exposes the same error categories and recovery information. |
+| User interface | Every language can contribute commands and declarative interface elements without code in another language. |
+| Developer experience | Every language receives API documentation, inspection facilities, and useful source locations. |
 
 The interfaces need identical reach, not identical spelling.
-A Rhai extension never needs a JavaScript shim to create its settings page.
-Both languages describe the same native controls through a declarative interface.
+No extension needs a shim in another language to create its settings page.
+Every language describes the same native controls through a declarative interface.
 
 ## Asynchronous operations
 
 The contract uses requests, completions, and cancellation.
-
-| JavaScript interface | Rhai interface |
-| --- | --- |
-| An operation returns a Promise. | An operation returns a request handle. |
-| The extension awaits or attaches a continuation. | The extension registers a completion handler. |
-| Cancellation follows the shared request contract. | Cancellation follows the same request contract. |
-
-A Rhai handler returns control after it submits work.
-The host invokes the completion handler later on the runtime's owner thread.
-The JavaScript adapter settles its Promise within the extension context's normal job processing.
-Neither adapter blocks the browser's interface thread.
-Neither adapter invokes a script callback reentrantly from an arbitrary transport thread.
+Each adapter maps them into its language's idiom.
+A JavaScript operation returns a Promise, which the adapter settles within the extension context's normal job processing.
+A language without a native asynchronous model receives a request handle and registers a completion handler.
+The host invokes each completion on the extension runtime's owner thread.
+No adapter blocks the browser's interface thread.
+No adapter invokes an extension callback reentrantly from an arbitrary transport thread.
 Parity applies to an operation's result and lifecycle, not to syntax or internal scheduling.
 
 ## Values
@@ -71,15 +67,15 @@ Parity applies to an operation's result and lifecycle, not to syntax or internal
 The contract has a schema, not a generic conversion to JSON.
 
 - The schema distinguishes ordinary Unicode text from lossless web strings.
-- Rhai exposes lossless web strings through a dedicated host type with explicit conversions.
+- A language whose strings cannot hold every code unit exposes lossless web strings through a dedicated host type with explicit conversions.
 - No adapter silently replaces a value that its native string type cannot represent.
 - Integers carry explicit ranges.
 - Object identifiers are opaque handles, never arbitrary JavaScript numbers.
 - The schema distinguishes absent fields from explicit null values.
 - Binary data uses a byte-buffer representation.
 
-These rules matter because Rhai strings hold valid Unicode, while ECMAScript strings can hold unpaired surrogates.
-Rhai also defaults to `i64` integers, while JavaScript has binary64 numbers and BigInt.
+These rules matter because ECMAScript strings can hold unpaired surrogates, while many language strings hold only Unicode scalar values.
+Languages also differ in integer width, and JavaScript has binary64 numbers and BigInt.
 A second language exposes assumptions that a JavaScript-only interface can conceal.
 
 ## Containment and resources
@@ -88,15 +84,15 @@ The initial security profile runs each untrusted extension in an isolated worker
 Its runtime receives only the facilities that the host explicitly exposes.
 The broker derives extension identity from the worker's authenticated connection.
 It never trusts an extension identifier inside a request.
-Both languages reach pages through a permission-checked document interface.
-Neither language receives raw DOM pointers or ambient access to page objects.
+Every language reaches pages through a permission-checked document interface.
+No language receives raw DOM pointers or ambient access to page objects.
 
-Interpreter limits are only one control.
+A language runtime's own limits are only one control.
 Host operations carry their own deadlines and resource accounting.
 The supervising process keeps an independent termination mechanism.
 The runtimes need no identical instruction budgets, because those units do not measure equivalent work.
-Both runtimes enforce the same policy for observable resources, including storage and outstanding requests.
-Development defaults never grant installed code unlimited resources.
+Every runtime enforces the same policy for observable resources, including storage and outstanding requests.
+Unlimited development resources do not imply unlimited resources for installed code.
 
 ## Language support packages
 
@@ -110,9 +106,7 @@ Each officially supported language receives three connected deliverables.
 
 Rust gets the browser shell as its flagship consumer.
 Every other language gets a maintained browser integration and useful extensions that exercise its SDK.
-A compiled language can launch a compiled extension worker.
-An interpreted language can supply a runtime host.
-The execution model can differ, while the capabilities and permission rules stay equivalent.
+ADR 0006 names the officially supported SDKs: Rust, C, TypeScript, and Elixir.
 No deliverable receives a private API, and a missing capability becomes a public-contract issue.
 The first-party integration builds against the same SDK artifact that external developers receive.
 Each SDK also exposes the frontend platform, so a frontend in that language needs no hidden JavaScript application.
@@ -131,7 +125,8 @@ The default browser remains the address bar and the page.
 
 The shared reference extension saves and restores an application workspace.
 It exercises persistent state, asynchronous operations, permissions, and lifecycle behavior.
-Every language implementation shares its manifest, permissions, command, and persistent data format.
+Its first implementations are in JavaScript and in Rust.
+Every implementation shares its manifest, permissions, command, and persistent data format.
 The test runner supplies identical initial state and controlled host responses.
 It compares externally observable behavior against an independent expected result.
 Agreement between implementations alone qualifies nothing, because they can share a defect.
@@ -150,8 +145,8 @@ A language qualifies only after these checks pass.
 - An independent example builds against its distributed SDK.
 
 Generated bindings alone never earn a supported label.
-Compatibility with existing browser extensions is a separate required capability family, `webextensions-compat`.
-Language parity does not establish that compatibility.
+Compatibility with existing browser extensions is a separate qualification target.
+Its release scope awaits an owner decision, so the qualification profile does not include it yet.
 
 ## Sequencing
 
@@ -167,7 +162,7 @@ The baseline still records these requirements before its public interfaces stabi
 | Schema types for text, lossless strings, ranged integers, handles, absence, and bytes | `FP-0021` |
 
 `FP-0036` defines the extension contract and broker.
-`FP-0037` and `FP-0038` build the Rhai and JavaScript adapters.
+`FP-0037` builds the Rust extension worker, and `FP-0038` builds the JavaScript adapter.
 `FP-0039` qualifies parity through the shared reference extension.
-`FP-0040` qualifies compatibility with existing browser extensions.
-`FP-0041` and `FP-0042` deliver the TypeScript and Elixir support packages.
+`FP-0040` holds the compatibility target until the owner decides its scope.
+`FP-0041`, `FP-0042`, and `FP-0049` deliver the TypeScript, Elixir, and C support packages.

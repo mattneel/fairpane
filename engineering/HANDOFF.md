@@ -20,18 +20,19 @@ The Zig engine owns web behavior, the Rust wrapper owns safe integration, and th
 The canonical wrapper crates `fairpane-sys` and `fairpane` stay free of third-party dependencies.
 The shell welcomes qualified crates, and GPUI hosts the chrome that Fairpane renders as a trusted document.
 ADR 0004 records the layers, the boundary, and the process arrangement.
-ADR 0005 records one extension contract with Rhai and JavaScript as equal clients.
+ADR 0005 records one extension contract with JavaScript and every officially supported language SDK as equal clients.
 ADR 0006 makes every language SDK power a first-party integration and a reference extension.
 ADR 0007 makes the frontend language independent of the renderer and reserves the surface interface.
 
 ## Next action
 
-1. Record the verdict of the `DecisionReview` agent on commits `799dcba` and `ec425ea`, and fix any finding.
-2. Record the `FP0003Review2` and `FP0003SpecReview2` verdicts, then apply the `specs/corpora.json` pins in a separate commit only after both accept.
-3. Record the `fairpane-review` verdict on `FP-0002`.
-4. Integrate the `FP0006Lifecycle` patch, run its gates, and request `fairpane-review`.
-5. Start the ready tasks `FP-0031`, `FP-0033`, and `FP-0047`.
-6. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
+1. Request an independent re-review of the decision commits `799dcba`, `ec425ea`, `2069b4d`, and the following docs commit against `engineering/evidence/decisions-2026-10-09/review-1-reject.json`.
+2. Correct the WPT `test262` attribution that `engineering/evidence/FP-0003/reviews/spec-review-2-reject.json` found, then request `fairpane-spec` again; `fairpane-review` already accepted the rework.
+3. Apply the `specs/corpora.json` pins in a separate commit only after both FP-0003 reviewers accept.
+4. Request `fairpane-review` on `FP-0002`, implemented in commit `e2eaace`.
+5. Integrate the `FP0006Lifecycle` patch, run its gates, and request `fairpane-review`.
+6. Start the ready tasks `FP-0031`, `FP-0033`, and `FP-0047`.
+7. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
 
 ```text
 node tools/fairpane.mjs check
@@ -70,10 +71,11 @@ On October 9, 2026, the owner selected Rust as that language, as ADR 0004 record
 The owner then supplied a design memo that limits third-party crates to the browser application.
 The owner selected GPUI to host engine-rendered chrome.
 `engineering/evidence/wrapper-language/` preserves the memo verbatim and the recorded answers.
-The owner's extension memo made Rhai and JavaScript equal clients of one extension contract.
-The owner answered "YES" to two required capability families, `extensions` and `webextensions-compat`.
+The owner's extension memo proposed one extension contract, and the owner later withdrew Rhai extensions: "We can just polyglot the whole way down."
+The owner decided that TypeScript extensions run on Fairpane's own JavaScript runtime.
+The owner has not decided whether compatibility with existing browser extensions enters the release profile, so `FP-0040` is blocked.
 The owner's SDK memo made a first-party integration and a reference extension mandatory for every supported language SDK.
 The owner's frontend memo made every SDK expose document and custom graphics frontends over one renderer.
-`engineering/evidence/extensions/` and `engineering/evidence/frontends/` preserve those memos verbatim.
+`engineering/evidence/extensions/` and `engineering/evidence/frontends/` preserve those memos and answers verbatim.
 The outbound license remains open.
 The Git history uses the owner's configured identity.

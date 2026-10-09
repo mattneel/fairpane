@@ -70,7 +70,7 @@ If the chrome renderer fails, the OS window frame keeps its title and close cont
 
 Extensions add capability without adding permanent chrome.
 An extension chooses its language, not its privileges or access to Fairpane's capabilities.
-Rhai and JavaScript are the first extension languages, with equal capabilities through one extension contract.
+JavaScript and every officially supported language SDK are equal extension clients of one extension contract.
 Every officially supported language SDK powers a maintained first-party integration and a useful reference extension.
 Language support is optional, so the default browser remains the address bar and the page.
 The extension implementation follows the first usable browser.

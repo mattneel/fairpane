@@ -1,0 +1,181 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "cc372bf547686ab4a5065911c3054282a19490f6"
+  ],
+  "summary": "I found no blocker or major defect in the FP-0003 rework, so the verdict is accept. All five plan criteria have evidence. Every fairpane-review finding from review 1 is fixed, except the note asking fairpane-spec to approve the policy-root additions, which is still open.\n\nIntegrity checks:\n- **Replace refs:** every Git child gets `--no-replace-objects` and starts with no inherited `GIT_*` variables (tools/corpus.mjs:48-52). A replace ref therefore cannot make verify pass. Case 11 includes a positive control showing that Git which honors replace refs would read the forged commit's tree as the recorded tree.\n- **Tampered objects:** verify runs `git fsck --full --strict --no-dangling`, which rehashes every stored object. A forged loose object fails even when nothing references it.\n- **Line-feed paths:** a path containing a line feed now fails the inventory, so the inventory format decodes uniquely.\n- **Substituted manifest:** the manifest is bound to the tree: every listed path must exist with the manifest hash equal to its Git blob ID. Its size and SHA-256 are checked against the record, and applicability is recomputed and compared field by field. A substituted manifest that names a changed file fails; one that only omits or reclassifies entries is detected only by its digest (see the findings).\n- **Stale pins:** pin checks cover `revision`, `inventory_sha256`, `license_record`, and `manifest_sha256` (tools/corpus.mjs:410-420).\n- **Missing denominators:** an applicability record without a valid denominator yields `incomplete` and exit status 1.\n- **No corpus code runs:** the only child processes are git and taskkill.\n- **`replaceSnapshot`:** it fetches into a fresh staging repository and swaps the snapshot only after the record validates and matches its pin, with a rollback if the rename fails. The real WPT refetch replaced an existing snapshot on Windows with exit status 0. The snapshot root now holds only `wpt/` (`MANIFEST.json`, `repository.git`) and `test262/repository.git`, with no `.fetch`, `.old`, checkout, or cache directories left behind.\n\nEvidence:\n- The controller-test receipt shows 86 of 86 tests passing.\n- The last two runs in raw/corpus-verify.log are the exact acceptance commands. Both ran from C:\\src\\fairpane with no `environment_overrides` and exited 0, with WPT at 76600 discovered tests.\n\nRemaining issues, all minor or notes:\n- A user or system Git config setting `fetch.fsckObjects=false` overrides the fetch's `-c transfer.fsckObjects=true`, so ADR 0003:29 overstates the fetch-time check.\n- The fetch, repin, and replace paths have no automated test. The branch that reads a pinned revision from `specs/corpora.json`, and the branch that rejects a pin mismatch, have never run in a test or in the evidence.\n- The pinned commit is not checked to be reachable from the upstream branch.\n- An empty or truncated manifest binds and yields a valid denominator of 0.\n- Some evidence prose is stale.\n- Pin enforcement does nothing until the integrator commits the `specs/corpora.json` pins.\n\nLimitations: I had only read, grep, and glob tools, so I ran no shell, git, or test command. I read the working tree at HEAD 9949e3c (.git/logs/HEAD shows cc372bf followed by 9949e3c). That tree contains FP-0002 attestation work that the 01:30 gate log does not show: tools/attest.mjs, tools/attest.test.mjs, and tools/selftest.mjs:21 and :220. I could not confirm that the FP-0003 files are byte-identical to cc372bf, so the selftest line numbers below are working-tree line numbers. I read the snapshot directories but did not modify them.",
+  "criteria": [
+    {
+      "criterion": "Record exact WPT and Test262 revisions without inventing hashes.",
+      "met": true,
+      "evidence": "specs/snapshots/wpt.json:5-8 (commit b60c4b34…, tree a499343a…, commit_date, retrieved_at 01:24:08.645Z) matches raw/corpus-fetch-wpt-manifest.log. That log shows the fetch '+b60c4b34…:refs/heads/master', '[new ref] b60c4b34… -> master', and the JSON result with the same fields. In the same run, ls-remote reported HEAD at acd62d7e…, so the fetch took the pinned commit, not the branch head. The snapshot ref file .tools/corpora/wpt/repository.git/refs/heads/master and its shallow file both contain b60c4b34…. Test262 is unchanged from the first patch (2e0a5676…), and the acceptance verify reproduces its tree and inventory."
+    },
+    {
+      "criterion": "Record license and inventory data before corpus import.",
+      "met": true,
+      "evidence": "Both records hold the license path, size, SHA-256, and name, and the inventory entry count, byte total, and SHA-256 (specs/snapshots/wpt.json:9-19). The WPT record adds the manifest URL, size, and SHA-256 at lines 20-24. The acceptance runs in raw/corpus-verify.log recompute every field from Git objects with exit 0. The WPT refetch reproduced the first patch's inventory SHA-256 0be4a67e…. No corpus file is tracked; the snapshots live under the ignored .tools/corpora."
+    },
+    {
+      "criterion": "Create separate local applicability metadata with explicit denominators.",
+      "met": true,
+      "evidence": "specs/applicability/wpt.json now has status 'counted' with 76600 discovered, 0 selected, an empty excluded list, and 76600 unclassified. The per-type breakdown sums to 76600, and the 53660 test262 items are reported separately with vendored revision 7ab7fafa…. raw/corpus-applicability-wpt.log shows exit 0. specs/applicability/test262.json has 53616 discovered. validateApplicability (tools/corpus.mjs:322-340) requires status 'counted' and consistent sums. verifyCorpus recomputes both records, and the acceptance runs show missing_denominators []. Caveat: completeness of the WPT count rests on the documented wpt.fyi trust decision (ADR 0003:91-99)."
+    },
+    {
+      "criterion": "Add reproducible snapshot and inventory checks.",
+      "met": true,
+      "evidence": "verifyCorpus (tools/corpus.mjs:509-540) checks fsck, the local ref, tree, committer date, license, inventory, manifest binding and digest, pins, the recomputed applicability record, and global denominator completeness. The gate receipt gates/2026-10-09T01-30-40-501Z-controller-test-0964454f.json has status pass and source 9aedf581…, and its log shows 86/86 tests, with cases 9-16 as tests 78-85. raw/rework-tests-before.log:112-116 shows the red baseline: 86 tests, 79 passing, 7 failing, exit 1. The final two runs in raw/corpus-verify.log are the exact contract commands, both exit 0 with no environment overrides."
+    },
+    {
+      "criterion": "Record Unicode, CLDR, and font-fixture import requirements without bundling unauthorized fonts.",
+      "met": true,
+      "evidence": "specs/IMPORT_REQUIREMENTS.md:48-64 lists every data file the spec review named, including CompositionExclusions, DerivedNormalizationProps, the break properties, emoji-data, LineBreak, EastAsianWidth, BidiBrackets, BidiMirroring, DerivedBidiClass, Scripts, ScriptExtensions, VerticalOrientation, IdnaMappingTable, and emoji-sequences and emoji-zwj-sequences. The file also covers the ECMA-402 Table 2 sanctioned units (118-119), the Public-directory alternative only where it exists (94-96), the LICENSE at the pinned tag (126), local-use-only corpus records (164-167), and OFL condition 5 (146). specs/corpora.json still lists unicode, cldr, and opentype-fixtures as not-fetched. fairpane-spec has authority over whether the wording is substantively accurate."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "review-1 blocker: WPT applicability was 'blocked' with null counts, failing criterion 3, and HANDOFF planned to split the work out without approval.",
+      "resolved": true,
+      "evidence": "specs/applicability/wpt.json is counted, with 76600 discovered and all unclassified. CONTRACT.md Revision 1 says a blocked record no longer satisfies the task. engineering/HANDOFF.md:6-7 and state.json:47-51 no longer defer WPT to another task."
+    },
+    {
+      "finding": "review-1 major: corpus-applicability wpt ran upstream Python from the corpus with the full environment and network access.",
+      "resolved": true,
+      "evidence": "Grep finds no python, materialize, checkout, or wptcache code in tools/. The only spawns in corpus.mjs are git (line 63) and taskkill (line 56). The manifest comes from wpt.fyi, with the x-wpt-sha check at corpus.mjs:229-234 and tree binding at 256-267. ADR 0003:83-104 records the trust decision. ADR 0003:58-60 and tools/README.md:108 now say that no OS network policy is enforced. The snapshot root holds no checkout or cache directory."
+    },
+    {
+      "finding": "review-1 major: materialize() guards were untested, and so were license and commit_date mismatches, applicability changes, blocked-record rules, wptManifestCounts, and CLI exit 1 on a mismatch.",
+      "resolved": true,
+      "evidence": "materialize() and the working-copy writer are gone (ADR 0003:104). Case 9 (selftest.mjs:611-632) covers license.sha256, commit_date, changed and removed applicability, and 'incomplete'. Case 13 (668-682) covers wptManifestCounts. Case 10 (633-643) checks CLI exit 1 on an inventory mismatch. The blocked status was removed: validateApplicability requires 'counted' (corpus.mjs:326)."
+    },
+    {
+      "finding": "review-1 minor: inherited GIT_* variables and replace refs were honored, and verify did no object hash check.",
+      "resolved": true,
+      "evidence": "gitEnv drops every variable matching /^GIT_/i (corpus.mjs:48-51), and gitArgv prefixes --no-replace-objects (line 52). verifyCorpus runs fsck --full --strict --no-dangling (line 517). Case 11 (selftest.mjs:644-663) covers an inherited GIT_OBJECT_DIRECTORY, a replace ref with a positive control at line 653, and a forged loose object. Residual: user and system Git config are still honored (new finding 1)."
+    },
+    {
+      "finding": "review-1 minor: the inventory was ambiguous for paths containing LF.",
+      "resolved": true,
+      "evidence": "listTree rejects any path containing byte 10 (corpus.mjs:105). Case 12 (selftest.mjs:664-667) covers it, and raw/rework-tests-before.log:90-92 shows it failing before the fix."
+    },
+    {
+      "finding": "review-1 minor: corpus-fetch reused an existing repository.git.",
+      "resolved": true,
+      "evidence": "replaceSnapshot (corpus.mjs:434-461) deletes and recreates <id>.fetch, runs git init --bare, fetches, builds and checks the record, and only then swaps directories. raw/corpus-fetch-wpt-manifest.log shows init into wpt.fetch\\repository.git. Residual: no automated test (new finding 2)."
+    },
+    {
+      "finding": "review-1 minor: corpus-verify wpt returned 'pass' while WPT applicability was blocked.",
+      "resolved": true,
+      "evidence": "missingDenominators (corpus.mjs:498-507) checks every corpus with a snapshot rule, and the result is 'incomplete' when any denominator is missing (line 535). fairpane.mjs:105 exits 1 unless the result is 'pass'. Case 9 (selftest.mjs:625-631) tests both a null denominator and a missing record."
+    },
+    {
+      "finding": "review-1 minor: the README said the manifest tool exited with status 1 instead of 70.",
+      "resolved": true,
+      "evidence": "engineering/evidence/FP-0003/README.md:35-36 now says the tool exited with status 70 and the controller with status 1."
+    },
+    {
+      "finding": "review-1 minor: the ADR's claim of 16 symbolic links had no preserved command output.",
+      "resolved": true,
+      "evidence": "Grep for '16 symbolic', 'symbolic links, all', and 'websockets' finds them only in review-1-reject.json, so the claim was dropped."
+    },
+    {
+      "finding": "review-1 note: fairpane-spec should explicitly approve the policy-root changes under specs.",
+      "resolved": false,
+      "evidence": "Still pending. Policy digest 90a4c701… (17 files) appears in the 01:30 receipts. README.md:85-88 lists fairpane-spec approval as an open item. fairpane-review cannot discharge this."
+    },
+    {
+      "finding": "review-1 note: the acceptance corpus-verify runs used --env FAIRPANE_CORPORA_DIR instead of the exact contract commands.",
+      "resolved": true,
+      "evidence": "The last two COMMAND blocks in raw/corpus-verify.log (started 01:30:55.818Z and 01:30:57.870Z) have cwd C:\\src\\fairpane, no environment_overrides, and exit_code 0. The suggestion to make corpus-verify a gate was not adopted; it was optional."
+    },
+    {
+      "finding": "spec-review-1 major: corpus-fetch always fetched the branch head, and corpus-verify ignored the pins.",
+      "resolved": true,
+      "evidence": "fetchCorpus fetches pins.revision (corpus.mjs:464-481), with a fallback to the record when no revision is pinned. corpus-repin is a separate command (483-496). pinProblems is checked in both fetch and verify. Case 15 (selftest.mjs:712-726) checks all four pin fields."
+    },
+    {
+      "finding": "spec-review-1 major and minor: WPT test262 items, _FIXTURE matching, and the user path in the WPT record.",
+      "resolved": true,
+      "evidence": "WPT_NOT_TESTS includes test262, which is reported separately with its vendored revision (corpus.mjs:343-374). FIXTURE_MARK is matched as a substring of the file name (line 345). Case 16 (selftest.mjs:727-732) covers it, and the baseline failed '2 !== 1'. Grep finds no Users or requi path in specs/ or engineering/decisions/."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 441,
+      "issue": "The fetch sets `-c transfer.fsckObjects=true`, but Git's `fetch.fsckObjects` takes precedence over `transfer.fsckObjects` from any config source. gitEnv (lines 48-51) still lets user and system Git config apply. A `fetch.fsckObjects=false` (or `fetch.fsck.*` settings) in ~/.gitconfig or the system config therefore disables or relaxes the fetch-time object checks. replaceSnapshot never runs the fsck that verify runs, so a snapshot can be installed that verify then rejects. ADR 0003:29 states unconditionally that 'transfer.fsckObjects=true therefore checks every object'. Object hashes are still computed by index-pack, and verify's fsck --strict catches malformed objects later, so this weakens a fetch-time guarantee, not commit-to-content binding. Reproduction: `git config --global fetch.fsckObjects false`, then run corpus-fetch; nothing fsck-checks the fetched objects before the swap.",
+      "recommendation": "Pass `-c fetch.fsckObjects=true` as well, or isolate config the way the fixtures do (GIT_CONFIG_NOSYSTEM=1 and GIT_CONFIG_GLOBAL set to an empty file, selftest.mjs:433-435). Run `fsck --full --strict --no-dangling` on the staging repository before the swap. Correct ADR 0003:29."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 434,
+      "issue": "replaceSnapshot, fetchCorpus, and repinCorpus have no automated test. Untested: the pin-mismatch rejection that should leave the existing snapshot (line 450), cleanup of a stale <id>.fetch, the rename rollback (line 453), and repin's pin_differences. The branch that pins from specs/corpora.json (`pins = policy`, line 467) has run in neither a test nor the evidence; the only real fetch used the record fallback ('Pinned commit … from specs/snapshots/wpt.json.' in raw/corpus-fetch-wpt-manifest.log). The design blocks offline tests: corpusPolicy requires an https:// upstream (line 38), and every fetch calls ls-remote over the network (line 477).",
+      "recommendation": "Let tests inject the upstream, for example a file:// fixture remote through the existing policyFile option. Add cases for: a pinned fetch producing the pinned commit; a pin mismatch leaving the old snapshot and record byte-identical with no staging left; and repin reporting pin_differences after which verify fails."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 474,
+      "issue": "corpus-fetch fetches the pinned commit by ID and records `ref` as the current HEAD branch (line 477), but never checks that the commit is reachable from that upstream branch. [INFERENCE from GitHub fork-network object sharing] GitHub can serve, by SHA, a commit that exists only in a fork of the upstream repository. A future pin naming such a commit would fetch, pass every check, and be recorded as `ref: refs/heads/master` from the official upstream. The current pins came from ls-remote output preserved in raw/corpus-fetch-*.log, so they are not affected.",
+      "recommendation": "Record in ADR 0003 that a pin's provenance rests on the corpus-repin ls-remote evidence. Alternatively, have corpus-fetch confirm that the commit is reachable from the upstream branch, for example by deepening from the branch tip until the pinned commit appears, before trusting `ref`."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 262,
+      "issue": "Binding goes one way: every manifest path must be in the tree, but nothing requires the tree's test files to be in the manifest. validateApplicability (line 333) accepts discovered = 0. Reproduction: the selftest server body `{\"items\":{},\"url_base\":\"/\",\"version\":9}` (selftest.mjs:698) would bind with paths 0 and give WPT a 'valid' denominator of 0. A manifest truncated by type would also bind and shrink the denominator. ADR 0003:98 documents this honestly. Before the specs/corpora.json pins land, only review of the committed record and applicability diffs would catch it.",
+      "recommendation": "Add a cheap completeness signal, for example require discovered > 0 and record how many tree blobs the manifest covers, so a truncated manifest is visible in the record. fairpane-spec may prefer to leave this as a documented trust decision."
+    },
+    {
+      "severity": "note",
+      "path": "specs/corpora.json",
+      "line": null,
+      "issue": "Every pin field is null, so pin enforcement in fetch and verify currently has no effect (README.md:57 says 'passes vacuously'). Until the integrator commits the ADR 0003 pins, running `corpus-repin wpt` and then `corpus-applicability wpt` lets a newly committed record pass corpus-verify at a new commit without any protected policy change.",
+      "recommendation": "Treat the pin commit as part of FP-0003 acceptance. Apply the ADR 0003:228-256 values, rerun the four acceptance commands, and accept only on that result."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 451,
+      "issue": "The record is written after the directory swap (line 455). If `rmSync(old)` (line 454) throws, for example a locked pack file on Windows, the command reports an error after installing the new snapshot but before writing its record. For corpus-fetch the contents are the same and verify passes, though `retrieved_at` stays stale. For corpus-repin the result is a fail-closed mismatch. Concurrent fetches share `<id>.fetch` without a lock, so one run's rmSync (line 437) can delete another run's staging. Each case fails rather than silently corrupting, as far as I can see [INFERENCE].",
+      "recommendation": "Write the record before removing `<id>.old`, and treat a failure to delete `.old` as a warning. Optionally create the staging directory exclusively, with a unique name or a lock file."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 56,
+      "issue": "killTree runs `taskkill.exe` by bare name. [INFERENCE from libuv search_path] On Windows, Node searches the current directory before PATH for a bare name. This conflicts with the repository rule that executable resolution never searches the working directory (selftest test 65, 'Executable resolution never searches the process working directory'). It runs only when a watchdog fires.",
+      "recommendation": "Resolve taskkill through resolveExecutable or `%SystemRoot%\\System32\\taskkill.exe`."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0003/README.md",
+      "line": 81,
+      "issue": "The Gates section describes only the first patch's receipts and says the integrator 'reruns both gates and the corpus-verify acceptance commands after review'. It does not cite the passing receipts gates/2026-10-09T01-30-40-*-{repo-check,controller-test}*.json or the exact acceptance runs appended to raw/corpus-verify.log, which state.json:41-43 already lists. Those runs happened before this review, while CONTRACT.md's Acceptance section says 'after review'. The current working tree also contains tools/attest.mjs, tools/attest.test.mjs, and attestation cases in selftest.mjs (lines 21 and 220) that the 01:30 gate log does not show, so [INFERENCE] those receipts may not match the current source fingerprint.",
+      "recommendation": "Cite the 01:30 receipts and the exact-command runs in the README. Rerun both gates and the acceptance commands at the accepting commit, after the pin commit."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/decisions/0003-corpus-snapshots.md",
+      "line": 264,
+      "issue": "The statement that 'corpus-fetch can rebuild every recorded field, except retrieved_at' is unproven for the WPT manifest bytes. Only one download exists (raw/corpus-fetch-wpt-manifest.log). If wpt.fyi re-serves byte-different JSON for the same commit, a refetch fails the manifest_sha256 pin even when every count is identical. The command fails closed in that case.",
+      "recommendation": "Word the claim as an expectation, or preserve a second download's digest as evidence."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0003/raw/rework-tests-before.log",
+      "line": 86,
+      "issue": "In the red baseline, case 11 failed because of the inherited GIT_OBJECT_DIRECTORY ('The snapshot does not contain commit …'), not because of the replace ref. Case 9 failed only on message wording (lines 81-83). The replace-ref defense and the applicability-count check therefore have no observed red-to-green transition. The positive control at selftest.mjs:653 still shows that the fixture substitution works, so [INFERENCE] the test does discriminate.",
+      "recommendation": "No action is required. Optionally split the replace-ref check into its own case so a baseline would isolate it."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0003/raw/corpus-fetch-wpt-manifest.log",
+      "line": 45,
+      "issue": "The rework RESULT lines record cwd C:\\Users\\requi\\.omp\\wt\\t91d469060\\m, a user-profile path. The same path appears in corpus-applicability-wpt.log:61, rework-corpus-verify-*.log, rework-tests-*.log, and rework-check.log. The specs records are clean. Whether the contract line 'No committed record contains a local user path' covers raw evidence logs is unclear. README.md:76-78 discloses the worktree cwd.",
+      "recommendation": "Have fairpane-spec confirm that the clause covers only specs records, or normalize the paths in future logs."
+    }
+  ],
+  "commands_run": []
+}

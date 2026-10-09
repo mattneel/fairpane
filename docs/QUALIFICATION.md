@@ -24,7 +24,7 @@ No file in this archive supplies browser conformance results.
 - Browser shell workflows exercise the Rust wrapper, the engine-rendered chrome, and the public embedding contract.
 - Separate C-only, minimal Rust, and browser-shell consumers prove that each embedder obtains the same engine capabilities.
 - Shared extension scenarios compare each language's reference extension against an independent expected result, not against another implementation.
-- Existing browser extensions qualify compatibility separately from language parity.
+- Compatibility with existing browser extensions stays outside the profile until the owner decides its release scope.
 
 WPT includes JavaScript tests, so a static renderer cannot claim their execution. [S19]
 Test262 does not substitute for browser integration. [S08]

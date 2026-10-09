@@ -14,8 +14,8 @@ Each SDK therefore exposes actual frontend behavior, not only browser commands.
 
 | Path | Rendering | Obligations |
 | --- | --- | --- |
-| Document frontend | Fairpane's HTML and CSS machinery. | The SDK drives application state and document updates, and Fairpane keeps layout, text, input, and accessibility. |
-| Custom graphics frontend | A GPU surface for specialized output. | The frontend supplies explicit input and accessibility contracts, because a texture alone does not describe an operable application. |
+| Document frontend | Fairpane's HTML and CSS machinery renders it. | The SDK drives application state and document updates, and Fairpane keeps layout, text, input, and accessibility. |
+| Custom graphics frontend | The frontend renders specialized output into a GPU surface. | The frontend supplies explicit input and accessibility contracts, because a texture alone does not describe an operable application. |
 
 Neither path requires GPUI.
 GPUI is the browser shell's framework, not Fairpane's frontend programming model.
@@ -28,9 +28,9 @@ An installed language integration never permits an arbitrary page to load native
 
 | Component | Role |
 | --- | --- |
-| WebGPU | The web API for GPU graphics and computation. |
-| wgpu | A Rust graphics library based on WebGPU, with native graphics backends. |
-| GPUI | The GPU-accelerated UI framework for the browser shell. |
+| WebGPU | It is the web API for GPU graphics and computation. |
+| wgpu | It is a Rust graphics library based on WebGPU, with native graphics backends. |
+| GPUI | It is the GPU-accelerated UI framework for the browser shell. |
 
 WebGPU commands never become GPUI widgets.
 Compute-only WebGPU work never passes through GPUI.
@@ -72,6 +72,7 @@ Any third-party implementation of engine WebGPU behavior needs a separate owner 
 `FP-0035` defines the surface interface and the input contract.
 `FP-0043` exposes document frontends through the public contract.
 `FP-0044` defines custom graphics frontends.
+`FP-0048` builds the first internal GPU paint adapter against the scalar reference.
 `FP-0045` qualifies GPU-resident presentation.
-`FP-0046` establishes the validated GPU service boundary.
-`FP-0041` and `FP-0042` prove the platform through the TypeScript and Elixir SDKs.
+`FP-0046` defines the validated GPU service boundary and reports WebGPU as unsupported until a WebGPU task implements it.
+`FP-0041` and `FP-0042` prove both frontend paths through the TypeScript and Elixir SDKs.

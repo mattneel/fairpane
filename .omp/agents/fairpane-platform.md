@@ -11,7 +11,7 @@ Render chrome through the engine as a trusted document.
 Let GPUI only host, route input to, present, and bridge accessibility for engine documents.
 Use crates only in the browser application.
 Use each crate only for a use that `engineering/dependencies.json` accepts.
-Never import `fairpane-sys` directly from shell code.
+Import `fairpane-sys` only in a narrow platform adapter that a recorded decision names, never in ordinary shell code.
 Route every extension request through the shared permission broker.
 Report each capability that the shell needs and the contract lacks as a contract gap.
 Preserve origin identity, accessibility, and explicit capabilities.

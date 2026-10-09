@@ -40,7 +40,7 @@ The archive has no enclosing directory.
 - Rust as the first-party wrapper and browser-shell language, with a wrapper that stays free of third-party dependencies.
 - A native browser with minimal chrome, an address bar, and the page.
 - A browser shell written in Rust on the public embedding contract, with chrome that Fairpane itself renders, so Fairpane's own browser dogfoods what every embedder uses.
-- One extension contract where an extension chooses its language, not its privileges, starting with Rhai and JavaScript as equal clients.
+- One extension contract where an extension chooses its language, not its privileges, with JavaScript and every officially supported language SDK as equal clients.
 - A maintained first-party Fairpane integration and a useful reference extension for every officially supported language SDK.
 - A frontend platform where any qualified language drives Fairpane's document model and receives accelerated output, without the browser shell's framework.
 - Open development, reproducible evidence, and maintainable public infrastructure.
@@ -72,7 +72,7 @@ Node or Bun runs the development controller. Neither ships inside the portable e
 OMP and external conformance harnesses are development tools, not renderer dependencies.
 The portable engine uses the pinned Zig standard library and compiler runtime.
 The canonical Rust wrapper has no third-party dependency.
-The Rust browser shell welcomes qualified crates for application work, but no crate parses, styles, renders, scripts, or makes security decisions for web content or chrome.
+The Rust browser application welcomes qualified crates for application work, but no crate parses, styles, renders, scripts, or makes security decisions for web content or chrome.
 Optional language hosts carry their own runtime dependencies, so the default browser carries none of them.
 Host adapters can use declared operating-system facilities.
 

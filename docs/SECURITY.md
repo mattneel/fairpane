@@ -21,11 +21,12 @@ Broker-validated state supplies the displayed origin, permission requests, and d
 A page cannot navigate, script, restyle, overlay, or inject content into the chrome.
 If the chrome renderer fails, the OS window frame keeps its title and close control, and the shell restarts the chrome.
 
-## Rust shell dependencies
+## Rust browser application dependencies
 
 The canonical Rust wrapper has no third-party runtime or build dependency.
-The browser shell can use qualified crates for user interface and application services.
-Each shell crate is pinned, license-checked, advisory-checked, source-checked, and reviewed on addition and upgrade.
+The browser application can use qualified crates for user interface and application services.
+Each application crate is pinned and reviewed on addition and upgrade.
+Each one passes license, advisory, source, ban, and duplicate checks across every declared target configuration, including build dependencies.
 No crate parses, styles, lays out, shapes, paints, or scripts web content or chrome.
 No crate implements web-visible network semantics, such as redirect handling, cookies, caching, or CORS.
 No crate makes an origin, URL, or permission decision that the engine or broker owns.
@@ -41,9 +42,10 @@ The engine applies web semantics, and the broker independently authorizes privil
 The initial security profile runs each untrusted extension in an isolated worker process.
 Its runtime receives only the facilities that the host explicitly exposes.
 The broker derives extension identity from the worker's authenticated connection, never from a request field.
-Rhai and JavaScript adapters call the same broker, and neither adapter implements its own permission policy.
+Every language adapter calls the same broker, and no adapter implements its own permission policy.
+No language host ships a third-party JavaScript or WebAssembly engine, a renderer, or a WebView.
 Extensions reach pages through a permission-checked document interface, never through raw DOM pointers.
-Host operations carry their own deadlines and resource accounting, beyond any interpreter limit.
+Host operations carry their own deadlines and resource accounting, beyond any limit of a language runtime.
 The supervising process keeps an independent termination mechanism.
 Installed extensions never receive unlimited resources.
 

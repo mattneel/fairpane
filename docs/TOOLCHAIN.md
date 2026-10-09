@@ -46,9 +46,9 @@ Rust nightly needs a specific feature and its own qualification case.
 A Rust toolchain upgrade follows the same separate-branch procedure as a Zig compiler upgrade.
 
 The canonical wrapper crates use only the Rust standard library and toolchain facilities.
-The browser shell commits its `Cargo.lock` and upgrades crates through reviewed changes.
-Each shell crate addition or upgrade passes license, advisory, source, and ban checks across every declared target configuration, including build dependencies.
-The shell adopts the newest qualified, compatible stack, not the independently newest version of every package.
+The browser application commits its `Cargo.lock` and upgrades crates through reviewed changes.
+Each application crate addition or upgrade passes license, advisory, source, ban, and duplicate checks across every declared target configuration, including build dependencies.
+The application adopts the newest qualified, compatible stack, not the independently newest version of every package.
 A minimal Rust consumer builds the wrapper outside the browser workspace, so workspace feature unification cannot hide a wrapper defect.
 
 ## Upgrade procedure
