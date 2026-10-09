@@ -2649,7 +2649,7 @@
         "State the upstream Test262 frontmatter and _FIXTURE.js conditions in the WPT discovery rule, and regenerate specs/applicability/wpt.json with unchanged counts.",
         "Name the UTS #46 CheckBidi and leading-mark consumers in the Bidi_Class and General_Category import rows.",
         "Test the rename rollback of the snapshot replacement.",
-        "Resolve taskkill.exe from the Windows system directory instead of the search path.",
+        "Resolve taskkill.exe and every other Windows system program that the tools start by bare name, including powershell.exe in the compiler installer, from the Windows system directory instead of the search path.",
         "Write the snapshot record before removing the old snapshot, and give concurrent fetches separate or locked staging directories."
       ],
       "read": [
@@ -3218,7 +3218,7 @@
       "id": "FP-0078",
       "title": "Close the FP-0013 review findings",
       "workstream": "text",
-      "depends_on": ["FP-0013"],
+      "depends_on": ["FP-0013", "FP-0052"],
       "role": "fairpane-text",
       "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
