@@ -764,7 +764,7 @@
       "owner": null,
       "evidence": [],
       "review": null,
-      "notes": ["Created to own glyph outline decoding and rasterization from the FP-0013 capability record."]
+      "notes": ["Created to own glyph outline decoding and rasterization from the FP-0013 capability record.", "Split on 2026-10-09 into FP-0119, FP-0120, FP-0121, and FP-0122. FP-0056 keeps its five criteria word for word as the closing task and maps them to the evidence of those slices."]
     },
     "FP-0057": {
       "status": "planned",
@@ -978,6 +978,10 @@
     "FP-0116": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: itemization and per-cluster font fallback."] },
     "FP-0117": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: inline layout under explicit available-size constraints. FP-0016 depends on it."] },
     "FP-0118": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: carets, hit tests, and bidi selection."] },
+    "FP-0119": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split as its first slice: the bounded outline model and TrueType glyf decoding. FP-0120 and FP-0121 build on its Path type."] },
+    "FP-0120": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split: the CFF Type 2 charstring interpreter and the honest CFF2 report. Until the owner answers the TN5176 table question, endchar seac returns its named unsupported error."] },
+    "FP-0121": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split: the scalar reference rasterizer, which uses 16 nonzero sub-scanlines per pixel row with exact horizontal span coverage, and its independent first-party oracle."] },
+    "FP-0122": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split: glyph rendering, comparison of real glyphs with the FP-0121 oracle, and the glyph-rasterization capability update together with the FP-0013 case 49 lists."] },
     "FP-0127": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created during the FP-0010 split because the DOM store has no shadow roots and FP-0103's declarative shadow roots need them."] }
   }
 }

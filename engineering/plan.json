@@ -2793,10 +2793,10 @@
       "id": "FP-0056",
       "title": "Decode glyph outlines and rasterize glyphs",
       "workstream": "text",
-      "depends_on": ["FP-0013"],
+      "depends_on": ["FP-0013", "FP-0119", "FP-0120", "FP-0121", "FP-0122"],
       "role": "fairpane-text",
-      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
-      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
       "authority": "routine-local-engineering",
       "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
       "required_reviewers": ["fairpane-review"],
@@ -2807,15 +2807,15 @@
         "Compare rasterized glyphs with reference fixtures under a tolerance whose rationale is recorded before the run.",
         "Reject malformed outlines without unbounded work or allocation."
       ],
-      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md", "engineering/evidence/FP-0119/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
-      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion. FP-0056 closes after FP-0119 through FP-0122 are accepted and maps each criterion to their evidence."
     },
     {
       "id": "FP-0057",
       "title": "Decide and qualify glyph hinting",
       "workstream": "text",
-      "depends_on": ["FP-0056"],
+      "depends_on": ["FP-0056", "FP-0061"],
       "role": "fairpane-text",
       "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/decisions"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
@@ -2825,9 +2825,11 @@
       "acceptance": [
         "Record a decision on TrueType bytecode hinting and CFF hinting with measured rendering evidence.",
         "Implement the decided behavior, with a bounded interpreter if hinting programs run.",
-        "Test malformed and hostile hinting programs for bounded execution."
+        "Test malformed and hostile hinting programs for bounded execution.",
+        "Decide and implement the ROUND_XY_TO_GRID composite offset rule and the Type 2 flex depth rule for hinted rendering, which the FP-0119 and FP-0120 unhinted outlines ignore.",
+        "Support composite point matching against phantom points, which FP-0119 reports as unsupported, with horizontal phantom points from hmtx, vertical phantom points from the FP-0061 vertical metrics, and the USE_MY_METRICS component flag."
       ],
-      "read": ["docs/RENDERING_AND_TEXT.md"],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -2847,9 +2849,10 @@
         "Implement a first-party Brotli decoder that passes the RFC 7932 test vectors.",
         "Decode WOFF2, including the glyf and loca transforms, with checked sizes.",
         "Reject malformed or oversized inputs within declared memory bounds.",
-        "Compare the sfnt parser's strictness with web-font practice, including table tags outside printable ASCII and known tables that overlap the table directory, as the FP-0013 security review notes."
+        "Compare the sfnt parser's strictness with web-font practice, including table tags outside printable ASCII and known tables that overlap the table directory, as the FP-0013 security review notes.",
+        "Compare the outline strictness choices that the FP-0119 and FP-0120 contracts list with web-font practice, and record each kept or changed choice."
       ],
-      "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md"],
+      "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -2868,9 +2871,11 @@
         "Parse TrueType and OpenType collections with checked offsets.",
         "Parse CFF2 and its item variation store.",
         "Apply variations through fvar, avar, gvar, HVAR, and MVAR with checked tables.",
-        "Test named instances and axis values against reference fixtures."
+        "Test named instances and axis values against reference fixtures.",
+        "Replace the FP-0120 UnsupportedCff2 report with CFF2 outline decoding, including blend and vsindex, under the FP-0120 interpreter bounds.",
+        "Apply gvar deltas to the FP-0119 decoded points, including component offsets and phantom points, under the FP-0119 budgets."
       ],
-      "read": ["docs/RENDERING_AND_TEXT.md"],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -2888,9 +2893,10 @@
       "acceptance": [
         "Render COLR version 0 and version 1 glyphs with CPAL palettes.",
         "Render sbix, CBDT and CBLC, and SVG glyphs, or report each unsupported format honestly.",
-        "Compare color glyph fixtures with references under recorded tolerances."
+        "Compare color glyph fixtures with references under recorded tolerances.",
+        "Add the even-odd fill rule to the FP-0121 rasterizer for every format that needs it, with a recorded coverage rule and an oracle tolerance derived before the run."
       ],
-      "read": ["docs/RENDERING_AND_TEXT.md"],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0121/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -3943,6 +3949,96 @@
         "Test a Latin ligature, Arabic text, the mixed-direction seed, and a Devanagari conjunct."
       ],
       "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0119",
+      "title": "Decode TrueType glyph outlines into a bounded outline model",
+      "workstream": "text",
+      "depends_on": ["FP-0013"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "specs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Decode simple TrueType glyphs with checked bounds, including every flag form, repeat counts, and every coordinate delta form.",
+        "Decode composite glyphs with every argument and transform form, scaled and unscaled offsets, and point matching between outline points, with a composite depth bound of 8, cycle detection, and constant native stack use.",
+        "Convert contours to closed paths of lines and quadratic curves with a frozen start-point rule, in font units without hinting, ignoring ROUND_XY_TO_GRID and reporting point matching against phantom points as unsupported.",
+        "Reject malformed glyphs without unbounded work or allocation, with budgets of 65536 points and 65536 component records, and record each strictness choice for FP-0058.",
+        "Decode every glyph of the three TrueType fixtures and check it against its header bounds and the maxp maxima.",
+        "Add at most 10 seconds to the tests/text run step on the development host."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0120",
+      "title": "Interpret CFF Type 2 charstrings and report CFF2 as unsupported",
+      "workstream": "text",
+      "depends_on": ["FP-0119"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "specs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security", "fairpane-spec"],
+      "acceptance": [
+        "Read Private DICTs, local and global subroutine INDEXes, FDArray, FDSelect, charsets, and FontMatrix values with checked offsets, and cite a primary source or record a decision for the order in which a CID font's FontMatrix values combine.",
+        "Interpret every Type 2 operator under the Appendix B limits on the argument stack, subroutine nesting, stem hints, charstring length, and the transient array, with a budget of 2^20 operations and a deterministic random operator seeded per glyph.",
+        "Parse widths and hint operators, including implicit vstem arguments and hintmask byte counts, ignore the flex depth in unhinted outlines, and report endchar seac with a named unsupported error until the owner answers the TN5176 table question.",
+        "Report every CFF2 font as unsupported, including a font whose only outline table is CFF2, and correct the cff2-and-variations capability text.",
+        "Reject malformed charstrings without unbounded work or allocation, record each strictness choice for FP-0058, and check every glyph of the CJK subset against its hmtx advance and the head bounds.",
+        "Add at most 10 seconds to the tests/text run step on the development host."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md", "engineering/evidence/FP-0119/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0121",
+      "title": "Build the scalar reference rasterizer and its independent oracle",
+      "workstream": "text",
+      "depends_on": ["FP-0119"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Flatten quadratic and cubic curves with a recorded tolerance, and resolve the nonzero winding rule on 16 sub-scanlines per pixel row, with exact horizontal coverage of each sub-scanline's nonzero spans.",
+        "Report each pixel's coverage as the mean over its 16 sub-scanlines, scaled to 0 to 255 with a recorded rounding rule, so that overlapping contours of one winding cover their union.",
+        "Compare masks with a separately written first-party oracle under a per-pixel tolerance derived before the run, and with hand-computed masks.",
+        "Bound mask size, segment count, and work, reject non-finite paths, and keep native stack use constant.",
+        "Add at most 10 seconds to the tests/text run step on the development host."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0122",
+      "title": "Render TrueType and CFF glyphs and compare them with reference fixtures",
+      "workstream": "text",
+      "depends_on": ["FP-0119", "FP-0120", "FP-0121"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "specs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Map TrueType and CFF glyph outlines to device space at a pixel size and a subpixel origin, and rasterize them with the FP-0121 rasterizer.",
+        "Compare glyphs from all four font fixtures with the FP-0121 oracle under the FP-0121 tolerance, recorded before the run.",
+        "Bound end-to-end work and allocation for hostile glyphs and pixel sizes.",
+        "Mark glyph-rasterization implemented in the capability record, and update the frozen obligation lists in tools/capabilities.mjs and the FP-0013 case 49 test, as a frozen part of the contract that its reviewers check.",
+        "Add at most 10 seconds to the tests/text run step on the development host."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md", "engineering/evidence/FP-0121/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
