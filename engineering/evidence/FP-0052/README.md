@@ -5,7 +5,7 @@
 Task `FP-0052` closes the FP-0003 review findings that `engineering/evidence/FP-0052/CONTRACT.md` freezes.
 The worker implemented it in an isolated working tree whose `HEAD` was `f31eb22b72588b095e3b031ecf7606665c37fd6e`.
 The host was Windows 10.0.26200 on x64 with Node v26.7.0.
-No protected path changed, and `specs/corpora.json` is unchanged.
+No protected path changed, and `specs/corpora.json` is unchanged; `raw/integration-protected-paths.log`, which review 1 asked for, shows that none of `775d988`, `8bc2f91`, and `05001ab` changes a protected path, and that the one protected change in `44b083c..05001ab`, `engineering/policy.json`, comes from P2 (`2e07f89`).
 The worker did not commit or push.
 
 ## Changes

@@ -1,0 +1,48 @@
+{
+  "verdict": "accept",
+  "summary": "I recommend accepting FP-0052. I found no blocker or major finding. I ran no shell, git, or test command. I read the repository files and the logs in raw/ and gates/. I also read the UAX #14 rev 57, UTS #46, and WPT pin texts and the integrator's copies in out/fp0052-src/. I read the GitHub commit API for 775d988, 8bc2f91, 05001ab, and d2eda72.\n\n1. Plan criteria.\n- IMPORT_REQUIREMENTS.md:62 and S37 now place East_Asian_Width in LB19a, LB30, and LB10 (Na). This matches UAX #14 rev 57: $EastAsian appears only in LB19a and LB30, and LB10 gives U+0041 properties.\n- Row 66 adds the General_Category consumers LB15a, LB15b, LB19, LB30b, and LB10 (Lu), plus UTS #46 §4.1 criterion 6.\n- Row 65 adds CheckBidi through RFC 5893 §2, which is the new S101. S41 states that the URL Standard sets CheckBidi and CheckJoiners to true, and out/fp0052-src/url.html:1875 and :1890 confirm it.\n- WPT_RULE, the corpus.mjs comment, ADR 0003, and S47 match test262.py `parse` and the elif chain in sourcefile.py.\n- In raw/applicability-diff.log, wpt.json changes on one line, `discovery.rule`. Discovery stays at 76620, and corpus-verify wpt confirms that count.\n- windowsSystemProgram resolves the taskkill.exe calls in corpus.mjs and in runProcess and stopDescendants, plus PowerShell in listProcessTree and installZig. No other Windows system program in tools/ starts by bare name: `tar` in installZig runs only after the win32 branch returns, and Get-Zig.ps1 extracts with .NET.\n- commitSnapshot writes in this order: stage the record, back up the old snapshot, swap in the new one, replace the record, and only then remove `<id>.old`. withFetchLock takes an exclusive `<id>.lock` before anything touches `<id>.fetch`.\n\n2. Cases.\n- Cases 1 to 8 assert what the contract and its amendments freeze.\n- tests-before.log is a real red baseline. Its working tree held the HEAD implementation blobs. Cases 1, 3, 4, 5, and both parts of 6 fail there, and frozen case 2 passes, as amendment 1 records.\n- tests-before-a1.log shows the revised case 2 failing on the bare-name base after 15052 ms.\n- mutation-a2.log shows case 2 failing under the bare-name control on both Node (15070 ms) and Bun (15054 ms).\n\n3. Mutation controls.\n- All four controls fail their cases: control 1 fails FP-0052 case 3 and FP-0013 case 54, control 2 fails case 5 and both parts of case 6, control 3 fails the SystemRoot case (and case 2 under a1 and a2), and control 4 fails the existing pin case.\n- The before and after hashes match.\n\n4. Integration runs.\n- integration-binding-a2.log shows HEAD 1a15063 and an empty status (ignored files included) for every source root, before and after the runs.\n- Both gate receipts pass with matching digests. The controller-test gate passed 236 of 236.\n- The Bun run passed 236 of 236 inside the binding window.\n- corpus-verify test262 and corpus-verify wpt both exited with status 0.\n\n5. Protected paths.\n- The GitHub file lists for all four commits contain no protected path. No shell or engine code changed.\n- No raw log records that check, so one README claim lacks its log.\n\nThe minor findings below cover that missing log, the incomplete General_Category rule list, and the missing Bun run of case 2 on the base.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 66,
+      "issue": "The General_Category consumer list leaves out UAX #14 LB1. In rev 57, LB1 resolves SA to CM for General_Category Mn or Mc and to AL otherwise, as the table under LB1 shows. This omission keeps the plan criterion \"Correct the UAX #14 rule references for ... General_Category\" from being fully met. The S37 purpose (specs/sources.json:306) has the same gap. The worker reproduced the frozen contract text, so this is a contract-level omission, not a deviation from the contract.",
+      "recommendation": "In a later amendment or follow-up, add LB1's SA resolution (Mn and Mc) to row 66 and to the S37 purpose."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0052/README.md",
+      "line": 8,
+      "issue": "The README states \"No protected path changed, and specs/corpora.json is unchanged\", but no raw log records a diff or name list for the protected paths. The policy digest cannot stand in for that check, because policy_roots includes `specs`, which this task changed. I confirmed the claim through the GitHub commit API: the file lists of 775d988, 8bc2f91, 05001ab, and d2eda72 hold only evidence files, specs/README.md, IMPORT_REQUIREMENTS.md, sources.json, applicability/wpt.json, tools/*, and ADR 0003.",
+      "recommendation": "Record `git diff --name-status 44b083c 05001ab -- <protected paths>` with `node tools/fairpane.mjs record`, and cite that log beside the claim."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/selftest.mjs",
+      "line": 1353,
+      "issue": "No log shows the final (amendment 2) case 2 failing on the bare-name base under Bun. tests-before-a1.log runs only under Node and uses the amendment 1 text. The Bun failure appears only under the bare-name mutation control (raw/mutation-a2.log:1006). Amendment 2 requires only the mutation control on both hosts, so the contract is met. [INFERENCE] The base differs from the mutation only in where the bare name appears, so the result would very likely match.",
+      "recommendation": "For completeness, record `bun tools/selftest.mjs` on a 44b083c scratch clone that has the 05001ab test files staged."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 527,
+      "issue": "When the policy has no revision, fetchCorpus reads its pins from specs/snapshots/<id>.json before replaceSnapshot takes `<id>.lock`. fetchFileSet, by contrast, reads its record under the lock. [INFERENCE] If a repin finishes between that read and the lock, this fetch then reinstalls the older recorded commit. The contract requires the lock only before `<id>.fetch`, so this is not a contract violation.",
+      "recommendation": "Take the lock before reading the pin record, or re-read the record under the lock and fail if it changed."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0052/raw/probe-search-order.log",
+      "line": 5,
+      "issue": "The probe script prints a fixed conclusion (\"The WHOAMI usage text shows that the bare name ran the copy...\"), but its own output on line 4 is blank. The README correctly calls the attempt inconclusive and relies on probe-search-order-2.log instead.",
+      "recommendation": "Avoid probe scripts that print conclusions regardless of the observed result."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0052/README.md",
+      "line": null,
+      "issue": "Four smaller evidence gaps remain, and the README discloses each one.\n- The Linux run covers only the 775d988 tree, so the amendment 1 and 2 revisions, including the \"case 2, amendment 2\" helper test, never ran on Linux.\n- The edit to case 2 in the a1 scratch clone was not run through `record`. The `git diff --no-index` hash 18e44ba..572d5ae binds it instead.\n- The corpus-verify logs do not record HEAD themselves. They start 166 ms after the binding's closing `rev-parse`, which shows 1a15063.\n- [INFERENCE] The Git half of case 6 depends on both fetches reaching the lock while the first fetch is still running. It passed in every recorded after-run.",
+      "recommendation": "Run the final tree on Linux before acceptance on that host, and record HEAD inside the corpus-verify logs at the next integration."
+    }
+  ]
+}
