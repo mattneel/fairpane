@@ -18,7 +18,7 @@ The engine renders the browser chrome through that contract.
 
 The project owns text, codecs, and runtime semantics instead of concealing external engines.
 Development infrastructure can use other languages and tools.
-The Rust wrapper and shell can use pinned, audited crates for responsibilities outside the engine.
+The Rust browser shell can use qualified crates for application work, while the engine and canonical wrappers stay first-party.
 Operating-system adapters expose their dependency inventory separately.
 The qualification program must distinguish a bootstrap from a functioning browser.
 The browser dogfoods the embedding contract, so a capability that the browser needs and the contract lacks is a contract defect.

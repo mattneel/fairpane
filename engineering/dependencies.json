@@ -12,39 +12,78 @@
     "external_runtime_dependencies": [],
     "compiler_runtime": "Declared through the exact Zig lock."
   },
-  "rust_wrapper_and_shell": {
+  "rust_wrapper": {
+    "decision": "engineering/decisions/0004-first-party-wrapper-language.md",
+    "crates": {
+      "fairpane-sys": "Exact declarations of the public C ABI, generated from the interface schema and shipped with it.",
+      "fairpane": "Safe, idiomatic Rust ownership and operations over fairpane-sys and the Rust standard library."
+    },
+    "source_roots": [
+      "bindings/rust"
+    ],
+    "external_runtime_dependencies": [],
+    "external_build_dependencies": [],
+    "policy": "First-party code, the Rust standard library, and Rust toolchain facilities only. No third-party runtime or build dependency, no framework-specific feature, and no async runtime requirement. Regenerating declarations is a separate development operation."
+  },
+  "rust_browser_shell": {
     "decision": "engineering/decisions/0004-first-party-wrapper-language.md",
     "source_roots": [
-      "bindings/rust",
       "apps/browser"
     ],
-    "toolchain": "Declared through an exact Rust toolchain lock that task FP-0029 creates.",
-    "policy": "Use the current stable release of the best-maintained crate for each responsibility outside the engine. Pin every crate in a committed Cargo.lock. Review every addition and upgrade.",
-    "allowed_responsibilities": [
-      "Windowing, the OS event loop, and monitor and DPI information",
-      "Keyboard, pointer, touch, and IME event delivery from the OS",
-      "Bridging an accessibility tree to UI Automation, NSAccessibility, and AT-SPI",
-      "Presentation of engine frames to the window",
-      "Process spawning, IPC transport, and sandbox setup that the broker design assigns to the host",
-      "Clipboard transport, file dialogs, notifications, and external-link handoff under explicit host policy",
-      "Configuration, profile directories, logging, crash reporting, command-line parsing, error types, host message serialization, async execution, and tests"
+    "policy": "Qualified third-party crates are welcome for user interface and application services. Every crate is pinned in a committed Cargo.lock and passes license, advisory, source, and ban checks across every declared target configuration, including build dependencies. The shell adopts the newest qualified, compatible stack, not the independently newest version of every package.",
+    "acceptable_uses": [
+      "A UI framework hosts windows, routes input and IME events, and presents engine-produced frames.",
+      "A graphics library presents an engine-produced frame.",
+      "An HTTP library supplies transport that the broker authorizes.",
+      "An accessibility adapter exposes platform objects for engine-provided semantics.",
+      "Host services such as async I/O, diagnostics, configuration, profile directories, clipboard transport, file dialogs, and notifications."
     ],
-    "forbidden_responsibilities": [
-      "Parsing, styling, layout, painting, or text shaping of web content or chrome",
-      "JavaScript or WebAssembly execution",
-      "A WebView or any embedded browser engine",
-      "URL parsing, origin computation, or any security decision that the engine owns",
-      "Web-visible network semantics, such as HTTP, cookies, caching, or CORS"
+    "outside_the_exception": [
+      "Delegating page or chrome layout, text shaping, or painting to a crate.",
+      "Supplying missing page-rendering behavior behind a callback.",
+      "Letting a transport crate's defaults replace the engine's Fetch semantics, including redirects, cookies, and response transformation.",
+      "Reconstructing page semantics from pixels.",
+      "Any WebView, embedded browser engine, or JavaScript or WebAssembly engine.",
+      "URL parsing, origin computation, or any security decision that the engine or broker owns."
     ],
-    "required_checks": [
-      "Exact toolchain pin",
-      "Committed Cargo.lock",
-      "License check",
-      "Security advisory check",
-      "Banned and duplicate crate check",
-      "Review of each crate addition and upgrade"
+    "candidates": [
+      {
+        "crate": "gpui",
+        "role": "Lead interface framework: windows, input, IME delivery, AccessKit accessibility, and frame presentation. Hosts engine-rendered chrome.",
+        "status": "candidate pending the FP-0032 qualification prototype"
+      },
+      {
+        "crate": "gpui-kit",
+        "role": "Selected behavior facilities only, paired with its specified GPUI snapshot. Its WebView and JavaScript-extension packages are excluded.",
+        "status": "candidate pending the FP-0032 qualification prototype"
+      },
+      {
+        "crate": "tokio",
+        "role": "Host-service runtime, not the engine's event loop or a wrapper requirement.",
+        "status": "candidate"
+      },
+      {
+        "crate": "reqwest with rustls",
+        "role": "Transport adapter under the broker, with redirects returned unconsumed, no cookie store, and no response transformation.",
+        "status": "candidate"
+      },
+      {
+        "crate": "tracing",
+        "role": "Structured shell diagnostics correlated with engine requests and frames.",
+        "status": "candidate"
+      },
+      {
+        "crate": "cargo-deny",
+        "role": "Development check for licenses, advisories, bans, and sources.",
+        "status": "candidate development tool"
+      }
     ],
-    "crates": []
+    "excluded": [
+      "GPUI Kit WebView packages",
+      "GPUI Kit JavaScript-extension packages",
+      "Any WebView or embedded browser engine",
+      "Any JavaScript or WebAssembly engine"
+    ]
   },
   "development": {
     "required_hosts": [
