@@ -82,7 +82,7 @@ The fetch removes its lock file after success and after failure.
 
 1. Controller, every host: the resolver returns `C:\Windows\System32\taskkill.exe` for `SystemRoot` `C:\Windows`, and fails with an error that names `SystemRoot` for an unset, empty, or relative value.
 2. Controller, every host: with the process working directory set to a directory that holds a program named `taskkill.exe` that exits with status 0, `runProcess` of a Node child that sleeps for 60 seconds with a 1-second timeout returns `timed_out: true` within 15 seconds.
-   On Windows, that program is a copy of `<SystemRoot>\System32\whoami.exe`.
+   On Windows, that program is the stand-in that amendment 1 defines; the original choice, a copy of `<SystemRoot>\System32\whoami.exe`, exits with status 1 for taskkill's arguments.
 3. Controller: for each of the write steps `stage the record`, `back up the sources`, `replace the sources`, and `replace the record`, a Git corpus repin that `onWriteStep` fails at that step rejects with the injected error.
    The snapshot directory digest, the record bytes, and the listing of `specs/snapshots/` stay as they were, and the corpora directory lists only `test262`.
 4. Controller: when removing `<id>.old` fails after the record is replaced, the fetch fails with the existing "could not remove the old copies" error, and the record and the snapshot are the new ones.
@@ -121,3 +121,19 @@ Required reviewers: `fairpane-review` and `fairpane-spec`.
 - No crash recovery between rename steps; `FP-0078` owns it.
 - No lock for commands that only read a snapshot.
 - No change to the pins, the applicability counts, or the discovery itself.
+
+## Amendments
+
+1. Case 2 as frozen cannot fail on Windows.
+   A copy of `whoami.exe` exits with status 1 for `/PID <pid> /T /F`, so a watchdog that starts `taskkill.exe` by bare name runs the copy, sees the failure, and falls back to stopping its direct child, which stops the command.
+   `raw/probe-search-order-2.log` shows that a bare `taskkill.exe` does run from the working directory.
+   Case 2 on Windows therefore changes as follows; the other hosts keep the frozen case.
+   - The program named `taskkill.exe` in the working directory is a hard link to the running Node executable, or a copy of it when a hard link fails.
+   - While the case runs, `NODE_OPTIONS` holds `--require` with the quoted path of a preload script in the case's directory, and the case restores the previous value afterward.
+   - The preload does nothing unless the base name of `process.execPath`, compared without regard to case, is `taskkill.exe`.
+     Then it writes a marker file in the case's directory and exits with status 0 before Node reads any script argument.
+   - Before it starts `runProcess`, the case starts the stand-in directly with `/PID 1 /T /F`, asserts exit status 0 and the marker, and removes the marker, so the stand-in is shown to work.
+   - The case then asserts that `runProcess` returns `timed_out: true` within 15 seconds and that no marker exists.
+   - Whatever happens, the case stops the sleeping command itself before it ends, as the frozen test already does.
+   Case 2 must fail on the base on Windows, where the watchdog starts `taskkill.exe` by bare name.
+   The mutation control that starts `taskkill.exe` by bare name must fail case 2 on Windows.
