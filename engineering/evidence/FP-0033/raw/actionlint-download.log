@@ -1,0 +1,23 @@
+
+COMMAND ["C:\\Windows\\System32\\curl.exe","-sS","--fail","--location","--output","out/actionlint/actionlint_1.7.12_checksums.txt","https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_checksums.txt","--output","out/actionlint/actionlint_1.7.12_windows_amd64.zip","https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_windows_amd64.zip"]
+RESULT {"executable":"C:\\Windows\\System32\\curl.exe","arguments":["-sS","--fail","--location","--output","out/actionlint/actionlint_1.7.12_checksums.txt","https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_checksums.txt","--output","out/actionlint/actionlint_1.7.12_windows_amd64.zip","https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_windows_amd64.zip"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t245a36d6d\\m","started_at":"2026-10-09T01:57:51.962Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":930}
+
+COMMAND ["C:\\Windows\\System32\\tar.exe","-xvf","out\\actionlint\\actionlint_1.7.12_windows_amd64.zip","-C","out\\actionlint"]
+x LICENSE.txt
+x README.md
+x docs/README.md
+x docs/api.md
+x docs/checks.md
+x docs/config.md
+x docs/install.md
+x docs/reference.md
+x docs/usage.md
+x man/actionlint.1
+x actionlint.exe
+RESULT {"executable":"C:\\Windows\\System32\\tar.exe","arguments":["-xvf","out\\actionlint\\actionlint_1.7.12_windows_amd64.zip","-C","out\\actionlint"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t245a36d6d\\m","started_at":"2026-10-09T01:58:09.090Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t245a36d6d\\m\\out\\actionlint\\actionlint.exe","-version"]
+1.7.12
+installed by downloading from release page
+built with go1.26.1 compiler for windows/amd64
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t245a36d6d\\m\\out\\actionlint\\actionlint.exe","arguments":["-version"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t245a36d6d\\m","started_at":"2026-10-09T01:58:09.168Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":84}

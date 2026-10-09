@@ -1,0 +1,14 @@
+
+COMMAND ["C:\\Windows\\System32\\findstr.exe","windows_amd64","out/actionlint/actionlint_1.7.12_checksums.txt"]
+FINDSTR: Cannot open actionlint_1.7.12_checksums.txt
+RESULT {"executable":"C:\\Windows\\System32\\findstr.exe","arguments":["windows_amd64","out/actionlint/actionlint_1.7.12_checksums.txt"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t245a36d6d\\m","started_at":"2026-10-09T01:57:57.306Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":12}
+
+COMMAND ["C:\\Windows\\System32\\findstr.exe","windows_amd64","out\\actionlint\\actionlint_1.7.12_checksums.txt"]
+6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9  actionlint_1.7.12_windows_amd64.zip
+RESULT {"executable":"C:\\Windows\\System32\\findstr.exe","arguments":["windows_amd64","out\\actionlint\\actionlint_1.7.12_checksums.txt"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t245a36d6d\\m","started_at":"2026-10-09T01:58:00.154Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":8}
+
+COMMAND ["C:\\Windows\\System32\\certutil.exe","-hashfile","out\\actionlint\\actionlint_1.7.12_windows_amd64.zip","SHA256"]
+SHA256 hash of out\actionlint\actionlint_1.7.12_windows_amd64.zip:
+6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9
+CertUtil: -hashfile command completed successfully.
+RESULT {"executable":"C:\\Windows\\System32\\certutil.exe","arguments":["-hashfile","out\\actionlint\\actionlint_1.7.12_windows_amd64.zip","SHA256"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t245a36d6d\\m","started_at":"2026-10-09T01:58:00.215Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":149}

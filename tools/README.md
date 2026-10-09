@@ -122,6 +122,31 @@ The local controller does not enforce every write that an OMP worker makes.
 Independent patch review and isolated workers enforce the integration boundary.
 A protected runner supplies the separate release boundary.
 
+## Run the gates in GitHub Actions
+
+`.github/workflows/gates.yml` runs the gates on pushes to `master`, on pull requests that target `master`, and on manual dispatch.
+The Windows job runs `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, `zig-build`, and `c-abi`.
+The Linux job runs `repo-check`, `controller-test`, and the three cross-compilation gates.
+Each job installs the locked compiler with `install-zig` and uploads `out/evidence` as an artifact, including after a failure.
+Those receipts remain unsigned local integrity records, and a hosted runner is not a protected release runner.
+
+`tools/workflow-check.mjs` checks the workflow policy without a YAML package.
+It parses only block mappings, block sequences, single-line scalars, single-line flow sequences, block scalars, and comments.
+It rejects anchors, aliases, tags, flow mappings, multi-line plain scalars, duplicate keys, and every other construct with a line number.
+It reports a `uses:` reference without a full 40-hex commit SHA and a version comment.
+It reports a workflow or job permission other than `contents: read`, any `continue-on-error`, and a `pull_request_target` trigger.
+It reports a checkout without `persist-credentials: false` and an expression that reads a secret or the workflow token.
+`tools/workflow-check.test.mjs` holds its cases, and `node tools/fairpane.mjs test` runs them.
+
+To update a pinned action, follow these steps.
+
+1. Look up the release tag through `https://api.github.com/repos/<owner>/<repo>/releases/latest`.
+2. Resolve the tag to its commit through `https://api.github.com/repos/<owner>/<repo>/git/ref/tags/<tag>`.
+3. Dereference an annotated tag object through `git/tags/<sha>` until the object type is `commit`.
+4. Replace the SHA and the version comment in every workflow that uses the action.
+5. Run `actionlint` at a pinned release with a verified digest.
+6. Run `node tools/fairpane.mjs test`.
+
 ## Extend the controller
 
 1. Add failing tests for the new gate behavior.

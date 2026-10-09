@@ -19,6 +19,7 @@ import {
 } from './corpus.mjs';
 import * as corpus from './corpus.mjs';
 import { attestationCases, removeAttestationFixtures } from './attest.test.mjs';
+import { workflowCases } from './workflow-check.test.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cases = [], temporary = [];
@@ -218,6 +219,7 @@ test('1: A forged local receipt passes validateReceipt without gate execution', 
   assert.equal(fs.existsSync(path.join(dir, 'executed.txt')), false);
 });
 for (const c of attestationCases) test(c.name, c.fn);
+for (const c of workflowCases) test(c.name, c.fn);
 test('15: release-check still exits with status 1', () => {
   const r = spawnSync(process.execPath, [path.join(root, 'tools/fairpane.mjs'), 'release-check'], { cwd: root, encoding: 'utf8', windowsHide: true });
   assert.equal(r.status, 1, r.stderr);
