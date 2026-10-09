@@ -147,3 +147,25 @@ The contract assigns these steps to the integrator, and the worker did not run t
 2. Run `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, and `c-abi` with `--evidence-dir engineering/evidence/FP-0050/gates`.
 3. Record `integration-abi-check.log` and an uncached `integration-tests.log`.
 4. Append `HEAD` and the status to `raw/integration-binding.log` after the last run.
+
+## Integration
+
+The integrator applied the patch without conflicts on top of `76ed5bd`, which already held the FP-0008 tokenizer.
+The first merged test run failed one test, FP-0008 case 18, with `error.NondeterministicMemoryUsage` from `checkAllAllocationFailures`.
+A temporary probe, which was not committed, showed that identical unlimited runs of that case's scenario made 17, 18, or 19 allocations, because whether the backing allocator grants a remap in place depends on its state from earlier runs.
+This patch's new reservation changed which run came first, so the checker met a run with fewer allocations than the first.
+Commit `6771856` therefore gave every `checkAllAllocationFailures` call the backing allocator with `resize_fail_index = 0` that the FP-0006 and FP-0009 checks already use, and the integrator committed this patch on top of it as `93a46fc`.
+
+The integrator kept case 1 as frozen after the worker's stop-rule report, as "Stop-rule observations" records.
+
+One uninterrupted sequence ran on `93a46fc`, with no commit or source edit during it.
+`raw/integration-binding.log` records `HEAD` `93a46fc` and an empty status, including ignored files, for every source root before the gates, and both again after the last run.
+
+- `gates/2026-10-09T11-12-56-386Z-repo-check-e933b0bc.json`
+- `gates/2026-10-09T11-12-56-709Z-controller-test-4bdf9a6e.json`, with 192 of 192 controller tests.
+- `gates/2026-10-09T11-13-32-136Z-zig-fmt-a4c585ab.json`
+- `gates/2026-10-09T11-13-32-417Z-zig-test-7f4a2e96.json`
+- `gates/2026-10-09T11-13-52-851Z-c-abi-fcb3da66.json`
+
+`raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0050-integration-cache` and the recorded override `ZIG_GLOBAL_CACHE_DIR`: 65 of 65 build steps and 222 of 222 tests.
+`raw/integration-bun.log` records Bun 1.4.2 with 192 of 192 controller tests, and `raw/integration-abi.log` records `abi-check` with result `pass`.
