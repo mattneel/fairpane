@@ -34,18 +34,19 @@
       ]
     },
     "FP-0003": {
-      "status": "implemented",
-      "owner": "fairpane-core worker FP0003Corpora, integrated by root-integrator",
+      "status": "active",
+      "owner": "fairpane-core worker FP0003Rework, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0003/README.md",
         "engineering/evidence/FP-0003/gates/2026-10-09T00-48-44-040Z-repo-check-550936e2.json",
         "engineering/evidence/FP-0003/gates/2026-10-09T00-48-44-231Z-controller-test-6714112b.json",
         "engineering/evidence/FP-0003/raw/corpus-verify.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0003/reviews/review-1-reject.json",
       "notes": [
         "Source digest 95d74b67ef7b7d1b234c1cdba198af30861d9fc66b76b5ab050afc23e5ba30cf. Test262 and WPT pinned; WPT applicability blocked on the manifest tool's Python requirements.",
-        "Awaiting fairpane-review and fairpane-spec. The specs/corpora.json pins follow their approval in a separate commit."
+        "fairpane-review and fairpane-spec rejected commit ce34ffc because WPT has no explicit denominator. See engineering/evidence/FP-0003/reviews/.",
+        "Contract revision 1 replaces the manifest tool run with the wpt.fyi manifest bound to the pinned tree, and it adds the review fixes."
       ]
     },
     "FP-0004": {

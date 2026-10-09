@@ -1,0 +1,114 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "ce34ffc8d9533e2a0949c94089696c5f98a5d84e"
+  ],
+  "summary": "FP-0003 pins Test262 and WPT using real ls-remote and fetch output. The snapshot records, license data, canonical inventories, Test262 applicability, and import requirements all have evidence behind them, and the logs show the exit statuses and digests they claim. The task still fails acceptance criterion 3. WPT has no applicability denominator: specs/applicability/wpt.json is honestly marked 'blocked' with null counts. That is not the explicit denominator the plan requires. HANDOFF.md also plans to accept FP-0003 and move WPT applicability to a new task, which shrinks the scope without owner approval. Two other problems must be fixed first. The WPT manifest step runs upstream corpus Python with the full user environment and unrestricted network access, while the contract and docs say no network is used outside corpus-fetch. The hostile-path guards in materialize() have no tests at all. Smaller integrity gaps: verify runs no object-hash check, Git replace refs and GIT_* environment variables are honored, the inventory line format is ambiguous for paths that contain a newline, corpus-fetch reuses an existing repository, and corpus-verify reports 'pass' for WPT even though its applicability is blocked. Limitations of this review: I had only file read and search tools, so I ran no commands. I could not run `git show --stat ce34ffc`. I read the working tree at HEAD, and .git/logs/HEAD:25-27 shows three later commits (c4e8d72, 475cb0e, be49a45). [INFERENCE] Going by their messages, those commits do not touch the FP-0003 files.",
+  "criteria": [
+    {
+      "criterion": "Record exact WPT and Test262 revisions without inventing hashes.",
+      "met": true,
+      "evidence": "specs/snapshots/test262.json:5-7 and specs/snapshots/wpt.json:5-7 match the ls-remote output and the fetch '[new ref]' lines in raw/corpus-fetch-test262.log:5-10 and raw/corpus-fetch-wpt.log:5-11. The fetch log JSON (exit 0) shows the tree and commit_date. In code, those come from the fetched commit object (tools/corpus.mjs:187-193), and the ref is checked with rev-parse (corpus.mjs:417-419). specs/corpora.json still has revision: null; it is protected, and the ADR proposes the pins for a separate commit."
+    },
+    {
+      "criterion": "Record license and inventory data before corpus import.",
+      "met": true,
+      "evidence": "Both snapshot records hold license.path, size, sha256, and name, plus inventory.entry_count, total_blob_bytes, and sha256 (specs/snapshots/*.json:10-20). The values match the fetch and verify logs. The snapshots live under the ignored .tools/ directory (.gitignore:1). No corpus file is in the tracked tree."
+    },
+    {
+      "criterion": "Create separate local applicability metadata with explicit denominators.",
+      "met": false,
+      "evidence": "Test262 has an explicit denominator: specs/applicability/test262.json and raw/corpus-applicability-test262.log record 53616 discovered, 0 selected, an empty excluded list, and 53616 unclassified, with a breakdown that sums to 53616. Unclassified and excluded are separate fields, and validateApplicability enforces the sum (corpus.mjs:240-264). WPT has no denominator: specs/applicability/wpt.json records status 'blocked' with discovered, selected, and unclassified all null. raw/wpt-manifest.log shows ModuleNotFoundError: No module named 'yaml', the tool exiting with 70, and the controller exiting with 1. The block is reported honestly and never as success, but the criterion is not met for WPT."
+    },
+    {
+      "criterion": "Add reproducible snapshot and inventory checks.",
+      "met": true,
+      "evidence": "corpus-verify recomputes the tree, commit_date, license, inventory, and Test262 applicability from Git objects only (corpus.mjs:424-444). raw/corpus-verify.log shows both corpora with exit_code 0 and digests that match the records. raw/corpus-verify-missing-snapshot.log shows exit_code 1. The gate log for controller-test reports 78/78 tests, including the 8 contract cases (tests 70-77). Caveats are in the findings: weak tamper resistance at the Git layer, an inventory format that is ambiguous for paths with a newline, and test gaps."
+    },
+    {
+      "criterion": "Record Unicode, CLDR, and font-fixture import requirements without bundling unauthorized fonts.",
+      "met": true,
+      "evidence": "specs/IMPORT_REQUIREMENTS.md covers the version selection rule, the data files, the license terms, and the font admission and per-file provenance rules, citing S25-S34 in specs/sources.json:207-282. A glob for **/*.{ttf,otf,woff,woff2,ttc} over the tracked tree found nothing. specs/corpora.json keeps unicode, cldr, and opentype-fixtures as not-fetched."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "blocker",
+      "path": "specs/applicability/wpt.json",
+      "line": 5,
+      "issue": "WPT applicability is 'blocked' with null counts, so acceptance criterion 3 ('explicit denominators') is unmet for WPT. The contract's fallback (CONTRACT.md: 'records that failure as a blocker and records no WPT count') turns a required denominator into an allowed gap. engineering/HANDOFF.md:24-25 plans to obtain verdicts, apply the corpora.json pins, and then create a new task for the Python environment. Accepting FP-0003 on that basis would shrink a named criterion without owner approval.",
+      "recommendation": "Do not mark FP-0003 accepted until a WPT denominator exists. For example, provision a pinned CPython 3.12 with a recorded offline wheelhouse and digests, as the ADR suggests, then rerun corpus-applicability wpt. Alternatively, get explicit owner approval, through the separate policy-change process, to split WPT applicability into its own task and amend FP-0003's acceptance text."
+    },
+    {
+      "severity": "major",
+      "path": "tools/corpus.mjs",
+      "line": 366,
+      "issue": "corpus-applicability wpt runs upstream Python code from the untrusted corpus checkout (the `wpt` launcher and tools/manifest/*) outside any sandbox. It passes the full process environment (`{ ...process.env, PYTHONDONTWRITEBYTECODE: '1' }`), which can include credentials, and leaves network access unrestricted. The 'no network' statements are claims, not enforcement: CONTRACT.md:72 ('Network access happens only in corpus-fetch'), specs/README.md:35, the corpus.mjs:472 docstring ('without network access'), and ADR 0003:98. --skip-venv-setup and --no-download only stop the launcher's own installs; they do not limit what the corpus code can do. The ADR records no trust decision for running corpus code. AGENTS.md treats test documents as untrusted and forbids running hostile content outside a sandbox.",
+      "recommendation": "Run the manifest tool with a minimal allowlisted environment (PATH, SYSTEMROOT, TEMP, and a fixed HOME/USERPROFILE). Deny network access where the platform allows it, or run it in a sandbox. Record the trust decision in ADR 0003. Reword the network claims to say what is actually enforced."
+    },
+    {
+      "severity": "major",
+      "path": "tools/selftest.mjs",
+      "line": 501,
+      "issue": "The FP-0003 tests cover the 8 contract cases. However, nothing tests the one function that writes files named by untrusted corpus paths: materialize() at corpus.mjs:287-326. Its guards for '..', '.git', backslash, control bytes, Windows reserved names, trailing dot or space, and case-folded collisions are all untested, so a regression could write outside <corpora-root>/wpt/checkout without any test failing. These are also untested: license and commit_date mismatches, a missing or altered applicability record during verify (corpus.mjs:446-470), the rule that a blocked record must carry null counts (corpus.mjs:250-254), wptManifestCounts (corpus.mjs:332-346), and the CLI's exit status 1 on a mismatch (only a missing snapshot is checked at the CLI level, selftest.mjs:524-526).",
+      "recommendation": "Add fixture-tree tests in which materialize() rejects '../x', 'a/../../x', '.GIT/config', a path with a backslash, a path with a control byte, 'CON.txt' and 'aux' (on Windows), and a case-only collision, and assert that nothing is written outside the checkout. Also add verify tests for license, commit_date, and applicability mismatches, tests for blocked-record validation, a wptManifestCounts test against a small manifest fixture, and a CLI test that exits 1 on a digest mismatch."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 40,
+      "issue": "Git child processes inherit every GIT_* variable (GIT_OBJECT_DIRECTORY, GIT_ALTERNATE_OBJECT_DIRECTORIES, GIT_REPLACE_REF_BASE, GIT_CONFIG_PARAMETERS and similar) and honor refs/replace in the snapshot repository. verify runs no object-hash check: there is no `git fsck`, and git cat-file and recursive tree reads do not rehash objects. [INFERENCE from Git behavior] Because of this, the recorded commit ID is checked at verify time only against the local ref. One reproduction: in the snapshot repo, run `git replace -f <fakeOID> <realCommit>`, where <fakeOID> is any existing object; point refs/heads/main at <fakeOID>; set record.commit=<fakeOID>. verify then sees the same tree, date, and inventory and passes. Blob content stays protected by the SHA-256 inventory, so this affects revision identity only, not content.",
+      "recommendation": "Pass --no-replace-objects (or set GIT_NO_REPLACE_OBJECTS=1) and drop inherited GIT_* variables. During verify, bind the commit ID to content: rehash the commit and tree objects locally (SHA-1 of '<type> <size>\\0'+body), or run `git fsck --full --strict --no-dangling` on the snapshot."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 173,
+      "issue": "The canonical inventory encoding cannot always be decoded uniquely, because a Git path may contain LF. [INFERENCE] Reproduction: tree A holds 'd/a\\n100644\\t<sha256(Y)>\\t<n>\\td/b' with content X and 'd/c' with content Z. Tree B holds 'd/a' with content X and 'd/b\\n100644\\t<sha256(Z)>\\t<n>\\td/c' with content Y, where |Y|=|Z|=n. Both produce the same bytes, sha256, entry_count, and total_blob_bytes. This requires the pinned upstream itself to contain LF paths. If the upstream has none, a substituted tree with LF paths changes entry_count. Still, the proposed corpora.json pin stores only inventory_sha256 (ADR 0003, 'Proposed specs/corpora.json values').",
+      "recommendation": "Reject LF in tree paths inside listTree. Alternatively, amend the frozen format to NUL-terminate or length-prefix the path. That is a contract change and needs approval."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 410,
+      "issue": "corpus-fetch reuses an existing repository.git. If the requested commit already exists locally, possibly as tampered objects, git fetch can skip the transfer and transfer.fsckObjects never sees those objects. The record is then built from the pre-existing local objects. Both evidence logs show a fresh `init --bare`, so the current pins are unaffected.",
+      "recommendation": "Fetch into a fresh temporary bare repository and atomically replace the snapshot. Alternatively, run fsck on the snapshot after fetching."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 442,
+      "issue": "corpus-verify wpt returns result 'pass' and exit 0 while WPT applicability is 'blocked'. The block shows only in the nested 'applicability' object. A blocked record is not checked beyond its commit (corpus.mjs:456), so rewriting a counted WPT record to 'blocked' with null counts would still verify as 'pass'. engineering/evidence/FP-0003/README.md:34 says 'Both passed'.",
+      "recommendation": "Return a distinct top-level result, such as 'pass-applicability-blocked', or a 'denominator_complete': false field. Say explicitly in the README that WPT verification covers only the snapshot, not applicability."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0003/README.md",
+      "line": 29,
+      "issue": "The README says raw/wpt-manifest.log 'records the failed manifest run with exit status 1'. The manifest tool actually exited with 70, as blocker.reason in that log and ADR 0003 state. Status 1 is the controller's exit code.",
+      "recommendation": "Say that the WPT manifest tool exited with 70 and that the controller exited with 1."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0003-corpus-snapshots.md",
+      "line": 96,
+      "issue": "'The pinned commit has 16 symbolic links, all under tools/third_party/websockets/' has no preserved command output. raw/wpt-manifest.log shows only {\"files\":164551,\"submodule_directories\":0}.",
+      "recommendation": "Record a command that lists the mode-120000 entries of the pinned tree, or remove the claim."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/policy.json",
+      "line": 42,
+      "issue": "'specs' is a policy root, so this commit's new specs files (snapshots, applicability, IMPORT_REQUIREMENTS.md, sources.json S25-S34) change the policy digest (17 files, 004e5036…). The contract allows writes under specs except corpora.json, and corpora.json is unchanged. Under AGENTS.md ('Keep acceptance-policy changes separate'), fairpane-spec should still approve this policy change explicitly.",
+      "recommendation": "Have fairpane-spec approve the policy-root additions explicitly."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0003/raw/corpus-verify.log",
+      "line": null,
+      "issue": "The acceptance corpus-verify runs used `record --env FAIRPANE_CORPORA_DIR=C:\\src\\fairpane\\.tools\\corpora` (see environment_overrides in RESULT), not the exact contract command. The value equals the default, so the result is equivalent. These runs are plain logs, not gate receipts, so they are not bound to the source or policy digests.",
+      "recommendation": "Run the exact contract commands, or document the override. Consider making corpus-verify a gate so that its receipt binds the source and policy digests."
+    }
+  ],
+  "commands_run": []
+}

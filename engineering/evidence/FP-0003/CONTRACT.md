@@ -124,3 +124,75 @@ Expected test denominator: the existing controller tests plus the eight cases ab
 - No test runner, expectation file, or conformance result exists in this task.
 - Unicode, CLDR, font, WebAssembly, WebGPU, and WebGL corpora stay unfetched.
 - This task does not change acceptance thresholds or required capability families.
+
+## Revision 1
+
+Revision 1 follows the rejecting reviews in `engineering/evidence/FP-0003/reviews/review-1-reject.json` and `engineering/evidence/FP-0003/reviews/spec-review-1-reject.json`.
+It supersedes each earlier statement that it contradicts.
+Every earlier exact test case still applies.
+
+### WPT denominator
+
+Plan criterion 3 requires an explicit WPT denominator, so a blocked WPT record no longer satisfies this task.
+The controller no longer runs the WPT manifest tool or any other code from a corpus.
+It obtains the official manifest that wpt.fyi publishes for the pinned commit from `https://wpt.fyi/api/manifest?sha=<commit>`.
+`corpus-fetch wpt` stores that manifest beside the snapshot and records its URL, byte size, and SHA-256 in the snapshot record.
+The fetch requires the response header `x-wpt-sha` to equal the pinned commit.
+
+The controller binds the manifest to the pinned tree.
+For every manifest path, the manifest hash must equal the Git blob ID of that path in the pinned tree.
+A manifest path that the tree lacks, or a hash mismatch, fails the fetch and the verification.
+`engineering/decisions/0003-corpus-snapshots.md` records the trust decision: upstream continuous integration classifies item types, and the controller verifies path and content correspondence.
+
+WPT discovery counts manifest items of every type except `support`, `spec`, and `test262`.
+Each item is one test URL, as upstream `TypeData.to_json` writes it.
+The record reports `test262` items separately, with the vendored Test262 revision from `third_party/test262/vendored.toml`, because Fairpane runs Test262 from its own pinned corpus.
+The record reports counts for each item type.
+This task selects and excludes no tests, so every discovered WPT test stays unclassified.
+The ADR records that `conformancechecker` items test HTML validators and that `manual` items need human interaction, for the later selection task.
+
+### Pins and verification
+
+When `specs/corpora.json` pins a revision, `corpus-fetch` fetches exactly that commit.
+Moving a snapshot to a new upstream head needs a separate `corpus-repin <id>` command and a protected policy change.
+`corpus-verify` fails when the snapshot commit, inventory SHA-256, license record, or manifest SHA-256 differs from a pin in `specs/corpora.json`.
+`corpus-verify` returns a top-level result other than `pass` whenever any applicability record lacks a denominator.
+
+Every Git child process runs with replace objects disabled and without inherited `GIT_*` variables.
+`corpus-verify` binds the recorded commit ID to content, by rehashing objects or by `git fsck --full --strict --no-dangling`.
+`corpus-fetch` fetches into a fresh repository and replaces the snapshot only after the record validates.
+The inventory rejects any tree path that contains a line feed.
+
+Test262 discovery excludes every file whose name contains `_FIXTURE`, as upstream `INTERPRETING.md` states.
+
+### Import requirements
+
+`specs/IMPORT_REQUIREMENTS.md` names every data file in the spec review's findings.
+These include normalization, segmentation, line breaking, bidirectional, script, IDNA, and emoji data, with the consuming specifications.
+It states that ECMA-402 defines the sanctioned unit identifiers.
+It allows the CLDR `Public` directory alternative only where that directory exists.
+It records the license file at a pinned tag as the governing text.
+It states that a corpus record covers only local use of third-party files inside the corpus.
+It requires each such file's own license before any copy or fixture use.
+It adds condition 5 of the SIL Open Font License 1.1.
+
+### Additional exact test cases
+
+9. Verification fails when the license digest, the commit date, or an applicability count differs from its record.
+10. `corpus-verify` exits with status 1 through the controller command on an inventory digest mismatch.
+11. A replace ref that substitutes the recorded commit cannot make verification pass.
+12. A tree path that contains a line feed fails the inventory.
+13. WPT counting of a fixture manifest reports per-type counts, excludes `support`, `spec`, and `test262` from discovery, and reports `test262` separately.
+14. A fixture manifest with a path that the tree lacks, or with a hash that differs from the blob ID, fails binding.
+15. A pinned revision in a fixture `corpora.json` makes verification fail for a snapshot at another commit, inventory digest, or manifest digest.
+16. Test262 discovery excludes a file named `a_FIXTURE_b.js` and a file named `x_FIXTURE.js`.
+
+Expected test denominator: the existing controller tests plus the sixteen FP-0003 cases.
+
+### Evidence corrections
+
+`engineering/evidence/FP-0003/README.md` states that the WPT manifest tool exited with status 70 and that the controller exited with status 1.
+ADR 0003 keeps the symbolic-link count only with a recorded listing command, or drops it.
+No committed record contains a local user path.
+The acceptance commands run exactly as the Acceptance section lists them, without environment overrides.
+Both reviewers review the revision, and `fairpane-spec` explicitly approves the policy-root additions under `specs`.

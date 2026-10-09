@@ -1,0 +1,143 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "c4e8d721fabf61d3432abe50ffa6f98f9a29fec2",
+    "475cb0ec42d50937caebb85aab1b60f0da990c5e"
+  ],
+  "summary": "I reject both commits. ADR 0004 carries over most of the memo accurately, and the owner's GPUI-hosted chrome answer is handled correctly. However, the plan does not work in the order it sets, and it weakens several protections. FP-0032 must deliver IME events through the public contract and define a frame protocol. It must also produce evidence for the accessibility and address-bar IME rows of the ADR's qualification table. Those capabilities only arrive in FP-0030 and FP-0018, and both of those tasks depend on FP-0017, which depends on FP-0032. FP-0032's allowed paths also exclude api, include, src, and bindings, so it cannot add those capabilities itself. Both commits narrow exclusions without authority from the memo: crates are no longer forbidden to parse or style web content or chrome, and HTTP caching and CORS were dropped from the forbidden network semantics. FP-0029 and docs/ABI_AND_WRAPPERS.md dropped the rule that the wrapper claims no Send or Sync bound the C contract does not grant. FP-0029 also dropped the path for extending the interface metadata. The ADR says the three CI consumers belong to FP-0033, but the plan assigns them to FP-0034. All protected-path changes are in c4e8d72, as required. I could not confirm that check and test pass at 475cb0e: this session has no shell tool, so I executed no commands. To read the actual commit contents, I fetched the public GitHub diffs (https://github.com/mattneel/fairpane/commit/<sha>.diff for both commits). c4e8d72 does not touch plan.json, so the 475cb0e diff equals the ce34ffc..475cb0e diff for plan.json. The local working tree has later changes, for example FP-0005 is 'active' in engineering/state.json, so I took commit contents from the diffs and checked line numbers against the working tree.",
+  "criteria": [
+    {
+      "criterion": "1. Fidelity of ADR 0004 to the owner memo and answers",
+      "met": false,
+      "evidence": "These items are present and accurate: the layer table (ADR 0004:30-35), the behavior table, with the memo's toolkit example explicitly replaced per the 'GPUI hosts engine-rendered chrome' answer (:44-53), the canonical wrapper rules (:57-66), Engine being neither Send nor Sync (:68-71), the frame release protocol (:73-76), no third-party build dependency (:78-81), the qualification table (:89-98), the RenderImage first path (:100-103), the GPUI Kit pairing and the WebView/JS exclusion (:105-109), the candidate crates (:111-118), transport rules (:120-123), the process arrangement (:125-133), the three consumers (:135-145), Rust 1.99.0, nightly, Cargo.lock, and idle costs (:147-153). These items are distorted or added beyond the memo: Consequences assigns the consumers to FP-0033 (:167) when the plan puts them in FP-0034. 'The trusted chrome document runs in its own renderer' (:132) appears in neither the memo nor the answers. cargo-deny gains 'bans' (:118). 'Cargo unifies features inside a workspace' (:143) drops the memo's qualifier 'in defined circumstances'. 'Shell code never handles raw engine pointers' (:65) drops the memo's qualifier 'ordinary'. The cookie rule becomes an absolute 'applies no cookie policy' (:122). These memo items are omitted: GPUI Kit 0.7.1, and 'custom controls still require correct semantics and keyboard behavior'. The ADR also never says that the owner's 00:41 answer, which extended the exception to 'the Rust wrapper', was superseded by the 00:49 memo. HANDOFF.md:64 records this only indirectly."
+    },
+    {
+      "criterion": "2. Repository-wide consistency with shell-only crates and GPUI hosting engine-rendered chrome",
+      "met": false,
+      "evidence": "Outside engineering/evidence/, nothing still says the wrapper may use crates, that crates or native widgets render chrome, or that GPUI renders chrome. I checked AGENTS.md, CHARTER, README, AGENT_LAUNCH, .omp/RULES.md, .omp/agents, book/src, docs, and the engineering JSON and handoff files. The remaining inconsistencies are these. ADR 0004:6 and :167 reference FP-0033 for the CI consumers, but plan.json:1587 assigns them to FP-0034. docs/PRODUCT.md:55 still says 'The shell renders that document'. .omp/agents/fairpane-platform.md:10 lets GPUI 'only host, route input to, and present', which leaves out the accessibility hosting that the owner's answer grants. The weakened prohibitions (missing 'parse' and 'style') appear consistently across AGENTS.md:25, ARCHITECTURE.md:25, SECURITY.md:29, and dependencies.json:42, which is itself a policy defect."
+    },
+    {
+      "criterion": "3. Plan integrity for FP-0017, FP-0020, FP-0029, FP-0030, FP-0032, FP-0033, and FP-0034",
+      "met": false,
+      "evidence": "There is no graph cycle. I traced the edges: FP-0032 needs FP-0016 and FP-0029, FP-0017 needs FP-0006, FP-0016, FP-0029, and FP-0032, FP-0030 and FP-0020 need FP-0017, FP-0034 needs FP-0017 and FP-0033, and FP-0033 needs FP-0001. The plan still does not work in that order. FP-0032:1526 requires IME delivery 'through the public contract', and FP-0030:1425-1428 is the task that adds IME to the contract through an ABI schema change. FP-0032:1523 and :1525 require a public frame path and a frame protocol, which FP-0018 adds and which FP-0016 (src-only) does not. FP-0032's allowed_paths exclude api, include, src, and bindings. FP-0032 omits the memo's accessibility area, yet ADR 0004:164 says FP-0032 qualifies GPUI 'through the prototype evidence above'. Several criteria are weaker than at ce34ffc. The FP-0029 rule 'Claim Send and Sync bounds only where the C contract grants them' became an Engine-only rule (plan.json:1370). The FP-0029 clause 'extend that metadata through a reviewed schema change where it falls short' was dropped (:1368). The FP-0029 'non-cloneable owners' requirement was dropped (:1369). FP-0032:1528 measures budgets instead of meeting them, against the memo's 'meet explicit budgets'."
+    },
+    {
+      "criterion": "4. Policy hygiene: protected paths only in c4e8d72, and check and test pass at 475cb0e",
+      "met": false,
+      "evidence": "The GitHub diff of c4e8d72 contains AGENTS.md, docs/CHARTER.md, engineering/qualification.json, engineering/dependencies.json, ADR 0001, ADR 0004, and three evidence files. The 475cb0e diff touches no protected path: it changes .omp/agents, AGENT_LAUNCH, README, docs other than CHARTER, HANDOFF, plan.json, and state.json. The separation is therefore correct. I have no observed evidence that check and test pass at 475cb0e. I ran neither command, and the repository holds no receipt bound to 475cb0e. By static reading of tools/lib.mjs:135-197 and :198-245, validatePlan and checkRepository should accept the plan, the workstreams, and the gates [INFERENCE]. The policy commit also weakens protected exclusions (see findings), and the ADR is marked 'Status: accepted' and pushed before independent approval."
+    },
+    {
+      "criterion": "5. Prose: fragments, spelling, and one instruction per sentence",
+      "met": false,
+      "evidence": "I found no non-American spelling. Several procedural sentences carry more than one instruction: AGENT_LAUNCH.md:40, .omp/agents/fairpane-platform.md:10-11, and plan.json:785, 791, 1368, 1370, 1372, and 1529. There are fragments in engineering/dependencies.json:26, 39, 42-47, and 52 and in the ADR and ARCHITECTURE table cells. docs/PRODUCT.md:60 has an ambiguous 'it'."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "blocker",
+      "path": "engineering/plan.json",
+      "line": 1526,
+      "issue": "The plan cannot be completed in the order it sets. FP-0032 requires 'Deliver keyboard, pointer, and IME composition events from GPUI to the engine through the public contract' (:1526), changing engine pixels and a frame protocol through the wrapper (:1523, :1525), and evidence 'for each area' (:1531). The ADR table for those areas includes accessibility and IME in the engine-rendered address bar. The public IME, editing, and accessibility capabilities come from FP-0030 (:1424-1428), and public frames come from FP-0018. Both depend on FP-0017, which depends on FP-0032 (:750-755). FP-0032's allowed_paths (apps, tests, tools, engineering/decisions, engineering/dependencies.json) prevent it from adding any of those capabilities. To reproduce, trace FP-0032 → FP-0030 (IME ABI) → FP-0017 → FP-0032.",
+      "recommendation": "Add a task that comes before FP-0032 and depends on FP-0016 and FP-0021. That task should add the public frame export, input events, and IME composition to the ABI schema, with C and Rust lifecycle tests. Make FP-0032 depend on it. Alternatively, limit FP-0032's IME and accessibility evidence to what the contract exposes at that point, and add a requalification criterion to FP-0030 so the memo's Text input and Accessibility rows are proven once FP-0030 lands. Either way, keep every memo evidence area."
+    },
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 1370,
+      "issue": "This is a weakened safety criterion. At ce34ffc, FP-0029 required 'Claim Send and Sync bounds only where the C contract grants them'. It now constrains only the initial Engine type. docs/ABI_AND_WRAPPERS.md also lost 'The idiomatic crate claims no Send or Sync bound that the C contract does not grant' (now :92-98). As written, a Document or frame type could implement Send or Sync without a C-contract grant. .omp/agents/fairpane-bindings.md:10 still states the general rule, so the documents disagree.",
+      "recommendation": "Restore 'Claim Send and Sync bounds only where the C contract grants them' alongside the Engine-specific criterion, and restore it in docs/ABI_AND_WRAPPERS.md."
+    },
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 1368,
+      "issue": "FP-0029 dropped the parent's clause 'extend that metadata through a reviewed schema change where it falls short' and the 'non-cloneable owners' requirement (:1369). FP-0029 now also requires 'typed input' batches and 'scoped buffer views' (:1369), but no prerequisite task provides an engine input or frame ABI. FP-0006 covers lifecycle and host requests, and FP-0029's allowed_paths exclude src.",
+      "recommendation": "Restore the metadata-extension and non-cloneable-owner criteria. Either give FP-0029 a prerequisite that supplies the input and frame ABI, or limit the input and buffer criteria to capabilities the contract exposes, with each gap recorded as a contract task."
+    },
+    {
+      "severity": "major",
+      "path": "AGENTS.md",
+      "line": 25,
+      "issue": "This change weakens a protected exclusion. ce34ffc said 'Never let a crate parse, style, lay out, paint, script, or make security decisions for web content or chrome.' c4e8d72 drops 'parse' and 'style' and narrows the security clause. The same narrowing appears in engineering/dependencies.json:42, docs/ARCHITECTURE.md:25, and docs/SECURITY.md:29. dependencies.json also dropped the forbidden 'Web-visible network semantics, such as HTTP, cookies, caching, or CORS' (now :44 covers only redirects, cookies, and transformation) and the duplicate-crate check. Neither the memo nor the answers authorize allowing crates to parse or style web content or chrome, or to implement caching or CORS.",
+      "recommendation": "In a separate policy commit, restore 'parse' and 'style' (and caching and CORS) in AGENTS.md, dependencies.json, ARCHITECTURE.md, and SECURITY.md. Keep the new 'shape' and broker wording, and obtain independent approval."
+    },
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 1522,
+      "issue": "FP-0032's criteria leave out the memo's Accessibility evidence area ('Focus and actions cross the chrome/page boundary correctly'). They also cut the Text input area down to raw event delivery, without IME in the address bar and a page field, and replace 'meet explicit budgets' with 'Measure ... against budgets' (:1528). ADR 0004:164 claims that FP-0032 qualifies GPUI through the full table at :91-98.",
+      "recommendation": "Add explicit FP-0032 criteria, or criteria in a sequenced follow-up task, for every memo evidence area. Require that idle CPU and latency meet budgets recorded before the run."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0004-first-party-wrapper-language.md",
+      "line": 167,
+      "issue": "Consequences says '`FP-0033` runs the three consumers in continuous integration', and Related tasks (:6) omits FP-0034. In the plan, FP-0033 runs the repository gates in GitHub Actions and FP-0034 builds the three consumers (plan.json:1587).",
+      "recommendation": "Change :167 to FP-0034 and add FP-0034 to Related tasks."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0004-first-party-wrapper-language.md",
+      "line": 132,
+      "issue": "'The trusted chrome document runs in its own renderer, separate from every page renderer' appears in neither the memo nor the answers. It is now a hard criterion in FP-0017 (plan.json:785) and a present-tense statement in SECURITY.md:17. Other additions also go beyond the source: 'bans' at :118, an unqualified 'Cargo unifies features inside a workspace' at :143, 'Shell code never handles raw engine pointers' at :65 without the memo's 'ordinary', and an absolute 'applies no cookie policy' at :122.",
+      "recommendation": "Label the separate chrome renderer as a project design choice with its rationale, or cite its source. Restore the memo's qualifiers."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 786,
+      "issue": "FP-0017 now requires renderer hosts that exchange validated process-protocol messages. No prerequisite defines or validates the process protocol: FP-0020 owns 'Validate protocol sizes, request ownership, and cancellation' and depends on FP-0017. This repeats the existing ordering issue at :789, where broker-validated origin is required before the broker exists.",
+      "recommendation": "Add a prerequisite task for the process protocol, or move the renderer-host criterion to a task after FP-0020."
+    },
+    {
+      "severity": "minor",
+      "path": "docs/PRODUCT.md",
+      "line": 55,
+      "issue": "'The shell renders that document through the same public contract' conflicts with :58-60 and the owner's answer that Fairpane renders the chrome and GPUI does not. Line 60, 'a qualification prototype must confirm it before the shell depends on it', has an ambiguous antecedent.",
+      "recommendation": "Write 'Fairpane renders that document, and the shell presents it through the same public contract as page content.' Change :60 to 'A qualification prototype must confirm GPUI before the shell depends on it.'"
+    },
+    {
+      "severity": "minor",
+      "path": ".omp/agents/fairpane-platform.md",
+      "line": 10,
+      "issue": "'let GPUI only host, route input to, and present it' leaves out the AccessKit accessibility hosting that the owner's answer assigns to GPUI. The sentence also carries two instructions, and :11 carries three.",
+      "recommendation": "Split each sentence into one instruction, and include accessibility delivery in GPUI's permitted role."
+    },
+    {
+      "severity": "minor",
+      "path": "AGENT_LAUNCH.md",
+      "line": 40,
+      "issue": "This procedure sentence carries two instructions: 'Use qualified, pinned crates ... and keep the wrapper crates first-party.'",
+      "recommendation": "Split it into two sentences."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 1368,
+      "issue": "Several acceptance criteria join two or three instructions in one sentence: :785, :791, :1368, :1370, :1372, and :1529.",
+      "recommendation": "Split each into one instruction per criterion."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/dependencies.json",
+      "line": 39,
+      "issue": "Policy prose contains sentence fragments: :26 'First-party code ... only.', :39 'Host services such as ...', :42-47 gerund and noun phrases, and :52 'Hosts engine-rendered chrome.'",
+      "recommendation": "Rewrite them as complete sentences."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/decisions/0004-first-party-wrapper-language.md",
+      "line": 3,
+      "issue": "The ADR is marked 'Status: accepted', and the policy commit was pushed to master before independent approval. AGENTS.md requires separate independent approval for acceptance-policy changes, and docs/GIT_OPERATIONS.md:38 requires passing check and test at every master commit. I found no recorded check or test receipt for c4e8d72 or 475cb0e.",
+      "recommendation": "Record the check and test receipts for both commits. Treat this review as the independent approval step, and land the fixes as a follow-up policy commit."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/decisions/0004-first-party-wrapper-language.md",
+      "line": 105,
+      "issue": "The ADR omits the memo's GPUI Kit 0.7.1 reference and the statement that custom controls still need correct semantics and keyboard behavior. It also does not record that the owner's 00:41 answer extended the exception to 'the Rust wrapper' before the 00:49 memo narrowed it.",
+      "recommendation": "Add one sentence recording that the memo supersedes the earlier wrapper exception, and keep the version as context for FP-0032."
+    }
+  ],
+  "commands_run": []
+}

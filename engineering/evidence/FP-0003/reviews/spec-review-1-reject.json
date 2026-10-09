@@ -1,0 +1,142 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "ce34ffc"
+  ],
+  "summary": "I made no repository changes and ran no shell, git, or test commands. I reviewed the FP-0003 files as they exist in the working tree and could not run `git show --stat ce34ffc` to check the commit diff itself. Upstream facts were checked against the GitHub REST API and official documentation.\n\nQ1: Both recorded revisions exist upstream, and their tree IDs and committer dates match. The license paths, byte sizes, and stated names also match upstream. I did not recompute the license SHA-256 digests or the inventory digests.\n\nQ2: The Test262 discovery correctly keeps the top-level `harness/` directory and non-`.js` fixtures out of the count, and correctly counts `test/harness` and `test/staging`. It counts files, not upstream execution scenarios, and it does not parse frontmatter. It matches fixtures by the `_FIXTURE.js` suffix, while upstream says any name containing `_FIXTURE`.\n\nQ3: Counting WPT manifest items and leaving out `spec` and `support` matches upstream manifest semantics, including `.any.js`, window and worker variants, and print reftests. Waiting on the official manifest tool instead of approximating the counts is faithful to upstream. However, the WPT snapshot vendors its own Test262 copy at a different revision. The rule as written would count those `test262` items as WPT tests, and nothing records a decision about them.\n\nQ4: No font is bundled, and the license statements match the Unicode, CLDR, and OFL sources. The list of Unicode data files is missing inputs that later tasks need.\n\nQ5: The proposed pin values match the evidence. Nothing would enforce them, though: `corpus-fetch` always fetches the branch head and overwrites the snapshot record, and `corpus-verify` ignores the pinned fields in `corpora.json`.\n\nThe WPT applicability record has no denominator, so acceptance criterion 3 is not met.",
+  "criteria": [
+    {
+      "criterion": "Record exact WPT and Test262 revisions without inventing hashes.",
+      "met": true,
+      "evidence": "specs/snapshots/test262.json:5-7 records commit 2e0a56762801e275a9fdf96dc49d90ba0cddcf63, tree 6a4268a9354a545d41c3b62efebc478ed8c521f4, and commit_date 2026-10-08T13:50:06+02:00. GitHub reports the same tree and a committer date of 2026-10-08T11:50:06Z, which is the same instant (https://api.github.com/repos/tc39/test262/commits/2e0a56762801e275a9fdf96dc49d90ba0cddcf63). specs/snapshots/wpt.json:5-7 records commit b60c4b349d9d167bf354a40bc0d4cbed15174606, tree a499343a14a03239fe23fdb3b183732ddaa6cf4b, and commit_date 2026-10-08T23:14:40+02:00. GitHub reports the same tree and a committer date of 21:14:40Z (https://api.github.com/repos/web-platform-tests/wpt/commits/b60c4b349d9d167bf354a40bc0d4cbed15174606). Both values come from the logged `ls-remote` and fetch output in raw/corpus-fetch-*.log."
+    },
+    {
+      "criterion": "Record license and inventory data before corpus import.",
+      "met": true,
+      "evidence": "The Test262 `LICENSE` file is 2213 bytes upstream, and its text says it is made available under the \"BSD License\" (https://api.github.com/repos/tc39/test262/contents/LICENSE?ref=2e0a567...). The WPT `LICENSE.md` file is 1500 bytes upstream, and its first heading is \"The 3-Clause BSD License\" (https://api.github.com/repos/web-platform-tests/wpt/contents/LICENSE.md?ref=b60c4b3...). Both match the records. I did not independently recompute the SHA-256 digests or inventory digests, because I had no shell. Instead I relied on the logged `corpus-verify` runs (raw/corpus-verify.log, exit 0 for both). Caveat: the WPT license record covers only the top-level license and not the files that carry their own licenses (see findings)."
+    },
+    {
+      "criterion": "Create separate local applicability metadata with explicit denominators.",
+      "met": false,
+      "evidence": "specs/applicability/test262.json records 53616 discovered tests, all unclassified, under an explicit rule. specs/applicability/wpt.json:5 has status \"blocked\" with discovered, selected, and unclassified all null, so there is no WPT denominator. The contract allows recording a blocker, but the plan criterion asks for explicit denominators, and WPT has none."
+    },
+    {
+      "criterion": "Add reproducible snapshot and inventory checks.",
+      "met": true,
+      "evidence": "tools/corpus.mjs:424-444 (`verifyCorpus`) recomputes the tree, committer date, license, and inventory from Git objects. The controller-test gate log (gates/...-controller-test-6714112b.log:85-87) reports 78 tests, 78 passing, 0 failing, and includes the eight FP-0003 cases (raw/test.log entries 60-67). Caveat: `corpus-fetch` cannot re-fetch a recorded commit, so a fresh machine cannot rebuild the snapshot through the controller (see the major finding)."
+    },
+    {
+      "criterion": "Record Unicode, CLDR, and font-fixture import requirements without bundling unauthorized fonts.",
+      "met": false,
+      "evidence": "No font file is tracked: a search for `**/*.{ttf,otf,woff,woff2,ttc}` found nothing. The license and version-selection statements match their sources (https://www.unicode.org/copyright.html, https://www.unicode.org/reports/tr44/, https://cldr.unicode.org/index/downloads). However, the frozen contract says the file \"names the data files that later tasks need\", and specs/IMPORT_REQUIREMENTS.md:37-52 leaves out the data files for normalization, segmentation, line breaking, bidi, and IDNA, as well as the emoji sequence files."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "blocker",
+      "path": "specs/applicability/wpt.json",
+      "line": 5,
+      "issue": "The WPT applicability status is \"blocked\" and discovered, selected, and unclassified are all null. Plan criterion 3 asks for explicit denominators, and WPT has none. The blocker record is accurate: raw/wpt-manifest.log shows `ModuleNotFoundError: No module named 'yaml'`. The task still does not meet the criterion.",
+      "recommendation": "Keep FP-0003 open, or split the WPT denominator into an explicitly approved follow-up task with a pinned Python and an offline wheelhouse. Do not mark FP-0003 accepted while the WPT denominator is null."
+    },
+    {
+      "severity": "major",
+      "path": "tools/corpus.mjs",
+      "line": 323,
+      "issue": "`WPT_NON_TEST_TYPES` leaves out only `spec` and `support`. The pinned WPT manifest also has a `test262` item type (https://raw.githubusercontent.com/web-platform-tests/wpt/b60c4b3.../tools/manifest/item.py:196-199). It generates those items from the vendored copy at `third_party/test262`, which is pinned to Test262 revision 7ab7fafa0003f73fc85c1b95d88094d33f7eb8bd (third_party/test262/vendored.toml). The pinned Test262 corpus is at 2e0a5676.... The rule would therefore count a second copy of Test262, at a different revision, inside the WPT denominator. Nothing records a decision about this, or about the `conformancechecker` items, which test HTML validators rather than browsers. This vendored copy is also why the manifest tool imports yaml.",
+      "recommendation": "Record an applicability decision in the ADR before any WPT count is produced. Either report `test262` items separately from WPT tests, or tie them to the pinned Test262 corpus. Also decide how `conformancechecker` and `manual` items are classified."
+    },
+    {
+      "severity": "major",
+      "path": "tools/corpus.mjs",
+      "line": 405,
+      "issue": "`fetchCorpus` always runs `ls-remote ... HEAD` and fetches whatever the branch head is, then overwrites specs/snapshots/<id>.json (lines 405-420). `verifyCorpus` compares only `upstream` against specs/corpora.json (line 430). Once the pins in ADR 0003:134-156 are applied, nothing enforces `revision`, `inventory_sha256`, or `license_record`. A later `corpus-fetch` would silently move the snapshot past the protected pin, and `corpus-verify` would still pass. The ADR also claims at line 182 that a reviewer can rebuild every field from a fresh fetch of the same commit, but the controller has no way to fetch a specific commit.",
+      "recommendation": "Extend ADR 0003 and the tooling in the same protected-policy change. `corpus-fetch` should fetch the pinned `revision` from corpora.json once a pin exists, and moving to a new head should require a separate re-pin command. `corpus-verify` should fail when the snapshot commit or inventory SHA-256 differs from corpora.json, or when `license_record` points elsewhere."
+    },
+    {
+      "severity": "major",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 37,
+      "issue": "The UCD data-file table lists conformance test files (BidiTest, NormalizationTest, LineBreakTest, GraphemeBreakTest, WordBreakTest) but not the data their algorithms consume. It also leaves out data that ECMAScript and web standards require. Missing: CompositionExclusions.txt and DerivedNormalizationProps.txt for `String.prototype.normalize` under UAX #15. Missing: ucd/auxiliary/GraphemeBreakProperty.txt, WordBreakProperty.txt, and SentenceBreakProperty.txt, plus ucd/emoji/emoji-data.txt (Extended_Pictographic), for UAX #29 and `Intl.Segmenter`. Missing: LineBreak.txt and EastAsianWidth.txt for UAX #14. Missing: BidiBrackets.txt, BidiMirroring.txt, and extracted/DerivedBidiClass.txt for UAX #9. Missing: Scripts.txt and ScriptExtensions.txt. Missing: VerticalOrientation.txt for CSS writing modes. Missing: the UTS #46 IDNA mapping data that the URL Standard's host parsing needs; UAX #44 Table 2a lists it under `.../idna/` (https://www.unicode.org/reports/tr44/). The contract requires the file to name the data files later tasks need.",
+      "recommendation": "Add each consumer and its data file to the table, citing the relevant UAX or UTS and the consuming specification. Then record the corrected list for the `unicode` corpus."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 51,
+      "issue": "The file says each RegExp property file can be found through the UAX #44 property table. The binary properties of strings in ECMA-262 Table 67 (RGI_Emoji, Basic_Emoji, and others) come from UTS #51 files (emoji-sequences.txt and emoji-zwj-sequences.txt) under `.../emoji/`. UAX #44 §4.1 says these \"are not considered formally a part of the UCD\", so its property table will not find them.",
+      "recommendation": "Name the UTS #51 emoji sequence files and their directory explicitly. Cite UTS #51 and ECMA-262 Table 67."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 84,
+      "issue": "The set of sanctioned unit identifiers is defined by ECMA-402 Table 2, which is a fixed subset of CLDR release 38 unit validity data (https://tc39.es/ecma402/ §6.6.2). The `unit.xml` file from the pinned CLDR release does not define that set. As written, the row suggests the pinned file determines which units are sanctioned.",
+      "recommendation": "State that the ECMA-402 table defines the sanctioned units. Keep CLDR only for unit display data."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 70,
+      "issue": "The CLDR releases table shows no `Public/cldr` data directory for several dot releases (46.1, 44.1, and 43.1 show \"n/a\") (https://cldr.unicode.org/index/downloads). For those releases, the alternative pinning rule cannot work. Line 60 also says to keep `unicode.org/license.txt`, even though a Git-tag import carries its own LICENSE file at the tag.",
+      "recommendation": "Allow the Public-directory alternative only when that directory exists. Record the repository's LICENSE file at the pinned tag as the governing license text."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 131,
+      "issue": "The pinned WPT tree contains third-party fonts that carry their own licenses, not WPT's BSD license. Examples are fonts/Lato-*.ttf, GentiumPlus-R.woff, Scheherazade-Regular.woff, Revalia.woff, and fonts/adobe-fonts/ (https://api.github.com/repos/web-platform-tests/wpt/contents/fonts?ref=b60c4b3...). The same applies to tools/third_party/. The statement that such files \"stay under that corpus's record\" suggests the WPT `LICENSE.md` record covers them, but it does not.",
+      "recommendation": "Say that the corpus record covers local, unredistributed use only. Require each file's own license to be recorded before any such file is used as a fixture or copied."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 111,
+      "issue": "The OFL 1.1 summary leaves out condition 5: the font software must be distributed entirely under the OFL and must not be distributed under any other license (https://openfontlicense.org/open-font-license-official-text/). That matters for a repository that may adopt Apache-2.0.",
+      "recommendation": "Add condition 5, and require OFL fixtures to keep their own license rather than inheriting the repository license."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 267,
+      "issue": "The code leaves out names that end in `_FIXTURE.js`. Upstream INTERPRETING.md says files whose names include `_FIXTURE` \"MUST NOT be interpreted as standalone tests\" (https://raw.githubusercontent.com/tc39/test262/2e0a567.../INTERPRETING.md). I found no divergent name in the test/language/module-code, test/language/import, and test/staging/sm subtrees. I did not check the full tree.",
+      "recommendation": "Match on the substring `_FIXTURE` in the file name, as upstream does. Then regenerate and verify the Test262 applicability record."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0003/README.md",
+      "line": 29,
+      "issue": "The README says raw/wpt-manifest.log records the manifest run failing \"with exit status 1\". The manifest tool itself exited with status 70, as specs/applicability/wpt.json `blocker.reason` and ADR 0003:166 say. Status 1 is the controller's exit status.",
+      "recommendation": "Say that the tool exited with status 70 and the controller command exited with status 1."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/applicability/wpt.json",
+      "line": 33,
+      "issue": "`blocker.output_tail` stores absolute local paths, including the user profile `C:\\Users\\requi\\...`, in a committed spec record. The record's own note says placeholders are used. This data is specific to one machine and identifies a person.",
+      "recommendation": "Normalize the paths in `output_tail` to placeholders, and keep the raw tail only in the evidence log."
+    },
+    {
+      "severity": "note",
+      "path": "specs/applicability/test262.json",
+      "line": 7,
+      "issue": "The discovery unit is one file. Under INTERPRETING.md, a test without the `onlyStrict`, `noStrict`, `module`, or `raw` flags runs twice. `negative`, `includes`, `features` (such as IsHTMLDDA), `async`, and `CanBlockIsFalse`/`CanBlockIsTrue` all affect how a test is applied or executed. This is acceptable for an all-unclassified discovery record, but the file-level count is not the execution denominator.",
+      "recommendation": "Have the later selection task define scenario expansion and frontmatter-based classification, and record both the file count and the scenario count."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/decisions/0003-corpus-snapshots.md",
+      "line": 141,
+      "issue": "`local_path` hard-codes the default `.tools/corpora` root, but `FAIRPANE_CORPORA_DIR` can override that root. The Test262 license name \"BSD License\" is the text's own wording, not an SPDX identifier. The license text also contains an Ecma notice that no third-party patent rights are granted. The proposed values otherwise match the snapshot records and fetch logs.",
+      "recommendation": "Write `local_path` relative to `<corpora-root>`. Consider recording the Ecma patent-rights notice next to the license name."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 336,
+      "issue": "Counting each manifest leaf as its array length minus one matches upstream TypeData.to_json, which writes `[hash] + items` (https://raw.githubusercontent.com/web-platform-tests/wpt/b60c4b3.../tools/manifest/typedata.py:241-242). Each item is one test URL, so `.any.js` global expansions, `.window.js` and `.worker.js` variants, `?variant` metadata, print-reftest, crashtest, wdspec, and manual items are each counted per URL. Blocking on the official manifest tool instead of approximating the counts is faithful to upstream.",
+      "recommendation": "No change is needed for the counting mechanism itself."
+    }
+  ],
+  "commands_run": []
+}
