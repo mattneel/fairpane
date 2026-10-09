@@ -461,7 +461,8 @@
         "Implement frozen tree-construction modes with standard recovery.",
         "Exercise malformed nesting and chunk boundaries through the actual DOM.",
         "Preserve parser continuation and future script-reentrancy boundaries.",
-        "Emit inspectable DOM dumps from real parsing."
+        "Emit inspectable DOM dumps from real parsing.",
+        "Run the tree-construction .dat tests of the pinned WPT corpus under html/syntax/parsing, where html5lib-tests moved them in commit 224991ec, and report pass, fail, and unsupported counts separately."
       ],
       "read": [
         "docs/RENDERING_AND_TEXT.md"
@@ -3197,7 +3198,7 @@
       "id": "FP-0077",
       "title": "Import html5lib-tests and run its tokenizer tests",
       "workstream": "html-dom",
-      "depends_on": ["FP-0008"],
+      "depends_on": ["FP-0008", "FP-0052", "FP-0064"],
       "role": "fairpane-core",
       "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
@@ -3208,7 +3209,7 @@
         "Pin html5lib-tests with a license record and inventory, applying the pin through a separate protected change.",
         "Run every tokenizer test against the HTML tokenizer and report pass, fail, and unsupported counts separately.",
         "Record each difference between html5lib-tests and the HTML Standard, such as error positions and error order, with the standard's text.",
-        "Run the tree-construction tests once FP-0010 lands, or name the task that runs them."
+        "Record that html5lib-tests moved its tree-construction tests to WPT html/syntax/parsing in commit 224991ec, which FP-0010 runs from the pinned WPT corpus."
       ],
       "read": ["engineering/evidence/FP-0008/CONTRACT.md", "engineering/decisions/0003-corpus-snapshots.md"],
       "contract_state": "bootstrap-seed",
