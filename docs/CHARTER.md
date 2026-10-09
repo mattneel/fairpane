@@ -15,11 +15,14 @@ The project owns its portable engine and JavaScript implementation.
 The canonical implementation uses Zig master with reproducible pins.
 Applications integrate through a stable C ABI after that ABI qualifies.
 Language wrappers express their host language's ownership and concurrency conventions.
-One wrapper language is first-party, and the project maintains it with the engine.
+Rust is the first-party wrapper language, and the project maintains its wrapper with the engine.
+The engine stays first-party Zig without third-party runtime dependencies.
+The Rust wrapper and the browser shell embrace the Rust ecosystem for work outside the engine's responsibility.
 
 The public browser is the engine's first embedder.
-Its shell is written in the first-party wrapper language and reaches the engine only through the public embedding contract.
+Its shell is written in Rust and reaches the engine only through the public embedding contract.
 Every capability the browser needs therefore exists in that contract for every other embedder.
+The engine renders the browser chrome as a trusted document through that same contract.
 The browser presents the page with minimal chrome.
 It treats web applications as applications without hiding origin identity or browser security decisions.
 The engine also remains useful independently of the browser application.

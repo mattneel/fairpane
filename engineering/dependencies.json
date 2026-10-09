@@ -12,10 +12,45 @@
     "external_runtime_dependencies": [],
     "compiler_runtime": "Declared through the exact Zig lock."
   },
+  "rust_wrapper_and_shell": {
+    "decision": "engineering/decisions/0004-first-party-wrapper-language.md",
+    "source_roots": [
+      "bindings/rust",
+      "apps/browser"
+    ],
+    "toolchain": "Declared through an exact Rust toolchain lock that task FP-0029 creates.",
+    "policy": "Use the current stable release of the best-maintained crate for each responsibility outside the engine. Pin every crate in a committed Cargo.lock. Review every addition and upgrade.",
+    "allowed_responsibilities": [
+      "Windowing, the OS event loop, and monitor and DPI information",
+      "Keyboard, pointer, touch, and IME event delivery from the OS",
+      "Bridging an accessibility tree to UI Automation, NSAccessibility, and AT-SPI",
+      "Presentation of engine frames to the window",
+      "Process spawning, IPC transport, and sandbox setup that the broker design assigns to the host",
+      "Clipboard transport, file dialogs, notifications, and external-link handoff under explicit host policy",
+      "Configuration, profile directories, logging, crash reporting, command-line parsing, error types, host message serialization, async execution, and tests"
+    ],
+    "forbidden_responsibilities": [
+      "Parsing, styling, layout, painting, or text shaping of web content or chrome",
+      "JavaScript or WebAssembly execution",
+      "A WebView or any embedded browser engine",
+      "URL parsing, origin computation, or any security decision that the engine owns",
+      "Web-visible network semantics, such as HTTP, cookies, caching, or CORS"
+    ],
+    "required_checks": [
+      "Exact toolchain pin",
+      "Committed Cargo.lock",
+      "License check",
+      "Security advisory check",
+      "Banned and duplicate crate check",
+      "Review of each crate addition and upgrade"
+    ],
+    "crates": []
+  },
   "development": {
     "required_hosts": [
       "Node 22+ or a qualified Bun runtime",
       "Zig from the lock",
+      "Rust from its lock once task FP-0029 creates it",
       "OMP supplied by the owner",
       "Git for isolation"
     ],
