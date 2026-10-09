@@ -387,7 +387,8 @@
       "evidence": [],
       "review": null,
       "notes": [
-        "The 2026-10-09 splits route these obligations to this task's frontier decomposition, each reported as unsupported until a task owns it: proper tail calls; the legacy caller and arguments own properties of non-strict functions; CLDR segmentation tailoring; Encoding Standard encoders, TextDecoder and TextEncoder, URL query encoding, and form submission; laboratory Content-Type plumbing for the transport-layer encoding; speculative parsing, custom element definitions, form-owner association, the reset algorithm of resettable elements, process internal resource links, and iframe srcdoc documents; and the scripts and the dictionary-based SA line breaking that the FP-0015 slices report as unsupported."
+        "The 2026-10-09 splits route these obligations to this task's frontier decomposition, each reported as unsupported until a task owns it: proper tail calls; the legacy caller and arguments own properties of non-strict functions; CLDR segmentation tailoring; Encoding Standard encoders, TextDecoder and TextEncoder, URL query encoding, and form submission; laboratory Content-Type plumbing for the transport-layer encoding; speculative parsing, custom element definitions, form-owner association, the reset algorithm of resettable elements, process internal resource links, and iframe srcdoc documents; and the scripts and the dictionary-based SA line breaking that the FP-0015 slices report as unsupported.",
+        "Later routings add: hash-flooding resistance of the engine's internal hash maps, including the FP-0082 parser's name sets (FP-0082 revision 2); and custom element registries, the ::part() pseudo-element, slots, slot assignment, and the flat tree, which no shadow-DOM task owns (FP-0127 pre-freeze check)."
       ]
     },
     "FP-0027": {
@@ -880,7 +881,7 @@
       "owner": null,
       "evidence": [],
       "review": null,
-      "notes": ["Created to own the cascade inputs and the HTML user-agent stylesheet that the FP-0014 contract has no input for."]
+      "notes": ["Created to own the cascade inputs and the HTML user-agent stylesheet that the FP-0014 contract has no input for.", "Criterion 5 adds the shadow-tree selectors :host, :host(), :host-context(), and ::slotted(), because FP-0072 is the only CSS task that depends on FP-0127, as the FP-0127 pre-freeze check found."]
     },
     "FP-0073": {
       "status": "planned",
@@ -966,7 +967,7 @@
     "FP-0100": { "status": "active", "owner": "fairpane-core worker FP0100Tree", "evidence": ["engineering/evidence/FP-0100/CONTRACT.md"], "review": null, "notes": ["Split from FP-0010 as the first slice; it carries FP-0010 criteria 1 to 4 word for word.", "Contract frozen in bd11c2b after the pre-freeze check and re-check of agent Check0100; dispatched on that base."] },
     "FP-0101": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0010 as the WPT .dat harness; it carries FP-0010 criteria 4 and 5 word for word."] },
     "FP-0102": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0010 for the table modes and foster parenting; it carries FP-0010 criteria 1 and 2 word for word."] },
-    "FP-0103": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0010 for templates and framesets; it carries FP-0010 criteria 1 and 2 word for word and follows FP-0127 for declarative shadow roots."] },
+    "FP-0103": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0010 for templates and framesets; it carries FP-0010 criteria 1 and 2 word for word and follows FP-0127 for declarative shadow roots.", "Its criteria 5 and 7 also dump declarative shadow roots, because the HTML Standard makes a declarative shadow root the template's contents, as the FP-0127 pre-freeze check found."] },
     "FP-0104": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0010 for foreign content; it carries FP-0010 criteria 1 and 2 word for word and owns the tokenizer fix that FP-0064 amendment 3 records."] },
     "FP-0105": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0010 for the fragment parsing algorithm; it carries FP-0010 criteria 1 and 3 word for word."] },
     "FP-0106": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from FP-0066 review 1's code findings and FP-0076 review 1's Windows status mapping finding."] },
