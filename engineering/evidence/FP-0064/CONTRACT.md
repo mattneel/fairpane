@@ -478,7 +478,7 @@ Every expected sequence in cases 3 to 10 must also hold when the input is fed on
 | Q8 | script | `<!--</script>` | 13 | `C"<!--</script>" !eof-in-script-html-comment-like-text@1:14 EOF` |
 | Q9 | foreign | `<![CDATA[a]]]>` | 14 | `C"a]" EOF` |
 | Q10 | foreign | `<![CDATA[]\0]` | 12 | `C"]\u0000]" !eof-in-cdata@1:13 EOF` |
-| Q11 | foreign | `<![CDATA[\uD83D\uDE00]]>` | 13 | `C"\uD83D\uDE00" EOF` |
+| Q11 | foreign | `<![CDATA[\uD83D\uDE00]]>` | 14 | `C"\uD83D\uDE00" EOF` |
 | Q12 | foreign | `<![CDATA[x]]>` | 13 | `C"x" EOF` |
 | Q13 | - | `<![CDATA[x]]>` | 13 | `=A5` of FP-0008 |
 | Q14 | plaintext | `a\r</plaintext>` | 14 | `C"a\u000A</plaintext>" EOF` |
@@ -646,4 +646,11 @@ Required reviewer: `fairpane-review`.
   That follows from the FP-0008 rule that preprocessing errors are reported first, as Q15 shows.
 - The standard compares the temporary buffer with "script" in the double escape states, and it builds the buffer in lowercase.
   This contract compares it code unit for code unit.
+
+## Amendments
+
+1. Case 13, row Q11: the Units value is 14, not 13.
+   The input is `<![CDATA[` (9 code units), the surrogate pair (2), and `]]>` (3).
+   Worker `FP0064States` found the frozen value wrong when the units assertion reported "expected 13, found 14", and kept that run as `raw/tests-attempt-1.log`.
+   The expected token sequence is unchanged.
 
