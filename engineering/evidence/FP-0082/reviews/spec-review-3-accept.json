@@ -1,0 +1,27 @@
+{
+  "verdict": "accept",
+  "summary": "I read revision 2 of FP-0082 (84ffa53, c28afb0, f397d8d, as integrated at a7219f9) against the ECMA-262 draft retrieved on 2026-10-09 with Annex B. Revision 2 changes no outcome that the spec makes observable. I found no script it newly accepts that the spec rejects, and none it newly rejects that the spec accepts.\n\n(1) Only `params_seen` feeds an early error. It drives the strict duplicate-parameter rule (15.1.1, 15.2.1) in two places:\n- `parseParams` at parser.zig:1836-1838, for a function whose enclosing code is strict.\n- `becomeStrict` at 1331, for a function body's own Use Strict Directive.\n\n`duplicateParameter` (1338-1346) empties the set with `resetSet`, reserves capacity for the function's own count, and returns the offset of the first repeated name. The keys are StringValues, because the lexer decodes escapes (lexer.zig:486-493), so `a` and `\\u0061` still collide. E79 (@28) and E80 (@14) are unchanged from the frozen contract rows (CONTRACT.md:548-549).\n\n(2) `seen` and `function_names` feed no early error in this subset. They build VarDeclaredNames and functionsToInitialize, which are runtime inputs. The per-level `seen` keeps declared names in the correct body:\n- `functionStart` declares a declaration's name in the enclosing body before `enterBody` (1786-1790).\n- `finishNames` resets the nested body's set before the scope is popped (1851-1863).\n- A nested body therefore never touches an enclosing body's names.\n\n(3) None of the early errors you listed can reach these sets:\n- Lexical declarations are `unsupported lexical_declaration`, so the lexical-versus-var conflicts (14.2.1, 15.2.1, 16.1.1) cannot arise.\n- Non-simple parameter lists are `unsupported`: destructuring, rest, and default parameters.\n- Methods and arrow functions are `unsupported`, so the UniqueFormalParameters rule cannot arise.\n- Block-level functions are `unsupported` or `function_declaration_position` (1491-1499). That decision depends only on context and strictness, not on the sets, so Annex B.3.1 to B.3.3 behave as before.\n- Duplicate top-level function declarations stay valid in strict code, because TopLevelLexicallyDeclaredNames excludes them, and no set rejects them.\n\n(4) The evidence agrees:\n- raw/tests-after-r2.log records `Build Summary: 100/100 steps succeeded; 324/324 tests passed`, with exit 0. That run includes every frozen early-error row.\n- raw/integration-tests-r2.log records 350/350 tests passed.\n- The census outputs of revision 1 and revision 2 are byte-identical. Both have SHA-256 0e5277cd3bad6676e588dd11e196231c95069088f45aa5e993eb947a962148c7 and the same summary over 102,151 runs: false_accept 0, false_syntax_error 0, agree_valid 28777, and agree_error 1949.\n- M14 and M15 fail case 1 as the contract requires (mutation-r2.log:188 and 230).",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "src/js/parser.zig",
+      "line": 274,
+      "issue": "The `Limiter` now refuses resize and remap, so a growing buffer briefly holds both its old and new blocks. That changes which large inputs reach `limit memory`, and possibly the offset where it is reported. This is an implementation limit, not a spec outcome: no frozen limit row changed, and the census reports `limit` 0 both before and after.",
+      "recommendation": "No change is needed. When FP-0098 or a later task tunes `max_memory_bytes`, it should note that the limit now counts the transient copies made during growth."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/parser.zig",
+      "line": 1355,
+      "issue": "The spec observes `seen` and `function_names` only through the AST lists they build, VarDeclaredNames and functionsToInitialize, and through no early error. The byte-identical census output is the only end-to-end evidence that revision 2 left those lists unchanged. No parser case compares the lists for nested bodies of different sizes before and after the rework.",
+      "recommendation": "Optionally add a parser-case row whose dump shows VarDeclaredNames and functionsToInitialize for three nested functions that reuse names across levels. That row would turn the [INFERENCE] about the per-level sets into a recorded check."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/parser.zig",
+      "line": 1742,
+      "issue": "This predates revision 2 and is outside its scope. The parser does not check the CatchParameter-versus-VarDeclaredNames rule (14.15.1, as modified by B.3.4). The check is not needed only because destructuring catch parameters return `unsupported`, so the Annex B exception for `CatchParameter : BindingIdentifier` always applies. Revision 2 does not affect this.",
+      "recommendation": "When FP-0087 or FP-0088 adds destructuring catch parameters, add that early error and a row for it, using the same per-body name sets."
+    }
+  ]
+}
