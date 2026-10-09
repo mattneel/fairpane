@@ -1114,7 +1114,7 @@
         "Declare platform APIs and system dependencies separately from the core.",
         "Exercise text input, resize, focus, and process teardown.",
         "Keep cross-compilation results distinct from native execution evidence.",
-        "Pin, build, and execute the first-party wrapper and the browser shell on actual Linux and macOS hosts through the public embedding contract."
+        "Pin, build, and execute the first-party wrapper and the browser shell on actual Linux and macOS hosts through the public embedding contract, adding each host's Rust artifacts to the lock through a separate reviewed lock change."
       ],
       "read": [
         "docs/TOOLCHAIN.md",
@@ -3254,7 +3254,7 @@
       "workstream": "wrappers",
       "depends_on": [],
       "role": "fairpane-bindings",
-      "allowed_paths": ["toolchains/rust.lock.json", "rust-toolchain.toml", "tools", "tests/rust", "engineering/dependencies.json", "engineering/decisions", "docs/TOOLCHAIN.md", "engineering/evidence"],
+      "allowed_paths": ["tools", "tests/rust", "engineering/dependencies.json", "engineering/decisions", "docs/TOOLCHAIN.md", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
       "authority": "routine-local-engineering",
       "required_gates": ["repo-check", "controller-test"],
@@ -3443,7 +3443,7 @@
         "Record the duration of the zig-test gate and of its compile and run phases on the Windows and Linux CI jobs over at least ten runs.",
         "Keep the output of a zig-test run that the gate stops at its timeout, so that the receipt shows which step was running.",
         "Rerun the zig-test gate on the Windows CI runner at least ten times with criterion 2's output capture, report each step's duration, fix any hang that a run shows, and state the cause of the run 37931192952 timeout only as [INFERENCE] unless a record decides it.",
-        "Keep the gate's slowest recorded duration at most two thirds of its timeout by reducing build or test time, or through a separate reviewed change to the timeout, without removing or weakening any test."
+        "Keep the slowest gate duration of the criterion 3 runs at most two thirds of its timeout by reducing build or test time, or through a separate reviewed change to the timeout, without removing or weakening any test."
       ],
       "read": ["engineering/evidence/FP-0014/ci/README.md", "engineering/gates.json", ".github/workflows/gates.yml"],
       "contract_state": "bootstrap-seed",
@@ -3453,9 +3453,9 @@
       "id": "FP-0099",
       "title": "Close the FP-0067 and FP-0079 review findings",
       "workstream": "laboratory",
-      "depends_on": ["FP-0052", "FP-0067", "FP-0079"],
+      "depends_on": ["FP-0052", "FP-0067", "FP-0079", "FP-0081"],
       "role": "fairpane-core",
-      "allowed_paths": ["tools", "tests", ".github", "docs", "api/README.md", "engineering/evidence"],
+      "allowed_paths": ["tools", "tests", "api/README.md", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
       "authority": "routine-local-engineering",
       "required_gates": ["repo-check", "controller-test"],
@@ -3463,10 +3463,11 @@
       "acceptance": [
         "Make the workflow checker report a missing job for each job whose gate list it requires, and test a workflow whose linux job is renamed.",
         "Run the workflow checks in repo-check, or record why only controller-test runs them.",
-        "Strip trailing spaces before the reserved device name comparison in the archive reader, and check each component name of an archive's components file with the archive path rules.",
+        "Strip trailing spaces before the reserved device name comparison in the archive reader, reject the reserved names CONIN$ and CONOUT$ as well, and check each component name of an archive's components file with the archive path rules.",
         "Start doctor's probes of bun, git, omp, and zig so that no probe runs a program from the repository directory, and test it with a marker program in the working directory.",
-        "State in api/README.md that the engine memory limit bounds the bytes the engine requests, not the resident memory of the process, and that it is a local integrity bound, not containment, as the FP-0081 reviews note.",
-        "Add a mutation control that removes the Linux job's gate order check from the workflow checker, and show that it fails a checker case, as FP-0067 review 1 notes."
+        "State in api/README.md that the engine memory limit bounds the bytes the engine requests, not the resident memory of the process, that resident memory can exceed it by allocator granularity, that a host that needs a hard cap combines it with operating-system limits, and that it is a local integrity bound, not containment, as FP-0081 security review 1 notes.",
+        "Add a mutation control that removes the Linux job's gate order check from the workflow checker, and show that it fails a checker case, as FP-0067 review 1 notes.",
+        "Validate source citations of every length, such as [S100], in repo-check, as the FP-0065 split draft found that only two-digit citations are checked."
       ],
       "read": ["engineering/evidence/FP-0067/reviews/review-1-reject.json", "engineering/evidence/FP-0079/reviews/security-review-2-accept.json", "engineering/evidence/FP-0081/reviews/security-review-1-accept.json"],
       "contract_state": "bootstrap-seed",
@@ -3481,7 +3482,7 @@
       "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
       "authority": "routine-local-engineering",
-      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test", "c-abi"],
       "required_reviewers": ["fairpane-review"],
       "acceptance": [
         "Check the exported symbols of the ReleaseSafe library in a gate or in reproduce-check, so that an export missing only from release builds fails a check.",
@@ -3507,7 +3508,7 @@
       "acceptance": [
         "Make the controller suite report each test's duration, and record the controller-test gate's per-test durations on the Windows and Linux CI jobs over at least ten runs.",
         "Name the tests that dominate the Windows duration and the cause of each from those records.",
-        "Keep the gate's slowest recorded Windows duration at most two thirds of its timeout by reducing test time, or through a separate reviewed change to the timeout, without removing, skipping, excluding, or weakening any test.",
+        "Keep the slowest Windows gate duration of the criterion 4 runs at most two thirds of its timeout by reducing test time, or through a separate reviewed change to the timeout, without removing, skipping, excluding, or weakening any test."
         "Rerun the gate on the Windows CI runner at least ten times after the change and report each duration."
       ],
       "read": ["engineering/evidence/FP-0098/ci/README.md", "engineering/evidence/ci/runs-2026-10-09.log", "engineering/evidence/ci/run-37952850522-attempt-1/README.md", "engineering/gates.json", "tools/selftest.mjs"],
