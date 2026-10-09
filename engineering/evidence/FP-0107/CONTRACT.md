@@ -163,3 +163,46 @@ Every section above stays in force except where this revision replaces it.
 1. `tests-after-r2.log`, `r2-repro-after.log` with the search path named `Path`, `bun-selftest-r2.log`, and `bun-r2-repro-after.log`, each passing every case.
 2. `mutation-r2.log` and `mutation-r2-M3.diff`, with the hash of `tools/test-runner.mjs` before, during, and after.
 3. A recorded run listing of the `3e7128c` series with each job's conclusion and each gate step's duration.
+
+## Revision 3
+
+Base: the commit that freezes this revision.
+Source: the ten dispatched runs on `57df855`, which `engineering/evidence/ci/runs-57df855.log` lists and whose receipts lie under `engineering/evidence/ci/run-<id>/`.
+Every run passes, but the Windows `controller-test` step takes 49 to 104 seconds, with receipt times from 49,004 to 103,199 ms, and run 37981495878 exceeds criterion 3's 80 seconds.
+Every section above stays in force except where this revision replaces it.
+
+### Revision 3 integrator decisions
+
+- Criterion 3 and its 80-second bound stay as frozen.
+- Across the ten Windows receipt logs, the sum of the cases' median `# duration_ms` values is about 156 seconds on four worker threads.
+  The 25 slowest cases take 2.3 to 6.1 seconds each, and nearly all of them build Git fixtures: corpus snapshots, release archives, and candidate repositories.
+  `raw/probe-process-starts.log` counted 1756 `git` starts in the base suite.
+- Revision 3 reduces that work without changing what any case asserts.
+  It may build a fixture with fewer `git` calls, for example through one `git fast-import`, one `git update-index --index-info`, or one `git hash-object -w --stdin-paths` call instead of one call per object.
+  It may reuse a fixture that no case changes, within one worker thread, with each reusing case named in the README.
+  It may change the runner's concurrency if three local runs and the dispatched runs support the change.
+- Every case keeps its name, its order, its assertions, and every input that its assertions depend on.
+  A changed fixture builder produces the same objects as before: the same blob, tree, and commit IDs wherever a case relies on an ID, and the same file contents otherwise.
+- Revision 3 changes no gate, timeout, workflow, or set of cases, and adds no cache.
+- The suite's child-process count, measured with `raw/process-probe.mjs` on the development host, falls by at least half, and the sum of the cases' median `# duration_ms` values over three local Windows runs falls by at least a third.
+  These are local targets only; the dispatched runs decide criterion 3.
+
+### Revision 3 exact test cases
+
+4. Controller, every host: for each fixture builder that revision 3 changes, one case builds the fixture from one fixed input and asserts the object IDs that the base builder produced for that input, which `tests-before-r3.log` records.
+
+Case 4 must fail before the change only if a builder's output changes; it passes on the base, which its before run records.
+
+### Revision 3 mutation controls
+
+- M4: one changed builder writes one file of its fixture with different content; case 4 must fail.
+
+### Revision 3 evidence
+
+1. `tests-before-r3.log`: `HEAD`, the blob IDs of every changed test file, `node tools/fairpane.mjs test`, and the object IDs of case 4's fixed inputs from the base builders.
+2. `probe-before-r3.log` and `probe-after-r3.log`: the child-process count per case and in total.
+3. `profile-before-r3.log` and `profile-after-r3.log`: three runs each of `node tools/fairpane.mjs test` on Windows, and `profile-linux-after-r3.log` on WSL Ubuntu.
+4. `names-r3.log`: the ordered case names before and after, which must be equal apart from case 4.
+5. `assertions-r3.log`: `git diff --stat` and `git diff` of the test files, with every changed line accounted for in the README as a fixture change, never an assertion change.
+6. `mutation-r3.log` with M4, and `bun-selftest-r3.log`.
+7. After integration, the ten dispatched runs of criterion 3 repeat on a head that contains revision 3.
