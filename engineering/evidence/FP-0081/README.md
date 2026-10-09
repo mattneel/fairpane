@@ -124,3 +124,25 @@ Control 2 also makes the two record variables constant, because the pinned compi
 
 No criterion is unmet.
 The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, and `c-abi`, as the contract requires.
+
+## Integration
+
+The integrator applied the worker's patch and committed it alone as `f40a902`.
+The worker's after-runs ran on its tree at `ed95bc5` with the change; the integrator's binding ran at `0a980f8`, which contains `f40a902` and the later `FP-0098` speed fix.
+
+- `raw/integration-binding.log` records `HEAD` `0a980f8` and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
+- `gates/2026-10-09T14-13-38-806Z-repo-check-dfec9ee7.json`, `gates/2026-10-09T14-13-39-201Z-controller-test-9afced62.json`, `gates/2026-10-09T14-14-21-776Z-zig-fmt-b4815709.json`, `gates/2026-10-09T14-14-22-040Z-zig-test-29ceed5b.json`, and `gates/2026-10-09T14-14-22-702Z-c-abi-2af40893.json` pass.
+- `raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0081-integration`: 65 of 65 build steps and 300 of 300 tests pass.
+- `raw/bun-selftest.log` records Bun 1.4.2 and `tools/selftest.mjs` with 212 of 212 tests.
+- `raw/integration-marker-check.log` records `grep -rn "MUTATION CONTROL" src tools tests` with exit status 1, so no mutation marker remains.
+
+## Reviews
+
+`reviews/review-1-accept.json` and `reviews/security-review-1-accept.json` accept the task with notes only.
+
+- The limit counts the bytes the engine requests, not the resident memory of the process, and allocator granularity can make resident use larger; it is a local integrity bound, not containment.
+  `FP-0099` adds that statement to `api/README.md`.
+- A refused `fp_engine_create`, `fp_document_create`, or `fp_document_load` still advances the process-wide owner and identifier counters, which no reported value shows.
+- A foreign-thread call that races with `fp_engine_destroy` reads a freed record, as every owner function already does; a handle is valid only until its destruction, and the Rust wrapper's thread bounds in `FP-0029` keep a safe caller from that race.
+- `reserveDeque` and `reserveMap` copy into new storage, so a load needs headroom for the whole new buffer under a tight limit.
+- The C smoke test cannot observe request or input counts, so the Zig limit run covers them.

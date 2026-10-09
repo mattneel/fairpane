@@ -1,0 +1,41 @@
+{
+  "verdict": "accept",
+  "summary": "FP-0081 at f40a902 meets the contract and amendments 1 and 2. I found no blocker or major finding. I reviewed the full commit diff from github.com/mattneel/fairpane/commit/f40a902.diff, the files on master, the contract, the README and the raw logs. I did not run any build, test or gate; every pass or fail below comes from the worker's recorded logs.\n\n(1) Interface. The schema, `include/fairpane.h`, `src/abi_generated.zig` and `tests/c/abi_layout.h` agree. `engine_options` gains `max_allocated_bytes` at offset 16, giving size 24. `engine_memory` is {struct_size u32 @0, reserved u32 @4 (range 0..0, \"Always zero.\"), allocated_bytes u64 @8, max_allocated_bytes u64 @16}, size 24 at both pointer widths. The descriptions match the contract text. `abi_revision` stays 0 (schema line 4, `FP_ABI_REVISION UINT32_C(0)`, `abi_generated.zig:7`). `checkNoPadding` in `tools/abi.mjs` reports `<structure>.<member>` for a member that needs padding before it and for a trailing member that needs padding after it, at 8-byte and 4-byte pointers. Case 9 tests both fixtures and validates the committed schema, and `controller-tests-after.log` shows 204/204. The generated blobs `6c31cf4`, `acf6b43` and `8f24173` match `generate.log`, and a second generation changed nothing.\n\n(2) Accounting. `MemoryBudget` counts requested lengths. It refuses an allocation, or a resize or remap that grows by d bytes, before the request reaches the backing allocator. The overflow-safe check is `std.math.add(u64, allocated, n) <= max`. A shrink or a free is never refused and reduces the count. `Engine.create` allocates the record, which holds the budget, through the budget. `destroy` frees the record through a copy of the budget and asserts the count is 0. Every engine allocation goes through `engine.gpa`. Case 1 checks the exact boundary (+48 accepted and +49 refused for alloc, resize and remap) and checks shrink and free under limit 0. Case 2 audits the reported bytes against a recording `FailingAllocator` after every call of the limit run.\n\n(3) No change on failure. The reserve-then-install restructuring holds. `createDocument` reserves the map in new storage and makes `documents.insert` the only in-place growth, which comes last. `load` reserves the event deque and request map in new storage, then copies the URL, then calls `requests.insert` last; `errdefer` releases everything else. `respond` now copies the body before it grows the input queue. `reject`, `cancel` and `step` each grow one container. On the base, `load` grew events in place before later reservations, so the restructuring is needed for an unchanged `fp_engine_get_memory`. The `engine.zig` diff touches no existing test. FP-0050 cases 1, 2, 3 and 5, FP-0006 cases 1–17 and the unchanged `failEachAllocation` run pass in `tests-after.log` (299/299). Case 4 and the limit run check allocated bytes, document info, ready events, queued-input state and native counts after every refused call.\n\n(4) Scenario. `api/failure-scenarios.json` marks `allocation-failure` as expressible in C and removes its `reason`. `tests/c/abi_smoke.c` `scenario_allocation_failure` drives every call through `fp_engine_set_memory_limit` alone: create with limit 0, document create, load stepped one byte at a time, respond, reject and cancel on full queues, step on a full event queue, and destroy at the limit. The `c-abi` gate passed (receipt 44d897af). Amendment 1 holds: the `failEachAllocation` run with `.resize_fail_index = 0` is unchanged apart from the shared `options()` helper passing `UINT64_MAX`.\n\n(5) Evidence. The mutation controls behave as the README says: control 1 fails case 1 (\"expected 64, found 16\"); control 2 fails the limit run and cases 2 and 3, and crashes case 4. The restore hashes return to `550a844` and `cb2a734`. The staged before-run blobs equal the committed blobs. No protected path changed; every changed file is under api, include, src, tests, tools or engineering/evidence. No browser-shell code is involved; the Zig harness's use of `c_api.createEngine` and native snapshots is test-only and follows the existing pattern.",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0081/README.md",
+      "line": 80,
+      "issue": "The claim that no `MUTATION CONTROL` marker remains in `src` has no recorded command. `mutation.log` (17 entries) shows only the restore of the two mutated files, by `git diff --no-index --exit-code` exit 0 and blob IDs `550a844` and `cb2a734`. Those records support the claim indirectly. [INFERENCE] No other file was mutated.",
+      "recommendation": "Either record a `grep -r \"MUTATION CONTROL\" src` with exit 1, or reword the sentence to cite the restored blob IDs only."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0081/raw/tests-after.log",
+      "line": 8,
+      "issue": "The after-runs (zig-test, c-abi, controller) ran on worker `HEAD` ed95bc5 plus uncommitted changes, not on f40a902 or on master with amendments 1 and 2. The c-abi receipt binds a source digest (7720b6a1…) that I cannot map to f40a902 without git. The blobs staged for the before-run do equal the committed blobs.",
+      "recommendation": "As the contract requires, the integrator should record `HEAD` and the ignored-inclusive status, then run repo-check, controller-test, zig-fmt, zig-test and c-abi on the integration head before accepting."
+    },
+    {
+      "severity": "note",
+      "path": "tests/c/abi_smoke.c",
+      "line": 642,
+      "issue": "The C observation compares allocated bytes, ready events, the `work_remaining` flag, and each tracked document's state and body. C cannot read request or input counts. A refused reject or cancel that wrongly queued its answer would therefore not change `work_remaining`. It would still be caught: the allocated bytes would differ, or the later successful attempt would return INVALID_STATE and fail `assert(status == FP_STATUS_OUT_OF_MEMORY)`. The Zig limit run also compares native counts. README resolved ambiguity 5 discloses this.",
+      "recommendation": "None required."
+    },
+    {
+      "severity": "note",
+      "path": "src/engine.zig",
+      "line": 215,
+      "issue": "`reserveDeque` and `reserveMap` always allocate a new buffer and copy into it, where the base could remap in place. Peak usage during a load is therefore old plus new storage, so under a tight limit a load needs headroom for the whole new buffer, not just the growth. This is accounted for correctly and documented in the module comment; the cost is performance and headroom only. The FP-0006 steady-state allocation tests still pass per `tests-after.log`.",
+      "recommendation": "None for this task. If load throughput matters later, consider reserving in place when the deque or map is the only growth the operation needs."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0081/raw/mutation.log",
+      "line": 302,
+      "issue": "Under control 2, case 2 fails at its first check (`fp_engine_create` with limit 0 succeeds). It never reaches the per-call audit, so no control isolates the audit itself. [INFERENCE] The audit would also catch an uncounted record, because the recording allocator would count `@sizeOf(Engine)` more bytes than the budget reports.",
+      "recommendation": "Optional: add a control that keeps create-at-zero refusing but leaves one later allocation uncounted, to show the audit fails on its own."
+    }
+  ]
+}

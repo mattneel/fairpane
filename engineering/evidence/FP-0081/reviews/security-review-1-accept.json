@@ -1,0 +1,34 @@
+{
+  "verdict": "accept",
+  "summary": "I found no blocker or major issue at f40a902; all four checks hold on read-only review. (1) No bypass: every engine allocation, including the engine record, goes through `MemoryBudget`. That covers both handle tables, both id maps, the input and event deques, URL copies, response-body copies and loaded bodies. `engine.zig` imports only `handles.zig` and `memory_budget.zig`, and the C layer allocates nothing outside the engine. `admits` uses a checked u64 add, so a `UINT64_MAX` limit is not a sentinel and cannot wrap. A growth delta is computed only after `new_len > old_len`, and `record` adds only an admitted delta. A refused request never reaches the backing allocator. On 32-bit targets, `usize` widens to u64. (2) A refused allocation leaves no partial state: each operation grows at most one container in place, as its last fallible step. `handles.Table.insert` makes one `ensureTotalCapacityPrecise` call; `Deque.ensureUnusedCapacity` and `ensureTotalCapacityPrecise` either remap or alloc+copy+free. Every other growth goes into new storage with `errdefer` cleanup, and it is installed only after every reservation has succeeded. `respond` frees its body copy if the in-place queue growth fails. The step formula `requests.count() - applied + announcements` cannot underflow, because each queued input belongs to a different live request. The event-slot invariant holds: `load` reserves count+added+2 slots and pushes at most 2 events. That keeps `destroyDocument`, `nextEvent`, `document`, `get_memory` and `engine_destroy` allocation-free, so they all succeed even at limit 0, and a host lowering the limit between calls only produces atomic `OUT_OF_MEMORY` results. Engine destroy releases the record through a copy of the budget taken before the free, so nothing reads the freed record. (3) Through `enter`, both new functions reject a null engine, then check the owner thread, before any other argument check. `get_memory` then checks for a null `out` and for `out_size < 24`, and writes only after every check passes. Neither function allocates. `create` validates `struct_size` before reading the new field, so a 16-byte legacy struct gets `INVALID_ARGUMENT`. (4) `fp_engine_options` and `fp_engine_memory` are both laid out as u32,u32,u64,u64 with offsets 0/4/8/16 and size 24, every member at a multiple of its own size. Their layout therefore does not depend on whether a target aligns u64 to 4 or 8 bytes. `checkNoPadding` enforces this rule at both pointer widths; `abi_generated.zig` asserts it at comptime and `tests/c/abi_layout.h` with `_Static_assert`. Tests and evidence cover cases 1–9, and both mutation controls are recorded as failing. Per the worker's README, `zig build test` passed 299/299, the `c-abi` gate passed and `controller-test` passed 204/204. I did not run anything myself; I read source code and evidence logs only. The design change the worker described (reserving storage before changing state) is sound and documented in the `engine.zig` header. The findings below are notes only.",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "README.md",
+      "line": 229,
+      "issue": "The limit counts the bytes the engine requests, not the memory actually held. That follows the contract, and the README states that allocator overhead is not counted. But with the single-threaded `process_allocator` (`std.heap.page_allocator`), each small allocation (a URL or body copy of 1 byte) takes at least one page. Resident memory can therefore exceed `max_allocated_bytes` by up to a page-size factor times the number of live allocations [INFERENCE: based on std `page_allocator`'s page granularity; I did not measure it]. A host might wrongly read the limit as a hard cap on resident memory (RSS).",
+      "recommendation": "Add one sentence to the Engines section saying the limit bounds the bytes the engine requests, not the process's resident memory, and that real usage can exceed it by allocator granularity. Hosts that need a hard cap should combine it with OS-level limits."
+    },
+    {
+      "severity": "note",
+      "path": "src/memory_budget.zig",
+      "line": 82,
+      "issue": "The budget is in-process self-accounting in the same trust domain as the engine: a local integrity check, not independent enforcement as `docs/SECURITY.md` uses the terms. Content that achieved memory corruption inside the renderer could rewrite `allocated_bytes` or `max_allocated_bytes`. Separately, `free` uses an unchecked `-=`, which would wrap in ReleaseFast if accounting ever went wrong; that would fail closed by refusing all later growth, but silently. I found no path that reaches either case.",
+      "recommendation": "No change is needed for FP-0081. The broker and supervising process should keep OS-level memory containment (job objects or cgroups) as the independent control, and documentation should not describe this limit as containment."
+    },
+    {
+      "severity": "note",
+      "path": "src/engine.zig",
+      "line": 278,
+      "issue": "`Engine.create` takes three process-wide owner identities before the budget can refuse the engine record. Likewise, `createDocument` and `load` take a document or request identifier before their last in-place table insert, which can still be refused. A refused call therefore advances a global counter. The only visible effect is a gap in identifiers; the 64-bit space cannot realistically be exhausted, and no engine, document, request or byte count changes.",
+      "recommendation": "No action is required. Optionally, take identifiers after all fallible reservations if gapless identifiers ever matter."
+    },
+    {
+      "severity": "note",
+      "path": "src/c_api.zig",
+      "line": 97,
+      "issue": "The owner-thread check in `enter` reads `engine.thread` from the engine record. A foreign-thread call that races with the owner's `fp_engine_destroy` is therefore a use-after-free. This affects every owner function and is not new in FP-0081; the two new functions inherit the same contract that the host must not use a destroyed engine.",
+      "recommendation": "No change for this task. Track it if the out-of-process renderer host ever lets untrusted callers reach these entry points."
+    }
+  ]
+}
