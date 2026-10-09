@@ -497,3 +497,44 @@ The integrator extended this ledger on 2026-10-09 after the push run of `a7219f9
 
 Every window of "Windows through `5859de7`" extends to `a7219f9` with no new failed attempt.
 `FP-0106`'s window begins at `a7219f9`, whose run passed.
+
+## Extension through `8b3aa72`
+
+The integrator extended this ledger on 2026-10-09 after the push run of `8b3aa72` concluded.
+`8b3aa72` is the latest pushed head, so it is the pre-acceptance head of every acceptance commit that the next push carries.
+
+### Runs after the previous extension
+
+- [runs-2026-10-09-extension-4.log](runs-2026-10-09-extension-4.log) records `gh run view` of every `Gates` run created from 21:02:54 to 21:42:06 UTC, with each attempt.
+  It holds run 37991104261 of `0df569a`, with attempts 1 and 2, and push run 37993723055 of `8b3aa72`.
+  Every attempt concluded `success` except attempt 1 of run 37991104261.
+- [pushes-through-8b3aa72.log](pushes-through-8b3aa72.log) lists the 2 commits that the push of `0df569a` carried and the 13 that the push of `8b3aa72` carried, as many as `a7219f9..8b3aa72` holds.
+  It also records `git ls-remote origin refs/heads/master`, which names `8b3aa7292cdd1e12dbbb7eaad288d48924de0985`.
+
+### Attempt 1 of run 37991104261 of `0df569a`
+
+- Failed gate and step: in the Linux job, `Run gate zig-test` failed after 601 s, every later Linux step was skipped, and the Windows job passed.
+  The receipt [run-37991104261-attempt-1/linux-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T21-05-34-879Z-zig-test-e061b527.json](run-37991104261-attempt-1/linux-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T21-05-34-879Z-zig-test-e061b527.json) records that the gate stopped `zig build test` at its 600,000 ms timeout, with `SIGKILL` after 600,486 ms.
+  Its log lists the build runner and one test binary that were still running.
+  [run-37991104261-attempt-1-download.log](run-37991104261-attempt-1-download.log) records the download of both jobs' receipts.
+- Cause: [INFERENCE] a slow runner.
+  The `controller-test` step before it on the same runner took 47 s, against 10 to 18 s in the 28 other Linux jobs of [runs-2026-10-09-extension-2.log](runs-2026-10-09-extension-2.log) and [runs-2026-10-09-extension-3.log](runs-2026-10-09-extension-3.log).
+  [run-37991104261-linux-case-times.log](run-37991104261-linux-case-times.log) compares its controller cases with those of run 37978329724: they took 4.9 times as long in sum, with a median ratio of 5.6 among the cases that took at least 200 ms there.
+  At that speed, `zig-test`, which took 122 to 314 s in those 28 jobs, cannot finish within 600 s.
+  The head changes only `engineering/state.json` and this ledger from `a7219f9`, whose Linux `zig-test` step passed in 244 s.
+  [run-37991104261-repro-linux.log](run-37991104261-repro-linux.log) runs `zig build --seed=0x76c7baf4 test --summary all`, with the failed run's seed, on `0df569a`'s tree under WSL Ubuntu, and it passes 397 of 397 tests in about three minutes.
+  Its first attempt, [run-37991104261-repro-linux-attempt-1.log](run-37991104261-repro-linux-attempt-1.log), passed the seed as a separate argument, which the build runner rejects.
+- Disposition: [run-37991104261-rerun.log](run-37991104261-rerun.log) records `gh run rerun 37991104261 --failed`, and attempt 2 passed in both jobs, with the Linux `zig-test` step at 284 s.
+
+### Windows through `8b3aa72`
+
+| Task | Implementation, first pushed head | Failed attempts in its window | Disposition |
+| --- | --- | --- | --- |
+| `FP-0082` | `5d41509`, `5d41509` | Those of "Windows through `5859de7`"; `0df569a` attempt 1 | The same; same-head attempt 2 |
+| `FP-0100` | `f17b396`, `9df8680` | `0df569a` attempt 1 | Same-head attempt 2 |
+| `FP-0119` | `077ad63`, `96bad1c` | `0df569a` attempt 1 | Same-head attempt 2 |
+| `FP-0131` | `9b47a37`, `5859de7` | `0df569a` attempt 1 | Same-head attempt 2 |
+| `FP-0106` | `63e14ca`, `a7219f9` | `0df569a` attempt 1 | Same-head attempt 2 |
+| `FP-0111` | `0484339`, `8b3aa72` | None | — |
+
+Every other run of every window concluded `success`.

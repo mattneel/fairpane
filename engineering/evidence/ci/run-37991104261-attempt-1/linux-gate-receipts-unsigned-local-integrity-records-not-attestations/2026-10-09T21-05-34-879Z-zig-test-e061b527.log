@@ -1,0 +1,25 @@
+Fairpane local gate: zig-test
+Trust: unsigned-local-integrity-only
+
+COMMAND ["/home/runner/work/fairpane/fairpane/.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig","build","test"]
+TIMEOUT after 600000 ms: the live process tree of PID 5520 follows.
+PROCESS {"pid":5520,"ppid":5512,"command_line":[".zig-cache/global/o/1e09c06e9c5c29926330d01e695c9d6b/maker","build","--zig-lib=.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/lib","--zig=/home/runner/work/fairpane/fairpane/.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig","--global-cache=.zig-cache/global","--seed=0x76c7baf4","test"]}
+PROCESS {"pid":5891,"ppid":5520,"command_line":["./.zig-cache/o/6a6bd1102149c34df8b5e13a9e664af8/test","--cache-dir=./.zig-cache","--seed=0x76c7baf4","--listen=-"]}
+TIMEOUT Stopping PID 5520 and its descendants.
+test
++- FP-0082 case 17: the census refuses an existing output file and exits with status 3 w
+fairpane-js-parse: census: cannot create ./.zig-cache/o/0c925f44918d6f5adba948a0455992d0/existing.jsonl: PathAlreadyExists
+failed command: ./zig-out/bin/fairpane-js-parse census ./tests/js/census/sound ./.zig-cache/o/0c925f44918d6f5adba948a0455992d0/existing.jsonl
+
+test
++- FP-0082 case 16: a missing path exits with status 3 w
+fairpane-js-parse: tests/js/parse/missing.js: FileNotFound
+failed command: cd . && ./zig-out/bin/fairpane-js-parse file tests/js/parse/missing.js
+
+test
++- FP-0082 case 16: invalid-utf8.js exits with status 3 w
+fairpane-js-parse: ./tests/js/parse/invalid-utf8.js: InvalidUtf8
+failed command: ./zig-out/bin/fairpane-js-parse file ./tests/js/parse/invalid-utf8.js
+
+RESULT {"executable":"/home/runner/work/fairpane/fairpane/.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig","arguments":["build","test"],"cwd":"/home/runner/work/fairpane/fairpane","started_at":"2026-10-09T21:05:34.940Z","exit_code":null,"signal":"SIGKILL","timed_out":true,"error":null,"duration_ms":600486,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"/home/runner/work/fairpane/fairpane/.zig-cache/global"}}
+GATE ERROR Gate command failed: ["/home/runner/work/fairpane/fairpane/.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux/zig","build","test"]

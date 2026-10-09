@@ -1,0 +1,12 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","archive","--format=tar","--prefix=t/","-o","out/ci-repro/0df569a.tar","0df569a"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["archive","--format=tar","--prefix=t/","-o","out/ci-repro/0df569a.tar","0df569a"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:16:37.616Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":168}
+
+COMMAND ["C:\\Windows\\System32\\wsl.exe","-d","Ubuntu","-e","sh","-c","set -e; uname -srmo; nproc; W=\"$HOME/fairpane-linux/work/ci-0df569a\"; rm -rf \"$W\"; mkdir -p \"$W\"; tar -xf out/ci-repro/0df569a.tar -C \"$W\"; cd \"$W/t\"; git init -q; git add -A; echo \"copied tree $(git write-tree)\"; export ZIG_GLOBAL_CACHE_DIR=\"$W/global-cache\"; set +e; timeout -s KILL 1500 \"$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/zig\" build --seed 0x76c7baf4 test --summary all --cache-dir .zig-cache-ci; echo \"zig build exit $?\""]
+Linux 7.2.6-locietta-WSL2-xanmod1 x86_64 GNU/Linux
+32
+copied tree 5811e795f5db5098d7ca03564173ae7e4ced20ba
+info: to access the help menu: zig build -h
+error: unrecognized argument: --seed
+zig build exit 1
+RESULT {"executable":"C:\\Windows\\System32\\wsl.exe","arguments":["-d","Ubuntu","-e","sh","-c","set -e; uname -srmo; nproc; W=\"$HOME/fairpane-linux/work/ci-0df569a\"; rm -rf \"$W\"; mkdir -p \"$W\"; tar -xf out/ci-repro/0df569a.tar -C \"$W\"; cd \"$W/t\"; git init -q; git add -A; echo \"copied tree $(git write-tree)\"; export ZIG_GLOBAL_CACHE_DIR=\"$W/global-cache\"; set +e; timeout -s KILL 1500 \"$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/zig\" build --seed 0x76c7baf4 test --summary all --cache-dir .zig-cache-ci; echo \"zig build exit $?\""],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:16:40.701Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":74536}
