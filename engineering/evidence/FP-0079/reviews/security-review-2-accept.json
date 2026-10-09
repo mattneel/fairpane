@@ -1,0 +1,48 @@
+{
+  "verdict": "accept",
+  "summary": "FP-0079 revision 1 (d2c1e5b) passes the trust-boundary review. No blocker or major finding remains. This was a read-only review: I did not rerun any test, and the git diff of the lock is [INFERENCE] (I compared values, not commits).\n\n(1) Each archive finding from my review 1 is fixed in tools/rust.mjs:\n- Control characters: line 110 rejects any code unit from U+0000 to U+001F.\n- `:` (NTFS streams): line 111 rejects it.\n- Trailing `.` or space: line 112 rejects a component that ends in either.\n- Reserved device names: line 113 tests the name before the first `.` against RESERVED_DEVICE_NAME (line 103). The match ignores case and covers COM1-9, LPT1-9 and the superscripts ¹²³ (U+00B9, U+00B2, U+00B3). I fetched Microsoft's page today, and the list matches it exactly; raw/reserved-names-r1.log records the same text.\n- Long-name cap: begin() checks the GNU `L` size against LONG_NAME_LIMIT (4096) at line 166, before it returns the entry, so no payload byte is buffered past the cap.\n- Fixtures: case 5 adds all 17 required fixtures, each with its exact message. raw/tests-before-r1.log shows 8 of them failing on the base, and M6 (removing the `:` rule) fails only the a:b fixture.\n\n(2) No new bypass:\n- Each entry has exactly one name: the long name if one is pending, otherwise the POSIX prefix + '/' + name. acceptedArchivePath and the root check (line 180) both run on that final name before path.join.\n- A trailing `/` is stripped only for directories, and an empty prefix component or a prefix ending in `/` produces an empty component, which is rejected.\n- The long-name fixtures carry a different header name. In the embedded-NUL fixture that header name would pass on its own, and the exact expected message shows that the long name is the one checked.\n- Chained `L` entries are each capped, and the last one wins and is fully checked. A dangling `L` entry fails with 'ends early'.\n- installComponents checks every manifest.in path with acceptedArchivePath.\n\n(3) doctor (tools/fairpane.mjs:88-100) no longer calls versionOf('rustc'). Its `rust` field runs only checkRust, which starts the locked tools by absolute path with cwd set to the toolchain's bin directory. Without a toolchain, the catch branch only computes a path.\n- Case 9 puts a marker `rustc` first on PATH. The before-run and the M5 mutation both show marker:true, while the after-run shows marker:false and that a direct start does create the marker. So the test catches a real PATH probe.\n\n(4) The marker PE is built in memory by markerImage() inside rust.test.mjs. It is written only into an mkdtemp directory under os.tmpdir() and removed by removeRustFixtures.\n- The tree contains no *.exe, and nothing outside the test calls markerProgram.\n- doctor receives the changed PATH through a copied env object, so process.env is unchanged.\n- The image imports only CreateFileW and ExitProcess and writes only the temporary marker path.\n\n(5) toolchains/rust.lock.json equals the contract's frozen object value for value, including checked_date 2026-10-09. Case 1 passes in raw/controller-tests-after-r1.log (202/202). That makes the lock approved again, but this is a local integrity check. Lasting protection depends on P1 and owner branch protection.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/rust.mjs",
+      "line": 113,
+      "issue": "The device-name check compares the whole text before the first '.' with the regex, so 'CON .txt' and 'NUL  .x' are not matched as 'CON' or 'NUL'. [INFERENCE] Windows device-name detection (RtlIsDosDeviceName_U, as in the ReactOS/Wine behavior) removes spaces before the extension dot, so on some Windows builds these names still open a device. Windows 11 may treat names with an extension differently. CONIN$ and CONOUT$ (which Python's os.path.isreserved also reserves) are not covered either; they are not on Microsoft's list.\n\nThe implementation meets the contract wording literally. The impact is limited: only archives that match the locked SHA-256 reach this code, 'wx' cannot overwrite, and a missing file would fail the later manifest.in checks.",
+      "recommendation": "Optionally strip trailing spaces from the name before the first '.' before testing it, so `part.split('.')[0].replace(/ +$/, '')`. Then add a fixture such as 'CON .txt'. A follow-up is fine; this does not block P1."
+    },
+    {
+      "severity": "note",
+      "path": "tools/rust.mjs",
+      "line": 284,
+      "issue": "Component names from the archive's `components` file pass only /^[a-z0-9][a-z0-9_.-]*$/, not acceptedArchivePath. The regex allows a trailing '.' (for example 'a.') and reserved names (for example 'nul'). [INFERENCE] Win32 path normalization removes a trailing '.' from a middle path segment, so 'a.' would read the directory 'a'. Nothing can escape: the regex forbids separators and a leading '.', extracted directory names already follow the archive path rules, and the 'Two components install' check rejects installing the same file twice.",
+      "recommendation": "Optionally run acceptedArchivePath on each component name as well, so the components file follows the same rules as archive paths."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0079/README.md",
+      "line": 253,
+      "issue": "The global-state comparison (identical before and after) cannot show whether a rustup proxy ran. 1.99.0-x86_64-pc-windows-msvc with rustfmt-preview was already installed before the run, so a proxy that read rust-toolchain.toml would have changed nothing. The independent evidence that doctor starts no PATH rustc is the case 9 marker test, together with the before-run and M5 results (marker:true) and the after-run (marker:false). The statement that the comparison 'replaces the [INFERENCE] note' therefore overstates it a little.",
+      "recommendation": "Optionally reword: the comparison shows that global state did not change, and the case 9 marker test and M5 show that doctor starts no PATH rustc."
+    },
+    {
+      "severity": "note",
+      "path": "tools/fairpane.mjs",
+      "line": 96,
+      "issue": "Case 9 tests only the PATH vector, not a rustc planted in the working directory. From the code, doctor starts no Rust tool by bare name, so it meets the requirement anyway. doctor still starts bare 'bun', 'git', 'omp(.exe)' and 'zig' through spawnSync. [INFERENCE] On Windows, libuv searches the current directory before PATH, so a git.exe planted at the repository root would run. These are not Rust tools, the behavior predates this task, and it is out of scope here.",
+      "recommendation": "None for FP-0079. Later, consider resolving doctor's probes with the controller's resolver, which never searches the working directory (selftest 163)."
+    },
+    {
+      "severity": "note",
+      "path": "tools/rust.test.mjs",
+      "line": 221,
+      "issue": "The marker PE is test-only and generated at run time. It goes into an mkdtemp directory under os.tmpdir() and is cleaned up afterwards. It is never committed (no *.exe in the tree) and never shipped. Its single section is readable, writable and executable (0xe0000060), and its imports are only CreateFileW and ExitProcess. [INFERENCE] Endpoint antivirus may flag or quarantine a hand-built image, which would make case 9 fail closed rather than pass.",
+      "recommendation": "None required."
+    },
+    {
+      "severity": "note",
+      "path": "toolchains/rust.lock.json",
+      "line": null,
+      "issue": "The lock values equal the contract's frozen object and are unchanged from the approved revision, and case 1 passes. My review 1 already traced the lock values to the signed manifest. This is local integrity only: an agent with write access could change both the lock and its checks.",
+      "recommendation": "Land P1 as planned so the lock becomes a protected path."
+    }
+  ]
+}

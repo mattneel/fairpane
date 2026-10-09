@@ -312,3 +312,10 @@ Those commits include `152ed53` (FP-0067), which changed other files under `tool
 - an empty `git diff --exit-code` of `toolchains/rust.lock.json` and `rust-toolchain.toml` between `04342e2` and `d2c1e5b`, and between `HEAD` and the working tree, including the provenance files;
 - `rust-lock-verify` on the committed manifest, with result `pass`, manifest SHA-256 `ce6dddc8…b6a2`, and no problems;
 - the SHA-256 of the manifest, `ce6dddc8…b6a2`, and of both key copies, which are equal at `e54b09a4…bc6b`.
+
+`reviews/security-review-2-accept.json` also accepts revision 1.
+The integrator landed policy change P1 as `9fb8d8f`, which cites both acceptances; this record commits the security review just after it.
+
+- `raw/integration-binding.log` records `HEAD` `9fb8d8f` and a status that includes ignored files for every source root of the new policy, before and after the runs below; both statuses are empty.
+- `gates/2026-10-09T13-58-47-056Z-repo-check-f14a0604.json` and `gates/2026-10-09T13-58-47-436Z-controller-test-a7bcec78.json` pass.
+- `raw/bun-selftest.log` records Bun 1.4.2 and `tools/selftest.mjs` with 209 of 209 tests.
