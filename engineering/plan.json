@@ -2784,7 +2784,8 @@
         "Import every remaining file of the specs/IMPORT_REQUIREMENTS.md table at the pinned Unicode version, with per-file provenance.",
         "Generate lookup tables for each consumer with a staleness check and an independent reference test.",
         "Run the Unicode conformance test files that the import requirements list against the generated data.",
-        "Keep one Unicode version for every consumer."
+        "Keep one Unicode version for every consumer.",
+        "Generate every consumer property of DerivedCoreProperties.txt and emoji/emoji-data.txt that FP-0108 does not generate, including ID_Start and ID_Continue for FP-0095 and the emoji binary properties for RegExp property escapes."
       ],
       "read": ["specs/IMPORT_REQUIREMENTS.md", "engineering/evidence/FP-0013/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
