@@ -1,0 +1,15 @@
+diff --git a/src/js/parser.zig b/src/js/parser.zig
+index a6246a6..01b40e3 100644
+--- a/src/js/parser.zig
++++ b/src/js/parser.zig
+@@ -2033,7 +2033,10 @@ const Parser = struct {
+     fn parenElement(p: *Parser, frame: *Frame) Error!void {
+         if (p.tok.tag == .ellipsis) return p.unsupported(.arrow_function, p.tok.start);
+         frame.state = .paren_after_element;
++        const floor = p.frames.items.len;
+         try p.callAssign(.{ .propagate = true });
++        // Mutation control M8: parse each parenthesized element in a nested native call.
++        try p.run(floor);
+     }
+ 
+     fn parenAfterElement(p: *Parser, frame: *Frame) Error!void {

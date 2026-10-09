@@ -1,0 +1,21 @@
+diff --git a/src/js/lexer.zig b/src/js/lexer.zig
+index ae785b6..caeacaf 100644
+--- a/src/js/lexer.zig
++++ b/src/js/lexer.zig
+@@ -286,16 +286,6 @@ pub const Lexer = struct {
+                         if (!terminated) return syntaxError(start, .unterminated_comment, start);
+                     } else break;
+                 },
+-                '<' => {
+-                    if (lexer.at(lexer.position + 1) == '!' and lexer.at(lexer.position + 2) == '-' and lexer.at(lexer.position + 3) == '-') {
+-                        lexer.skipLine();
+-                    } else break;
+-                },
+-                '-' => {
+-                    if (lexer.line_start and lexer.at(lexer.position + 1) == '-' and lexer.at(lexer.position + 2) == '>') {
+-                        lexer.skipLine();
+-                    } else break;
+-                },
+                 '#' => {
+                     if (lexer.position == 0 and lexer.at(1) == '!') {
+                         lexer.skipLine();

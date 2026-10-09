@@ -1,0 +1,13 @@
+diff --git a/src/js/parser.zig b/src/js/parser.zig
+index a6246a6..6d571e2 100644
+--- a/src/js/parser.zig
++++ b/src/js/parser.zig
+@@ -1803,7 +1803,7 @@ const Parser = struct {
+             // A `=>` after `left`: an arrow function, or an async arrow function after a call of `async`.
+             .arrow => {
+                 if (left.data == .call and p.isAsyncReference(left.data.call.callee)) return p.unsupported(.async_function, left.start);
+-                return p.unsupported(.arrow_function, p.tok.start);
++                return p.syntax(.unexpected_token, p.tok.start);
+             },
+             else => {
+                 const operator = assignmentOperator(p.tok.tag) orelse return p.finishAssign(frame, left);

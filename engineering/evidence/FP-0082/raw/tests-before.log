@@ -1,0 +1,1526 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+a3e5cf941688d5f045ec060e8c6b1219b6a86b23
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t64b25565c\\m","started_at":"2026-10-09T13:46:42.258Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","add","--","build.zig","src/js/parser.zig","src/js/test262_metadata.zig","src/js/runtime.zig","src/js/value.zig","tests/js","tools/selftest.mjs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["add","--","build.zig","src/js/parser.zig","src/js/test262_metadata.zig","src/js/runtime.zig","src/js/value.zig","tests/js","tools/selftest.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t64b25565c\\m","started_at":"2026-10-09T13:46:42.326Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":84}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","ls-files","-s","--","build.zig","src/js/parser.zig","src/js/test262_metadata.zig","src/js/runtime.zig","src/js/value.zig","tests/js","tools/selftest.mjs"]
+100644 1e74f312c616bdc4e04e3d3bbd65bb92b21bbeb5 0	build.zig
+100644 cd1ad53c05552538fba4096c6e5b69704ae65a3a 0	src/js/parser.zig
+100644 8d45047af819275465f9fb20765c6886508dd95e 0	src/js/runtime.zig
+100644 03b42fcbedb8c22229e92c88e65b71636f6593fd 0	src/js/test262_metadata.zig
+100644 bb9f59dab22aa3ba0791d32c7c0b36f8f735f2a0 0	src/js/value.zig
+100644 0b17c98c30561b2f625434eafd87afc3c4b9632d 0	tests/js/census/sound/EXTRACT.json
+100644 6da9a68fe3e1b7c886dadbe263416dc62a898dc0 0	tests/js/census/sound/features.txt
+100644 970f35088c723e29bfd50a3b87afe27d2e943831 0	tests/js/census/sound/test/a.js
+100644 a1e5cc83d6f2b048e6e7bf2df2bd31809d387e37 0	tests/js/census/sound/test/b.js
+100644 d3d5e164c5dc69a501185d651cc3a8ee2a756d1a 0	tests/js/census/sound/test/c.js
+100644 443b39328e785845460c783c9d0f4f128166b70b 0	tests/js/census/sound/test/d.js
+100644 03d17406230ebf91936f815ef49495500209c2d5 0	tests/js/census/sound/test/e.js
+100644 50561404fa2193c1b8db6ca4e15c2bc6b64ca6cb 0	tests/js/census/sound/test/f_FIXTURE.js
+100644 18cd8bf140b26756b5293f613928ad773795ba65 0	tests/js/census/sound/test/g.js
+100644 992f4ccfb29c1807e41483b1a4d6267d5ca420d8 0	tests/js/census/sound/test/h.js
+100644 7ec43c9bdf41244e6cc523ece812df63fa5b51d6 0	tests/js/census/unsound/EXTRACT.json
+100644 6da9a68fe3e1b7c886dadbe263416dc62a898dc0 0	tests/js/census/unsound/features.txt
+100644 6b9b7e051edf1698c39f08b3ea6d10a50957227c 0	tests/js/census/unsound/test/i.js
+100644 1492e85b06e94d48ed22c8d219d9219a43e2f3a2 0	tests/js/census/unsound/test/j.js
+100644 1e586c34f367ce3799695e18da6a42ecf499d62d 0	tests/js/census/unsound/test/k.js
+100644 8f16eecdee49b4b41564fa80ba72a538c9a56117 0	tests/js/parse/invalid-utf8.js
+100644 5b960f923ea2c43734a473d431af6e4b8d947432 0	tests/js/parse/syntax.js
+100644 e0edd59279ac8aef3f77effa174fd86eadfc67b0 0	tests/js/parse/unsupported.js
+100644 919952317dead6cea745be5feb56913b16ef4bff 0	tests/js/parse/valid.js
+100644 ce83cecd340d18de594ac084f484931c66fa1963 0	tools/selftest.mjs
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["ls-files","-s","--","build.zig","src/js/parser.zig","src/js/test262_metadata.zig","src/js/runtime.zig","src/js/value.zig","tests/js","tools/selftest.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t64b25565c\\m","started_at":"2026-10-09T13:46:42.462Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0082-before"]
+test
++- FP-0011 case 20: abi_reference_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_reference_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_exception_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadException declares exception without allocation
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_exception_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_tagged_index_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_tagged_index_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 35: leaf_widens_context.zig failure
+error: ========= expected to find in stderr: =========
+       expected type '*js.runtime.Runtime(.reference)', found '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_widens_context.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 36: binding_stray_kernel.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel stub_kernel belongs to no operation
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/binding_stray_kernel.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 34: leaf_reaches_heap.zig failure
+error: ========= expected to find in stderr: =========
+       no field or member function named 'allocateString' in 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_reaches_heap.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: mutation_throws.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: throwTypeError requires effects {allocation, exception}; the context has effects {heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/mutation_throws.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke ToNumber, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_to_number.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_callback_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadCallback declares callback without allocation, exception, and heap_mutation
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_callback_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 36: binding_missing_kernel.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation StubOperation has no kernel
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/binding_missing_kernel.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_nan_box_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_nan_box_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_calls_behavior.zig failure
+error: ========= expected to find in stderr: =========
+       expected type
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_calls_behavior.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: allocation_invokes_call.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {allocation} cannot invoke Call, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/allocation_invokes_call.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_duplicate_id.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: duplicate operation id number_add
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_duplicate_id.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke Number::toString, which has effects {allocation}
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_number_to_string.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: kernel_wider_context.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::add takes a context with effects {allocation}, but the operation has effects {}
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_wider_context.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_allocates.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: allocateString requires effects {allocation}; the context has effects {}
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_allocates.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_plain_reference.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: field hidden of layout Probe holds a heap reference but is declared plain
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_plain_reference.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_positive.zig failure
+src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+src\js\runtime.zig:1555:17: note: file imported here
+    _ = @import("ast.zig");
+                ^~~~~~~~~
+src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+src\js\runtime.zig:1554:17: note: file imported here
+    _ = @import("lexer.zig");
+                ^~~~~~~~~~~
+src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+src\js\runtime.zig:1558:17: note: file imported here
+    _ = @import("parse_census.zig");
+                ^~~~~~~~~~~~~~~~~~
+src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                        ^~~~~~~
+src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                               ^~~~~~~
+src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+    try writeCodeTable(&out.writer);
+        ^~~~~~~~~~~~~~
+src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(gpa, source.units, .{});
+                        ^~~~~~~~~~~
+src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(gpa, text, .{});
+                        ^~~~~~~~~~~
+src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+    var parse = try parseScript(gpa, source.items, .{});
+                    ^~~~~~~~~~~
+src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                        ^~~~~~~~~~~
+src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                        ^~~~~~~~~~~
+src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+    var parse = try parseScript(gpa, source, .{});
+                    ^~~~~~~~~~~
+src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                 ^~~~~~~~
+src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+    try testing.expect(try read(arena, text) == .metadata_error);
+                           ^~~~
+src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+    try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                            ^~~~~
+error: process exited with code 1 (expected exited with code 0)
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_positive.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_undescribed_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe does not describe field extra
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_undescribed_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_missing_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe describes field ghost, which does not exist
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_missing_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::sameValue returns error.Throw, but the operation does not have the exception effect
+       ========= but stderr does not contain it: =====
+       src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+       src\js\runtime.zig:1555:17: note: file imported here
+           _ = @import("ast.zig");
+                       ^~~~~~~~~
+       src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+       src\js\runtime.zig:1554:17: note: file imported here
+           _ = @import("lexer.zig");
+                       ^~~~~~~~~~~
+       src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+       src\js\runtime.zig:1558:17: note: file imported here
+           _ = @import("parse_census.zig");
+                       ^~~~~~~~~~~~~~~~~~
+       src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+       fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                               ^~~~~~~
+       src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+       fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                                      ^~~~~~~
+       src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+           try writeCodeTable(&out.writer);
+               ^~~~~~~~~~~~~~
+       src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, source.units, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, text, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source.items, .{});
+                           ^~~~~~~~~~~
+       src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                               ^~~~~~~~~~~
+       src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+               var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                               ^~~~~~~~~~~
+       src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+           var parse = try parseScript(gpa, source, .{});
+                           ^~~~~~~~~~~
+       src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+       fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                        ^~~~~~~~
+       src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+           try testing.expect(try read(arena, text) == .metadata_error);
+                                  ^~~~
+       src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+           try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                                   ^~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_undeclared_throw.zig -Mfairpane=src/root.zig
+
+test
++- run test
+   +- compile test debug native 15 errors
+src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+src\js\runtime.zig:1555:17: note: file imported here
+    _ = @import("ast.zig");
+                ^~~~~~~~~
+src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+src\js\runtime.zig:1554:17: note: file imported here
+    _ = @import("lexer.zig");
+                ^~~~~~~~~~~
+src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+src\js\runtime.zig:1558:17: note: file imported here
+    _ = @import("parse_census.zig");
+                ^~~~~~~~~~~~~~~~~~
+src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                        ^~~~~~~
+src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                               ^~~~~~~
+src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+    try writeCodeTable(&out.writer);
+        ^~~~~~~~~~~~~~
+src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(gpa, source.units, .{});
+                        ^~~~~~~~~~~
+src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(gpa, text, .{});
+                        ^~~~~~~~~~~
+src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+    var parse = try parseScript(gpa, source.items, .{});
+                    ^~~~~~~~~~~
+src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                        ^~~~~~~~~~~
+src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                        ^~~~~~~~~~~
+src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+    var parse = try parseScript(gpa, source, .{});
+                    ^~~~~~~~~~~
+src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                 ^~~~~~~~
+src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+    try testing.expect(try read(arena, text) == .metadata_error);
+                           ^~~~
+src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+    try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                            ^~~~~
+error: 15 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug --dep fairpane "-Mroot=tests\\text\\root.zig" -Odebug "-Mfairpane=src\\root.zig" --cache-dir "out\\fp0082-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- run test
+   +- compile test debug native 15 errors
+src\js\ast.zig:1:1: error: unable to load "ast.zig": FileNotFound
+src\js\runtime.zig:1555:17: note: file imported here
+    _ = @import("ast.zig");
+                ^~~~~~~~~
+src\js\lexer.zig:1:1: error: unable to load "lexer.zig": FileNotFound
+src\js\runtime.zig:1554:17: note: file imported here
+    _ = @import("lexer.zig");
+                ^~~~~~~~~~~
+src\js\parse_census.zig:1:1: error: unable to load "parse_census.zig": FileNotFound
+src\js\runtime.zig:1558:17: note: file imported here
+    _ = @import("parse_census.zig");
+                ^~~~~~~~~~~~~~~~~~
+src\js\parser.zig:342:57: error: use of undeclared identifier 'Options'
+fn outcomeOf(gpa: Allocator, text: []const u8, options: Options) ![]u8 {
+                                                        ^~~~~~~
+src\js\parser.zig:348:64: error: use of undeclared identifier 'Options'
+fn outcomeOfUnits(gpa: Allocator, units: []const u16, options: Options) ![]u8 {
+                                                               ^~~~~~~
+src\js\parser.zig:442:9: error: use of undeclared identifier 'writeCodeTable'
+    try writeCodeTable(&out.writer);
+        ^~~~~~~~~~~~~~
+src\js\parser.zig:456:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(gpa, source.units, .{});
+                        ^~~~~~~~~~~
+src\js\parser.zig:490:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(gpa, text, .{});
+                        ^~~~~~~~~~~
+src\js\parser.zig:518:21: error: use of undeclared identifier 'parseScript'
+    var parse = try parseScript(gpa, source.items, .{});
+                    ^~~~~~~~~~~
+src\js\parser.zig:631:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(std.heap.page_allocator, depth_run.source, .{});
+                        ^~~~~~~~~~~
+src\js\parser.zig:746:25: error: use of undeclared identifier 'parseScript'
+        var parse = try parseScript(gpa, statements, .{ .max_memory_bytes = 4096 });
+                        ^~~~~~~~~~~
+src\js\parser.zig:773:21: error: use of undeclared identifier 'parseScript'
+    var parse = try parseScript(gpa, source, .{});
+                    ^~~~~~~~~~~
+src\js\test262_metadata.zig:13:50: error: use of undeclared identifier 'Metadata'
+fn readTest(arena: Allocator, text: []const u8) !Metadata {
+                                                 ^~~~~~~~
+src\js\test262_metadata.zig:24:28: error: use of undeclared identifier 'read'
+    try testing.expect(try read(arena, text) == .metadata_error);
+                           ^~~~
+src\js\test262_metadata.zig:33:29: error: use of undeclared identifier 'Flags'
+    try testing.expectEqual(Flags{ .only_strict = true, .raw = true }, flow.flags);
+                            ^~~~~
+error: 15 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0082-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- FP-0082 case 17: the census of the unsound fixture exits with status 1
+   +- install fairpane-js-parse
+      +- compile exe fairpane-js-parse debug native 1 errors
+out\fp0082-before\o\46654abfb7e5372c91f3222a40490c48\src\js\parse_main.zig:1:1: error: unable to load "parse_main.zig": FileNotFound
+out\fp0082-before\o\46654abfb7e5372c91f3222a40490c48\fairpane_js_parse.zig:1:26: note: file imported here
+pub const main = @import("src/js/parse_main.zig").main;
+                         ^~~~~~~~~~~~~~~~~~~~~~~
+error: 1 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-exe -Odebug "-Mroot=out\\fp0082-before\\o\\46654abfb7e5372c91f3222a40490c48\\fairpane_js_parse.zig" --cache-dir "out\\fp0082-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane-js-parse --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 40/78 steps succeeded (25 failed)
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 15 errors
++- run test transitive failure
+|  +- compile test debug native 15 errors
++- FP-0007 case 13: case 2 passes with exit status 0 success 40ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 3s MaxRSS:360M
++- FP-0007 case 13: case 3 fails with exit status 1 success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 37ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 78ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 13ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 17ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:343M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 47ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 51ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 40ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 46ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 52ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 55ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 51ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 45ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 50ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 45ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 14ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 49ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 42ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 46ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 44ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 45ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
++- FP-0011 case 4: allocation_invokes_call.zig failure
++- FP-0011 case 4: leaf_allocates.zig failure
++- FP-0011 case 4: mutation_throws.zig failure
++- FP-0011 case 4: leaf_calls_behavior.zig failure
++- FP-0011 case 4: leaf_positive.zig failure
++- FP-0011 case 5: catalog_callback_alone.zig failure
++- FP-0011 case 5: catalog_exception_alone.zig failure
++- FP-0011 case 5: catalog_duplicate_id.zig failure
++- FP-0011 case 5: kernel_wider_context.zig failure
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
++- FP-0011 case 8: layout_undescribed_field.zig failure
++- FP-0011 case 8: layout_plain_reference.zig failure
++- FP-0011 case 8: layout_missing_field.zig failure
++- FP-0011 case 20: abi_reference_value.zig failure
++- FP-0011 case 20: abi_nan_box_value.zig failure
++- FP-0011 case 20: abi_tagged_index_value.zig failure
++- FP-0011 case 34: leaf_reaches_heap.zig failure
++- FP-0011 case 35: leaf_widens_context.zig failure
++- FP-0011 case 36: binding_missing_kernel.zig failure
++- FP-0011 case 36: binding_stray_kernel.zig failure
++- FP-0082 case 16: valid.js exits with status 0 and prints the T9 dump transitive failure
+|  +- install fairpane-js-parse transitive failure
+|     +- compile exe fairpane-js-parse debug native 1 errors
+|        +- WriteFile src success
++- FP-0082 case 16: syntax.js exits with status 1 and prints its syntax error transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: unsupported.js exits with status 2 and prints its unsupported outcome transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: invalid-utf8.js exits with status 3 transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: a missing path exits with status 3 transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: no arguments exits with status 3 and writes the usage transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census of the sound fixture exits with status 0 transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census of the unsound fixture exits with status 1 transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census refuses an existing output file and exits with status 3 transitive failure
+   +- install fairpane-js-parse (+1 more reused dependencies)
+   +- WriteFile existing.jsonl success
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x87861752 test --summary all --cache-dir out/fp0082-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0082-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t64b25565c\\m","started_at":"2026-10-09T13:46:45.959Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":6573,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

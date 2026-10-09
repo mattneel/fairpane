@@ -1,0 +1,40 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+7ffafd3fd157208ec3af4ee10e644e846064f120
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t64b25565c\\m","started_at":"2026-10-09T14:22:01.526Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","engineering/evidence/FP-0082/raw/recursive-parser.zig.txt","engineering/evidence/FP-0082/raw/recursive-ast.zig.txt","engineering/evidence/FP-0082/raw/stack-probe.zig.txt","engineering/evidence/FP-0082/raw/make-stack-overlay.mjs","src/js/parser.zig","src/js/ast.zig","src/js/lexer.zig"]
+82e29dacc018e5bd6846666bbba02301549e76f6
+545fd9619060ed74fb13edd7e554794df7ee4beb
+8025ef548f011a73117f5b99d9afd348b3b2254d
+701e420032f3f55e3525681dd1c89771a20f7fdd
+3b3666d16e86b27970a370bd00651828da20ace8
+bd505c818bd7058542296a8c83ca3997812724e4
+17c632dd943158338dd2244ad8f313d022ff34c1
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","engineering/evidence/FP-0082/raw/recursive-parser.zig.txt","engineering/evidence/FP-0082/raw/recursive-ast.zig.txt","engineering/evidence/FP-0082/raw/stack-probe.zig.txt","engineering/evidence/FP-0082/raw/make-stack-overlay.mjs","src/js/parser.zig","src/js/ast.zig","src/js/lexer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t64b25565c\\m","started_at":"2026-10-09T14:22:01.603Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0082/raw/make-stack-overlay.mjs","out/fp0082-stack-explicit"]
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0082/raw/make-stack-overlay.mjs","out/fp0082-stack-explicit"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t64b25565c\\m","started_at":"2026-10-09T14:22:01.673Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":57}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","out/fp0082-stack-explicit/src/root.zig","--test-filter","FP-0082 probe","--cache-dir","out/fp0082-stack-cache-explicit"]
+1/6 root.test_0...OK
+2/6 css.css.test_0...OK
+3/6 font.opentype.test_0...OK
+4/6 html.root.test_0...OK
+5/6 js.runtime.test_0...OK
+6/6 js.parser.test.FP-0082 probe stack...probe (: 1 levels per repetition, 21152 bytes at 50 repetitions, 21152 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+probe a(: 1 levels per repetition, 20832 bytes at 50 repetitions, 20832 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+probe a[: 1 levels per repetition, 21392 bytes at 50 repetitions, 21392 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+probe !: 1 levels per repetition, 21136 bytes at 50 repetitions, 21136 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+probe typeof : 1 levels per repetition, 21264 bytes at 50 repetitions, 21264 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+probe {: 1 levels per repetition, 21968 bytes at 50 repetitions, 21968 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+probe if (a) : 1 levels per repetition, 21760 bytes at 50 repetitions, 21760 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+probe ({a:: 3 levels per repetition, 21808 bytes at 50 repetitions, 21808 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 366
+probe (function(){: 3 levels per repetition, 21488 bytes at 50 repetitions, 21488 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 366
+probe a?a:: 1 levels per repetition, 21264 bytes at 50 repetitions, 21264 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+probe a=: 1 levels per repetition, 21264 bytes at 50 repetitions, 21264 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+probe a**: 1 levels per repetition, 20832 bytes at 50 repetitions, 20832 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+probe new : 1 levels per repetition, 20960 bytes at 50 repetitions, 20960 bytes at 100 repetitions, 0 bytes per repetition, largest passing count 1100
+OK
+All 6 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","out/fp0082-stack-explicit/src/root.zig","--test-filter","FP-0082 probe","--cache-dir","out/fp0082-stack-cache-explicit"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t64b25565c\\m","started_at":"2026-10-09T14:22:01.784Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":2464,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

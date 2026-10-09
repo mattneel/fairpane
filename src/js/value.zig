@@ -157,6 +157,12 @@ test "FP-0011 case 20: no value representation or js import reaches the C ABI so
         @embedFile("measure_main_reference.zig"),
         @embedFile("measure_main_nan_box.zig"),
         @embedFile("measure_main_tagged_index.zig"),
+        @embedFile("lexer.zig"),
+        @embedFile("ast.zig"),
+        @embedFile("parser.zig"),
+        @embedFile("test262_metadata.zig"),
+        @embedFile("parse_census.zig"),
+        @embedFile("parse_main.zig"),
     };
     // The needles are split so that this file does not contain them.
     const needles = [_][]const u8{ "ex" ++ "port ", "call" ++ "conv(", "ex" ++ "tern struct", "ex" ++ "tern union" };

@@ -1,0 +1,12 @@
+diff --git a/src/js/parser.zig b/src/js/parser.zig
+index a6246a6..da08de0 100644
+--- a/src/js/parser.zig
++++ b/src/js/parser.zig
+@@ -1980,7 +1980,6 @@ const Parser = struct {
+             .kw_true => .true_literal,
+             .kw_false => .false_literal,
+             .number => number: {
+-                if (p.tok.legacy_octal != null and p.scope().strict) return p.syntax(.strict_octal, start);
+                 break :number .{ .number = p.tok.value };
+             },
+             .string => string: {

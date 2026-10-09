@@ -1071,6 +1071,72 @@ test('A manifest without test items fails binding, and an applicability record w
   const noTests = test262Applicability(c, await listTree(g, c));
   assert.equal(noTests.discovered, 0); assert.throws(() => validateApplicability(noTests), /zero discovered tests/);
 });
+// FP-0082 case 18: corpus-extract.
+const T262_EXTRACT_FILES = [...T262_FILES, { path: 'harness/assert.js', text: 'assert;\n' },
+  { path: 'features.txt', text: '## Proposed language features\n\n## Standard language features\n' }, { path: 'README.md', text: 'Not extracted.\n' }];
+/** Every file under `dir` as a sorted list of `[relative path with "/", contents]`. */
+function extractedFiles(dir) {
+  const files = [];
+  const walk = d => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p); else files.push([path.relative(dir, p).split(path.sep).join('/'), fs.readFileSync(p, 'utf8')]);
+    }
+  };
+  walk(dir);
+  return files.sort(([a], [b]) => Buffer.compare(Buffer.from(a), Buffer.from(b)));
+}
+test('FP-0082 case 18: corpus-extract writes exactly the test/ and harness/ blobs and features.txt, and an EXTRACT.json record', async () => {
+  const f = await corpusFixture('test262', T262_EXTRACT_FILES);
+  const out = path.join(f.dir, 'out', 'extract');
+  const r = await corpus.extractCorpus(f.dir, 'test262', out, { corporaDir: f.corporaDir });
+  const written = ['features.txt', 'harness/assert.js', 'test/harness/h_FIXTURE.js', 'test/language/a.js'];
+  const text = p => T262_EXTRACT_FILES.find(x => x.path === p).text;
+  const files = extractedFiles(out);
+  assert.deepEqual(files.map(([p]) => p), ['EXTRACT.json', ...written]);
+  for (const [p, contents] of files) if (p !== 'EXTRACT.json') assert.equal(contents, text(p), `${p} differs from its blob.`);
+  const lines = written.map(p => `${fixtureGit(f.g, ['rev-parse', `${f.commit}:${p}`])} ${p}\n`).join('');
+  const expected = { schema_version: 1, corpus: 'test262', commit: f.commit, tree: f.record.tree, files: 4, entries_sha256: sha256(lines) };
+  assert.deepEqual(readJson(path.join(out, 'EXTRACT.json')), expected);
+  assert.equal(r.result, 'pass'); assert.equal(r.files, 4); assert.equal(r.entries_sha256, expected.entries_sha256);
+});
+test('FP-0082 case 18: corpus-extract refuses a non-empty output directory, a directory outside out/, and an absent commit', async () => {
+  const f = await corpusFixture('test262', T262_EXTRACT_FILES), options = { corporaDir: f.corporaDir };
+  const full = path.join(f.dir, 'out', 'full');
+  put(full, 'stale.txt', 'A file from an earlier run.\n');
+  await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', full, options), /must be absent or empty/);
+  assert.deepEqual(fs.readdirSync(full), ['stale.txt']);
+  for (const outside of [path.join(f.dir, 'extract'), path.join(f.dir, 'out'), temp(), path.join(f.dir, 'out', '..', 'x')])
+    await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', outside, options), /must lie under/);
+  writeJson(f.recordFile, { ...f.record, commit: 'f'.repeat(40) });
+  const absent = path.join(f.dir, 'out', 'absent');
+  await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', absent, options), /does not contain commit/);
+  assert.equal(fs.existsSync(absent), false);
+});
+test('FP-0082 case 18: the corpus-extract path check rejects empty, ".", and ".." components, and extraction rejects other modes', async () => {
+  for (const bad of ['test/../x', 'test//x', 'test/./x', '/test/x', 'test/x/', '..', '.'])
+    assert.equal(corpus.extractPathProblem(Buffer.from(bad)) !== null, true, `${bad} passed the path check.`);
+  for (const good of ['test/x.js', 'harness/a.b.js', 'test/..x/y'])
+    assert.equal(corpus.extractPathProblem(Buffer.from(good)), null, `${good} failed the path check.`);
+  const f = await corpusFixture('test262', [...T262_EXTRACT_FILES, { path: 'test/link.js', text: 'test/language/a.js', mode: '120000' }]);
+  await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', path.join(f.dir, 'out', 'x'), { corporaDir: f.corporaDir }),
+    /test\/link\.js has mode 120000/);
+  const g = await corpusFixture('test262', [...T262_EXTRACT_FILES, { path: 'test/run.sh', text: 'true\n', mode: '100755' }]);
+  const r = await corpus.extractCorpus(g.dir, 'test262', path.join(g.dir, 'out', 'x'), { corporaDir: g.corporaDir });
+  assert.equal(r.files, 5);
+});
+test('FP-0082 case 18: corpus-extract rejects a stored blob whose content does not hash to its tree object ID', async () => {
+  const f = await corpusFixture('test262', T262_EXTRACT_FILES);
+  const blob = p => fixtureGit(f.g, ['rev-parse', `${f.commit}:${p}`]);
+  const objectFile = id => path.join(f.g, 'objects', id.slice(0, 2), id.slice(2));
+  // Git reads a loose object without rehashing it, so the altered file yields other content under the listed ID.
+  const target = objectFile(blob('test/language/a.js'));
+  fs.chmodSync(target, 0o644); fs.copyFileSync(objectFile(blob('harness/assert.js')), target);
+  const out = path.join(f.dir, 'out', 'altered');
+  await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', out, { corporaDir: f.corporaDir }),
+    /test\/language\/a\.js: the written file hashes to [0-9a-f]{40}, not to its tree object ID/);
+  assert.equal(fs.existsSync(path.join(out, 'EXTRACT.json')), false);
+});
 /** Paths and SHA-256 digests of every file under `dir`, sorted. */
 function directoryDigest(dir) {
   const lines = [];

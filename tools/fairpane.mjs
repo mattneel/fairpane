@@ -46,6 +46,9 @@ function help() {
   corpus-applicability <id>   Count discovered tests or files in a local snapshot.
   corpus-verify <id>          Recompute a local snapshot and compare its records and pins.
   corpus-derive <id>          Run the declared import-tool derivations of a file-set corpus and record them.
+  corpus-extract test262 <out-dir>
+                              Write the pinned Test262 test/ and harness/ blobs and features.txt to a fresh
+                              directory under out/, check each file's Git blob ID, and write EXTRACT.json.
   font-expectations [--check] Run tools/fonts/font_expectations.py for every fixture font in a staging
                               directory after checking fontTools against its wheel's RECORD. --check exits
                               with status 1 when an output differs from the committed file; otherwise the

@@ -1551,4 +1551,9 @@ test {
     _ = @import("number.zig");
     _ = @import("number_vectors.zig");
     _ = @import("measure.zig");
+    _ = @import("lexer.zig");
+    _ = @import("ast.zig");
+    _ = @import("parser.zig");
+    _ = @import("test262_metadata.zig");
+    _ = @import("parse_census.zig");
 }

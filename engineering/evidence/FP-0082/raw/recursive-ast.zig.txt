@@ -1,0 +1,576 @@
+//! The FP-0082 syntax tree, its function records and declaration lists, and the dump writer.
+//!
+//! Every node records the code-unit offset of its first token and its height: 1 for a leaf, and
+//! one more than its tallest child otherwise. The height counts the same parenthesized groups as
+//! the node depth of the dump, so the parser can bound the depth of a tree that it builds bottom up.
+
+const std = @import("std");
+const number = @import("number.zig");
+const Writer = std.Io.Writer;
+
+/// An identifier's StringValue. Identifiers are ASCII until FP-0095.
+pub const Name = []const u16;
+
+pub const Script = struct {
+    strict: bool,
+    /// TopLevelVarDeclaredNames in source order, first occurrence only.
+    var_declared_names: []const Name,
+    /// The functionsToInitialize list of GlobalDeclarationInstantiation (16.1.7).
+    functions_to_initialize: []const *const Function,
+    statements: []const *const Statement,
+};
+
+pub const Function = struct {
+    /// The 1-based index of a FunctionDeclaration among all FunctionDeclarations of the source,
+    /// in the order of their `function` tokens, or 0 for a FunctionExpression.
+    index: u32,
+    name: ?Name,
+    params: []const Name,
+    strict: bool,
+    /// TopLevelVarDeclaredNames of the FunctionBody in source order, first occurrence only.
+    var_declared_names: []const Name,
+    /// The functionsToInitialize list of FunctionDeclarationInstantiation (10.2.11).
+    functions_to_initialize: []const *const Function,
+    statements: []const *const Statement,
+    /// The code-unit range of the function's source text, from `function` through `}`.
+    source_start: u32,
+    source_end: u32,
+    height: u32,
+};
+
+pub const Declarator = struct { name: Name, init: ?*const Expression };
+
+pub const ForInit = union(enum) {
+    variable: []const Declarator,
+    expression: *const Expression,
+};
+
+pub const Case = struct {
+    /// Null for the default clause.
+    test_expression: ?*const Expression,
+    body: []const *const Statement,
+};
+
+pub const Catch = struct {
+    /// Null for an omitted catch binding.
+    param: ?Name,
+    body: []const *const Statement,
+};
+
+pub const Statement = struct {
+    start: u32,
+    height: u32,
+    data: Data,
+
+    pub const Data = union(enum) {
+        expression: *const Expression,
+        variable: []const Declarator,
+        block: []const *const Statement,
+        empty,
+        if_statement: struct { test_expression: *const Expression, consequent: *const Statement, alternate: ?*const Statement },
+        do_while: struct { body: *const Statement, test_expression: *const Expression },
+        while_statement: struct { test_expression: *const Expression, body: *const Statement },
+        for_statement: struct { init: ?ForInit, test_expression: ?*const Expression, update: ?*const Expression, body: *const Statement },
+        continue_statement: ?Name,
+        break_statement: ?Name,
+        return_statement: ?*const Expression,
+        throw_statement: *const Expression,
+        switch_statement: struct { discriminant: *const Expression, cases: []const Case },
+        labelled: struct { label: Name, body: *const Statement },
+        try_statement: struct { block: []const *const Statement, handler: ?Catch, finalizer: ?[]const *const Statement },
+        debugger,
+        function_declaration: *const Function,
+    };
+};
+
+pub const UpdateOperator = enum { increment, decrement };
+pub const UnaryOperator = enum { delete, @"void", typeof, plus, minus, bitwise_not, logical_not };
+pub const BinaryOperator = enum {
+    exponent,
+    multiply,
+    divide,
+    remainder,
+    add,
+    subtract,
+    shift_left,
+    shift_right,
+    shift_right_unsigned,
+    less,
+    greater,
+    less_equal,
+    greater_equal,
+    instanceof,
+    in,
+    equal,
+    not_equal,
+    strict_equal,
+    strict_not_equal,
+    bitwise_and,
+    bitwise_xor,
+    bitwise_or,
+};
+pub const LogicalOperator = enum { @"and", @"or" };
+pub const AssignmentOperator = enum {
+    assign,
+    multiply,
+    divide,
+    remainder,
+    add,
+    subtract,
+    shift_left,
+    shift_right,
+    shift_right_unsigned,
+    bitwise_and,
+    bitwise_xor,
+    bitwise_or,
+    exponent,
+};
+
+pub const Property = union(enum) {
+    /// `PropertyName : AssignmentExpression` with a literal key, by its PropName.
+    property: struct { key: []const u16, value: *const Expression },
+    computed: struct { key: *const Expression, value: *const Expression },
+    shorthand: Name,
+    /// The `__proto__: value` form of 13.2.5.
+    proto: *const Expression,
+
+    pub fn height(property: Property) u32 {
+        return switch (property) {
+            .property => |p| 1 + p.value.height,
+            .computed => |c| 1 + @max(1 + c.key.height, c.value.height),
+            .shorthand => 1,
+            .proto => |value| 1 + value.height,
+        };
+    }
+};
+
+pub const Expression = struct {
+    start: u32,
+    height: u32,
+    data: Data,
+
+    pub const Data = union(enum) {
+        identifier: Name,
+        this,
+        null_literal,
+        true_literal,
+        false_literal,
+        number: f64,
+        string: []const u16,
+        object: []const Property,
+        function: *const Function,
+        paren: *const Expression,
+        member: struct { object: *const Expression, name: Name },
+        index: struct { object: *const Expression, index: *const Expression },
+        call: struct { callee: *const Expression, arguments: []const *const Expression },
+        new: struct { callee: *const Expression, arguments: []const *const Expression },
+        prefix: struct { operator: UpdateOperator, operand: *const Expression },
+        postfix: struct { operator: UpdateOperator, operand: *const Expression },
+        unary: struct { operator: UnaryOperator, operand: *const Expression },
+        binary: struct { operator: BinaryOperator, left: *const Expression, right: *const Expression },
+        logical: struct { operator: LogicalOperator, left: *const Expression, right: *const Expression },
+        conditional: struct { test_expression: *const Expression, consequent: *const Expression, alternate: *const Expression },
+        assign: struct { operator: AssignmentOperator, target: *const Expression, value: *const Expression },
+        sequence: []const *const Expression,
+    };
+};
+
+pub fn updateText(operator: UpdateOperator) []const u8 {
+    return switch (operator) {
+        .increment => "++",
+        .decrement => "--",
+    };
+}
+
+pub fn unaryText(operator: UnaryOperator) []const u8 {
+    return switch (operator) {
+        .delete => "delete",
+        .@"void" => "void",
+        .typeof => "typeof",
+        .plus => "+",
+        .minus => "-",
+        .bitwise_not => "~",
+        .logical_not => "!",
+    };
+}
+
+pub fn binaryText(operator: BinaryOperator) []const u8 {
+    return switch (operator) {
+        .exponent => "**",
+        .multiply => "*",
+        .divide => "/",
+        .remainder => "%",
+        .add => "+",
+        .subtract => "-",
+        .shift_left => "<<",
+        .shift_right => ">>",
+        .shift_right_unsigned => ">>>",
+        .less => "<",
+        .greater => ">",
+        .less_equal => "<=",
+        .greater_equal => ">=",
+        .instanceof => "instanceof",
+        .in => "in",
+        .equal => "==",
+        .not_equal => "!=",
+        .strict_equal => "===",
+        .strict_not_equal => "!==",
+        .bitwise_and => "&",
+        .bitwise_xor => "^",
+        .bitwise_or => "|",
+    };
+}
+
+pub fn logicalText(operator: LogicalOperator) []const u8 {
+    return switch (operator) {
+        .@"and" => "&&",
+        .@"or" => "||",
+    };
+}
+
+pub fn assignmentText(operator: AssignmentOperator) []const u8 {
+    return switch (operator) {
+        .assign => "=",
+        .multiply => "*=",
+        .divide => "/=",
+        .remainder => "%=",
+        .add => "+=",
+        .subtract => "-=",
+        .shift_left => "<<=",
+        .shift_right => ">>=",
+        .shift_right_unsigned => ">>>=",
+        .bitwise_and => "&=",
+        .bitwise_xor => "^=",
+        .bitwise_or => "|=",
+        .exponent => "**=",
+    };
+}
+
+// The dump writer. Each function that recurses keeps few locals, because the recursion depth
+// reaches the parser's depth bound on the embedder's thread.
+
+/// Writes the one-line dump of `script`.
+pub fn writeScript(script: *const Script, writer: *Writer) Writer.Error!void {
+    try writer.writeAll(if (script.strict) "(script strict " else "(script sloppy ");
+    try writeDeclarations(script.var_declared_names, script.functions_to_initialize, writer);
+    try writeStatements(script.statements, writer);
+    try writer.writeByte(')');
+}
+
+fn writeDeclarations(names: []const Name, functions: []const *const Function, writer: *Writer) Writer.Error!void {
+    try writer.writeAll("(var-declared-names");
+    for (names) |name| {
+        try writer.writeByte(' ');
+        try writeName(name, writer);
+    }
+    try writer.writeAll(") (functions-to-initialize");
+    for (functions) |function| {
+        try writer.writeByte(' ');
+        try writeName(function.name.?, writer);
+        try writer.print("#{d}", .{function.index});
+    }
+    try writer.writeByte(')');
+}
+
+/// Writes each statement preceded by a space.
+fn writeStatements(statements: []const *const Statement, writer: *Writer) Writer.Error!void {
+    for (statements) |statement| {
+        try writer.writeByte(' ');
+        try writeStatement(statement, writer);
+    }
+}
+
+fn writeName(name: Name, writer: *Writer) Writer.Error!void {
+    for (name) |unit| try writer.writeByte(@intCast(unit));
+}
+
+/// Writes `units` in double quotes, escaping `"` and `\`, and every code unit outside 0x20 to 0x7E as `\uXXXX`.
+fn writeString(units: []const u16, writer: *Writer) Writer.Error!void {
+    try writer.writeByte('"');
+    for (units) |unit| {
+        switch (unit) {
+            '"' => try writer.writeAll("\\\""),
+            '\\' => try writer.writeAll("\\\\"),
+            0x20...0x21, 0x23...0x5B, 0x5D...0x7E => try writer.writeByte(@intCast(unit)),
+            else => try writer.print("\\u{X:0>4}", .{unit}),
+        }
+    }
+    try writer.writeByte('"');
+}
+
+fn writeNumber(value: f64, writer: *Writer) Writer.Error!void {
+    var buffer: [number.max_string_units]u16 = undefined;
+    try writeName(number.toString(value, &buffer), writer);
+}
+
+fn writeFunction(function: *const Function, writer: *Writer) Writer.Error!void {
+    if (function.index != 0) {
+        try writer.print("(function-declaration #{d} ", .{function.index});
+        try writeName(function.name.?, writer);
+    } else {
+        try writer.writeAll("(function-expression ");
+        if (function.name) |name| try writeName(name, writer) else try writer.writeByte('-');
+    }
+    try writer.writeAll(" (params");
+    for (function.params) |param| {
+        try writer.writeByte(' ');
+        try writeName(param, writer);
+    }
+    try writer.writeAll(if (function.strict) ") strict " else ") sloppy ");
+    try writeDeclarations(function.var_declared_names, function.functions_to_initialize, writer);
+    try writeStatements(function.statements, writer);
+    try writer.writeByte(')');
+}
+
+fn writeDeclarators(declarators: []const Declarator, writer: *Writer) Writer.Error!void {
+    try writer.writeAll("(var");
+    for (declarators) |*declarator| {
+        try writer.writeAll(" (");
+        try writeName(declarator.name, writer);
+        if (declarator.init) |init| {
+            try writer.writeByte(' ');
+            try writeExpression(init, writer);
+        }
+        try writer.writeByte(')');
+    }
+    try writer.writeByte(')');
+}
+
+fn writeOptional(expression: ?*const Expression, writer: *Writer) Writer.Error!void {
+    try writer.writeByte(' ');
+    if (expression) |e| try writeExpression(e, writer) else try writer.writeByte('-');
+}
+
+fn writeBlock(statements: []const *const Statement, writer: *Writer) Writer.Error!void {
+    try writer.writeAll("(block");
+    try writeStatements(statements, writer);
+    try writer.writeByte(')');
+}
+
+fn writeLabelled(keyword: []const u8, label: ?Name, writer: *Writer) Writer.Error!void {
+    try writer.writeByte('(');
+    try writer.writeAll(keyword);
+    if (label) |name| {
+        try writer.writeByte(' ');
+        try writeName(name, writer);
+    }
+    try writer.writeByte(')');
+}
+
+fn writeKeyed(keyword: []const u8, first: *const Expression, second: *const Statement, writer: *Writer) Writer.Error!void {
+    try writer.writeAll(keyword);
+    try writeExpression(first, writer);
+    try writer.writeByte(' ');
+    try writeStatement(second, writer);
+    try writer.writeByte(')');
+}
+
+fn writeStatement(statement: *const Statement, writer: *Writer) Writer.Error!void {
+    switch (statement.data) {
+        .expression => |e| {
+            try writer.writeAll("(expression ");
+            try writeExpression(e, writer);
+            try writer.writeByte(')');
+        },
+        .variable => |declarators| try writeDeclarators(declarators, writer),
+        .block => |statements| try writeBlock(statements, writer),
+        .empty => try writer.writeAll("(empty)"),
+        .if_statement => |*s| try writeIf(s.test_expression, s.consequent, s.alternate, writer),
+        .do_while => |*s| {
+            try writer.writeAll("(do-while ");
+            try writeStatement(s.body, writer);
+            try writer.writeByte(' ');
+            try writeExpression(s.test_expression, writer);
+            try writer.writeByte(')');
+        },
+        .while_statement => |*s| try writeKeyed("(while ", s.test_expression, s.body, writer),
+        .for_statement => |*s| try writeFor(s.init, s.test_expression, s.update, s.body, writer),
+        .continue_statement => |label| try writeLabelled("continue", label, writer),
+        .break_statement => |label| try writeLabelled("break", label, writer),
+        .return_statement => |value| {
+            try writer.writeAll("(return");
+            if (value) |e| {
+                try writer.writeByte(' ');
+                try writeExpression(e, writer);
+            }
+            try writer.writeByte(')');
+        },
+        .throw_statement => |e| {
+            try writer.writeAll("(throw ");
+            try writeExpression(e, writer);
+            try writer.writeByte(')');
+        },
+        .switch_statement => |*s| try writeSwitch(s.discriminant, s.cases, writer),
+        .labelled => |*s| {
+            try writer.writeAll("(labelled ");
+            try writeName(s.label, writer);
+            try writer.writeByte(' ');
+            try writeStatement(s.body, writer);
+            try writer.writeByte(')');
+        },
+        .try_statement => |*s| try writeTry(s.block, s.handler, s.finalizer, writer),
+        .debugger => try writer.writeAll("(debugger)"),
+        .function_declaration => |function| try writeFunction(function, writer),
+    }
+}
+
+fn writeIf(test_expression: *const Expression, consequent: *const Statement, alternate: ?*const Statement, writer: *Writer) Writer.Error!void {
+    try writer.writeAll("(if ");
+    try writeExpression(test_expression, writer);
+    try writer.writeByte(' ');
+    try writeStatement(consequent, writer);
+    if (alternate) |s| {
+        try writer.writeByte(' ');
+        try writeStatement(s, writer);
+    }
+    try writer.writeByte(')');
+}
+
+fn writeFor(init: ?ForInit, test_expression: ?*const Expression, update: ?*const Expression, body: *const Statement, writer: *Writer) Writer.Error!void {
+    try writer.writeAll("(for ");
+    if (init) |head| switch (head) {
+        .variable => |declarators| try writeDeclarators(declarators, writer),
+        .expression => |e| try writeExpression(e, writer),
+    } else try writer.writeByte('-');
+    try writeOptional(test_expression, writer);
+    try writeOptional(update, writer);
+    try writer.writeByte(' ');
+    try writeStatement(body, writer);
+    try writer.writeByte(')');
+}
+
+fn writeSwitch(discriminant: *const Expression, cases: []const Case, writer: *Writer) Writer.Error!void {
+    try writer.writeAll("(switch ");
+    try writeExpression(discriminant, writer);
+    for (cases) |*case| {
+        if (case.test_expression) |e| {
+            try writer.writeAll(" (case ");
+            try writeExpression(e, writer);
+        } else {
+            try writer.writeAll(" (default");
+        }
+        try writeStatements(case.body, writer);
+        try writer.writeByte(')');
+    }
+    try writer.writeByte(')');
+}
+
+fn writeTry(block: []const *const Statement, handler: ?Catch, finalizer: ?[]const *const Statement, writer: *Writer) Writer.Error!void {
+    try writer.writeAll("(try ");
+    try writeBlock(block, writer);
+    if (handler) |*clause| {
+        try writer.writeAll(" (catch ");
+        if (clause.param) |name| try writeName(name, writer) else try writer.writeByte('-');
+        try writer.writeByte(' ');
+        try writeBlock(clause.body, writer);
+        try writer.writeByte(')');
+    }
+    if (finalizer) |statements| {
+        try writer.writeAll(" (finally ");
+        try writeBlock(statements, writer);
+        try writer.writeByte(')');
+    }
+    try writer.writeByte(')');
+}
+
+fn writeObject(properties: []const Property, writer: *Writer) Writer.Error!void {
+    try writer.writeAll("(object");
+    for (properties) |*property| {
+        try writer.writeByte(' ');
+        switch (property.*) {
+            .property => |*p| {
+                try writer.writeAll("(property ");
+                try writeString(p.key, writer);
+                try writer.writeByte(' ');
+                try writeExpression(p.value, writer);
+            },
+            .computed => |*c| {
+                try writer.writeAll("(property (computed ");
+                try writeExpression(c.key, writer);
+                try writer.writeAll(") ");
+                try writeExpression(c.value, writer);
+            },
+            .shorthand => |name| {
+                try writer.writeAll("(shorthand ");
+                try writeName(name, writer);
+            },
+            .proto => |value| {
+                try writer.writeAll("(proto ");
+                try writeExpression(value, writer);
+            },
+        }
+        try writer.writeByte(')');
+    }
+    try writer.writeByte(')');
+}
+
+/// Writes `(<head> e e...)` for a callee or operand followed by the expressions of `rest`.
+fn writeList(head: []const u8, first: *const Expression, rest: []const *const Expression, writer: *Writer) Writer.Error!void {
+    try writer.writeAll(head);
+    try writeExpression(first, writer);
+    for (rest) |e| {
+        try writer.writeByte(' ');
+        try writeExpression(e, writer);
+    }
+    try writer.writeByte(')');
+}
+
+/// Writes `(<kind> <operator> left right)`.
+fn writeOperation(kind: []const u8, operator: []const u8, left: *const Expression, right: ?*const Expression, writer: *Writer) Writer.Error!void {
+    try writer.writeByte('(');
+    try writer.writeAll(kind);
+    try writer.writeByte(' ');
+    try writer.writeAll(operator);
+    try writer.writeByte(' ');
+    try writeExpression(left, writer);
+    if (right) |e| {
+        try writer.writeByte(' ');
+        try writeExpression(e, writer);
+    }
+    try writer.writeByte(')');
+}
+
+fn writeExpression(expression: *const Expression, writer: *Writer) Writer.Error!void {
+    switch (expression.data) {
+        .identifier => |name| {
+            try writer.writeAll("(identifier ");
+            try writeName(name, writer);
+            try writer.writeByte(')');
+        },
+        .this => try writer.writeAll("(this)"),
+        .null_literal => try writer.writeAll("(null)"),
+        .true_literal => try writer.writeAll("(true)"),
+        .false_literal => try writer.writeAll("(false)"),
+        .number => |value| {
+            try writer.writeAll("(number ");
+            try writeNumber(value, writer);
+            try writer.writeByte(')');
+        },
+        .string => |units| {
+            try writer.writeAll("(string ");
+            try writeString(units, writer);
+            try writer.writeByte(')');
+        },
+        .object => |properties| try writeObject(properties, writer),
+        .function => |function| try writeFunction(function, writer),
+        .paren => |inner| try writeList("(paren ", inner, &.{}, writer),
+        .member => |*m| {
+            try writer.writeAll("(member ");
+            try writeExpression(m.object, writer);
+            try writer.writeByte(' ');
+            try writeString(m.name, writer);
+            try writer.writeByte(')');
+        },
+        .index => |*i| try writeList("(index ", i.object, (&i.index)[0..1], writer),
+        .call => |*c| try writeList("(call ", c.callee, c.arguments, writer),
+        .new => |*n| try writeList("(new ", n.callee, n.arguments, writer),
+        .prefix => |*u| try writeOperation("prefix", updateText(u.operator), u.operand, null, writer),
+        .postfix => |*u| try writeOperation("postfix", updateText(u.operator), u.operand, null, writer),
+        .unary => |*u| try writeOperation("unary", unaryText(u.operator), u.operand, null, writer),
+        .binary => |*b| try writeOperation("binary", binaryText(b.operator), b.left, b.right, writer),
+        .logical => |*l| try writeOperation("logical", logicalText(l.operator), l.left, l.right, writer),
+        .conditional => |*c| try writeList("(conditional ", c.test_expression, &.{ c.consequent, c.alternate }, writer),
+        .assign => |*a| try writeOperation("assign", assignmentText(a.operator), a.target, a.value, writer),
+        .sequence => |elements| try writeList("(sequence ", elements[0], elements[1..], writer),
+    }
+}

@@ -197,7 +197,7 @@ pub fn build(b: *std.Build) void {
     check_step.dependOn(&lab_check.step);
 
     // A module may import only files under the directory of its root source file.
-    // Each measurement root therefore sits beside a copy of `src`, so `src/js` can import `src/dom.zig`.
+    // Each measurement root and the `fairpane-js-parse` root therefore sit beside a copy of `src`, so `src/js` can import `src/dom.zig`.
     const measure_step = b.step("measure", "Build the FP-0011 measurement executables");
     const measure_sources = b.addWriteFiles();
     _ = measure_sources.addCopyDirectory(b.path("src"), "src", .{ .include_extensions = &.{".zig"} });
@@ -216,6 +216,106 @@ pub fn build(b: *std.Build) void {
         });
         measure_step.dependOn(&b.addInstallArtifact(exe, .{}).step);
     }
+
+    const parse_exe = b.addExecutable(.{
+        .name = "fairpane-js-parse",
+        .root_module = b.createModule(.{
+            .root_source_file = measure_sources.add("fairpane_js_parse.zig", "pub const main = @import(\"src/js/parse_main.zig\").main;\n"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+    const install_parse = b.addInstallArtifact(parse_exe, .{});
+    const js_tools_step = b.step("js-tools", "Build and install the FP-0082 fairpane-js-parse executable");
+    js_tools_step.dependOn(&install_parse.step);
+    check_step.dependOn(&parse_exe.step);
+    const installed_parse = b.graph.path(.install_bin, b.fmt("fairpane-js-parse{s}", .{target.result.exeFileExt()}));
+    addParseCases(b, test_step, &install_parse.step, installed_parse);
+}
+
+/// The T9 dump of FP-0082 contract case 2.
+const t9_dump = "(script sloppy (var-declared-names f) (functions-to-initialize f#1) (function-declaration #1 f (params a b) sloppy (var-declared-names c g) (functions-to-initialize g#2) (var (c (identifier a))) (function-declaration #2 g (params) sloppy (var-declared-names) (functions-to-initialize)) (return (binary + (identifier c) (identifier b)))))";
+
+/// The files of the FP-0082 census fixture trees under `tests/js/census`.
+const census_fixtures = [_][]const u8{
+    "sound/EXTRACT.json",
+    "sound/features.txt",
+    "sound/test/a.js",
+    "sound/test/b.js",
+    "sound/test/c.js",
+    "sound/test/d.js",
+    "sound/test/e.js",
+    "sound/test/f_FIXTURE.js",
+    "sound/test/g.js",
+    "sound/test/h.js",
+    "unsound/EXTRACT.json",
+    "unsound/features.txt",
+    "unsound/test/i.js",
+    "unsound/test/j.js",
+    "unsound/test/k.js",
+};
+
+/// Adds FP-0082 contract cases 16 and 17, which run the installed `fairpane-js-parse` executable.
+fn addParseCases(b: *std.Build, test_step: *std.Build.Step, install: *std.Build.Step, parse: std.Build.LazyPath) void {
+    const files = [_]struct { name: []const u8, file: []const u8, status: u8, stdout: []const u8 }{
+        .{ .name = "FP-0082 case 16: valid.js exits with status 0 and prints the T9 dump", .file = "valid.js", .status = 0, .stdout = t9_dump ++ "\n" },
+        .{ .name = "FP-0082 case 16: syntax.js exits with status 1 and prints its syntax error", .file = "syntax.js", .status = 1, .stdout = "syntax-error unexpected_token @4\n" },
+        .{ .name = "FP-0082 case 16: unsupported.js exits with status 2 and prints its unsupported outcome", .file = "unsupported.js", .status = 2, .stdout = "unsupported arrow_function @2\n" },
+    };
+    for (files) |case| {
+        const run = labRun(b, install, parse, case.name);
+        run.addArg("file");
+        run.addFileArg(b.path(b.fmt("tests/js/parse/{s}", .{case.file})));
+        run.expectExitCode(case.status);
+        run.expectStdOutEqual(case.stdout);
+        test_step.dependOn(&run.step);
+    }
+
+    const invalid = labRun(b, install, parse, "FP-0082 case 16: invalid-utf8.js exits with status 3");
+    invalid.addArg("file");
+    invalid.addFileArg(b.path("tests/js/parse/invalid-utf8.js"));
+    invalid.expectExitCode(3);
+    test_step.dependOn(&invalid.step);
+
+    const missing = labRun(b, install, parse, "FP-0082 case 16: a missing path exits with status 3");
+    missing.setCwd(b.path("."));
+    missing.has_side_effects = true;
+    missing.addArgs(&.{ "file", "tests/js/parse/missing.js" });
+    missing.expectExitCode(3);
+    test_step.dependOn(&missing.step);
+
+    const usage = labRun(b, install, parse, "FP-0082 case 16: no arguments exits with status 3 and writes the usage");
+    usage.expectExitCode(3);
+    usage.expectStdErrMatch("usage: fairpane-js-parse");
+    test_step.dependOn(&usage.step);
+
+    const sound = labRun(b, install, parse, "FP-0082 case 17: the census of the sound fixture exits with status 0");
+    sound.addArg("census");
+    sound.addDirectoryArg(b.path("tests/js/census/sound"));
+    _ = sound.addOutputDirectoryArg2("census-sound", .{ .suffix = "/census.jsonl" });
+    for (census_fixtures) |name| sound.addFileInput(b.path(b.fmt("tests/js/census/{s}", .{name})));
+    sound.expectExitCode(0);
+    sound.expectStdOutMatch("{\"format\":\"fairpane-js-parse-census\",\"version\":1,\"commit\":\"0000000000000000000000000000000000000000\"}\n");
+    sound.expectStdOutMatch("{\"summary\":{\"discovered\":7,\"module\":1,\"proposal_files\":1,\"runs\":9,\"agree_valid\":2,\"agree_error\":3,\"unsupported\":2,\"limit\":0,\"proposal_mismatch\":2,\"false_accept\":0,\"false_syntax_error\":0,\"metadata_error\":0,\"input_error\":0},\"unsupported_by_code\":{\"arrow_function\":1,\"with\":1}}");
+    test_step.dependOn(&sound.step);
+
+    const unsound = labRun(b, install, parse, "FP-0082 case 17: the census of the unsound fixture exits with status 1");
+    unsound.addArg("census");
+    unsound.addDirectoryArg(b.path("tests/js/census/unsound"));
+    _ = unsound.addOutputDirectoryArg2("census-unsound", .{ .suffix = "/census.jsonl" });
+    for (census_fixtures) |name| unsound.addFileInput(b.path(b.fmt("tests/js/census/{s}", .{name})));
+    unsound.expectExitCode(1);
+    unsound.expectStdOutMatch("\"false_accept\":2,\"false_syntax_error\":1,\"metadata_error\":1,");
+    test_step.dependOn(&unsound.step);
+
+    const existing = b.addWriteFiles();
+    const refuse = labRun(b, install, parse, "FP-0082 case 17: the census refuses an existing output file and exits with status 3");
+    refuse.addArg("census");
+    refuse.addDirectoryArg(b.path("tests/js/census/sound"));
+    refuse.addFileArg(existing.add("existing.jsonl", "An existing output file.\n"));
+    for (census_fixtures) |name| refuse.addFileInput(b.path(b.fmt("tests/js/census/{s}", .{name})));
+    refuse.expectExitCode(3);
+    test_step.dependOn(&refuse.step);
 }
 
 /// A static library that `zig build` installs: the compiled object, the archive that holds it, and the archive's file name.

@@ -31,6 +31,7 @@ It does not publish code, change approval settings, or choose an account identit
 | `corpus-applicability <id>` | Counts discovered tests or files in a local snapshot without network access or corpus code. |
 | `corpus-verify <id>` | Recomputes a local snapshot and compares its records and `specs/corpora.json` pins. |
 | `corpus-derive <id>` | Runs the declared import-tool derivations of a file-set corpus, requires each output to match any existing fixture byte for byte, and records it. |
+| `corpus-extract test262 <out-dir>` | Writes the pinned Test262 blobs under `test/` and `harness/`, and `features.txt`, to an absent or empty directory under `out/`, checks each written file's Git blob ID against the tree, and writes `EXTRACT.json`. No corpus code runs. |
 | `attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>` | Verifies a signed result against protected trust input and a full commit ID in a candidate repository. |
 | `abi-generate` | Validates the ABI schema and failure scenarios, then writes `include/fairpane.h`, `src/abi_generated.zig`, and `tests/c/abi_layout.h`. |
 | `abi-check` | Regenerates the ABI files in memory and exits with status 1 when a committed file differs. |

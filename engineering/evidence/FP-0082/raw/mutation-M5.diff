@@ -1,0 +1,22 @@
+diff --git a/src/js/parser.zig b/src/js/parser.zig
+index a6246a6..819b341 100644
+--- a/src/js/parser.zig
++++ b/src/js/parser.zig
+@@ -645,7 +645,7 @@ const Parser = struct {
+     /// Moves to the depth of a child node.
+     fn descend(p: *Parser) error{Diagnostic}!void {
+         p.depth += 1;
+-        if (p.depth > p.options.max_depth) return p.limitDepth();
++        if (p.depth >= p.options.max_depth) return p.limitDepth();
+     }
+ 
+     fn ascend(p: *Parser) void {
+@@ -654,7 +654,7 @@ const Parser = struct {
+ 
+     /// Checks a node of `height` that sits at the current depth or deeper.
+     fn checkHeight(p: *Parser, height: u32) error{Diagnostic}!void {
+-        if (p.depth + height - 1 > p.options.max_depth) return p.limitDepth();
++        if (p.depth + height - 1 >= p.options.max_depth) return p.limitDepth();
+     }
+ 
+     fn newExpression(p: *Parser, start: u32, height: u32, data: Expression.Data) Error!*const Expression {

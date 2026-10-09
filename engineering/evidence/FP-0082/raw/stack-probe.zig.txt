@@ -1,0 +1,47 @@
+
+// FP-0082 stack probe. It is appended to a copy of src/js/parser.zig and is not part of the tree.
+test "FP-0082 probe stack" {
+    const gpa = testing.allocator;
+    const shapes = [_]struct { open: []const u8, close: []const u8, levels: u32 }{
+        .{ .open = "(", .close = ")", .levels = 1 },
+        .{ .open = "a(", .close = ")", .levels = 1 },
+        .{ .open = "a[", .close = "]", .levels = 1 },
+        .{ .open = "!", .close = "", .levels = 1 },
+        .{ .open = "typeof ", .close = "", .levels = 1 },
+        .{ .open = "{", .close = "}", .levels = 1 },
+        .{ .open = "if (a) ", .close = "", .levels = 1 },
+        .{ .open = "({a:", .close = "})", .levels = 3 },
+        .{ .open = "(function(){", .close = "})", .levels = 3 },
+        .{ .open = "a?a:", .close = "", .levels = 1 },
+        .{ .open = "a=", .close = "", .levels = 1 },
+        .{ .open = "a**", .close = "", .levels = 1 },
+        .{ .open = "new ", .close = "", .levels = 1 },
+    };
+    for (shapes) |shape| {
+        // The largest repetition count whose parse and write stay inside the painted part of a 1 MiB stack.
+        var low: usize = 1;
+        var high: usize = 1100 / shape.levels;
+        while (low < high) {
+            const mid = (low + high + 1) / 2;
+            const source = try nested(gpa, shape.open, "a", shape.close, mid);
+            defer gpa.free(source);
+            var depth_run: DepthRun = .{ .source = source, .limit = false };
+            const thread = try std.Thread.spawn(.{ .stack_size = case_stack_size }, DepthRun.run, .{&depth_run});
+            thread.join();
+            if (depth_run.stack_bytes < case_stack_size - 2 * paint_margin) low = mid else high = mid - 1;
+        }
+        const fifty = try nested(gpa, shape.open, "a", shape.close, 50);
+        defer gpa.free(fifty);
+        const hundred = try nested(gpa, shape.open, "a", shape.close, 100);
+        defer gpa.free(hundred);
+        var first: DepthRun = .{ .source = fifty, .limit = false };
+        var thread = try std.Thread.spawn(.{ .stack_size = case_stack_size }, DepthRun.run, .{&first});
+        thread.join();
+        var second: DepthRun = .{ .source = hundred, .limit = false };
+        thread = try std.Thread.spawn(.{ .stack_size = case_stack_size }, DepthRun.run, .{&second});
+        thread.join();
+        std.debug.print("probe {s}: {d} levels per repetition, {d} bytes at 50 repetitions, {d} bytes at 100 repetitions, {d} bytes per repetition, largest passing count {d}\n", .{
+            shape.open, shape.levels, first.stack_bytes, second.stack_bytes, (second.stack_bytes -| first.stack_bytes) / 50, low,
+        });
+    }
+}

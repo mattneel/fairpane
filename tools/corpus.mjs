@@ -655,7 +655,73 @@ export async function deriveCorpus(root, id, { corporaDir = corporaRoot(root) } 
   return deriveFileSet(root, id, { corporaDir, rule: FILE_SET_RULES[id] });
 }
 
+// Extraction. FP-0082 and later tasks read an extracted Test262 tree; no corpus code runs.
+const EXTRACT_PREFIXES = [Buffer.from('test/'), Buffer.from('harness/')], EXTRACT_FEATURES = Buffer.from('features.txt');
+const EXTRACT_MODES = new Set(['100644', '100755']);
+/** Returns why a tree path cannot be written under the output directory, or null. */
+export function extractPathProblem(entryPath) {
+  let start = 0;
+  for (let i = 0; i <= entryPath.length; i++) {
+    if (i < entryPath.length && entryPath[i] !== 0x2f) continue;
+    const component = entryPath.subarray(start, i).toString('latin1');
+    if (component === '') return 'an empty path component';
+    if (component === '.' || component === '..') return `a "${component}" path component`;
+    start = i + 1;
+  }
+  return null;
+}
+/** The Git blob object ID of `bytes`. */
+function blobId(bytes) {
+  return crypto.createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+}
+/**
+ * Write every blob of the pinned tree whose path starts with "test/" or "harness/", and "features.txt", to `outDir`,
+ * which must lie under `<root>/out/` and be absent or empty. Each written file must hash to its tree object ID.
+ * `EXTRACT.json` records the commit, the tree, the file count, and the SHA-256 of the sorted lines `<oid> <path>\n`.
+ */
+export async function extractCorpus(root, id, outDir, { corporaDir = corporaRoot(root), allowFileUpstream = false } = {}) {
+  invariant(id === 'test262', `corpus-extract applies only to test262, not ${id}.`);
+  const outRoot = path.resolve(root, 'out'), target = path.resolve(root, outDir);
+  invariant(target.startsWith(`${outRoot}${path.sep}`), `The output directory must lie under ${outRoot}${path.sep}: ${target}`);
+  invariant(!fs.existsSync(target) || (fs.statSync(target).isDirectory() && fs.readdirSync(target).length === 0),
+    `The output directory must be absent or empty: ${target}`);
+  const { record, gitDir } = await loadSnapshot(root, id, corporaDir, allowFileUpstream);
+  const { tree } = await commitObject(gitDir, record.commit);
+  const entries = (await listTree(gitDir, record.commit))
+    .filter(e => e.path.equals(EXTRACT_FEATURES) || EXTRACT_PREFIXES.some(p => e.path.subarray(0, p.length).equals(p)))
+    .sort((a, b) => Buffer.compare(a.path, b.path));
+  for (const e of entries) {
+    const shown = e.path.toString('utf8');
+    invariant(e.type === 'blob' && EXTRACT_MODES.has(e.mode), `${shown} has mode ${e.mode}, not 100644 or 100755.`);
+    const problem = extractPathProblem(e.path);
+    invariant(problem === null, `${shown} has ${problem}.`);
+  }
+  invariant(entries.some(e => e.path.equals(EXTRACT_FEATURES)), 'The pinned tree has no features.txt.');
+  fs.mkdirSync(target, { recursive: true });
+  let index = 0, chunks = [];
+  await streamBlobs(gitDir, entries.map(e => e.oid), {
+    start() { chunks = []; },
+    data(chunk) { chunks.push(Buffer.from(chunk)); },
+    end() {
+      const e = entries[index++], file = path.join(target, ...e.path.toString('utf8').split('/'));
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, Buffer.concat(chunks), { flag: 'wx' });
+      const written = blobId(fs.readFileSync(file));
+      invariant(written === e.oid, `${e.path.toString('utf8')}: the written file hashes to ${written}, not to its tree object ID ${e.oid}.`);
+    },
+  });
+  const lines = entries.map(e => Buffer.concat([Buffer.from(`${e.oid} `), e.path, Buffer.from('\n')]));
+  const extract = { schema_version: 1, corpus: id, commit: record.commit, tree, files: entries.length, entries_sha256: sha256(Buffer.concat(lines)) };
+  writeJson(path.join(target, 'EXTRACT.json'), extract);
+  return { result: 'pass', out: target, ...extract,
+    note: 'Extraction wrote Git blobs whose content hashes to their tree object IDs. No corpus code ran.' };
+}
+
 export async function corpusCommand(root, command, args) {
+  if (command === 'corpus-extract') {
+    invariant(args.length === 2, `Usage: ${command} <corpus-id> <out-dir>`);
+    return extractCorpus(root, args[0], args[1]);
+  }
   invariant(args.length === 1, `Usage: ${command} <corpus-id>`);
   const run = { 'corpus-fetch': fetchCorpus, 'corpus-repin': repinCorpus, 'corpus-verify': verifyCorpus, 'corpus-applicability': classifyCorpus,
     'corpus-derive': deriveCorpus }[command];

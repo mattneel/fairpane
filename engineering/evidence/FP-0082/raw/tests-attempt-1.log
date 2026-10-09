@@ -1,0 +1,61 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","out/fp0082-stack-recursive/src/js/parser.zig","out/fp0082-stack-recursive/src/js/ast.zig","out/fp0082-stack-recursive/src/js/lexer.zig"]
+4a04cd1b852efc31b6a7e9662ad0116b282e2ce5
+545fd9619060ed74fb13edd7e554794df7ee4beb
+17c632dd943158338dd2244ad8f313d022ff34c1
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","out/fp0082-stack-recursive/src/js/parser.zig","out/fp0082-stack-recursive/src/js/ast.zig","out/fp0082-stack-recursive/src/js/lexer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t64b25565c\\m","started_at":"2026-10-09T14:22:13.488Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","out/fp0082-stack-recursive/src/root.zig","--test-filter","FP-0082 case","--cache-dir","out/fp0082-stack-cache-recursive"]
+1/20 root.test_0...OK
+2/20 css.css.test_0...OK
+3/20 font.opentype.test_0...OK
+4/20 html.root.test_0...OK
+5/20 js.runtime.test_0...OK
+6/20 js.parser.test.FP-0082 case 1: writeCodeTable writes the frozen code tables...OK
+7/20 js.parser.test.FP-0082 case 2: each source produces exactly its syntax-tree dump...case T32 call
+expected: (script sloppy (var-declared-names) (functions-to-initialize) (expression (call (identifier a) (paren (identifier b)))))
+actual:   (script sloppy (var-declared-names) (functions-to-initialize) (expression (call (identifier a) (identifier b))))
+FAIL (TestExpectedEqual)
+C:\Users\requi\.omp\wt\t64b25565c\m\out\fp0082-stack-recursive\src\js\parser.zig:2154:24: 0x7ff60a8ddba9 in expectCases (test_zcu.obj)
+    if (failures != 0) return error.TestExpectedEqual;
+                       ^
+C:\Users\requi\.omp\wt\t64b25565c\m\out\fp0082-stack-recursive\src\js\parser.zig:2229:5: 0x7ff60a8e22d2 in test.FP-0082 case 2: each source produces exactly its syntax-tree dump (test_zcu.obj)
+    try expectCases(&t_cases);
+    ^
+8/20 js.parser.test.FP-0082 case 3: function nodes record their source ranges...OK
+9/20 js.parser.test.FP-0082 case 4: Number::toString of 100,000 random Numbers parses back to the same bits and text...OK
+10/20 js.parser.test.FP-0082 case 5: one string of the 65,536 escapes \u0000 through \uFFFF produces every code unit in order...OK
+11/20 js.parser.test.FP-0082 case 6: each source produces exactly its syntax error...OK
+12/20 js.parser.test.FP-0082 case 7: each source produces exactly its unsupported outcome...OK
+13/20 js.parser.test.FP-0082 case 8: the outcome is the first diagnostic in detection order...OK
+14/20 js.parser.test.FP-0082 case 9: the strict prefix gives a strict script, a strict-mode syntax error, or an unsupported outcome...case T30: syntax-error invalid_character @14
+case T32 call: (script strict (var-declared-names) (functions-to-initialize) (expression (string "use strict")) (expression (call (identifier a) (identifier b))))
+FAIL (TestUnexpectedResult)
+C:\Users\requi\.omp\wt\t64b25565c\m\out\fp0082-stack-recursive\src\js\parser.zig:2361:24: 0x7ff60a8dc974 in test.FP-0082 case 9: the strict prefix gives a strict script, a strict-mode syntax error, or an unsupported outcome (test_zcu.obj)
+    if (failures != 0) return error.TestUnexpectedResult;
+                       ^
+15/20 js.parser.test.FP-0082 case 10: the depth bound holds at its boundaries on a 1 MiB stack...the run used at least 1031984 bytes of its 1 MiB stack
+FAIL (TestStackExceeded)
+C:\Users\requi\.omp\wt\t64b25565c\m\out\fp0082-stack-recursive\src\js\parser.zig:2436:9: 0x7ff60a8d8c89 in runOnSmallStack (test_zcu.obj)
+        return error.TestStackExceeded;
+        ^
+C:\Users\requi\.omp\wt\t64b25565c\m\out\fp0082-stack-recursive\src\js\parser.zig:2480:26: 0x7ff60a8db990 in test.FP-0082 case 10: the depth bound holds at its boundaries on a 1 MiB stack (test_zcu.obj)
+    const parens_stack = try runOnSmallStack(accepted_parens, false);
+                         ^
+16/20 js.parser.test.FP-0082 case 11: inputs nested 100,000 times give limit depth on a 1 MiB stack...the run used at least 1031984 bytes of its 1 MiB stack
+shape (
+FAIL (TestStackExceeded)
+C:\Users\requi\.omp\wt\t64b25565c\m\out\fp0082-stack-recursive\src\js\parser.zig:2436:9: 0x7ff60a8d8c89 in runOnSmallStack (test_zcu.obj)
+        return error.TestStackExceeded;
+        ^
+C:\Users\requi\.omp\wt\t64b25565c\m\out\fp0082-stack-recursive\src\js\parser.zig:2508:13: 0x7ff60a8d8f77 in test.FP-0082 case 11: inputs nested 100,000 times give limit depth on a 1 MiB stack (test_zcu.obj)
+            return err;
+            ^
+17/20 js.parser.test.FP-0082 case 12: the memory and source-length limits, and a million statements under the defaults...OK
+18/20 js.parser.test.FP-0082 case 13: every induced allocation failure returns error.OutOfMemory without a leak...OK
+19/20 js.parser.test.FP-0082 case 14: random sources, prefixes, and deletions yield outcomes without a panic or a leak...OK
+20/20 js.test262_metadata.test.FP-0082 case 15: the metadata reader reads its YAML subset and reports metadata errors...OK
+16 passed; 0 skipped; 4 failed.
+error: the following test command failed with exit code 1:
+out\fp0082-stack-cache-recursive\o\37f6822c74325ff0e1defc361ec62317\test.exe --seed=0xdde44961
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","out/fp0082-stack-recursive/src/root.zig","--test-filter","FP-0082 case","--cache-dir","out/fp0082-stack-cache-recursive"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t64b25565c\\m","started_at":"2026-10-09T14:22:13.565Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":5457,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

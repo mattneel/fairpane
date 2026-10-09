@@ -1,0 +1,31 @@
+diff --git a/src/js/lexer.zig b/src/js/lexer.zig
+index ae785b6..fc564f3 100644
+--- a/src/js/lexer.zig
++++ b/src/js/lexer.zig
+@@ -256,8 +256,8 @@ pub const Lexer = struct {
+         while (lexer.position < len) {
+             const c = lexer.source[lexer.position];
+             switch (c) {
+-                '\t', 0x0B, 0x0C, ' ', 0xA0, 0x1680, 0x2000...0x200A, 0x202F, 0x205F, 0x3000, 0xFEFF => lexer.position += 1,
+-                '\n', '\r', 0x2028, 0x2029 => {
++                '\t', 0x0B, 0x0C, ' ', 0xA0, 0x1680, 0x2000...0x200A, 0x2028, 0x202F, 0x205F, 0x3000, 0xFEFF => lexer.position += 1,
++                '\n', '\r', 0x2029 => {
+                     lexer.position += 1;
+                     newline = true;
+                     lexer.line_start = true;
+@@ -717,13 +717,13 @@ pub const Lexer = struct {
+ };
+ 
+ pub fn isLineTerminator(unit: u16) bool {
+-    return unit == '\n' or unit == '\r' or unit == 0x2028 or unit == 0x2029;
++    return unit == '\n' or unit == '\r' or unit == 0x2029;
+ }
+ 
+ /// WhiteSpace (12.2): TAB, VT, FF, ZWNBSP, and the `Zs` members of Unicode 18.0.0 that FP-0011 recorded.
+ pub fn isWhiteSpace(unit: u16) bool {
+     return switch (unit) {
+-        '\t', 0x0B, 0x0C, ' ', 0xA0, 0x1680, 0x2000...0x200A, 0x202F, 0x205F, 0x3000, 0xFEFF => true,
++        '\t', 0x0B, 0x0C, ' ', 0xA0, 0x1680, 0x2000...0x200A, 0x2028, 0x202F, 0x205F, 0x3000, 0xFEFF => true,
+         else => false,
+     };
+ }
