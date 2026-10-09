@@ -1,0 +1,8 @@
+
+COMMAND ["C:\\Windows\\System32\\powercfg.exe","/getactivescheme"]
+Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)RESULT {"executable":"C:\\Windows\\System32\\powercfg.exe","arguments":["/getactivescheme"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T11:24:36.343Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","-NoProfile","-Command","[Environment]::ProcessorCount; (Get-Process -Id $PID).ProcessorAffinity"]
+32
+4294967295
+RESULT {"executable":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","arguments":["-NoProfile","-Command","[Environment]::ProcessorCount; (Get-Process -Id $PID).ProcessorAffinity"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T11:24:36.421Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":489}

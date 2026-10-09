@@ -1,0 +1,128 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","engineering/evidence/FP-0011/raw/measure-summary-r1.mjs"]
+c557da7ef6c2bdfb686a87eaa09da4473f40bef38814a766072c49977d0e0271 *engineering/evidence/FP-0011/raw/measure-summary-r1.mjs
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["engineering/evidence/FP-0011/raw/measure-summary-r1.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T11:40:25.802Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0011/raw/measure-summary-r1.mjs"]
+HEADER reference/run1 exit=0 started=2026-10-09T11:24:50.503Z {"format":"fairpane-js-measure","version":1,"representation":"reference","value_size_bytes":16,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047552,"clock":"awake","allocator":"smp_allocator"}
+STATS reference/run1 add-small-int n=11 min=18588900 median=18648200 max=18749700 checksums="1000000" checksum_ok=true peak_live_bytes=3974 cells_allocated=27 collections=0
+STATS reference/run1 add-fraction n=11 min=18600800 median=18632500 max=18688700 checksums="500000" checksum_ok=true peak_live_bytes=3972 cells_allocated=27 collections=0
+STATS reference/run1 get-prototype-chain n=11 min=24874400 median=25060900 max=26116500 checksums="7000000" checksum_ok=true peak_live_bytes=5398 cells_allocated=36 collections=0
+STATS reference/run1 number-to-string n=11 min=6466300 median=6571000 max=7100700 checksums=788890 checksum_ok=true peak_live_bytes=13444028 cells_allocated=100026 collections=0
+STATS reference/run1 object-churn n=11 min=9760300 median=19119700 max=30549700 checksums=6250 checksum_ok=true peak_live_bytes=27923892 cells_allocated=100026 collections=1
+STATS reference/run1 mark-generated n=11 min=1881400 median=2110000 max=2840600 checksums=100000 checksum_ok=true peak_live_bytes=51695844 cells_allocated=100026 collections=1
+STATS reference/run1 mark-manual n=11 min=1905600 median=2263400 max=3046500 checksums=100000 checksum_ok=true peak_live_bytes=51695844 cells_allocated=100026 collections=1
+HEADER reference/run2 exit=0 started=2026-10-09T11:24:56.834Z {"format":"fairpane-js-measure","version":1,"representation":"reference","value_size_bytes":16,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047552,"clock":"awake","allocator":"smp_allocator"}
+STATS reference/run2 add-small-int n=11 min=18688000 median=18775200 max=19202000 checksums="1000000" checksum_ok=true peak_live_bytes=3974 cells_allocated=27 collections=0
+STATS reference/run2 add-fraction n=11 min=18502000 median=18542500 max=18769200 checksums="500000" checksum_ok=true peak_live_bytes=3972 cells_allocated=27 collections=0
+STATS reference/run2 get-prototype-chain n=11 min=25159000 median=25377500 max=26379100 checksums="7000000" checksum_ok=true peak_live_bytes=5398 cells_allocated=36 collections=0
+STATS reference/run2 number-to-string n=11 min=6439100 median=6528200 max=7035300 checksums=788890 checksum_ok=true peak_live_bytes=13444028 cells_allocated=100026 collections=0
+STATS reference/run2 object-churn n=11 min=15930300 median=27121700 max=33677100 checksums=6250 checksum_ok=true peak_live_bytes=27923892 cells_allocated=100026 collections=1
+STATS reference/run2 mark-generated n=11 min=7567000 median=7986700 max=8475400 checksums=100000 checksum_ok=true peak_live_bytes=51695844 cells_allocated=100026 collections=1
+STATS reference/run2 mark-manual n=11 min=2397000 median=8111700 max=12706400 checksums=100000 checksum_ok=true peak_live_bytes=51695844 cells_allocated=100026 collections=1
+HEADER nan_box/run1 exit=0 started=2026-10-09T11:24:52.064Z {"format":"fairpane-js-measure","version":1,"representation":"nan_box","value_size_bytes":8,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047040,"clock":"awake","allocator":"smp_allocator"}
+STATS nan_box/run1 add-small-int n=11 min=12365300 median=12385800 max=12564700 checksums="1000000" checksum_ok=true peak_live_bytes=3710 cells_allocated=27 collections=0
+STATS nan_box/run1 add-fraction n=11 min=12369900 median=12419300 max=18486600 checksums="500000" checksum_ok=true peak_live_bytes=3708 cells_allocated=27 collections=0
+STATS nan_box/run1 get-prototype-chain n=11 min=22749100 median=22873900 max=24584000 checksums="7000000" checksum_ok=true peak_live_bytes=5062 cells_allocated=36 collections=0
+STATS nan_box/run1 number-to-string n=11 min=4976800 median=5026100 max=5331700 checksums=788890 checksum_ok=true peak_live_bytes=12659612 cells_allocated=100026 collections=0
+STATS nan_box/run1 object-churn n=11 min=17036000 median=23504700 max=33321300 checksums=6250 checksum_ok=true peak_live_bytes=27058908 cells_allocated=100026 collections=1
+STATS nan_box/run1 mark-generated n=11 min=7504500 median=16586300 max=18111600 checksums=100000 checksum_ok=true peak_live_bytes=26895828 cells_allocated=100026 collections=1
+STATS nan_box/run1 mark-manual n=11 min=2533300 median=2629100 max=2940000 checksums=100000 checksum_ok=true peak_live_bytes=26895828 cells_allocated=100026 collections=1
+HEADER nan_box/run2 exit=0 started=2026-10-09T11:24:58.887Z {"format":"fairpane-js-measure","version":1,"representation":"nan_box","value_size_bytes":8,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047040,"clock":"awake","allocator":"smp_allocator"}
+STATS nan_box/run2 add-small-int n=11 min=12578400 median=12724400 max=12796300 checksums="1000000" checksum_ok=true peak_live_bytes=3710 cells_allocated=27 collections=0
+STATS nan_box/run2 add-fraction n=11 min=12624200 median=12679100 max=12948800 checksums="500000" checksum_ok=true peak_live_bytes=3708 cells_allocated=27 collections=0
+STATS nan_box/run2 get-prototype-chain n=11 min=23017000 median=23416800 max=24387200 checksums="7000000" checksum_ok=true peak_live_bytes=5062 cells_allocated=36 collections=0
+STATS nan_box/run2 number-to-string n=11 min=5019200 median=5112100 max=5523300 checksums=788890 checksum_ok=true peak_live_bytes=12659612 cells_allocated=100026 collections=0
+STATS nan_box/run2 object-churn n=11 min=18252800 median=25730800 max=32875700 checksums=6250 checksum_ok=true peak_live_bytes=27058908 cells_allocated=100026 collections=1
+STATS nan_box/run2 mark-generated n=11 min=16180700 median=17268400 max=17883200 checksums=100000 checksum_ok=true peak_live_bytes=26895828 cells_allocated=100026 collections=1
+STATS nan_box/run2 mark-manual n=11 min=2553500 median=7308700 max=18789000 checksums=100000 checksum_ok=true peak_live_bytes=26895828 cells_allocated=100026 collections=1
+HEADER tagged_index/run1 exit=0 started=2026-10-09T11:24:53.871Z {"format":"fairpane-js-measure","version":1,"representation":"tagged_index","value_size_bytes":4,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047552,"clock":"awake","allocator":"smp_allocator"}
+STATS tagged_index/run1 add-small-int n=11 min=28101700 median=28193200 max=28348800 checksums="1000000" checksum_ok=true peak_live_bytes=3646 cells_allocated=27 collections=0
+STATS tagged_index/run1 add-fraction n=11 min=38870500 median=39529300 max=40248500 checksums="500000" checksum_ok=true peak_live_bytes=56287048 cells_allocated=500028 collections=0
+STATS tagged_index/run1 get-prototype-chain n=11 min=23181700 median=23787500 max=24230900 checksums="7000000" checksum_ok=true peak_live_bytes=4978 cells_allocated=36 collections=0
+STATS tagged_index/run1 number-to-string n=11 min=7097500 median=7180000 max=7686300 checksums=788890 checksum_ok=true peak_live_bytes=23006956 cells_allocated=200026 collections=0
+STATS tagged_index/run1 object-churn n=11 min=30585000 median=42606800 max=53994900 checksums=6250 checksum_ok=true peak_live_bytes=70279372 cells_allocated=500026 collections=1
+STATS tagged_index/run1 mark-generated n=11 min=9454900 median=9990200 max=10850200 checksums=100000 checksum_ok=true peak_live_bytes=70191848 cells_allocated=500026 collections=1
+STATS tagged_index/run1 mark-manual n=11 min=10024300 median=10933900 max=11836700 checksums=100000 checksum_ok=true peak_live_bytes=70191848 cells_allocated=500026 collections=1
+HEADER tagged_index/run2 exit=0 started=2026-10-09T11:25:00.951Z {"format":"fairpane-js-measure","version":1,"representation":"tagged_index","value_size_bytes":4,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047552,"clock":"awake","allocator":"smp_allocator"}
+STATS tagged_index/run2 add-small-int n=11 min=28031100 median=28166500 max=28275400 checksums="1000000" checksum_ok=true peak_live_bytes=3646 cells_allocated=27 collections=0
+STATS tagged_index/run2 add-fraction n=11 min=38893500 median=39039100 max=39241600 checksums="500000" checksum_ok=true peak_live_bytes=56287048 cells_allocated=500028 collections=0
+STATS tagged_index/run2 get-prototype-chain n=11 min=22618300 median=22967500 max=23383700 checksums="7000000" checksum_ok=true peak_live_bytes=4978 cells_allocated=36 collections=0
+STATS tagged_index/run2 number-to-string n=11 min=7150100 median=7255800 max=7500200 checksums=788890 checksum_ok=true peak_live_bytes=23006956 cells_allocated=200026 collections=0
+STATS tagged_index/run2 object-churn n=11 min=32143300 median=42707200 max=57961300 checksums=6250 checksum_ok=true peak_live_bytes=70279372 cells_allocated=500026 collections=1
+STATS tagged_index/run2 mark-generated n=11 min=10691100 median=11487900 max=12289000 checksums=100000 checksum_ok=true peak_live_bytes=70191848 cells_allocated=500026 collections=1
+STATS tagged_index/run2 mark-manual n=11 min=10029600 median=10919400 max=11539400 checksums=100000 checksum_ok=true peak_live_bytes=70191848 cells_allocated=500026 collections=1
+SERIES reference/run1/add-small-int 18632300 18601700 18667300 18749700 18711400 18643500 18588900 18661400 18664500 18610100 18648200
+SERIES reference/run1/add-fraction 18616300 18616800 18688700 18625800 18620300 18634800 18658700 18653400 18632500 18637300 18600800
+SERIES reference/run1/get-prototype-chain 25093300 24992400 25086100 24874400 26116500 24906300 25299900 25060900 25188100 24988800 24944700
+SERIES reference/run1/number-to-string 7100700 6766800 6636900 6512400 6593500 6544200 6782400 6571000 6568600 6466300 6552700
+SERIES reference/run1/object-churn 23106900 15911900 25023200 19119700 27356300 22394900 30549700 17333000 13302800 9760300 10167500
+SERIES reference/run1/mark-generated 2166600 2840600 2466900 2114500 1953900 1922800 2110000 1881400 2189000 2037300 1992800
+SERIES reference/run1/mark-manual 2296200 2547000 2035200 2768900 2098400 3046500 1911800 2403100 1905600 2263400 1959400
+SERIES reference/run2/add-small-int 18688000 18763400 18749300 18873100 18775200 18796300 18741400 18777400 19202000 19045800 18771200
+SERIES reference/run2/add-fraction 18769200 18709600 18661900 18502000 18533800 18599700 18561600 18542500 18538600 18519600 18525000
+SERIES reference/run2/get-prototype-chain 25277800 25159000 25372100 25402400 26379100 25377500 25580900 25755800 25537600 25329300 25374700
+SERIES reference/run2/number-to-string 7035300 6818600 6603300 6528200 6550200 6499500 6524100 6533900 6507800 6439100 6512600
+SERIES reference/run2/object-churn 23571600 15930300 25549900 18924100 27240700 21474000 33322900 32013600 31462300 27121700 33677100
+SERIES reference/run2/mark-generated 8204800 7650000 8179500 7880300 8475400 7709100 7986700 7784500 8129900 7567000 8063100
+SERIES reference/run2/mark-manual 8118000 12305800 7871100 11571500 7962300 12034800 8111700 12706400 4757800 3497800 2397000
+SERIES nan_box/run1/add-small-int 12564700 12518000 12382400 12381700 12371600 12386400 12387700 12379000 12385800 12365300 12413900
+SERIES nan_box/run1/add-fraction 12377500 12405400 12404100 12404800 12369900 12568900 12842700 12419300 14345700 18486600 12547500
+SERIES nan_box/run1/get-prototype-chain 22749100 22873900 23095500 22853900 24584000 22838400 23735600 22837000 22916500 23360900 22853400
+SERIES nan_box/run1/number-to-string 5331700 5258000 5104300 5026100 5023300 4976800 5050000 4983600 5069200 5017700 4984200
+SERIES nan_box/run1/object-churn 18150700 17036000 20651100 19491600 23504700 22844800 26477400 25850600 30794000 28427300 33321300
+SERIES nan_box/run1/mark-generated 16338200 17471900 16273800 17560300 16199900 17003900 16586300 18111600 16370500 17794100 7504500
+SERIES nan_box/run1/mark-manual 2629100 2940000 2552400 2868300 2540100 2838800 2567400 2819100 2533300 2809500 2544000
+SERIES nan_box/run2/add-small-int 12634600 12705500 12622700 12578400 12689600 12741700 12776000 12796300 12767200 12755700 12724400
+SERIES nan_box/run2/add-fraction 12728300 12663200 12678700 12705300 12624200 12706700 12648900 12679100 12704700 12675400 12948800
+SERIES nan_box/run2/get-prototype-chain 23457200 23416800 23117100 23084500 24387200 23048500 23866700 24092300 23231100 23574600 23017000
+SERIES nan_box/run2/number-to-string 5523300 5209400 5112100 5051300 5145400 5115000 5075800 5294100 5068500 5019200 5072900
+SERIES nan_box/run2/object-churn 26577300 18252800 21472400 20681900 24531800 23400800 26716500 25730800 29895800 29271400 32875700
+SERIES nan_box/run2/mark-generated 16556900 17883200 16323100 17851300 17597900 17653300 16180700 17268400 16637000 17311500 16422200
+SERIES nan_box/run2/mark-manual 16464900 18789000 15947400 18355200 16256600 7308700 2553500 2810400 2609800 2867200 2558300
+SERIES tagged_index/run1/add-small-int 28181400 28152100 28193200 28186000 28235300 28101700 28221600 28193200 28306900 28348800 28107500
+SERIES tagged_index/run1/add-fraction 39049900 38870500 39131000 39437300 39331400 39685200 39529300 39704800 39875500 39979000 40248500
+SERIES tagged_index/run1/get-prototype-chain 23340900 24138500 23566600 23837000 23260000 23976800 24065700 23787500 23282000 24230900 23181700
+SERIES tagged_index/run1/number-to-string 7686300 7185700 7159200 7097500 7252800 7180000 7184100 7122900 7126900 7179800 7180200
+SERIES tagged_index/run1/object-churn 30585000 32572000 35745400 37481000 42359700 42606800 46170400 48794600 52904700 53994900 48265500
+SERIES tagged_index/run1/mark-generated 9759900 9845300 9454900 10169200 9641200 10077700 9885700 10850200 10143900 9990200 10231700
+SERIES tagged_index/run1/mark-manual 10653100 11402400 10550300 11836700 10346200 11568100 10566700 11165100 10933900 11391100 10024300
+SERIES tagged_index/run2/add-small-int 28031100 28166500 28179600 28072000 28157700 28275400 28188400 28228500 28191400 28154700 28095300
+SERIES tagged_index/run2/add-fraction 39015600 39067000 39241600 39047100 39034900 39080100 39116300 39039100 39026300 39004600 38893500
+SERIES tagged_index/run2/get-prototype-chain 22967500 23383700 22913100 23228000 22743000 23188100 22667900 23136200 22618300 23337600 22819500
+SERIES tagged_index/run2/number-to-string 7369800 7304000 7292100 7255800 7259400 7150100 7500200 7245900 7217500 7233400 7237100
+SERIES tagged_index/run2/object-churn 32730100 32143300 36170600 40555500 42347400 42707200 50872500 49328700 54636000 55321500 57961300
+SERIES tagged_index/run2/mark-generated 11575200 12289000 10799700 11711900 11172400 11487900 11767800 11738900 10886400 11040400 10691100
+SERIES tagged_index/run2/mark-manual 10497000 10361200 11143800 11107700 10464500 11126500 10567900 11539400 11202300 10919400 10029600
+SHIFT reference/run1/object-churn before sample 9: median 22750900 then 10167500, ratio 2.24
+SHIFT reference/run1/object-churn before sample 10: median 22394900 then 9963900, ratio 2.25
+SHIFT reference/run2/mark-manual before sample 9: median 9844750 then 3497800, ratio 2.81
+SHIFT reference/run2/mark-manual before sample 10: median 8118000 then 2947400, ratio 2.75
+SHIFT reference/run2/mark-manual before sample 11: median 8114850 then 2397000, ratio 3.39
+SHIFT nan_box/run1/mark-generated before sample 11: median 16795100 then 7504500, ratio 2.24
+SHIFT nan_box/run2/mark-manual before sample 6: median 16464900 then 2710100, ratio 6.08
+SHIFT nan_box/run2/mark-manual before sample 7: median 16360750 then 2609800, ratio 6.27
+SHIFT tagged_index/run2/object-churn before sample 3: median 32436700 then 49328700, ratio 1.52
+SHIFT tagged_index/run2/object-churn before sample 4: median 32730100 then 50100600, ratio 1.53
+PAIR nan_box vs reference add-small-int: nan_box faster
+PAIR nan_box vs reference add-fraction: nan_box faster
+PAIR nan_box vs reference get-prototype-chain: nan_box faster
+PAIR nan_box vs reference number-to-string: nan_box faster
+PAIR nan_box vs reference object-churn: nan_box not separable (overlap/overlap) | shifts: reference/run1/object-churn at sample 9,10
+PAIR nan_box vs reference mark-generated: nan_box slower | shifts: nan_box/run1/mark-generated at sample 11
+PAIR tagged_index vs reference add-small-int: tagged_index slower
+PAIR tagged_index vs reference add-fraction: tagged_index slower
+PAIR tagged_index vs reference get-prototype-chain: tagged_index faster
+PAIR tagged_index vs reference number-to-string: tagged_index not separable (overlap/slower)
+PAIR tagged_index vs reference object-churn: tagged_index not separable (slower/overlap) | shifts: reference/run1/object-churn at sample 9,10; tagged_index/run2/object-churn at sample 3,4
+PAIR tagged_index vs reference mark-generated: tagged_index slower
+PAIR nan_box vs tagged_index add-small-int: nan_box faster
+PAIR nan_box vs tagged_index add-fraction: nan_box faster
+PAIR nan_box vs tagged_index get-prototype-chain: nan_box not separable (overlap/overlap)
+PAIR nan_box vs tagged_index number-to-string: nan_box faster
+PAIR nan_box vs tagged_index object-churn: nan_box not separable (overlap/overlap) | shifts: tagged_index/run2/object-churn at sample 3,4
+PAIR nan_box vs tagged_index mark-generated: nan_box not separable (overlap/slower) | shifts: nan_box/run1/mark-generated at sample 11
+TRACER reference mark-generated vs mark-manual: generated not separable (overlap/overlap) | shifts: reference/run2/mark-manual at sample 9,10,11
+TRACER nan_box mark-generated vs mark-manual: generated not separable (slower/overlap) | shifts: nan_box/run1/mark-generated at sample 11; nan_box/run2/mark-manual at sample 6,7
+TRACER tagged_index mark-generated vs mark-manual: generated not separable (overlap/overlap)
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0011/raw/measure-summary-r1.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T11:40:25.880Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":43}

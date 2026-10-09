@@ -193,24 +193,29 @@
       ]
     },
     "FP-0011": {
-      "status": "active",
-      "owner": "fairpane-js worker FP0011R1, integrated by root-integrator",
+      "status": "implemented",
+      "owner": "fairpane-js workers FP0011Js and FP0011R1, integrated and measured by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0011/README.md",
-        "engineering/evidence/FP-0011/gates/2026-10-09T05-07-25-099Z-repo-check-407bab9b.json",
-        "engineering/evidence/FP-0011/gates/2026-10-09T05-07-25-326Z-controller-test-a34cd7af.json",
-        "engineering/evidence/FP-0011/gates/2026-10-09T05-07-49-589Z-zig-fmt-eb9c23ca.json",
-        "engineering/evidence/FP-0011/gates/2026-10-09T05-07-49-773Z-zig-test-6695a235.json",
-        "engineering/evidence/FP-0011/gates/2026-10-09T05-08-01-799Z-zig-build-a3ac6c56.json",
-        "engineering/evidence/FP-0011/raw/integration-tests.log",
-        "engineering/evidence/FP-0011/raw/mutation-left-root.log",
-        "engineering/evidence/FP-0011/raw/measure-summary.log"
+        "engineering/evidence/FP-0011/gates/2026-10-09T10-08-09-873Z-repo-check-0f1d1adf.json",
+        "engineering/evidence/FP-0011/gates/2026-10-09T10-08-10-220Z-controller-test-2c171a81.json",
+        "engineering/evidence/FP-0011/gates/2026-10-09T10-08-45-669Z-zig-fmt-3e7dd269.json",
+        "engineering/evidence/FP-0011/gates/2026-10-09T10-08-45-923Z-zig-test-8f4b2ba1.json",
+        "engineering/evidence/FP-0011/raw/tests-before-r1.log",
+        "engineering/evidence/FP-0011/raw/mutation-left-root-r1.log",
+        "engineering/evidence/FP-0011/raw/mutation-r1.log",
+        "engineering/evidence/FP-0011/raw/r1-integration-tests.log",
+        "engineering/evidence/FP-0011/raw/r1-measure-binding.log",
+        "engineering/evidence/FP-0011/raw/measure-summary-r1.log",
+        "engineering/evidence/FP-0011/raw/measure-shift-decisions-r1.log"
       ],
       "review": null,
       "notes": [
         "The frozen contract is engineering/evidence/FP-0011/CONTRACT.md, drafted by worker FP0011Contract and frozen on commit 8af0f20.",
         "Commit 84b7b14 implements it with 132 of 132 Zig tests in the integrated tree.",
-        "fairpane-review rejected 84b7b14 and ba3a352 in reviews/review-1-reject.json: a leaf context reaches the heap, and StringToNumber rounds long literals wrongly. Contract revision 1 is frozen in f95fab6."
+        "fairpane-review rejected 84b7b14 and ba3a352 in reviews/review-1-reject.json: a leaf context reaches the heap, and StringToNumber rounds long literals wrongly. Contract revision 1 is frozen in f95fab6.",
+        "Commit 60c0c90 implements revision 1 with 181 of 181 controller tests and 178 of 178 Zig tests.",
+        "The integrator's measurement runs at 60c0c90 replace the worker's runs: nan_box is now separably slower on mark-generated, so reference stays FP-0012's default representation, and the generated tracer stays the default tracer by an outcome that a level shift decides, as ADR 0008 states. Awaiting fairpane-review."
       ]
     },
     "FP-0012": {

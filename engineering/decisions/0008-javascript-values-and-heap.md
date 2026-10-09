@@ -91,7 +91,14 @@ When a DOM node gains a reference to a JavaScript cell, this bridge leaks every 
 
 ## 3. Environment
 
-`raw/doctor.log` holds this output of `node tools/fairpane.mjs doctor`.
+The worker's measurement runs ran in an uncommitted worktree and record no source digest, as review 1 found.
+Contract revision 1 therefore requires the runs at the integration commit, on an otherwise idle machine, with no worker building.
+The root integrator ran them at `60c0c90` on 2026-10-09, and they replace the worker's runs as the basis of this record.
+The worker's logs stay in `raw/` as superseded records.
+
+`raw/r1-measure-binding.log` records `git worktree add --detach out/fp0011-measure 60c0c90`, `HEAD` `60c0c90` and an empty status, including ignored files, for every source root before and after the runs, and the removal of the worktree.
+
+`raw/doctor-r1.log` holds this output of `node tools/fairpane.mjs doctor`, run in the main checkout at 11:24:33Z.
 
 ```json
 {
@@ -114,9 +121,9 @@ When a DOM node gains a reference to a JavaScript cell, this bridge leaks every 
     "version": "omp/18.8.6"
   },
   "compiler": {
-    "available": false,
-    "error": "The locked compiler is absent. Run the local compiler installer.",
-    "expected_path": "C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe"
+    "available": true,
+    "path": "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+    "version": "0.18.0-dev.120+9fe22a29b"
   },
   "path_zig": {
     "available": true,
@@ -128,9 +135,13 @@ When a DOM node gains a reference to a JavaScript cell, this bridge leaks every 
 }
 ```
 
-The doctor looked for the compiler inside the worker's tree.
-Every recorded build used the locked compiler at `C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe`, as each log's `COMMAND` line shows.
-The processor is an AMD Ryzen 9 9955HX3D with 16 cores and 32 logical processors, as `raw/measure-load.log` reports.
+`raw/environment-r1.log` records the active power scheme, `Balanced` (`381b4222-f694-41f0-9685-ff5bb260df2e`).
+It also records a PowerShell process started through the same `record` command path, which reports 32 logical processors and the processor affinity mask `4294967295`, which selects all 32.
+The measurement processes started the same way and set no affinity, so they kept that default mask [INFERENCE: the mask was read from the PowerShell process, not from the measurement processes].
+The processor is an AMD Ryzen 9 9955HX3D with 16 cores and 32 logical processors, as the worker's `raw/measure-load.log` reports.
+
+`raw/measure-build-r1.log` records `zig build measure -Doptimize=ReleaseFast --summary all` in the worktree, with the locked compiler and the recorded override `ZIG_GLOBAL_CACHE_DIR`, and 8 of 8 steps.
+The locked compiler names the `ReleaseFast` mode `fast`.
 
 These are the harness header lines of the six runs.
 
@@ -143,64 +154,63 @@ nan_box run 2:      {"format":"fairpane-js-measure","version":1,"representation"
 tagged_index run 2: {"format":"fairpane-js-measure","version":1,"representation":"tagged_index","value_size_bytes":4,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047552,"clock":"awake","allocator":"smp_allocator"}
 ```
 
-The locked compiler names the `ReleaseFast` mode `fast`.
-`raw/measure-build.log` records `zig build measure -Doptimize=ReleaseFast --summary all`.
-The runs followed the order `reference`, `nan_box`, `tagged_index`, `reference`, `nan_box`, `tagged_index`, and every run exited with status 0.
-Before each run, `raw/measure-load.log` recorded a processor load of 1, 1, 3, 0, 7, and 0 percent.
-Other agent sessions were open on the host, so those single readings are the only evidence of an idle machine.
+The runs followed the order `reference`, `nan_box`, `tagged_index`, `reference`, `nan_box`, `tagged_index`.
+They started at 11:24:50Z, 11:24:52Z, 11:24:53Z, 11:24:56Z, 11:24:58Z, and 11:25:00Z, and every run exited with status 0.
+The integrator's session ran no other command during the runs.
+Three agent sessions were open, one review and two contract drafts, and each was instructed to install, build, and execute nothing.
+No processor-load reading was recorded.
 
 ## 4. Measurements
 
 Each executable checked every vector of cases 21 through 23 in its own optimize mode, ran each workload once as warmup, and then ran it 11 more times.
-`raw/measure-summary.log` records the summary script and its output.
+`raw/measure-summary-r1.log` records the SHA-256 and the output of `raw/measure-summary-r1.mjs`, which applies the method of the original `raw/measure-summary.log`.
 The script takes the 11 measured samples of each workload, sorts their `ns` values, and reports the first, sixth, and eleventh.
 Each `ns` value times only a workload's steps, not heap creation or the checksum.
-Every recorded `ns` value is a multiple of 100.
 
 | Workload | Representation | Run | Min ns | Median ns | Max ns |
 | --- | --- | --- | ---: | ---: | ---: |
-| `add-small-int` | `reference` | 1 | 17379500 | 17458000 | 17689100 |
-| `add-small-int` | `reference` | 2 | 17403500 | 17475500 | 17505100 |
-| `add-small-int` | `nan_box` | 1 | 12083400 | 12142200 | 12247300 |
-| `add-small-int` | `nan_box` | 2 | 12194700 | 12238300 | 12300700 |
-| `add-small-int` | `tagged_index` | 1 | 28218500 | 28307300 | 28614800 |
-| `add-small-int` | `tagged_index` | 2 | 28552500 | 28961100 | 29303600 |
-| `add-fraction` | `reference` | 1 | 17447000 | 17474800 | 17508500 |
-| `add-fraction` | `reference` | 2 | 17429900 | 17461500 | 17534100 |
-| `add-fraction` | `nan_box` | 1 | 12128000 | 12147800 | 12190100 |
-| `add-fraction` | `nan_box` | 2 | 12217700 | 12287100 | 12419400 |
-| `add-fraction` | `tagged_index` | 1 | 37815800 | 38300300 | 38762900 |
-| `add-fraction` | `tagged_index` | 2 | 38205700 | 38744400 | 39319200 |
-| `get-prototype-chain` | `reference` | 1 | 24548900 | 24596300 | 24845800 |
-| `get-prototype-chain` | `reference` | 2 | 24535900 | 24692300 | 24810300 |
-| `get-prototype-chain` | `nan_box` | 1 | 23085800 | 23177200 | 23217100 |
-| `get-prototype-chain` | `nan_box` | 2 | 23207300 | 23253400 | 23604200 |
-| `get-prototype-chain` | `tagged_index` | 1 | 22041300 | 22912400 | 23512000 |
-| `get-prototype-chain` | `tagged_index` | 2 | 22245900 | 23161700 | 24146200 |
-| `number-to-string` | `reference` | 1 | 6244900 | 6307800 | 6525000 |
-| `number-to-string` | `reference` | 2 | 6235700 | 6310800 | 6485100 |
-| `number-to-string` | `nan_box` | 1 | 4766100 | 4825400 | 5235800 |
-| `number-to-string` | `nan_box` | 2 | 4812600 | 4867600 | 4994700 |
-| `number-to-string` | `tagged_index` | 1 | 6759400 | 6780300 | 8657400 |
-| `number-to-string` | `tagged_index` | 2 | 7213100 | 8989200 | 9532300 |
-| `object-churn` | `reference` | 1 | 13307500 | 19908800 | 26053400 |
-| `object-churn` | `reference` | 2 | 12834700 | 19865200 | 25583900 |
-| `object-churn` | `nan_box` | 1 | 13785300 | 17373300 | 24862700 |
-| `object-churn` | `nan_box` | 2 | 13585200 | 18830300 | 28887800 |
-| `object-churn` | `tagged_index` | 1 | 28679000 | 39453700 | 49401800 |
-| `object-churn` | `tagged_index` | 2 | 28634500 | 41360100 | 51157900 |
-| `mark-generated` | `reference` | 1 | 5336200 | 6236000 | 6670800 |
-| `mark-generated` | `reference` | 2 | 5598900 | 6513500 | 6855200 |
-| `mark-generated` | `nan_box` | 1 | 10120300 | 11320700 | 13294500 |
-| `mark-generated` | `nan_box` | 2 | 2649700 | 14118400 | 15733500 |
-| `mark-generated` | `tagged_index` | 1 | 9574300 | 10184800 | 10365400 |
-| `mark-generated` | `tagged_index` | 2 | 10262700 | 15232400 | 31166200 |
-| `mark-manual` | `reference` | 1 | 6480900 | 7480400 | 9440100 |
-| `mark-manual` | `reference` | 2 | 1811700 | 2237700 | 7752900 |
-| `mark-manual` | `nan_box` | 1 | 10709800 | 12249700 | 14064200 |
-| `mark-manual` | `nan_box` | 2 | 2532600 | 2872600 | 3393500 |
-| `mark-manual` | `tagged_index` | 1 | 9440500 | 9957800 | 10685700 |
-| `mark-manual` | `tagged_index` | 2 | 10314700 | 15317300 | 25389100 |
+| `add-small-int` | `reference` | 1 | 18588900 | 18648200 | 18749700 |
+| `add-small-int` | `reference` | 2 | 18688000 | 18775200 | 19202000 |
+| `add-small-int` | `nan_box` | 1 | 12365300 | 12385800 | 12564700 |
+| `add-small-int` | `nan_box` | 2 | 12578400 | 12724400 | 12796300 |
+| `add-small-int` | `tagged_index` | 1 | 28101700 | 28193200 | 28348800 |
+| `add-small-int` | `tagged_index` | 2 | 28031100 | 28166500 | 28275400 |
+| `add-fraction` | `reference` | 1 | 18600800 | 18632500 | 18688700 |
+| `add-fraction` | `reference` | 2 | 18502000 | 18542500 | 18769200 |
+| `add-fraction` | `nan_box` | 1 | 12369900 | 12419300 | 18486600 |
+| `add-fraction` | `nan_box` | 2 | 12624200 | 12679100 | 12948800 |
+| `add-fraction` | `tagged_index` | 1 | 38870500 | 39529300 | 40248500 |
+| `add-fraction` | `tagged_index` | 2 | 38893500 | 39039100 | 39241600 |
+| `get-prototype-chain` | `reference` | 1 | 24874400 | 25060900 | 26116500 |
+| `get-prototype-chain` | `reference` | 2 | 25159000 | 25377500 | 26379100 |
+| `get-prototype-chain` | `nan_box` | 1 | 22749100 | 22873900 | 24584000 |
+| `get-prototype-chain` | `nan_box` | 2 | 23017000 | 23416800 | 24387200 |
+| `get-prototype-chain` | `tagged_index` | 1 | 23181700 | 23787500 | 24230900 |
+| `get-prototype-chain` | `tagged_index` | 2 | 22618300 | 22967500 | 23383700 |
+| `number-to-string` | `reference` | 1 | 6466300 | 6571000 | 7100700 |
+| `number-to-string` | `reference` | 2 | 6439100 | 6528200 | 7035300 |
+| `number-to-string` | `nan_box` | 1 | 4976800 | 5026100 | 5331700 |
+| `number-to-string` | `nan_box` | 2 | 5019200 | 5112100 | 5523300 |
+| `number-to-string` | `tagged_index` | 1 | 7097500 | 7180000 | 7686300 |
+| `number-to-string` | `tagged_index` | 2 | 7150100 | 7255800 | 7500200 |
+| `object-churn` | `reference` | 1 | 9760300 | 19119700 | 30549700 |
+| `object-churn` | `reference` | 2 | 15930300 | 27121700 | 33677100 |
+| `object-churn` | `nan_box` | 1 | 17036000 | 23504700 | 33321300 |
+| `object-churn` | `nan_box` | 2 | 18252800 | 25730800 | 32875700 |
+| `object-churn` | `tagged_index` | 1 | 30585000 | 42606800 | 53994900 |
+| `object-churn` | `tagged_index` | 2 | 32143300 | 42707200 | 57961300 |
+| `mark-generated` | `reference` | 1 | 1881400 | 2110000 | 2840600 |
+| `mark-generated` | `reference` | 2 | 7567000 | 7986700 | 8475400 |
+| `mark-generated` | `nan_box` | 1 | 7504500 | 16586300 | 18111600 |
+| `mark-generated` | `nan_box` | 2 | 16180700 | 17268400 | 17883200 |
+| `mark-generated` | `tagged_index` | 1 | 9454900 | 9990200 | 10850200 |
+| `mark-generated` | `tagged_index` | 2 | 10691100 | 11487900 | 12289000 |
+| `mark-manual` | `reference` | 1 | 1905600 | 2263400 | 3046500 |
+| `mark-manual` | `reference` | 2 | 2397000 | 8111700 | 12706400 |
+| `mark-manual` | `nan_box` | 1 | 2533300 | 2629100 | 2940000 |
+| `mark-manual` | `nan_box` | 2 | 2553500 | 7308700 | 18789000 |
+| `mark-manual` | `tagged_index` | 1 | 10024300 | 10933900 | 11836700 |
+| `mark-manual` | `tagged_index` | 2 | 10029600 | 10919400 | 11539400 |
 
 | Representation | `value_size_bytes` | `executable_bytes` | `object-churn` peak live bytes, both runs |
 | --- | ---: | ---: | ---: |
@@ -209,12 +219,13 @@ Every recorded `ns` value is a multiple of 100.
 | `tagged_index` | 4 | 1047552 | 70279372 |
 
 `cells_allocated`, `bytes_allocated`, and `peak_live_bytes` cover a whole sample, including the 20 intrinsic cells that `Heap.init` creates.
-Under `tagged_index`, `add-fraction` allocated 500028 cells and `object-churn` allocated 500026, because each fraction lives in a `heap_number` cell.
-The other two representations allocated 27 and 100026 cells for those workloads.
+Under `tagged_index`, `add-fraction` allocated 500028 cells, `number-to-string` 200026, and `object-churn`, `mark-generated`, and `mark-manual` 500026 each, because each fraction lives in a `heap_number` cell.
+The other two representations allocated 27 cells for `add-fraction` and 100026 for each of the other four.
 `add-fraction` ran no collection, because the only collection trigger is the cell limit.
 
 ## 5. Separability
 
+`raw/measure-summary-r1.log` applies the separability rule to the revision 1 runs.
 A difference is separable only when the two sample ranges do not overlap in both runs.
 "Faster" means that the first range lies wholly below the second range in both runs.
 
@@ -223,47 +234,74 @@ A difference is separable only when the two sample ranges do not overlap in both
 | `add-small-int` | faster | slower | faster |
 | `add-fraction` | faster | slower | faster |
 | `get-prototype-chain` | faster | faster | not separable; both runs overlap |
-| `number-to-string` | faster | slower | faster |
-| `object-churn` | not separable; both runs overlap | slower | not separable; faster in run 1, overlap in run 2 |
-| `mark-generated` | not separable; slower in run 1, overlap in run 2 | slower | not separable; both runs overlap |
+| `number-to-string` | faster | not separable; overlap in run 1, slower in run 2 | faster |
+| `object-churn` | not separable; both runs overlap | not separable; slower in run 1, overlap in run 2 | not separable; both runs overlap |
+| `mark-generated` | slower | slower | not separable; overlap in run 1, slower in run 2 |
 
 | Representation | `mark-generated` against `mark-manual` |
 | --- | --- |
 | `reference` | not separable; both runs overlap |
-| `nan_box` | not separable; both runs overlap |
+| `nan_box` | not separable; slower in run 1, overlap in run 2 |
 | `tagged_index` | not separable; both runs overlap |
+
+### Level shifts
+
+Contract revision 1 requires this section to state any shift of sample level within a run that decides a separability outcome.
+`raw/measure-shift-decisions-r1.log` records the SHA-256 and the output of `raw/measure-shift-decisions-r1.mjs`.
+A level shift splits a run's 11 measured samples, in sample order, into a prefix and a suffix whose ranges do not overlap and whose medians differ by a factor of at least 1.5.
+A shift decides an outcome when keeping only the prefix, or only the suffix, as that run's samples changes the outcome between separably faster, separably slower, and not separable.
+Five series have shifts, and three of the shifts decide an outcome.
+
+| Series | Samples in order, ns | Outcome that the shift decides |
+| --- | --- | --- |
+| `reference` run 1 `object-churn` | 23106900 15911900 25023200 19119700 27356300 22394900 30549700 17333000 13302800 9760300 10167500 | None |
+| `reference` run 2 `mark-manual` | 8118000 12305800 7871100 11571500 7962300 12034800 8111700 12706400 4757800 3497800 2397000 | None |
+| `nan_box` run 1 `mark-generated` | 16338200 17471900 16273800 17560300 16199900 17003900 16586300 18111600 16370500 17794100 7504500 | `nan_box` against `tagged_index` on `mark-generated` is not separable; samples 1 to 10 alone would make `nan_box` separably slower. |
+| `nan_box` run 2 `mark-manual` | 16464900 18789000 15947400 18355200 16256600 7308700 2553500 2810400 2609800 2867200 2558300 | The tracer comparison under `nan_box` is not separable; samples 6 to 11, or 7 to 11, alone would make `mark-generated` separably slower than `mark-manual`. |
+| `tagged_index` run 2 `object-churn` | 32730100 32143300 36170600 40555500 42347400 42707200 50872500 49328700 54636000 55321500 57961300 | `tagged_index` against `reference` on `object-churn` is not separable; samples 3 to 11, or 4 to 11, alone would make `tagged_index` separably slower. |
+
+Only the `nan_box` run 2 `mark-manual` shift decides an outcome that a pre-registered rule uses: the tracer rule in section 6.
+The other two deciding shifts change no rule outcome, because `tagged_index` does not qualify and the comparison between the candidates applies only when both qualify.
+An earlier version of the script compared the whole verdict text, so it also counted a change inside "not separable" as a decision.
+Its run is kept as `raw/measure-shift-decisions-r1-attempt-1.log`, that version as `raw/measure-shift-decisions-r1-attempt-1.mjs`, and an accidental repeat of the same run as `raw/measure-shift-decisions-r1-attempt-2.log`.
 
 ## 6. Application of the pre-registered rules
 
+These rules apply to the revision 1 runs.
 Every sample of every run reported its table checksum, and every run exited with status 0.
 
 `nan_box` is separably faster than `reference` on four of the six workloads: `add-small-int`, `add-fraction`, `get-prototype-chain`, and `number-to-string`.
-It is separably slower on none.
-`nan_box` therefore qualifies.
+It is separably slower on `mark-generated`, and no level shift decides that outcome.
+`nan_box` therefore does not qualify.
 
 `tagged_index` is separably faster than `reference` on one workload, `get-prototype-chain`.
-It is separably slower on `add-small-int`, `add-fraction`, `number-to-string`, `object-churn`, and `mark-generated`.
+It is separably slower on `add-small-int`, `add-fraction`, and `mark-generated`.
 `tagged_index` therefore does not qualify.
 
-Only one candidate qualifies, so the tie rule does not apply.
-Under the pre-registered rule, `nan_box` becomes `FP-0012`'s default representation.
+No candidate qualifies, so `reference` stays `FP-0012`'s default representation.
+The worker's runs had made `nan_box` the default, and this record withdraws that outcome.
 
-Case 9 passes in `raw/tests-after.log`.
+Case 9 passes in `raw/r1-integration-tests.log`, the uncached test run at `60c0c90`.
 `mark-generated` is not separably slower than `mark-manual` under any representation.
 Under the pre-registered rule, the generated tracer becomes `FP-0012`'s default tracer.
+Under `nan_box`, that outcome depends on the level shift in run 2 of `mark-manual`, as section 5 states.
+Under `reference`, which `FP-0012` uses, the two tracers do not separate in either run, and no shift decides that outcome.
 
 ## 7. Limits
 
 The measurements come from one machine and one target, `x86_64-windows-gnu`.
 The workloads are microbenchmarks over the generic kernels, without an integrated workload.
 `docs/QUALIFICATION.md` requires an integrated workload check before any microbenchmark win counts, so this record makes no speed claim beyond the recorded samples.
-The `mark-*` and `object-churn` samples spread widely within each run; for example, `mark-manual` under `reference` ranged from 1811700 to 7752900 ns in run 2.
-The recorded load readings are single instants, so concurrent activity between them is unmeasured.
+The `mark-*` and `object-churn` samples fall into separate levels, within runs as section 5 lists and between runs.
+For example, `reference` `mark-generated` ranged from 1881400 to 2840600 ns in run 1 and from 7567000 to 8475400 ns in run 2 for the same work.
+No record shows which logical processor ran each sample, so the cause of the levels is unmeasured.
+[INFERENCE] The processor has two core complexes with different cache sizes, and the heaps of these workloads, about 27 to 70 MB at their peak, exceed the smaller cache, so a thread that moves between the complexes would change their timing.
 The kernels are the generic reference, so each sample includes their scope and invocation overhead, which is the same code for every representation.
 
 ## 8. Consequences
 
 `reference`, `nan_box`, and `tagged_index` remain built and tested, and `reference` remains the generic reference for every later comparison.
 The generated tracer and the manual tracer both remain built, and case 9 keeps testing their equivalence.
-`FP-0012` starts from `nan_box` and the generated tracer, and it repeats these comparisons on an integrated workload before any speed claim.
+`FP-0012` starts from `reference` and the generated tracer.
+Before any speed claim, it repeats these comparisons on an integrated workload, interleaves the representations and tracers within one process, and records the logical processor of each sample, as its plan entry requires.
 No value representation reaches the C ABI: the fixtures of case 20 fail to compile, and no file under `src/js` declares an exported or C-calling-convention function.

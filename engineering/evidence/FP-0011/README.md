@@ -103,3 +103,47 @@ The worker ran no measurement executable; sections 3 through 6 of ADR 0008 still
 - The new tests could not run on the base tree with the new runtime API, so `tests-before-r1.log` appends the case 38 vectors and test to the base's number files and copies `build.zig` and the four new fixtures. The appending script lives in the ignored `out/fp0011-r1-overlay/make-overlay.mjs`, and the log records its full text before running it.
 - The ExponentPart bound is the literal's length plus 400: the scale's magnitude is at most the length, so a saturated exponent leaves a magnitude of at least 400 in the decimal exponent, which gives zero or infinity for any digits.
 - The contract names `raw/mutation-r1.log` only. The two diffs that it applies are kept beside it so the recorded commands can be replayed.
+
+### Integration
+
+The integrator applied the patch without conflicts and committed it as `60c0c90`.
+The integrator accepts the worker's resolved ambiguities.
+A host that owns a `Runtime` keeps direct use of its heap, because revision 1 limits only what a context holder can reach.
+
+One uninterrupted sequence ran on `60c0c90`, with no commit or source edit during it.
+`raw/r1-integration-binding.log` records `HEAD` `60c0c90` and an empty status, including ignored files, for every source root at 10:08:09Z, and the empty status again at 10:09:43Z, after the last run.
+It does not record `HEAD` again; `engineering/evidence/FP-0027/raw/r1-binding.log` records `HEAD` `60c0c90` in the same checkout at 10:10:32Z.
+
+- `gates/2026-10-09T10-08-09-873Z-repo-check-0f1d1adf.json`
+- `gates/2026-10-09T10-08-10-220Z-controller-test-2c171a81.json`, with 181 of 181 controller tests.
+- `gates/2026-10-09T10-08-45-669Z-zig-fmt-3e7dd269.json`
+- `gates/2026-10-09T10-08-45-923Z-zig-test-8f4b2ba1.json`
+
+`raw/r1-integration-tests.log` runs `zig build test --summary all` with the fresh local cache `out/fp0011-r1-integration-cache` and the recorded override `ZIG_GLOBAL_CACHE_DIR`: 62 of 62 build steps and 178 of 178 tests.
+`raw/r1-integration-bun.log` records Bun 1.4.2 with 181 of 181 controller tests.
+
+Commit `6771856` later changed the test block of FP-0011 case 14 in `src/js/heap.zig`, which now runs `checkAllAllocationFailures` over a backing allocator that fails every remap.
+No measurement executable compiles a test block.
+
+### Measurements at the integration commit
+
+Contract revision 1 requires the integrator to rerun `doctor`, `measure-build`, and the six measurement runs at the integration commit.
+The integrator ran them in a detached worktree at `60c0c90`, and ADR 0008 sections 3 through 6 now cite only these runs.
+
+| Log | RESULT |
+| --- | --- |
+| `raw/r1-measure-binding.log` | `git worktree add --detach out/fp0011-measure 60c0c90`; `HEAD` `60c0c90` and an empty status for every source root before and after the runs; the removal of the worktree. Each exits with status 0. |
+| `raw/doctor-r1.log` | `doctor` with exit status 0, showing the locked compiler available. |
+| `raw/environment-r1.log` | The active power scheme `Balanced`, and a process started through `record` that reports 32 logical processors and the affinity mask `4294967295`. |
+| `raw/measure-build-r1.log` | `zig build measure -Doptimize=ReleaseFast --summary all` in the worktree, exit status 0, 8 of 8 steps. |
+| `raw/measure-<representation>-r1-run<n>.log` | The six runs in the frozen order, each exit status 0, with every one of the 72 samples per workload carrying its table checksum. |
+| `raw/measure-summary-r1.log` | The SHA-256 and output of `raw/measure-summary-r1.mjs`, which repeats the method of `raw/measure-summary.log`. |
+| `raw/measure-shift-decisions-r1.log` | The SHA-256 and output of `raw/measure-shift-decisions-r1.mjs`, which finds which level shifts decide a separability outcome. |
+| `raw/measure-shift-decisions-r1-attempt-1.log` and `-attempt-2.log` | Two runs of an earlier version, kept as `raw/measure-shift-decisions-r1-attempt-1.mjs`, that compared whole verdict text; the second is an accidental repeat. |
+
+The rerun changes the representation decision.
+`nan_box` is separably faster than `reference` on the same four workloads as before, but it is now separably slower on `mark-generated` in both runs, so it no longer qualifies.
+`tagged_index` does not qualify either, so `reference` stays `FP-0012`'s default representation.
+The generated tracer still becomes the default tracer under the pre-registered rule, and ADR 0008 section 5 states that a level shift in `nan_box` run 2 of `mark-manual` decides that outcome.
+Review 1's minor finding about the mid-run regime shift is answered by that statement and by the per-series sample lists in the ADR.
+The plan entry of `FP-0012` now requires interleaved comparisons that record the logical processor of each sample.

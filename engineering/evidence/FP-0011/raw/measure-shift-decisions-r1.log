@@ -1,0 +1,49 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","engineering/evidence/FP-0011/raw/measure-shift-decisions-r1.mjs"]
+f5eb53e8de541008564eef59e7c60e19f00359acca2f78a37cbbde706812cbda *engineering/evidence/FP-0011/raw/measure-shift-decisions-r1.mjs
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["engineering/evidence/FP-0011/raw/measure-shift-decisions-r1.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T11:43:58.166Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":13}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0011/raw/measure-shift-decisions-r1.mjs"]
+SERIES reference/run1/object-churn 23106900 15911900 25023200 19119700 27356300 22394900 30549700 17333000 13302800 9760300 10167500 | shifts before sample 9,10
+SERIES reference/run2/mark-manual 8118000 12305800 7871100 11571500 7962300 12034800 8111700 12706400 4757800 3497800 2397000 | shifts before sample 9,10,11
+SERIES nan_box/run1/mark-generated 16338200 17471900 16273800 17560300 16199900 17003900 16586300 18111600 16370500 17794100 7504500 | shifts before sample 11
+SERIES nan_box/run2/mark-manual 16464900 18789000 15947400 18355200 16256600 7308700 2553500 2810400 2609800 2867200 2558300 | shifts before sample 6,7
+SERIES tagged_index/run2/object-churn 32730100 32143300 36170600 40555500 42347400 42707200 50872500 49328700 54636000 55321500 57961300 | shifts before sample 3,4
+PAIR nan_box vs reference add-small-int: faster
+PAIR nan_box vs reference add-fraction: faster
+PAIR nan_box vs reference get-prototype-chain: faster
+PAIR nan_box vs reference number-to-string: faster
+PAIR nan_box vs reference object-churn: not separable (overlap/overlap)
+  reference/run1/object-churn shift before sample 9: samples 1-8 only gives not separable (overlap/overlap); samples 9-11 only gives not separable (slower/overlap); does not decide
+  reference/run1/object-churn shift before sample 10: samples 1-9 only gives not separable (overlap/overlap); samples 10-11 only gives not separable (slower/overlap); does not decide
+PAIR nan_box vs reference mark-generated: slower
+  nan_box/run1/mark-generated shift before sample 11: samples 1-10 only gives slower; samples 11-11 only gives slower; does not decide
+PAIR tagged_index vs reference add-small-int: slower
+PAIR tagged_index vs reference add-fraction: slower
+PAIR tagged_index vs reference get-prototype-chain: faster
+PAIR tagged_index vs reference number-to-string: not separable (overlap/slower)
+PAIR tagged_index vs reference object-churn: not separable (slower/overlap)
+  reference/run1/object-churn shift before sample 9: samples 1-8 only gives not separable (slower/overlap); samples 9-11 only gives not separable (slower/overlap); does not decide
+  reference/run1/object-churn shift before sample 10: samples 1-9 only gives not separable (slower/overlap); samples 10-11 only gives not separable (slower/overlap); does not decide
+  tagged_index/run2/object-churn shift before sample 3: samples 1-2 only gives not separable (slower/overlap); samples 3-11 only gives slower; DECIDES
+  tagged_index/run2/object-churn shift before sample 4: samples 1-3 only gives not separable (slower/overlap); samples 4-11 only gives slower; DECIDES
+PAIR tagged_index vs reference mark-generated: slower
+PAIR nan_box vs tagged_index add-small-int: faster
+PAIR nan_box vs tagged_index add-fraction: faster
+PAIR nan_box vs tagged_index get-prototype-chain: not separable (overlap/overlap)
+PAIR nan_box vs tagged_index number-to-string: faster
+PAIR nan_box vs tagged_index object-churn: not separable (overlap/overlap)
+  tagged_index/run2/object-churn shift before sample 3: samples 1-2 only gives not separable (overlap/overlap); samples 3-11 only gives not separable (overlap/faster); does not decide
+  tagged_index/run2/object-churn shift before sample 4: samples 1-3 only gives not separable (overlap/overlap); samples 4-11 only gives not separable (overlap/faster); does not decide
+PAIR nan_box vs tagged_index mark-generated: not separable (overlap/slower)
+  nan_box/run1/mark-generated shift before sample 11: samples 1-10 only gives slower; samples 11-11 only gives not separable (faster/slower); DECIDES
+TRACER reference mark-generated vs mark-manual: not separable (overlap/overlap)
+  reference/run2/mark-manual shift before sample 9: samples 1-8 only gives not separable (overlap/overlap); samples 9-11 only gives not separable (overlap/slower); does not decide
+  reference/run2/mark-manual shift before sample 10: samples 1-9 only gives not separable (overlap/overlap); samples 10-11 only gives not separable (overlap/slower); does not decide
+  reference/run2/mark-manual shift before sample 11: samples 1-10 only gives not separable (overlap/overlap); samples 11-11 only gives not separable (overlap/slower); does not decide
+TRACER nan_box mark-generated vs mark-manual: not separable (slower/overlap)
+  nan_box/run1/mark-generated shift before sample 11: samples 1-10 only gives not separable (slower/overlap); samples 11-11 only gives not separable (slower/overlap); does not decide
+  nan_box/run2/mark-manual shift before sample 6: samples 1-5 only gives not separable (slower/overlap); samples 6-11 only gives slower; DECIDES
+  nan_box/run2/mark-manual shift before sample 7: samples 1-6 only gives not separable (slower/overlap); samples 7-11 only gives slower; DECIDES
+TRACER tagged_index mark-generated vs mark-manual: not separable (overlap/overlap)
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0011/raw/measure-shift-decisions-r1.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T11:43:58.231Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":40}

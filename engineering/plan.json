@@ -554,10 +554,12 @@
         "Run selected Test262 cases through that runtime rather than the development host.",
         "Expose explicit generic execution and collection safepoints.",
         "Preserve all remaining language obligations in the task graph.",
-        "Add adaptive-dispatch experiments without replacing semantics with constant results."
+        "Add adaptive-dispatch experiments without replacing semantics with constant results.",
+        "Start from the reference representation and the generated tracer that ADR 0008 selects, and repeat its representation and tracer comparisons on an integrated workload before any speed claim, interleaving them within one process and recording the logical processor of each sample."
       ],
       "read": [
-        "docs/JAVASCRIPT_RUNTIME.md"
+        "docs/JAVASCRIPT_RUNTIME.md",
+        "engineering/decisions/0008-javascript-values-and-heap.md"
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
