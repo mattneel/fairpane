@@ -1,0 +1,41 @@
+{
+  "verdict": "accept",
+  "summary": "I accept FP-0052's specification-text changes. All three checks pass, with four minor findings and two notes, and no blocker or major finding. I made no edits. I ran no shell, git, or test commands; I only read files, ran read-only jq queries, and fetched primary sources.\n\nScope limit: local master and origin/master are both at 0276268, which is a descendant of 775d988 according to .git/logs. I read the working tree at that commit, so I could not diff 775d988 itself. [INFERENCE] The later commits do not touch these specs files, judging only by their reflog messages (FP-0066, FP-0082, FP-0098, amendments).\n\nCheck 1 passes. UAX #14 revision 57 is for Unicode 18.0.0, dated 2026-09-01. It defines $EastAsian as [\\p{ea=F}\\p{ea=W}\\p{ea=H}] and uses it only in LB19a and LB30. LB10 gives a remaining CM or ZWJ the properties of U+0041: Line_Break=AL, General_Category=Lu, East_Asian_Width=Na, and Extended_Pictographic=N. The General_Category uses are:\n- LB15a: [\\p{Pi}&QU]\n- LB15b: [\\p{Pf}&QU]\n- LB19: [QU - \\p{Pi}] and [QU - \\p{Pf}]\n- LB30b: [\\p{Extended_Pictographic}&\\p{Cn}]\nIMPORT_REQUIREMENTS.md:62, :66, and S37 (sources.json:306) cite these rules correctly. One use is missing: the LB1 default table also uses General_Category, to resolve SA into CM or AL (finding 1).\n\nCheck 2 passes. Upstream WPT at b60c4b3 works like this:\n- `name_is_test262` is `\"test262\" in self.dir_path.split(os.path.sep) and self.ext == \".js\"`.\n- `manifest_items` reaches that branch only after the non-test, manual, conformance, webdriver, aamtest, visual, crashtest, print-reftest, multi-global, worker, window, and extension branches.\n- `test262.parse` returns None when the name ends in `_FIXTURE.js` or when `/\\*---(.*)---\\*/` (DOTALL) finds no match. A YAML parse that yields None still returns a record.\n- A None record makes the file a `support` item.\nSo the rule states both the frontmatter condition and the `_FIXTURE.js` condition exactly. One clause goes too far (finding 2). The same wording appears in WPT_RULE, the corpus.mjs:257-258 comment, ADR 0003:223-224, and S47.\n\nThe regenerated wpt.json matches the earlier counts:\n- raw/applicability.log: exit 0, with FAIRPANE_CORPORA_DIR set to C:\\src\\fairpane\\.tools\\corpora.\n- raw/applicability-diff.log: `git diff --stat` shows 1 insertion and 1 deletion; the only changed line is `discovery.rule`, at index ad89917..14e0009.\n- The committed wpt.json still has discovered 76620, breakdown test262 20, reported_separately 53640 (43 + 53597), manifest sha256 86d55bee…, and item_counts test262 53660 and support 41779. These equal the values that spec-review-3 accepted.\n- raw/integration-corpus-verify-wpt.log: exit 0, discovered 76620.\n\nCheck 3 passes. UTS #46 revision 36 is for Unicode 18.0.0. Its section 4.1 criterion 6 says a label \"must not begin with a combining mark, that is: General_Category=Mark\". Criterion 9 applies \"all six of the numbered conditions in RFC 5893, Section 2\" when CheckBidi is set and the domain name is a Bidi domain name. RFC 5893 section 2 has exactly six conditions, and they use Bidi property values. The URL Standard sets CheckBidi and CheckJoiners to true in both its ToASCII and ToUnicode calls. The rows at IMPORT_REQUIREMENTS.md:65 and :66, S39, S41, and the new S101 name these consumers correctly. The only problem is the URL Standard's algorithm name, which has since changed (finding 3).",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 66,
+      "issue": "The General_Category row lists UAX #14 rules LB15a, LB15b, LB19, LB30b, and LB10, and each of those references is correct. It leaves out LB1, the non-tailorable rule that resolves classes. Its default table in UAX #14 revision 57 resolves SA to CM for General_Category Mn or Mc and to AL otherwise. A conforming default line breaker therefore reads General_Category in LB1 as well. The S37 purpose at specs/sources.json:306 has the same gap. There is no import gap, because DerivedGeneralCategory.txt is already imported.",
+      "recommendation": "Add 'rule LB1, which resolves SA to CM for Mn and Mc and to AL otherwise' to the UAX #14 consumer text in this row and in the S37 purpose. Record this through a contract amendment, because FP-0052 froze the row text."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/applicability/wpt.json",
+      "line": 7,
+      "issue": "The rule says '...; any other such file becomes a \"support\" item.' Read naturally, 'such file' means any '.js' file with a 'test262' directory component. That claim is too broad for upstream in general. An earlier branch of manifest_items can give such a file another type: '.any.js', '.window.js', '.worker.js', and '.extension.js' files become testharness, and the manual or visual type flags give those types. Only a file that reaches the name_is_test262 branch and fails the _FIXTURE.js or frontmatter condition becomes support. At the pin, no counts change: a jq query over .tools/corpora/wpt/MANIFEST.json finds 53660 test262 files and 298 support files among the '.js' files under a test262 directory, and no other type. The same clause appears in the WPT_RULE text at tools/corpus.mjs:394, the comment at tools/corpus.mjs:258, ADR 0003:224, and S47 at specs/sources.json:386. It follows the frozen contract wording.",
+      "recommendation": "Narrow the clause, for example: 'a file that reaches that rule but fails the _FIXTURE.js or frontmatter condition becomes a \"support\" item.' Apply the change to all copies through a contract amendment, then regenerate wpt.json and confirm that the diff changes only the rule text."
+    },
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 65,
+      "issue": "The row says the URL Standard sets CheckBidi to true 'for domain to ASCII and domain to Unicode'. The current URL Standard section 3.3 has no algorithm named 'domain to ASCII'. It defines 'domain parser' (anchor concept-domain-to-ascii) and 'domain parser ToASCII', which calls Unicode ToASCII with CheckBidi and CheckJoiners set to true. 'domain-to-ASCII' survives only as a validation-error name. The same stale name appears in S41 at specs/sources.json:338 and in the older ContextJ row at IMPORT_REQUIREMENTS.md:71. The consumer itself is identified correctly.",
+      "recommendation": "Use the URL Standard's current names: 'domain parser ToASCII' (used by the domain parser) and 'domain to Unicode'. Apply this in the rows at :65 and :71 and in S41."
+    },
+    {
+      "severity": "note",
+      "path": "specs/applicability/wpt.json",
+      "line": 7,
+      "issue": "I could not verify that wpt.json is byte-identical at 775d988, because I did not run git and the working tree is at 0276268. The only evidence of a one-line diff is raw/applicability-diff.log, recorded in the worker's tree at 14:32:59Z. The committed counts do equal the earlier accepted values.",
+      "recommendation": "The integrator should run `git diff 775d988^ 775d988 -- specs/applicability/wpt.json` and `git diff 775d988 0276268 -- specs/IMPORT_REQUIREMENTS.md specs/sources.json specs/README.md specs/applicability/wpt.json`, and record both outputs."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0052/CONTRACT.md",
+      "line": null,
+      "issue": "The contract's Sources section cites sourcefile.py name_is_test262 at lines 439-442, the manifest_items branch at 1168-1196, and test262.py parse at 59-75. In my fetches of the raw files at b60c4b3, name_is_test262 is at about 428-431, the branch starts at about 1155, and parse is at about 55-72. These numbers agree with spec-review-3's 428-431 and 1155-1162. [INFERENCE] The contract's numbers may come from a different view. The reader tool adds header lines, so my exact offsets are not certain. No specs file cites these line numbers.",
+      "recommendation": "No change to the specs files is needed. Recheck the line citations against the raw files before reusing them."
+    }
+  ]
+}

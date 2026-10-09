@@ -1,0 +1,19 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","775d988^","775d988","--","specs/applicability/wpt.json"]
+diff --git a/specs/applicability/wpt.json b/specs/applicability/wpt.json
+index ad89917..14e0009 100644
+--- a/specs/applicability/wpt.json
++++ b/specs/applicability/wpt.json
+@@ -4,7 +4,7 @@
+   "commit": "b60c4b349d9d167bf354a40bc0d4cbed15174606",
+   "status": "counted",
+   "discovery": {
+-    "rule": "Read the manifest that wpt.fyi publishes for the pinned commit after binding every manifest path and hash to the Git blob IDs of the pinned tree. Count the items of each manifest item type; each file entry contributes its array length minus one, because the first element is the file hash and each other element is one test URL. Discovered tests are the items of every type except \"spec\" and \"support\", minus the \"test262\" items whose path starts with \"third_party/test262/\", the vendored Test262 copy. Upstream assigns the \"test262\" type to every \".js\" file with a \"test262\" directory component, so \"test262\" items elsewhere, such as the WPT tests under \"infrastructure/test262/\", count in discovery. The record reports the vendored \"test262\" items separately, counted by their directory under \"third_party/test262/\", with the vendored Test262 revision from third_party/test262/vendored.toml.",
++    "rule": "Read the manifest that wpt.fyi publishes for the pinned commit after binding every manifest path and hash to the Git blob IDs of the pinned tree. Count the items of each manifest item type; each file entry contributes its array length minus one, because the first element is the file hash and each other element is one test URL. Discovered tests are the items of every type except \"spec\" and \"support\", minus the \"test262\" items whose path starts with \"third_party/test262/\", the vendored Test262 copy. Upstream gives the \"test262\" type to a \".js\" file with a \"test262\" directory component only when no earlier rule of manifest_items applies to it, its name does not end in \"_FIXTURE.js\", and it contains a \"/*---\" to \"---*/\" frontmatter block; any other such file becomes a \"support\" item. The \"test262\" type therefore does not identify the vendored copy, and \"test262\" items elsewhere, such as the WPT tests under \"infrastructure/test262/\", count in discovery. The record reports the vendored \"test262\" items separately, counted by their directory under \"third_party/test262/\", with the vendored Test262 revision from third_party/test262/vendored.toml.",
+     "command": "node tools/fairpane.mjs corpus-applicability wpt"
+   },
+   "manifest": {
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","775d988^","775d988","--","specs/applicability/wpt.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:37:17.239Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","775d988","HEAD","--","specs/IMPORT_REQUIREMENTS.md","specs/sources.json","specs/README.md","specs/applicability/wpt.json"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","775d988","HEAD","--","specs/IMPORT_REQUIREMENTS.md","specs/sources.json","specs/README.md","specs/applicability/wpt.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:37:17.337Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29}
