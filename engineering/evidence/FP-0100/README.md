@@ -307,3 +307,19 @@ The restored file is byte-identical to the saved fixed file, and `raw/tests-afte
 - The tree dump writes each code point in UTF-8 and a lone surrogate in its three-byte generalized UTF-8 form, because the dump does not escape.
 - After `template_start_tag` from the after head entry, the head element stays on the stack, because the remaining steps of that entry belong to `FP-0103`; the stack is not observable after an unsupported outcome.
 - A start tag that ends in an unsupported outcome raises no `non-void-html-element-start-tag-with-trailing-solidus` error, because the branch that would acknowledge its flag did not run.
+
+## Integration
+
+Commit `f17b396` applies the worker's `out/fp0100.patch`, blob `5e127bc1bfbd56574e3afe8fc515972c4cd5055e`, on `57df855`, and all 21 files apply cleanly.
+That head holds `FP-0107`'s four-worker controller runner and the `FP-0082`, `FP-0108`, `FP-0119`, and `FP-0123` integrations; FP-0100 adds no controller case.
+
+`raw/integration-binding.log` records `HEAD` `f17b396` and a status that includes ignored files for every source root before and after these runs, from 19:30:13 to 19:33:25 UTC:
+
+| Run | Record | Result |
+| --- | --- | --- |
+| `repo-check` | `gates/2026-10-09T19-30-14-124Z-repo-check-eee884e6.json` | pass, 270 ms |
+| `controller-test` | `gates/2026-10-09T19-30-14-715Z-controller-test-eafc55b4.json` | pass, 248 of 248, 52,817 ms |
+| `zig-fmt` | `gates/2026-10-09T19-31-07-807Z-zig-fmt-3546e36c.json` | pass, 91 ms |
+| `zig-test` | `gates/2026-10-09T19-31-08-211Z-zig-test-cb3d2e18.json` | pass, 1,116 ms on the warm local cache |
+| Uncached `zig build test --summary all` | `raw/integration-tests.log`, with the fresh cache directory `out/out/fp0100-integration` | exit 0; `Build Summary: 101/101 steps succeeded; 394/394 tests passed` |
+| Bun 1.4.2 | `raw/bun-selftest.log` | 248 of 248 |
