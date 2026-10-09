@@ -1,9 +1,9 @@
 # ADR 0007: One renderer for frontends in every language
 
-Status: accepted.
+Status: decided by the owner; this record awaits an accepting independent review.
 Owner: the project owner.
 Date: 2026-10-09.
-Related tasks: `FP-0035`, `FP-0041`, `FP-0042`, `FP-0043`, `FP-0044`, `FP-0045`, `FP-0046`.
+Related tasks: `FP-0035`, `FP-0041`, `FP-0042`, `FP-0043`, `FP-0044`, `FP-0045`, `FP-0046`, `FP-0048`.
 
 ## Decision
 
@@ -41,9 +41,9 @@ An installed language integration never permits an arbitrary page to load native
 
 | Component | Role |
 | --- | --- |
-| WebGPU | The web API for GPU graphics and computation. |
-| wgpu | A Rust graphics library based on WebGPU, with native graphics backends. |
-| GPUI | The GPU-accelerated UI framework for the browser shell. |
+| WebGPU | It is the web API for GPU graphics and computation. |
+| wgpu | It is a Rust graphics library based on WebGPU, with native graphics backends. |
+| GPUI | It is the GPU-accelerated UI framework for the browser shell. |
 
 The surface bridge avoids any translation from WebGPU commands into GPUI widgets.
 WebGPU computation needs no canvas, so that work never passes through GPUI.
@@ -91,9 +91,10 @@ Any third-party implementation of engine WebGPU behavior needs a separate owner 
 `FP-0035` defines the versioned surface interface and the input contract.
 `FP-0043` exposes the document frontend platform through the public contract.
 `FP-0044` defines the custom graphics frontend contract.
+`FP-0048` builds the first internal GPU paint adapter against the scalar reference.
 `FP-0045` qualifies GPU-resident presentation without routine CPU readback.
-`FP-0046` establishes the validated GPU service boundary.
-`FP-0041` and `FP-0042` build a frontend through each language's SDK.
+`FP-0046` defines the validated GPU service boundary, and it reports WebGPU as unsupported until a WebGPU task implements it.
+`FP-0041` and `FP-0042` build document and custom graphics frontends through each language's SDK.
 
 ## Sources and evidence
 

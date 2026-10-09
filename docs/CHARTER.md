@@ -17,7 +17,7 @@ Applications integrate through a stable C ABI after that ABI qualifies.
 Language wrappers express their host language's ownership and concurrency conventions.
 Rust is the first-party wrapper language and the browser-shell language.
 The engine and the canonical language wrappers keep a first-party dependency policy.
-The Rust browser shell welcomes qualified third-party dependencies for application work.
+The Rust browser application welcomes qualified third-party dependencies for application work.
 Those dependencies never substitute for engine behavior and never migrate into the reusable contract.
 
 The public browser is the engine's first embedder.
@@ -30,7 +30,8 @@ The engine also remains useful independently of the browser application.
 
 Fairpane is extensible through one extension contract.
 An extension chooses its language, not its privileges or access to Fairpane's capabilities.
-Rhai and JavaScript are its first clients, and they receive equal capabilities through idiomatic interfaces.
+Every extension language receives equal capabilities through idiomatic interfaces.
+Its clients are JavaScript on Fairpane's own runtime and every officially supported language SDK.
 Every officially supported language SDK powers a maintained first-party Fairpane integration and a useful reference extension.
 Those consumers use the same public contracts and distributed SDKs available to everyone else.
 Language support stays optional, so the default browser remains the address bar and the page.

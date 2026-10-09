@@ -1,6 +1,6 @@
 # ADR 0004: Rust for the wrapper and the browser shell
 
-Status: accepted.
+Status: accepted by the owner; this revision awaits an accepting independent review.
 Owner: the project owner.
 Date: 2026-10-09.
 Related tasks: `FP-0017`, `FP-0020`, `FP-0021`, `FP-0023`, `FP-0029`, `FP-0030`, `FP-0032`, `FP-0033`, `FP-0034`, `FP-0035`.
@@ -35,7 +35,7 @@ GPUI hosts that engine-rendered chrome and the page documents in the shell's win
 | Zig engine | First-party code and the pinned Zig toolchain. | Web semantics and document execution. |
 | `fairpane-sys` | First-party bindings and Rust toolchain facilities. | Exact declarations of the public C ABI. |
 | `fairpane` | First-party wrapper code, `fairpane-sys`, and the Rust standard library. | Safe, idiomatic Rust ownership and operations. |
-| Rust browser shell | Qualified third-party dependencies are welcome. | User interface and application services. |
+| Rust browser application | Qualified third-party dependencies are welcome. | The shell's user interface and application services. |
 
 The crate names describe the structure, not reserved package names.
 Dependencies belong to the application that needs them.
@@ -67,6 +67,11 @@ FFI declarations do not establish foreign-code safety, so their correctness is p
 - It states thread restrictions and cancellation behavior explicitly.
 - Ordinary shell code never handles raw engine pointers and never imports `fairpane-sys` directly.
 - Unsafe code stays inside the wrapper and narrow platform adapters.
+
+A narrow platform adapter is a shell module that a recorded decision names.
+It may handle raw engine pointers only for an interoperation that the wrapper cannot yet express safely.
+Each such use also becomes a wrapper task, so the safe interface eventually absorbs it.
+Every other shell module is ordinary shell code.
 
 The initial `Engine` type implements neither `Send` nor `Sync`.
 Those traits are safety claims, and a mutex around a foreign handle does not establish the library's thread contract.
@@ -101,9 +106,10 @@ A qualification prototype selects the framework through Fairpane's actual needs.
 | Application behavior | Multiple windows keep distinct identity and recover after a renderer failure. |
 | Efficiency | Idle CPU use and interaction latency meet explicit budgets. |
 
-`FP-0032` produces the evidence for engine frames, presentation, application behavior, and efficiency, and it confirms IME event delivery.
+`FP-0032` produces the evidence for engine frames, presentation, window identity, and efficiency, and it confirms IME event delivery.
 The text input and accessibility areas need engine editing and accessibility, so `FP-0030` produces their evidence.
-The GPUI selection stays provisional until both tasks pass.
+Renderer-failure recovery needs renderer processes, so `FP-0020` produces that part of the application behavior evidence.
+The GPUI selection stays provisional until all three tasks pass.
 
 The first frame path uploads already-decoded software frames through GPUI's `RenderImage` input.
 That path does not establish zero-copy GPU interoperability.
@@ -124,7 +130,7 @@ The following crates are candidates for their stated roles, not a preapproved ma
 | Asynchronous host services | Tokio | A host-service runtime, not the engine's event loop or a wrapper requirement. |
 | HTTP transport and TLS | reqwest with rustls | A transport adapter under the resource broker's control. |
 | Structured diagnostics | tracing | Shell spans correlated with engine requests and frames. |
-| Dependency policy | cargo-deny | Development checks for advisories and approved dependency sources. |
+| Dependency policy | cargo-deny | Development checks for licenses, advisories, and approved dependency sources. |
 
 The transport adapter never consumes a redirect that the engine needs to evaluate.
 It returns redirect responses through the public resource contract.

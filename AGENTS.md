@@ -24,6 +24,7 @@ The result requires mechanically demonstrated behavior and sustained maintainabi
 - Use qualified, pinned crates only in the Rust browser application, never to supply engine behavior.
 - Never let a crate parse, style, lay out, shape, paint, or script web content or chrome, or make a security decision that the engine or broker owns.
 - Keep the runtime dependencies of each language host in that optional host, outside the engine and the canonical wrappers.
+- Never ship a third-party JavaScript or WebAssembly engine, renderer, or WebView in any language host.
 - Let an extension choose its language, never its privileges or its access to Fairpane's capabilities.
 - Keep the engine embedding API and the permissioned extension API distinct.
 - Make every officially supported language SDK power a maintained first-party Fairpane integration and a useful reference extension.

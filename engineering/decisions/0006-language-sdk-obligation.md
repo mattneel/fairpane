@@ -1,9 +1,9 @@
 # ADR 0006: Every language SDK powers a first-party integration
 
-Status: accepted.
+Status: decided by the owner; this record awaits an accepting independent review.
 Owner: the project owner.
 Date: 2026-10-09.
-Related tasks: `FP-0022`, `FP-0039`, `FP-0041`, `FP-0042`.
+Related tasks: `FP-0022`, `FP-0029`, `FP-0037`, `FP-0039`, `FP-0041`, `FP-0042`, `FP-0049`.
 
 ## Decision
 
@@ -17,6 +17,21 @@ Rust gets the browser shell as its flagship consumer.
 Every other language gets a maintained browser integration and useful extensions that exercise its SDK.
 The browser becomes the place where the entire SDK family proves itself.
 
+## Officially supported SDKs
+
+A language SDK becomes officially supported only through its own support package and qualification.
+The current set has four planned members.
+
+| SDK | Flagship integration | Reference extension |
+| --- | --- | --- |
+| Rust | The browser shell, `FP-0017`. | The Rust workspace extension, `FP-0037` and `FP-0039`. |
+| C | The C-only consumer, `FP-0034`. | The C support package, `FP-0049`. |
+| TypeScript | The TypeScript support package, `FP-0041`. | The TypeScript workspace extension, `FP-0041`. |
+| Elixir | The Elixir support package, `FP-0042`. | The Elixir workspace extension, `FP-0042`. |
+
+The direct Zig API sits over internal interfaces, so it is not a public SDK.
+The other languages in `docs/ABI_AND_WRAPPERS.md` join the set only with a support package.
+
 ## The support package
 
 | Deliverable | Purpose |
@@ -29,8 +44,10 @@ The language-support extension supplies the bridge.
 The reference extension proves that another developer can cross it.
 Neither deliverable receives a private API.
 A missing capability becomes a public-contract issue, not an internal shortcut.
-For a compiled language, the integration can launch a compiled extension worker.
-For an interpreted language, it can supply a runtime host.
+For a compiled language, the integration launches a compiled extension worker.
+For an interpreted language, it supplies a runtime host.
+No host ships a third-party JavaScript or WebAssembly engine, a renderer, or a WebView.
+TypeScript extensions therefore run on Fairpane's own JavaScript runtime through the TypeScript SDK's extension transport, as the owner decided.
 The execution model can differ, while the capabilities and permission rules stay equivalent.
 
 ## Feedback before adoption
@@ -93,9 +110,10 @@ Developers add the language support they need.
 
 The `embedding-wrappers` capability family includes the support package for each officially supported language.
 `FP-0022` builds the TypeScript and Elixir SDK slices.
-`FP-0041` and `FP-0042` deliver their language-support and reference extensions after the shared scenarios in `FP-0039` exist.
+`FP-0041`, `FP-0042`, and `FP-0049` deliver the TypeScript, Elixir, and C support packages after the shared scenarios in `FP-0039` exist.
 
 ## Sources and evidence
 
 - `engineering/evidence/extensions/owner-sdk-memo-2026-10-09.md` holds the owner's memo verbatim.
 - `engineering/evidence/extensions/owner-sdk-memo-extraction.log` records its extraction from the owner's answer.
+- `engineering/evidence/extensions/owner-answers-2.log` records the owner's decision that TypeScript extensions run on Fairpane's own JavaScript runtime.

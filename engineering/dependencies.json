@@ -36,8 +36,7 @@
       "A graphics library, such as wgpu, presents an engine-produced surface in the shell.",
       "An HTTP library supplies transport that the broker authorizes.",
       "An accessibility adapter exposes platform objects for engine-provided semantics.",
-      "A crate supplies a host service, such as asynchronous I/O, diagnostics, configuration, profile directories, clipboard transport, file dialogs, or notifications.",
-      "The optional Rhai component runs extension code under the extension contract."
+      "A crate supplies a host service, such as asynchronous I/O, diagnostics, configuration, profile directories, clipboard transport, file dialogs, or notifications."
     ],
     "outside_the_exception": [
       "A crate parses, styles, lays out, shapes, paints, or scripts web content or chrome.",
@@ -52,7 +51,8 @@
     "candidates": [
       {
         "crate": "gpui",
-        "role": "GPUI is the lead interface framework. It hosts windows, input, IME delivery, AccessKit accessibility, frame presentation, and the engine-rendered chrome. GPUI Kit publishes its paired GPUI snapshot as the gpui-pre package.",
+        "role": "GPUI is the lead interface framework. It hosts windows, input, IME delivery, AccessKit accessibility, frame presentation, and the engine-rendered chrome. GPUI Kit's installation guide names gpui-pre as the crates.io package that publishes its paired GPUI snapshot.",
+        "source": "https://gpui-kit.com/docs/installation",
         "status": "candidate pending FP-0032 and FP-0030"
       },
       {
@@ -77,13 +77,8 @@
       },
       {
         "crate": "cargo-deny",
-        "role": "Cargo-deny is a development check for advisories and approved dependency sources.",
+        "role": "Cargo-deny is a development check for licenses, advisories, and approved dependency sources. The tool for the ban and duplicate checks stays unassigned until FP-0017 selects one.",
         "status": "candidate development tool"
-      },
-      {
-        "crate": "rhai",
-        "role": "Rhai runs extension code in the optional Rhai component, outside the engine and the canonical wrapper. It never executes web content or chrome.",
-        "status": "candidate pending FP-0037"
       },
       {
         "crate": "wgpu",
@@ -100,7 +95,7 @@
   },
   "optional_language_hosts": {
     "decision": "engineering/decisions/0006-language-sdk-obligation.md",
-    "policy": "Each language-support host is optional. Its runtime dependencies belong to that host, outside the Zig engine and the canonical wrappers. A host never executes web content or chrome, and it never replaces Fairpane's JavaScript runtime in the JavaScript extension adapter. The default browser installation carries no third-party language runtime."
+    "policy": "Each language-support host is optional. Its runtime dependencies belong to that host, outside the Zig engine and the canonical wrappers. A host never executes web content or chrome. No host ships a third-party JavaScript or WebAssembly engine, a renderer, or a WebView, so JavaScript and TypeScript extensions run on Fairpane's own runtime. The default browser installation carries no third-party language runtime."
   },
   "development": {
     "required_hosts": [
