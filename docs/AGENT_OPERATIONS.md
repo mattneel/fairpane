@@ -54,6 +54,9 @@ A prose claim of success is not an acceptance receipt.
 
 A worker keeps each failed or abandoned attempt as its own raw log, such as `tests-before-attempt-1.log`, and never deletes it.
 Every recorded Zig command names its cache override through `node tools/fairpane.mjs record --env`.
+A recorded command captures only what the task needs, because the evidence is public.
+It never lists a home directory, a user profile, or another unrelated user file, and it never records a credential or token.
+The integrator reviews each worker's new logs for such content before committing them.
 The integrator records `HEAD` and a status that includes ignored files for every source root before the gates, and records both again after the last run.
 
 ## Durable state
