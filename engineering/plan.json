@@ -3314,7 +3314,7 @@
       "id": "FP-0080",
       "title": "Generate fairpane-sys and link it against the native library",
       "workstream": "wrappers",
-      "depends_on": ["FP-0021", "FP-0079"],
+      "depends_on": ["FP-0021", "FP-0079", "FP-0132", "FP-0133", "FP-0134"],
       "role": "fairpane-bindings",
       "allowed_paths": ["api", "bindings", "include", "src/abi_generated.zig", "tests", "tools", "build.zig", "Cargo.toml", "Cargo.lock", "engineering/dependencies.json", "engineering/decisions", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "specs/corpora.json"],
@@ -4247,6 +4247,78 @@
         "Read a Git corpus's pin record under its fetch lock, or re-read it under the lock and fail when it changed, and test a repin that finishes between the first read and the lock."
       ],
       "read": ["engineering/evidence/FP-0052/reviews/review-1-accept.json", "engineering/evidence/FP-0052/reviews/spec-review-1-accept.json", "engineering/evidence/FP-0052/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0132",
+      "title": "Lock the i686-unknown-linux-gnu Rust standard library",
+      "workstream": "wrappers",
+      "depends_on": ["FP-0079"],
+      "role": "fairpane-bindings",
+      "allowed_paths": ["tools", "tests/rust", "docs/TOOLCHAIN.md", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Add the i686-unknown-linux-gnu rust-std component of the locked channel manifest to toolchains/rust.lock.json under a targets member, with its URL and SHA-256 from the committed signed manifest, through a separate protected change with independent approval.",
+        "Install every locked target's standard library into every host toolchain from its digest-checked archive, and check the installed receipt against the lock before any version check.",
+        "Replace an installed toolchain whose receipt differs from the lock only after the new toolchain passes its checks.",
+        "Keep rust-toolchain.toml free of targets, and run no rustup command.",
+        "Compile a no_std probe crate for i686-unknown-linux-gnu with the locked toolchain on Windows and Linux.",
+        "Amend the FP-0079 cases that the targets member affects without dropping an assertion, and add at most one second of controller case time."
+      ],
+      "read": ["engineering/evidence/FP-0079/CONTRACT.md", "docs/TOOLCHAIN.md", "engineering/decisions/0010-rust-toolchain-host.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0133",
+      "title": "Generate fairpane-sys from the ABI schema with Rust layout assertions",
+      "workstream": "wrappers",
+      "depends_on": ["FP-0021", "FP-0132"],
+      "role": "fairpane-bindings",
+      "allowed_paths": ["api", "bindings", "include", "src/abi_generated.zig", "tests", "tools", "Cargo.toml", "Cargo.lock", "engineering/dependencies.json", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-test", "c-abi"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Generate fairpane-sys from the FP-0021 metadata.",
+        "Ship the generated declarations with their source schema.",
+        "Keep regeneration a separate development operation.",
+        "Extend the interface metadata through a reviewed schema change where it falls short.",
+        "Keep generated declarations separate from the idiomatic layer.",
+        "Detect stale generated files mechanically.",
+        "Do not call generated source alone qualified support.",
+        "Prove that fairpane-sys resolves no third-party crate in any declared target configuration, including build dependencies.",
+        "Declare the wrapper's target configurations in engineering/dependencies.json.",
+        "Assert in Rust every structure size and member offset from the layout model that the C and Zig checks use, and compile those assertions for the host and for i686-unknown-linux-gnu with the locked toolchain.",
+        "Add the Rust crate roots to the policy source inventory through a separate protected change after the crate lands."
+      ],
+      "read": ["engineering/evidence/FP-0021/CONTRACT.md", "docs/ABI_AND_WRAPPERS.md", "engineering/decisions/0004-first-party-wrapper-language.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0134",
+      "title": "Link fairpane-sys against the native library and add the Rust gates",
+      "workstream": "wrappers",
+      "depends_on": ["FP-0133"],
+      "role": "fairpane-bindings",
+      "allowed_paths": ["bindings", "tests", "tools", "build.zig", "Cargo.toml", "Cargo.lock", ".github/workflows", "engineering/dependencies.json", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-test", "c-abi"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Link a fairpane-sys test against the actual native library on Windows and Linux.",
+        "Implement the rust-fmt and rust-wrapper gate kinds so that they run only the locked toolchain in an isolated Cargo environment.",
+        "Register the rust-fmt and rust-wrapper gates in engineering/gates.json through a separate protected change, and rerun the dependency proof of FP-0133 for every declared target configuration in the rust-wrapper gate.",
+        "Run both gates in the Gates workflow on Windows and Linux with the locked toolchain installed from its verified archives."
+      ],
+      "read": ["engineering/evidence/FP-0080/CONTRACT.md", "docs/ABI_AND_WRAPPERS.md", "engineering/evidence/FP-0079/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
