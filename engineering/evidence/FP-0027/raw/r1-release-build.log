@@ -1,0 +1,13 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","require('fs').mkdirSync(process.argv[1])","C:\\src\\fairpane\\out\\fp0027-r1-release"]
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","require('fs').mkdirSync(process.argv[1])","C:\\src\\fairpane\\out\\fp0027-r1-release"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T09:50:51.902Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-fp0027-r1-ea3433abcc09ef22dec71b4e03e697e61f21cb16\\fairpane-ea3433abcc09ef22dec71b4e03e697e61f21cb16.tar"]
+\d5514c5e05f37527b8438459f0bc3e48d8e12cae5bb6e2e9d39888d64a5c4635 *C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-fp0027-r1-ea3433abcc09ef22dec71b4e03e697e61f21cb16\\fairpane-ea3433abcc09ef22dec71b4e03e697e61f21cb16.tar
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-fp0027-r1-ea3433abcc09ef22dec71b4e03e697e61f21cb16\\fairpane-ea3433abcc09ef22dec71b4e03e697e61f21cb16.tar"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T09:50:51.989Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\Windows\\System32\\tar.exe","-xf","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-fp0027-r1-ea3433abcc09ef22dec71b4e03e697e61f21cb16\\fairpane-ea3433abcc09ef22dec71b4e03e697e61f21cb16.tar","--strip-components","1"]
+RESULT {"executable":"C:\\Windows\\System32\\tar.exe","arguments":["-xf","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-fp0027-r1-ea3433abcc09ef22dec71b4e03e697e61f21cb16\\fairpane-ea3433abcc09ef22dec71b4e03e697e61f21cb16.tar","--strip-components","1"],"cwd":"C:\\src\\fairpane\\out\\fp0027-r1-release","started_at":"2026-10-09T09:50:52.074Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":168}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","-Doptimize=ReleaseSafe","--prefix","C:\\src\\fairpane\\out\\fp0027-r1-release\\zig-out"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","-Doptimize=ReleaseSafe","--prefix","C:\\src\\fairpane\\out\\fp0027-r1-release\\zig-out"],"cwd":"C:\\src\\fairpane\\out\\fp0027-r1-release","started_at":"2026-10-09T09:50:52.298Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":62839,"environment_overrides":{"ZIG_LOCAL_CACHE_DIR":"C:\\src\\fairpane\\out\\fp0027-r1-release\\.zig-cache","ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\out\\fp0027-r1-release\\.zig-global-cache"}}

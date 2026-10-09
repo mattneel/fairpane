@@ -335,21 +335,24 @@
       "notes": []
     },
     "FP-0027": {
-      "status": "active",
+      "status": "implemented",
       "owner": "root-integrator",
       "evidence": [
         "engineering/evidence/FP-0027/README.md",
-        "engineering/evidence/FP-0027/gates/2026-10-09T09-33-31-406Z-repo-check-fea293bf.json",
-        "engineering/evidence/FP-0027/gates/2026-10-09T09-33-31-671Z-controller-test-41678707.json",
-        "engineering/evidence/FP-0027/raw/tests-before.log",
-        "engineering/evidence/FP-0027/raw/reproduce-check.log",
-        "engineering/evidence/FP-0027/raw/provenance.log"
+        "engineering/evidence/FP-0027/gates/2026-10-09T09-50-13-341Z-repo-check-20faffbf.json",
+        "engineering/evidence/FP-0027/gates/2026-10-09T09-50-13-648Z-controller-test-fc421308.json",
+        "engineering/evidence/FP-0027/raw/tests-before-r1.log",
+        "engineering/evidence/FP-0027/raw/r1-source-archive.log",
+        "engineering/evidence/FP-0027/raw/r1-release-build.log",
+        "engineering/evidence/FP-0027/raw/r1-provenance.log",
+        "engineering/evidence/FP-0027/raw/r1-reproduce-check.log"
       ],
       "review": null,
       "notes": [
         "The frozen contract is engineering/evidence/FP-0027/CONTRACT.md, based on commit 97aa319.",
         "Commit 493edb6 implements it with 167 of 167 controller tests. The worker's real reproduce-check of ba3a352 reports different, which FP-0066 addresses.",
-        "fairpane-review rejected 493edb6 and 2b766fa in reviews/review-1-reject.json because the real release records ran on ba3a352. Contract revision 1, frozen in 3531b1a, is implemented in ea3433a."
+        "fairpane-review rejected 493edb6 and 2b766fa in reviews/review-1-reject.json because the real release records ran on ba3a352. Contract revision 1, frozen in 3531b1a, is implemented in ea3433a.",
+        "The revision 1 release records ran on ea3433a: source-archive, a release build, and provenance pass, and reproduce-check reports different for lib/fairpane.lib, which FP-0066 owns. Awaiting fairpane-review."
       ]
     },
     "FP-0028": {

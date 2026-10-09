@@ -52,3 +52,31 @@ The integration commit is `493edb6`.
 - `gates/2026-10-09T09-33-31-671Z-controller-test-41678707.json`, with 167 of 167 controller tests.
 
 `raw/integration-bun.log` records Bun with 167 of 167 controller tests.
+
+## Revision 1
+
+Review 1 rejected `493edb6` because the real release records ran on `ba3a352`, which predates the implementation.
+The root integrator implemented contract revision 1 in `ea3433a`, as the revision assigns.
+
+- `tools/release.mjs` names the builder `https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#unsigned-local-builder-1`, a URI as SLSA Provenance version 1 requires.
+- The manifest records `git_version`, because the tar depends on the Git implementation as well as the commit.
+- The reproducibility report names its canonical command `build_type_command`.
+- ADR 0009 states that the meanings of build type 1 and unsigned local builder 1 never change, that the toolchain fields come from the lock and the recording host, and what the tar depends on; `tools/README.md` repeats the user-facing parts.
+
+| Log | RESULT |
+| --- | --- |
+| `raw/tests-before-r1.log` | On `3531b1a` with the new expectations, `node tools/release.test.mjs` exits with status 1: cases 1 and 4 fail and the other seven pass. |
+| `raw/tests-after-r1.log` | On the implementation, the same command exits with status 0 with 9 of 9 passing. |
+| `raw/r1-binding.log` | `HEAD` `ea3433a`, an empty status including ignored files for every source root, Git 2.54.0.windows.1, Node v26.7.0, and Zig 0.18.0-dev.120+9fe22a29b. Later records show `HEAD` `60c0c90`, an empty diff of `tools/release.mjs`, `tools/attest.mjs`, `tools/lib.mjs`, and `tools/fairpane.mjs` from `ea3433a`, and an empty status after the last run. |
+| `gates/2026-10-09T09-50-13-341Z-repo-check-20faffbf.json` | `pass` on `ea3433a`. |
+| `gates/2026-10-09T09-50-13-648Z-controller-test-fc421308.json` | `pass` on `ea3433a`. |
+| `raw/r1-source-archive.log` | `source-archive ea3433a` into a directory outside the repository exits with status 0: tree `25e56b0`, 917 files, a 10373120-byte tar with SHA-256 `d5514c5e05f37527b8438459f0bc3e48d8e12cae5bb6e2e9d39888d64a5c4635`, and a manifest with SHA-256 `9fa150fb7b35f428f83cfbcd35c67bac2aeb0bdc2413962d3cf7005a062f0475`. GNU `sha256sum` agrees with both. |
+| `raw/fairpane-ea3433abcc09ef22dec71b4e03e697e61f21cb16.manifest.json` | A copy of that manifest, with the same SHA-256. Its `git_version` is `git version 2.54.0.windows.1`. The tar is not stored, as revision 1 states. |
+| `raw/r1-release-build.log` | A non-recursive creation of the new directory `out/fp0027-r1-release`, the tar's SHA-256 before extraction, the extraction, and `zig build -Doptimize=ReleaseSafe` with fresh caches inside that directory, each with exit status 0. |
+| `raw/r1-provenance.log` | `provenance ea3433a` for `include/fairpane.h` and `lib/fairpane.lib`, the only installed files, exits with status 0. The subjects' SHA-256 values, `845b602f…` and `45afa4da…`, equal `sha256sum` of the installed files. |
+| `raw/provenance-ea3433abcc09ef22dec71b4e03e697e61f21cb16.json` | The statement from that log, reformatted with two-space indentation and not signed. |
+| `raw/r1-reproduce-check.log` | `reproduce-check ea3433a` exits with status 1 with result `different`: only `lib/fairpane.lib` differs between the two work trees, and both trees were removed. Task `FP-0066` owns path-independent builds. |
+
+The first attempt ran every step in one shell job, which stopped responding after the release build while it listed the installed files.
+The integrator stopped that job and ran `provenance`, `reproduce-check`, and the final status as separate commands; the logs contain only completed commands.
+Commits after `ea3433a` changed no release tool, and every release command takes the commit ID as an argument.

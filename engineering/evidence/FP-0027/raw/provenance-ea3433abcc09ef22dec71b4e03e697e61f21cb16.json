@@ -1,0 +1,63 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "fairpane.h",
+      "digest": {
+        "sha256": "845b602f10c46a62bc29897a649200bcef8e57a477cff23bb91bc170d216b410"
+      }
+    },
+    {
+      "name": "fairpane.lib",
+      "digest": {
+        "sha256": "45afa4da214334456543e0dde0de5fda6678b26d51fd2145b47dbcb0e5dd1635"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#build-type-1",
+      "externalParameters": {
+        "source": {
+          "commit": "ea3433abcc09ef22dec71b4e03e697e61f21cb16",
+          "tree": "25e56b07e54eab101e136f1dbbcf08b7a4f0170f"
+        },
+        "command": [
+          "zig",
+          "build",
+          "-Doptimize=ReleaseSafe",
+          "--prefix",
+          "zig-out"
+        ],
+        "toolchain": {
+          "zig_version": "0.18.0-dev.120+9fe22a29b",
+          "platform": "x86_64-windows",
+          "archive_sha256": "a48ff20a7357640cf67ad7be819d3f988e9a5085362fe67dc9b94e02a42571ae"
+        }
+      },
+      "internalParameters": {},
+      "resolvedDependencies": [
+        {
+          "name": "fairpane-ea3433abcc09ef22dec71b4e03e697e61f21cb16",
+          "digest": {
+            "gitCommit": "ea3433abcc09ef22dec71b4e03e697e61f21cb16",
+            "gitTree": "25e56b07e54eab101e136f1dbbcf08b7a4f0170f"
+          }
+        },
+        {
+          "name": "zig-x86_64-windows-0.18.0-dev.120+9fe22a29b",
+          "uri": "https://ziglang.org/builds/zig-x86_64-windows-0.18.0-dev.120+9fe22a29b.zip",
+          "digest": {
+            "sha256": "a48ff20a7357640cf67ad7be819d3f988e9a5085362fe67dc9b94e02a42571ae"
+          }
+        }
+      ]
+    },
+    "runDetails": {
+      "builder": {
+        "id": "https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#unsigned-local-builder-1"
+      }
+    }
+  }
+}
