@@ -1,0 +1,335 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0014-cache-before-r1"]
+test
++- run test 226 pass, 6 fail (232 total)
+error: 'css.tests.test.FP-0014 case 22: invalid and unsupported selectors report the first problem in token order' failed:
+       expected .unsupported_selector, found .invalid_selector
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:727:46: 0x7ff7c8e82c15 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:728:70: 0x7ff7c8e7db0d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7fe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:728:70: 0x7ff7c8e7db0d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7fe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7fe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:727:46: 0x7ff7c8e7dab5 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff7c8e7db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff7c905c31c in expectEqualInner__func_4952 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff7c905c4d5 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:487:31: 0x7ff7c905c50d in expectSelectorFailure (test_zcu.obj)
+               .failure => |failure| try testing.expectEqual(kind, failure.kind),
+                                     ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:499:32: 0x7ff7c90a01ca in test.FP-0014 case 22: invalid and unsupported selectors report the first problem in token order (test_zcu.obj)
+           for (unsupported) |source| try expectSelectorFailure(source, .unsupported_selector);
+                                      ^
+error: 'css.tests.test.FP-0014 case 49: a text node's style comes from defaulting, not from the parent's whole style' failed:
+       case 49: part "display is inline flow" fails with TestUnexpectedResult
+       expected 0, found 5
+       case 49: part "every margin is 0px" fails with TestExpectedEqual
+       case 49: part "color is 1 2 3" passes
+       case 49: part "font-size is 20" passes
+       case 49: part "--k is [ident(v)]" passes
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1750:9: 0x7ff7c8feac3e in finish (test_zcu.obj)
+               return error.TestCasePartsFailed;
+               ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1784:5: 0x7ff7c9067291 in test.FP-0014 case 49: a text node's style comes from defaulting, not from the parent's whole style (test_zcu.obj)
+           try parts.finish();
+           ^
+error: 'css.tests.test.FP-0014 case 50: nothing inside an ignored at-rule's block reports a diagnostic' failed:
+       expected 1, found 4
+       case 50: part "one ignored_at_rule diagnostic for media" fails with TestExpectedEqual
+       case 50: part "only the rule for d is kept" passes
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1750:9: 0x7ff7c8feac3e in finish (test_zcu.obj)
+               return error.TestCasePartsFailed;
+               ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1798:5: 0x7ff7c90652e3 in test.FP-0014 case 50: nothing inside an ignored at-rule's block reports a diagnostic (test_zcu.obj)
+           try parts.finish();
+           ^
+error: 'css.tests.test.FP-0014 case 51: the other arbitrary substitution functions make a custom property unsupported' failed:
+       case 51: part "--a is guaranteed-invalid with unsupported_value" fails with TestExpectedGuaranteedInvalid
+       case 51: part "--b is guaranteed-invalid with unsupported_value" fails with TestExpectedGuaranteedInvalid
+       case 51: part "--c is guaranteed-invalid with unsupported_value" fails with TestExpectedGuaranteedInvalid
+       case 51: part "--d is guaranteed-invalid with unsupported_value" fails with TestExpectedGuaranteedInvalid
+       case 51: part "--e is guaranteed-invalid with unsupported_value" fails with TestExpectedGuaranteedInvalid
+       case 51: part "--f is guaranteed-invalid with unsupported_value" fails with TestExpectedGuaranteedInvalid
+       case 51: part "--g is [function(foo)[number(1,integer,none)]]" passes
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1750:9: 0x7ff7c8feac3e in finish (test_zcu.obj)
+               return error.TestCasePartsFailed;
+               ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1829:5: 0x7ff7c905da59 in test.FP-0014 case 51: the other arbitrary substitution functions make a custom property unsupported (test_zcu.obj)
+           try parts.finish();
+           ^
+error: 'css.tests.test.FP-0014 case 52: grid-lanes, the math inner type, and the column combinator are unsupported standard forms' failed:
+       slices differ. first difference occurs at index 0 (0x0)
+       
+       ============ expected this output: =============  len: 1 (0x1)
+       
+       [0]: .unsupported_value
+       
+       ============= instead found this: ==============  len: 1 (0x1)
+       
+       [0]: .invalid_value
+       
+       ================================================
+       
+       case 52: part "display: grid-lanes" fails with TestExpectedEqual
+       slices differ. first difference occurs at index 0 (0x0)
+       
+       ============ expected this output: =============  len: 1 (0x1)
+       
+       [0]: .unsupported_value
+       
+       ============= instead found this: ==============  len: 1 (0x1)
+       
+       [0]: .invalid_value
+       
+       ================================================
+       
+       case 52: part "display: inline-grid-lanes" fails with TestExpectedEqual
+       slices differ. first difference occurs at index 0 (0x0)
+       
+       ============ expected this output: =============  len: 1 (0x1)
+       
+       [0]: .unsupported_value
+       
+       ============= instead found this: ==============  len: 1 (0x1)
+       
+       [0]: .invalid_value
+       
+       ================================================
+       
+       case 52: part "display: block grid-lanes" fails with TestExpectedEqual
+       slices differ. first difference occurs at index 0 (0x0)
+       
+       ============ expected this output: =============  len: 1 (0x1)
+       
+       [0]: .unsupported_value
+       
+       ============= instead found this: ==============  len: 1 (0x1)
+       
+       [0]: .invalid_value
+       
+       ================================================
+       
+       case 52: part "display: math" fails with TestExpectedEqual
+       slices differ. first difference occurs at index 0 (0x0)
+       
+       ============ expected this output: =============  len: 1 (0x1)
+       
+       [0]: .unsupported_value
+       
+       ============= instead found this: ==============  len: 1 (0x1)
+       
+       [0]: .invalid_value
+       
+       ================================================
+       
+       case 52: part "display: block math" fails with TestExpectedEqual
+       slices differ. first difference occurs at index 0 (0x0)
+       
+       ============ expected this output: =============  len: 1 (0x1)
+       
+       [0]: .unsupported_value
+       
+       ============= instead found this: ==============  len: 1 (0x1)
+       
+       [0]: .invalid_value
+       
+       ================================================
+       
+       case 52: part "display: inline math" fails with TestExpectedEqual
+       expected .unsupported_selector, found .invalid_selector
+       case 52: part "a||b" fails with TestExpectedEqual
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1750:9: 0x7ff7c8feac3e in finish (test_zcu.obj)
+               return error.TestCasePartsFailed;
+               ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1843:5: 0x7ff7c905a08b in test.FP-0014 case 52: grid-lanes, the math inner type, and the column combinator are unsupported standard forms (test_zcu.obj)
+           try parts.finish();
+           ^
+error: 'css.tests.test.FP-0014 case 53: selector matching exits early, and class tokens deduplicate in n log n time' failed:
+       case 53: 16244657 compound-match attempts after the element at depth 140 exceed the bound 16008000
+       case 53: part "a 2000-deep chain stays within 4 * 2000 * 2001 compound-match attempts" fails with TestBoundExceeded
+       case 53: matching makes 200010000 class-token comparisons, which exceed the bound 640000
+       case 53: part "20000 class tokens stay within 32 * 20000 class-token comparisons" fails with TestBoundExceeded
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1750:9: 0x7ff7c8feac3e in finish (test_zcu.obj)
+               return error.TestCasePartsFailed;
+               ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1928:5: 0x7ff7c8feadb9 in test.FP-0014 case 53: selector matching exits early, and class tokens deduplicate in n log n time (test_zcu.obj)
+           try parts.finish();
+           ^
+failed command: cd . && ".\\out\\fp0014-cache-before-r1\\o\\c6bc1acebdc4aac27813a381148414ad\\test.exe" "--cache-dir=.\\out\\fp0014-cache-before-r1" --seed=0x370d096 --listen=-
+
+Build Summary: 63/65 steps succeeded (1 failed); 271/277 tests passed (6 failed)
+test transitive failure
++- run test 226 pass, 6 fail (232 total)
+|  +- compile test debug native success 7s MaxRSS:847M
++- run test 45 pass (45 total) 293ms MaxRSS:16M
+|  +- compile test debug native success 3s MaxRSS:414M
++- FP-0007 case 13: case 2 passes with exit status 0 success 47ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:357M
++- FP-0007 case 13: case 3 fails with exit status 1 success 49ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 50ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 34ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 77ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 9ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 12ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:342M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 52ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 32ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 51ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 32ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 41ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 54ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 42ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 53ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 41ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 54ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 43ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 53ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 8ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 44ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 44ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 53ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 40ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 43ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 445ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 418ms
++- FP-0011 case 4: allocation_invokes_call.zig success 420ms
++- FP-0011 case 4: leaf_allocates.zig success 382ms
++- FP-0011 case 4: mutation_throws.zig success 403ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 389ms
++- FP-0011 case 4: leaf_positive.zig success 417ms
++- FP-0011 case 5: catalog_callback_alone.zig success 368ms
++- FP-0011 case 5: catalog_exception_alone.zig success 382ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 385ms
++- FP-0011 case 5: kernel_wider_context.zig success 410ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 371ms
++- FP-0011 case 8: layout_undescribed_field.zig success 361ms
++- FP-0011 case 8: layout_plain_reference.zig success 400ms
++- FP-0011 case 8: layout_missing_field.zig success 368ms
++- FP-0011 case 20: abi_reference_value.zig success 410ms
++- FP-0011 case 20: abi_nan_box_value.zig success 355ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 399ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 414ms
++- FP-0011 case 35: leaf_widens_context.zig success 371ms
++- FP-0011 case 36: binding_missing_kernel.zig success 373ms
++- FP-0011 case 36: binding_stray_kernel.zig success 414ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x370d096 test --summary all --cache-dir out/fp0014-cache-before-r1
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0014-cache-before-r1"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:18:41.298Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":192496,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

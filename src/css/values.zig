@@ -416,13 +416,17 @@ const Items = struct {
     }
 };
 
+/// Display keywords whose computed value needs flex, grid, grid lanes, ruby, or math layout.
+/// `grid-lanes` and `inline-grid-lanes` are defined by `css-grid-3/Overview.bs` line 348 at the pinned commit,
+/// and the `math` inner type by MathML Core section 4.1.
 const unsupported_display_keywords = [_][]const u8{
-    "flex",      "grid",      "ruby",                "inline-flex",         "inline-grid",
-    "ruby-base", "ruby-text", "ruby-base-container", "ruby-text-container",
+    "flex",              "grid",      "ruby",                "inline-flex",         "inline-grid",
+    "ruby-base",         "ruby-text", "ruby-base-container", "ruby-text-container", "grid-lanes",
+    "inline-grid-lanes", "math",
 };
 
 fn parseDisplay(list: []const ComponentValue) Outcome {
-    // A value that contains a keyword whose computed value needs flex, grid, or ruby containment is unsupported.
+    // A value that contains a keyword whose computed value needs flex, grid, grid lanes, ruby, or math layout is unsupported.
     var index: usize = 0;
     while (index < list.len) : (index = nextItem(list, index)) {
         if (!list[index].isToken(.ident)) continue;

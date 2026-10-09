@@ -5,14 +5,15 @@
 //! that includes `@charset`, which section 8.3 defines as no rule.
 //! A qualified rule inside a style rule's block is dropped with `nested_rule_ignored`,
 //! and a nested declarations rule with `nested_declarations_ignored`, because CSS Nesting is outside this task.
-//! Rules and declarations inside an at-rule's block are dropped with the at-rule, without their own diagnostics.
+//! An ignored at-rule reports one diagnostic, and nothing inside its block, at any depth, reports one,
+//! because the validator does not check the block of an at-rule that it drops.
 
 const std = @import("std");
 const parser = @import("parser.zig");
 const registry = @import("registry.zig");
 const values = @import("values.zig");
 const selectors = @import("selectors.zig");
-const cascade = @import("cascade.zig");
+const applicable = @import("applicable.zig");
 const web_string = @import("../web_string.zig");
 const Allocator = std.mem.Allocator;
 const View = web_string.View;
@@ -21,7 +22,7 @@ const ComponentValue = parser.ComponentValue;
 const Context = parser.Context;
 
 /// The cascade origin of a stylesheet (Cascade 5 section 6.2).
-pub const Origin = cascade.Origin;
+pub const Origin = applicable.Origin;
 
 pub const DiagnosticKind = enum {
     invalid_selector,
@@ -122,6 +123,7 @@ const SheetValidator = struct {
         return .{ .ptr = v, .vtable = &.{
             .qualifiedPrelude = qualifiedPrelude,
             .qualifiedRule = qualifiedRule,
+            .atRuleBlock = atRuleBlock,
             .atRule = atRule,
             .declaration = declaration,
         } };
@@ -172,8 +174,14 @@ const SheetValidator = struct {
                 try v.diagnose(.{ .kind = .nested_rule_ignored, .range = rule.range });
                 return false;
             },
-            .at_rule_block => return false,
+            // `atRuleBlock` silences the block of every at-rule.
+            .at_rule_block => unreachable,
         }
+    }
+
+    /// Every at-rule is dropped, so the contents of its block are not checked.
+    fn atRuleBlock(_: ?*anyopaque, _: *const parser.AtRule, _: Context) Allocator.Error!bool {
+        return false;
     }
 
     fn atRule(ptr: ?*anyopaque, rule: *const parser.AtRule, _: Context) Allocator.Error!bool {

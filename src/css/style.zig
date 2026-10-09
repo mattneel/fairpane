@@ -50,12 +50,15 @@ pub const StyleMap = struct {
         return &map.styles[index];
     }
 
-    /// A text node's style: defaulting from its parent element (Cascade 1.1).
-    /// A text node outside the document's tree returns `error.NotStyled`.
-    pub fn textStyle(map: *const StyleMap, text: NodeHandle) StyleError!*const ComputedStyle {
+    /// A text node's style: the style that defaulting gives it (Cascade 5 section 1.1). Inherited properties take
+    /// the parent element's computed values, and every other property takes its initial value, with no root
+    /// blockification. A text node outside the document's tree returns `error.NotStyled`.
+    /// The result borrows the map's custom values.
+    pub fn textStyle(map: *const StyleMap, text: NodeHandle) StyleError!ComputedStyle {
         if (try map.store.nodeKind(text) != .text) return error.NotStyled;
         const parent = try map.store.parentNode(text) orelse return error.NotStyled;
-        return map.get(parent) catch error.NotStyled;
+        const parent_style = map.get(parent) catch return error.NotStyled;
+        return ComputedStyle.defaulted(parent_style);
     }
 };
 

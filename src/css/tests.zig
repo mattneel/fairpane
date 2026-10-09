@@ -12,6 +12,7 @@ const selectors = @import("selectors.zig");
 const registry = @import("registry.zig");
 const values = @import("values.zig");
 const cascade = @import("cascade.zig");
+const applicable = @import("applicable.zig");
 const compute = @import("compute.zig");
 const style = @import("style.zig");
 const testing = std.testing;
@@ -439,7 +440,7 @@ fn parseSelectors(source: View) !SelectorParse {
     return .{ .arena = arena, .result = result };
 }
 
-fn expectSpecificities(source: View, expected: []const selectors.Specificity) !void {
+fn expectSpecificities(source: View, expected: []const applicable.Specificity) !void {
     var parsed = try parseSelectors(source);
     defer parsed.deinit();
     const list = switch (parsed.result) {
@@ -451,7 +452,7 @@ fn expectSpecificities(source: View, expected: []const selectors.Specificity) !v
 }
 
 test "FP-0014 case 21: selectors parse with their specificity, which saturates at 65535" {
-    const cases = [_]struct { sources: []const View, specificity: selectors.Specificity }{
+    const cases = [_]struct { sources: []const View, specificity: applicable.Specificity }{
         .{ .sources = &.{ u("*"), u("*|*"), u("|*") }, .specificity = .{} },
         .{ .sources = &.{ u("div"), u("*|div"), u("|div") }, .specificity = .{ .c = 1 } },
         .{ .sources = &.{
@@ -490,12 +491,12 @@ fn expectSelectorFailure(source: View, kind: selectors.FailureKind) !void {
 
 test "FP-0014 case 22: invalid and unsupported selectors report the first problem in token order" {
     const invalid = [_]View{
-        u(""),    u("a,"),  u(",a"),   u("a,,b"), u("> a"),    u("a >"),       u("a > > b"), u("a ."),
-        u(". a"), u("#1a"), u("[]"),   u("[x=]"), u("[x==y]"), u("[x = y z]"), u("[x=y j]"), u("[x=1]"),
-        u("[1]"), u("a:"),  u("a||b"), u("a!b"),  u("a ~"),    u("*|"),        u("|"),
+        u(""),    u("a,"),  u(",a"),  u("a,,b"), u("> a"),    u("a >"),       u("a > > b"), u("a ."),
+        u(". a"), u("#1a"), u("[]"),  u("[x=]"), u("[x==y]"), u("[x = y z]"), u("[x=y j]"), u("[x=1]"),
+        u("[1]"), u("a:"),  u("a!b"), u("a ~"),  u("*|"),     u("|"),
     };
     for (invalid) |source| try expectSelectorFailure(source, .invalid_selector);
-    const unsupported = [_]View{ u("a:hover"), u(":root"), u("a::before"), u("a:not(b)"), u("a|b"), u("[ns|x]"), u("&"), u("& a") };
+    const unsupported = [_]View{ u("a:hover"), u(":root"), u("a::before"), u("a:not(b)"), u("a|b"), u("[ns|x]"), u("&"), u("& a"), u("a||b") };
     for (unsupported) |source| try expectSelectorFailure(source, .unsupported_selector);
     try expectSelectorFailure(u("a:hover, ,b"), .unsupported_selector);
 }
@@ -1069,7 +1070,8 @@ test "FP-0014 case 34: inheritance reaches descendants and text nodes, and uncon
     try s.store.appendChild(other_document, other_root);
     _ = try s.sheet("r { color: rgb(1 2 3); font-size: 20px; margin-top: 5px; display: block; --k: v }", .author);
     const map = try s.resolve();
-    for ([_]*const ComputedStyle{ try map.get(div), try map.get(p), try map.textStyle(text) }) |computed| {
+    const text_style = try map.textStyle(text);
+    for ([_]*const ComputedStyle{ try map.get(div), try map.get(p), &text_style }) |computed| {
         try expectRgba(computed.color, 1, 2, 3, 1);
         try testing.expectEqual(20, computed.font_size);
         try testing.expectEqual(values.LengthPercentageAuto{ .length = 0 }, computed.margin_top);
@@ -1574,13 +1576,13 @@ fn expectNoParameterOfTypes(comptime function: anytype, comptime forbidden: []co
     }
 }
 
-fn levelDeclaration(level: u8, value: *const values.DeclaredValue) cascade.ApplicableDeclaration {
-    const origin: cascade.Origin = switch (level) {
+fn levelDeclaration(level: u8, value: *const values.DeclaredValue) applicable.ApplicableDeclaration {
+    const origin: applicable.Origin = switch (level) {
         1, 6 => .user_agent,
         2, 5 => .user,
         else => .author,
     };
-    const specificity: selectors.Specificity = if (level <= 3) .{ .a = 1 } else .{ .c = 1 };
+    const specificity: applicable.Specificity = if (level <= 3) .{ .a = 1 } else .{ .c = 1 };
     return .{
         .property = .{ .standard = .color },
         .value = value,
@@ -1601,16 +1603,16 @@ test "FP-0014 case 47: the cascade and computed values take no DOM or selector i
     comptime expectNoParameterOfTypes(cascade.cascade, &dom_and_selector_types);
     comptime expectNoParameterOfTypes(compute.computeStyle, &dom_and_selector_types);
     comptime {
-        for (@typeInfo(cascade.ApplicableDeclaration).@"struct".field_types) |field_type| {
+        for (@typeInfo(applicable.ApplicableDeclaration).@"struct".field_types) |field_type| {
             if (field_type == f64) @compileError("ApplicableDeclaration holds a computed font size");
         }
     }
-    comptime expectNoFieldOfTypes(cascade.ApplicableDeclaration, &.{
+    comptime expectNoFieldOfTypes(applicable.ApplicableDeclaration, &.{
         values.Display, values.Color, values.LengthPercentageAuto, values.CustomValue, ComputedStyle,
     });
 
     var declared: [6]values.DeclaredValue = undefined;
-    var declarations: [6]cascade.ApplicableDeclaration = undefined;
+    var declarations: [6]applicable.ApplicableDeclaration = undefined;
     for (&declared, &declarations, 1..) |*value, *declaration, level| {
         value.* = .{ .color = .{ .srgb = .{ .red = @floatFromInt(level), .green = 0, .blue = 0, .alpha = 1 } } };
         declaration.* = levelDeclaration(@intCast(level), value);
@@ -1624,7 +1626,7 @@ test "FP-0014 case 47: the cascade and computed values take no DOM or selector i
     parent.color = .{ .srgb = .{ .red = 9, .green = 9, .blue = 9, .alpha = 1 } };
     parent.margin_top = .{ .length = 7 };
     const font: values.DeclaredValue = .{ .font_size = .{ .length = .{ .value = 30, .unit = .px } } };
-    const single = [_]cascade.ApplicableDeclaration{.{
+    const single = [_]applicable.ApplicableDeclaration{.{
         .property = .{ .standard = .font_size },
         .value = &font,
         .origin = .author,
@@ -1724,12 +1726,215 @@ test "FP-0014 case 48: every induced allocation failure returns OutOfMemory, lea
     try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
 }
 
-test "FP-0014: the system color palette is opaque and each legible pair has a contrast ratio of at least 4.5" {
+// Revision 1.
+
+/// The parts of one revision 1 case. Every part runs, and a failing case names each part that fails and each that passes,
+/// so that a run before the fix shows which parts already pass.
+const Parts = struct {
+    case: []const u8,
+    passed: [16][]const u8 = undefined,
+    passed_count: usize = 0,
+    failed: usize = 0,
+
+    fn check(p: *Parts, part: []const u8, result: anyerror!void) void {
+        if (result) |_| {
+            p.passed[p.passed_count] = part;
+            p.passed_count += 1;
+        } else |err| {
+            p.failed += 1;
+            std.debug.print("{s}: part \"{s}\" fails with {s}\n", .{ p.case, part, @errorName(err) });
+        }
+    }
+
+    fn finish(p: *const Parts) !void {
+        if (p.failed == 0) return;
+        for (p.passed[0..p.passed_count]) |part| std.debug.print("{s}: part \"{s}\" passes\n", .{ p.case, part });
+        return error.TestCasePartsFailed;
+    }
+};
+
+fn expectDisplay(computed: *const ComputedStyle, expected: values.Display) !void {
+    try testing.expect(std.meta.eql(expected, computed.display));
+}
+
+fn expectZeroMargins(computed: *const ComputedStyle) !void {
+    inline for (.{ "margin_top", "margin_right", "margin_bottom", "margin_left" }) |field| {
+        try testing.expectEqual(values.LengthPercentageAuto{ .length = 0 }, @field(computed, field));
+    }
+}
+
+fn expectFontSize(computed: *const ComputedStyle, expected: f64) !void {
+    try testing.expectEqual(expected, computed.font_size);
+}
+
+test "FP-0014 case 49: a text node's style comes from defaulting, not from the parent's whole style" {
+    var s: Scenario = undefined;
+    try s.init();
+    defer s.deinit();
+    const root = try s.add(null, "r");
+    const text = try s.store.createText(s.document, u("text"));
+    try s.store.appendChild(root, text);
+    _ = try s.sheet("r { display: block; margin-top: 5px; margin-left: 2px; color: rgb(1 2 3); font-size: 20px; --k: v }", .author);
+    const map = try s.resolve();
+    const computed: ComputedStyle = try map.textStyle(text);
+    var parts: Parts = .{ .case = "case 49" };
+    parts.check("display is inline flow", expectDisplay(&computed, pair(.@"inline", .flow, false)));
+    parts.check("every margin is 0px", expectZeroMargins(&computed));
+    parts.check("color is 1 2 3", expectRgba(computed.color, 1, 2, 3, 1));
+    parts.check("font-size is 20", expectFontSize(&computed, 20));
+    parts.check("--k is [ident(v)]", expectCustom(&computed, "--k", "[ident(v)]"));
+    try parts.finish();
+}
+
+fn expectOnlyRule(sheet: *const Stylesheet, comptime name: []const u8) !void {
+    try testing.expectEqual(1, sheet.rules.len);
+    try expectSelectorText(sheet, 0, name);
+}
+
+test "FP-0014 case 50: nothing inside an ignored at-rule's block reports a diagnostic" {
+    var sheet = try parseSheet("@media x { b { colour: red } a { b {} } @media y { c { color: blue } } } d { color: red }", .author);
+    defer sheet.deinit();
+    var parts: Parts = .{ .case = "case 50" };
+    parts.check("only the rule for d is kept", expectOnlyRule(&sheet, "d"));
+    parts.check("one ignored_at_rule diagnostic for media", expectDiagnostics(&sheet, &.{.{ .kind = .ignored_at_rule, .name = "media" }}));
+    try parts.finish();
+}
+
+/// Checks that the custom property `name` has exactly the diagnostics `expected` among the style map's diagnostics.
+fn expectCustomReasons(map: *const style.StyleMap, comptime name: []const u8, expected: []const InvalidReason) !void {
+    var reasons: [4]InvalidReason = undefined;
+    var count: usize = 0;
+    for (map.diagnostics) |diagnostic| {
+        if (diagnostic.property != .custom or !std.mem.eql(u16, diagnostic.property.custom, u(name).units)) continue;
+        if (count == reasons.len) return error.TestTooManyDiagnostics;
+        reasons[count] = diagnostic.reason;
+        count += 1;
+    }
+    try testing.expectEqualSlices(InvalidReason, expected, reasons[0..count]);
+}
+
+fn expectUnsupportedCustom(map: *const style.StyleMap, computed: *const ComputedStyle, comptime name: []const u8) !void {
+    try expectCustom(computed, name, null);
+    try expectCustomReasons(map, name, &.{.unsupported_value});
+}
+
+test "FP-0014 case 51: the other arbitrary substitution functions make a custom property unsupported" {
+    var s: Scenario = undefined;
+    const computed = try rootStyle(&s, "r { --a: attr(data-x); --b: if(else: 2); --c: inherit(--k); --d: ident(a); --e: random-item(--x, a, b); --f: if(...var(--args); else: x); --g: foo(1); --args: 1 }");
+    defer s.deinit();
+    const map = &s.map.?;
+    var parts: Parts = .{ .case = "case 51" };
+    inline for (.{ "--a", "--b", "--c", "--d", "--e", "--f" }) |name| {
+        parts.check(name ++ " is guaranteed-invalid with unsupported_value", expectUnsupportedCustom(map, computed, name));
+    }
+    parts.check("--g is [function(foo)[number(1,integer,none)]]", expectCustom(computed, "--g", "[function(foo)[number(1,integer,none)]]"));
+    try parts.finish();
+}
+
+fn expectUnsupportedDisplay(value: []const u8) !void {
+    const observed = try observeProperty("p", "display", value, 1);
+    try observed.expectSheetDiagnostics(&.{.unsupported_value});
+}
+
+test "FP-0014 case 52: grid-lanes, the math inner type, and the column combinator are unsupported standard forms" {
+    var parts: Parts = .{ .case = "case 52" };
+    inline for (.{ "grid-lanes", "inline-grid-lanes", "block grid-lanes", "math", "block math", "inline math" }) |value| {
+        parts.check("display: " ++ value, expectUnsupportedDisplay(value));
+    }
+    parts.check("a||b", expectSelectorFailure(u("a||b"), .unsupported_selector));
+    try parts.finish();
+}
+
+/// Case 53's chain: `root` and `depth` nested `e` elements under the sheet `x e e e { margin-top: 3px } e { margin-top: 1px }`.
+fn expectChainWithinBound(depth: usize) !void {
+    const bound = 4 * depth * (depth + 1);
+    var s: Scenario = undefined;
+    try s.init();
+    defer s.deinit();
+    var elements: std.ArrayList(NodeHandle) = .empty;
+    defer elements.deinit(testing.allocator);
+    try elements.append(testing.allocator, try s.add(null, "root"));
+    for (0..depth) |_| try elements.append(testing.allocator, try s.add(elements.getLast(), "e"));
+    const sheets = [_]*const Stylesheet{try s.sheet("x e e e { margin-top: 3px } e { margin-top: 1px }", .author)};
+    // First match each element in tree order, as `resolve` does, and stop as soon as the count exceeds the bound,
+    // so that a matcher without the early exit fails quickly instead of running for hours.
+    {
+        var matcher: selectors.Matcher = .init(testing.allocator, &s.store);
+        defer matcher.deinit();
+        selectors.test_counters.compound_match_attempts = 0;
+        for (elements.items, 0..) |element, element_depth| {
+            testing.allocator.free(try selectors.matchRulesWith(testing.allocator, &matcher, element, &sheets));
+            const attempts = selectors.test_counters.compound_match_attempts;
+            if (attempts > bound) {
+                std.debug.print("case 53: {d} compound-match attempts after the element at depth {d} exceed the bound {d}\n", .{ attempts, element_depth, bound });
+                return error.TestBoundExceeded;
+            }
+        }
+    }
+    selectors.test_counters.compound_match_attempts = 0;
+    _ = try s.resolve();
+    const attempts = selectors.test_counters.compound_match_attempts;
+    if (attempts > bound) {
+        std.debug.print("case 53: resolution makes {d} compound-match attempts, which exceed the bound {d}\n", .{ attempts, bound });
+        return error.TestBoundExceeded;
+    }
+    for (elements.items[1..]) |element| {
+        try testing.expectEqual(values.LengthPercentageAuto{ .length = 1 }, (try s.get(element)).margin_top);
+    }
+}
+
+/// The number of the element's classes, from the ordered set parser.
+fn classCount(store: *dom.Store, element: NodeHandle) !usize {
+    const classes = try store.classes(testing.allocator, element);
+    defer testing.allocator.free(classes);
+    return classes.len;
+}
+
+/// Case 53's element with `tokens` distinct class tokens, `c0` to `c{tokens - 1}`.
+fn expectClassesWithinBound(tokens: usize) !void {
+    const bound = 32 * tokens;
+    var s: Scenario = undefined;
+    try s.init();
+    defer s.deinit();
+    const element = try s.add(null, "r");
+    var value: std.ArrayList(u8) = .empty;
+    defer value.deinit(testing.allocator);
+    for (0..tokens) |index| try value.print(testing.allocator, "c{d} ", .{index});
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+    try s.store.setAttribute(element, null, u("class"), try runtimeView(arena.allocator(), value.items));
+    const selector = try std.fmt.allocPrint(arena.allocator(), ".c{d}", .{tokens - 1});
+    var parsed = try parseSelectors(try runtimeView(arena.allocator(), selector));
+    defer parsed.deinit();
+    var matcher: selectors.Matcher = .init(testing.allocator, &s.store);
+    defer matcher.deinit();
+    dom.test_counters.class_token_comparisons = 0;
+    const matched = try matcher.matchList(element, &parsed.result.list) != null;
+    if (dom.test_counters.class_token_comparisons > bound) {
+        std.debug.print("case 53: matching makes {d} class-token comparisons, which exceed the bound {d}\n", .{ dom.test_counters.class_token_comparisons, bound });
+        return error.TestBoundExceeded;
+    }
+    try testing.expect(matched);
+    try testing.expectEqual(tokens, try classCount(&s.store, element));
+    if (dom.test_counters.class_token_comparisons > bound) {
+        std.debug.print("case 53: matching and the ordered set make {d} class-token comparisons, which exceed the bound {d}\n", .{ dom.test_counters.class_token_comparisons, bound });
+        return error.TestBoundExceeded;
+    }
+}
+
+test "FP-0014 case 53: selector matching exits early, and class tokens deduplicate in n log n time" {
+    var parts: Parts = .{ .case = "case 53" };
+    parts.check("a 2000-deep chain stays within 4 * 2000 * 2001 compound-match attempts", expectChainWithinBound(2000));
+    parts.check("20000 class tokens stay within 32 * 20000 class-token comparisons", expectClassesWithinBound(20000));
+    try parts.finish();
+}
+
+test "FP-0014 case 54: the system color palette is opaque and each legible pair has a contrast ratio of at least 4.5" {
     const pairs = [_][2]values.SystemColor{
         .{ .canvas, .canvas_text },             .{ .canvas, .link_text },         .{ .canvas, .visited_text },
         .{ .canvas, .active_text },             .{ .button_face, .button_text },  .{ .field, .field_text },
         .{ .mark, .mark_text },                 .{ .highlight, .highlight_text }, .{ .selected_item, .selected_item_text },
-        .{ .accent_color, .accent_color_text },
+        .{ .accent_color, .accent_color_text }, .{ .canvas, .button_border },
     };
     for (pairs) |entry| {
         const background = luminance(entry[0].srgb());

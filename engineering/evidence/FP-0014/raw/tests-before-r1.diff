@@ -1,0 +1,311 @@
+diff --git a/src/css/selectors.zig b/src/css/selectors.zig
+index 1ecf079..d640569 100644
+--- a/src/css/selectors.zig
++++ b/src/css/selectors.zig
+@@ -12,6 +12,7 @@
+ //! Matching uses an explicit backtracking stack, so no function recurses.
+ 
+ const std = @import("std");
++const builtin = @import("builtin");
+ const dom = @import("../dom.zig");
+ const parser = @import("parser.zig");
+ const tokenizer = @import("tokenizer.zig");
+@@ -24,6 +25,12 @@ const Range = parser.Range;
+ const NodeHandle = dom.NodeHandle;
+ const View = web_string.View;
+ 
++/// Test-only instrumentation, compiled only in test builds.
++/// `compound_match_attempts` counts each attempt to match a compound against an element, which case 53 of FP-0014 bounds.
++pub const test_counters = if (builtin.is_test) struct {
++    pub var compound_match_attempts: usize = 0;
++} else struct {};
++
+ /// Specificity (section 15). Each component saturates at 65535, as section 15 permits.
+ pub const Specificity = struct {
+     /// ID selectors.
+@@ -508,6 +515,7 @@ pub const Matcher = struct {
+     }
+ 
+     fn matchesCompound(m: *Matcher, element: NodeHandle, compound: *const Compound) MatchError!bool {
++        if (builtin.is_test) test_counters.compound_match_attempts += 1;
+         const name = try m.store.elementName(element) orelse return error.NotAnElement;
+         if (compound.type_selector) |selector| {
+             if (selector.namespace == .none and name.namespace != null) return false;
+@@ -521,6 +529,7 @@ pub const Matcher = struct {
+                 .class => |class| blk: {
+                     var classes = try m.store.classes(element);
+                     while (classes.next()) |own| {
++                        dom.countClassTokenComparison();
+                         if (std.mem.eql(u16, own.units, class)) break :blk true;
+                     }
+                     break :blk false;
+diff --git a/src/css/tests.zig b/src/css/tests.zig
+index 7ebc039..b9a4580 100644
+--- a/src/css/tests.zig
++++ b/src/css/tests.zig
+@@ -490,12 +490,12 @@ fn expectSelectorFailure(source: View, kind: selectors.FailureKind) !void {
+ 
+ test "FP-0014 case 22: invalid and unsupported selectors report the first problem in token order" {
+     const invalid = [_]View{
+-        u(""),    u("a,"),  u(",a"),   u("a,,b"), u("> a"),    u("a >"),       u("a > > b"), u("a ."),
+-        u(". a"), u("#1a"), u("[]"),   u("[x=]"), u("[x==y]"), u("[x = y z]"), u("[x=y j]"), u("[x=1]"),
+-        u("[1]"), u("a:"),  u("a||b"), u("a!b"),  u("a ~"),    u("*|"),        u("|"),
++        u(""),    u("a,"),  u(",a"),  u("a,,b"), u("> a"),    u("a >"),       u("a > > b"), u("a ."),
++        u(". a"), u("#1a"), u("[]"),  u("[x=]"), u("[x==y]"), u("[x = y z]"), u("[x=y j]"), u("[x=1]"),
++        u("[1]"), u("a:"),  u("a!b"), u("a ~"),  u("*|"),     u("|"),
+     };
+     for (invalid) |source| try expectSelectorFailure(source, .invalid_selector);
+-    const unsupported = [_]View{ u("a:hover"), u(":root"), u("a::before"), u("a:not(b)"), u("a|b"), u("[ns|x]"), u("&"), u("& a") };
++    const unsupported = [_]View{ u("a:hover"), u(":root"), u("a::before"), u("a:not(b)"), u("a|b"), u("[ns|x]"), u("&"), u("& a"), u("a||b") };
+     for (unsupported) |source| try expectSelectorFailure(source, .unsupported_selector);
+     try expectSelectorFailure(u("a:hover, ,b"), .unsupported_selector);
+ }
+@@ -1724,12 +1724,216 @@ test "FP-0014 case 48: every induced allocation failure returns OutOfMemory, lea
+     try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
+ }
+ 
+-test "FP-0014: the system color palette is opaque and each legible pair has a contrast ratio of at least 4.5" {
++// Revision 1.
++
++/// The parts of one revision 1 case. Every part runs, and a failing case names each part that fails and each that passes,
++/// so that a run before the fix shows which parts already pass.
++const Parts = struct {
++    case: []const u8,
++    passed: [16][]const u8 = undefined,
++    passed_count: usize = 0,
++    failed: usize = 0,
++
++    fn check(p: *Parts, part: []const u8, result: anyerror!void) void {
++        if (result) |_| {
++            p.passed[p.passed_count] = part;
++            p.passed_count += 1;
++        } else |err| {
++            p.failed += 1;
++            std.debug.print("{s}: part \"{s}\" fails with {s}\n", .{ p.case, part, @errorName(err) });
++        }
++    }
++
++    fn finish(p: *const Parts) !void {
++        if (p.failed == 0) return;
++        for (p.passed[0..p.passed_count]) |part| std.debug.print("{s}: part \"{s}\" passes\n", .{ p.case, part });
++        return error.TestCasePartsFailed;
++    }
++};
++
++fn expectDisplay(computed: *const ComputedStyle, expected: values.Display) !void {
++    try testing.expect(std.meta.eql(expected, computed.display));
++}
++
++fn expectZeroMargins(computed: *const ComputedStyle) !void {
++    inline for (.{ "margin_top", "margin_right", "margin_bottom", "margin_left" }) |field| {
++        try testing.expectEqual(values.LengthPercentageAuto{ .length = 0 }, @field(computed, field));
++    }
++}
++
++fn expectFontSize(computed: *const ComputedStyle, expected: f64) !void {
++    try testing.expectEqual(expected, computed.font_size);
++}
++
++test "FP-0014 case 49: a text node's style comes from defaulting, not from the parent's whole style" {
++    var s: Scenario = undefined;
++    try s.init();
++    defer s.deinit();
++    const root = try s.add(null, "r");
++    const text = try s.store.createText(s.document, u("text"));
++    try s.store.appendChild(root, text);
++    _ = try s.sheet("r { display: block; margin-top: 5px; margin-left: 2px; color: rgb(1 2 3); font-size: 20px; --k: v }", .author);
++    const map = try s.resolve();
++    const computed: ComputedStyle = (try map.textStyle(text)).*;
++    var parts: Parts = .{ .case = "case 49" };
++    parts.check("display is inline flow", expectDisplay(&computed, pair(.@"inline", .flow, false)));
++    parts.check("every margin is 0px", expectZeroMargins(&computed));
++    parts.check("color is 1 2 3", expectRgba(computed.color, 1, 2, 3, 1));
++    parts.check("font-size is 20", expectFontSize(&computed, 20));
++    parts.check("--k is [ident(v)]", expectCustom(&computed, "--k", "[ident(v)]"));
++    try parts.finish();
++}
++
++fn expectOnlyRule(sheet: *const Stylesheet, comptime name: []const u8) !void {
++    try testing.expectEqual(1, sheet.rules.len);
++    try expectSelectorText(sheet, 0, name);
++}
++
++test "FP-0014 case 50: nothing inside an ignored at-rule's block reports a diagnostic" {
++    var sheet = try parseSheet("@media x { b { colour: red } a { b {} } @media y { c { color: blue } } } d { color: red }", .author);
++    defer sheet.deinit();
++    var parts: Parts = .{ .case = "case 50" };
++    parts.check("only the rule for d is kept", expectOnlyRule(&sheet, "d"));
++    parts.check("one ignored_at_rule diagnostic for media", expectDiagnostics(&sheet, &.{.{ .kind = .ignored_at_rule, .name = "media" }}));
++    try parts.finish();
++}
++
++/// Checks that the custom property `name` has exactly the diagnostics `expected` among the style map's diagnostics.
++fn expectCustomReasons(map: *const style.StyleMap, comptime name: []const u8, expected: []const InvalidReason) !void {
++    var reasons: [4]InvalidReason = undefined;
++    var count: usize = 0;
++    for (map.diagnostics) |diagnostic| {
++        if (diagnostic.property != .custom or !std.mem.eql(u16, diagnostic.property.custom, u(name).units)) continue;
++        if (count == reasons.len) return error.TestTooManyDiagnostics;
++        reasons[count] = diagnostic.reason;
++        count += 1;
++    }
++    try testing.expectEqualSlices(InvalidReason, expected, reasons[0..count]);
++}
++
++fn expectUnsupportedCustom(map: *const style.StyleMap, computed: *const ComputedStyle, comptime name: []const u8) !void {
++    try expectCustom(computed, name, null);
++    try expectCustomReasons(map, name, &.{.unsupported_value});
++}
++
++test "FP-0014 case 51: the other arbitrary substitution functions make a custom property unsupported" {
++    var s: Scenario = undefined;
++    const computed = try rootStyle(&s, "r { --a: attr(data-x); --b: if(else: 2); --c: inherit(--k); --d: ident(a); --e: random-item(--x, a, b); --f: if(...var(--args); else: x); --g: foo(1); --args: 1 }");
++    defer s.deinit();
++    const map = &s.map.?;
++    var parts: Parts = .{ .case = "case 51" };
++    inline for (.{ "--a", "--b", "--c", "--d", "--e", "--f" }) |name| {
++        parts.check(name ++ " is guaranteed-invalid with unsupported_value", expectUnsupportedCustom(map, computed, name));
++    }
++    parts.check("--g is [function(foo)[number(1,integer,none)]]", expectCustom(computed, "--g", "[function(foo)[number(1,integer,none)]]"));
++    try parts.finish();
++}
++
++fn expectUnsupportedDisplay(value: []const u8) !void {
++    const observed = try observeProperty("p", "display", value, 1);
++    try observed.expectSheetDiagnostics(&.{.unsupported_value});
++}
++
++test "FP-0014 case 52: grid-lanes, the math inner type, and the column combinator are unsupported standard forms" {
++    var parts: Parts = .{ .case = "case 52" };
++    inline for (.{ "grid-lanes", "inline-grid-lanes", "block grid-lanes", "math", "block math", "inline math" }) |value| {
++        parts.check("display: " ++ value, expectUnsupportedDisplay(value));
++    }
++    parts.check("a||b", expectSelectorFailure(u("a||b"), .unsupported_selector));
++    try parts.finish();
++}
++
++/// Case 53's chain: `root` and `depth` nested `e` elements under the sheet `x e e e { margin-top: 3px } e { margin-top: 1px }`.
++fn expectChainWithinBound(depth: usize) !void {
++    const bound = 4 * depth * (depth + 1);
++    var s: Scenario = undefined;
++    try s.init();
++    defer s.deinit();
++    var elements: std.ArrayList(NodeHandle) = .empty;
++    defer elements.deinit(testing.allocator);
++    try elements.append(testing.allocator, try s.add(null, "root"));
++    for (0..depth) |_| try elements.append(testing.allocator, try s.add(elements.getLast(), "e"));
++    const sheets = [_]*const Stylesheet{try s.sheet("x e e e { margin-top: 3px } e { margin-top: 1px }", .author)};
++    // First match each element in tree order, as `resolve` does, and stop as soon as the count exceeds the bound,
++    // so that a matcher without the early exit fails quickly instead of running for hours.
++    {
++        var matcher: selectors.Matcher = .init(testing.allocator, &s.store);
++        defer matcher.deinit();
++        selectors.test_counters.compound_match_attempts = 0;
++        for (elements.items, 0..) |element, element_depth| {
++            testing.allocator.free(try selectors.matchRulesWith(testing.allocator, &matcher, element, &sheets));
++            const attempts = selectors.test_counters.compound_match_attempts;
++            if (attempts > bound) {
++                std.debug.print("case 53: {d} compound-match attempts after the element at depth {d} exceed the bound {d}\n", .{ attempts, element_depth, bound });
++                return error.TestBoundExceeded;
++            }
++        }
++    }
++    selectors.test_counters.compound_match_attempts = 0;
++    _ = try s.resolve();
++    const attempts = selectors.test_counters.compound_match_attempts;
++    if (attempts > bound) {
++        std.debug.print("case 53: resolution makes {d} compound-match attempts, which exceed the bound {d}\n", .{ attempts, bound });
++        return error.TestBoundExceeded;
++    }
++    for (elements.items[1..]) |element| {
++        try testing.expectEqual(values.LengthPercentageAuto{ .length = 1 }, (try s.get(element)).margin_top);
++    }
++}
++
++/// The number of the element's classes, from the ordered set parser.
++fn classCount(store: *dom.Store, element: NodeHandle) !usize {
++    var classes = try store.classes(element);
++    var count: usize = 0;
++    while (classes.next()) |_| count += 1;
++    return count;
++}
++
++/// Case 53's element with `tokens` distinct class tokens, `c0` to `c{tokens - 1}`.
++fn expectClassesWithinBound(tokens: usize) !void {
++    const bound = 32 * tokens;
++    var s: Scenario = undefined;
++    try s.init();
++    defer s.deinit();
++    const element = try s.add(null, "r");
++    var value: std.ArrayList(u8) = .empty;
++    defer value.deinit(testing.allocator);
++    for (0..tokens) |index| try value.print(testing.allocator, "c{d} ", .{index});
++    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
++    defer arena.deinit();
++    try s.store.setAttribute(element, null, u("class"), try runtimeView(arena.allocator(), value.items));
++    const selector = try std.fmt.allocPrint(arena.allocator(), ".c{d}", .{tokens - 1});
++    var parsed = try parseSelectors(try runtimeView(arena.allocator(), selector));
++    defer parsed.deinit();
++    var matcher: selectors.Matcher = .init(testing.allocator, &s.store);
++    defer matcher.deinit();
++    dom.test_counters.class_token_comparisons = 0;
++    const matched = try matcher.matchList(element, &parsed.result.list) != null;
++    if (dom.test_counters.class_token_comparisons > bound) {
++        std.debug.print("case 53: matching makes {d} class-token comparisons, which exceed the bound {d}\n", .{ dom.test_counters.class_token_comparisons, bound });
++        return error.TestBoundExceeded;
++    }
++    try testing.expect(matched);
++    try testing.expectEqual(tokens, try classCount(&s.store, element));
++    if (dom.test_counters.class_token_comparisons > bound) {
++        std.debug.print("case 53: matching and the ordered set make {d} class-token comparisons, which exceed the bound {d}\n", .{ dom.test_counters.class_token_comparisons, bound });
++        return error.TestBoundExceeded;
++    }
++}
++
++test "FP-0014 case 53: selector matching exits early, and class tokens deduplicate in n log n time" {
++    var parts: Parts = .{ .case = "case 53" };
++    parts.check("a 2000-deep chain stays within 4 * 2000 * 2001 compound-match attempts", expectChainWithinBound(2000));
++    parts.check("20000 class tokens stay within 32 * 20000 class-token comparisons", expectClassesWithinBound(20000));
++    try parts.finish();
++}
++
++test "FP-0014 case 54: the system color palette is opaque and each legible pair has a contrast ratio of at least 4.5" {
+     const pairs = [_][2]values.SystemColor{
+         .{ .canvas, .canvas_text },             .{ .canvas, .link_text },         .{ .canvas, .visited_text },
+         .{ .canvas, .active_text },             .{ .button_face, .button_text },  .{ .field, .field_text },
+         .{ .mark, .mark_text },                 .{ .highlight, .highlight_text }, .{ .selected_item, .selected_item_text },
+-        .{ .accent_color, .accent_color_text },
++        .{ .accent_color, .accent_color_text }, .{ .canvas, .button_border },
+     };
+     for (pairs) |entry| {
+         const background = luminance(entry[0].srgb());
+diff --git a/src/dom.zig b/src/dom.zig
+index 00547c3..b139667 100644
+--- a/src/dom.zig
++++ b/src/dom.zig
+@@ -42,6 +42,17 @@ const testing = std.testing;
+ const View = web_string.View;
+ const WebString = web_string.WebString;
+ 
++/// Test-only instrumentation, compiled only in test builds.
++/// `class_token_comparisons` counts each comparison of two class tokens, which case 53 of FP-0014 bounds.
++pub const test_counters = if (builtin.is_test) struct {
++    pub var class_token_comparisons: usize = 0;
++} else struct {};
++
++/// Counts one class-token comparison in test builds.
++pub fn countClassTokenComparison() void {
++    if (builtin.is_test) test_counters.class_token_comparisons += 1;
++}
++
+ /// The node types that a store holds.
+ pub const Kind = enum {
+     document,
+@@ -817,6 +828,7 @@ pub const ClassIterator = struct {
+         var index: usize = 0;
+         while (nextToken(units, &index)) |earlier| {
+             if (earlier.start >= token.start) return false;
++            countClassTokenComparison();
+             if (std.mem.eql(u16, units[earlier.start..earlier.end], wanted)) return true;
+         }
+         return false;

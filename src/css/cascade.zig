@@ -1,47 +1,20 @@
 //! CSS Cascading and Inheritance Level 5, section 6: the cascade sort for the origins of 6.2 and the importance of 6.3,
 //! and the rollback of explicit defaulting from section 7.3.
 //!
-//! This stage reads no DOM and no selector: its input is the applicable declarations of one element.
+//! This stage reads no DOM and no selector: its input is the applicable declarations of one element,
+//! which `applicable.zig` defines without importing either.
 //! Encapsulation contexts, element-attached styles, cascade layers, and animation and transition origins have no input,
 //! so every declaration of an origin sits in that origin's implicit final layer.
 
 const std = @import("std");
 const registry = @import("registry.zig");
 const values = @import("values.zig");
-const selectors = @import("selectors.zig");
+const applicable = @import("applicable.zig");
 const Allocator = std.mem.Allocator;
 const PropertyKey = registry.PropertyKey;
-
-/// The cascade origins of section 6.2 that have input in this task.
-pub const Origin = enum { user_agent, user, author };
-
-/// The order of appearance: sheets as the caller passes them, then rules and declarations in source order.
-pub const Order = struct {
-    sheet: u32,
-    rule: u32,
-    declaration: u32,
-};
-
-/// The style rule that holds a declaration.
-pub const RuleIdentity = struct {
-    sheet: u32,
-    rule: u32,
-
-    pub fn eql(a: RuleIdentity, b: RuleIdentity) bool {
-        return a.sheet == b.sheet and a.rule == b.rule;
-    }
-};
-
-/// One declaration that applies to an element. It holds no computed value.
-pub const ApplicableDeclaration = struct {
-    property: PropertyKey,
-    value: *const values.DeclaredValue,
-    origin: Origin,
-    important: bool,
-    specificity: selectors.Specificity,
-    order: Order,
-    rule: RuleIdentity,
-};
+const ApplicableDeclaration = applicable.ApplicableDeclaration;
+const Origin = applicable.Origin;
+const RuleIdentity = applicable.RuleIdentity;
 
 /// The precedence of origin and importance (section 6.2); a larger value wins.
 /// From highest: important user agent, important user, important author, normal author, normal user, normal user agent.

@@ -1,0 +1,224 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/css/cascade.zig"]
+830b398de5490bf3a994ff6dff675fd44808a2bca737d18f75722de9b7d85b05 *src/css/cascade.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/css/cascade.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:32:48.271Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":13}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0014/raw/mutation-cascade-origin-r1.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0014/raw/mutation-cascade-origin-r1.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:32:48.335Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/css/cascade.zig"]
+14a457bd12e9f3be3037b06570d9047ec95a15483e7468bbb1fae7ade0c67778 *src/css/cascade.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/css/cascade.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:32:48.410Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":13}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0014-cache-mutation-cascade-r1"]
+test
++- run test 232 pass, 1 fail (233 total)
+error: 'css.tests.test.FP-0014 case 35: origin and importance decide before specificity, in the six-level order' failed:
+       expected 5, found 4
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:727:46: 0x7ff6b83b2c15 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:728:70: 0x7ff6b83adb0d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83afe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:728:70: 0x7ff6b83adb0d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83afe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83afe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:727:46: 0x7ff6b83adab5 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\handles.zig:730:69: 0x7ff6b83adb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff6b823c237 in expectEqualInner__func_1248 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff6b859f2da in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:170:21: 0x7ff6b859f305 in expectEqualInner__func_5085 (test_zcu.obj)
+                           try expectEqual(expected_payload, actual_payload);
+                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff6b859f442 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:727:5: 0x7ff6b859f49e in expectRgba (test_zcu.obj)
+           try testing.expectEqual(red, rgba.red);
+           ^
+       C:\Users\requi\.omp\wt\t8ee29f43a\m\src\css\tests.zig:1129:9: 0x7ff6b85bd9f2 in test.FP-0014 case 35: origin and importance decide before specificity, in the six-level order (test_zcu.obj)
+               try expectRgba((try s.get(p)).color, @floatFromInt(k), 0, 0, 1);
+               ^
+failed command: cd . && ".\\out\\fp0014-cache-mutation-cascade-r1\\o\\e1b81e233444e3ae23b380c5f0dd1cb7\\test.exe" "--cache-dir=.\\out\\fp0014-cache-mutation-cascade-r1" --seed=0x7550af6c --listen=-
+
+Build Summary: 63/65 steps succeeded (1 failed); 277/278 tests passed (1 failed)
+test transitive failure
++- run test 232 pass, 1 fail (233 total)
+|  +- compile test debug native success 7s MaxRSS:846M
++- run test 45 pass (45 total) 290ms MaxRSS:16M
+|  +- compile test debug native success 3s MaxRSS:420M
++- FP-0007 case 13: case 2 passes with exit status 0 success 35ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:358M
++- FP-0007 case 13: case 3 fails with exit status 1 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 37ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 34ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 41ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 35ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 39ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 73ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 6ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 10ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:345M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 33ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 34ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 38ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 46ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 39ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 45ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 40ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 47ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 41ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 40ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 46ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 5ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 39ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 44ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 45ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 45ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 41ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 421ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 409ms
++- FP-0011 case 4: allocation_invokes_call.zig success 426ms
++- FP-0011 case 4: leaf_allocates.zig success 381ms
++- FP-0011 case 4: mutation_throws.zig success 370ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 345ms
++- FP-0011 case 4: leaf_positive.zig success 408ms
++- FP-0011 case 5: catalog_callback_alone.zig success 376ms
++- FP-0011 case 5: catalog_exception_alone.zig success 373ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 390ms
++- FP-0011 case 5: kernel_wider_context.zig success 395ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 395ms
++- FP-0011 case 8: layout_undescribed_field.zig success 352ms
++- FP-0011 case 8: layout_plain_reference.zig success 362ms
++- FP-0011 case 8: layout_missing_field.zig success 357ms
++- FP-0011 case 20: abi_reference_value.zig success 362ms
++- FP-0011 case 20: abi_nan_box_value.zig success 367ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 373ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 363ms
++- FP-0011 case 35: leaf_widens_context.zig success 355ms
++- FP-0011 case 36: binding_missing_kernel.zig success 354ms
++- FP-0011 case 36: binding_stray_kernel.zig success 379ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x7550af6c test --summary all --cache-dir out/fp0014-cache-mutation-cascade-r1
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0014-cache-mutation-cascade-r1"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:32:51.350Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":164558,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0014/raw/mutation-cascade-origin-r1.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0014/raw/mutation-cascade-origin-r1.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:35:39.805Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/css/cascade.zig"]
+830b398de5490bf3a994ff6dff675fd44808a2bca737d18f75722de9b7d85b05 *src/css/cascade.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/css/cascade.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:35:39.881Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}

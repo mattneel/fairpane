@@ -1,0 +1,13 @@
+--- a/src/css/cascade.zig
++++ b/src/css/cascade.zig
+@@ -21,8 +21,8 @@
+ pub fn originPrecedence(origin: Origin, important: bool) u3 {
+     if (important) return switch (origin) {
+         .user_agent => 5,
+-        .user => 4,
+-        .author => 3,
++        .user => 3,
++        .author => 4,
+     };
+     return switch (origin) {
+         .author => 2,

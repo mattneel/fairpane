@@ -1,11 +1,13 @@
 //! Arbitrary substitution functions: CSS Values and Units Level 5, Appendix A, and the `var()` function of
 //! CSS Custom Properties for Cascading Variables Level 1, section 3.
 //!
-//! `var()` is the only arbitrary substitution function in this task. Its argument grammar is
+//! `var()` is the only arbitrary substitution function that this task implements. Its argument grammar is
 //! `var( <declaration-value> , <declaration-value>? )`, where the first argument is a strict free-form production
 //! and the fallback is a non-strict free-form production (Values 5 section 3.1.1).
 //! A free-form production that starts with a {}-block is that block's contents.
-//! The spread syntax is detected and reported as unsupported; task `FP-0071` owns it.
+//! Values 5 also defines `if()`, `inherit()`, `attr()`, `ident()`, and `random-item()` as arbitrary substitution functions.
+//! A custom property value that contains one of them is invalid at computed-value time and reported as unsupported,
+//! and so is a value that uses the spread syntax. Task `FP-0071` owns these functions and the spread syntax.
 //!
 //! "Substitute arbitrary substitution functions" recurses through "replace a var() function" in the standard.
 //! Here each invocation is a resumable `Substitution` that asks its driver for nested substitutions and for
@@ -25,6 +27,30 @@ pub const expansion_limit: usize = 65536;
 
 fn isVarFunction(value: ComponentValue) bool {
     return value.kind == .function and tokenizer.asciiCaseInsensitiveEql(value.token.value, "var");
+}
+
+/// The arbitrary substitution functions of Values 5 at the pinned commit, other than `var()`
+/// (`css-values-5/Overview.bs` lines 1680, 1911, 2194, 2358, and 2741).
+const unsupported_functions = [_][]const u8{ "if", "inherit", "attr", "ident", "random-item" };
+
+fn isUnsupportedFunction(value: ComponentValue) bool {
+    if (value.kind != .function) return false;
+    inline for (unsupported_functions) |name| {
+        if (tokenizer.asciiCaseInsensitiveEql(value.token.value, name)) return true;
+    }
+    return false;
+}
+
+fn isArbitrarySubstitutionFunction(value: ComponentValue) bool {
+    return isVarFunction(value) or isUnsupportedFunction(value);
+}
+
+/// Whether the list contains an arbitrary substitution function other than `var()`, at any depth.
+pub fn containsUnsupportedFunction(list: []const ComponentValue) bool {
+    for (list) |value| {
+        if (isUnsupportedFunction(value)) return true;
+    }
+    return false;
 }
 
 /// Whether the list contains a `var()` function at any depth.
@@ -119,7 +145,7 @@ pub fn usesSpread(arguments: []const ComponentValue) bool {
     var index: usize = 0;
     while (index < arguments.len) {
         const value = arguments[index];
-        if (isVarFunction(value)) {
+        if (isArbitrarySubstitutionFunction(value)) {
             index = nextItem(arguments, index);
             continue;
         }
@@ -139,7 +165,7 @@ fn hasSpreadAmong(list: []const ComponentValue, start: usize, end: usize) bool {
             dots += 1;
             continue;
         }
-        if (dots >= 3 and isVarFunction(value)) return true;
+        if (dots >= 3 and isArbitrarySubstitutionFunction(value)) return true;
         dots = 0;
     }
     return false;

@@ -123,6 +123,8 @@ pub const Context = enum { top_level, at_rule_block, qualified_rule_block };
 /// Answers "valid in the current context" for the parser.
 /// A qualified rule's prelude is checked when the parser reaches its block, so diagnostics follow source order,
 /// and the rule itself is checked when its block ends, with the prelude's result.
+/// When the parser reaches an at-rule's block, it asks whether the validator checks that block's contents;
+/// a validator that will drop the at-rule answers no, and the block is consumed without validator calls.
 pub const Validator = struct {
     ptr: ?*anyopaque,
     vtable: *const VTable,
@@ -130,6 +132,8 @@ pub const Validator = struct {
     pub const VTable = struct {
         qualifiedPrelude: *const fn (ptr: ?*anyopaque, prelude: []const ComponentValue, context: Context) Allocator.Error!bool,
         qualifiedRule: *const fn (ptr: ?*anyopaque, rule: *const QualifiedRule, context: Context, prelude_valid: bool) Allocator.Error!bool,
+        /// Whether the contents of the at-rule's block are checked. The rule has its name and prelude, and no block yet.
+        atRuleBlock: *const fn (ptr: ?*anyopaque, rule: *const AtRule, context: Context) Allocator.Error!bool,
         atRule: *const fn (ptr: ?*anyopaque, rule: *const AtRule, context: Context) Allocator.Error!bool,
         declaration: *const fn (ptr: ?*anyopaque, declaration: *const Declaration, context: Context) Allocator.Error!bool,
     };
@@ -138,6 +142,7 @@ pub const Validator = struct {
     pub const syntax_only: Validator = .{ .ptr = null, .vtable = &.{
         .qualifiedPrelude = acceptPrelude,
         .qualifiedRule = acceptQualified,
+        .atRuleBlock = acceptAt,
         .atRule = acceptAt,
         .declaration = acceptDeclaration,
     } };
@@ -350,7 +355,9 @@ const Delivered = union(enum) {
 const Owner = union(enum) {
     /// "Parse a block's contents": the frame's result is the entry point's result.
     none,
-    at_rule: struct { rule: *AtRule, context: Context },
+    /// `silent` is whether the at-rule itself goes unchecked; its block frame is also silent when the validator
+    /// does not check the block's contents.
+    at_rule: struct { rule: *AtRule, context: Context, silent: bool },
     qualified: struct { rule: *QualifiedRule, context: Context, prelude_valid: bool },
     /// A rule that looks like a custom property: its block is consumed and nothing is returned.
     discard,
@@ -363,7 +370,8 @@ const BlockFrame = struct {
     owner: Owner,
     /// The context of every rule and declaration in the block.
     context: Context,
-    /// Whether the block's result is discarded, so the validator is not asked.
+    /// Whether the validator is not asked about the block's rules and declarations, because the block's result
+    /// is discarded or the validator does not check this at-rule's block.
     silent: bool,
     /// The start of the owning rule's source range.
     start: usize,
@@ -510,7 +518,7 @@ const Parser = struct {
             .at_rule => |owner| blk: {
                 owner.rule.block = items;
                 owner.rule.range.end = end;
-                const valid = frame.silent or try p.validator.vtable.atRule(p.validator.ptr, owner.rule, owner.context);
+                const valid = owner.silent or try p.validator.vtable.atRule(p.validator.ptr, owner.rule, owner.context);
                 break :blk .{ .at = if (valid) .{ .at = owner.rule } else null };
             },
             .qualified => |owner| blk: {
@@ -581,10 +589,11 @@ const Parser = struct {
                         .range = .{ .start = keyword.range.start, .end = token.range.end },
                     };
                     p.discard();
+                    const block_silent = silent or !(try p.validator.vtable.atRuleBlock(p.validator.ptr, rule, context));
                     try p.stack.append(p.gpa, .{ .block = .{
-                        .owner = .{ .at_rule = .{ .rule = rule, .context = context } },
+                        .owner = .{ .at_rule = .{ .rule = rule, .context = context, .silent = silent } },
                         .context = .at_rule_block,
-                        .silent = silent,
+                        .silent = block_silent,
                         .start = keyword.range.start,
                     } });
                     return;

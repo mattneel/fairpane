@@ -1,0 +1,13 @@
+--- a/src/css/selectors.zig
++++ b/src/css/selectors.zig
+@@ -448,8 +448,8 @@
+ fn noCandidate(combinator: Combinator) Outcome {
+     return switch (combinator) {
+         // An ancestor further up may still have an element sibling.
+         .next_sibling, .subsequent_sibling => .restart_from_descendant,
+         // No ancestor is left, and every other candidate for the compounds to the right has a subset of these ancestors.
+-        .child, .descendant => .not_matched_globally,
++        .child, .descendant => .restart_from_descendant,
+     };
+ }
+ 

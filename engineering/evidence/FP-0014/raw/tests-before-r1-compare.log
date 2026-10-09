@@ -1,0 +1,72 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\mkdir.exe","-p","out/r1check"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\mkdir.exe","arguments":["-p","out/r1check"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:42:25.837Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","archive","--format=tar","-o","out/r1check-base.tar","b0e8e33","src/css/tests.zig","src/css/selectors.zig","src/dom.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["archive","--format=tar","-o","out/r1check-base.tar","b0e8e33","src/css/tests.zig","src/css/selectors.zig","src/dom.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:42:25.914Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":48}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\tar.exe","-xf","out/r1check-base.tar","-C","out/r1check"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\tar.exe","arguments":["-xf","out/r1check-base.tar","-C","out/r1check"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:42:26.024Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\patch.exe","-p1","-d","out/r1check","-i","../../engineering/evidence/FP-0014/raw/tests-before-r1.diff"]
+patching file src/css/selectors.zig
+patching file src/css/tests.zig
+patching file src/dom.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\patch.exe","arguments":["-p1","-d","out/r1check","-i","../../engineering/evidence/FP-0014/raw/tests-before-r1.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:42:26.106Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\diff.exe","out/r1check/src/css/tests.zig","src/css/tests.zig"]
+14a15
+> const applicable = @import("applicable.zig");
+442c443
+< fn expectSpecificities(source: View, expected: []const selectors.Specificity) !void {
+---
+> fn expectSpecificities(source: View, expected: []const applicable.Specificity) !void {
+454c455
+<     const cases = [_]struct { sources: []const View, specificity: selectors.Specificity }{
+---
+>     const cases = [_]struct { sources: []const View, specificity: applicable.Specificity }{
+1072c1073,1074
+<     for ([_]*const ComputedStyle{ try map.get(div), try map.get(p), try map.textStyle(text) }) |computed| {
+---
+>     const text_style = try map.textStyle(text);
+>     for ([_]*const ComputedStyle{ try map.get(div), try map.get(p), &text_style }) |computed| {
+1577,1578c1579,1580
+< fn levelDeclaration(level: u8, value: *const values.DeclaredValue) cascade.ApplicableDeclaration {
+<     const origin: cascade.Origin = switch (level) {
+---
+> fn levelDeclaration(level: u8, value: *const values.DeclaredValue) applicable.ApplicableDeclaration {
+>     const origin: applicable.Origin = switch (level) {
+1583c1585
+<     const specificity: selectors.Specificity = if (level <= 3) .{ .a = 1 } else .{ .c = 1 };
+---
+>     const specificity: applicable.Specificity = if (level <= 3) .{ .a = 1 } else .{ .c = 1 };
+1604c1606
+<         for (@typeInfo(cascade.ApplicableDeclaration).@"struct".field_types) |field_type| {
+---
+>         for (@typeInfo(applicable.ApplicableDeclaration).@"struct".field_types) |field_type| {
+1608c1610
+<     comptime expectNoFieldOfTypes(cascade.ApplicableDeclaration, &.{
+---
+>     comptime expectNoFieldOfTypes(applicable.ApplicableDeclaration, &.{
+1613c1615
+<     var declarations: [6]cascade.ApplicableDeclaration = undefined;
+---
+>     var declarations: [6]applicable.ApplicableDeclaration = undefined;
+1627c1629
+<     const single = [_]cascade.ApplicableDeclaration{.{
+---
+>     const single = [_]applicable.ApplicableDeclaration{.{
+1777c1779
+<     const computed: ComputedStyle = (try map.textStyle(text)).*;
+---
+>     const computed: ComputedStyle = try map.textStyle(text);
+1886,1889c1888,1890
+<     var classes = try store.classes(element);
+<     var count: usize = 0;
+<     while (classes.next()) |_| count += 1;
+<     return count;
+---
+>     const classes = try store.classes(testing.allocator, element);
+>     defer testing.allocator.free(classes);
+>     return classes.len;
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\diff.exe","arguments":["out/r1check/src/css/tests.zig","src/css/tests.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t8ee29f43a\\m","started_at":"2026-10-09T12:42:26.186Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":57}

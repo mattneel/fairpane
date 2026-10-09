@@ -3,19 +3,25 @@
 //!
 //! The frozen subset is type and universal selectors with `*|` and `|` namespace prefixes, class, ID, and attribute
 //! selectors with every matcher and the `i` and `s` modifiers, and the descendant, child, next-sibling, and
-//! subsequent-sibling combinators. Pseudo-classes, pseudo-elements, declared namespace prefixes, and nesting
-//! are standard constructs outside the subset and report `unsupported_selector`.
+//! subsequent-sibling combinators. Pseudo-classes, pseudo-elements, declared namespace prefixes, nesting,
+//! and the column combinator `||` of Selectors 5 are standard constructs outside the subset and report
+//! `unsupported_selector`.
 //!
 //! Every store document is an XML document, so names, IDs, classes, and attribute values compare by identical
 //! code units (section 3.7); the `i` modifier compares attribute values ASCII case-insensitively.
 //! No default namespace is declared, so `E` and `*|E` match any namespace (section 5.3).
-//! Matching uses an explicit backtracking stack, so no function recurses.
+//!
+//! Matching keeps an explicit stack of open combinators, so no function recurses. It gives up on the whole selector
+//! as soon as a descendant or child combinator has no ancestor left to try, because any other candidate for the
+//! compounds to its right has only a subset of those ancestors. Each descendant combinator therefore walks the
+//! ancestors at most once per match. Task `FP-0070` owns a constant-time ancestor filter for deep trees.
 
 const std = @import("std");
+const builtin = @import("builtin");
 const dom = @import("../dom.zig");
 const parser = @import("parser.zig");
 const tokenizer = @import("tokenizer.zig");
-const cascade = @import("cascade.zig");
+const applicable = @import("applicable.zig");
 const stylesheet = @import("stylesheet.zig");
 const web_string = @import("../web_string.zig");
 const Allocator = std.mem.Allocator;
@@ -23,22 +29,14 @@ const ComponentValue = parser.ComponentValue;
 const Range = parser.Range;
 const NodeHandle = dom.NodeHandle;
 const View = web_string.View;
+const Specificity = applicable.Specificity;
+const ApplicableDeclaration = applicable.ApplicableDeclaration;
 
-/// Specificity (section 15). Each component saturates at 65535, as section 15 permits.
-pub const Specificity = struct {
-    /// ID selectors.
-    a: u16 = 0,
-    /// Class selectors, attribute selectors, and pseudo-classes.
-    b: u16 = 0,
-    /// Type selectors and pseudo-elements.
-    c: u16 = 0,
-
-    pub fn order(x: Specificity, y: Specificity) std.math.Order {
-        if (x.a != y.a) return std.math.order(x.a, y.a);
-        if (x.b != y.b) return std.math.order(x.b, y.b);
-        return std.math.order(x.c, y.c);
-    }
-};
+/// Test-only instrumentation, compiled only in test builds.
+/// `compound_match_attempts` counts each attempt to match a compound against an element, which case 53 of FP-0014 bounds.
+pub const test_counters = if (builtin.is_test) struct {
+    pub var compound_match_attempts: usize = 0;
+} else struct {};
 
 /// The namespace that a type, universal, or attribute selector requires.
 pub const NamespaceConstraint = enum {
@@ -209,6 +207,8 @@ const SelectorParser = struct {
             const whitespace = p.skipWhitespace();
             const next = p.at(0) orelse break;
             if (next.isToken(.comma)) break;
+            // The column combinator `||` (`selectors-5/Overview.bs` line 462 at the pinned commit) is outside the subset.
+            if (next.isDelim('|') and p.atDelim(1, '|')) return p.fail(.unsupported_selector, 0);
             const combinator: Combinator = if (next.isDelim('>'))
                 .child
             else if (next.isDelim('+'))
@@ -233,7 +233,8 @@ const SelectorParser = struct {
         var type_selector: ?TypeSelector = null;
         if (p.at(0)) |first| {
             if (first.isToken(.ident)) {
-                if (p.atDelim(1, '|')) {
+                // `E||F` is the type selector `E` and the column combinator.
+                if (p.atDelim(1, '|') and !p.atDelim(2, '|')) {
                     // A declared namespace prefix, such as `ns|E`, needs `@namespace`.
                     if (p.atToken(2, .ident) or p.atDelim(2, '*')) return p.fail(.unsupported_selector, 0);
                     return p.fail(.invalid_selector, 1);
@@ -241,7 +242,7 @@ const SelectorParser = struct {
                 type_selector = .{ .namespace = .any, .name = first.token.value };
                 p.position += 1;
             } else if (first.isDelim('*')) {
-                if (p.atDelim(1, '|')) {
+                if (p.atDelim(1, '|') and !p.atDelim(2, '|')) {
                     if (p.atToken(2, .ident)) {
                         type_selector = .{ .namespace = .any, .name = p.at(2).?.token.value };
                     } else if (p.atDelim(2, '*')) {
@@ -422,21 +423,42 @@ fn lastEnd(list: []const ComponentValue) usize {
 
 pub const MatchError = dom.AttributeError || Allocator.Error;
 
-const Mode = enum { exact, ancestors, siblings };
-
-const State = struct {
-    /// The index of the compound to match.
-    compound: usize,
-    element: NodeHandle,
-    /// `exact` matches the compound at `element`; `ancestors` and `siblings` also try the next candidate on failure.
-    mode: Mode,
+/// The outcome of matching a compound and every compound to its left at one candidate element,
+/// as in Servo's `SelectorMatchingResult`.
+const Outcome = enum {
+    matched,
+    /// The compound failed at its candidate: the nearest descendant or subsequent-sibling combinator to the right
+    /// tries its next candidate.
+    restart_from_sibling,
+    /// The nearest descendant combinator to the right tries its next candidate.
+    restart_from_descendant,
+    /// No candidate of any combinator to the right can match, so the selector does not match.
+    not_matched_globally,
 };
 
-/// A reusable backtracking stack for matching.
+/// A combinator whose left side is being tried.
+const Frame = struct {
+    /// The compound to the combinator's left, which is `compounds[compound]`; the combinator is `combinators[compound]`.
+    compound: usize,
+    /// The element where that compound is being tried.
+    candidate: NodeHandle,
+};
+
+/// The outcome when a combinator has no first or next candidate.
+fn noCandidate(combinator: Combinator) Outcome {
+    return switch (combinator) {
+        // An ancestor further up may still have an element sibling.
+        .next_sibling, .subsequent_sibling => .restart_from_descendant,
+        // No ancestor is left, and every other candidate for the compounds to the right has a subset of these ancestors.
+        .child, .descendant => .not_matched_globally,
+    };
+}
+
+/// A reusable stack of open combinators for matching.
 pub const Matcher = struct {
     gpa: Allocator,
     store: *dom.Store,
-    stack: std.ArrayList(State) = .empty,
+    stack: std.ArrayList(Frame) = .empty,
 
     pub fn init(gpa: Allocator, store: *dom.Store) Matcher {
         return .{ .gpa = gpa, .store = store };
@@ -448,40 +470,57 @@ pub const Matcher = struct {
     }
 
     /// Whether `selector` matches `element`. Combinators consider element parents and element siblings only.
+    /// Each compound is tried from right to left; a failure returns through the open combinators until one of them
+    /// tries its next candidate, or until the outcome decides the whole selector.
     pub fn matches(m: *Matcher, element: NodeHandle, selector: *const ComplexSelector) MatchError!bool {
         m.stack.clearRetainingCapacity();
-        try m.stack.append(m.gpa, .{ .compound = selector.compounds.len - 1, .element = element, .mode = .exact });
-        while (m.stack.pop()) |state| {
-            switch (state.mode) {
-                .ancestors, .siblings => {
-                    // Try this candidate first, and the next candidate when it fails.
-                    const next = if (state.mode == .ancestors) try m.parentElement(state.element) else try m.previousElementSibling(state.element);
-                    try m.stack.ensureUnusedCapacity(m.gpa, 2);
-                    if (next) |candidate| m.stack.appendAssumeCapacity(.{ .compound = state.compound, .element = candidate, .mode = state.mode });
-                    m.stack.appendAssumeCapacity(.{ .compound = state.compound, .element = state.element, .mode = .exact });
-                },
-                .exact => {
-                    if (!try m.matchesCompound(state.element, &selector.compounds[state.compound])) continue;
-                    if (state.compound == 0) return true;
-                    const previous = state.compound - 1;
-                    switch (selector.combinators[previous]) {
-                        .child => if (try m.parentElement(state.element)) |parent| {
-                            try m.stack.append(m.gpa, .{ .compound = previous, .element = parent, .mode = .exact });
-                        },
-                        .descendant => if (try m.parentElement(state.element)) |parent| {
-                            try m.stack.append(m.gpa, .{ .compound = previous, .element = parent, .mode = .ancestors });
-                        },
-                        .next_sibling => if (try m.previousElementSibling(state.element)) |sibling| {
-                            try m.stack.append(m.gpa, .{ .compound = previous, .element = sibling, .mode = .exact });
-                        },
-                        .subsequent_sibling => if (try m.previousElementSibling(state.element)) |sibling| {
-                            try m.stack.append(m.gpa, .{ .compound = previous, .element = sibling, .mode = .siblings });
-                        },
-                    }
-                },
+        var compound = selector.compounds.len - 1;
+        var candidate = element;
+        attempt: while (true) {
+            var outcome: Outcome = undefined;
+            if (!try m.matchesCompound(candidate, &selector.compounds[compound])) {
+                outcome = .restart_from_sibling;
+            } else if (compound == 0) {
+                outcome = .matched;
+            } else {
+                const combinator = selector.combinators[compound - 1];
+                if (try m.nextCandidate(candidate, combinator)) |first| {
+                    try m.stack.append(m.gpa, .{ .compound = compound - 1, .candidate = first });
+                    compound -= 1;
+                    candidate = first;
+                    continue :attempt;
+                }
+                outcome = noCandidate(combinator);
             }
+            // Return the outcome through the open combinators.
+            while (m.stack.pop()) |frame| {
+                const combinator = selector.combinators[frame.compound];
+                switch (outcome) {
+                    .matched, .not_matched_globally => continue,
+                    .restart_from_sibling, .restart_from_descendant => {},
+                }
+                switch (combinator) {
+                    // These combinators have one candidate.
+                    .next_sibling => continue,
+                    .child => {
+                        outcome = .restart_from_descendant;
+                        continue;
+                    },
+                    // An earlier sibling has the same ancestors, so it cannot repair an ancestor failure.
+                    .subsequent_sibling => if (outcome == .restart_from_descendant) continue,
+                    .descendant => {},
+                }
+                if (try m.nextCandidate(frame.candidate, combinator)) |next| {
+                    // The popped frame's slot is still allocated.
+                    m.stack.appendAssumeCapacity(.{ .compound = frame.compound, .candidate = next });
+                    compound = frame.compound;
+                    candidate = next;
+                    continue :attempt;
+                }
+                outcome = noCandidate(combinator);
+            }
+            return outcome == .matched;
         }
-        return false;
     }
 
     /// The specificity of the most specific selector of `list` that matches `element`, or null when none matches.
@@ -492,6 +531,15 @@ pub const Matcher = struct {
             if (best == null or selector.specificity.order(best.?) == .gt) best = selector.specificity;
         }
         return best;
+    }
+
+    /// The candidate after `element` for the compound left of `combinator`: the parent element for the child and
+    /// descendant combinators, and the previous element sibling for the sibling combinators.
+    fn nextCandidate(m: *Matcher, element: NodeHandle, combinator: Combinator) MatchError!?NodeHandle {
+        return switch (combinator) {
+            .child, .descendant => m.parentElement(element),
+            .next_sibling, .subsequent_sibling => m.previousElementSibling(element),
+        };
     }
 
     fn parentElement(m: *Matcher, element: NodeHandle) MatchError!?NodeHandle {
@@ -508,6 +556,7 @@ pub const Matcher = struct {
     }
 
     fn matchesCompound(m: *Matcher, element: NodeHandle, compound: *const Compound) MatchError!bool {
+        if (builtin.is_test) test_counters.compound_match_attempts += 1;
         const name = try m.store.elementName(element) orelse return error.NotAnElement;
         if (compound.type_selector) |selector| {
             if (selector.namespace == .none and name.namespace != null) return false;
@@ -518,13 +567,7 @@ pub const Matcher = struct {
         for (compound.simples) |simple| {
             const matched = switch (simple) {
                 .id => |id| if (try m.store.elementId(element)) |own| std.mem.eql(u16, own.units, id) else false,
-                .class => |class| blk: {
-                    var classes = try m.store.classes(element);
-                    while (classes.next()) |own| {
-                        if (std.mem.eql(u16, own.units, class)) break :blk true;
-                    }
-                    break :blk false;
-                },
+                .class => |class| try m.store.hasClass(element, .{ .units = class }),
                 .attribute => |*attribute| try m.matchesAttribute(element, attribute),
             };
             if (!matched) return false;
@@ -610,20 +653,20 @@ pub fn matchRules(
     store: *dom.Store,
     element: NodeHandle,
     sheets: []const *const stylesheet.Stylesheet,
-) MatchError![]cascade.ApplicableDeclaration {
+) MatchError![]ApplicableDeclaration {
     var matcher: Matcher = .init(gpa, store);
     defer matcher.deinit();
     return matchRulesWith(gpa, &matcher, element, sheets);
 }
 
-/// `matchRules` with a caller-owned matcher, so a traversal reuses one backtracking stack.
+/// `matchRules` with a caller-owned matcher, so a traversal reuses one combinator stack.
 pub fn matchRulesWith(
     gpa: Allocator,
     matcher: *Matcher,
     element: NodeHandle,
     sheets: []const *const stylesheet.Stylesheet,
-) MatchError![]cascade.ApplicableDeclaration {
-    var output: std.ArrayList(cascade.ApplicableDeclaration) = .empty;
+) MatchError![]ApplicableDeclaration {
+    var output: std.ArrayList(ApplicableDeclaration) = .empty;
     errdefer output.deinit(gpa);
     for (sheets, 0..) |sheet, sheet_index| {
         for (sheet.rules, 0..) |*rule, rule_index| {

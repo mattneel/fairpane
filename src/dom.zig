@@ -42,6 +42,17 @@ const testing = std.testing;
 const View = web_string.View;
 const WebString = web_string.WebString;
 
+/// Test-only instrumentation, compiled only in test builds.
+/// `class_token_comparisons` counts each comparison of two class tokens, which case 53 of FP-0014 bounds.
+pub const test_counters = if (builtin.is_test) struct {
+    pub var class_token_comparisons: usize = 0;
+} else struct {};
+
+/// Counts one class-token comparison in test builds.
+fn countClassTokenComparison() void {
+    if (builtin.is_test) test_counters.class_token_comparisons += 1;
+}
+
 /// The node types that a store holds.
 pub const Kind = enum {
     document,
@@ -367,10 +378,51 @@ pub const Store = struct {
         return value;
     }
 
-    /// The element's classes: the ordered set parser over its `class` attribute in no namespace.
-    pub fn classes(store: *Store, element: NodeHandle) AttributeError!ClassIterator {
-        const value = try store.attribute(element, null, ascii("class")) orelse return .{ .units = &.{} };
-        return .{ .units = value.units };
+    /// The element's classes: the ordered set parser over its `class` attribute in no namespace (DOM section 1.2),
+    /// with each token once, at its first occurrence. Duplicates are removed in time proportional to `n log n`
+    /// for `n` tokens. The views borrow the attribute value, so any attribute change ends their validity.
+    /// The caller frees the result with `gpa`.
+    pub fn classes(store: *Store, gpa: Allocator, element: NodeHandle) (AttributeError || Allocator.Error)![]View {
+        const value = try store.attribute(element, null, ascii("class")) orelse return gpa.alloc(View, 0);
+        const units = value.units;
+        var tokens: std.ArrayList(ClassToken) = .empty;
+        defer tokens.deinit(gpa);
+        var index: usize = 0;
+        while (nextClassToken(units, &index)) |token| try tokens.append(gpa, token);
+        // Sort the token positions by code units, then by position, so each run of identical tokens starts with
+        // the first occurrence, which the ordered set keeps.
+        const order = try gpa.alloc(usize, tokens.items.len);
+        defer gpa.free(order);
+        for (order, 0..) |*slot, position| slot.* = position;
+        const by_units: ClassOrder = .{ .units = units, .tokens = tokens.items };
+        std.mem.sortUnstable(usize, order, by_units, ClassOrder.lessThan);
+        const keep = try gpa.alloc(bool, tokens.items.len);
+        defer gpa.free(keep);
+        var kept: usize = 0;
+        for (order, 0..) |position, rank| {
+            keep[position] = rank == 0 or !by_units.eql(order[rank - 1], position);
+            if (keep[position]) kept += 1;
+        }
+        const result = try gpa.alloc(View, kept);
+        var written: usize = 0;
+        for (tokens.items, keep) |token, first| {
+            if (!first) continue;
+            result[written] = .{ .units = units[token.start..token.end] };
+            written += 1;
+        }
+        return result;
+    }
+
+    /// Whether `class` is one of the element's classes. Duplicate tokens do not change the answer,
+    /// so the scan needs no deduplication and takes time proportional to the attribute value's length.
+    pub fn hasClass(store: *Store, element: NodeHandle, class: View) AttributeError!bool {
+        const value = try store.attribute(element, null, ascii("class")) orelse return false;
+        var index: usize = 0;
+        while (nextClassToken(value.units, &index)) |token| {
+            countClassTokenComparison();
+            if (std.mem.eql(u16, value.units[token.start..token.end], class.units)) return true;
+        }
+        return false;
     }
 
     fn elementRecord(store: *Store, node: NodeHandle) AttributeError!*Element {
@@ -787,39 +839,40 @@ pub const AttributeIterator = struct {
     }
 };
 
-/// The ordered set parser of the DOM Standard, section 1.2, over one attribute value.
-/// It splits on ASCII whitespace and yields each token once, at its first occurrence.
-/// Any attribute change ends the iterator's validity.
-pub const ClassIterator = struct {
+/// One token of a `class` attribute value, as a range of code units.
+const ClassToken = struct { start: usize, end: usize };
+
+/// The ordered set parser's split on ASCII whitespace (DOM section 1.2): the next token at or after `index`.
+fn nextClassToken(units: []const u16, index: *usize) ?ClassToken {
+    while (index.* < units.len and isAsciiWhitespace(units[index.*])) index.* += 1;
+    if (index.* == units.len) return null;
+    const start = index.*;
+    while (index.* < units.len and !isAsciiWhitespace(units[index.*])) index.* += 1;
+    return .{ .start = start, .end = index.* };
+}
+
+/// Orders the positions of class tokens by code units, then by position.
+const ClassOrder = struct {
     units: []const u16,
-    index: usize = 0,
+    tokens: []const ClassToken,
 
-    pub fn next(iterator: *ClassIterator) ?View {
-        while (nextToken(iterator.units, &iterator.index)) |token| {
-            if (!occursBefore(iterator.units, token)) return .{ .units = iterator.units[token.start..token.end] };
-        }
-        return null;
+    fn text(order: ClassOrder, position: usize) []const u16 {
+        const token = order.tokens[position];
+        return order.units[token.start..token.end];
     }
 
-    const Token = struct { start: usize, end: usize };
-
-    fn nextToken(units: []const u16, index: *usize) ?Token {
-        while (index.* < units.len and isAsciiWhitespace(units[index.*])) index.* += 1;
-        if (index.* == units.len) return null;
-        const start = index.*;
-        while (index.* < units.len and !isAsciiWhitespace(units[index.*])) index.* += 1;
-        return .{ .start = start, .end = index.* };
+    fn lessThan(order: ClassOrder, a: usize, b: usize) bool {
+        countClassTokenComparison();
+        return switch (std.mem.order(u16, order.text(a), order.text(b))) {
+            .lt => true,
+            .gt => false,
+            .eq => a < b,
+        };
     }
 
-    /// Whether an identical token starts before `token`, so the ordered set already holds it.
-    fn occursBefore(units: []const u16, token: Token) bool {
-        const wanted = units[token.start..token.end];
-        var index: usize = 0;
-        while (nextToken(units, &index)) |earlier| {
-            if (earlier.start >= token.start) return false;
-            if (std.mem.eql(u16, units[earlier.start..earlier.end], wanted)) return true;
-        }
-        return false;
+    fn eql(order: ClassOrder, a: usize, b: usize) bool {
+        countClassTokenComparison();
+        return std.mem.eql(u16, order.text(a), order.text(b));
     }
 };
 
@@ -2064,9 +2117,10 @@ fn expectAttributes(store: *Store, element: NodeHandle, expected: []const Expect
 }
 
 fn expectClasses(store: *Store, element: NodeHandle, expected: []const View) !void {
-    var iterator = try store.classes(element);
-    for (expected) |wanted| try testing.expect(iterator.next().?.eql(wanted));
-    try testing.expectEqual(null, iterator.next());
+    const set = try store.classes(testing.allocator, element);
+    defer testing.allocator.free(set);
+    try testing.expectEqual(expected.len, set.len);
+    for (expected, set) |wanted, actual| try testing.expect(actual.eql(wanted));
 }
 
 test "FP-0014 case 18: setAttribute keeps list order, replaces in place, and honors namespaces, and removal reports its result" {
@@ -2174,7 +2228,7 @@ test "FP-0014 case 20: attribute operations reject bad handles, and each induced
     try expectRejected(s, error.NotAnElement, Store.removeAttribute, .{ s, text, null, ascii("a") });
     try expectRejected(s, error.NotAnElement, Store.attributes, .{ s, text });
     try expectRejected(s, error.NotAnElement, Store.elementId, .{ s, text });
-    try expectRejected(s, error.NotAnElement, Store.classes, .{ s, text });
+    try expectRejected(s, error.NotAnElement, Store.classes, .{ s, testing.allocator, text });
 
     // A detached element with attributes is swept without a leak.
     const swept = try newElement(s, document, "swept");
@@ -2200,5 +2254,41 @@ test "FP-0014 case 20: attribute operations reject bad handles, and each induced
     try attributeAllocationScenario(probe.allocator());
     try testing.expect(probe.allocations >= 10);
     try testing.checkAllAllocationFailures(no_remap.allocator(), attributeAllocationScenario, .{});
+    try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
+}
+
+/// The FP-0014 revision 1 class scenario: `classes` deduplicates in order, `hasClass` agrees with it,
+/// and an induced allocation failure in `classes` leaves the store unchanged.
+fn classAllocationScenario(gpa: Allocator) !void {
+    var store = try Store.init(gpa);
+    defer store.deinit();
+    const s = &store;
+    const document = try guarded(s, Store.createDocument, .{s});
+    const element = try guarded(s, Store.createElement, .{ s, document, null, ascii("e") });
+    try guarded(s, Store.setAttribute, .{ s, element, null, ascii("class"), ascii("b a\tb c a\x0cd b") });
+    const set = try guarded(s, Store.classes, .{ s, gpa, element });
+    defer gpa.free(set);
+    const expected = [_]View{ ascii("b"), ascii("a"), ascii("c"), ascii("d") };
+    try testing.expectEqual(expected.len, set.len);
+    for (expected, set) |wanted, actual| try testing.expect(actual.eql(wanted));
+    for (expected) |class| try testing.expect(try s.hasClass(element, class));
+    try testing.expect(!try s.hasClass(element, ascii("e")));
+    try testing.expect(!try s.hasClass(element, ascii("")));
+}
+
+test "FP-0014 revision 1: classes deduplicate in order, hasClass agrees, and both reject non-elements" {
+    var store = try Store.init(testing.allocator);
+    defer store.deinit();
+    const s = &store;
+    const document = try newDocument(s);
+    const text = try newText(s, document, "t");
+    try expectRejected(s, error.NotAnElement, Store.hasClass, .{ s, text, ascii("a") });
+    try expectRejected(s, error.NotAnElement, Store.classes, .{ s, testing.allocator, text });
+    const plain = try newElement(s, document, "p");
+    try testing.expect(!try s.hasClass(plain, ascii("a")));
+    try expectClasses(s, plain, &.{});
+
+    var no_remap: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+    try testing.checkAllAllocationFailures(no_remap.allocator(), classAllocationScenario, .{});
     try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
 }

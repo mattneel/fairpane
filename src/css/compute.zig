@@ -14,13 +14,14 @@ const parser = @import("parser.zig");
 const registry = @import("registry.zig");
 const values = @import("values.zig");
 const cascade = @import("cascade.zig");
+const applicable = @import("applicable.zig");
 const substitution = @import("substitution.zig");
 const Allocator = std.mem.Allocator;
 const ComponentValue = parser.ComponentValue;
 const PropertyId = registry.PropertyId;
 const PropertyKey = registry.PropertyKey;
 const CascadeResult = cascade.CascadeResult;
-const ApplicableDeclaration = cascade.ApplicableDeclaration;
+const ApplicableDeclaration = applicable.ApplicableDeclaration;
 
 /// Why a property became invalid at computed-value time.
 pub const InvalidReason = enum {
@@ -82,6 +83,20 @@ pub const ComputedStyle = struct {
         }
         if (!customEqual(a.custom, b.custom)) addEffects(&effects, &registry.custom_family);
         return effects;
+    }
+
+    /// The style that defaulting gives a node with no cascaded value, such as a text node (Cascade 5 sections 1.1 and 7.1):
+    /// each inherited property takes `parent`'s computed value, and every other property takes its initial value.
+    /// The result borrows `parent`'s custom values.
+    pub fn defaulted(parent: *const ComputedStyle) ComputedStyle {
+        var style = initial();
+        inline for (comptime std.enums.values(PropertyId)) |id| {
+            if (comptime registry.record(id).inherited) @field(style, @tagName(id)) = @field(parent, @tagName(id));
+        }
+        // Custom properties are inherited (Variables 1 section 2).
+        comptime std.debug.assert(registry.custom_family.inherited);
+        style.custom = parent.custom;
+        return style;
     }
 
     fn setInitial(style: *ComputedStyle, comptime id: PropertyId) void {
@@ -416,6 +431,12 @@ const Engine = struct {
                     if (try e.customKeyword(work, declaration, keyword, name)) |value| return value;
                 },
                 .custom => |custom| {
+                    // Values 5 defines other arbitrary substitution functions, which task FP-0071 owns,
+                    // so a value that contains one is invalid at computed-value time.
+                    if (substitution.containsUnsupportedFunction(custom.tokens)) {
+                        try e.diagnose(.{ .custom = name }, .unsupported_value);
+                        return .{ .tokens = null };
+                    }
                     if (!substitution.containsVar(custom.tokens)) return .{ .tokens = custom.tokens };
                     // Replace substitution functions in the property, with «"property", name» as the context.
                     const guard = e.guards.items.len;
