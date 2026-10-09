@@ -1,0 +1,272 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","54cf4d4..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"]
+ tools/lib.mjs | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 114 insertions(+), 11 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","54cf4d4..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:58.231Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":35}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","log","--oneline","54cf4d4..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"]
+9d5638b FP-0098: make zig-test fast again and list processes on a timeout
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["log","--oneline","54cf4d4..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:58.324Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","--diff-filter=D","54cf4d4..29a9f8e","--","src","tests","build.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","--diff-filter=D","54cf4d4..29a9f8e","--","src","tests","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:58.408Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const {execFileSync}=require('node:child_process'); const range=process.argv[1]; const diff=execFileSync('git',['diff',range,'--','src','tests','build.zig'],{encoding:'utf8'}); let file='', removed=[]; for (const line of diff.split(/\\r?\\n/)) { if (line.startsWith('diff --git ')) file=line; if (/^-(?!-).*\\btest\\s+\"/.test(line)) removed.push({file,line}); } console.log(JSON.stringify({range,search:'removed test declarations: /^-(?!-).*\\\\btest\\\\s+\"/',count:removed.length,removed},null,2));","54cf4d4..29a9f8e"]
+{
+  "range": "54cf4d4..29a9f8e",
+  "search": "removed test declarations: /^-(?!-).*\\btest\\s+\"/",
+  "count": 0,
+  "removed": []
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const {execFileSync}=require('node:child_process'); const range=process.argv[1]; const diff=execFileSync('git',['diff',range,'--','src','tests','build.zig'],{encoding:'utf8'}); let file='', removed=[]; for (const line of diff.split(/\\r?\\n/)) { if (line.startsWith('diff --git ')) file=line; if (/^-(?!-).*\\btest\\s+\"/.test(line)) removed.push({file,line}); } console.log(JSON.stringify({range,search:'removed test declarations: /^-(?!-).*\\\\btest\\\\s+\"/',count:removed.length,removed},null,2));","54cf4d4..29a9f8e"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:58.498Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":67}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","54cf4d4..29a9f8e","--","src","tests","build.zig"]
+ src/dom.zig | 55 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 55 insertions(+)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","54cf4d4..29a9f8e","--","src","tests","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:58.618Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","54cf4d4..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"]
+diff --git a/tools/lib.mjs b/tools/lib.mjs
+index 7a3478c..ef00cf6 100644
+--- a/tools/lib.mjs
++++ b/tools/lib.mjs
+@@ -3,7 +3,7 @@ import fs from 'node:fs';
+ import path from 'node:path';
+ import os from 'node:os';
+ import crypto from 'node:crypto';
+-import { spawn, spawnSync } from 'node:child_process';
++import { spawn, spawnSync, execFile } from 'node:child_process';
+ 
+ export const STATES = new Set(['planned', 'active', 'blocked', 'implemented', 'accepted']);
+ export const REQUIRED_CAPABILITIES = Object.freeze([
+@@ -437,8 +437,108 @@ function finishRecord(io, fd, result) {
+   finally { closeQuietly(io, fd); }
+   return result;
+ }
+-/** Execute without a shell. OS sandboxing and disk quotas remain separate. Never rejects after argument validation. */
+-export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env, copyOutput, fileSystem } = {}) {
++/** The limit on the process listing that precedes a timeout's stop, so that a failed listing cannot delay the stop much. */
++export const PROCESS_LISTING_LIMIT_MS = 10000;
++// Windows PowerShell 5.1 prints every process as UTF-8 JSON. Creation times are strings of 100-nanosecond ticks.
++const PROCESS_TABLE_SCRIPT = '[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false); '
++  + 'ConvertTo-Json -Compress -InputObject @(Get-CimInstance -ClassName Win32_Process | ForEach-Object { '
++  + '[pscustomobject]@{ pid = [long]$_.ProcessId; ppid = [long]$_.ParentProcessId; '
++  + 'created = $(if ($_.CreationDate) { [string]$_.CreationDate.ToFileTimeUtc() } else { "0" }); command_line = $_.CommandLine } })';
++/** Windows PowerShell by its full path under the system directory, never through PATH. */
++function windowsPowerShellPath() {
++  const systemRoot = process.env.SystemRoot;
++  if (!systemRoot) throw new Error('SystemRoot is not set, so Windows PowerShell cannot be located.');
++  return path.join(systemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
++}
++function windowsProcessTable(powershell, limitMs) {
++  return new Promise((resolve, reject) => {
++    execFile(powershell, ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', PROCESS_TABLE_SCRIPT],
++      { encoding: 'utf8', windowsHide: true, timeout: limitMs, maxBuffer: 64 * 1024 * 1024 }, (error, stdout, stderr) => {
++        if (error) {
++          const detail = String(stderr ?? '').trim().split(/\r?\n/).slice(0, 5).join(' ');
++          reject(new Error(error.killed ? `Windows PowerShell did not finish within ${limitMs} ms.` : `${error.message}${detail ? ` ${detail}` : ''}`));
++          return;
++        }
++        try {
++          resolve(JSON.parse(stdout).map(p => ({ pid: p.pid, ppid: p.ppid, created: BigInt(p.created), command_line: p.command_line })));
++        } catch (e) { reject(new Error(`Windows PowerShell printed no process table: ${e.message}`)); }
++      });
++  });
++}
++/**
++ * Read `/proc/<pid>/stat` and `/proc/<pid>/cmdline` for every process.
++ * A process that ends during the scan is skipped, and so is one that permissions hide, because a descendant has the same user.
++ */
++async function linuxProcessTable(procRoot) {
++  const table = [];
++  for (const name of await fs.promises.readdir(procRoot)) {
++    if (!/^[1-9]\d*$/.test(name)) continue;
++    let stat, cmdline;
++    try {
++      stat = await fs.promises.readFile(path.join(procRoot, name, 'stat'), 'utf8');
++      cmdline = await fs.promises.readFile(path.join(procRoot, name, 'cmdline'));
++    } catch (e) {
++      if (['ENOENT', 'ESRCH', 'EACCES', 'EPERM'].includes(e.code)) continue;
++      throw e;
++    }
++    // The command name in parentheses can contain spaces and parentheses, so the fields start after the last parenthesis.
++    const close = stat.lastIndexOf(')'), fields = stat.slice(close + 2).split(' ');
++    // Field 3 is the state, field 4 the parent process ID, and field 22 the start time.
++    if (fields[0] === 'Z' || fields[0] === 'X') continue;
++    const argv = cmdline.length ? cmdline.toString('utf8').replace(/\0$/, '').split('\0') : [];
++    table.push({ pid: Number(name), ppid: Number(fields[1]), created: BigInt(fields[19]),
++      command_line: argv.length ? argv : `[${stat.slice(stat.indexOf('(') + 1, close)}]` });
++  }
++  return table;
++}
++/**
++ * List `rootPid` and each live descendant: its process ID, parent process ID, and command line.
++ * A process counts as a child only if it started no earlier than its parent, so a reused parent ID adds no stranger.
++ * The command line is a string on Windows and an argument array on Linux. Rejects with the reason when the listing fails.
++ */
++export async function listProcessTree(rootPid, { platform = process.platform, powershell, procRoot = '/proc', limitMs = PROCESS_LISTING_LIMIT_MS } = {}) {
++  let timer;
++  const limit = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`The process listing did not finish within ${limitMs} ms.`)), limitMs); });
++  try {
++    const read = platform === 'win32' ? windowsProcessTable(powershell ?? windowsPowerShellPath(), limitMs)
++      : platform === 'linux' ? linuxProcessTable(procRoot)
++      : Promise.reject(new Error(`No process listing exists for platform ${platform}.`));
++    const table = await Promise.race([read, limit]);
++    const tree = table.filter(p => p.pid === rootPid), seen = new Set([rootPid]);
++    for (let i = 0; i < tree.length; i++) {
++      for (const p of table) {
++        if (p.ppid === tree[i].pid && !seen.has(p.pid) && p.created >= tree[i].created) { seen.add(p.pid); tree.push(p); }
++      }
++    }
++    return tree.map(({ pid, ppid, command_line }) => ({ pid, ppid, command_line }));
++  } finally { clearTimeout(timer); }
++}
++/** The timeout section of a command log: the live process tree, or the reason that the listing failed. */
++async function timeoutSection(pid, timeoutMs, processListing) {
++  let lines;
++  try {
++    const tree = await listProcessTree(pid, processListing);
++    lines = [`TIMEOUT after ${timeoutMs} ms: the live process tree of PID ${pid} follows.`,
++      ...tree.map(p => `PROCESS ${JSON.stringify(p)}`)];
++    if (!tree.some(p => p.pid === pid)) lines.push(`TIMEOUT PID ${pid} is no longer running.`);
++  } catch (e) { lines = [`TIMEOUT after ${timeoutMs} ms: the process listing failed: ${e.message}`]; }
++  return [...lines, `TIMEOUT Stopping PID ${pid} and its descendants.`].join('\n') + '\n';
++}
++/** Stop a command and its descendants. */
++function stopProcessTree(child) {
++  if (process.platform === 'win32' && child.pid) {
++    const k = spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 10000 });
++    if (k.error || k.status !== 0) child.kill('SIGKILL');
++  } else if (child.pid) {
++    try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
++  }
++}
++/**
++ * Execute without a shell. OS sandboxing and disk quotas remain separate. Never rejects after argument validation.
++ * At the timeout, the log first receives the command's live process tree, and then the command and its descendants stop.
++ * `processListing` passes `powershell` or `procRoot` to `listProcessTree`.
++ */
++export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env, copyOutput, fileSystem, processListing } = {}) {
+   invariant(typeof executable === 'string' && Array.isArray(args), 'An executable and argument array are required.');
+   invariant(typeof logPath === 'string' && logPath.length > 0, 'A log path is required.');
+   const io = recordFs(fileSystem), copy = copyOutput ?? ((file, out) => copyFileToDescriptor(io, file, out));
+@@ -483,14 +583,16 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000,
+         env: env ? { ...process.env, ...env } : process.env, windowsHide: true, detached: process.platform !== 'win32' });
+       child.on('error', error => { errors.push(error.message); finish(null, null); });
+       child.on('close', (code, signal) => finish(code, signal));
+-      timer = setTimeout(() => {
++      timer = setTimeout(async () => {
+         timedOut = true;
+-        if (process.platform === 'win32' && child.pid) {
+-          const k = spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 10000 });
+-          if (k.error || k.status !== 0) child.kill('SIGKILL');
+-        } else if (child.pid) {
+-          try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
++        if (child.pid) {
++          const section = await timeoutSection(child.pid, timeoutMs, processListing);
++          // A command that ended during the listing has already closed its log and needs no stop.
++          if (settled) return;
++          try { writeLog(io, fd, Buffer.from(section)); }
++          catch (e) { errors.push(`Log write failed: ${e.message}`); }
+         }
++        stopProcessTree(child);
+       }, timeoutMs);
+     } catch (e) { errors.push(e.message); finish(null, null); }
+   });
+@@ -538,7 +640,8 @@ export function gateEnvironment(root, gate) {
+   // Keep compiler caches inside the repository's ignored build directory, not the user's global cache.
+   return gate.kind === 'zig' || gate.kind === 'c-abi' ? { ZIG_GLOBAL_CACHE_DIR: path.join(root, '.zig-cache', 'global') } : undefined;
+ }
+-export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
++/** Run one gate. `processListing` reaches `runProcess` for each command, so a test can make the timeout listing fail. */
++export async function runGate(root, id, { evidenceDir = 'out/evidence', processListing } = {}) {
+   const gate = readJson(safePath(root, 'engineering/gates.json')).gates.find(g => g.id === id);
+   invariant(gate, `Unknown gate: ${id}`);
+   const before = fingerprints(root);
+@@ -554,7 +657,7 @@ export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
+   let error = null, zigVersion = null;
+   const env = gateEnvironment(root, gate);
+   async function run(exe, argv) {
+-    const r = await runProcess(exe, argv, { cwd: root, logPath, timeoutMs: gate.timeout_ms, env });
++    const r = await runProcess(exe, argv, { cwd: root, logPath, timeoutMs: gate.timeout_ms, env, processListing });
+     commands.push(r);
+     invariant(r.exit_code === 0 && !r.signal && !r.timed_out && !r.error, `Gate command failed: ${JSON.stringify([exe, ...argv])}`);
+   }
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","54cf4d4..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:58.706Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":28}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","54cf4d4..29a9f8e","--","src","tests","build.zig"]
+diff --git a/src/dom.zig b/src/dom.zig
+index 37667a5..3934fc5 100644
+--- a/src/dom.zig
++++ b/src/dom.zig
+@@ -751,7 +751,19 @@ pub const Store = struct {
+         return null;
+     }
+ 
++    /// Whether `ancestor` is an inclusive ancestor of `node`.
++    /// Every ancestor has a child, so a node without children is an inclusive ancestor only of itself.
++    /// That shortcut answers the insertion of a new leaf without walking the ancestors of `node`,
++    /// which made building a chain of n elements take time quadratic in n.
++    /// `isInclusiveAncestorByWalk` is the reference that the shortcut must agree with.
+     fn isInclusiveAncestor(store: *Store, ancestor: NodeHandle, node: NodeHandle) bool {
++        if (sameNode(ancestor, node)) return true;
++        if (store.at(ancestor).first_child == null) return false;
++        return store.isInclusiveAncestorByWalk(ancestor, node);
++    }
++
++    /// The definition: walk the inclusive ancestors of `node`, looking for `ancestor`.
++    fn isInclusiveAncestorByWalk(store: *Store, ancestor: NodeHandle, node: NodeHandle) bool {
+         var cursor: ?NodeHandle = node;
+         while (cursor) |current| : (cursor = store.at(current).parent) {
+             if (sameNode(current, ancestor)) return true;
+@@ -1366,6 +1378,49 @@ test "FP-0009 case 2: every condition of ensure pre-insert validity returns its
+     }
+ }
+ 
++test "FP-0098: the leaf shortcut of the inclusive-ancestor check agrees with the ancestor walk for every pair of nodes" {
++    var store = try Store.init(testing.allocator);
++    defer store.deinit();
++    const s = &store;
++    const document = try newDocument(s);
++    const html = try newElement(s, document, "html");
++    const body = try newElement(s, document, "body");
++    const div = try newElement(s, document, "div");
++    const text = try newText(s, document, "t");
++    const p = try newElement(s, document, "p");
++    const fragment = try newFragment(s, document);
++    const span = try newElement(s, document, "span");
++    const em = try newElement(s, document, "em");
++    const lone = try newElement(s, document, "x");
++    const y = try newElement(s, document, "y");
++    const z = try newComment(s, document, "z");
++    try appendChecked(s, document, html);
++    try appendChecked(s, html, body);
++    try appendChecked(s, body, div);
++    try appendChecked(s, div, text);
++    try appendChecked(s, body, p);
++    try appendChecked(s, fragment, span);
++    try appendChecked(s, span, em);
++    try appendChecked(s, y, z);
++    const nodes = [_]NodeHandle{ document, html, body, div, text, p, fragment, span, em, lone, y, z };
++    var related: usize = 0;
++    for (nodes) |ancestor| {
++        for (nodes) |node| {
++            const expected = s.isInclusiveAncestorByWalk(ancestor, node);
++            try testing.expectEqual(expected, s.isInclusiveAncestor(ancestor, node));
++            related += @intFromBool(expected);
++        }
++    }
++    // Each node is its own inclusive ancestor, and the proper ancestor pairs are
++    // document over 5, html over 4, body over 3, div over 1, fragment over 2, span over 1, and y over 1.
++    try testing.expectEqual(nodes.len + 17, related);
++    try testing.expect(s.isInclusiveAncestor(html, text));
++    try testing.expect(s.isInclusiveAncestor(text, text));
++    try testing.expect(!s.isInclusiveAncestor(p, body));
++    try testing.expect(!s.isInclusiveAncestor(em, fragment));
++    try testing.expect(s.isInclusiveAncestor(fragment, em));
++}
++
+ test "FP-0009 case 3: every condition of the replace validity checks returns its standard error and changes nothing" {
+     var store = try Store.init(testing.allocator);
+     defer store.deinit();
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","54cf4d4..29a9f8e","--","src","tests","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:58.784Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29}

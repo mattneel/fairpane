@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "repo-check",
+  "gate_sha256": "83889f6c10672d867afaf998faeda5b700c86ef1730d7dbff34c22e2062cc69e",
+  "status": "pass",
+  "started_at": "2026-10-09T14:04:34.193Z",
+  "finished_at": "2026-10-09T14:04:34.353Z",
+  "host": {
+    "platform": "linux",
+    "architecture": "x64",
+    "os_release": "6.17.0-1022-azure",
+    "runtime": "v24.21.0",
+    "bun_version": null,
+    "zig_version": null
+  },
+  "source_before": {
+    "sha256": "c60518fc81a59bd4d2dbd9dc90512b1352d95db2dee05dadfa7ba2fbb6295afc",
+    "file_count": 286
+  },
+  "source_after": {
+    "sha256": "c60518fc81a59bd4d2dbd9dc90512b1352d95db2dee05dadfa7ba2fbb6295afc",
+    "file_count": 286
+  },
+  "policy_before": {
+    "sha256": "e2b37533b264bc03ffea6716553bd0dcd0fadbdcb9536538e27a1e28ecda3925",
+    "file_count": 24
+  },
+  "policy_after": {
+    "sha256": "e2b37533b264bc03ffea6716553bd0dcd0fadbdcb9536538e27a1e28ecda3925",
+    "file_count": 24
+  },
+  "commands": [
+    {
+      "executable": "/opt/hostedtoolcache/node/24.21.0/x64/bin/node",
+      "arguments": [
+        "/home/runner/work/fairpane/fairpane/tools/fairpane.mjs",
+        "check"
+      ],
+      "cwd": "/home/runner/work/fairpane/fairpane",
+      "started_at": "2026-10-09T14:04:34.193Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 122
+    }
+  ],
+  "error": null,
+  "outputs": [
+    {
+      "path": "out/evidence/2026-10-09T14-04-34-192Z-repo-check-d21250ff.log",
+      "size": 1001,
+      "sha256": "8aaba376f2235d6d181ab4cc524917a21d9d7a218afbbed1166c9b9bc3b92da7"
+    }
+  ]
+}

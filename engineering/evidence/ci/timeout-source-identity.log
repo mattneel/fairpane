@@ -1,0 +1,15 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const {execFileSync}=require('node:child_process'); const heads=process.argv.slice(1); const files=['src/css/tests.zig','src/dom.zig','build.zig','engineering/gates.json','toolchains/zig.lock.json']; for(const head of heads){const hashes=execFileSync('git',['rev-parse',head,...files.map(p=>head+':'+p)],{encoding:'utf8'}).trim().split(/\r?\n/); console.log(JSON.stringify({head:hashes[0],files:Object.fromEntries(files.map((p,i)=>[p,hashes[i+1]]))}));}","4531b33","d526219","a3e5cf9","152ed53","f38fe6c","45acde8","bb25dcf","f40a902","54cf4d4","cced395","e84e578","9d5638b","29a9f8e"]
+[eval]:1
+const {execFileSync}=require('node:child_process'); const heads=process.argv.slice(1); const files=['src/css/tests.zig','src/dom.zig','build.zig','engineering/gates.json','toolchains/zig.lock.json']; for(const head of heads){const hashes=execFileSync('git',['rev-parse',head,...files.map(p=>head+':'+p)],{encoding:'utf8'}).trim().split(/
+                                                                                                                                                                                                                                                                                                                                                ^
+Unterminated regexp literal
+
+SyntaxError: Invalid regular expression: missing /
+    at makeContextifyScript (node:internal/vm:194:14)
+    at compileScript (node:internal/process/execution:420:10)
+    at evalTypeScript (node:internal/process/execution:292:22)
+    at node:internal/main/eval_string:71:3
+
+Node.js v26.7.0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const {execFileSync}=require('node:child_process'); const heads=process.argv.slice(1); const files=['src/css/tests.zig','src/dom.zig','build.zig','engineering/gates.json','toolchains/zig.lock.json']; for(const head of heads){const hashes=execFileSync('git',['rev-parse',head,...files.map(p=>head+':'+p)],{encoding:'utf8'}).trim().split(/\r?\n/); console.log(JSON.stringify({head:hashes[0],files:Object.fromEntries(files.map((p,i)=>[p,hashes[i+1]]))}));}","4531b33","d526219","a3e5cf9","152ed53","f38fe6c","45acde8","bb25dcf","f40a902","54cf4d4","cced395","e84e578","9d5638b","29a9f8e"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:46:22.545Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":64}

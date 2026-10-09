@@ -1,0 +1,23 @@
+Fairpane local gate: repo-check
+Trust: unsigned-local-integrity-only
+
+COMMAND ["/opt/hostedtoolcache/node/24.21.0/x64/bin/node","/home/runner/work/fairpane/fairpane/tools/fairpane.mjs","check"]
+{
+  "result": "pass",
+  "level": "bootstrap-integrity-only",
+  "tasks": 98,
+  "gates": 9,
+  "capability_families": 21,
+  "fingerprints": {
+    "source": {
+      "sha256": "1c727460534d1677a8de8c3e2b92dccd96d80e86d1294330486051fbf68703da",
+      "file_count": 284
+    },
+    "policy": {
+      "sha256": "7f54414c3c601aa711ad9de04dfe9c3d4b4fd3999cc01dd1f1ea7de2d3ea17ee",
+      "file_count": 23
+    }
+  },
+  "note": "This check is not browser conformance or an independent security attestation."
+}
+RESULT {"executable":"/opt/hostedtoolcache/node/24.21.0/x64/bin/node","arguments":["/home/runner/work/fairpane/fairpane/tools/fairpane.mjs","check"],"cwd":"/home/runner/work/fairpane/fairpane","started_at":"2026-10-09T13:34:56.627Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":115}

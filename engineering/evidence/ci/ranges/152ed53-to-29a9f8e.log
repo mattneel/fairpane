@@ -1,0 +1,1774 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","152ed53..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"]
+ tools/lib.mjs | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 114 insertions(+), 11 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","152ed53..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:55.489Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","log","--oneline","152ed53..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"]
+9d5638b FP-0098: make zig-test fast again and list processes on a timeout
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["log","--oneline","152ed53..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:55.557Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":23}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","--diff-filter=D","152ed53..29a9f8e","--","src","tests","build.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","--diff-filter=D","152ed53..29a9f8e","--","src","tests","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:55.625Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const {execFileSync}=require('node:child_process'); const range=process.argv[1]; const diff=execFileSync('git',['diff',range,'--','src','tests','build.zig'],{encoding:'utf8'}); let file='', removed=[]; for (const line of diff.split(/\\r?\\n/)) { if (line.startsWith('diff --git ')) file=line; if (/^-(?!-).*\\btest\\s+\"/.test(line)) removed.push({file,line}); } console.log(JSON.stringify({range,search:'removed test declarations: /^-(?!-).*\\\\btest\\\\s+\"/',count:removed.length,removed},null,2));","152ed53..29a9f8e"]
+{
+  "range": "152ed53..29a9f8e",
+  "search": "removed test declarations: /^-(?!-).*\\btest\\s+\"/",
+  "count": 0,
+  "removed": []
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const {execFileSync}=require('node:child_process'); const range=process.argv[1]; const diff=execFileSync('git',['diff',range,'--','src','tests','build.zig'],{encoding:'utf8'}); let file='', removed=[]; for (const line of diff.split(/\\r?\\n/)) { if (line.startsWith('diff --git ')) file=line; if (/^-(?!-).*\\btest\\s+\"/.test(line)) removed.push({file,line}); } console.log(JSON.stringify({range,search:'removed test declarations: /^-(?!-).*\\\\btest\\\\s+\"/',count:removed.length,removed},null,2));","152ed53..29a9f8e"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:55.691Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":63}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","152ed53..29a9f8e","--","src","tests","build.zig"]
+ src/abi_generated.zig |  37 ++++++-
+ src/abi_scenarios.zig | 259 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ src/c_api.zig         | 234 +++++++++++++++++++++++++++++++++++++++++++-
+ src/dom.zig           |  55 +++++++++++
+ src/engine.zig        | 122 ++++++++++++++++++++---
+ src/memory_budget.zig | 153 +++++++++++++++++++++++++++++
+ src/root.zig          |   1 +
+ tests/c/abi_layout.h  |   9 +-
+ tests/c/abi_smoke.c   | 263 ++++++++++++++++++++++++++++++++++++++++++++++++--
+ 9 files changed, 1106 insertions(+), 27 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","152ed53..29a9f8e","--","src","tests","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:55.799Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","152ed53..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"]
+diff --git a/tools/lib.mjs b/tools/lib.mjs
+index 7a3478c..ef00cf6 100644
+--- a/tools/lib.mjs
++++ b/tools/lib.mjs
+@@ -3,7 +3,7 @@ import fs from 'node:fs';
+ import path from 'node:path';
+ import os from 'node:os';
+ import crypto from 'node:crypto';
+-import { spawn, spawnSync } from 'node:child_process';
++import { spawn, spawnSync, execFile } from 'node:child_process';
+ 
+ export const STATES = new Set(['planned', 'active', 'blocked', 'implemented', 'accepted']);
+ export const REQUIRED_CAPABILITIES = Object.freeze([
+@@ -437,8 +437,108 @@ function finishRecord(io, fd, result) {
+   finally { closeQuietly(io, fd); }
+   return result;
+ }
+-/** Execute without a shell. OS sandboxing and disk quotas remain separate. Never rejects after argument validation. */
+-export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env, copyOutput, fileSystem } = {}) {
++/** The limit on the process listing that precedes a timeout's stop, so that a failed listing cannot delay the stop much. */
++export const PROCESS_LISTING_LIMIT_MS = 10000;
++// Windows PowerShell 5.1 prints every process as UTF-8 JSON. Creation times are strings of 100-nanosecond ticks.
++const PROCESS_TABLE_SCRIPT = '[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false); '
++  + 'ConvertTo-Json -Compress -InputObject @(Get-CimInstance -ClassName Win32_Process | ForEach-Object { '
++  + '[pscustomobject]@{ pid = [long]$_.ProcessId; ppid = [long]$_.ParentProcessId; '
++  + 'created = $(if ($_.CreationDate) { [string]$_.CreationDate.ToFileTimeUtc() } else { "0" }); command_line = $_.CommandLine } })';
++/** Windows PowerShell by its full path under the system directory, never through PATH. */
++function windowsPowerShellPath() {
++  const systemRoot = process.env.SystemRoot;
++  if (!systemRoot) throw new Error('SystemRoot is not set, so Windows PowerShell cannot be located.');
++  return path.join(systemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
++}
++function windowsProcessTable(powershell, limitMs) {
++  return new Promise((resolve, reject) => {
++    execFile(powershell, ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', PROCESS_TABLE_SCRIPT],
++      { encoding: 'utf8', windowsHide: true, timeout: limitMs, maxBuffer: 64 * 1024 * 1024 }, (error, stdout, stderr) => {
++        if (error) {
++          const detail = String(stderr ?? '').trim().split(/\r?\n/).slice(0, 5).join(' ');
++          reject(new Error(error.killed ? `Windows PowerShell did not finish within ${limitMs} ms.` : `${error.message}${detail ? ` ${detail}` : ''}`));
++          return;
++        }
++        try {
++          resolve(JSON.parse(stdout).map(p => ({ pid: p.pid, ppid: p.ppid, created: BigInt(p.created), command_line: p.command_line })));
++        } catch (e) { reject(new Error(`Windows PowerShell printed no process table: ${e.message}`)); }
++      });
++  });
++}
++/**
++ * Read `/proc/<pid>/stat` and `/proc/<pid>/cmdline` for every process.
++ * A process that ends during the scan is skipped, and so is one that permissions hide, because a descendant has the same user.
++ */
++async function linuxProcessTable(procRoot) {
++  const table = [];
++  for (const name of await fs.promises.readdir(procRoot)) {
++    if (!/^[1-9]\d*$/.test(name)) continue;
++    let stat, cmdline;
++    try {
++      stat = await fs.promises.readFile(path.join(procRoot, name, 'stat'), 'utf8');
++      cmdline = await fs.promises.readFile(path.join(procRoot, name, 'cmdline'));
++    } catch (e) {
++      if (['ENOENT', 'ESRCH', 'EACCES', 'EPERM'].includes(e.code)) continue;
++      throw e;
++    }
++    // The command name in parentheses can contain spaces and parentheses, so the fields start after the last parenthesis.
++    const close = stat.lastIndexOf(')'), fields = stat.slice(close + 2).split(' ');
++    // Field 3 is the state, field 4 the parent process ID, and field 22 the start time.
++    if (fields[0] === 'Z' || fields[0] === 'X') continue;
++    const argv = cmdline.length ? cmdline.toString('utf8').replace(/\0$/, '').split('\0') : [];
++    table.push({ pid: Number(name), ppid: Number(fields[1]), created: BigInt(fields[19]),
++      command_line: argv.length ? argv : `[${stat.slice(stat.indexOf('(') + 1, close)}]` });
++  }
++  return table;
++}
++/**
++ * List `rootPid` and each live descendant: its process ID, parent process ID, and command line.
++ * A process counts as a child only if it started no earlier than its parent, so a reused parent ID adds no stranger.
++ * The command line is a string on Windows and an argument array on Linux. Rejects with the reason when the listing fails.
++ */
++export async function listProcessTree(rootPid, { platform = process.platform, powershell, procRoot = '/proc', limitMs = PROCESS_LISTING_LIMIT_MS } = {}) {
++  let timer;
++  const limit = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`The process listing did not finish within ${limitMs} ms.`)), limitMs); });
++  try {
++    const read = platform === 'win32' ? windowsProcessTable(powershell ?? windowsPowerShellPath(), limitMs)
++      : platform === 'linux' ? linuxProcessTable(procRoot)
++      : Promise.reject(new Error(`No process listing exists for platform ${platform}.`));
++    const table = await Promise.race([read, limit]);
++    const tree = table.filter(p => p.pid === rootPid), seen = new Set([rootPid]);
++    for (let i = 0; i < tree.length; i++) {
++      for (const p of table) {
++        if (p.ppid === tree[i].pid && !seen.has(p.pid) && p.created >= tree[i].created) { seen.add(p.pid); tree.push(p); }
++      }
++    }
++    return tree.map(({ pid, ppid, command_line }) => ({ pid, ppid, command_line }));
++  } finally { clearTimeout(timer); }
++}
++/** The timeout section of a command log: the live process tree, or the reason that the listing failed. */
++async function timeoutSection(pid, timeoutMs, processListing) {
++  let lines;
++  try {
++    const tree = await listProcessTree(pid, processListing);
++    lines = [`TIMEOUT after ${timeoutMs} ms: the live process tree of PID ${pid} follows.`,
++      ...tree.map(p => `PROCESS ${JSON.stringify(p)}`)];
++    if (!tree.some(p => p.pid === pid)) lines.push(`TIMEOUT PID ${pid} is no longer running.`);
++  } catch (e) { lines = [`TIMEOUT after ${timeoutMs} ms: the process listing failed: ${e.message}`]; }
++  return [...lines, `TIMEOUT Stopping PID ${pid} and its descendants.`].join('\n') + '\n';
++}
++/** Stop a command and its descendants. */
++function stopProcessTree(child) {
++  if (process.platform === 'win32' && child.pid) {
++    const k = spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 10000 });
++    if (k.error || k.status !== 0) child.kill('SIGKILL');
++  } else if (child.pid) {
++    try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
++  }
++}
++/**
++ * Execute without a shell. OS sandboxing and disk quotas remain separate. Never rejects after argument validation.
++ * At the timeout, the log first receives the command's live process tree, and then the command and its descendants stop.
++ * `processListing` passes `powershell` or `procRoot` to `listProcessTree`.
++ */
++export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env, copyOutput, fileSystem, processListing } = {}) {
+   invariant(typeof executable === 'string' && Array.isArray(args), 'An executable and argument array are required.');
+   invariant(typeof logPath === 'string' && logPath.length > 0, 'A log path is required.');
+   const io = recordFs(fileSystem), copy = copyOutput ?? ((file, out) => copyFileToDescriptor(io, file, out));
+@@ -483,14 +583,16 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000,
+         env: env ? { ...process.env, ...env } : process.env, windowsHide: true, detached: process.platform !== 'win32' });
+       child.on('error', error => { errors.push(error.message); finish(null, null); });
+       child.on('close', (code, signal) => finish(code, signal));
+-      timer = setTimeout(() => {
++      timer = setTimeout(async () => {
+         timedOut = true;
+-        if (process.platform === 'win32' && child.pid) {
+-          const k = spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 10000 });
+-          if (k.error || k.status !== 0) child.kill('SIGKILL');
+-        } else if (child.pid) {
+-          try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
++        if (child.pid) {
++          const section = await timeoutSection(child.pid, timeoutMs, processListing);
++          // A command that ended during the listing has already closed its log and needs no stop.
++          if (settled) return;
++          try { writeLog(io, fd, Buffer.from(section)); }
++          catch (e) { errors.push(`Log write failed: ${e.message}`); }
+         }
++        stopProcessTree(child);
+       }, timeoutMs);
+     } catch (e) { errors.push(e.message); finish(null, null); }
+   });
+@@ -538,7 +640,8 @@ export function gateEnvironment(root, gate) {
+   // Keep compiler caches inside the repository's ignored build directory, not the user's global cache.
+   return gate.kind === 'zig' || gate.kind === 'c-abi' ? { ZIG_GLOBAL_CACHE_DIR: path.join(root, '.zig-cache', 'global') } : undefined;
+ }
+-export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
++/** Run one gate. `processListing` reaches `runProcess` for each command, so a test can make the timeout listing fail. */
++export async function runGate(root, id, { evidenceDir = 'out/evidence', processListing } = {}) {
+   const gate = readJson(safePath(root, 'engineering/gates.json')).gates.find(g => g.id === id);
+   invariant(gate, `Unknown gate: ${id}`);
+   const before = fingerprints(root);
+@@ -554,7 +657,7 @@ export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
+   let error = null, zigVersion = null;
+   const env = gateEnvironment(root, gate);
+   async function run(exe, argv) {
+-    const r = await runProcess(exe, argv, { cwd: root, logPath, timeoutMs: gate.timeout_ms, env });
++    const r = await runProcess(exe, argv, { cwd: root, logPath, timeoutMs: gate.timeout_ms, env, processListing });
+     commands.push(r);
+     invariant(r.exit_code === 0 && !r.signal && !r.timed_out && !r.error, `Gate command failed: ${JSON.stringify([exe, ...argv])}`);
+   }
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","152ed53..29a9f8e","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:55.871Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":23}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","152ed53..29a9f8e","--","src","tests","build.zig"]
+diff --git a/src/abi_generated.zig b/src/abi_generated.zig
+index f23f69d..acf6b43 100644
+--- a/src/abi_generated.zig
++++ b/src/abi_generated.zig
+@@ -121,6 +121,19 @@ pub const EngineOptions = extern struct {
+     max_outstanding_requests: u32,
+     /// The maximum size of one response body in bytes.
+     max_response_body_bytes: u64,
++    /// The most bytes that the engine's allocations may hold at once. 18446744073709551615 permits every allocation that the process allocator grants.
++    max_allocated_bytes: u64,
++};
++
++/// Output of `functions.fp_engine_get_memory`.
++pub const EngineMemory = extern struct {
++    struct_size: u32,
++    /// Always zero.
++    reserved: u32,
++    /// The bytes that the engine's live allocations hold.
++    allocated_bytes: u64,
++    /// The current limit.
++    max_allocated_bytes: u64,
+ };
+ 
+ /// Output of `functions.fp_document_get`.
+@@ -194,7 +207,7 @@ pub const functions = struct {
+     /// Statuses: `Status.ok`, `Status.invalid_argument`.
+     /// out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+     pub const fp_query_capabilities = fn (out: ?*Capabilities, out_size: usize) callconv(.c) u32;
+-    /// Creates an engine on the calling thread and stores it in the output.
++    /// Creates an engine on the calling thread and stores it in the output. Every allocation of the engine, including the engine itself, counts against the allocation limit of the options.
+     /// Thread: The calling thread becomes the owner of the engine that the call creates. The host must destroy the engine before that thread exits.
+     /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.limit_exceeded`, `Status.out_of_memory`.
+     /// options: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+@@ -206,6 +219,18 @@ pub const functions = struct {
+     /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`.
+     /// engine: input, non-null, consumed on success. A call that returns `Status.ok` ends the handle, and a call that returns any other status leaves the handle with the caller. Ends when `functions.fp_engine_destroy` destroys the engine.
+     pub const fp_engine_destroy = fn (engine: ?*Engine) callconv(.c) u32;
++    /// Initializes the declared engine memory structure with the bytes that the engine's live allocations hold and the current limit. The call allocates nothing.
++    /// Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns `Status.wrong_thread`.
++    /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`.
++    /// engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
++    /// out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
++    pub const fp_engine_get_memory = fn (engine: ?*Engine, out: ?*EngineMemory, out_size: usize) callconv(.c) u32;
++    /// Replaces the most bytes that the engine's allocations may hold at once. A limit below the bytes that the live allocations hold is accepted. An allocation that the limit refuses fails like any other allocation, so its call returns `Status.out_of_memory` and changes nothing. The call allocates nothing.
++    /// Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns `Status.wrong_thread`.
++    /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`.
++    /// engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
++    /// max_allocated_bytes: input. The new limit. 18446744073709551615 permits every allocation that the process allocator grants.
++    pub const fp_engine_set_memory_limit = fn (engine: ?*Engine, max_allocated_bytes: u64) callconv(.c) u32;
+     /// Creates an empty document and stores its identifier in the output.
+     /// Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns `Status.wrong_thread`.
+     /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`, `Status.limit_exceeded`, `Status.out_of_memory`.
+@@ -268,6 +293,8 @@ pub const statuses = struct {
+     pub const fp_query_capabilities: []const Status = &.{ .ok, .invalid_argument };
+     pub const fp_engine_create: []const Status = &.{ .ok, .invalid_argument, .limit_exceeded, .out_of_memory };
+     pub const fp_engine_destroy: []const Status = &.{ .ok, .invalid_argument, .wrong_thread };
++    pub const fp_engine_get_memory: []const Status = &.{ .ok, .invalid_argument, .wrong_thread };
++    pub const fp_engine_set_memory_limit: []const Status = &.{ .ok, .invalid_argument, .wrong_thread };
+     pub const fp_document_create: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .limit_exceeded, .out_of_memory };
+     pub const fp_document_destroy: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .unknown_id };
+     pub const fp_document_get: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .unknown_id };
+@@ -291,10 +318,16 @@ comptime {
+     if (@offsetOf(Capabilities, "struct_size") != 0) @compileError("Capabilities.struct_size differs from the offset that the schema implies.");
+     if (@offsetOf(Capabilities, "abi_revision") != 4) @compileError("Capabilities.abi_revision differs from the offset that the schema implies.");
+     if (@offsetOf(Capabilities, "feature_bits") != 8) @compileError("Capabilities.feature_bits differs from the offset that the schema implies.");
+-    if (@sizeOf(EngineOptions) != 16) @compileError("EngineOptions differs from the size that the schema implies.");
++    if (@sizeOf(EngineOptions) != 24) @compileError("EngineOptions differs from the size that the schema implies.");
+     if (@offsetOf(EngineOptions, "struct_size") != 0) @compileError("EngineOptions.struct_size differs from the offset that the schema implies.");
+     if (@offsetOf(EngineOptions, "max_outstanding_requests") != 4) @compileError("EngineOptions.max_outstanding_requests differs from the offset that the schema implies.");
+     if (@offsetOf(EngineOptions, "max_response_body_bytes") != 8) @compileError("EngineOptions.max_response_body_bytes differs from the offset that the schema implies.");
++    if (@offsetOf(EngineOptions, "max_allocated_bytes") != 16) @compileError("EngineOptions.max_allocated_bytes differs from the offset that the schema implies.");
++    if (@sizeOf(EngineMemory) != 24) @compileError("EngineMemory differs from the size that the schema implies.");
++    if (@offsetOf(EngineMemory, "struct_size") != 0) @compileError("EngineMemory.struct_size differs from the offset that the schema implies.");
++    if (@offsetOf(EngineMemory, "reserved") != 4) @compileError("EngineMemory.reserved differs from the offset that the schema implies.");
++    if (@offsetOf(EngineMemory, "allocated_bytes") != 8) @compileError("EngineMemory.allocated_bytes differs from the offset that the schema implies.");
++    if (@offsetOf(EngineMemory, "max_allocated_bytes") != 16) @compileError("EngineMemory.max_allocated_bytes differs from the offset that the schema implies.");
+     if (@sizeOf(DocumentInfo) != layout(24, 16)) @compileError("DocumentInfo differs from the size that the schema implies.");
+     if (@offsetOf(DocumentInfo, "struct_size") != 0) @compileError("DocumentInfo.struct_size differs from the offset that the schema implies.");
+     if (@offsetOf(DocumentInfo, "state") != 4) @compileError("DocumentInfo.state differs from the offset that the schema implies.");
+diff --git a/src/abi_scenarios.zig b/src/abi_scenarios.zig
+index c9083ae..37aa5bf 100644
+--- a/src/abi_scenarios.zig
++++ b/src/abi_scenarios.zig
+@@ -3,6 +3,7 @@
+ //! Every call binds an exported C symbol of the actual engine through its generated function type, as a foreign caller does.
+ //! Scenarios that need an allocator create the engine with `c_api.createEngine`, the allocator-taking form of `fp_engine_create`.
+ //! Some checks read the native engine's queue lengths to show that a failed call changed nothing.
++//! The allocation-failure scenario runs twice: once with a failing allocator, and once through the engine's memory limit alone, as C runs it.
+ 
+ const std = @import("std");
+ const abi = @import("abi_generated.zig");
+@@ -19,6 +20,8 @@ const fp_abi_revision = bind("fp_abi_revision");
+ const fp_query_capabilities = bind("fp_query_capabilities");
+ const fp_engine_create = bind("fp_engine_create");
+ const fp_engine_destroy = bind("fp_engine_destroy");
++const fp_engine_get_memory = bind("fp_engine_get_memory");
++const fp_engine_set_memory_limit = bind("fp_engine_set_memory_limit");
+ const fp_document_create = bind("fp_document_create");
+ const fp_document_destroy = bind("fp_document_destroy");
+ const fp_document_get = bind("fp_document_get");
+@@ -38,6 +41,7 @@ const out_of_memory = @backingInt(abi.Status.out_of_memory);
+ const wrong_thread = @backingInt(abi.Status.wrong_thread);
+ const reject_unsupported_version = @backingInt(abi.RejectReason.unsupported_version);
+ const never = std.math.maxInt(usize);
++const unlimited = std.math.maxInt(u64);
+ const pattern: u8 = 0xA5;
+ 
+ fn options(max_outstanding_requests: u32, max_response_body_bytes: u64) abi.EngineOptions {
+@@ -45,6 +49,7 @@ fn options(max_outstanding_requests: u32, max_response_body_bytes: u64) abi.Engi
+         .struct_size = @sizeOf(abi.EngineOptions),
+         .max_outstanding_requests = max_outstanding_requests,
+         .max_response_body_bytes = max_response_body_bytes,
++        .max_allocated_bytes = unlimited,
+     };
+ }
+ 
+@@ -110,6 +115,14 @@ fn nextEvent(engine: *abi.Engine) !abi.Event {
+     return event;
+ }
+ 
++fn memory(engine: *abi.Engine) !abi.EngineMemory {
++    var result: abi.EngineMemory = undefined;
++    try testing.expectEqual(ok, fp_engine_get_memory(engine, &result, @sizeOf(abi.EngineMemory)));
++    try testing.expectEqual(@sizeOf(abi.EngineMemory), result.struct_size);
++    try testing.expectEqual(0, result.reserved);
++    return result;
++}
++
+ /// Removes the next event and checks its kind, document, and request.
+ fn expectEvent(engine: *abi.Engine, kind: abi.EventKind, document: abi.DocumentId, request: abi.RequestId) !abi.Event {
+     const event = try nextEvent(engine);
+@@ -240,8 +253,8 @@ const ForeignThread = struct {
+     engine: *abi.Engine,
+     document: abi.DocumentId,
+     request: abi.RequestId,
+-    statuses: [10]u32 = @splat(ok),
+-    invalid_statuses: [14]u32 = @splat(ok),
++    statuses: [13]u32 = @splat(ok),
++    invalid_statuses: [16]u32 = @splat(ok),
+     revision: u32 = 99,
+     capabilities_status: u32 = 99,
+     document_out: abi.DocumentId = @fromBackingInt(77),
+@@ -249,6 +262,7 @@ const ForeignThread = struct {
+     info: abi.DocumentInfo = undefined,
+     outcome: abi.StepOutcome = undefined,
+     event: abi.Event = undefined,
++    memory: abi.EngineMemory = undefined,
+ 
+     fn run(calls: *ForeignThread) void {
+         const engine = calls.engine;
+@@ -275,6 +289,8 @@ const ForeignThread = struct {
+             fp_engine_step(engine, 8, &calls.outcome, @sizeOf(abi.StepOutcome) - 1),
+             fp_engine_next_event(engine, null, @sizeOf(abi.Event)),
+             fp_engine_next_event(engine, &calls.event, 0),
++            fp_engine_get_memory(engine, null, @sizeOf(abi.EngineMemory)),
++            fp_engine_get_memory(engine, &calls.memory, @sizeOf(abi.EngineMemory) - 1),
+         };
+         calls.statuses = .{
+             fp_document_create(engine, &calls.document_out),
+@@ -286,6 +302,10 @@ const ForeignThread = struct {
+             fp_request_cancel(engine, calls.request),
+             fp_engine_step(engine, 8, &calls.outcome, @sizeOf(abi.StepOutcome)),
+             fp_engine_next_event(engine, &calls.event, @sizeOf(abi.Event)),
++            fp_engine_get_memory(engine, &calls.memory, @sizeOf(abi.EngineMemory)),
++            // Every limit is valid, so the second call passes a different valid limit instead of an invalid argument.
++            fp_engine_set_memory_limit(engine, 0),
++            fp_engine_set_memory_limit(engine, unlimited),
+             fp_engine_destroy(engine),
+         };
+     }
+@@ -296,12 +316,17 @@ test "Scenario wrong-thread: every owner-thread function returns FP_STATUS_WRONG
+     defer destroyEngine(engine);
+     const document = try createDocument(engine);
+     const request = try load(engine, document, "https://example.test/thread");
++    // A limit that neither foreign limit call sets shows that neither one applied.
++    try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, unlimited - 1));
+     const before = snapshot(engine);
++    const before_memory = try memory(engine);
++    try testing.expectEqual(unlimited - 1, before_memory.max_allocated_bytes);
+ 
+     var calls: ForeignThread = .{ .engine = engine, .document = document, .request = request };
+     fill(&calls.info);
+     fill(&calls.outcome);
+     fill(&calls.event);
++    fill(&calls.memory);
+     const thread = try std.Thread.spawn(.{}, ForeignThread.run, .{&calls});
+     thread.join();
+ 
+@@ -314,7 +339,9 @@ test "Scenario wrong-thread: every owner-thread function returns FP_STATUS_WRONG
+     try expectFilled(&calls.info);
+     try expectFilled(&calls.outcome);
+     try expectFilled(&calls.event);
++    try expectFilled(&calls.memory);
+     try testing.expectEqual(before, snapshot(engine));
++    try testing.expectEqual(before_memory, try memory(engine));
+     try testing.expectEqual(abi.DocumentState.loading, try state(engine, document));
+     try respond(engine, request, "owner");
+ }
+@@ -563,6 +590,234 @@ test "Scenario allocation-failure: each allocating operation returns FP_STATUS_O
+     try testing.expectEqual(failing.allocated_bytes, failing.freed_bytes);
+ }
+ 
++/// The allocation-failure scenario through the memory limit alone, as a C caller runs it.
++/// With `recording` under the engine, a check after every call compares the engine's reported bytes with the bytes live in that allocator.
++const LimitRun = struct {
++    recording: ?*testing.FailingAllocator,
++    engine: *abi.Engine = undefined,
++    /// The scenario's documents, whose reported state a refused call leaves unchanged.
++    documents: [3]abi.DocumentId = undefined,
++    tracked: usize = 0,
++
++    /// What a refused call leaves unchanged.
++    const Observation = struct {
++        allocated_bytes: u64,
++        events_ready: u64,
++        work_remaining: u32,
++        documents: [3]abi.DocumentInfo,
++        native: Snapshot,
++    };
++
++    /// Checks that the engine reports exactly the bytes live in the recording allocator.
++    fn audit(run: *const LimitRun) !void {
++        const recording = run.recording orelse return;
++        try testing.expectEqual(@as(u64, recording.allocated_bytes - recording.freed_bytes), (try memory(run.engine)).allocated_bytes);
++    }
++
++    fn createEngine(run: *LimitRun, engine_options: abi.EngineOptions, out: *?*abi.Engine) u32 {
++        if (run.recording) |recording| return c_api.createEngine(recording.allocator(), &engine_options, out);
++        return fp_engine_create(&engine_options, out);
++    }
++
++    fn setLimit(run: *LimitRun, limit: u64) !void {
++        try testing.expectEqual(ok, fp_engine_set_memory_limit(run.engine, limit));
++        try run.audit();
++    }
++
++    /// Sets the limit to the allocated bytes that the engine reports.
++    fn limitToAllocated(run: *LimitRun) !void {
++        const allocated = (try memory(run.engine)).allocated_bytes;
++        try run.audit();
++        try run.setLimit(allocated);
++    }
++
++    fn newDocument(run: *LimitRun) !abi.DocumentId {
++        const document = try createDocument(run.engine);
++        try run.audit();
++        return document;
++    }
++
++    fn issue(run: *LimitRun, document: abi.DocumentId, url: []const u8) !abi.RequestId {
++        const request = try load(run.engine, document, url);
++        try run.audit();
++        return request;
++    }
++
++    fn expectState(run: *LimitRun, expected: abi.DocumentState, document: abi.DocumentId) !void {
++        try testing.expectEqual(expected, try state(run.engine, document));
++        try run.audit();
++    }
++
++    fn drainOne(run: *LimitRun) !abi.Event {
++        const event = try nextEvent(run.engine);
++        try run.audit();
++        return event;
++    }
++
++    fn track(run: *LimitRun, document: abi.DocumentId) void {
++        run.documents[run.tracked] = document;
++        run.tracked += 1;
++    }
++
++    fn observe(run: *LimitRun) !Observation {
++        var result: Observation = .{
++            .allocated_bytes = (try memory(run.engine)).allocated_bytes,
++            .events_ready = 0,
++            .work_remaining = 0,
++            .documents = std.mem.zeroes([3]abi.DocumentInfo),
++            .native = snapshot(run.engine),
++        };
++        try run.audit();
++        // A zero-budget step applies nothing and allocates nothing.
++        const outcome = try step(run.engine, 0);
++        try run.audit();
++        result.events_ready = outcome.events_ready;
++        result.work_remaining = outcome.work_remaining;
++        for (run.documents[0..run.tracked], result.documents[0..run.tracked]) |document, *slot| {
++            slot.* = try info(run.engine, document);
++            try run.audit();
++        }
++        return result;
++    }
++
++    /// Sets the limit to the allocated bytes, then one byte higher, and so on, until `context.attempt` succeeds.
++    /// Every earlier attempt must return FP_STATUS_OUT_OF_MEMORY and change nothing that the engine reports.
++    /// The limit is unlimited again afterward.
++    fn untilAllowed(run: *LimitRun, context: anytype) !void {
++        const before = try run.observe();
++        var extra: u64 = 0;
++        while (true) : (extra += 1) {
++            try run.setLimit(before.allocated_bytes + extra);
++            const result = try context.attempt(run.engine);
++            try run.audit();
++            if (result == ok) break;
++            try testing.expectEqual(out_of_memory, result);
++            try testing.expectEqual(before, try run.observe());
++        }
++        try testing.expect(extra > 0);
++        try run.setLimit(unlimited);
++    }
++
++    /// Rejects requests of new documents until a rejection at the limit fails, so the input queue is full.
++    /// A rejection allocates only when the input queue must grow.
++    fn fillInputs(run: *LimitRun) !void {
++        while (true) {
++            const request = try run.issue(try run.newDocument(), "https://example.test/input");
++            try run.limitToAllocated();
++            const result = fp_request_reject(run.engine, request, reject_unsupported_version);
++            try run.audit();
++            try run.setLimit(unlimited);
++            if (result == out_of_memory) return;
++            try testing.expectEqual(ok, result);
++        }
++    }
++
++    /// Reloads `spare` with an empty URL at the limit and reports whether the reload succeeded.
++    fn reloadAtLimit(run: *LimitRun, spare: abi.DocumentId) !bool {
++        try run.limitToAllocated();
++        var request: abi.RequestId = @fromBackingInt(0);
++        const result = fp_document_load(run.engine, spare, null, 0, &request);
++        try run.audit();
++        try run.setLimit(unlimited);
++        if (result == out_of_memory) return false;
++        try testing.expectEqual(ok, result);
++        return true;
++    }
++
++    /// Reloads `spare` until only the event slots that the outstanding requests reserve are free.
++    /// After two unlimited loads, the request table and map have a free entry, so a reload with an empty URL allocates only when the event queue must grow.
++    /// A reload announces two events, so a reload at the limit fails exactly when fewer than two slots beyond that floor are free.
++    fn fillEvents(run: *LimitRun, spare: abi.DocumentId) !void {
++        _ = try run.issue(spare, "");
++        _ = try run.issue(spare, "");
++        while (try run.reloadAtLimit(spare)) {}
++        // One slot or none beyond the floor is free, and draining an event frees one more.
++        try testing.expect((try run.drainOne()).kind != @backingInt(abi.EventKind.none));
++        if (!try run.reloadAtLimit(spare)) {
++            try testing.expect((try run.drainOne()).kind != @backingInt(abi.EventKind.none));
++            try testing.expect(try run.reloadAtLimit(spare));
++        }
++    }
++};
++
++fn limitScenario(recording: ?*testing.FailingAllocator) !void {
++    var run: LimitRun = .{ .recording = recording };
++    var refused = options(1024, 64);
++    refused.max_allocated_bytes = 0;
++    var handle: ?*abi.Engine = null;
++    try testing.expectEqual(out_of_memory, run.createEngine(refused, &handle));
++    try testing.expectEqual(null, handle);
++    if (recording) |live| try testing.expectEqual(0, live.allocations);
++    try testing.expectEqual(ok, run.createEngine(options(1024, 64), &handle));
++    run.engine = handle.?;
++    try run.audit();
++
++    var create: CreateDocument = .{};
++    try run.untilAllowed(&create);
++    const document = create.out;
++    run.track(document);
++
++    var load_document: LoadDocument = .{ .document = document };
++    try run.untilAllowed(&load_document);
++    try run.expectState(.loading, document);
++
++    var respond_answer: Answer = .{ .request = load_document.out, .kind = .response };
++    try run.untilAllowed(&respond_answer);
++
++    const rejected = try run.newDocument();
++    run.track(rejected);
++    var reject_answer: Answer = .{ .request = try run.issue(rejected, "https://example.test/rejected"), .kind = .rejection };
++    try run.fillInputs();
++    try run.untilAllowed(&reject_answer);
++
++    const cancelled = try run.newDocument();
++    run.track(cancelled);
++    var cancel_answer: Answer = .{ .request = try run.issue(cancelled, "https://example.test/cancelled"), .kind = .cancellation };
++    try run.fillInputs();
++    try run.untilAllowed(&cancel_answer);
++
++    const spare = try run.newDocument();
++    try run.fillEvents(spare);
++    var apply: Step = .{};
++    try run.untilAllowed(&apply);
++    try run.expectState(.loaded, document);
++    try run.expectState(.failed, rejected);
++    try run.expectState(.failed, cancelled);
++
++    const doomed = try run.newDocument();
++    const doomed_request = try run.issue(doomed, "https://example.test/doomed");
++    try run.fillEvents(spare);
++    // The load reserved the cancellation event, so the destruction succeeds with the limit at the allocated bytes.
++    try run.limitToAllocated();
++    try testing.expectEqual(ok, fp_document_destroy(run.engine, doomed));
++    try run.audit();
++    try run.setLimit(unlimited);
++    var last = try run.drainOne();
++    while (true) {
++        const event = try run.drainOne();
++        if (event.kind == @backingInt(abi.EventKind.none)) break;
++        last = event;
++    }
++    try testing.expectEqual(@backingInt(abi.EventKind.request_cancelled), last.kind);
++    try testing.expectEqual(@as(?abi.DocumentId, doomed), last.document_id.get());
++    try testing.expectEqual(@as(?abi.RequestId, doomed_request), last.request_id.get());
++    try expectUnknownDocument(run.engine, doomed);
++    try run.audit();
++
++    try testing.expectEqual(ok, fp_engine_destroy(run.engine));
++    if (recording) |live| try testing.expectEqual(live.allocated_bytes, live.freed_bytes);
++}
++
++test "Scenario allocation-failure: through the memory limit alone, each allocating operation returns FP_STATUS_OUT_OF_MEMORY until the limit admits it, and changes nothing" {
++    try limitScenario(null);
++}
++
++test "FP-0081 case 2: across the allocation-failure scenario through the limit, fp_engine_get_memory reports the bytes live in a recording allocator after every call" {
++    var recording: testing.FailingAllocator = .init(testing.allocator, .{});
++    try limitScenario(&recording);
++    try testing.expect(recording.allocations > 0);
++}
++
+ test "Scenario null-required-pointer: a null required pointer returns FP_STATUS_INVALID_ARGUMENT and writes nothing" {
+     try testing.expectEqual(invalid_argument, fp_query_capabilities(null, @sizeOf(abi.Capabilities)));
+     var untouched: ?*abi.Engine = @ptrFromInt(0x1000);
+diff --git a/src/c_api.zig b/src/c_api.zig
+index 7683146..0f0c3cb 100644
+--- a/src/c_api.zig
++++ b/src/c_api.zig
+@@ -109,8 +109,8 @@ fn inputRange(bytes: ?[*]const u8, len: usize) error{InvalidArgument}![]const u8
+     return error.InvalidArgument;
+ }
+ 
+-/// `fp_engine_create` with an explicit allocator.
+-/// Zig tests use it to inject allocation failure and to detect leaked engine storage.
++/// `fp_engine_create` with an explicit backing allocator, which `fp_engine_create` sets to the process allocator.
++/// Zig tests use it to inject allocation failure and to record every byte that an engine allocates.
+ pub fn createEngine(gpa: Allocator, options: ?*const abi.EngineOptions, out_engine: ?*?*abi.Engine) u32 {
+     return finish("fp_engine_create", engineCreate(gpa, options, out_engine));
+ }
+@@ -123,6 +123,7 @@ fn engineCreate(gpa: Allocator, options: ?*const abi.EngineOptions, out_engine:
+         .max_outstanding_requests = input.max_outstanding_requests,
+         // A bound beyond the address space admits every body that the host can present.
+         .max_response_body_bytes = std.math.cast(usize, input.max_response_body_bytes) orelse std.math.maxInt(usize),
++        .max_allocated_bytes = input.max_allocated_bytes,
+     });
+     out.* = @ptrCast(created);
+ }
+@@ -202,6 +203,32 @@ fn engineDestroy(handle: ?*abi.Engine) !void {
+     try engine.destroy();
+ }
+ 
++export fn fp_engine_get_memory(handle: ?*abi.Engine, out: ?*abi.EngineMemory, out_size: usize) callconv(.c) u32 {
++    return finish("fp_engine_get_memory", engineGetMemory(handle, out, out_size));
++}
++
++fn engineGetMemory(handle: ?*abi.Engine, out: ?*abi.EngineMemory, out_size: usize) !void {
++    const engine = try enter(handle);
++    const result = out orelse return error.InvalidArgument;
++    if (out_size < @sizeOf(abi.EngineMemory)) return error.InvalidArgument;
++    const memory = try engine.memory();
++    result.* = .{
++        .struct_size = @sizeOf(abi.EngineMemory),
++        .reserved = 0,
++        .allocated_bytes = memory.allocated_bytes,
++        .max_allocated_bytes = memory.max_allocated_bytes,
++    };
++}
++
++export fn fp_engine_set_memory_limit(handle: ?*abi.Engine, max_allocated_bytes: u64) callconv(.c) u32 {
++    return finish("fp_engine_set_memory_limit", engineSetMemoryLimit(handle, max_allocated_bytes));
++}
++
++fn engineSetMemoryLimit(handle: ?*abi.Engine, max_allocated_bytes: u64) !void {
++    const engine = try enter(handle);
++    try engine.setMemoryLimit(max_allocated_bytes);
++}
++
+ export fn fp_document_create(handle: ?*abi.Engine, out_document: ?*abi.DocumentId) callconv(.c) u32 {
+     return finish("fp_document_create", documentCreate(handle, out_document));
+ }
+@@ -332,8 +359,11 @@ const test_options: abi.EngineOptions = .{
+     .struct_size = @sizeOf(abi.EngineOptions),
+     .max_outstanding_requests = 64,
+     .max_response_body_bytes = 1024,
++    .max_allocated_bytes = unlimited,
+ };
+ 
++const unlimited = std.math.maxInt(u64);
++
+ fn createTestEngine(gpa: std.mem.Allocator) !*abi.Engine {
+     var handle: ?*abi.Engine = null;
+     try testing.expectEqual(ok, createEngine(gpa, &test_options, &handle));
+@@ -554,3 +584,203 @@ test "FP-0050 case 3: fp_document_destroy cannot return FP_STATUS_OUT_OF_MEMORY"
+         try testing.expect(found);
+     }
+ }
++
++fn memoryOf(engine: *abi.Engine) !abi.EngineMemory {
++    var result: abi.EngineMemory = undefined;
++    try testing.expectEqual(ok, fp_engine_get_memory(engine, &result, @sizeOf(abi.EngineMemory)));
++    try testing.expectEqual(@sizeOf(abi.EngineMemory), result.struct_size);
++    try testing.expectEqual(0, result.reserved);
++    return result;
++}
++
++/// The bytes that a recording allocator holds for its live allocations.
++fn liveBytes(recording: *const testing.FailingAllocator) u64 {
++    return recording.allocated_bytes - recording.freed_bytes;
++}
++
++test "FP-0081 case 3: createEngine with a limit below the bytes that creation needs returns FP_STATUS_OUT_OF_MEMORY, writes no engine, and allocates nothing" {
++    // An unlimited engine reports the bytes that creation needs.
++    var probe_recording: testing.FailingAllocator = .init(testing.allocator, .{});
++    const probe = try createTestEngine(probe_recording.allocator());
++    const needed = (try memoryOf(probe)).allocated_bytes;
++    try testing.expect(needed > 0);
++    try testing.expectEqual(liveBytes(&probe_recording), needed);
++    try testing.expectEqual(ok, fp_engine_destroy(probe));
++    try testing.expectEqual(0, liveBytes(&probe_recording));
++
++    var options = test_options;
++    for ([_]u64{ 0, needed - 1 }) |limit| {
++        var recording: testing.FailingAllocator = .init(testing.allocator, .{});
++        options.max_allocated_bytes = limit;
++        var handle: ?*abi.Engine = @ptrFromInt(0x1000);
++        try testing.expectEqual(out_of_memory, createEngine(recording.allocator(), &options, &handle));
++        try testing.expectEqual(@as(?*abi.Engine, @ptrFromInt(0x1000)), handle);
++        // The limit refused the engine record before any request reached the allocator.
++        try testing.expectEqual(0, recording.allocations);
++        try testing.expectEqual(0, recording.allocated_bytes);
++    }
++
++    var exact: testing.FailingAllocator = .init(testing.allocator, .{});
++    options.max_allocated_bytes = needed;
++    var handle: ?*abi.Engine = null;
++    try testing.expectEqual(ok, createEngine(exact.allocator(), &options, &handle));
++    const created = try memoryOf(handle.?);
++    try testing.expectEqual(needed, created.allocated_bytes);
++    try testing.expectEqual(needed, created.max_allocated_bytes);
++    try testing.expectEqual(ok, fp_engine_destroy(handle.?));
++    try testing.expectEqual(0, liveBytes(&exact));
++}
++
++/// Sets the limit one byte below the allocated bytes, checks that the engine reports it, and returns the allocated bytes.
++fn limitBelowAllocated(engine: *abi.Engine) !u64 {
++    const allocated = (try memoryOf(engine)).allocated_bytes;
++    try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, allocated - 1));
++    const limited = try memoryOf(engine);
++    try testing.expectEqual(allocated, limited.allocated_bytes);
++    try testing.expectEqual(allocated - 1, limited.max_allocated_bytes);
++    return allocated;
++}
++
++/// Rejects requests of new documents until the input queue is full, then returns an unanswered request of one more document.
++fn fillInputs(engine: *abi.Engine) !abi.RequestId {
++    const native_engine = nativeEngine(engine);
++    var document: abi.DocumentId = @fromBackingInt(0);
++    while (native_engine.inputs.buffer.len != native_engine.inputs.len) {
++        try testing.expectEqual(ok, fp_document_create(engine, &document));
++        const request = try loadUrl(engine, document, "https://example.test/input");
++        try testing.expectEqual(ok, fp_request_reject(engine, request, reject_unsupported_version));
++    }
++    try testing.expectEqual(ok, fp_document_create(engine, &document));
++    return loadUrl(engine, document, "https://example.test/unanswered");
++}
++
++test "FP-0081 case 4: a limit below the allocated bytes is accepted, every allocating call then returns FP_STATUS_OUT_OF_MEMORY, and a higher limit lets the same calls succeed" {
++    var options = test_options;
++    options.max_outstanding_requests = 1024;
++    var handle: ?*abi.Engine = null;
++    try testing.expectEqual(ok, createEngine(testing.allocator, &options, &handle));
++    const engine = handle.?;
++    defer testing.expectEqual(ok, fp_engine_destroy(engine)) catch unreachable;
++    const native_engine = nativeEngine(engine);
++
++    // The first document grows the empty identifier map and document table.
++    var allocated = try limitBelowAllocated(engine);
++    var document: abi.DocumentId = @fromBackingInt(0xD0C);
++    try testing.expectEqual(out_of_memory, fp_document_create(engine, &document));
++    try testing.expectEqual(0xD0C, @backingInt(document));
++    try testing.expectEqual(0, native_engine.documents.count());
++    try testing.expectEqual(allocated, (try memoryOf(engine)).allocated_bytes);
++    try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, unlimited));
++    try testing.expectEqual(ok, fp_document_create(engine, &document));
++
++    // A load copies its URL.
++    const url = "https://example.test/fp-0081-case-4";
++    var request: abi.RequestId = @fromBackingInt(0x5E0);
++    allocated = try limitBelowAllocated(engine);
++    try testing.expectEqual(out_of_memory, fp_document_load(engine, document, url, url.len, &request));
++    try testing.expectEqual(0x5E0, @backingInt(request));
++    try testing.expectEqual(document_empty, try documentState(engine, document));
++    try testing.expectEqual(0, native_engine.requests.count());
++    try testing.expectEqual(allocated, (try memoryOf(engine)).allocated_bytes);
++    try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, unlimited));
++    request = try loadUrl(engine, document, url);
++
++    // A response copies its body.
++    const response: abi.Response = .{ .struct_size = @sizeOf(abi.Response), .version = 1, .request_id = request, .body = "body", .body_len = 4 };
++    allocated = try limitBelowAllocated(engine);
++    try testing.expectEqual(out_of_memory, fp_request_respond(engine, &response));
++    try testing.expectEqual(0, native_engine.inputs.len);
++    try testing.expectEqual(allocated, (try memoryOf(engine)).allocated_bytes);
++    try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, unlimited));
++    try testing.expectEqual(ok, fp_request_respond(engine, &response));
++
++    // A rejection and a host cancellation grow a full input queue.
++    var cancelled = request;
++    for ([_]bool{ false, true }) |cancel| {
++        const unanswered = try fillInputs(engine);
++        const inputs = native_engine.inputs.len;
++        allocated = try limitBelowAllocated(engine);
++        const refused = if (cancel) fp_request_cancel(engine, unanswered) else fp_request_reject(engine, unanswered, reject_unsupported_version);
++        try testing.expectEqual(out_of_memory, refused);
++        try testing.expectEqual(inputs, native_engine.inputs.len);
++        try testing.expectEqual(allocated, (try memoryOf(engine)).allocated_bytes);
++        try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, unlimited));
++        const accepted = if (cancel) fp_request_cancel(engine, unanswered) else fp_request_reject(engine, unanswered, reject_unsupported_version);
++        try testing.expectEqual(ok, accepted);
++        cancelled = unanswered;
++    }
++
++    // A step that applies the host cancellation grows an event queue whose only free slots are the reserved ones.
++    var spare: abi.DocumentId = @fromBackingInt(0);
++    try testing.expectEqual(ok, fp_document_create(engine, &spare));
++    _ = try loadUrl(engine, spare, "https://example.test/spare");
++    while (native_engine.events.buffer.len - native_engine.events.len > native_engine.requests.count()) {
++        if (native_engine.events.buffer.len - native_engine.events.len == native_engine.requests.count() + 1) {
++            var event: abi.Event = undefined;
++            try testing.expectEqual(ok, fp_engine_next_event(engine, &event, @sizeOf(abi.Event)));
++        }
++        _ = try loadUrl(engine, spare, "https://example.test/spare");
++    }
++    const inputs = native_engine.inputs.len;
++    const events = native_engine.events.len;
++    var outcome: abi.StepOutcome = .{ .struct_size = 1, .work_remaining = 2, .applied = 3, .events_ready = 4, .next_deadline = 5 };
++    allocated = try limitBelowAllocated(engine);
++    try testing.expectEqual(out_of_memory, fp_engine_step(engine, std.math.maxInt(u32), &outcome, @sizeOf(abi.StepOutcome)));
++    try testing.expectEqual(3, outcome.applied);
++    try testing.expectEqual(inputs, native_engine.inputs.len);
++    try testing.expectEqual(events, native_engine.events.len);
++    try testing.expectEqual(allocated, (try memoryOf(engine)).allocated_bytes);
++    try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, unlimited));
++    try testing.expectEqual(ok, fp_engine_step(engine, std.math.maxInt(u32), &outcome, @sizeOf(abi.StepOutcome)));
++    try testing.expectEqual(inputs, outcome.applied);
++    try testing.expectEqual(document_loaded, try documentState(engine, document));
++    try testing.expectEqual(unknown_id, fp_request_cancel(engine, cancelled));
++}
++
++/// Calls both memory functions from a thread that does not own the engine, with valid and then invalid arguments.
++const MemoryCalls = struct {
++    engine: *abi.Engine,
++    memory: abi.EngineMemory = .{ .struct_size = 7, .reserved = 10, .allocated_bytes = 8, .max_allocated_bytes = 9 },
++    statuses: [5]u32 = @splat(ok),
++
++    fn run(calls: *MemoryCalls) void {
++        calls.statuses = .{
++            fp_engine_get_memory(calls.engine, &calls.memory, @sizeOf(abi.EngineMemory)),
++            fp_engine_get_memory(calls.engine, null, @sizeOf(abi.EngineMemory)),
++            fp_engine_get_memory(calls.engine, &calls.memory, @sizeOf(abi.EngineMemory) - 1),
++            fp_engine_set_memory_limit(calls.engine, 0),
++            fp_engine_set_memory_limit(calls.engine, unlimited),
++        };
++    }
++};
++
++test "FP-0081 case 5: invalid memory calls return FP_STATUS_INVALID_ARGUMENT and write nothing, and foreign calls return FP_STATUS_WRONG_THREAD first" {
++    const engine = try createTestEngine(testing.allocator);
++    defer testing.expectEqual(ok, fp_engine_destroy(engine)) catch unreachable;
++    const untouched: abi.EngineMemory = .{ .struct_size = 7, .reserved = 10, .allocated_bytes = 8, .max_allocated_bytes = 9 };
++
++    var memory = untouched;
++    const statuses = [_]u32{
++        fp_engine_get_memory(engine, &memory, @sizeOf(abi.EngineMemory) - 1),
++        fp_engine_get_memory(engine, &memory, 0),
++        fp_engine_get_memory(engine, null, @sizeOf(abi.EngineMemory)),
++        fp_engine_get_memory(null, &memory, @sizeOf(abi.EngineMemory)),
++        fp_engine_set_memory_limit(null, 0),
++    };
++    for (statuses) |status| try testing.expectEqual(invalid_argument, status);
++    try testing.expectEqual(untouched, memory);
++    try testing.expectEqual(unlimited, (try memoryOf(engine)).max_allocated_bytes);
++
++    // A limit that neither foreign call sets shows that neither one applied.
++    const before = try memoryOf(engine);
++    const limit = before.allocated_bytes + 4096;
++    try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, limit));
++    var calls: MemoryCalls = .{ .engine = engine };
++    const thread = try std.Thread.spawn(.{}, MemoryCalls.run, .{&calls});
++    thread.join();
++    for (calls.statuses) |status| try testing.expectEqual(wrong_thread, status);
++    try testing.expectEqual(untouched, calls.memory);
++    const after = try memoryOf(engine);
++    try testing.expectEqual(before.allocated_bytes, after.allocated_bytes);
++    try testing.expectEqual(limit, after.max_allocated_bytes);
++}
+diff --git a/src/dom.zig b/src/dom.zig
+index 37667a5..3934fc5 100644
+--- a/src/dom.zig
++++ b/src/dom.zig
+@@ -751,7 +751,19 @@ pub const Store = struct {
+         return null;
+     }
+ 
++    /// Whether `ancestor` is an inclusive ancestor of `node`.
++    /// Every ancestor has a child, so a node without children is an inclusive ancestor only of itself.
++    /// That shortcut answers the insertion of a new leaf without walking the ancestors of `node`,
++    /// which made building a chain of n elements take time quadratic in n.
++    /// `isInclusiveAncestorByWalk` is the reference that the shortcut must agree with.
+     fn isInclusiveAncestor(store: *Store, ancestor: NodeHandle, node: NodeHandle) bool {
++        if (sameNode(ancestor, node)) return true;
++        if (store.at(ancestor).first_child == null) return false;
++        return store.isInclusiveAncestorByWalk(ancestor, node);
++    }
++
++    /// The definition: walk the inclusive ancestors of `node`, looking for `ancestor`.
++    fn isInclusiveAncestorByWalk(store: *Store, ancestor: NodeHandle, node: NodeHandle) bool {
+         var cursor: ?NodeHandle = node;
+         while (cursor) |current| : (cursor = store.at(current).parent) {
+             if (sameNode(current, ancestor)) return true;
+@@ -1366,6 +1378,49 @@ test "FP-0009 case 2: every condition of ensure pre-insert validity returns its
+     }
+ }
+ 
++test "FP-0098: the leaf shortcut of the inclusive-ancestor check agrees with the ancestor walk for every pair of nodes" {
++    var store = try Store.init(testing.allocator);
++    defer store.deinit();
++    const s = &store;
++    const document = try newDocument(s);
++    const html = try newElement(s, document, "html");
++    const body = try newElement(s, document, "body");
++    const div = try newElement(s, document, "div");
++    const text = try newText(s, document, "t");
++    const p = try newElement(s, document, "p");
++    const fragment = try newFragment(s, document);
++    const span = try newElement(s, document, "span");
++    const em = try newElement(s, document, "em");
++    const lone = try newElement(s, document, "x");
++    const y = try newElement(s, document, "y");
++    const z = try newComment(s, document, "z");
++    try appendChecked(s, document, html);
++    try appendChecked(s, html, body);
++    try appendChecked(s, body, div);
++    try appendChecked(s, div, text);
++    try appendChecked(s, body, p);
++    try appendChecked(s, fragment, span);
++    try appendChecked(s, span, em);
++    try appendChecked(s, y, z);
++    const nodes = [_]NodeHandle{ document, html, body, div, text, p, fragment, span, em, lone, y, z };
++    var related: usize = 0;
++    for (nodes) |ancestor| {
++        for (nodes) |node| {
++            const expected = s.isInclusiveAncestorByWalk(ancestor, node);
++            try testing.expectEqual(expected, s.isInclusiveAncestor(ancestor, node));
++            related += @intFromBool(expected);
++        }
++    }
++    // Each node is its own inclusive ancestor, and the proper ancestor pairs are
++    // document over 5, html over 4, body over 3, div over 1, fragment over 2, span over 1, and y over 1.
++    try testing.expectEqual(nodes.len + 17, related);
++    try testing.expect(s.isInclusiveAncestor(html, text));
++    try testing.expect(s.isInclusiveAncestor(text, text));
++    try testing.expect(!s.isInclusiveAncestor(p, body));
++    try testing.expect(!s.isInclusiveAncestor(em, fragment));
++    try testing.expect(s.isInclusiveAncestor(fragment, em));
++}
++
+ test "FP-0009 case 3: every condition of the replace validity checks returns its standard error and changes nothing" {
+     var store = try Store.init(testing.allocator);
+     defer store.deinit();
+diff --git a/src/engine.zig b/src/engine.zig
+index 6f319a6..cb2a734 100644
+--- a/src/engine.zig
++++ b/src/engine.zig
+@@ -10,16 +10,23 @@
+ //!
+ //! Each operation reserves its storage, including event capacity, before it changes any state.
+ //! An allocation failure therefore leaves every engine, document, and request unchanged.
++//! An operation grows at most one container in place, as its last reservation.
++//! It reserves every other growth in new storage that it installs only after every reservation succeeded.
++//! A failed operation releases that new storage, so it also leaves the engine's allocated bytes unchanged.
+ //! A load also reserves one event slot for the eventual cancellation of its request.
+ //! After every operation, the event queue therefore has at least one unused slot for each outstanding request.
+ //! Destroying a document uses that slot, so it never allocates.
+ //! A step that applies a host cancellation announces two events but ends one request, so it can still need storage.
+ //!
++//! Each engine counts the bytes of its live allocations, including its own record, and refuses an allocation beyond its limit.
++//! A refused allocation is an allocation failure.
++//!
+ //! Internal generational handles stay inside this module.
+ //! Callers identify documents and requests by opaque process-wide identifiers.
+ 
+ const std = @import("std");
+ const handles = @import("handles.zig");
++const MemoryBudget = @import("memory_budget.zig").MemoryBudget;
+ const Allocator = std.mem.Allocator;
+ const assert = std.debug.assert;
+ const testing = std.testing;
+@@ -65,6 +72,17 @@ pub const Options = struct {
+     max_outstanding_requests: u32,
+     /// The maximum size of one response body in bytes.
+     max_response_body_bytes: usize,
++    /// The most bytes that the engine's allocations may hold at once, including the engine record.
++    /// `std.math.maxInt(u64)` permits every allocation that the backing allocator grants.
++    max_allocated_bytes: u64 = std.math.maxInt(u64),
++};
++
++/// The engine's allocated bytes and its limit.
++pub const Memory = struct {
++    /// The bytes that the engine's live allocations hold.
++    allocated_bytes: u64,
++    /// The current limit.
++    max_allocated_bytes: u64,
+ };
+ 
+ /// Announces that a request was issued or cancelled.
+@@ -191,30 +209,81 @@ fn announcementsFor(answer: Answer) usize {
+     };
+ }
+ 
++/// Reserves room for `unused` more items of `deque` in new storage, without changing `deque`.
++/// The result is empty when `deque` already has the room.
++/// `installDeque` moves the items into the result, and `deinit` on the result instead releases it.
++fn reserveDeque(comptime T: type, gpa: Allocator, deque: *const std.Deque(T), unused: usize) Allocator.Error!std.Deque(T) {
++    const needed = std.math.add(usize, deque.len, unused) catch return error.OutOfMemory;
++    if (deque.buffer.len >= needed) return .empty;
++    return .initCapacity(gpa, std.ArrayList(T).growCapacity(needed));
++}
++
++/// Moves the items of `deque` into the storage that `reserveDeque` returned. It never allocates.
++fn installDeque(comptime T: type, gpa: Allocator, deque: *std.Deque(T), reserved: std.Deque(T)) void {
++    if (reserved.buffer.len == 0) return;
++    var grown = reserved;
++    var items = deque.iterator();
++    while (items.next()) |item| grown.pushBackAssumeCapacity(item);
++    deque.deinit(gpa);
++    deque.* = grown;
++}
++
++/// Reserves room for `unused` more entries of `map` in a new map, without changing `map`.
++/// The result is empty when `map` already has the room.
++/// `installMap` moves the entries into the result, and `deinit` on the result instead releases it.
++fn reserveMap(gpa: Allocator, map: anytype, unused: u32) Allocator.Error!@TypeOf(map.*) {
++    // A map grows only when `unused` exceeds its `available` count, as its own `ensureUnusedCapacity` decides.
++    if (map.available >= unused) return .empty;
++    var reserved: @TypeOf(map.*) = .empty;
++    try reserved.ensureTotalCapacity(gpa, std.math.add(u32, map.count(), unused) catch return error.OutOfMemory);
++    return reserved;
++}
++
++/// Moves the entries of `map` into the map that `reserveMap` returned. It never allocates.
++fn installMap(gpa: Allocator, map: anytype, reserved: @TypeOf(map.*)) void {
++    if (reserved.capacity() == 0) return;
++    var grown = reserved;
++    var entries = map.iterator();
++    while (entries.next()) |entry| grown.putAssumeCapacityNoClobber(entry.key_ptr.*, entry.value_ptr.*);
++    map.deinit(gpa);
++    map.* = grown;
++}
++
+ /// A single-thread engine.
+ /// The thread that creates an engine owns it, and every call from another thread returns `error.WrongThread`.
+ /// The host must destroy an engine before the thread that created it exits, because the system can reuse the identifier of an exited thread.
+ pub const Engine = struct {
++    /// Counts every allocation of the engine against its limit.
++    /// It holds the current limit, which `setMemoryLimit` replaces, so `options.max_allocated_bytes` is only the initial limit.
++    budget: MemoryBudget,
++    /// The allocator of `budget`.
+     gpa: Allocator,
+     options: Options,
+     thread: std.Thread.Id,
+     owner: handles.OwnerId,
+     documents: DocumentTable,
+     requests: RequestTable,
+-    document_ids: std.AutoHashMapUnmanaged(DocumentId, DocumentTable.Handle),
+-    request_ids: std.AutoHashMapUnmanaged(RequestId, RequestTable.Handle),
++    document_ids: DocumentIds,
++    request_ids: RequestIds,
+     inputs: std.Deque(Input),
+     events: std.Deque(Event),
+ 
++    const DocumentIds = std.AutoHashMapUnmanaged(DocumentId, DocumentTable.Handle);
++    const RequestIds = std.AutoHashMapUnmanaged(RequestId, RequestTable.Handle);
++
+     /// Issues fresh owner identities for the engine and for each handle table.
+-    /// `gpa` must outlive the engine.
+-    pub fn create(gpa: Allocator, options: Options) CreateError!*Engine {
++    /// The engine allocates from `backing` through its budget, and the engine record counts against `options.max_allocated_bytes`.
++    /// `backing` must outlive the engine.
++    pub fn create(backing: Allocator, options: Options) CreateError!*Engine {
+         const owner = handles.issueEngineOwnerId() catch return error.IdentifiersExhausted;
+         const documents_owner = handles.issueEngineOwnerId() catch return error.IdentifiersExhausted;
+         const requests_owner = handles.issueEngineOwnerId() catch return error.IdentifiersExhausted;
+-        const engine = try gpa.create(Engine);
++        // The record holds the budget, so the budget counts the record before it moves into it.
++        var budget: MemoryBudget = .init(backing, options.max_allocated_bytes);
++        const engine = try budget.allocator().create(Engine);
+         engine.* = .{
+-            .gpa = gpa,
++            .budget = budget,
++            .gpa = undefined,
+             .options = options,
+             .thread = std.Thread.getCurrentId(),
+             .owner = owner,
+@@ -225,11 +294,13 @@ pub const Engine = struct {
+             .inputs = .empty,
+             .events = .empty,
+         };
++        engine.gpa = engine.budget.allocator();
+         return engine;
+     }
+ 
+     /// Releases the engine and everything it owns.
+     /// That includes documents, outstanding requests, queued answers, and undrained events.
++    /// Afterward, nothing that the engine allocated remains.
+     pub fn destroy(engine: *Engine) ThreadError!void {
+         try engine.checkThread();
+         const gpa = engine.gpa;
+@@ -245,22 +316,43 @@ pub const Engine = struct {
+         engine.request_ids.deinit(gpa);
+         engine.documents.deinit(gpa);
+         engine.requests.deinit(gpa);
+-        gpa.destroy(engine);
++        // The record holds the budget, so a copy of the budget releases the record.
++        var budget = engine.budget;
++        budget.allocator().destroy(engine);
++        assert(budget.allocated_bytes == 0);
+     }
+ 
+     pub fn checkThread(engine: *const Engine) ThreadError!void {
+         if (std.Thread.getCurrentId() != engine.thread) return error.WrongThread;
+     }
+ 
++    /// Reports the engine's allocated bytes and its limit. It allocates nothing.
++    pub fn memory(engine: *const Engine) ThreadError!Memory {
++        try engine.checkThread();
++        return .{ .allocated_bytes = engine.budget.allocated_bytes, .max_allocated_bytes = engine.budget.max_allocated_bytes };
++    }
++
++    /// Replaces the limit. It allocates nothing.
++    /// A limit below the allocated bytes is valid, and it refuses every later growth until enough bytes are released.
++    pub fn setMemoryLimit(engine: *Engine, max_allocated_bytes: u64) ThreadError!void {
++        try engine.checkThread();
++        engine.budget.max_allocated_bytes = max_allocated_bytes;
++    }
++
+     /// Creates an `empty` document.
+     pub fn createDocument(engine: *Engine) CreateDocumentError!DocumentId {
+         try engine.checkThread();
+-        try engine.document_ids.ensureUnusedCapacity(engine.gpa, 1);
++        const gpa = engine.gpa;
++        var document_ids = try reserveMap(gpa, &engine.document_ids, 1);
++        errdefer document_ids.deinit(gpa);
+         const id: DocumentId = @fromBackingInt(try issueIdentifier());
+-        const handle = engine.documents.insert(engine.gpa, .{ .id = id, .state = .empty, .request = null, .body = no_bytes }) catch |err| return switch (err) {
++        const handle = engine.documents.insert(gpa, .{ .id = id, .state = .empty, .request = null, .body = no_bytes }) catch |err| return switch (err) {
+             error.OutOfMemory => error.OutOfMemory,
+             error.HandleSpaceExhausted => error.LimitExceeded,
+         };
++
++        // Every reservation succeeded, so nothing below can fail.
++        installMap(gpa, &engine.document_ids, document_ids);
+         engine.document_ids.putAssumeCapacityNoClobber(id, handle);
+         return id;
+     }
+@@ -303,8 +395,10 @@ pub const Engine = struct {
+         // Afterward, each outstanding request, including the one that the load issues, keeps one reserved slot.
+         // A reload ends the request that it replaces, so it adds no outstanding request.
+         const added: usize = @intFromBool(previous == null);
+-        try engine.events.ensureUnusedCapacity(gpa, engine.requests.count() + added + 2);
+-        try engine.request_ids.ensureUnusedCapacity(gpa, 1);
++        var events = try reserveDeque(Event, gpa, &engine.events, engine.requests.count() + added + 2);
++        errdefer events.deinit(gpa);
++        var request_ids = try reserveMap(gpa, &engine.request_ids, 1);
++        errdefer request_ids.deinit(gpa);
+         const url_copy = try gpa.dupe(u8, url);
+         errdefer gpa.free(url_copy);
+         const request_id: RequestId = @fromBackingInt(try issueIdentifier());
+@@ -321,6 +415,8 @@ pub const Engine = struct {
+         };
+ 
+         // Every reservation succeeded, so nothing below can fail.
++        installDeque(Event, gpa, &engine.events, events);
++        installMap(gpa, &engine.request_ids, request_ids);
+         engine.request_ids.putAssumeCapacityNoClobber(request_id, request_handle);
+         if (previous) |request| engine.withdrawRequest(request);
+         engine.events.pushBackAssumeCapacity(.{ .request_issued = .{
+@@ -356,8 +452,10 @@ pub const Engine = struct {
+         const handle = try engine.unansweredRequest(request);
+         if (version != (engine.requests.get(handle) catch unreachable).version) return error.UnsupportedVersion;
+         if (body.len > engine.options.max_response_body_bytes) return error.LimitExceeded;
+-        try engine.inputs.ensureUnusedCapacity(engine.gpa, 1);
+         const body_copy = try engine.gpa.dupe(u8, body);
++        errdefer engine.gpa.free(body_copy);
++        // The queue grows in place last, so a failed growth leaves only the copy to release.
++        try engine.inputs.ensureUnusedCapacity(engine.gpa, 1);
+         engine.queueAnswer(handle, .{ .response = body_copy });
+     }
+ 
+diff --git a/src/memory_budget.zig b/src/memory_budget.zig
+new file mode 100644
+index 0000000..550a844
+--- /dev/null
++++ b/src/memory_budget.zig
+@@ -0,0 +1,153 @@
++//! A byte budget over a backing allocator.
++//!
++//! The budget counts the byte lengths that its user requests, and it refuses any allocation or growth beyond its limit.
++//! It does not count allocator overhead or alignment padding, so the count is the same on every allocator and platform.
++//! A refused request never reaches the backing allocator.
++//! A shrink and a free never fail on the limit, and they reduce the count by the bytes that they release.
++//! A budget is not thread-safe, so only one thread may use it at a time.
++
++const std = @import("std");
++const Allocator = std.mem.Allocator;
++const Alignment = std.mem.Alignment;
++const testing = std.testing;
++
++pub const MemoryBudget = struct {
++    backing: Allocator,
++    /// The bytes that the live allocations hold.
++    allocated_bytes: u64,
++    /// The most bytes that the live allocations may hold at once.
++    /// `std.math.maxInt(u64)` permits every allocation that the backing allocator grants.
++    /// A limit below `allocated_bytes` is valid, and it refuses every growth until enough bytes are released.
++    max_allocated_bytes: u64,
++
++    pub fn init(backing: Allocator, max_allocated_bytes: u64) MemoryBudget {
++        return .{ .backing = backing, .allocated_bytes = 0, .max_allocated_bytes = max_allocated_bytes };
++    }
++
++    /// The returned allocator refers to `budget`, so `budget` must not move while the allocator is in use.
++    pub fn allocator(budget: *MemoryBudget) Allocator {
++        return .{ .ptr = budget, .vtable = &vtable };
++    }
++
++    const vtable: Allocator.VTable = .{ .alloc = alloc, .resize = resize, .remap = remap, .free = free };
++
++    /// Whether the live allocations and `bytes` more fit within the limit.
++    fn admits(budget: *const MemoryBudget, bytes: usize) bool {
++        const total = std.math.add(u64, budget.allocated_bytes, bytes) catch return false;
++        return total <= budget.max_allocated_bytes;
++    }
++
++    /// Whether the limit admits changing an allocation from `old_len` to `new_len` bytes.
++    /// A shrink is always admitted.
++    fn admitsChange(budget: *const MemoryBudget, old_len: usize, new_len: usize) bool {
++        return new_len <= old_len or budget.admits(new_len - old_len);
++    }
++
++    /// Records a granted change of one allocation from `old_len` to `new_len` bytes.
++    fn record(budget: *MemoryBudget, old_len: usize, new_len: usize) void {
++        if (new_len >= old_len) {
++            budget.allocated_bytes += new_len - old_len;
++        } else {
++            budget.allocated_bytes -= old_len - new_len;
++        }
++    }
++
++    fn alloc(context: *anyopaque, len: usize, alignment: Alignment, return_address: usize) ?[*]u8 {
++        const budget: *MemoryBudget = @ptrCast(@alignCast(context));
++        if (!budget.admits(len)) return null;
++        const result = budget.backing.rawAlloc(len, alignment, return_address) orelse return null;
++        budget.allocated_bytes += len;
++        return result;
++    }
++
++    fn resize(context: *anyopaque, memory: []u8, alignment: Alignment, new_len: usize, return_address: usize) bool {
++        const budget: *MemoryBudget = @ptrCast(@alignCast(context));
++        if (!budget.admitsChange(memory.len, new_len)) return false;
++        if (!budget.backing.rawResize(memory, alignment, new_len, return_address)) return false;
++        budget.record(memory.len, new_len);
++        return true;
++    }
++
++    fn remap(context: *anyopaque, memory: []u8, alignment: Alignment, new_len: usize, return_address: usize) ?[*]u8 {
++        const budget: *MemoryBudget = @ptrCast(@alignCast(context));
++        if (!budget.admitsChange(memory.len, new_len)) return null;
++        const result = budget.backing.rawRemap(memory, alignment, new_len, return_address) orelse return null;
++        budget.record(memory.len, new_len);
++        return result;
++    }
++
++    fn free(context: *anyopaque, memory: []u8, alignment: Alignment, return_address: usize) void {
++        const budget: *MemoryBudget = @ptrCast(@alignCast(context));
++        budget.backing.rawFree(memory, alignment, return_address);
++        budget.allocated_bytes -= memory.len;
++    }
++};
++
++/// The bytes that a recording allocator holds for its live allocations.
++fn liveBytes(recording: *const testing.FailingAllocator) u64 {
++    return recording.allocated_bytes - recording.freed_bytes;
++}
++
++test "FP-0081 case 1: the budget admits exactly the remaining bytes, refuses one byte more, and never refuses a shrink or a free" {
++    // A fixed buffer grants every in-place resize and remap of its last allocation, so only the budget can refuse one.
++    var storage: [256]u8 = undefined;
++    var fixed: std.heap.FixedBufferAllocator = .init(&storage);
++    var recording: testing.FailingAllocator = .init(fixed.allocator(), .{});
++    var budget: MemoryBudget = .init(recording.allocator(), 64);
++    const gpa = budget.allocator();
++    const byte: Alignment = .of(u8);
++
++    // An allocation of exactly the remaining bytes succeeds, and one byte more fails.
++    const first = gpa.rawAlloc(16, byte, @returnAddress()).?;
++    try testing.expectEqual(16, budget.allocated_bytes);
++    try testing.expectEqual(null, gpa.rawAlloc(49, byte, @returnAddress()));
++    try testing.expectEqual(16, budget.allocated_bytes);
++    try testing.expectEqual(1, recording.allocations);
++    const second = gpa.rawAlloc(48, byte, @returnAddress()).?;
++    try testing.expectEqual(64, budget.allocated_bytes);
++    try testing.expectEqual(liveBytes(&recording), budget.allocated_bytes);
++    try testing.expectEqual(null, gpa.rawAlloc(1, byte, @returnAddress()));
++    try testing.expectEqual(2, recording.allocations);
++
++    // A free reduces the count by the released bytes. It frees the last allocation, so `first` can grow in place.
++    gpa.rawFree(second[0..48], byte, @returnAddress());
++    try testing.expectEqual(16, budget.allocated_bytes);
++    try testing.expectEqual(liveBytes(&recording), budget.allocated_bytes);
++
++    // A growing resize of exactly the remaining bytes succeeds, and one byte more fails.
++    try testing.expect(!gpa.rawResize(first[0..16], byte, 16 + 49, @returnAddress()));
++    try testing.expectEqual(16, budget.allocated_bytes);
++    try testing.expectEqual(0, recording.resize_index);
++    try testing.expect(gpa.rawResize(first[0..16], byte, 64, @returnAddress()));
++    try testing.expectEqual(64, budget.allocated_bytes);
++    try testing.expectEqual(liveBytes(&recording), budget.allocated_bytes);
++
++    // A shrinking resize succeeds even under a limit below the count, and it reduces the count by the released bytes.
++    budget.max_allocated_bytes = 0;
++    try testing.expect(gpa.rawResize(first[0..64], byte, 16, @returnAddress()));
++    try testing.expectEqual(16, budget.allocated_bytes);
++    try testing.expectEqual(liveBytes(&recording), budget.allocated_bytes);
++
++    // A growing remap of exactly the remaining bytes succeeds, and one byte more fails.
++    budget.max_allocated_bytes = 64;
++    try testing.expectEqual(null, gpa.rawRemap(first[0..16], byte, 16 + 49, @returnAddress()));
++    try testing.expectEqual(16, budget.allocated_bytes);
++    const remapped = gpa.rawRemap(first[0..16], byte, 64, @returnAddress()).?;
++    try testing.expectEqual(64, budget.allocated_bytes);
++    try testing.expectEqual(liveBytes(&recording), budget.allocated_bytes);
++
++    // A shrinking remap and a free succeed even under a limit below the count.
++    budget.max_allocated_bytes = 0;
++    const shrunk = gpa.rawRemap(remapped[0..64], byte, 8, @returnAddress()).?;
++    try testing.expectEqual(8, budget.allocated_bytes);
++    try testing.expectEqual(liveBytes(&recording), budget.allocated_bytes);
++    gpa.rawFree(shrunk[0..8], byte, @returnAddress());
++    try testing.expectEqual(0, budget.allocated_bytes);
++    try testing.expectEqual(0, liveBytes(&recording));
++}
++
++test "the budget refuses a request whose count would overflow" {
++    var budget: MemoryBudget = .init(testing.allocator, std.math.maxInt(u64));
++    budget.allocated_bytes = std.math.maxInt(u64);
++    try testing.expectEqual(null, budget.allocator().rawAlloc(1, .of(u8), @returnAddress()));
++}
+diff --git a/src/root.zig b/src/root.zig
+index 5a24235..df4e806 100644
+--- a/src/root.zig
++++ b/src/root.zig
+@@ -26,6 +26,7 @@ test {
+     // The laboratory drives the engine but is not part of the library's API.
+     _ = @import("lab.zig");
+     _ = handles;
++    _ = @import("memory_budget.zig");
+     _ = js;
+     _ = unicode;
+     _ = @import("unicode/properties_test.zig");
+diff --git a/tests/c/abi_layout.h b/tests/c/abi_layout.h
+index 3168025..8f24173 100644
+--- a/tests/c/abi_layout.h
++++ b/tests/c/abi_layout.h
+@@ -17,10 +17,17 @@ _Static_assert(offsetof(fp_capabilities, struct_size) == 0, "fp_capabilities.str
+ _Static_assert(offsetof(fp_capabilities, abi_revision) == 4, "fp_capabilities.abi_revision differs from the offset that the schema implies.");
+ _Static_assert(offsetof(fp_capabilities, feature_bits) == 8, "fp_capabilities.feature_bits differs from the offset that the schema implies.");
+ 
+-_Static_assert(sizeof(fp_engine_options) == 16, "fp_engine_options differs from the size that the schema implies.");
++_Static_assert(sizeof(fp_engine_options) == 24, "fp_engine_options differs from the size that the schema implies.");
+ _Static_assert(offsetof(fp_engine_options, struct_size) == 0, "fp_engine_options.struct_size differs from the offset that the schema implies.");
+ _Static_assert(offsetof(fp_engine_options, max_outstanding_requests) == 4, "fp_engine_options.max_outstanding_requests differs from the offset that the schema implies.");
+ _Static_assert(offsetof(fp_engine_options, max_response_body_bytes) == 8, "fp_engine_options.max_response_body_bytes differs from the offset that the schema implies.");
++_Static_assert(offsetof(fp_engine_options, max_allocated_bytes) == 16, "fp_engine_options.max_allocated_bytes differs from the offset that the schema implies.");
++
++_Static_assert(sizeof(fp_engine_memory) == 24, "fp_engine_memory differs from the size that the schema implies.");
++_Static_assert(offsetof(fp_engine_memory, struct_size) == 0, "fp_engine_memory.struct_size differs from the offset that the schema implies.");
++_Static_assert(offsetof(fp_engine_memory, reserved) == 4, "fp_engine_memory.reserved differs from the offset that the schema implies.");
++_Static_assert(offsetof(fp_engine_memory, allocated_bytes) == 8, "fp_engine_memory.allocated_bytes differs from the offset that the schema implies.");
++_Static_assert(offsetof(fp_engine_memory, max_allocated_bytes) == 16, "fp_engine_memory.max_allocated_bytes differs from the offset that the schema implies.");
+ 
+ _Static_assert(sizeof(fp_document_info) == (sizeof(void *) == 8 ? 24 : 16), "fp_document_info differs from the size that the schema implies.");
+ _Static_assert(offsetof(fp_document_info, struct_size) == 0, "fp_document_info.struct_size differs from the offset that the schema implies.");
+diff --git a/tests/c/abi_smoke.c b/tests/c/abi_smoke.c
+index 8541a09..747131a 100644
+--- a/tests/c/abi_smoke.c
++++ b/tests/c/abi_smoke.c
+@@ -1,6 +1,7 @@
+ /* The C smoke test. It runs every failure scenario of api/failure-scenarios.json that C can express.
+  * Each scenario function names its identifier, and main runs every one.
+- * Before the scenarios, main runs the FP-0006 lifecycle check and the FP-0050 reject, cancel, and empty-range checks.
++ * Before the scenarios, main runs the FP-0006 lifecycle check, the FP-0050 reject, cancel, and empty-range checks,
++ * and the FP-0081 memory argument checks.
+  */
+ #if !defined(_WIN32)
+ #  define _POSIX_C_SOURCE 200809L
+@@ -46,7 +47,7 @@ static int is_filled(const void *bytes, size_t size, unsigned char value) {
+ static void check_document_lifecycle(void) {
+     static const char url[] = "https://example.test/c-smoke";
+     static const char body[] = "<p>C smoke</p>";
+-    fp_engine_options options = {sizeof(fp_engine_options), 4, 1024};
++    fp_engine_options options = {sizeof(fp_engine_options), 4, 1024, UINT64_MAX};
+     fp_engine *engine = NULL;
+     fp_engine *untouched = (fp_engine *)&options;
+ 
+@@ -144,7 +145,7 @@ static void check_document_lifecycle(void) {
+ }
+ 
+ static fp_engine *create_engine(uint32_t max_outstanding_requests, uint64_t max_response_body_bytes) {
+-    fp_engine_options options = {sizeof(fp_engine_options), max_outstanding_requests, max_response_body_bytes};
++    fp_engine_options options = {sizeof(fp_engine_options), max_outstanding_requests, max_response_body_bytes, UINT64_MAX};
+     fp_engine *engine = NULL;
+     assert(fp_engine_create(&options, &engine) == FP_STATUS_OK);
+     assert(engine != NULL);
+@@ -318,6 +319,43 @@ static void check_empty_ranges(void) {
+     destroy_engine(engine);
+ }
+ 
++/* The allocated bytes and the limit that an engine reports. */
++static fp_engine_memory engine_memory(fp_engine *engine) {
++    fp_engine_memory memory;
++    assert(fp_engine_get_memory(engine, &memory, sizeof(memory)) == FP_STATUS_OK);
++    assert(memory.struct_size == sizeof(memory) && memory.reserved == 0);
++    return memory;
++}
++
++static void set_limit(fp_engine *engine, uint64_t limit) {
++    assert(fp_engine_set_memory_limit(engine, limit) == FP_STATUS_OK);
++}
++
++static void limit_to_allocated(fp_engine *engine) {
++    set_limit(engine, engine_memory(engine).allocated_bytes);
++}
++
++/* FP-0081 case 5: invalid memory calls return FP_STATUS_INVALID_ARGUMENT and write nothing.
++ * Scenario wrong-thread covers both functions from a foreign thread. */
++static void check_engine_memory(void) {
++    fp_engine *engine = create_engine(4, 16);
++    fp_engine_memory memory;
++    memset(&memory, 0xA5, sizeof(memory));
++    assert(fp_engine_get_memory(engine, &memory, sizeof(memory) - 1) == FP_STATUS_INVALID_ARGUMENT);
++    assert(fp_engine_get_memory(engine, &memory, 0) == FP_STATUS_INVALID_ARGUMENT);
++    assert(fp_engine_get_memory(engine, NULL, sizeof(memory)) == FP_STATUS_INVALID_ARGUMENT);
++    assert(fp_engine_get_memory(NULL, &memory, sizeof(memory)) == FP_STATUS_INVALID_ARGUMENT);
++    assert(fp_engine_set_memory_limit(NULL, 0) == FP_STATUS_INVALID_ARGUMENT);
++    assert(is_filled(&memory, sizeof(memory), 0xA5));
++
++    memory = engine_memory(engine);
++    assert(memory.allocated_bytes > 0 && memory.max_allocated_bytes == UINT64_MAX);
++    set_limit(engine, 0);
++    fp_engine_memory limited = engine_memory(engine);
++    assert(limited.allocated_bytes == memory.allocated_bytes && limited.max_allocated_bytes == 0);
++    destroy_engine(engine);
++}
++
+ /* Scenario unknown-identifier: zero, never-issued, and other-family identifiers return FP_STATUS_UNKNOWN_ID. */
+ static void scenario_unknown_identifier(void) {
+     fp_engine *engine = create_engine(4, 16);
+@@ -381,8 +419,8 @@ struct foreign_calls {
+     fp_engine *engine;
+     fp_document_id document;
+     fp_request_id request;
+-    uint32_t statuses[10];
+-    uint32_t invalid_statuses[14];
++    uint32_t statuses[13];
++    uint32_t invalid_statuses[16];
+     uint32_t revision;
+     uint32_t capabilities_status;
+     fp_document_id document_out;
+@@ -390,6 +428,7 @@ struct foreign_calls {
+     fp_document_info info;
+     fp_step_outcome outcome;
+     fp_event event;
++    fp_engine_memory memory;
+ };
+ 
+ static void run_foreign_calls(struct foreign_calls *calls) {
+@@ -416,6 +455,8 @@ static void run_foreign_calls(struct foreign_calls *calls) {
+     calls->invalid_statuses[11] = fp_engine_step(engine, 8, &calls->outcome, sizeof(calls->outcome) - 1);
+     calls->invalid_statuses[12] = fp_engine_next_event(engine, NULL, sizeof(calls->event));
+     calls->invalid_statuses[13] = fp_engine_next_event(engine, &calls->event, 0);
++    calls->invalid_statuses[14] = fp_engine_get_memory(engine, NULL, sizeof(calls->memory));
++    calls->invalid_statuses[15] = fp_engine_get_memory(engine, &calls->memory, sizeof(calls->memory) - 1);
+     calls->statuses[0] = fp_document_create(engine, &calls->document_out);
+     calls->statuses[1] = fp_document_destroy(engine, calls->document);
+     calls->statuses[2] = fp_document_get(engine, calls->document, &calls->info, sizeof(calls->info));
+@@ -425,7 +466,11 @@ static void run_foreign_calls(struct foreign_calls *calls) {
+     calls->statuses[6] = fp_request_cancel(engine, calls->request);
+     calls->statuses[7] = fp_engine_step(engine, 8, &calls->outcome, sizeof(calls->outcome));
+     calls->statuses[8] = fp_engine_next_event(engine, &calls->event, sizeof(calls->event));
+-    calls->statuses[9] = fp_engine_destroy(engine);
++    calls->statuses[9] = fp_engine_get_memory(engine, &calls->memory, sizeof(calls->memory));
++    /* Every limit is valid, so the second call passes a different valid limit instead of an invalid argument. */
++    calls->statuses[10] = fp_engine_set_memory_limit(engine, 0);
++    calls->statuses[11] = fp_engine_set_memory_limit(engine, UINT64_MAX);
++    calls->statuses[12] = fp_engine_destroy(engine);
+ }
+ 
+ #if defined(_WIN32)
+@@ -459,6 +504,10 @@ static void scenario_wrong_thread(void) {
+     fp_engine *engine = create_engine(4, 16);
+     fp_document_id document = create_document(engine);
+     fp_request_id request = load(engine, document, "https://example.test/thread");
++    /* A limit that neither foreign limit call sets shows that neither one applied. */
++    assert(fp_engine_set_memory_limit(engine, UINT64_MAX - 1) == FP_STATUS_OK);
++    fp_engine_memory before;
++    assert(fp_engine_get_memory(engine, &before, sizeof(before)) == FP_STATUS_OK);
+     struct foreign_calls calls;
+     memset(&calls, 0xA5, sizeof(calls));
+     calls.engine = engine;
+@@ -479,6 +528,10 @@ static void scenario_wrong_thread(void) {
+     assert(is_filled(&calls.info, sizeof(calls.info), 0xA5));
+     assert(is_filled(&calls.outcome, sizeof(calls.outcome), 0xA5));
+     assert(is_filled(&calls.event, sizeof(calls.event), 0xA5));
++    assert(is_filled(&calls.memory, sizeof(calls.memory), 0xA5));
++    fp_engine_memory after;
++    assert(fp_engine_get_memory(engine, &after, sizeof(after)) == FP_STATUS_OK);
++    assert(after.allocated_bytes == before.allocated_bytes && after.max_allocated_bytes == UINT64_MAX - 1);
+     expect_queues(engine, 2, 0);
+     assert(document_state(engine, document) == FP_DOCUMENT_LOADING);
+     respond(engine, request, "owner");
+@@ -577,9 +630,201 @@ static void scenario_engine_teardown_outstanding(void) {
+     assert(fp_engine_destroy(engine) == FP_STATUS_OK);
+ }
+ 
++/* What a refused call leaves unchanged: the reported bytes, the ready events, the queued input, and each tracked document. */
++struct observation {
++    uint64_t allocated_bytes;
++    uint64_t events_ready;
++    uint32_t work_remaining;
++    size_t count;
++    fp_document_info documents[3];
++};
++
++static struct observation observe(fp_engine *engine, const fp_document_id *documents, size_t count) {
++    struct observation result;
++    memset(&result, 0, sizeof(result));
++    assert(count <= sizeof(result.documents) / sizeof(result.documents[0]));
++    result.allocated_bytes = engine_memory(engine).allocated_bytes;
++    /* A zero-budget step applies nothing and allocates nothing. */
++    fp_step_outcome outcome = step(engine, 0);
++    result.events_ready = outcome.events_ready;
++    result.work_remaining = outcome.work_remaining;
++    result.count = count;
++    for (size_t index = 0; index < count; index += 1) result.documents[index] = document_info(engine, documents[index]);
++    return result;
++}
++
++static int same_observation(const struct observation *a, const struct observation *b) {
++    if (a->allocated_bytes != b->allocated_bytes || a->events_ready != b->events_ready) return 0;
++    if (a->work_remaining != b->work_remaining || a->count != b->count) return 0;
++    for (size_t index = 0; index < a->count; index += 1) {
++        const fp_document_info *x = &a->documents[index], *y = &b->documents[index];
++        if (x->state != y->state || x->body != y->body || x->body_len != y->body_len) return 0;
++    }
++    return 1;
++}
++
++/* One attempt of a call that the limit may refuse. It returns the call's status and checks that a refused call wrote no output. */
++typedef uint32_t (*attempt_fn)(fp_engine *engine, void *context);
++
++/* Sets the limit to the allocated bytes, then one byte higher, and so on, until the attempt succeeds.
++ * Every earlier attempt must return FP_STATUS_OUT_OF_MEMORY and change nothing that the engine reports.
++ * The limit is unlimited again afterward. */
++static void until_allowed(fp_engine *engine, const fp_document_id *documents, size_t count, attempt_fn attempt, void *context) {
++    const struct observation before = observe(engine, documents, count);
++    uint64_t extra = 0;
++    for (;; extra += 1) {
++        set_limit(engine, before.allocated_bytes + extra);
++        uint32_t status = attempt(engine, context);
++        if (status == FP_STATUS_OK) break;
++        assert(status == FP_STATUS_OUT_OF_MEMORY);
++        struct observation after = observe(engine, documents, count);
++        assert(same_observation(&before, &after));
++    }
++    assert(extra > 0);
++    set_limit(engine, UINT64_MAX);
++}
++
++static uint32_t attempt_create(fp_engine *engine, void *context) {
++    fp_document_id *out = context;
++    uint32_t status = fp_document_create(engine, out);
++    if (status != FP_STATUS_OK) assert(*out == 0xD0C);
++    return status;
++}
++
++struct load_attempt {
++    fp_document_id document;
++    fp_request_id out;
++};
++
++static uint32_t attempt_load(fp_engine *engine, void *context) {
++    static const char url[] = "https://example.test/allocation";
++    struct load_attempt *attempt = context;
++    uint32_t status = fp_document_load(engine, attempt->document, (const uint8_t *)url, strlen(url), &attempt->out);
++    if (status != FP_STATUS_OK) assert(attempt->out == 0x5E0);
++    return status;
++}
++
++static uint32_t attempt_respond(fp_engine *engine, void *context) {
++    fp_response answer = response(*(const fp_request_id *)context, "allocation");
++    return fp_request_respond(engine, &answer);
++}
++
++static uint32_t attempt_reject(fp_engine *engine, void *context) {
++    return fp_request_reject(engine, *(const fp_request_id *)context, FP_REJECT_UNSUPPORTED_VERSION);
++}
++
++static uint32_t attempt_cancel(fp_engine *engine, void *context) {
++    return fp_request_cancel(engine, *(const fp_request_id *)context);
++}
++
++static uint32_t attempt_step(fp_engine *engine, void *context) {
++    (void)context;
++    fp_step_outcome outcome;
++    memset(&outcome, 0xA5, sizeof(outcome));
++    uint32_t status = fp_engine_step(engine, UINT32_MAX, &outcome, sizeof(outcome));
++    if (status != FP_STATUS_OK) assert(is_filled(&outcome, sizeof(outcome), 0xA5));
++    return status;
++}
++
++/* Rejects requests of new documents until a rejection at the limit fails, so the input queue is full.
++ * A rejection allocates only when the input queue must grow. */
++static void fill_inputs(fp_engine *engine) {
++    for (;;) {
++        fp_request_id request = load(engine, create_document(engine), "https://example.test/input");
++        limit_to_allocated(engine);
++        uint32_t status = fp_request_reject(engine, request, FP_REJECT_UNSUPPORTED_VERSION);
++        set_limit(engine, UINT64_MAX);
++        if (status == FP_STATUS_OUT_OF_MEMORY) return;
++        assert(status == FP_STATUS_OK);
++    }
++}
++
++/* Reloads the spare document with an empty URL at the limit and reports whether the reload succeeded. */
++static int reload_at_limit(fp_engine *engine, fp_document_id spare) {
++    fp_request_id request = 0;
++    limit_to_allocated(engine);
++    uint32_t status = fp_document_load(engine, spare, NULL, 0, &request);
++    set_limit(engine, UINT64_MAX);
++    assert(status == FP_STATUS_OK || status == FP_STATUS_OUT_OF_MEMORY);
++    return status == FP_STATUS_OK;
++}
++
++/* Reloads the spare document until only the event slots that the outstanding requests reserve are free.
++ * After two unlimited loads, the request table and map have a free entry, so a reload with an empty URL allocates only when
++ * the event queue must grow. A reload announces two events, so a reload at the limit fails exactly when fewer than two slots
++ * beyond that floor are free. */
++static void fill_events(fp_engine *engine, fp_document_id spare) {
++    load(engine, spare, "");
++    load(engine, spare, "");
++    while (reload_at_limit(engine, spare)) {
++    }
++    /* One slot or none beyond the floor is free, and draining an event frees one more. */
++    assert(next_event(engine).kind != FP_EVENT_NONE);
++    if (!reload_at_limit(engine, spare)) {
++        assert(next_event(engine).kind != FP_EVENT_NONE);
++        assert(reload_at_limit(engine, spare));
++    }
++}
++
++/* Scenario allocation-failure: through the memory limit alone, each allocating operation returns FP_STATUS_OUT_OF_MEMORY
++ * until the limit admits it, and changes nothing. */
++static void scenario_allocation_failure(void) {
++    fp_engine_options options = {sizeof(fp_engine_options), 1024, 64, 0};
++    fp_engine *untouched = (fp_engine *)&options;
++    assert(fp_engine_create(&options, &untouched) == FP_STATUS_OUT_OF_MEMORY);
++    assert(untouched == (fp_engine *)&options);
++    fp_engine *engine = create_engine(1024, 64);
++    fp_document_id tracked[3] = {0, 0, 0};
++
++    fp_document_id document = 0xD0C;
++    until_allowed(engine, tracked, 0, attempt_create, &document);
++    tracked[0] = document;
++    struct load_attempt loading = {document, 0x5E0};
++    until_allowed(engine, tracked, 1, attempt_load, &loading);
++    assert(document_state(engine, document) == FP_DOCUMENT_LOADING);
++    fp_request_id answered = loading.out;
++    until_allowed(engine, tracked, 1, attempt_respond, &answered);
++
++    fp_document_id rejected = create_document(engine);
++    tracked[1] = rejected;
++    fp_request_id rejected_request = load(engine, rejected, "https://example.test/rejected");
++    fill_inputs(engine);
++    until_allowed(engine, tracked, 2, attempt_reject, &rejected_request);
++
++    fp_document_id cancelled = create_document(engine);
++    tracked[2] = cancelled;
++    fp_request_id cancelled_request = load(engine, cancelled, "https://example.test/cancelled");
++    fill_inputs(engine);
++    until_allowed(engine, tracked, 3, attempt_cancel, &cancelled_request);
++
++    fp_document_id spare = create_document(engine);
++    fill_events(engine, spare);
++    until_allowed(engine, tracked, 3, attempt_step, NULL);
++    assert(document_state(engine, document) == FP_DOCUMENT_LOADED);
++    assert(document_state(engine, rejected) == FP_DOCUMENT_FAILED);
++    assert(document_state(engine, cancelled) == FP_DOCUMENT_FAILED);
++
++    fp_document_id doomed = create_document(engine);
++    fp_request_id doomed_request = load(engine, doomed, "https://example.test/doomed");
++    fill_events(engine, spare);
++    /* The load reserved the cancellation event, so the destruction succeeds with the limit at the allocated bytes. */
++    limit_to_allocated(engine);
++    assert(fp_document_destroy(engine, doomed) == FP_STATUS_OK);
++    set_limit(engine, UINT64_MAX);
++    fp_event last = next_event(engine);
++    for (;;) {
++        fp_event event = next_event(engine);
++        if (event.kind == FP_EVENT_NONE) break;
++        last = event;
++    }
++    assert(last.kind == FP_EVENT_REQUEST_CANCELLED && last.document_id == doomed && last.request_id == doomed_request);
++    expect_unknown_document(engine, doomed);
++    destroy_engine(engine);
++}
++
+ /* Scenario null-required-pointer: a null required pointer returns FP_STATUS_INVALID_ARGUMENT and writes nothing. */
+ static void scenario_null_required_pointer(void) {
+-    fp_engine_options options = {sizeof(fp_engine_options), 4, 16};
++    fp_engine_options options = {sizeof(fp_engine_options), 4, 16, UINT64_MAX};
+     fp_engine *untouched = (fp_engine *)&options;
+     assert(fp_query_capabilities(NULL, sizeof(fp_capabilities)) == FP_STATUS_INVALID_ARGUMENT);
+     assert(fp_engine_create(NULL, &untouched) == FP_STATUS_INVALID_ARGUMENT);
+@@ -638,7 +883,7 @@ static void scenario_null_required_pointer(void) {
+ 
+ /* Scenario short-structure: a structure or output size below the declared size returns FP_STATUS_INVALID_ARGUMENT. */
+ static void scenario_short_structure(void) {
+-    fp_engine_options options = {sizeof(fp_engine_options) - 1, 4, 16};
++    fp_engine_options options = {sizeof(fp_engine_options) - 1, 4, 16, UINT64_MAX};
+     fp_engine *untouched = (fp_engine *)&options;
+     assert(fp_engine_create(&options, &untouched) == FP_STATUS_INVALID_ARGUMENT);
+     assert(untouched == (fp_engine *)&options);
+@@ -723,6 +968,7 @@ int main(void) {
+     check_document_lifecycle();
+     check_reject_and_cancel();
+     check_empty_ranges();
++    check_engine_memory();
+     scenario_unknown_identifier();
+     scenario_foreign_identifier();
+     scenario_retired_identifier();
+@@ -731,6 +977,7 @@ int main(void) {
+     scenario_cancel_after_answer_queued();
+     scenario_document_teardown_outstanding();
+     scenario_engine_teardown_outstanding();
++    scenario_allocation_failure();
+     scenario_null_required_pointer();
+     scenario_short_structure();
+     scenario_response_body_bound();
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","152ed53..29a9f8e","--","src","tests","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:42:55.937Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}

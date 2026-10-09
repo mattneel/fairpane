@@ -1,0 +1,15 @@
+
+COMMAND ["C:\\Program Files\\GitHub CLI\\gh.exe","run","view","37952850522","--repo","mattneel/fairpane","--attempt","1","--log-failed"]
+Windows gates	Run gate controller-test	﻿2026-10-09T15:38:50.7382793Z ##[group]Run node tools/fairpane.mjs run controller-test
+Windows gates	Run gate controller-test	2026-10-09T15:38:50.7383417Z [36;1mnode tools/fairpane.mjs run controller-test[0m
+Windows gates	Run gate controller-test	2026-10-09T15:38:50.7450229Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+Windows gates	Run gate controller-test	2026-10-09T15:38:50.7450754Z ##[endgroup]
+Windows gates	Run gate controller-test	2026-10-09T15:38:51.1146544Z Execute gate controller-test.
+Windows gates	Run gate controller-test	2026-10-09T15:40:51.8780411Z {
+Windows gates	Run gate controller-test	2026-10-09T15:40:51.8781886Z   "gate": "controller-test",
+Windows gates	Run gate controller-test	2026-10-09T15:40:51.8782261Z   "status": "fail",
+Windows gates	Run gate controller-test	2026-10-09T15:40:51.8782872Z   "receipt": "out/evidence/2026-10-09T15-38-51-214Z-controller-test-a8dcfbd8.json",
+Windows gates	Run gate controller-test	2026-10-09T15:40:51.8784004Z   "error": "Gate command failed: [\"C:\\\\hostedtoolcache\\\\windows\\\\node\\\\24.21.0\\\\x64\\\\node.exe\",\"D:\\\\a\\\\fairpane\\\\fairpane\\\\tools\\\\selftest.mjs\"]"
+Windows gates	Run gate controller-test	2026-10-09T15:40:51.8784584Z }
+Windows gates	Run gate controller-test	2026-10-09T15:40:51.9872358Z ##[error]Process completed with exit code 1.
+RESULT {"executable":"C:\\Program Files\\GitHub CLI\\gh.exe","arguments":["run","view","37952850522","--repo","mattneel/fairpane","--attempt","1","--log-failed"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t60e032fd5\\m","started_at":"2026-10-09T16:45:25.519Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":789}
