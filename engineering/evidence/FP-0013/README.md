@@ -192,3 +192,28 @@ The reviewer should check these bounds against the contract's linear-time statem
 3. Record `HEAD`, the staged diff, and file hashes.
 4. Run `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` with `--evidence-dir engineering/evidence/FP-0013/gates`.
 5. Apply the proposed `specs/corpora.json` values in a separate protected commit, and run `corpus-verify` for both corpora again.
+
+## Integration
+
+The integrator applied the patch with `git apply --3way` and committed it as `b1fdb8c`.
+The patch contains no change to `tools/workflow-check.mjs`, and the integrated controller suite passes the FP-0033 cases.
+
+- `src/root.zig`, `tools/fairpane.mjs`, and `tools/README.md` conflicted only where FP-0011, FP-0021, and FP-0027 had added lines beside this patch's lines, so the integrator kept both sides.
+- In `tools/selftest.mjs`, the `corpus-verify` fixture keeps this patch's version, which copies every `tools/*.mjs` file, including FP-0027's `release.mjs`.
+  The other three conflicts there kept both sides.
+- ADR 0003 now points at the file-set kind, as the worker suggested.
+- The integrator confirms the reserved font name resolution.
+  The subset uses no name that contains `Source`, so it meets OFL condition 3 whether or not `Source` is reserved.
+- The source registry has 85 entries with no duplicate identifier.
+
+`raw/integration-binding.log` records `HEAD` `b1fdb8c` and an empty status, including ignored files, for every source root before the gates, and an empty status again after the last run.
+
+- `gates/2026-10-09T09-37-48-986Z-repo-check-61f657c7.json`
+- `gates/2026-10-09T09-37-49-271Z-controller-test-24f7f361.json`, with 180 of 180 controller tests.
+- `gates/2026-10-09T09-38-20-142Z-zig-fmt-17d5dcdb.json`
+- `gates/2026-10-09T09-38-20-365Z-zig-test-5556126d.json`
+
+`raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0013-integration-cache`: 40 of 40 build steps and 177 of 177 tests.
+`raw/integration-bun.log` records Bun 1.4.2 with 180 of 180 controller tests.
+`raw/integration-corpus.log` records `ucd-check`, `corpus-verify unicode`, and `corpus-verify opentype-fixtures`, each with exit status 0 and result `pass`, against the unpinned `specs/corpora.json` entries.
+The proposed pins wait for review acceptance and a separate protected commit.

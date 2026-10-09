@@ -204,13 +204,23 @@
       "notes": []
     },
     "FP-0013": {
-      "status": "active",
-      "owner": "fairpane-text worker FP0013Text",
-      "evidence": [],
+      "status": "implemented",
+      "owner": "fairpane-text worker FP0013Text, integrated by root-integrator",
+      "evidence": [
+        "engineering/evidence/FP-0013/README.md",
+        "engineering/evidence/FP-0013/gates/2026-10-09T09-37-48-986Z-repo-check-61f657c7.json",
+        "engineering/evidence/FP-0013/gates/2026-10-09T09-37-49-271Z-controller-test-24f7f361.json",
+        "engineering/evidence/FP-0013/gates/2026-10-09T09-38-20-142Z-zig-fmt-17d5dcdb.json",
+        "engineering/evidence/FP-0013/gates/2026-10-09T09-38-20-365Z-zig-test-5556126d.json",
+        "engineering/evidence/FP-0013/raw/tests-before.log",
+        "engineering/evidence/FP-0013/raw/integration-tests.log",
+        "engineering/evidence/FP-0013/raw/integration-corpus.log"
+      ],
       "review": null,
       "notes": [
         "The frozen contract is engineering/evidence/FP-0013/CONTRACT.md, drafted by worker FP0013Contract and frozen on commit 28e2195.",
-        "The owner approved Unicode data and OFL fonts in the repository; engineering/evidence/FP-0013/owner-answers.log records it."
+        "The owner approved Unicode data and OFL fonts in the repository; engineering/evidence/FP-0013/owner-answers.log records it.",
+        "Commit b1fdb8c implements it with 180 of 180 controller tests and 177 of 177 Zig tests. Awaiting fairpane-review and fairpane-security; the unicode and opentype-fixtures pins wait for acceptance."
       ]
     },
     "FP-0014": {
