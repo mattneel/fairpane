@@ -1092,7 +1092,10 @@ fn AllocationFailure(comptime Rt: type) type {
 
 test "FP-0011 case 14: every induced allocation failure returns OutOfMemory and leaks nothing" {
     inline for (test_representations) |r| {
-        try testing.checkAllAllocationFailures(testing.allocator, AllocationFailure(runtime.Runtime(r)).run, .{});
+        // Fail every remap so that each growth step is an allocation the checker can induce.
+        var no_remap: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+        try testing.checkAllAllocationFailures(no_remap.allocator(), AllocationFailure(runtime.Runtime(r)).run, .{});
+        try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
     }
 }
 

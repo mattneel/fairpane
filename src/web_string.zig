@@ -587,7 +587,10 @@ fn allocationFailureScenario(gpa: std.mem.Allocator) !void {
 }
 
 test "16: every allocating operation survives each induced allocation failure" {
-    try testing.checkAllAllocationFailures(testing.allocator, allocationFailureScenario, .{});
+    // Fail every remap so that each growth step is an allocation the checker can induce.
+    var no_remap: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+    try testing.checkAllAllocationFailures(no_remap.allocator(), allocationFailureScenario, .{});
+    try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
 }
 
 test "FP-0047 case 1: fromUtf8 rejects an F0 lead followed by a byte below 0x90" {

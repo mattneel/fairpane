@@ -2764,7 +2764,10 @@ test "FP-0007 case 12: each induced allocation failure in parsing and a complete
     for ([_][]const u8{ "case-01-valid.json", "case-05-null-body.json" }) |name| {
         const bytes = try readFixture(name);
         defer testing.allocator.free(bytes);
-        try testing.checkAllAllocationFailures(testing.allocator, runUnderAllocationFailure, .{bytes});
+        // Fail every remap so that each growth step is an allocation the checker can induce.
+        var no_remap: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+        try testing.checkAllAllocationFailures(no_remap.allocator(), runUnderAllocationFailure, .{bytes});
+        try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
     }
 }
 
@@ -2980,7 +2983,10 @@ test "FP-0008 case 18: each induced allocation failure in a run that decodes and
     for ([_][]const u8{ "fp0008-tokenize-pass.json", "fp0008-tokenize-errors.json" }) |name| {
         const bytes = try readFixture(name);
         defer testing.allocator.free(bytes);
-        try testing.checkAllAllocationFailures(testing.allocator, runUnderAllocationFailure, .{bytes});
+        // Fail every remap so that each growth step is an allocation the checker can induce.
+        var no_remap: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+        try testing.checkAllAllocationFailures(no_remap.allocator(), runUnderAllocationFailure, .{bytes});
+        try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
     }
 }
 

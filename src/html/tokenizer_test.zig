@@ -879,5 +879,8 @@ fn tokenizeUnderAllocationFailure(gpa: Allocator) !void {
 }
 
 test "FP-0008 case 17: each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks" {
-    try testing.checkAllAllocationFailures(testing.allocator, tokenizeUnderAllocationFailure, .{});
+    // Fail every remap so that each growth step is an allocation the checker can induce.
+    var no_remap: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+    try testing.checkAllAllocationFailures(no_remap.allocator(), tokenizeUnderAllocationFailure, .{});
+    try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
 }
