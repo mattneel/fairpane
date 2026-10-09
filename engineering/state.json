@@ -166,11 +166,13 @@
       ]
     },
     "FP-0011": {
-      "status": "planned",
-      "owner": null,
+      "status": "active",
+      "owner": "fairpane-js worker FP0011Js",
       "evidence": [],
       "review": null,
-      "notes": []
+      "notes": [
+        "The frozen contract is engineering/evidence/FP-0011/CONTRACT.md, drafted by worker FP0011Contract and frozen on commit 8af0f20."
+      ]
     },
     "FP-0012": {
       "status": "planned",
@@ -236,8 +238,8 @@
       "notes": []
     },
     "FP-0021": {
-      "status": "implemented",
-      "owner": "fairpane-bindings worker FP0021Schema, integrated by root-integrator",
+      "status": "active",
+      "owner": "fairpane-bindings workers FP0021Schema and FP0021Revision, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0021/README.md",
         "engineering/evidence/FP-0021/gates/2026-10-09T02-46-05-308Z-repo-check-1114babe.json",
@@ -248,10 +250,11 @@
         "engineering/evidence/FP-0021/raw/integration-zig-tests.log",
         "engineering/evidence/FP-0021/raw/mutation-stale.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0021/reviews/review-1-reject.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0021/CONTRACT.md, based on commit 24c0c64.",
-        "Commit 13372de implements it with 138 of 138 controller tests and 89 of 89 Zig tests. Awaiting fairpane-review."
+        "Commit 13372de implements it with 138 of 138 controller tests and 89 of 89 Zig tests.",
+        "fairpane-review rejected 13372de because engine_destroy's consumption was lost from the ownership data. Contract revision 1 is active in worker FP0021Revision."
       ]
     },
     "FP-0022": {
@@ -359,7 +362,7 @@
       ]
     },
     "FP-0033": {
-      "status": "implemented",
+      "status": "active",
       "owner": "fairpane-core worker FP0033Actions, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0033/README.md",
@@ -369,12 +372,12 @@
         "engineering/evidence/FP-0033/raw/revision-1-tests-before.log",
         "engineering/evidence/FP-0033/raw/github-run-37873082602.log"
       ],
-      "review": "engineering/evidence/FP-0033/reviews/security-review-1-reject.json",
+      "review": "engineering/evidence/FP-0033/reviews/review-2-reject.json",
       "notes": [
         "Created so continuous integration runs the controller and Zig checks that docs/GIT_OPERATIONS.md names for branch protection.",
-        "The frozen contract is engineering/evidence/FP-0033/CONTRACT.md, based on commit 7bc9ace, with revision 1.",
-        "GitHub run 37873082602 succeeded for commit 24c0c64 in both jobs.",
-        "fairpane-review and fairpane-security rejected 24c0c64. Commit 7bbe196 implements revision 1, and policy commit 29f2135 binds .github. Awaiting both re-reviews."
+        "The frozen contract is engineering/evidence/FP-0033/CONTRACT.md, based on commit 7bc9ace, with revisions 1 and 2.",
+        "GitHub run 37873082602 succeeded for commit 24c0c64 in both jobs, and run 37875841603 for 94c96ed.",
+        "fairpane-security accepted revision 1 (security-review-2-accept.json). fairpane-review rejected it because the gate-step check missed defaults, env, working-directory, and extra steps. Revision 2 is active in worker FP0033Revision2."
       ]
     },
     "FP-0034": {
@@ -544,7 +547,7 @@
       ]
     },
     "FP-0051": {
-      "status": "implemented",
+      "status": "active",
       "owner": "root-integrator",
       "evidence": [
         "engineering/evidence/FP-0051/README.md",
@@ -553,11 +556,12 @@
         "engineering/evidence/FP-0051/raw/tests-before.log",
         "engineering/evidence/FP-0051/raw/tests-after.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0051/reviews/review-1-reject.json",
       "notes": [
         "Created from the minor findings and notes in engineering/evidence/FP-0002/reviews/review-3-accept.json.",
         "The frozen contract is engineering/evidence/FP-0051/CONTRACT.md, based on commit 9ee1725.",
-        "Commit 199b279 implements it with 142 of 142 controller tests. Awaiting fairpane-review."
+        "Commit 199b279 implements it with 142 of 142 controller tests.",
+        "fairpane-review rejected 199b279: aliased policy spellings, status 1 for existing corrupt commits, and Git discovery gaps. The root integrator implements a revision."
       ]
     },
     "FP-0052": {

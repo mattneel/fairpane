@@ -1,0 +1,182 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "7bbe1964b7638e63471fcd6433160f1c9f516c0c",
+    "29f213561171808e859bafb5380f5491f5b9f5b2",
+    "94c96edcb5fad5cfa7bc1a96fc0fd3995512573a"
+  ],
+  "summary": "I am rejecting revision 1 because of one major finding. Every finding from review 1 is resolved. The checker now rejects any character outside printable ASCII. The only exceptions are LF, CRLF and one leading BOM. That closes the NEL, LS, PS, tab and lone-CR bypasses. Expressions now go through a positive allowlist that handles string literals. I could not get a secret or the token through it. Case variants such as SECRETS.X or GitHub.Token, index syntax, parenthesised contexts like (github).token, and a '}}' inside a string literal all report a problem. I found no ASCII YAML form that a libyaml-family parser reads as a different policy-relevant structure. The only differential I found is a block scalar whose leading blank line has more spaces than its first content line. The checker accepts it, and libyaml rejects it, so it fails closed on GitHub. Revision checks 6-11 hold. The policy change is a separate +1-line policy commit to the protected engineering/policy.json, and it only strengthens receipt binding. The receipts were made at HEAD 29f2135 with a clean source tree, and I confirmed through the API that the Gates run for 94c96ed succeeded. The blocking problem is in gateStepProblems. Its doc comment says it reports 'Problems that would let a gate in the Gates workflow pass without running', and test 61 is named 'A gate step that can be skipped or rerouted fails'. The revision bans `shell:` on a step, but it does not check `defaults.run.shell` at the workflow or job level, which applies the same custom shell template to every run step. It also does not check step or default `working-directory`, or `env` such as NODE_OPTIONS. With one of these added to gates.yml, both workflow checkers report nothing, every controller test passes, and the gate steps can exit 0 without running a gate. I ran no shell commands. My conclusions about checker behavior come from tracing the code, not from executing it.",
+  "criteria": [
+    {
+      "criterion": "Revision: only printable ASCII with LF or CRLF line ends after an optional leading BOM; any other character is a line-numbered parse error",
+      "met": true,
+      "evidence": "tools/workflow-check.mjs:112-119 strips one leading U+FEFF and normalizes CRLF, then rejects the first character matching /[^\\n\\x20-\\x7E]/ before any line splitting. The check therefore covers full-line comments, trailing comments, scalars and keys alike. A lone CR, \\r\\r\\n, a second BOM, C0/C1 controls, DEL and U+FFFD from invalid UTF-8 all fail."
+    },
+    {
+      "criterion": "Revision: every ${{ }} and every if: value is an expression limited to always/format and the four read forms; index syntax, other names, and unterminated expressions or strings are problems",
+      "met": true,
+      "evidence": "workflow-check.mjs:214-251 and the if: scan in workflowProblems. Bodies are delimited the same way as the runner, which toggles on ' and closes at an unquoted '}}'. String literals are removed before names are matched. The character filter rejects [ ] * + { } $. Every NamedValue token that GitHub's lexer can produce from the remaining ASCII is matched by the name regex, either alone or as the head of a dotted chain, and the whole chain must be on the allowlist. Splitting with whitespace (github . token), parentheses ((github).token), hyphen tricks (github.run_id-secrets.X) and case variants (SECRETS.X, Always()) all fail closed, because the allowlist uses exact case-sensitive matches."
+    },
+    {
+      "criterion": "Revision: a workflow_run trigger is a problem",
+      "met": true,
+      "evidence": "workflow-check.mjs:275. The test case 'FP-0033 4: A workflow_run trigger fails' passes (controller log line 64)."
+    },
+    {
+      "criterion": "Revision: in Gates, no step sets shell:, and only an upload-artifact step sets if:, exactly ${{ always() }}",
+      "met": true,
+      "evidence": "gateStepProblems at workflow-check.mjs:317-338 does this literally and also flags a job-level if:. Read literally, the criterion is met. The equivalent forms defaults.run.shell and working-directory are not covered (finding 1)."
+    },
+    {
+      "criterion": "Check 6: every file under .github/workflows equals its reviewed problem list; an unlisted file fails",
+      "met": true,
+      "evidence": "workflow-check.test.mjs REVIEWED and case 51: readdirSync(.github/workflows) must equal ['gates.yml','pages.yml']. gates.yml must have [], and pages.yml must have exactly 'Line 49: Job deploy grants…'. I counted line 49 of pages.yml, and it is the deploy job's `permissions:`. The case passes in the Node receipt log (line 56) and the Bun log (line 54)."
+    },
+    {
+      "criterion": "Check 7: NEL, LS, PS, tab before a comment, lone CR, and a non-ASCII letter each fail to parse",
+      "met": true,
+      "evidence": "Case 64 covers U+0085, U+2028, U+2029 and \\r in a trailing-comment position, `pull_request_target:\\t# note`, and 'Fixtur\\u00e9'. It also checks that a leading BOM is accepted. It passes on Node and Bun. In the red baseline it failed with 'Expected a parse error, got success'."
+    },
+    {
+      "criterion": "Check 8: secrets.X, github.token, github['token'], toJSON(github), format('}}{0}', secrets.X), and a bare if: secrets.X each report a problem",
+      "met": true,
+      "evidence": "Case 60 covers all six. The 'bare if' fixture is `if: secrets.X != ''`, which still goes through the bare-if path without ${{. Tracing a literal `if: secrets.X` gives 'reads secrets.X' as well."
+    },
+    {
+      "criterion": "Check 9: workflow_run, if: on a gate step, shell: on a gate step, and an upload without if: ${{ always() }} each report a problem",
+      "met": true,
+      "evidence": "Cases 59 and 61. The upload fixture uses `if: ${{ success() }}`. An upload with no if: at all is not reported by gateStepProblems (workflow-check.mjs:332), but the order test asserts it for the last step of gates.yml (test line 103). See the note finding."
+    },
+    {
+      "criterion": "Check 10: the test asserts the Gates concurrency group and cancellation expressions",
+      "met": true,
+      "evidence": "Case 52 asserts both strings exactly. They match gates.yml:16-17."
+    },
+    {
+      "criterion": "Check 11: actionlint 1.7.12 on the integrated workflow, with the linted file's SHA-256 recorded",
+      "met": true,
+      "evidence": "raw/revision-1-actionlint.log: certutil 6e7241b5…f6e9 equals the checksums entry. The log records rev-parse HEAD = 29f2135 in C:\\src\\fairpane, gates.yml SHA-256 27c988f8…e75a, pages.yml SHA-256 8230ec4d…3b28, and 'Found 0 errors in 2 files', exit 0. The shellcheck and pyflakes rules were disabled and disclosed. Neither 7bbe196 nor 29f2135 changes gates.yml, according to the GitHub commits API. I did not recompute the SHA-256 values."
+    },
+    {
+      "criterion": "Policy change in a separate policy: commit adds .github to source_roots",
+      "met": true,
+      "evidence": "Commit 29f2135 touches only engineering/policy.json (+2/-1): 'engineering/templates' gains a comma, and '.github' is appended to source_roots. This is a protected-path change made separately from the implementation commit, as AGENTS.md:62 requires. It widens receipt binding, which strengthens the policy. Receipt source_before.file_count is 100 and covers .github."
+    },
+    {
+      "criterion": "Documentation: pull-request runs enforce nothing independently, and install-zig accepts an existing directory after a version check",
+      "met": true,
+      "evidence": "tools/README.md:139-141. The evidence README Limits section states the same."
+    },
+    {
+      "criterion": "Evidence binds to the reviewed commits",
+      "met": true,
+      "evidence": "raw/revision-1-binding.log records HEAD 29f2135 at 02:41:12.072Z. Its porcelain status shows only untracked files under engineering/evidence, which is not a source root (policy.json:4-35). The repo-check receipt starts at 02:41:12.233Z and the controller-test receipt at 02:41:12.411Z. Both have identical before and after source fingerprints (37afb4e4…, 100 files) and policy fingerprints (bb313e06…, 17 files). The controller log shows 129/129 with all 14 FP-0033 cases. The Bun log starts at 02:41:33.766Z and shows 129/129. Commit 94c96ed adds only FP-0033 evidence and engineering/state.json. I did not run evidence-check."
+    },
+    {
+      "criterion": "Red baseline for the new cases",
+      "met": true,
+      "evidence": "raw/revision-1-tests-before.log: the first run exits 1 on the missing export. The second run exits 1 with 9/14 passing. The workflow_run, expression, gate-step, tab and line-break cases fail. Cases 6 and 10 pass against the old checker, because they assert properties of the unchanged workflow files."
+    },
+    {
+      "criterion": "Contract check 5 holds for the revised integration",
+      "met": true,
+      "evidence": "The repository does not record it (finding 2). I observed it through the API: Gates run 37875841603 for head_sha 94c96edc…a573a, event push, conclusion success. 'Windows gates' (labels windows-2025) passed steps 1-11, including all six gates. 'Linux gates' (labels ubuntu-24.04) passed steps 1-10, including all five gates."
+    },
+    {
+      "criterion": "Protected paths unchanged except by the policy commit",
+      "met": true,
+      "evidence": "Commit 7bbe196 touches CONTRACT.md, raw/revision-1-tests-before.log, both reviews, tools/README.md, tools/workflow-check.mjs and tools/workflow-check.test.mjs. Commit 94c96ed touches FP-0033 evidence and engineering/state.json. Neither touches a protected path."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "major: The parser split lines only at LF, so NEL, LS or PS after a comment hid keys that libyaml-family parsers read (workflow-check.mjs:111)",
+      "resolved": true,
+      "evidence": "workflow-check.mjs:112-119 rejects every character outside \\n and \\x20-\\x7E on the whole text before tokenizing. The reproduction from review 1 (`# note\\u2028        continue-on-error: true`) now throws 'Character U+2028 is not accepted' when traced. Case 64 covers NEL, LS, PS and CR, it failed in the red baseline, and it passes on Node and Bun. The header claim at line 4 holds for the character layer."
+    },
+    {
+      "finding": "minor: SECRET_EXPRESSION missed github['token'], toJSON(github), and format('}}{0}', secrets.X)",
+      "resolved": true,
+      "evidence": "The regex is replaced by allowlist scanning that understands string literals (workflow-check.mjs:214-251). Case 60 asserts each of the three forms. tools/README.md:150-151 now describes the allowlist instead of the old claim."
+    },
+    {
+      "finding": "minor: The evidence README did not disclose tests-after.log exit 1 or the nature of tests-before.log",
+      "resolved": true,
+      "evidence": "The evidence README paragraph after the contract-check table states that tests-after.log exited 1 with two FP-0002 failures from the worker's work tree, that the integration receipt is authoritative, and that tests-before.log is a baseline without the new cases."
+    },
+    {
+      "finding": "note: actionlint ran in the worker worktree, and no digest of the linted file was recorded",
+      "resolved": true,
+      "evidence": "raw/revision-1-actionlint.log runs in C:\\src\\fairpane at HEAD 29f2135 and records the SHA-256 of both linted files."
+    },
+    {
+      "finding": "note: The concurrency behavior was untested",
+      "resolved": true,
+      "evidence": "Case 52 asserts the exact group and cancel-in-progress expressions (workflow-check.test.mjs:76-79)."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "tools/workflow-check.mjs",
+      "line": 314,
+      "issue": "gateStepProblems claims to report 'Problems that would let a gate in the Gates workflow pass without running', and test case 61 is named 'A gate step that can be skipped or rerouted fails'. It inspects only the job if:, the step shell: and the step if:. The same custom-shell template that the revision bans on a step is still allowed one level up through `defaults.run.shell`, at workflow or job level. Step or default `working-directory`, and `env` such as NODE_OPTIONS or PATH at any level, are also unchecked. So is an extra pinned `uses:` step, because the order test filters to `run` fields only (workflow-check.test.mjs:99). Minimal reproduction, traced but not executed: `t = readWorkflow('gates.yml').replace('permissions:\\n  contents: read\\n', 'permissions:\\n  contents: read\\n\\ndefaults:\\n  run:\\n    shell: bash -c \"mkdir -p out/evidence && echo fake > out/evidence/fake.json\" {0}\\n')`. Then checkWorkflow(t) returns [] and gateStepProblems(parseWorkflow(t)) returns []. Cases 51 and 52 still pass, because the run strings, runners, job keys, triggers, concurrency and upload are unchanged. [INFERENCE: GitHub's documented custom-shell behavior] Every run step would then exit 0 without running a gate, and the upload would find a file and succeed, so both jobs go green. Adding `        working-directory: decoy` under one gate step, or `    env:\\n      NODE_OPTIONS: --require ./decoy.cjs` under a job, has the same checker result. [INFERENCE] GitHub's parser also knows the feature-flagged `background` step key (languageservices template-reader.ts:29), which this checker would not report either. The revision's literal rule 'no step sets shell:' is met. Its stated purpose, closing the security review's 'custom shell: template … exit-0 step' finding, is not met, so the doc comment and the test name are unsupported success claims.",
+      "recommendation": "Replace the denylist with a key allowlist for the Gates workflow. Allow root keys {name, on, permissions, concurrency, jobs}, job keys {name, runs-on, timeout-minutes, steps}, gate run steps {name, run}, setup steps {name, uses, with}, and the upload step {name, if, uses, with}. Also require the full step sequence, uses and all, to match the expected order, not only the run strings. Add fixtures for defaults.run.shell at workflow and job level, a step working-directory, and a job env, each of which must report a problem. Otherwise, narrow the doc comment at workflow-check.mjs:314 and the name of case 61 to the three conditions actually checked."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0033/README.md",
+      "line": 32,
+      "issue": "The Revision 1 evidence records no GitHub run for the revised integration. Revision 1 changes the controller-test gate that CI executes and adds .github to source_roots, so contract check 5 ('the workflow runs on GitHub for the integration commit, and both jobs succeed', recorded with `gh run view --json`) is evidenced only for 24c0c648. I observed through the API that Gates run 37875841603 for 94c96ed concluded success with both jobs and every gate step successful, but the repository has no recorded `gh run view` log for it.",
+      "recommendation": "Record `gh run view 37875841603 --json headSha,conclusion,jobs` with `node tools/fairpane.mjs record` under raw/, and cite it in the Revision 1 table."
+    },
+    {
+      "severity": "note",
+      "path": "tools/workflow-check.mjs",
+      "line": 332,
+      "issue": "gateStepProblems skips any step without if:. An actions/upload-artifact step with no condition therefore reports nothing, even though contract revision check 9 speaks of 'an upload step without if: ${{ always() }}'. The order test catches this for the last step of each Gates job (workflow-check.test.mjs:103). It does not catch it for any other upload step.",
+      "recommendation": "For an upload-artifact step, require if: to equal exactly '${{ always() }}' rather than only validating it when present. Add a fixture with no if:."
+    },
+    {
+      "severity": "note",
+      "path": "tools/workflow-check.mjs",
+      "line": 143,
+      "issue": "The parser and libyaml read one ASCII form differently. When a leading blank line of a block scalar has more spaces than its first content line, the checker takes the content indent from the first content line and accepts the scalar. libyaml, go-yaml and YamlDotNet take the maximum indent from the leading blank lines, end the scalar, and then fail to parse. Example: `        run: |\\n            \\n          echo hi\\n`. This fails closed, because GitHub and actionlint reject the file, so it cannot hide a key.",
+      "recommendation": "Optionally reject a block scalar whose leading blank lines have more spaces than its first content line, so the subset matches libyaml exactly."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0033/raw/revision-1-tests-before.log",
+      "line": null,
+      "issue": "The red baseline ran from out/fp0033-rev1-before with the old checker plus a stub gateStepProblems. The commands that staged those files and created the stub are not recorded, so the baseline cannot be reproduced from the log alone. The README discloses the stub.",
+      "recommendation": "For future baselines, record the commands that stage the old files and the stub, or record the stub's content and the old checker's blob ID in the log."
+    }
+  ],
+  "commands_run": [
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/actions/runs?head_sha=94c96edcb5fad5cfa7bc1a96fc0fd3995512573a (HTTP fetch through the read tool, not a shell)",
+      "exit_status": 0,
+      "observation": "total_count 2: Pages run 37875841622 succeeded, and Gates run 37875841603 (push, master) completed with conclusion success."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/actions/runs/37875841603/jobs (HTTP fetch through the read tool)",
+      "exit_status": 0,
+      "observation": "'Windows gates' (windows-2025) and 'Linux gates' (ubuntu-24.04), both head_sha 94c96edc…, conclusion success. Every gate step succeeded: Windows steps 5-10, Linux steps 5-9, and both upload steps."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/commits/{7bbe1964…,29f21356…,94c96edc…} (HTTP fetch through the read tool)",
+      "exit_status": 0,
+      "observation": "7bbe196 touches CONTRACT.md, the revision-1 baseline log, the two reviews, tools/README.md, workflow-check.mjs and workflow-check.test.mjs, and not gates.yml. 29f2135 touches only engineering/policy.json, adding '.github' to source_roots. 94c96ed touches only FP-0033 evidence and engineering/state.json."
+    },
+    {
+      "command": "grep https://raw.githubusercontent.com/actions/languageservices/main/workflow-parser/src/templates/template-reader.ts and schema/template-schema.ts (read tool)",
+      "exit_status": 0,
+      "observation": "Property lookup is a case-sensitive object index (template-schema.ts:266), so a case-variant key such as Continue-On-Error is an 'Unexpected value' error and fails closed. Duplicate detection is case-insensitive. The keys background, wait, wait-all and cancel exist behind the allowBackgroundSteps feature flag."
+    },
+    {
+      "command": "read .git/logs/HEAD and .git/refs/remotes/origin/master (read tool)",
+      "exit_status": 0,
+      "observation": "The sequence 2f4852a → 7bbe196 → 29f2135 → 94c96ed was pushed together, and later commits (FP-0009, plan, FP-0021) do not touch FP-0033 files according to a grep of their evidence directories."
+    }
+  ]
+}

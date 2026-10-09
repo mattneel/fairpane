@@ -90,3 +90,29 @@ A separate `policy:` commit adds `.github` to `source_roots` in `engineering/pol
 `tools/README.md` and the evidence README state that a pull request runs its own workflow, checker, and controller.
 A green check on a pull request therefore enforces nothing independently of that pull request.
 They also state that `install-zig` accepts an existing compiler directory after only a version check.
+
+Revision 2 follows `reviews/review-2-reject.json` and the minor findings of `reviews/security-review-2-accept.json`.
+
+### Revision 2 checker changes
+
+`gateWorkflowProblems` replaces `gateStepProblems` and checks the Gates workflow against allowlists, not denylists.
+The workflow may set only `name`, `on`, `permissions`, `concurrency`, and `jobs`.
+A job may set only `name`, `runs-on`, `timeout-minutes`, and `steps`.
+A run step may set only `name` and `run`, and its command must be `node tools/fairpane.mjs install-zig` or `node tools/fairpane.mjs run <gate>`.
+An action step may set only `name`, `uses`, and `with`, and an `actions/upload-artifact` step must also set `if: ${{ always() }}`.
+The only accepted actions are `actions/checkout` with the input `persist-credentials`, `actions/setup-node` with `node-version`, and `actions/upload-artifact` with `name`, `path`, and `if-no-files-found`.
+
+For every workflow, a `run:` value may contain no `${{ }}` expression, so no expression can reach a shell.
+Only the triggers `push`, `pull_request`, and `workflow_dispatch` are accepted, and any other trigger is a problem.
+A permission problem names the exact grants, so a reviewed problem list binds the grants themselves.
+A block scalar whose leading blank lines hold more spaces than its first content line fails to parse, as it does in libyaml.
+
+### Revision 2 checks
+
+12. Fixtures with `defaults.run.shell` at the workflow and job levels, `env` at each level, a step `working-directory`, a job `container`, an extra action step, a checkout `ref` input, a run step with another command, and an upload step without `if:` each report a problem from `gateWorkflowProblems`.
+13. A fixture with `${{ steps.x.outputs.y }}` inside `run:` reports a problem.
+14. Fixtures with the triggers `issue_comment` and `schedule` report problems.
+15. Widening the `pages.yml` deploy job to `write-all` or adding `contents: write` changes its problem text, so the reviewed list fails.
+16. The block scalar fixture of review 2 fails to parse.
+
+The revision evidence records `git show --stat` of each revision commit, `git hash-object` of each workflow file, and the commands that stage the red baseline.

@@ -1,0 +1,170 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "13372de5366a83ac0754c8528ce550da3376144f",
+    "9ee17251777f8755db3b9a5b518772212caf08c9"
+  ],
+  "summary": "I reject FP-0021 because of one major finding. Everything else is in good shape. The schema contains no C or Zig syntax: a grep for uint, size_t, sizeof, *, NULL, FP_, fp_, const, u32, u64 and usize in api/fairpane.schema.json found nothing. The generator is deterministic and validates its input. abi-check regenerates both files in memory and compares them byte for byte, so a stale file cannot pass. Controller case 1 enforces the same byte comparison inside the required controller-test gate, and .gitattributes pins LF line endings. I compared the generated include/fairpane.h with the FP-0006 header at 7bc9ace, fetched from the public mirror. Every name, value, field order, layout and function signature from FP-0006 is unchanged. uint64_t identifiers became typedefs of uint64_t, which is the same type. The header adds FP_ABI_REVISION, FP_OPTIONAL, fp_document_id and fp_request_id. c_api.zig:41-43 compares the type of each exported function with its generated function type at compile time. That check catches any change to a parameter, return type or calling convention, and a missing export. The generated Zig file checks every structure size and field offset for 64-bit and 32-bit targets, and layout-32bit.log shows a 32-bit size change failing compilation. The 14 scenarios call the real exported symbols of the actual engine. They check exact statuses, that output storage stays unwritten (0xA5 fill patterns), that queue counts are unchanged, and that nothing leaks (FailingAllocator and testing.allocator), so they test real behavior rather than restating expectations. The major defect is that the schema records fp_engine_destroy's engine parameter as borrowed for the call only. In fact the call consumes the handle when it returns ok, and leaves it valid when it returns wrong_thread. The FP-0006 api/bootstrap.json recorded this as \"consumed on success\", so this machine-readable ownership fact was lost in the migration. The ownership vocabulary has no value that can express it, and FP-0024 will generate fairpane-sys from this schema. The generated comments that use schema names instead of C names are a real but minor defect for C consumers. Each such name is derivable by the naming rule, and api/README.md keeps the C-named rules, but the public header now says less than the hand-written FP-0006 header did. I ran no commands. All observations come from file reads, the repository's recorded logs and receipts, and read-only GitHub API and raw-file fetches of 7bc9ace, e70d7b7, 13372de and 9ee1725.",
+  "criteria": [
+    {
+      "criterion": "Plan 1: Generate raw declarations from ownership-aware interface metadata.",
+      "met": true,
+      "evidence": "tools/abi.mjs generate() validates api/fairpane.schema.json and emits include/fairpane.h and src/abi_generated.zig. Case 1 (byte-identical regeneration) passes in gates/...controller-test-54b193bf.log (ok 65). Every pointer parameter and field states direction, nullability, ownership and lifetime, and the validator enforces this (tools/abi.mjs validatePointer). One exception: the ownership of fp_engine_destroy is wrong (major finding 1)."
+    },
+    {
+      "criterion": "Plan 2: Detect stale generated files mechanically.",
+      "met": true,
+      "evidence": "abiCheck (tools/abi.mjs) regenerates in memory and compares Buffers byte for byte. A missing file is also reported. fairpane.mjs:89 exits with status 1 unless the result is pass, and any thrown error exits with status 1 (fairpane.mjs:153). raw/mutation-stale.log: changing FP_STATUS_WRONG_THREAD to 8 by hand makes abi-check exit 1 and name include/fairpane.h at line 46. Case 2 changes one byte in each file of a copied repository. Case 1 makes the required controller-test gate fail whenever a committed file is stale."
+    },
+    {
+      "criterion": "Plan 3: Qualify C and Zig lifecycle callers against the actual engine.",
+      "met": true,
+      "evidence": "The c-abi gate (gates/...c-abi-ce4fe73c.log) builds the library, compiles tests/c/abi_smoke.c with -std=c11 -Wall -Wextra -Werror against the generated header, and runs it with exit 0. NDEBUG is rejected at abi_smoke.c:18-20, so the asserts always run. src/abi_scenarios.zig binds each exported symbol through @extern with its generated function type. raw/integration-zig-tests.log reports 89/89 passed with a fresh local cache, and the zig-test gate passed."
+    },
+    {
+      "criterion": "Plan 4: Define shared foreign-runtime failure scenarios before more wrappers.",
+      "met": true,
+      "evidence": "api/failure-scenarios.json defines 14 scenarios that cover all eight required situations. validateScenarios requires each situation and checks every expected status against the schema's status list for that function. Case 9 confirms that a scenario missing its id, calls, effects or status is rejected. Minor gaps are in findings 5 and 7."
+    },
+    {
+      "criterion": "Plan 5: Keep the metadata language-neutral, with ownership, lifetime, thread, and error semantics expressed as data rather than C or Zig syntax.",
+      "met": false,
+      "evidence": "The schema is language-neutral: the syntax grep found no matches. Thread rules, lifetimes with ended_by, nullability, ownership and per-function status lists are all data. However, the schema states the wrong ownership for fp_engine_destroy (api/fairpane.schema.json:268, borrowed for the call). It cannot express ownership that is consumed only on success, because the vocabulary at tools/abi.mjs:27 has no such value. FP-0006 recorded \"consumed on success\" as data."
+    },
+    {
+      "criterion": "Plan 6: Give the schema distinct types for Unicode text, lossless web strings, ranged integers, opaque handles, absent versus null fields, and byte buffers.",
+      "met": true,
+      "evidence": "The kinds are text, web_string, integer with an explicit range, handle, identifier, optional with absent encoded as zero, a nullability fact for pointers, and bytes. Case 5 generates a fixture structure and finds 7 distinct C types and 7 distinct Zig types. Limits are in note 10."
+    },
+    {
+      "criterion": "Contract case 1: Committed generated files reproduce byte for byte.",
+      "met": true,
+      "evidence": "tools/abi.test.mjs case 1; controller-test gate ok 65 and Bun log ok 65; raw/integration-abi-check.log exit 0."
+    },
+    {
+      "criterion": "Contract case 2: A one-byte change makes abi-check exit 1 and name the file.",
+      "met": true,
+      "evidence": "Case 2 changes one byte in each generated file inside a copied controller tree. It asserts exit status 1, that the changed file is named, and that the other file is not. raw/mutation-stale.log shows the same behavior on the real tree."
+    },
+    {
+      "criterion": "Contract case 3: Deterministic across runs and schema key order.",
+      "met": true,
+      "evidence": "Case 3 compares two runs and a run on the schema with every object's keys reversed. The generator reads keys by name and iterates arrays only."
+    },
+    {
+      "criterion": "Contract case 4: The validator rejects an unknown kind, a pointer without ownership, a pointer without lifetime, an inverted range, a duplicate name, and a structure without struct_size.",
+      "met": true,
+      "evidence": "Case 4 checks all six rejections, plus a collision between generated C names (FP_STATUS_OK)."
+    },
+    {
+      "criterion": "Contract case 5: Distinct schema kinds map to distinct C and Zig declarations.",
+      "met": true,
+      "evidence": "Case 5 fixture: int32_t/i32, fp_document_id/DocumentId, fp_engine */?*Engine, const uint8_t */?[*]const u8, const char */?[*]const c_char, const uint16_t */?[*]const u16, and FP_OPTIONAL(fp_request_id)/Optional(RequestId). FP_OPTIONAL expands to its argument, so in C it marks the field rather than creating a distinct type."
+    },
+    {
+      "criterion": "Contract case 6: Zig compile-time checks assert the implied size and offsets of every structure.",
+      "met": true,
+      "evidence": "src/abi_generated.zig ends with a comptime block that checks size and every offset, with 32-bit and 64-bit values via layout(). Case 6 checks that each expected assertion is present. raw/layout-32bit.log shows a successful x86-linux and arm-linux-musleabihf compile, and a mutated 32-bit size that fails to compile."
+    },
+    {
+      "criterion": "Contract case 7: The C smoke test runs every C-expressible scenario with its expected statuses.",
+      "met": true,
+      "evidence": "tests/c/abi_smoke.c has a `Scenario <id>:` marker for each of the 12 C-expressible scenarios, and main calls every scenario function (case 7 checks both). The c-abi gate exits 0."
+    },
+    {
+      "criterion": "Contract case 8: A Zig test runs the same scenarios through the generated declarations against the actual engine.",
+      "met": true,
+      "evidence": "src/abi_scenarios.zig has one test per scenario, 14 in total, named `Scenario <id>:`. root.zig imports the file, and case 8 checks it. The calls go through the exported C symbols. The tests read engine internals through nativeOf and c_api.createEngine only for snapshots and allocator injection, which the file header documents."
+    },
+    {
+      "criterion": "Contract case 9: Every scenario has an id, calls, and outcomes, and the validator rejects one without them.",
+      "met": true,
+      "evidence": "Case 9 (ok 73) passes."
+    },
+    {
+      "criterion": "Contract evidence: the required raw logs and the integrator gates repo-check, controller-test, zig-fmt, zig-test, zig-build and c-abi.",
+      "met": false,
+      "evidence": "All required raw logs are present, and five gate receipts pass on source digest f942ef25… (105 files), whose roots include api, include, src, tests and tools. The zig-build receipt that the contract names is missing (finding 4)."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "api/fairpane.schema.json",
+      "line": 268,
+      "issue": "fp_engine_destroy's `engine` parameter is recorded as `ownership: borrowed, lifetime: call`. In fact a call that returns ok consumes the handle, so the README says the pointer is invalid afterward. A call that returns wrong_thread leaves the handle valid. The FP-0006 api/bootstrap.json, deleted in 13372de, recorded this as `\"ownership\": \"consumed on success\"`. The vocabulary at tools/abi.mjs:27 is only borrowed, owned_by_engine and transferred_to_caller, so the schema cannot state the one ownership transfer back to the engine. The `engine_destroy` lifetime's `ended_by` list implies the handle ends there, but it does not say which argument ends or that it ends only on ok. As a result the machine-readable contract contradicts the actual semantics for the destructor. FP-0024 is scheduled to generate fairpane-sys and the safe Rust Drop from this data.",
+      "recommendation": "Add an ownership value such as `consumed`, with a data condition such as `on_statuses: [\"ok\"]`, or an equivalent `consumes` fact. Set it on engine_destroy.engine. Make the validator require that every function in a handle lifetime's `ended_by` list has a matching consuming parameter. Add a case-4 rejection for a destructor without one, then regenerate. Through the reviewed schema path, also consider recording identifier liveness (note 8)."
+    },
+    {
+      "severity": "minor",
+      "path": "include/fairpane.h",
+      "line": 30,
+      "issue": "Yes, the generated comments that use schema names are a defect for C consumers. It is minor: it does not affect the ABI, and api/README.md keeps the C names. The generated public header names things a C caller cannot write. Examples: `abi_revision` at line 30; `query_capabilities`, `document_get`, `engine_step` and `engine_next_event` at lines 91, 108, 128 and 141; \"the deadline_none constant\" at line 137 instead of FP_DEADLINE_NONE; \"a document_state_changed event\" and \"a request_issued event\" at lines 149 and 153; \"a reject_reason value\" at line 185 instead of FP_REJECT_*; \"the kind is none\" at line 194 instead of FP_EVENT_NONE; and \"the declared structure size\" at lines 99 and 117 instead of sizeof(fp_engine_options) and sizeof(fp_response). The comment on fp_query_capabilities also lost \"A non-null output pointer must reference a writable, aligned object\". The generator (tools/abi.mjs:493 and the structure and field emitters) renders only descriptions. It never renders the nullability, ownership, lifetime or thread data, so the ownership-aware metadata does not reach the C documentation at all.",
+      "recommendation": "Keep the schema language-neutral, but add a reference markup to descriptions, for example {function:document_get}, {constant:deadline_none} and {enumeration:reject_reason}. The validator should resolve each reference, and each generator should render it in its own naming (fp_document_get, FP_DEADLINE_NONE, FP_REJECT_*). Emit a short generated comment per parameter and field stating nullability, ownership, lifetime and thread rule. Annotate uint32_t fields and parameters whose kind is an enumeration with their macro family."
+    },
+    {
+      "severity": "minor",
+      "path": "docs/ABI_AND_WRAPPERS.md",
+      "line": 5,
+      "issue": "The document still says \"`api/bootstrap.json` describes a tiny experimental capability probe\", but 13372de deleted that file. docs/ is outside FP-0021's allowed paths, so this stale reference needs a separate change.",
+      "recommendation": "Record a follow-up, or open a docs-scoped task, that points the document at api/fairpane.schema.json and api/failure-scenarios.json."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0021/CONTRACT.md",
+      "line": null,
+      "issue": "The frozen contract says the integrator runs repo-check, controller-test, zig-fmt, zig-test, zig-build and c-abi with --evidence-dir. engineering/evidence/FP-0021/gates/ has no zig-build receipt, and README.md does not mention the omission. The c-abi gate runs `zig build --prefix`, but that is not the zig-build gate defined in engineering/gates.json:40.",
+      "recommendation": "Run `node tools/fairpane.mjs run zig-build --evidence-dir engineering/evidence/FP-0021/gates` on the reviewed commit and list the receipt. Otherwise, record the deviation explicitly."
+    },
+    {
+      "severity": "minor",
+      "path": "api/failure-scenarios.json",
+      "line": 67,
+      "issue": "The wrong-thread scenario claims that each call \"is refused before any other argument check\". Both implementations pass only valid arguments from the foreign thread: src/abi_scenarios.zig:273 and tests/c/abi_smoke.c:372 (run_foreign_calls). The ordering is therefore never exercised. c_api.zig enter() does check the thread first, so the behavior is correct by inspection, but no test proves it.",
+      "recommendation": "From the foreign thread, also call each owner function with an invalid argument, such as a null output, a short size or an unknown identifier. Expect wrong_thread, and check that no output is written."
+    },
+    {
+      "severity": "minor",
+      "path": "src/c_api.zig",
+      "line": 41,
+      "issue": "The compile-time check covers function types and the native enumeration values. It does not tie each export to its schema status list: statusOf accepts the whole Failure union, so a new native error would surface as an unlisted status without any compile-time signal. By inspection, the current error sets in engine.zig:112-125 match every schema status list. The check also iterates only over schema functions, so an extra `export fn fp_*` outside the schema would compile silently.",
+      "recommendation": "Generate each function's allowed status set into abi_generated.zig, and assert at comptime that each export's native error set maps into it. Also assert that no fp_ export exists outside abi.functions, or check the library's exported symbols in the c-abi gate."
+    },
+    {
+      "severity": "minor",
+      "path": "src/abi_scenarios.zig",
+      "line": 689,
+      "issue": "The Zig foreign-unwind test can only fail if ordinary engine use breaks. It checks that every generated function returns u32, then makes test code return a Zig error between calls. The engine never calls host code (api/failure-scenarios.json:262), so this exercises no unwinding. The scenario is honest about this, but it should not count toward qualifying unwind safety.",
+      "recommendation": "Keep the scenario, but state in api/README.md and the evidence README that the C and Zig runs only establish that the boundary has no unwinding channel. Require each later wrapper (Rust panic=unwind, C++ exceptions) to inject a real panic or exception."
+    },
+    {
+      "severity": "note",
+      "path": "api/fairpane.schema.json",
+      "line": 124,
+      "issue": "Identifier families have only prose descriptions. The schema does not state as data that a document identifier stays live until document_destroy or engine_destroy, or that a request identifier stays live until request_end.",
+      "recommendation": "Give each identifier family a `lifetime` that references the existing lifetimes."
+    },
+    {
+      "severity": "note",
+      "path": "tools/abi.mjs",
+      "line": 352,
+      "issue": "The layout model gives every member natural alignment, including 8 for identifiers (line 347) and 64-bit integers. The i386 System V C ABI aligns uint64_t members to 4 inside structures. Current structures are unaffected, because every 64-bit member sits at a multiple of 8. A future structure could differ between the model and C. The C-side layout checks (tests/c/abi_smoke.c:22-35) are a hand-written subset, not generated from the schema. [INFERENCE] Whether Zig's extern struct on x86-linux would also differ from the model was not observed.",
+      "recommendation": "Generate C _Static_assert checks of sizeof and offsetof for every structure from the same layout model. Compile them for at least one 32-bit x86 target in a cross gate."
+    },
+    {
+      "severity": "note",
+      "path": "tools/abi.mjs",
+      "line": 127,
+      "issue": "`optional` accepts only integer, enumeration and identifier values encoded as zero. A three-state field (absent, explicit null, value) of text, web_string or bytes cannot be represented. Integer ranges are metadata only: the generated code neither reflects nor enforces them.",
+      "recommendation": "Extend `optional` with a presence-flag encoding for pointer kinds when the first web-facing API needs it. Consider generating range assertions in the Zig tests."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0021/raw/tests-before.log",
+      "line": null,
+      "issue": "The baseline failures are import and compile failures only. The scenarios characterize FP-0006 behavior that already existed, and no mutation shows a scenario catching an engine regression. The evidence README's \"20 compile errors\" is clang's error limit (\"too many errors emitted\"), not a total count.",
+      "recommendation": "Optionally, add one engine-side mutation, such as skipping the thread check or writing output before a status check. Show it killed by both the C and Zig scenarios. Change the wording to \"at least 20\"."
+    }
+  ],
+  "commands_run": []
+}

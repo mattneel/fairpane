@@ -1,0 +1,148 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "7bbe196",
+    "29f2135",
+    "94c96ed"
+  ],
+  "summary": "I accept revision 1. I read the files as they are in the working tree. I could not run git, so I could not diff the three commits. The commit identities come from the evidence: raw/revision-1-binding.log and raw/revision-1-actionlint.log record HEAD 29f2135 before the receipts were written, and raw/github-run-37875841603.log records headSha 94c96ed.\n\nThe major finding from review 1 is resolved. policy.json:34 now lists .github in source_roots. fingerprints() hashes the path, size, and SHA-256 of every file it walks under that root. validateReceipt then reports 'The receipt refers to stale source.' for any receipt made before a workflow edit or before a new workflow file was added. The new receipts count 100 source files; the old ones counted 97.\n\nThe minor findings are also resolved:\n- The tokenizer rejects every character outside printable ASCII. That covers tabs, a lone CR, NEL, LS, and PS.\n- Expressions are checked against an allowlist of names, not a denylist.\n- Every workflow file is compared with a reviewed list of problems.\n- workflow_run is rejected along with pull_request_target.\n- A gate step may not set shell:, and only the upload step may set if:.\n- Both READMEs now state the limits of pull-request runs and of install-zig.\n\nThree new minor findings remain. None is exploitable from a fork pull request, because such a run can rewrite the checker anyway. On master, each one needs a reviewed merge.\n1. Step outputs are on the expression allowlist, but nothing stops a run: script from interpolating them. That is the standard injection sink.\n2. gateStepProblems does not catch other ways to stop a gate from really running. These are defaults.run.shell, env such as NODE_OPTIONS, working-directory, container, and an extra uses: step inserted between the gates.\n3. The pages.yml exception matches only the text of the problem message. Widening the deploy job to write-all produces the same message, so the test still passes.\n\nAll of these are local integrity checks. Under docs/SECURITY.md:79-81 they do not provide independent enforcement.",
+  "criteria": [
+    {
+      "criterion": "A workflow edit makes a gate receipt stale",
+      "met": true,
+      "evidence": "engineering/policy.json:34 adds .github to source_roots. lib.mjs:88-91 fingerprints() calls hashInputs(source_roots). collectFiles (lib.mjs:62-78) walks .github recursively over the filesystem, so it also catches an untracked new workflow file. hashInputs adds the path, size, and SHA-256 of each file (lib.mjs:84). validateReceipt with current=true compares the result against source_before (lib.mjs:280-283). The receipts made after the change record file_count 100 at HEAD 29f2135 (gates/2026-10-09T02-41-12-409Z-controller-test-574028d3.json:18-21); the earlier receipts recorded 97. .github is not in policy_roots or protected_paths. A workflow edit therefore invalidates the source fingerprint but does not need a policy commit, which the contract allows."
+    },
+    {
+      "criterion": "Tab and non-ASCII rejection closes the parser differential",
+      "met": true,
+      "evidence": "workflow-check.mjs:112-119 strips one leading BOM and normalizes CRLF. It then rejects the first character that matches /[^\\n\\x20-\\x7E]/, which covers tabs, a lone CR, NUL, DEL, NEL, LS, PS, and any non-ASCII byte. Invalid UTF-8 decodes to U+FFFD and is rejected too. Because this check covers the whole file, it also closes the plain-scalar and sequence-item tab cases from review 1, not only the tested key form. Tests are at test.mjs:211-215."
+    },
+    {
+      "criterion": "The expression allowlist cannot read secrets or tokens",
+      "met": true,
+      "evidence": "expressionBodies (workflow-check.mjs:223-236) finds the closing }} while tracking single-quoted strings. [INFERENCE] This matches GitHub's template scanning. expressionProblems blanks out the string literals and rejects any character outside [A-Za-z0-9_.\\s()=!<>&|,-], so [, ], *, {, }, and \" are all rejected. It then matches each dotted name in full against three exact github.* paths, STEP_OUTPUT, or literals. A space around a dot (github . token) makes the bare segments fail, and hyphenated identifiers such as y-secrets.X fail as whole names. format() string literals are constants written by the workflow author, and format's other arguments go through the same name check. A bare if: value is checked at :296-299. Every scalar is visited: plain, quoted, flow items, and block scalars. Comments are skipped, and GitHub does not evaluate comments either. The cases are at test.mjs:153-164. The remaining semantic gap concerns step outputs; see the findings."
+    },
+    {
+      "criterion": "pull_request_target and workflow_run are banned in every workflow file",
+      "met": true,
+      "evidence": "workflow-check.mjs:275 rejects both trigger names in scalar, sequence, and mapping form. test.mjs:72-77 reads every entry of .github/workflows and requires the list to equal Object.keys(REVIEWED). Each file must produce exactly its reviewed problems. gates.yml triggers on push, pull_request, and workflow_dispatch. pages.yml triggers on push and workflow_dispatch. The glob with gitignore off shows only these two files."
+    },
+    {
+      "criterion": "Pull-request and install-zig limits are documented",
+      "met": true,
+      "evidence": "tools/README.md:140-142 and FP-0033/README.md under Limits say that a pull request runs its own workflow, checker, and controller, so its green check enforces nothing independently. Both also say that install-zig accepts an existing directory after only a version check. The code matches: lib.mjs installZig returns checkCompiler() when .tools/zig/<ver>/<platform> exists. .tools/ is gitignored but can still be force-added."
+    },
+    {
+      "criterion": "Workflow trust posture unchanged: read-only token, no secrets, pinned actions, no persisted credentials, safe concurrency",
+      "met": true,
+      "evidence": "gates.yml:10-17 and :26-28 are unchanged in substance. test.mjs:83-86 asserts the exact concurrency group and cancel-in-progress expressions. The checker rejects any secrets key (workflow-check.mjs:293), which includes secrets: inherit."
+    },
+    {
+      "criterion": "Integrated run on GitHub succeeds for the revision",
+      "met": true,
+      "evidence": "raw/github-run-37875841603.log records gh run view exit 0: run 37875841603, push event, headSha 94c96edc…, conclusion success. Both the 'Windows gates' and 'Linux gates' jobs report conclusion success. A search for failure, skipped, cancelled, or timed_out conclusions found nothing."
+    },
+    {
+      "criterion": "actionlint 1.7.12 with a verified digest on the integrated workflows",
+      "met": true,
+      "evidence": "raw/revision-1-actionlint.log: certutil computes 6e7241b5…f6e9, which matches the checksums.txt line. HEAD is 29f2135. The log records gates.yml SHA-256 27c988f8… and pages.yml SHA-256 8230ec4d…, then 'Found 0 errors in 2 files' with exit 0. The shellcheck and pyflakes rules were disabled. The digest comes from the release's own checksum file, so it proves integrity, not authenticity."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "major: policy.json omits .github, so workflow edits leave controller-test receipts current",
+      "resolved": true,
+      "evidence": "policy.json:34 adds .github to source_roots. lib.mjs:88-91 and :280-283 now report a stale receipt after any change under .github. The receipts at HEAD 29f2135 count 100 source files, up from 97. I could not confirm with git that 29f2135 is a separate policy: commit touching only policy.json; that comes from the evidence README. Optional hardening, not done: put .github/workflows/gates.yml under policy_roots or protected_paths."
+    },
+    {
+      "finding": "minor: a tab-separated comment hides pull_request_target (workflow-check.mjs:103)",
+      "resolved": true,
+      "evidence": "Tabs and all non-ASCII characters are now parse errors for the whole file (workflow-check.mjs:114-119), so the plain-scalar and sequence-item forms fail as well. The test is at test.mjs:213."
+    },
+    {
+      "finding": "minor: toJSON(github) and github['token'] bypass SECRET_EXPRESSION",
+      "resolved": true,
+      "evidence": "An allowlist now covers calls (always, format) and reads (three github paths and steps.*.outputs.*) (workflow-check.mjs:214-217, 239-252). [ is a syntax problem. The tests at test.mjs:153-164 cover github['token'], toJSON(github), format('}}{0}', secrets.X), secrets['TOKEN'] in a block scalar, and a bare if: secrets.X."
+    },
+    {
+      "finding": "minor: only gates.yml is asserted clean, and workflow_run is not rejected",
+      "resolved": true,
+      "evidence": "test.mjs:72-77 compares the directory listing with REVIEWED and checks each file. workflow-check.mjs:275 rejects workflow_run, and test.mjs:150-152 covers it. Residual: the pages.yml exception matches only the message text; see the new finding."
+    },
+    {
+      "finding": "minor: nothing rejects if: or shell: on gate steps",
+      "resolved": true,
+      "evidence": "gateStepProblems (workflow-check.mjs:317-338) rejects a job-level if:, any step shell:, and any step if: other than ${{ always() }} on upload-artifact. The tests are at test.mjs:166-177. Residual bypasses through defaults, env, working-directory, container, or an inserted uses: step are listed as a new finding."
+    },
+    {
+      "finding": "minor: no documentation that pull-request runs use the pull request's own workflow, checker, and controller, or of the install-zig version-only check",
+      "resolved": true,
+      "evidence": "tools/README.md:140-142 and FP-0033/README.md under Limits now state both. Two of my optional recommendations were not adopted: a repo-check rule rejecting tracked .tools/ files, and a compiler binary digest in receipts. Because a pull request controls the controller anyway, the documentation is sufficient."
+    },
+    {
+      "finding": "note: runner image labels are mutable, and receipts lack ImageVersion",
+      "resolved": true,
+      "evidence": "Still not recorded, but now documented: the FP-0033/README.md Limits section says 'Receipts do not record the runner image version'."
+    },
+    {
+      "finding": "note: setup-node runtime not checked against a project-held digest",
+      "resolved": false,
+      "evidence": "Unchanged. I accept this as the pinned action's trust boundary, which is note-level."
+    },
+    {
+      "finding": "note: Get-Zig.ps1 has no streaming size cap",
+      "resolved": false,
+      "evidence": "Unchanged. Only disk exhaustion is possible before Assert-Archive rejects the file, and nothing is extracted. Note-level."
+    },
+    {
+      "finding": "note: tar -tf checks names only, not entry types",
+      "resolved": false,
+      "evidence": "Unchanged (lib.mjs installZig). The check runs after the SHA-256 match against the protected lock, so it is defense in depth only."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/workflow-check.mjs",
+      "line": 215,
+      "issue": "STEP_OUTPUT lets any expression read steps.<id>.outputs.<name>, wherever it appears. A step can set an output from untrusted data without using any expression. For example, it can read $GITHUB_EVENT_PATH (a head_commit.message on a push to master, or workflow_dispatch inputs) and write the value to $GITHUB_OUTPUT, or an action can echo such data back as an output. A later `run: echo \"${{ steps.x.outputs.msg }}\"` would then be shell injection, and the checker would report nothing. This allowlist entry is the only one whose value depends on data. github.event_name, run_id, and pull_request.number are fixed sets or integers. Neither workflow uses the pattern today: gates.yml has no expression in any run:, and pages.yml uses steps.deployment.outputs.page_url only in environment.url.",
+      "recommendation": "Reject any ${{ }} inside a run: value, and pass values through env: instead. Alternatively, allow step outputs only outside run: and outside with.script. Add a fixture with run: echo ${{ steps.x.outputs.y }}."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/workflow-check.mjs",
+      "line": 317,
+      "issue": "gateStepProblems claims to report 'Problems that would let a gate in the Gates workflow pass without running', but it inspects only a step's shell: and if: and a job's if:. Several other changes would make a gate step exit 0 without running. Workflow- or job-level defaults.run.shell (for example 'true {0}') overrides the shell of every run step. env NODE_OPTIONS=--import=data:… or --require=… at workflow, job, or step level can call process.exit(0) before fairpane.mjs runs. working-directory can point node at a different tools/fairpane.mjs. container: changes the execution environment. A pinned uses: step inserted between the gates can write NODE_OPTIONS to $GITHUB_ENV. The gates.yml test compares only the filtered list of run strings (test.mjs:99-100) and checks only that the last step is the upload, so none of these changes fails it.",
+      "recommendation": "In gateStepProblems, allowlist keys instead of denying a few. Allow name, on, permissions, concurrency, and jobs at workflow level. Allow name, runs-on, timeout-minutes, and steps at job level. Allow name, uses, with, and run at step level, plus if: only on the upload step. In the gates.yml test, assert the full ordered list of steps, including uses references, not only the run strings."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/workflow-check.test.mjs",
+      "line": 68,
+      "issue": "The pages.yml exception matches only the message text 'Line 49: Job deploy grants a permission other than contents: read.' The checker emits that same text for any widening at that line. Changing the deploy job to permissions: write-all, or adding contents: write, actions: write, or pull-requests: write, keeps check 6 green. The exception was reviewed as 'pages: write and id-token: write only', but the test does not bind it to that.",
+      "recommendation": "For pages.yml, assert that the deploy job's permissions map is exactly {pages: write, id-token: write}. Assert also that its steps are the single pinned actions/deploy-pages step."
+    },
+    {
+      "severity": "note",
+      "path": "tools/workflow-check.mjs",
+      "line": 275,
+      "issue": "Triggers are checked against a denylist of two names. Other events also run base-branch code with base-branch cache scope even when a pull request starts them: issue_comment, pull_request_review, pull_request_review_comment, issues, and discussion. A run step in such a workflow can check out pull-request code by reading $GITHUB_EVENT_PATH, with no expression the checker would see. Secrets and a write token are already excluded, and no workflow uses actions/cache, so the remaining impact is limited to cache poisoning.",
+      "recommendation": "Allow only the triggers that have been reviewed (push, pull_request, and workflow_dispatch), and make any other trigger need a reviewed exception."
+    },
+    {
+      "severity": "note",
+      "path": "tools/workflow-check.mjs",
+      "line": 332,
+      "issue": "An upload-artifact step that has no if: at all reports no problem (`if (!condition) continue`). An upload without if: is skipped after a failed gate, so the evidence of the failure would not be uploaded. Contract check 9's fixture uses if: ${{ success() }}, not an omitted if:. For gates.yml itself, test.mjs:101-103 separately asserts that the last step has if: ${{ always() }}.",
+      "recommendation": "In gateStepProblems, require every actions/upload-artifact step to carry exactly ${{ always() }}, and add a fixture with no if:."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0033/README.md",
+      "line": null,
+      "issue": "I could not run git to confirm three things: that 29f2135 is a separate policy: commit touching only engineering/policy.json, that 7bbe196 changes only writable paths, and that the file hashes in raw/revision-1-actionlint.log match the committed workflows. Those claims come from the evidence logs and the README.",
+      "recommendation": "The integrator should record `git show --stat 29f2135 7bbe196` and `git hash-object .github/workflows/*.yml` alongside the existing binding log."
+    }
+  ],
+  "commands_run": []
+}

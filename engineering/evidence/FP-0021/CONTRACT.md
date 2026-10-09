@@ -106,3 +106,45 @@ Required reviewer: `fairpane-review`.
 
 - No language wrapper beyond C and Zig exists in this task.
 - The ABI revision stays zero and experimental.
+
+## Revisions
+
+Revision 1 follows the rejecting review `reviews/review-1-reject.json` of commit `13372de`.
+
+### Ownership
+
+The ownership vocabulary gains `consumed_on_success`.
+It means that a call returning `ok` takes the handle and ends its lifetime, and a call returning any other status leaves the handle with the caller.
+The validator accepts it only for an input handle parameter.
+`engine_destroy` declares its `engine` parameter `consumed_on_success`.
+Each identifier family names the lifetime that ends its identifiers, using the existing lifetime names.
+
+### Language-specific names in generated text
+
+Schema descriptions refer to schema items through references, such as `{function:document_get}`, `{constant:deadline_none}`, `{status:ok}`, `{event:request_issued}`, `{enumeration:reject_reason}`, and `{size:engine_options}`.
+The validator rejects a reference to an item that does not exist and a description that names a function, constant, status, or event without a reference.
+The C generator renders each reference as the C name, such as `fp_document_get`, `FP_DEADLINE_NONE`, `FP_STATUS_OK`, `FP_EVENT_REQUEST_ISSUED`, `FP_REJECT_*`, and `sizeof(fp_engine_options)`.
+The Zig generator renders the Zig name of each item.
+
+### Checks
+
+The generator emits C `_Static_assert` checks of `sizeof` and `offsetof` for every structure from the same layout model, and the C smoke test compiles them.
+The `cross` gates or a recorded `zig cc` run compile those checks for a 32-bit x86 target.
+`abi_generated.zig` carries each function's allowed status set, and `src/c_api.zig` asserts at compile time that every native error of each export maps into that set.
+A test fails when the library exports an `fp_` symbol that the schema does not declare.
+From a foreign thread, the C and Zig scenarios also call each owner function with an invalid argument and expect `wrong_thread` with no output written.
+`api/README.md` states that the C and Zig scenarios only establish that the boundary has no unwinding channel, and that each later wrapper must inject a real panic or exception.
+
+### Revision test cases
+
+10. The validator rejects `consumed_on_success` on an output parameter, and the generated C and Zig text states the consumption rule for `fp_engine_destroy`.
+11. The validator rejects an unknown reference and an unreferenced function name, and the generated header contains no schema-only name such as `document_get` outside a C name.
+12. The generated C static assertions compile for x86_64 and for a 32-bit x86 target.
+13. A wrong-thread call with an invalid argument returns `wrong_thread` and writes no output, in C and in Zig.
+14. A mutation that skips the thread check in `src/c_api.zig` fails both the C and the Zig scenarios, and its diff and logs are recorded.
+
+### Evidence
+
+The integrator also runs the `zig-build` gate on the revision commit.
+The evidence README says "at least 20 errors" for the baseline compile.
+`docs/ABI_AND_WRAPPERS.md` is outside this task's paths, so the integrator corrects its stale reference separately.

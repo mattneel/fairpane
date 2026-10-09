@@ -1,0 +1,104 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "199b279a57ec53efec67de95d928a9d64d746462",
+    "71e0ad1e02e11769f64b46af48b9f2462d69134e"
+  ],
+  "summary": "Rejected because of two major findings. Criteria 1, 4, and 5 are met. Criteria 2 and 3 are not fully met. (A) Criterion 3: loadTrustPolicy compares the lexical policy path with the canonical real path of the candidate (attest.mjs:96, fairpane.mjs:132). The check misses a policy path that is spelled through any alias of the candidate root and then follows a link inside the candidate to a file outside it. Such aliases include macOS /tmp or /var, a Windows 8.3 short name, a junction to an ancestor, a subst drive, and the \\\\?\\C:\\ or \\\\.\\C:\\ device forms. Case FP-0051 4 passes a mkdtemp path that has not been resolved, so it is expected to fail on macOS and on the project's own windows-2025 CI job, where TEMP contains RUNNER~1 [INFERENCE]. (B) Criterion 2: `git rev-parse --verify --quiet X^{commit}` exits with status 1 for any failure of get_oid_with_context that does not end the process with die(). parse_object returns NULL with 'hash mismatch' and with 'bogus commit object', and both happen when an object exists. So a hash-mismatched or malformed commit object is reported as unknown-candidate. The fixture covers only a loose object that is not valid zlib, which takes Git's die() path to status 128. ADR 0002:77 and the code comment at attest.mjs:175 are therefore inaccurate. (C) enclosingGitDirectory matches Git for ordinary `git worktree add` layouts. Those layouts include absolute and relative gitdir lines, commondir, a submodule .git file, a work tree of a bare repository, and a .git symlink. It does not match Git in these cases: a .git directory that contains a commondir file, a .git directory that is not a valid Git directory (Git skips it), and a nested repository inside a linked work tree. A layout set by GIT_DIR or core.worktree also cannot be detected. Each of these cases yields 'verified' with exit status 0, which contradicts README:38-39 ('only makes a result advisory'). The lexical check handles case through Node's win32 path.relative, which lowercases both paths. It handles `..` through path.resolve. On Windows, \\\\?\\ paths defeat it. Evidence binding: binding.log shows HEAD 199b279 at 02:51:13.112Z. The reflog shows 199b279 committed at 02:51:07Z and 71e0ad1 at 02:52:18Z. Both gates, tests-after, and tests-bun ran in that interval, with source digest cc4463f7… (105 files). The policy digest bb313e06… equals the base FP-0021 receipts, so no protected policy changed. The status omitted --ignored, however, and ignored paths under the source roots, such as .omp/sessions/, would be hashed without appearing. I ran no commands. I read the working tree at HEAD 8af0f20, so it is [INFERENCE] that the tools files I read equal 199b279.",
+  "criteria": [
+    {
+      "criterion": "Report a verifier that runs from a linked work tree of the candidate repository as advisory, with a test.",
+      "met": true,
+      "evidence": "fairpane.mjs:135-136 compares enclosingGitDirectory(root) with repository.gitDirectory. Case FP-0051 1 (attest.test.mjs:220-231) is 'ok 15' in raw/tests-after.log at 02:51:35Z and 'ok 51' in the controller-test gate log. raw/tests-before.log shows it failing with result 'verified' under a stub. Residual gaps in layouts other than `git worktree add` are listed under findings."
+    },
+    {
+      "criterion": "Reserve unknown-candidate for a missing commit object, and report any other Git failure of the commit lookup as a tool error, with a corrupted-object fixture.",
+      "met": false,
+      "evidence": "attest.mjs:176 maps every status 1 to unknown-candidate. In rev-parse, die_no_single_rev(quiet) calls exit(1) on any lookup failure that does not end the process with die(). In peel_onion, parse_object returns NULL for 'hash mismatch' (check_object_signature) and for 'bogus commit object' (parse_commit_buffer), so status 1 also arises for corrupt or malformed commits that exist [INFERENCE from Git source, not executed]. Case FP-0051 3 (attest.test.mjs:242-249) writes a file that is not valid zlib. That takes the die() path ('loose object … is corrupt', status 128), so it exercises only one kind of corruption."
+    },
+    {
+      "criterion": "Reject a trust-policy path whose lexical form or resolved form lies inside the candidate repository or its Git directory, and read the same resolved path that was checked.",
+      "met": false,
+      "evidence": "attest.mjs:94-99 reads `resolved`, so the 'read what was checked' part is met. isLexicallyInside (attest.mjs:82-85), however, compares path.resolve(policyPath) with locations that fairpane.mjs:131-132 has already resolved to canonical real paths. A policy path spelled through a non-canonical alias of the candidate root (/tmp vs /private/tmp, RUNNER~1, a junction, subst, \\\\?\\C:\\) followed by an inner link that leads outside passes both checks. Case FP-0051 4 passes only because this host's %TEMP% is canonical (raw/tests-after.log, ok 18)."
+    },
+    {
+      "criterion": "Document that path comparison cannot detect a UNC or administrative-share alias of the candidate.",
+      "met": true,
+      "evidence": "ADR 0002 lines 26-28 ('cannot detect a UNC or administrative-share alias of the candidate, such as `\\\\localhost\\C$\\...`') and tools/README.md:105-107."
+    },
+    {
+      "criterion": "Make the outside-repository test independent of whether the temporary directory lies inside a Git work tree.",
+      "met": true,
+      "evidence": "attest.test.mjs:198-202 chooses the expected error from enclosingGitDirectory(outside). That covers the ordinary dotfiles case. Edge cases where Git and the function disagree remain (see the note)."
+    },
+    {
+      "criterion": "Protected paths stay unchanged.",
+      "met": true,
+      "evidence": "The policy digest bb313e06aa16… (17 files) in both FP-0051 gate receipts equals the FP-0021 receipts at the base, 2026-10-09T02-46-05Z. policy_roots cover every protected path (engineering/policy.json:36-45)."
+    },
+    {
+      "criterion": "Evidence binds to the reviewed commit.",
+      "met": true,
+      "evidence": "raw/binding.log shows rev-parse HEAD = 199b279a57ec… at 02:51:13.112Z, and its status lists only untracked files outside the source roots. The gates ran from 02:51:13.291Z to 02:51:35.620Z with equal source digests before and after (cc4463f7…, 105 files). tests-after ran at 02:51:35Z and tests-bun at 02:51:38Z. In .git/logs/HEAD, 199b279 is at epoch 1791514267 (02:51:07Z) and 71e0ad1 at 1791514338 (02:52:18Z). The binding is weaker than FP-0002's: the status omits --ignored, and the receipts carry no commit ID."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "tools/attest.mjs",
+      "line": 96,
+      "issue": "isLexicallyInside(policyPath, location) compares the operator's spelling with the canonical real path of the location (fairpane.mjs:131-132 passes candidateRepository's realpathSync.native output). If the operator's spelling of the candidate differs from the canonical path, the lexical test is always false. The realpath test then sees only the redirected target. Minimal reproduction [INFERENCE, not executed]: on macOS, run `git init /tmp/cand`, commit once, run `ln -s /tmp/out /tmp/cand/link`, and place a writer-keyed trust-policy.json in /tmp/out. Then run `attest-verify --repository /tmp/cand --trust-policy /tmp/cand/link/trust-policy.json …`. The root is /private/tmp/cand, and the lexical /tmp/cand/link/… lies outside it. The real path /private/tmp/out/… also lies outside, so the policy is accepted. On Windows, the same bypass works with `mklink /J C:\\cand\\link C:\\out` and any of these spellings: `\\\\?\\C:\\cand\\link\\trust-policy.json` (path.win32.relative returns the absolute target when the roots differ), the 8.3 short name of the candidate directory, or a junction C:\\alias pointing to C:\\cand. Finding 3 of review 3 is therefore closed only when the candidate path contains no link, short name, or device prefix.",
+      "recommendation": "Walk the components of path.resolve(policyPath). Resolve each existing prefix with realpathSync.native, and reject when any prefix's real path lies inside a protected location. This rejects any route through a link inside the candidate, whatever the spelling of the root. Alternatively, also compare the lexical path against the operator's lexical --repository spelling. Extend case 4 with an aliased root (a symlink or junction to candidate.dir), and on Windows with a \\\\?\\ spelling."
+    },
+    {
+      "severity": "major",
+      "path": "tools/attest.mjs",
+      "line": 176,
+      "issue": "Status 1 from `rev-parse --verify --quiet X^{commit}` does not mean the object is missing. rev-parse calls exit(1) whenever get_oid_with_context fails without die(). peel_onion fails when parse_object returns NULL. parse_object returns NULL after error('hash mismatch') and after parse_commit_buffer's error('bogus commit object'), and both arise for objects that exist. Minimal reproductions [INFERENCE from Git source, not executed]: (1) In the fixture, copy the loose object file of `second` over that of `first`, then run candidateIdentity(dir, first). Git prints 'error: hash mismatch <first>' and exits with status 1, so the result is unknown-candidate instead of a tool error. (2) Run `printf x | git hash-object -t commit --literally -w --stdin` and pass the resulting ID. Git prints 'bogus commit object' with status 1, so the result is unknown-candidate. ADR 0002:77 ('a corrupt or unreadable object … is a tool error') and the comment at attest.mjs:175 are inaccurate. Case FP-0051 3 covers only the zlib-garbage die() path, which exits with status 128.",
+      "recommendation": "On status 1, probe `git cat-file -t <id>`, which reads only the header and does no hash check. Report a missing object as unknown-candidate, and report a non-commit type as unknown-candidate. Report a 'commit' type that failed to peel as a tool error that quotes Git's stderr. Add the hash-mismatch and `--literally` malformed-commit fixtures to case FP-0051 3, and correct the comment and the contract text at CONTRACT.md:28."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/attest.test.mjs",
+      "line": 255,
+      "issue": "Case FP-0051 4 passes path.join(candidate.dir, 'link', …), where candidate.dir comes from mkdtemp without resolution, together with locations resolved by realpathSync.native. Because of the defect at attest.mjs:96, the case passes only when os.tmpdir() is canonical. On macOS ($TMPDIR is under /var, a symlink to /private/var) and on the windows-2025 runner that .github/workflows/gates.yml:22,41 uses for controller-test (TEMP = C:\\Users\\RUNNER~1\\…), the expected result is 'Expected rejection unprotected-policy, got success' [INFERENCE]. No CI run of 199b279 is recorded. The only recorded run, github-run-37875841603, is at 94c96ed.",
+      "recommendation": "After fixing attest.mjs:96, make the case use an aliased root spelling deliberately, so the result does not depend on the host's temporary directory. Record a CI run of the fixed commit."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/attest.mjs",
+      "line": 153,
+      "issue": "enclosingGitDirectory differs from Git's discovery in ways that produce 'verified' for a verifier that shares the candidate's common directory or lies inside one of its work trees [INFERENCE, not executed]. (a) It returns a .git directory without reading its commondir file. Git honors commondir in any git dir (gitrepository-layout; get_common_dir_noenv). Example: mkdir V/.git, write HEAD, and write commondir containing C:/cand/.git. Then `git -C V rev-parse --git-common-dir` reports the candidate's directory, while the function returns V/.git. (b) It stops at any .git directory, but Git's is_git_directory rejects an empty or invalid .git directory and keeps walking up. An empty linked/v/.git inside a linked work tree therefore shadows linked/.git. (c) A nested repository inside a linked work tree stops discovery, so a verifier in linked/vendor/v is 'outside-candidate'. In the same position inside the main work tree, isInside(root, repository.root) would make it advisory. (d) A layout set by GIT_DIR or core.worktree leaves no marker and cannot be detected. Absolute and relative gitdir lines, a relative commondir, a submodule .git file (common = .git/modules/sub), a work tree of a bare repository, and a .git symlink are handled correctly. Minor differences in parsing are a note.",
+      "recommendation": "Apply the commondir lookup to .git directories too. Skip a .git directory that lacks HEAD and objects, as Git's is_git_directory does. Also enumerate <common>/worktrees/*/gitdir and report advisory when the verifier root lies inside any registered work tree. That check covers (b) and (c). Document (d)."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0051/README.md",
+      "line": 38,
+      "issue": "README:38-39 states that the only error direction of enclosingGitDirectory 'only makes a result advisory'. Cases (a)-(c) of the previous finding go the other way, so the claim is unsupported. tools/README.md:108 and ADR 0002 ('from another work tree of that repository') also overstate the coverage.",
+      "recommendation": "State the cases in which the function reports no shared common directory where Git would find one, or fix them and keep the claim."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0051/raw/binding.log",
+      "line": null,
+      "issue": "The status ran without --ignored, unlike FP-0002 revision 3. Source roots include .omp, whose .omp/sessions/, .omp/artifacts/, and .omp/local.yml are gitignored, and patterns such as *.key and .env can match inside the source roots. collectFiles (tools/lib.mjs:61-78) hashes ignored files too. The digest cc4463f7… therefore cannot be tied to the tree of 199b279 from the evidence alone, although the timestamps and the reflog are consistent with it. The receipts carry no commit ID.",
+      "recommendation": "Record `git status --porcelain --untracked-files=all --ignored`, or run the gates in a fresh work tree of the commit, as FP-0002 did."
+    },
+    {
+      "severity": "note",
+      "path": "tools/attest.test.mjs",
+      "line": 202,
+      "issue": "The function under test is the oracle for the expected error. When it finds a .git entry that Git does not use, the expectation is wrong. Examples are an empty .git directory above the temporary directory, a dubious-ownership refusal, and a file system boundary, because GIT_DISCOVERY_ACROSS_FILESYSTEM is unset. In each case, Git reports 'cannot be read' while the test expects 'top-level directory'.",
+      "recommendation": "Derive the expectation from Git itself (`git -C outside rev-parse --show-toplevel`, with the GIT_* environment removed), or accept either tool error."
+    },
+    {
+      "severity": "note",
+      "path": "tools/attest.mjs",
+      "line": 155,
+      "issue": "Parsing differences from Git. The gitdir regex accepts at most one trailing CR LF, while Git strips any run of trailing CR and LF. Such a file fails closed as a tool error. commondir uses .trim(), which also strips leading and trailing spaces, while Git strips only CR and LF. On POSIX, path.resolve at line 94 collapses `..` lexically before realpath, so /out/L/../p.json reads /out/p.json even when the kernel would open a different file. The read file is the checked file, so this is not a bypass.",
+      "recommendation": "Match Git's trimming of only CR and LF in both files. Optionally document the POSIX `..` semantics."
+    }
+  ],
+  "commands_run": []
+}
