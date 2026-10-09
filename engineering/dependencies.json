@@ -106,7 +106,23 @@
       "OMP supplied by the owner",
       "Git for isolation"
     ],
-    "package_dependencies": []
+    "package_dependencies": [],
+    "import_tools": [
+      {
+        "name": "fontTools",
+        "version": "4.66.1",
+        "wheel_url": "https://files.pythonhosted.org/packages/f6/10/d45b74135d5d642cb3a4fb0a957c1613ef93de4c8548671dfc3a5bf38299/fonttools-4.66.1-py3-none-any.whl",
+        "wheel_sha256": "7234ae9e28db64273fbbfa72caebd0a97e3bdba6b05064114741b9539ef339d0",
+        "license": "MIT",
+        "host": "A Python 3 interpreter supplied by the host, whose exact version each import records.",
+        "installation": "Installed under .tools/python from the verified wheel with --no-index --no-deps.",
+        "uses": [
+          "Subsetting a font fixture during an import, with the recorded argument vector and input and output digests.",
+          "Writing font expectation files that the first-party parser's tests compare against."
+        ],
+        "boundary": "An import-time tool only. No build, gate, test, or runtime path runs it, and no engine or wrapper code depends on it."
+      }
+    ]
   },
   "platform_adapters": [],
   "audit_status": "lexical-bootstrap-check-only",
