@@ -2838,7 +2838,7 @@
       "id": "FP-0058",
       "title": "Decode WOFF and WOFF2 with a first-party Brotli decoder",
       "workstream": "text",
-      "depends_on": ["FP-0013"],
+      "depends_on": ["FP-0013", "FP-0119", "FP-0120"],
       "role": "fairpane-text",
       "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
@@ -2874,7 +2874,8 @@
         "Apply variations through fvar, avar, gvar, HVAR, and MVAR with checked tables.",
         "Test named instances and axis values against reference fixtures.",
         "Replace the FP-0120 UnsupportedCff2 report with CFF2 outline decoding, including blend and vsindex, under the FP-0120 interpreter bounds.",
-        "Apply gvar deltas to the FP-0119 decoded points, including component offsets and phantom points, under the FP-0119 budgets."
+        "Apply gvar deltas to the FP-0119 decoded points, including component offsets and phantom points, under the FP-0119 budgets.",
+        "Implement endchar seac through the TN5176 StandardEncoding and the font's charset once the owner approves those tables, replacing the FP-0120 unsupported error, and otherwise keep cff-seac recorded as a remaining capability obligation."
       ],
       "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
@@ -2991,7 +2992,7 @@
       "workstream": "html-dom",
       "depends_on": ["FP-0008", "FP-0123", "FP-0124", "FP-0125", "FP-0126"],
       "role": "fairpane-core",
-      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
       "authority": "routine-local-engineering",
       "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
@@ -3142,7 +3143,7 @@
       "id": "FP-0072",
       "title": "Complete the cascade inputs and the HTML user-agent stylesheet",
       "workstream": "css-layout",
-      "depends_on": ["FP-0100", "FP-0014"],
+      "depends_on": ["FP-0100", "FP-0014", "FP-0127"],
       "role": "fairpane-core",
       "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
@@ -3920,7 +3921,7 @@
       "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
       "required_reviewers": ["fairpane-review", "fairpane-spec"],
       "acceptance": [
-        "Take the font list, font size, direction, white-space behavior, and line height as explicit layout parameters, which FP-0071 later wires to CSS properties.",
+        "Take the font list, font size, direction, white-space behavior, and line height as explicit layout parameters, which FP-0130 feeds from computed CSS values.",
         "Break shaped runs into lines at UAX #14 opportunities for a definite available inline size, and report min-content and max-content sizes for indefinite constraints without using zero.",
         "Reorder each line under UAX #9 rules L1 and L2, and keep code-unit-to-glyph mappings in every line fragment.",
         "Process white space for the supported white-space behavior, and report every other behavior as unsupported.",
@@ -4037,7 +4038,8 @@
         "Compare glyphs from all four font fixtures with the FP-0121 oracle under the FP-0121 tolerance, recorded before the run.",
         "Bound end-to-end work and allocation for hostile glyphs and pixel sizes.",
         "Mark glyph-rasterization implemented in the capability record, and update the frozen obligation lists in tools/capabilities.mjs and the FP-0013 case 49 test, as a frozen part of the contract that its reviewers check.",
-        "Add at most 10 seconds to the tests/text run step on the development host."
+        "Add at most 10 seconds to the tests/text run step on the development host.",
+        "Treat the FP-0121 oracle masks and the hand-computed masks as the reference fixtures that FP-0056 criterion 4 names."
       ],
       "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md", "engineering/evidence/FP-0121/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
@@ -4115,7 +4117,7 @@
       "id": "FP-0126",
       "title": "Implement HTML encoding sniffing, the prescan, and changing the encoding, and decode every document in the laboratory",
       "workstream": "html-dom",
-      "depends_on": ["FP-0125"],
+      "depends_on": ["FP-0125", "FP-0100"],
       "role": "fairpane-core",
       "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/decisions", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
@@ -4129,7 +4131,8 @@
         "Implement change the encoding as a decision function whose change mechanism is a restart, and provide the hook that the tree-construction task handling meta in head calls.",
         "Complete the laboratory decode stage for every loaded body with the sniffed encoding and confidence, changing FP-0007 case 2 and FP-0008 cases 21, 25, and 26 on purpose, so that the sniff result never depends on chunk boundaries.",
         "Record in this task's evidence every WPT test under encoding/, html/syntax/charset, html/syntax/xmldecl, and html/syntax/speculative-charset at the pinned commit with the exact reason it can or cannot run, and run each one that can.",
-        "Record the run-step time that the new tests add to zig build test."
+        "Record the run-step time that the new tests add to zig build test.",
+        "Call the change-the-encoding hook from the FP-0100 in head insertion mode's meta branch, and test a restart of a document whose encoding confidence is tentative."
       ],
       "read": ["engineering/evidence/FP-0008/CONTRACT.md", "engineering/evidence/FP-0123/CONTRACT.md", "engineering/evidence/FP-0007/CONTRACT.md", "specs/applicability/wpt.json"],
       "contract_state": "bootstrap-seed",
@@ -4154,6 +4157,26 @@
         "Keep every FP-0009 and FP-0014 outcome, and record each shadow-tree behavior that selectors, style, and the laboratory do not yet support, with its owner task."
       ],
       "read": ["engineering/evidence/FP-0009/CONTRACT.md", "docs/ARCHITECTURE.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0130",
+      "title": "Feed computed text properties into inline layout",
+      "workstream": "text",
+      "depends_on": ["FP-0071", "FP-0117"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Feed the computed font-family, font-size, font-style, font-weight, line-height, white-space, direction, unicode-bidi, writing-mode, word-break, overflow-wrap, line-break, letter-spacing, word-spacing, text-align, and lang values into the FP-0117 inline layout parameters.",
+        "Report each of those properties that inline layout does not yet honor as unsupported with its owner task.",
+        "Test each property's effect on real layout output from parsed documents and style sheets."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0014/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }

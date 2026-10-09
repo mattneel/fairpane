@@ -1,0 +1,113 @@
+{
+  "verdict": "reject",
+  "summary": "Plan review 4: I reject overall because of two major dependency gaps; five of the seven commits are approved.\n\nI read each commit's patch on GitHub, plan.json and state.json at the current tree, policy.json, and tools/lib.mjs:347-349. I also confirmed through the GitHub API that the Encoding Standard pin whatwg/encoding a985b62a9b45 exists. I ran nothing, so `node tools/fairpane.mjs check` passing is [INFERENCE]. Every new dependency names an existing task, no cycle appears, and every new task has a state entry.\n\n**The two majors.** Each leaves a criterion whose prerequisite is outside its task's dependency closure, the same class of defect as plan review 1's major.\n1. 36782a5 changes FP-0072 to depend on FP-0100 instead of FP-0010. That drops its transitive path to FP-0127, so FP-0072's 'encapsulation contexts' criterion can be dispatched before the DOM has shadow roots.\n2. c122677 gives FP-0058 a criterion that reviews FP-0119's and FP-0120's strictness choices, without depending on either. FP-0058 is ready to dispatch now, because its only prerequisite, FP-0013, is accepted.\n\nAdding \"FP-0127\" to FP-0072 and \"FP-0119\" and \"FP-0120\" to FP-0058 fixes both without a cycle.\n\n**What holds up across the commits.**\n- **66d71bd** applies every plan review 3 finding. policy.json now protects rust-toolchain.toml (policy.json:56). FP-0099's new citation criterion is accurate: tools/lib.mjs:348-349 matches only `[S\\d{2}]`.\n- **f5be48f** only restores the comma that 66d71bd dropped. It changes no criterion and removes, skips, excludes, or weakens nothing. This review is the fairpane-review record that docs/AGENT_OPERATIONS.md needs for f5be48f as the fixing commit. Before relying on it, confirm that a later Gates run containing f5be48f passed; I could not see CI runs.\n- **All four splits** keep the closing task's criteria word for word: FP-0010 (5), FP-0015 (5), FP-0056 (5), and FP-0065 (4). Each closing task depends on all of its slices, and the slices together cover each closing criterion with specific, testable criteria. Reviewers and gates fit, and protected lists now match policy.json.\n- **New criteria on FP-0057, FP-0059, and FP-0060** are testable, and their owners already depend on FP-0056 or FP-0061.\n- **f719aed** correctly gives FP-0016 inline layout through FP-0117 and glyph rendering through FP-0122, instead of the closing FP-0015.\n\nThe minor findings concern obligations that only a commit message, a state note, or another task's text routes: CFF seac, the change-the-encoding hook, and wiring layout parameters to CSS.",
+  "commits": [
+    {
+      "commit": "66d71bd",
+      "verdict": "approve",
+      "notes": "Each plan review 3 finding is fixed.\n- FP-0079 drops toolchains/rust.lock.json and rust-toolchain.toml from its writable paths (3257). policy.json:55-56 now protects both, so task lists and policy agree.\n- FP-0099 now depends on FP-0081. It loses the .github and docs paths, cites FP-0081 security review 1 exactly, and adds the allocator-granularity and OS-limit statements.\n- FP-0099 criterion 3 now also rejects CONIN$ and CONOUT$.\n- FP-0106 now requires the c-abi gate.\n- FP-0023 criterion 5 appends 'adding each host's Rust artifacts to the lock through a separate reviewed lock change'. This adds a constraint and keeps the obligation.\n- FP-0098 criterion 4 and FP-0107 criterion 3 now apply their thresholds to the criterion 3 and criterion 4 runs. Their numbers are unchanged and no test may be weakened.\n\nNew FP-0099 criterion 7, 'Validate source citations of every length, such as [S100], in repo-check', is testable. Its premise holds: tools/lib.mjs:348 matches only `\\[S\\d{2}(?:,\\s*S\\d{2})*\\]`, so `[S100]` is never checked.\n\nThe commit dropped the comma after FP-0107 criterion 3, so plan.json did not parse at this head. f5be48f fixes that."
+    },
+    {
+      "commit": "f5be48f",
+      "verdict": "approve",
+      "notes": "The diff changes one line (plan.json:3510). It appends the missing comma to FP-0107 criterion 3, and the criterion text is byte-identical before and after. It changes no criterion, dependency, path, gate, timeout, or threshold, and removes, skips, excludes, or weakens nothing.\n\nThis review is the fairpane-review record that docs/AGENT_OPERATIONS.md:94 requires for f5be48f as the fixing commit for 66d71bd's repo-check failure. The failure record must still name:\n- the failed gate and step from the 66d71bd run;\n- a passing run of a later head in the acceptance range;\n- the `git diff --stat` of the listed paths over that range.\n\nI saw no CI runs."
+    },
+    {
+      "commit": "36782a5",
+      "verdict": "reject",
+      "notes": "**The split itself is correct.** FP-0010 keeps its five criteria word for word and depends on FP-0100 to FP-0105. It gains engineering/evidence, the zig-fmt gate, and fairpane-spec.\n\nThe slices carry FP-0010's criteria verbatim:\n- criterion 1 by FP-0100, FP-0102, FP-0103, FP-0104, and FP-0105;\n- criterion 2 by FP-0100, FP-0102, FP-0103, and FP-0104;\n- criterion 3 by FP-0100 and FP-0105;\n- criterion 4 by FP-0100 and FP-0101;\n- criterion 5 by FP-0101.\n\nTheir new criteria are specific and testable: FP-0100's 130 branches, partitions, and DOM store extensions; FP-0101's blob-level corpus reading, parseDat parity, scenario expansion, and five outcome classes; and the slices' clean-cutover removals and no-pass-becomes-fail reruns. Each slice's dependencies are sufficient: FP-0101 on FP-0003 and FP-0052 for the verified snapshot, FP-0103 on FP-0102 and FP-0127, and FP-0105 on the three mode slices. FP-0127 is a necessary new prerequisite with testable criteria. Moving FP-0019, FP-0068, and FP-0070 to FP-0100 is sound, because their criteria need HTML documents and modes, not tables or foreign content.\n\n**Major: FP-0072 (3145).** Its dependency on FP-0010 was replaced by FP-0100. Its criterion 1 requires 'encapsulation contexts', which are shadow trees in Cascade 5, and only FP-0127 provides shadow roots. Through FP-0010 → FP-0103 → FP-0127 it used to reach them; now it does not."
+    },
+    {
+      "commit": "66ad8ad",
+      "verdict": "approve",
+      "notes": "FP-0015 keeps its five criteria and depends on FP-0108 to FP-0118. It gains the evidence path and zig-fmt, and its expansion rule names the WPT owners. Coverage of its criteria:\n- criterion 1, shaping with reference fixtures: FP-0114 and FP-0115;\n- criterion 2, bidi order and mappings: FP-0109, FP-0112, FP-0113, and FP-0117;\n- criterion 3, line breaking: FP-0110 and FP-0117;\n- criterion 4, fallback, marks, carets, and selection: FP-0113, FP-0114, FP-0116, and FP-0118;\n- criterion 5, honest unsupported reporting: FP-0111, FP-0114, FP-0115, and FP-0117.\n\nThe needed Unicode data is already imported by FP-0013 (specs/IMPORT_REQUIREMENTS.md:11): Scripts, Script_Extensions, Joining_Type, and the Indic categories. Slices that import more have tools and specs paths.\n\nThe font parsers FP-0111, FP-0112, and FP-0113 require fairpane-security. The owner-blocked reference fixtures in FP-0114 and FP-0115 are named as blockers.\n\nFP-0055 now waits for FP-0108 to FP-0110, which import part of its files, and FP-0030 gains FP-0055 for word boundaries; neither creates a cycle.\n\nMinor: FP-0117 criterion 1 routes CSS wiring to FP-0071, which has no such criterion (see findings)."
+    },
+    {
+      "commit": "c122677",
+      "verdict": "reject",
+      "notes": "FP-0056 keeps its five criteria, depends on FP-0119 to FP-0122, and gains the evidence path. Coverage of its criteria:\n- criterion 1, TrueType: FP-0119;\n- criterion 2, Type 2 charstrings: FP-0120;\n- criterion 3, the reference rasterizer: FP-0121;\n- criterion 4, comparison under a recorded tolerance: FP-0122, against the FP-0121 oracle;\n- criterion 5, malformed outlines: FP-0119, FP-0120, and FP-0122.\n\nThe slices have hostile-input bounds and fairpane-security or fairpane-spec reviewers.\n\nNew criteria on existing tasks:\n- FP-0057 criteria 4 and 5 are testable, and FP-0057 gains FP-0061 for the vertical phantom points. FP-0061 depends only on FP-0013.\n- FP-0059 criteria 5 and 6 and FP-0060 criterion 4 are testable and reach FP-0119 to FP-0121 through FP-0056.\n\n**Major: FP-0058 criterion 6** (plan.json:2855) compares, and may change, 'the outline strictness choices that the FP-0119 and FP-0120 contracts list'. FP-0058 still depends only on FP-0013 (2841), which is accepted, so FP-0058 is ready now.\n\nMinor: FP-0120's endchar seac has no owner task once the owner answers."
+    },
+    {
+      "commit": "42043a7",
+      "verdict": "approve",
+      "notes": "FP-0065 keeps its four criteria and depends on FP-0123 to FP-0126. Its state note maps each criterion to the slices:\n- criterion 1 to FP-0126;\n- criterion 2 to FP-0123 through FP-0125, where FP-0125 empties the unsupported set;\n- criterion 3 to FP-0126 criterion 6;\n- criterion 4 to every slice.\n\nThe slices are specific and testable: exact pins, index counts, every restore path, exhaustive pointer sweeps, chunk invariance, and one remaining UTF-8 decoder. They form a single chain from FP-0008, and the deferrals to FP-0026 are recorded.\n\nThe pin commit a985b62a exists (GitHub API). The counts of 40 encodings and 228 labels are [INFERENCE]; I did not count them.\n\nMinor: the call to FP-0126's change-the-encoding hook from the 'in head' meta handling has no owner task (see findings)."
+    },
+    {
+      "commit": "f719aed",
+      "verdict": "approve",
+      "notes": "FP-0016 drops FP-0015 and gains FP-0117 and FP-0122. Its criteria cover boxes and fragments, scene rasterization, incremental comparison, real parser and layout output, and recording the layout families. None of them uses carets, selection, or Devanagari.\n\nFP-0117 brings shaping, fallback, bidi, and line breaking through FP-0116 → FP-0114 and FP-0109/FP-0110. FP-0122 brings the glyph rendering that FP-0016's text painting lacked. No criterion changes, and no cycle forms."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 3145,
+      "issue": "36782a5 replaced FP-0072's dependency on FP-0010 with FP-0100. FP-0072 criterion 1 (3153) is 'Implement cascade layers, encapsulation contexts, and the animation and transition origins'. In Cascade 5, encapsulation contexts are shadow trees, and FP-0127 (4139) is the only task that gives the DOM store shadow roots. FP-0072 used to reach FP-0127 through FP-0010 → FP-0103 → FP-0127; it no longer does.\n\nreadyTasks (tools/lib.mjs:170-171) will release FP-0072 once FP-0100 and FP-0014 are accepted. The encapsulation-context criterion can then be met only with a stand-in for shadow trees, which AGENTS.md forbids, or not at all. FP-0127 criterion 5 expects each shadow-tree style behavior to have an owner, which makes FP-0072 the natural owner.",
+      "recommendation": "Add \"FP-0127\" to FP-0072's depends_on. FP-0127 depends only on FP-0009, so this adds no cycle. Optionally add FP-0127/CONTRACT.md to FP-0072's read list."
+    },
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 2841,
+      "issue": "c122677 adds FP-0058 criterion 6 (2855): 'Compare the outline strictness choices that the FP-0119 and FP-0120 contracts list with web-font practice, and record each kept or changed choice'. It also adds both contracts to FP-0058's read list. FP-0058's depends_on is still [\"FP-0013\"]. FP-0013 is accepted (state.json:232) and FP-0058 is planned, so FP-0058 is ready now.\n\nA worker dispatched today has no FP-0119 or FP-0120 contract, choice list, or decoder to compare or change. FP-0119 criterion 4 and FP-0120 criterion 5 record their choices 'for FP-0058', which confirms the intended order.",
+      "recommendation": "Add \"FP-0119\" and \"FP-0120\" to FP-0058's depends_on. Both depend only on FP-0013 and FP-0119, so this adds no cycle."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3993,
+      "issue": "FP-0120 criterion 3 reports endchar seac 'with a named unsupported error until the owner answers the TN5176 table question', and the FP-0120 state note repeats it. No task owns implementing seac after the answer: FP-0057 took flex, FP-0059 CFF2, and FP-0060 even-odd. FP-0056 criterion 2 ('Interpret CFF Type 2 charstrings …') stays in the closing task, but no slice is required to close the seac gap.",
+      "recommendation": "Name the owner in the plan. Either add a seac criterion, conditional on the owner's TN5176 decision, to FP-0122 or FP-0059, or record the decision as an FP-0056 closing condition in its expansion_rule."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 4129,
+      "issue": "FP-0126 criterion 4 provides 'the hook that the tree-construction task handling meta in head calls'. The FP-0126 state note (state.json:989) says that task calls it 'once both exist', but no criterion of FP-0100, which implements 'in head', or of any other task requires the call. The two tasks also do not depend on each other. The 'in head' meta branch's change-the-encoding step therefore has no owner, while FP-0010 criterion 1 requires standard recovery.",
+      "recommendation": "Add a criterion to a task that depends on both FP-0100 and FP-0126 that calls the hook from the 'in head' meta branch and tests a tentative-confidence restart. FP-0010's closing task already depends on FP-0100; it would also need FP-0126. Alternatively, add that dependency to FP-0126 and put the call there."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3923,
+      "issue": "FP-0117 criterion 1 takes font list, size, direction, white-space, and line height as explicit parameters, 'which FP-0071 later wires to CSS properties'. FP-0071's criteria (3093-3098) cover the property registry and value grammars and say nothing about wiring computed values into inline layout. FP-0016, which depends on FP-0014 and FP-0117 and produces fragments from real parser and layout output, is the natural owner, but it has no such criterion either.",
+      "recommendation": "Either drop the routing clause and add a criterion to FP-0016 that feeds computed font and white-space values into FP-0117's parameters, or add that criterion to FP-0071 together with a dependency on FP-0117."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 4037,
+      "issue": "FP-0056 criterion 4 keeps 'Compare rasterized glyphs with reference fixtures under a tolerance whose rationale is recorded before the run'. FP-0122 compares glyphs with the FP-0121 first-party oracle, and FP-0121 compares with hand-computed masks. Whether masks produced by an independent first-party oracle count as 'reference fixtures' is left to FP-0056's closing review, which must map that criterion to evidence.",
+      "recommendation": "Freeze in FP-0122's contract, or state in FP-0056's expansion_rule, that the oracle masks and hand-computed masks are the reference fixtures, so the closing review has a fixed test."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 478,
+      "issue": "These read lists name contracts that do not exist in the tree yet:\n- FP-0010: FP-0100 and FP-0101;\n- FP-0056 and FP-0057 to FP-0060: FP-0119 to FP-0121;\n- FP-0065: FP-0123 to FP-0126;\n- the slices themselves.\n\nA glob of engineering/evidence/FP-01*/CONTRACT.md finds only FP-0107. check does not validate read paths.",
+      "recommendation": "Freeze and commit each slice contract before dispatching any task whose read list names it."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 4082,
+      "issue": "FP-0124 criterion 1 imports the index files 'unedited and marked -text'. That needs a .gitattributes rule, but FP-0124's allowed_paths (src, tests, build.zig, specs, engineering/evidence) do not include the root .gitattributes, which is a source root.",
+      "recommendation": "In FP-0124's contract, either put the rule in a nested .gitattributes under the import directory in src, or add \".gitattributes\" to its allowed_paths in a plan commit."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 2992,
+      "issue": "The FP-0065 closing task kept allowed_paths [src, tests, tools, build.zig, specs], without engineering/evidence. The other closing tasks gained that path in this review set: FP-0010, FP-0015, and FP-0056. Each closing task maps its criteria to slice evidence.",
+      "recommendation": "Add \"engineering/evidence\" to FP-0065's allowed_paths in the next plan commit, for consistency."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 2774,
+      "issue": "FP-0055 now depends on FP-0108, FP-0109, and FP-0110, so FP-0093 (RegExp) and FP-0095 (Unicode identifiers) also wait for grapheme segmentation, UAX #9, and UAX #14. FP-0095 needs only ID_Start and ID_Continue from DerivedCoreProperties.txt, which FP-0108 imports.",
+      "recommendation": "Optionally make FP-0095 depend on FP-0108 instead of FP-0055, if FP-0108's import covers ID_Start and ID_Continue, so the JavaScript work is not held behind bidi and line breaking."
+    }
+  ]
+}
