@@ -42,7 +42,8 @@ The schema changes through the existing generator, and `include/fairpane.h` and 
 
 - `engine_options` gains a final field `max_allocated_bytes`, a 64-bit unsigned integer with range 0 to 18446744073709551615.
   Its description is "The most bytes that the engine's allocations may hold at once. 18446744073709551615 permits every allocation that the process allocator grants."
-- A new output structure `engine_memory` has the fields `struct_size`, `allocated_bytes`, and `max_allocated_bytes`.
+- A new output structure `engine_memory` has the fields `struct_size`, `reserved`, `allocated_bytes`, and `max_allocated_bytes`.
+  `reserved` is a 32-bit unsigned integer with range 0 to 0, described as "Always zero."
   `allocated_bytes` is "The bytes that the engine's live allocations hold."
   `max_allocated_bytes` is "The current limit."
 - A new function `engine_get_memory(engine, out)` initializes `engine_memory`.
@@ -92,6 +93,7 @@ Its calls induce each failure through the limit alone:
 6. C: `tests/c/abi_smoke.c` runs `Scenario allocation-failure:` through the limit, with every call and effect of the scenario.
 7. Zig: `src/abi_scenarios.zig` keeps its existing `FailingAllocator` run of every allocation point, the `failEachAllocation` loop with `.resize_fail_index = 0`, unchanged, and adds the same scenario through the limit.
 8. Controller: the generated header, the generated Zig declarations, and the layout model agree on the sizes and offsets of `engine_options` and `engine_memory` on 32-bit and 64-bit targets, and the scenario checks require the C smoke test to name `allocation-failure`.
+9. Controller: the schema checker rejects a fixture structure with a 32-bit field followed by a 64-bit field, and one with a 64-bit field followed by a single 32-bit field, each with a message that names the structure and the member that needs padding; the committed schema passes.
 
 Cases 1 to 6 and 8 must fail before the change.
 Two mutation controls must each fail a case: one counts no growth of a resize, and one leaves the engine record uncounted.
@@ -125,3 +127,10 @@ Required reviewers: `fairpane-review` and `fairpane-security`.
 1. Case 7 named the wrong enumerator.
    The existing run in `src/abi_scenarios.zig` enumerates allocation points with its own `failEachAllocation` loop over a `testing.FailingAllocator` with `.resize_fail_index = 0`, not with `testing.checkAllAllocationFailures`.
    Worker `FP0081Budget` found the difference, and the case now names that loop; the requirement to keep the run and add the limit run is unchanged.
+2. `engine_memory` gains `reserved` after `struct_size`, and the schema checker forbids implicit padding.
+   Worker `FP0081Budget` found that the frozen fields put a 64-bit member after a lone 32-bit member.
+   The 32-bit x86 System V ABI aligns a 64-bit member to four bytes, while 64-bit targets and 32-bit Windows align it to eight, so the offsets would differ by target and the layout model would be wrong for one of them.
+   With `reserved`, every member falls at a multiple of its size, and the layout is the same on every target of one pointer width.
+   The schema checker in `tools/abi.mjs` now rejects a structure in which, at either pointer width, a member's offset is not the sum of the earlier members' sizes or not a multiple of its own size, or the structure's size is not a multiple of its largest member's size.
+   Every structure of the committed schema already meets that rule.
+   Case 9 covers the rule.
