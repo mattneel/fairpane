@@ -27,7 +27,8 @@ The watchdog block in `runProcess` is unchanged.
 
 ## Tests
 
-`tools/selftest.mjs` adds the eight contract cases as tests 86 through 93.
+`tools/selftest.mjs` adds the eight contract cases as tests 86 through 93 on the worker's 110-test base.
+In the integrated 126-test suite, they run as tests 97 through 104.
 
 | Log | Command | Result |
 | --- | --- | --- |

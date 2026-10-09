@@ -2653,6 +2653,50 @@
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0053",
+      "title": "Close the FP-0031 review findings",
+      "workstream": "laboratory",
+      "depends_on": [
+        "FP-0031"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "tools",
+        "tests",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Move the mutation-control harness into the controller source inventory, so a controller-test receipt binds the code that its test exercises.",
+        "Retry a failed capture-directory removal a bounded number of times before the record reports the failure.",
+        "Add a mutant that removes the log close in finishRecord and is killed by the log-close assertions alone.",
+        "Include the command record's error in the short-write assertion message.",
+        "Apply each mutant's replacement text literally, without replacement-pattern interpretation."
+      ],
+      "read": [
+        "engineering/evidence/FP-0031/reviews/review-1-accept.json",
+        "engineering/evidence/FP-0031/CONTRACT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
   ]
 }

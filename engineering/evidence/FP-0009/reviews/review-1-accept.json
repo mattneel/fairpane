@@ -1,0 +1,113 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "8f5c2bc7e6fd78b5404a23815b242cc140bf6464",
+    "952356fcb24a6a767da8ce1c19fae9d6c20b0e5e"
+  ],
+  "summary": "Commit 8f5c2bc adds src/dom.zig and one import plus one test reference in src/root.zig. It also adds the worker's raw logs. Commit 952356f adds the README, the four gate receipts, the binding log, and a state.json update that sets FP-0009 to 'implemented'. Neither commit touches a protected path; I checked the file lists of both diffs on the public mirror.\n\nI compared every validity condition and mutation step against the DOM Standard, Living Standard last updated 5 October 2026 (Bikeshed revision b76da7af). Every step matches. The current text of \"replace\" step 1 reads \"Ensure pre-insert validity given node, parent, child, and « child ».\" The implementation does this at dom.zig:283.\n\nAll twelve contract cases exist and test what the contract states. By inspection, `expectInvariants` detects a broken link, a dangling handle, a node document that disagrees with its parent's or is not a live document, a parent or sibling cycle, and a node listed twice. Mutation paths never touch the allocator, and their error sets exclude `OutOfMemory`. `sweep` marks whole trees and keeps documents alive permanently, so it cannot free a reachable node or leave a dangling link. Case 11 runs `checkAllAllocationFailures` over creation of elements (namespace and local name), text with an unpaired surrogate, comments, and processing instructions, with every remap forced to fail.\n\nThe mutation control and integration logs show the claimed results. The control's diff pre-image is blob 2beeb73, which is the committed src/dom.zig blob.\n\nThe only gaps are in evidence binding and documentation precision, so there is no blocker or major finding. I ran no shell commands, so every judgment rests on reading the files, the recorded logs, and the fetched spec and commit diffs.",
+  "criteria": [
+    {
+      "criterion": "Plan: Preserve parent, child, sibling, and document ownership invariants.",
+      "met": true,
+      "evidence": "`expectInvariants` (src/dom.zig:653-736) checks the following: each node's document is a live document; a document is its own document and has no parent; the ancestor chain is bounded by the node count; each child's node document equals its parent's; and the previous and next links, first and last links, and parent links agree. Child-list walks are bounded by the node count. The DOM node-tree constraints are checked at dom.zig:739-759. `with_parent == listed_children` catches a node listed twice. Every *Checked helper (dom.zig:776-852), `expectRejected` (dom.zig:853-858), and `guarded` run it after each operation."
+    },
+    {
+      "criterion": "Plan: Reject invalid hierarchy mutations with correct observable outcomes.",
+      "met": true,
+      "evidence": "`ensurePreInsertValidity` (dom.zig:388-480) matches spec steps 1-11 exactly, including the childrenToExclude bullets. `replaceChild` (dom.zig:277-293) matches replace steps 1-9. `removeChild` (dom.zig:296-303) matches pre-remove. Case 2 (dom.zig:931-1122) has a fixture for every condition of steps 1, 2, 3, 4, 5.1, 6, both parts of 8.1, all three bullets of 9.1, and all three bullets of 11, plus checks of step order. Case 3 (dom.zig:1124-1305) covers every condition that replace can reach, along with positive exclusion cases. `expectRejected` checks a fingerprint taken before and after each rejected call."
+    },
+    {
+      "criterion": "Plan: Define trace roots for later VM integration.",
+      "met": true,
+      "evidence": "`retain`, `release` (NotRetained), `forEachRoot`, and `sweep` are at dom.zig:315-353, and `isRoot` is at dom.zig:139. Case 8 (dom.zig:1592-1660) checks: every document and retained node is visited exactly once, including a retained document; an unreachable detached subtree is freed (2 nodes); a doubly retained subtree survives one release; and a retained leaf keeps its whole 4-node tree alive."
+    },
+    {
+      "criterion": "Plan: Test mutation during iteration and owner teardown.",
+      "met": true,
+      "evidence": "Case 9 (dom.zig:1662-1712) covers four changes during iteration: removing the yielded child, inserting before the recorded next sibling, moving the yielded child to another parent, and appending after the last child. It asserts that exactly the 6 original children are visited in order. Case 10 (dom.zig:1714-1743) destroys a store holding documents, a retained node, detached subtrees, a fragment, and an empty text node. A counting FailingAllocator confirms that allocated bytes equal freed bytes and allocations equal deallocations."
+    },
+    {
+      "criterion": "Contract: All mutation algorithms match the 5 October 2026 DOM Standard, including replace calling ensure pre-insert validity with « child ».",
+      "met": true,
+      "evidence": "The fetched spec (\"Last Updated 5 October 2026\") shows pre-insert step 1 with « » and replace step 1 with « child ». Replace computes referenceChild in steps 2-3, adopts node in step 6, removes child only if it has a parent in step 7, and inserts in step 9. The code mirrors this order at dom.zig:283-292. Insert is at dom.zig:485-501. It moves fragment children in order and adopts each one, but it does not adopt the fragment itself, as the spec requires. Remove (dom.zig:520-535) and adopt (dom.zig:539-552) match their spec steps. `adopt` returns NotSupported for a document, per adoptNode() step 1."
+    },
+    {
+      "criterion": "Contract: The twelve exact test cases exist and test what the contract states.",
+      "met": true,
+      "evidence": "Tests named 'FP-0009 case 1' through 'case 12' are at dom.zig:880, 931, 1124, 1307, 1351, 1431, 1484, 1592, 1662, 1714, 1801, and 1810. Each one matches its contract text, as described in the other criteria."
+    },
+    {
+      "criterion": "Contract: Mutation does not allocate.",
+      "met": true,
+      "evidence": "`insert`, `link`, `remove`, `adoptInto`, `ensurePreInsertValidity`, and `preInsert` use only `store.at` and link rewrites; none references `store.gpa`. `MutationError` (LookupError || HierarchyRequest/NotFound) and `AdoptError` exclude OutOfMemory at the type level."
+    },
+    {
+      "criterion": "Contract: sweep never frees a reachable node and never leaves a dangling link.",
+      "met": true,
+      "evidence": "`markTree` (dom.zig:598-607) climbs to the tree root and marks every node in that tree. `sweep` frees only unmarked nodes, so it frees only whole trees that contain no root. Documents are always roots, so node-document links can never dangle. Removing an entry that the iterator just returned is a documented, permitted operation of `handles.Table.iterator` (handles.zig:193-196). Case 8 and case 12 check StaleHandle results and run invariants after each sweep."
+    },
+    {
+      "criterion": "Contract: The allocation-failure case covers creation with strings, and each failure returns OutOfMemory, changes nothing, and leaks nothing.",
+      "met": true,
+      "evidence": "Case 11 (dom.zig:1801-1808) runs `allocationScenario` (dom.zig:1760-1799). The scenario creates elements with an HTML namespace and with no namespace, text with an unpaired surrogate 0xD800, a comment, processing instructions, empty text, a fragment, and a doctype. It also covers insertion, adoption, retention, release, and sweep. `guarded` asserts that each failure is error.OutOfMemory, that the fingerprint is unchanged, and that the invariants hold. Setting `resize_fail_index = 0` makes every remap fail, because the pinned FailingAllocator.zig:89-117 does not advance its index on a failed resize. That forces every table growth through a reallocation the checker can fail. `checkAllAllocationFailures` itself returns MemoryLeakDetected on a leak (testing.zig:1186)."
+    },
+    {
+      "criterion": "Contract: The mutation control removes the inclusive-ancestor check, stores its exact diff, and fails case 2.",
+      "met": true,
+      "evidence": "raw/mutation-ancestor.diff removes the check at dom.zig:405, and its pre-image blob is 2beeb73, the committed src/dom.zig blob. raw/mutation-ancestor.log shows '73 pass, 2 fail (75 total)', with case 2 failing at dom.zig:966 (current line 967, appendChild(outer, outer)) and case 3 at dom.zig:1148 (current line 1149), and exit_code 1. The sha256 is bce8131d... both before and after the control."
+    },
+    {
+      "criterion": "Contract: tests-before.log, an uncached tests-after.log, and integration logs exist and show the claimed results.",
+      "met": true,
+      "evidence": "tests-before.log shows exit 1 with 35 'undeclared identifier' errors. tests-after.log uses cache-dir out/fp0009-cache-after, shows a compile step, '75/75 tests passed', and exit 0. integration-tests.log uses a fresh cache-dir, runs in C:\\src\\fairpane, shows 75/75, and exits 0. fmt.log exits 0."
+    },
+    {
+      "criterion": "Contract: The integrator records HEAD, the staged diff, and file hashes, then runs repo-check, controller-test, zig-fmt, and zig-test into the gates directory.",
+      "met": false,
+      "evidence": "All four gate receipts pass, with identical source digests (07f4a9f8...) and policy digests (782bc403...) before and after. The controller-test log shows '# tests 126 # pass 126 # fail 0'. However, integration-binding.log records only `git rev-parse HEAD` (8f5c2bc) and `git status --porcelain`. It records no staged diff and no file hashes (see the minor finding)."
+    },
+    {
+      "criterion": "Protected paths unchanged.",
+      "met": true,
+      "evidence": "The 8f5c2bc diff touches only engineering/evidence/FP-0009/raw/*, src/dom.zig, and src/root.zig. The 952356f diff touches only engineering/evidence/FP-0009/{README.md,gates/*,raw/integration-binding.log} and engineering/state.json. No path in plan.json protected_paths is modified."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0009/raw/integration-binding.log",
+      "line": 1,
+      "issue": "CONTRACT.md:88 requires the integrator to record HEAD, the staged diff, and file hashes before the gates run. The binding log records only HEAD (8f5c2bc) and porcelain status. It has no staged-diff command and no per-file hashes. The binding still holds in substance: the status shows no modified tracked files, and every gate receipt carries the source digest 07f4a9f8.... But the evidence is not the evidence the contract named, and the README does not disclose the omission.",
+      "recommendation": "Add a binding record that captures `git diff --cached` (empty after the commit) and sha256 of src/dom.zig and src/root.zig at 8f5c2bc. Alternatively, have the README state that the gate receipts' source digest replaces the file hashes."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0009/raw/integration-tests.log",
+      "line": 2,
+      "issue": "The only integrated-tree run that shows a test count (75/75) started at 2026-10-09T02:30:24Z. That is before commit 8f5c2bc existed: its reflog timestamp 1791513039 is 02:30:39Z, and the log is itself part of that commit. The run records no HEAD or source digest. The digest-bound zig-test gate log (gates/...zig-test-1d6856f2.log) ran `zig build test` without --summary and so shows only exit 0, with no test count. The link from the committed tree to '75 tests' is indirect: dom.zig blob 2beeb73 is the pre-image of the mutation diff, and the worker's sha256 is bce8131d.",
+      "recommendation": "Record a post-commit `zig build test --summary all` run with a fresh cache next to `git rev-parse HEAD`, or bind the integration run to the gate source digest."
+    },
+    {
+      "severity": "note",
+      "path": "src/dom.zig",
+      "line": 615,
+      "issue": "The ChildIterator documentation says that removing or moving the yielded child neither skips nor repeats another original child. That is literally true, but moving the yielded child after the recorded sibling in the same parent revisits the moved child itself. Repro: children [A,B,C]; on yield A, call appendChild(P, A); the iterator then yields B, C, A. Moving the recorded next sibling earlier also repeats other children. Repro: on yield A, call insertBefore(P, B, A) to get [B,A,C]; the iterator yields B, then A again. The contract only requires correct behavior when the yielded child is removed, and the README discloses the early end. These cases are therefore outside the contract, but the documentation is imprecise.",
+      "recommendation": "State that the iterator revisits the yielded child if a move places it after the recorded sibling, and that moving the recorded sibling within the parent is unsupported."
+    },
+    {
+      "severity": "note",
+      "path": "src/dom.zig",
+      "line": 653,
+      "issue": "Inspection shows that `expectInvariants` detects broken links, dangling handles, cycles, nodes listed twice, and node documents that disagree with the parent's or are not a live document. However, no negative self-test corrupts a record to prove the checker fails. The checker also cannot detect a detached root whose node document is consistently wrong. Case 6 covers that adopt path with explicit assertions.",
+      "recommendation": "Optionally add a test that corrupts one link, one node document, one parent cycle, and one duplicate listing, and asserts that `expectInvariants` returns an error for each."
+    },
+    {
+      "severity": "note",
+      "path": "src/dom.zig",
+      "line": 204,
+      "issue": "The data model stores no ProcessingInstruction target, no DocumentType name, publicId, or systemId, and no element namespace prefix. `createProcessingInstruction` and `createDocumentType` therefore cannot represent standard nodes completely. The contract only requires PI data and the element namespace and local name, so this is within scope. A later task will have to change these signatures.",
+      "recommendation": "Track the missing node fields in the HTML parser or DOM bindings task contract so the API change is planned."
+    }
+  ],
+  "commands_run": []
+}

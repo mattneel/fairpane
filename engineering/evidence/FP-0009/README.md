@@ -42,6 +42,15 @@ Adopting a document returns `error.NotSupported`, from `adoptNode()` step 1, and
 A `release` without a matching `retain` returns `error.NotRetained`.
 The child iterator ends when its recorded next sibling is freed or leaves the parent.
 
+## Review 1
+
+`reviews/review-1-accept.json` accepts commits `8f5c2bc` and `952356f` with two minor findings and three notes.
+The minor findings concern evidence binding, and `raw/review-binding.log` answers both.
+It records `HEAD`, an empty `git diff --stat 8f5c2bc HEAD` over `src`, `build.zig`, `include`, and `api`, the SHA-256 of `src/dom.zig` and `src/root.zig`, and an uncached `zig build test --summary all` with 75 of 75 tests.
+That run included the two-line comment change of commit `56c686c`, which `git diff --stat -- src` shows in the same log.
+Commit `56c686c` answers the note about moves during iteration.
+The missing processing-instruction target and document-type fields are recorded for `FP-0010`, whose tree construction needs them.
+
 ## Limits
 
 The store is not yet connected to `Engine` or to the C ABI, as the contract's non-goals state.

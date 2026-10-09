@@ -1,0 +1,94 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "c9c243fc32f9a0a9fbc068027e7917de6c769bdc"
+  ],
+  "summary": "I recommend accept. Commit c9c243f (parent cd4f25c; contract frozen earlier in fad1af2) meets all eight FP-0031 plan criteria. I read its full diff from the public mirror (github.com/mattneel/fairpane/commit/c9c243f.diff and the commits API) and the files in the working tree. I ran no shell commands.\n\n- **Watchdog:** no diff hunk touches the spawn, close, or timer block in runProcess (lib.mjs:373-388), so the watchdog block is unchanged.\n- **fileSystem option:** when it is absent, recordFs returns the frozen RECORD_FS of node:fs functions (lib.mjs:286-288). tools/fairpane.mjs:104 never passes the option, and runGate does not either. The Node and Bun runs of the pre-existing runProcess tests pass through that default path.\n- **Short writes:** the COMMAND line (openLog, lib.mjs:319), the output copy (lib.mjs:300), and the RESULT line (finishRecord, lib.mjs:328) all go through writeLog (lib.mjs:290-293), which throws on a short count. runGate's own header and GATE ERROR lines use writeFileSync and appendFileSync, which loop internally rather than truncate silently.\n- **Mutation control:** the baseline gate is sound. It requires exit 0, a nonempty test set, and zero failures in an identical template copy before any mutant runs (harness.mjs:23-30). A kill counts only when the single regex-matched target test reports `not ok` in that mutant's run (harness.mjs:33-41). A suite crash counts as SURVIVED, not KILLED. I checked all 13 logged kill messages, and each one is the target test's own assertion, not an unrelated failure.\n- **Integration logs:** they show 126/126 under Node (controller-test receipt 1a6c56ee and its log) and under Bun 1.4.2 (raw/integration-tests-bun.log). raw/integration-mutation-control.log shows baseline 126 tests, 0 failing, then 13/13 kills, with RESULT exit_code 0.\n- **Protected paths:** the commit touches none.\n\nFindings: one minor and five notes.\n- **Minor:** the new controller test 104 imports harness.mjs from engineering/evidence, which is outside the source inventory. The controller-test receipt therefore does not bind the code that test exercises.\n- **Notes:**\n  - tests-before shows cases 4 and 7 passing before the change, which the README discloses; mutants cover them.\n  - The README and the commit message number the tests 86-93, but in the integrated file they are 97-104.\n  - A capture-removal failure now fails gates, and rmSync has no retries, so transient Windows file locks can fail a gate.\n  - No mutant exercises the log-close assertions on their own.\n  - harness.mjs uses string-pattern replace, and one kill message is uninformative.",
+  "criteria": [
+    {
+      "criterion": "Test that a capture-start failure writes a RESULT line, closes the log, and returns an error result.",
+      "met": true,
+      "evidence": "selftest.mjs:450-464 (test 86 on the worker base, 97 integrated). It forces mkdtempSync to fail, then openSync of output.log to fail. It asserts exit_code null, the exact error, a matching last RESULT line, and that trackingFs saw the log fd closed; the second case also checks the temp directory is empty. Code: lib.mjs:356-364. tests-before.log 'not ok 86' (0 !== null). Integrated controller-test log line 102 'ok 97'. Mutant 'capture-start failure skips the RESULT line…' was KILLED."
+    },
+    {
+      "criterion": "Test that a failed RESULT write returns an error result instead of crashing.",
+      "met": true,
+      "evidence": "selftest.mjs:465-486 covers three paths: the unresolved-name path of recordCommand, the capture-start path, and the child-exit path. Each returns 'Log write failed: forced result write failure' and leaves the log closed. Code: finishRecord lib.mjs:327-332. tests-before 'not ok 87'. Integrated 'ok 98'. Mutant 'a failed RESULT write throws' was KILLED with message 'forced result write failure', which is the recordCommand rejection."
+    },
+    {
+      "criterion": "Test that a spawn error and a capture error both remain in the result.",
+      "met": true,
+      "evidence": "selftest.mjs:487-496 uses a missing executable plus a throwing readSync. It asserts the error equals `${spawnError} Output capture failed: forced capture read failure` in both the result and the RESULT line. Code: lib.mjs:369-372 and 377. tests-before 'not ok 88'. Integrated 'ok 99'. Mutant 'a spawn error drops the capture error' was KILLED with a strictEqual diff."
+    },
+    {
+      "criterion": "Test that runGate writes nothing before it validates the evidence directory.",
+      "met": true,
+      "evidence": "selftest.mjs:497-504 takes a recursive listing before and after a rejected runGate for three bad directories. Code: lib.mjs:438-445 validates the log and receipt paths before mkdirSync and writeFileSync. The test passed before the change (tests-before 'ok 89'), which the README discloses. The mutant 'runGate writes its log before path validation' was KILLED: the listing gained 'tools\\\\…-fixture-f84af778.log'."
+    },
+    {
+      "criterion": "Detect short writes to the log and report them as errors.",
+      "met": true,
+      "evidence": "writeLog (lib.mjs:290-293) is used for COMMAND (319), output copy (300), and RESULT (328). selftest.mjs:505-520 forces a count of length-1 for each kind and for the unresolved recordCommand path. tests-before 'not ok 90'. Integrated 'ok 101'. Mutant 'a short log write is ignored' was KILLED."
+    },
+    {
+      "criterion": "Report a failed capture-directory removal in the command record.",
+      "met": true,
+      "evidence": "removeCapture (lib.mjs:306-309) is called at 363 and 371. selftest.mjs:521-535 checks the result error and the logged RESULT on both the normal path and the capture-start path, and expects two surviving directories. tests-before 'not ok 91'. Integrated 'ok 102'. Mutant 'a failed capture-directory removal is silent' was KILLED (null vs expected)."
+    },
+    {
+      "criterion": "Assert that started_at is a canonical UTC ISO 8601 timestamp.",
+      "met": true,
+      "evidence": "selftest.mjs:536-553 covers runProcess success, spawn error, and log failure; recordCommand resolved and unresolved; runGate commands; and four logged RESULT lines. It applies a strict regex and checks the round trip new Date(x).toISOString() === x. The test passed before the change (tests-before 'ok 92'), which the README discloses. The 'started_at uses local time text' mutant was KILLED."
+    },
+    {
+      "criterion": "Give the mutation control an unmutated baseline run and the failure message of each target test.",
+      "met": true,
+      "evidence": "harness.mjs:22-45 runs runSuite(null) first, stops on any failure or a nonzero exit, and logs `KILLED …` plus `  message: …`. mutants.mjs:79-104 builds a full-repository template with its own Git repo. selftest.mjs:554-583 asserts call order [null, …], SETUP-FAILED handling, and the BASELINE-FAILED short circuit. raw/integration-mutation-control.log: 'BASELINE exit 0: 126 tests, 0 failing', 13 KILLED entries each with a message, and 'mutants: 13, killed: 13, survived: 0'."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/selftest.mjs",
+      "line": 555,
+      "issue": "Test 104 imports engineering/evidence/FP-0028/controls/harness.mjs. engineering/evidence is not in source_roots (engineering/policy.json:4-33), so the controller-test receipt's source digest does not cover the code that test exercises. A later edit to harness.mjs, such as dropping `failing.length` from the baseline condition at harness.mjs:27, would change what test 104 checks. It would leave fingerprints(root).source unchanged, so the receipt 1a6c56ee would still check as current [INFERENCE from the policy roots; not executed]. This conflicts with the AGENTS.md rule 'Bind test evidence to the tested source and policy digests'. It also makes the controller suite depend on a mutable evidence record; tests-before.log 'not ok 93' shows it failing without that file.",
+      "recommendation": "Move parseTap and runControl into tools/, for example tools/mutation-control.mjs, inside the source inventory. Import that module from both selftest.mjs and controls/mutants.mjs. Do not add evidence paths to source_roots, because policy.json is protected."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0031/README.md",
+      "line": 30,
+      "issue": "The README and the commit message say the eight cases are 'tests 86 through 93'. In the committed tools/selftest.mjs they run as tests 97-104: controller-test gate log lines 102-109 and integration-mutation-control.log 'not ok 97'…'not ok 104'. 86-93 is accurate only for the worker's 110-test base logs.",
+      "recommendation": "State both numberings, or refer to the cases by name."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0031/raw/tests-before.log",
+      "line": null,
+      "issue": "The contract requires tests-before.log to show 'the new cases failing before the change'. Cases 4 and 7 pass there ('ok 89', 'ok 92'), because the base code already behaved correctly. The README discloses this, and the runGate-early-write and local-time mutants are the substitute evidence that both tests detect the regression.",
+      "recommendation": "No change needed. Keep the disclosure."
+    },
+    {
+      "severity": "note",
+      "path": "tools/lib.mjs",
+      "line": 307,
+      "issue": "A failed capture-directory removal now fails the command and therefore the gate, as the contract requires. rmSync runs with force but without maxRetries. On Windows, a transient EBUSY or EPERM from an antivirus scanner or the indexer holding output.log briefly will now fail a gate that previously passed, and nothing retries the removal.",
+      "recommendation": "Pass maxRetries and retryDelay to rmSync. Keep recording the error if removal still fails after the retries."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0028/controls/mutants.mjs",
+      "line": 36,
+      "issue": "The 'capture-start failure skips the RESULT line and leaves the log open' mutant removes the RESULT write and the close together. It is killed by the missing RESULT line: lastResult throws 'Cannot read properties of undefined (reading 'slice')' at selftest.mjs:445. No mutant shows that the trackingFs logClosed assertions (selftest.mjs:455, 461, 472, 478, 484) catch a leaked log descriptor on their own. A related point: the short-write kill message is only the assertion label 'COMMAND' (selftest.mjs:515), which hides the actual r.error.",
+      "recommendation": "Add a mutant that replaces `finally { closeQuietly(io, fd); }` in finishRecord with `finally { }`, targeting the capture-start test. Include r.error in the short-write assertion message."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0028/controls/harness.mjs",
+      "line": 39,
+      "issue": "`source.replace(from, to)` treats `to` as a replacement pattern, so `$&`, `$'`, `` $` `` and `$$` are interpreted. The current mutants contain only `${`, which stays literal, so present results are correct. A future mutant containing one of those sequences would silently apply a different mutation.",
+      "recommendation": "Use `source.replace(from, () => to)`."
+    }
+  ],
+  "commands_run": []
+}

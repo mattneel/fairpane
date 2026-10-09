@@ -1,0 +1,54 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+94c96edcb5fad5cfa7bc1a96fc0fd3995512573a
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:43:08.303Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","8f5c2bc","HEAD","--","src","build.zig","include","api"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","8f5c2bc","HEAD","--","src","build.zig","include","api"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:43:08.364Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":23}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","--","src"]
+ src/dom.zig | 2 ++
+ 1 file changed, 2 insertions(+)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","--","src"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:43:08.433Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Windows\\System32\\certutil.exe","-hashfile","src\\dom.zig","SHA256"]
+SHA256 hash of src\dom.zig:
+e3d1217ae1f6470209fcbf2136d0cee32ab565618060c21e0dc4bf8285795a97
+CertUtil: -hashfile command completed successfully.
+RESULT {"executable":"C:\\Windows\\System32\\certutil.exe","arguments":["-hashfile","src\\dom.zig","SHA256"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:43:08.497Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":119}
+
+COMMAND ["C:\\Windows\\System32\\certutil.exe","-hashfile","src\\root.zig","SHA256"]
+SHA256 hash of src\root.zig:
+b2543aa3be5e774d77f1ae8f614061d2b928d94f7978df9c209ca0a8879ef5bb
+CertUtil: -hashfile command completed successfully.
+RESULT {"executable":"C:\\Windows\\System32\\certutil.exe","arguments":["-hashfile","src\\root.zig","SHA256"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:43:08.663Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":119}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","show","8f5c2bc:src/root.zig","--format="]
+//! Experimental Fairpane bootstrap. No browser capabilities exist yet.
+
+pub const c_api = @import("c_api.zig");
+pub const dom = @import("dom.zig");
+pub const engine = @import("engine.zig");
+pub const handles = @import("handles.zig");
+pub const web_string = @import("web_string.zig");
+
+comptime {
+    _ = c_api;
+}
+
+test {
+    _ = c_api;
+    _ = dom;
+    _ = engine;
+    _ = handles;
+    _ = web_string;
+}
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["show","8f5c2bc:src/root.zig","--format="],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:43:08.832Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0009-review-cache"]
+Build Summary: 3/3 steps succeeded; 75/75 tests passed
+test success
++- run test 75 pass (75 total) 56ms MaxRSS:5M
+   +- compile test debug native success 2s MaxRSS:388M
+
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0009-review-cache"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:43:08.903Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":5414}

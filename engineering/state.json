@@ -137,7 +137,7 @@
       "notes": []
     },
     "FP-0009": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0009Dom, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0009/README.md",
@@ -146,12 +146,14 @@
         "engineering/evidence/FP-0009/gates/2026-10-09T02-31-06-136Z-zig-fmt-2bd95ed7.json",
         "engineering/evidence/FP-0009/gates/2026-10-09T02-31-06-271Z-zig-test-1d6856f2.json",
         "engineering/evidence/FP-0009/raw/integration-tests.log",
-        "engineering/evidence/FP-0009/raw/mutation-ancestor.log"
+        "engineering/evidence/FP-0009/raw/mutation-ancestor.log",
+        "engineering/evidence/FP-0009/raw/review-binding.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0009/reviews/review-1-accept.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0009/CONTRACT.md, based on commit 93dcaf0.",
-        "Commit 8f5c2bc implements it with 75 of 75 Zig tests. Awaiting fairpane-review."
+        "Commit 8f5c2bc implements it with 75 of 75 Zig tests.",
+        "fairpane-review accepted 8f5c2bc and 952356f; raw/review-binding.log and commit 56c686c answer its findings."
       ]
     },
     "FP-0010": {
@@ -159,7 +161,9 @@
       "owner": null,
       "evidence": [],
       "review": null,
-      "notes": []
+      "notes": [
+        "The FP-0009 store lacks the processing-instruction target and the document-type name, public ID, and system ID; tree construction must add them."
+      ]
     },
     "FP-0011": {
       "status": "planned",
@@ -318,7 +322,7 @@
       ]
     },
     "FP-0031": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0031Records, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0031/README.md",
@@ -327,11 +331,12 @@
         "engineering/evidence/FP-0031/raw/tests-before.log",
         "engineering/evidence/FP-0031/raw/integration-mutation-control.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0031/reviews/review-1-accept.json",
       "notes": [
         "Created from the minor findings in engineering/evidence/FP-0028/reviews/review-1-accept.json.",
         "The frozen contract is engineering/evidence/FP-0031/CONTRACT.md, based on commit 7bc9ace.",
-        "Integrated on cd4f25c with 126 of 126 controller tests and 13 of 13 mutants killed. Awaiting fairpane-review."
+        "Integrated on cd4f25c with 126 of 126 controller tests and 13 of 13 mutants killed.",
+        "fairpane-review accepted c9c243f with one minor finding and five notes; FP-0053 carries them."
       ]
     },
     "FP-0032": {
@@ -544,6 +549,15 @@
       "review": null,
       "notes": [
         "Created from the minor findings and notes in the FP-0003 review-3 and spec-review-3 records."
+      ]
+    },
+    "FP-0053": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": [
+        "Created from the minor finding and notes in engineering/evidence/FP-0031/reviews/review-1-accept.json."
       ]
     }
   }
