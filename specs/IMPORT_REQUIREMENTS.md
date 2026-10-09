@@ -7,8 +7,11 @@ Bracketed identifiers name primary sources in `specs/sources.json`.
 
 Task FP-0013 imports Unicode 18.0.0 data and four OpenType font fixtures as the file-set corpora `unicode` and `opentype-fixtures`.
 `specs/snapshots/unicode.json` and `specs/snapshots/opentype-fixtures.json` record their sources, extracted files, and derived files.
-The `unicode` import takes `ucd/UCD.zip` and eight of its members into `src/unicode/ucd/`, with `https://www.unicode.org/license.txt` beside them.
-Those members are `Scripts.txt`, `ScriptExtensions.txt`, `PropertyValueAliases.txt`, `extracted/DerivedBidiClass.txt`, `extracted/DerivedJoiningType.txt`, `extracted/DerivedGeneralCategory.txt`, `IndicSyllabicCategory.txt`, and `IndicPositionalCategory.txt`.
+The `unicode` import takes `ucd/UCD.zip` and twelve of its members into `src/unicode/ucd/`, with `https://www.unicode.org/license.txt` beside them.
+Task FP-0013 imported eight of those members: `Scripts.txt`, `ScriptExtensions.txt`, `PropertyValueAliases.txt`, `extracted/DerivedBidiClass.txt`, `extracted/DerivedJoiningType.txt`, `extracted/DerivedGeneralCategory.txt`, `IndicSyllabicCategory.txt`, and `IndicPositionalCategory.txt`.
+Task FP-0108 imported the other four: `auxiliary/GraphemeBreakProperty.txt`, `DerivedCoreProperties.txt`, `emoji/emoji-data.txt`, and `auxiliary/GraphemeBreakTest.txt`.
+FP-0108 generates only `Grapheme_Cluster_Break`, `Indic_Conjunct_Break`, and `Extended_Pictographic` from them.
+Task FP-0055 generates the other properties of `DerivedCoreProperties.txt` and `emoji-data.txt`, such as `ID_Start`, `ID_Continue`, and the emoji binary properties.
 Every other file of the table below remains a later import, which task FP-0055 owns.
 The `opentype-fixtures` import takes Noto Sans, Noto Sans Arabic, and Noto Sans Devanagari unchanged, and a recorded subset of Noto Sans CJK JP, into `tests/text/fonts/`.
 The `specs/corpora.json` entries keep their `not-fetched` status until a separate protected commit applies the reviewed pins.

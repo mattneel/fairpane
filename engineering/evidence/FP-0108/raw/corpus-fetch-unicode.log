@@ -1,0 +1,124 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-fetch","unicode"]
+Download https://www.unicode.org/Public/18.0.0/ucd/UCD.zip
+Stored https://www.unicode.org/Public/18.0.0/ucd/UCD.zip: 5657953 bytes, SHA-256 7b3e555514060b92290d154f53655c5eb0fa62b16eb04c03434ff72d1a66a0d8
+Download https://www.unicode.org/license.txt
+Stored https://www.unicode.org/license.txt: 1995 bytes, SHA-256 e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96
+Inventory of ucd-zip: 71 file members, 39580113 bytes, SHA-256 37761bcf3660066413756e978f9d5ec7c7be3c187738f5d95785203c8dd8b2f4
+Published https://www.unicode.org/Public/18.0.0/ucd/Scripts.txt equals member Scripts.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/ScriptExtensions.txt equals member ScriptExtensions.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/PropertyValueAliases.txt equals member PropertyValueAliases.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/extracted/DerivedBidiClass.txt equals member extracted/DerivedBidiClass.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/extracted/DerivedJoiningType.txt equals member extracted/DerivedJoiningType.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/extracted/DerivedGeneralCategory.txt equals member extracted/DerivedGeneralCategory.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/IndicSyllabicCategory.txt equals member IndicSyllabicCategory.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/IndicPositionalCategory.txt equals member IndicPositionalCategory.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/auxiliary/GraphemeBreakProperty.txt equals member auxiliary/GraphemeBreakProperty.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/DerivedCoreProperties.txt equals member DerivedCoreProperties.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/emoji/emoji-data.txt equals member emoji/emoji-data.txt.
+Published https://www.unicode.org/Public/18.0.0/ucd/auxiliary/GraphemeBreakTest.txt equals member auxiliary/GraphemeBreakTest.txt.
+{
+  "result": "pass",
+  "corpus": "unicode",
+  "kind": "file-set",
+  "record": "specs/snapshots/unicode.json",
+  "version": "18.0.0",
+  "sources": [
+    {
+      "id": "ucd-zip",
+      "size": 5657953,
+      "sha256": "7b3e555514060b92290d154f53655c5eb0fa62b16eb04c03434ff72d1a66a0d8",
+      "release": {
+        "name": "Unicode 18.0.0",
+        "repository": null,
+        "tag": null,
+        "commit": null
+      },
+      "inventory": {
+        "entry_count": 71,
+        "total_bytes": 39580113,
+        "sha256": "37761bcf3660066413756e978f9d5ec7c7be3c187738f5d95785203c8dd8b2f4"
+      }
+    },
+    {
+      "id": "unicode-license",
+      "size": 1995,
+      "sha256": "e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96",
+      "release": {
+        "name": "Unicode License v3",
+        "repository": null,
+        "tag": null,
+        "commit": null
+      }
+    }
+  ],
+  "selected": [
+    {
+      "path": "src/unicode/ucd/Scripts.txt",
+      "size": 196089,
+      "sha256": "0071fd81b6aeae25f6e8bce8efec3066a6476a91b49bdb2f52dc76e817862a6a"
+    },
+    {
+      "path": "src/unicode/ucd/ScriptExtensions.txt",
+      "size": 21145,
+      "sha256": "5c9d34a922f687726f2a8bcf57d49f905987e51f1b21b58c95a00fbe255cec23"
+    },
+    {
+      "path": "src/unicode/ucd/PropertyValueAliases.txt",
+      "size": 83536,
+      "sha256": "06c4c8eaf7b0bf34abe73b113da1215bd784ac254d4c223600b90267caa4bbbd"
+    },
+    {
+      "path": "src/unicode/ucd/extracted/DerivedBidiClass.txt",
+      "size": 176412,
+      "sha256": "d9e23222522551348ea1ccfbb4f62efbf98982afb95840f8959c08ed992c5607"
+    },
+    {
+      "path": "src/unicode/ucd/extracted/DerivedJoiningType.txt",
+      "size": 41024,
+      "sha256": "e2408ff2c92b175b0f7bf62c989bbb54c7b077528fe31f8d69b96fa09e7d61ed"
+    },
+    {
+      "path": "src/unicode/ucd/extracted/DerivedGeneralCategory.txt",
+      "size": 282143,
+      "sha256": "d6b151d2d40ee9b1876d26f417980f45ffae47b6055ccf7203cb31f07a030f94"
+    },
+    {
+      "path": "src/unicode/ucd/IndicSyllabicCategory.txt",
+      "size": 86842,
+      "sha256": "a2b3aacf6b3e7bad4ca351ef985d9543825e20280ff280c25f646d9bc4ce304c"
+    },
+    {
+      "path": "src/unicode/ucd/IndicPositionalCategory.txt",
+      "size": 52327,
+      "sha256": "c9ad44d267c317ee0e1ec66cbd4d15033c2964f905d11fc8905915f9a5a9ae52"
+    },
+    {
+      "path": "src/unicode/ucd/auxiliary/GraphemeBreakProperty.txt",
+      "size": 100009,
+      "sha256": "0839dcb79e4ac639ecd538b1abf7c9d22e3f9dd265b7e182d33627aa4d75b45a"
+    },
+    {
+      "path": "src/unicode/ucd/DerivedCoreProperties.txt",
+      "size": 1159889,
+      "sha256": "09c928886a178fcafd93c29e4bd59073a058e5a100b716d425cb563ab50f68c9"
+    },
+    {
+      "path": "src/unicode/ucd/emoji/emoji-data.txt",
+      "size": 108719,
+      "sha256": "80d00f8e616a0ef27fd6b8de3b758c06383b5d917e2977709578e68baf733bf1"
+    },
+    {
+      "path": "src/unicode/ucd/auxiliary/GraphemeBreakTest.txt",
+      "size": 137090,
+      "sha256": "b0cf047ee94485bbdc846de2b902f5f8a815f6b674f9d04223cddadd91c9df31"
+    },
+    {
+      "path": "src/unicode/ucd/license.txt",
+      "size": 1995,
+      "sha256": "e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96"
+    }
+  ],
+  "source_listing_sha256": "2511e5384857e35883ec38bd8c0d225d1ea7591f6ee6ba6347c572f6b47a59d7"
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-fetch","unicode"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:48:44.616Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":3673,"environment_overrides":{"FAIRPANE_CORPORA_DIR":"C:\\src\\fairpane\\.tools\\corpora"}}

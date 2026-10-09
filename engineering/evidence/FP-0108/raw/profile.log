@@ -1,0 +1,389 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--test-runner","tools/zig/test_profile_runner.zig","--cache-dir","out/test-profile","src/root.zig"]
+TEST 1/281 0.001 ms pass root.test_0
+TEST 2/281 0.116 ms pass abi_scenarios.test.Scenario unknown-identifier: zero, never-issued, and other-family identifiers return FP_STATUS_UNKNOWN_ID and change nothing
+TEST 3/281 0.016 ms pass abi_scenarios.test.Scenario foreign-identifier: identifiers from another engine return FP_STATUS_UNKNOWN_ID and change neither engine
+TEST 4/281 0.018 ms pass abi_scenarios.test.Scenario retired-identifier: a destroyed document and an ended request return FP_STATUS_UNKNOWN_ID
+TEST 5/281 0.279 ms pass abi_scenarios.test.Scenario wrong-thread: every owner-thread function returns FP_STATUS_WRONG_THREAD from another thread, even with an invalid argument, and changes nothing
+TEST 6/281 0.041 ms pass abi_scenarios.test.Scenario cancel-before-answer-queued: a host cancellation queues input, and the step fails the document
+TEST 7/281 0.048 ms pass abi_scenarios.test.Scenario cancel-after-answer-queued: a queued answer blocks a host cancellation, and an engine cancellation discards it
+TEST 8/281 0.028 ms pass abi_scenarios.test.Scenario document-teardown-outstanding: destroying a document cancels its request, discards its answer, and keeps other documents
+TEST 9/281 0.164 ms pass abi_scenarios.test.Scenario engine-teardown-outstanding: destroying an engine releases outstanding requests, queued answers, bodies, and undrained events
+TEST 10/281 0.530 ms pass abi_scenarios.test.Scenario allocation-failure: each allocating operation returns FP_STATUS_OUT_OF_MEMORY at every allocation and changes nothing
+TEST 11/281 6.322 ms pass abi_scenarios.test.Scenario allocation-failure: through the memory limit alone, each allocating operation returns FP_STATUS_OUT_OF_MEMORY until the limit admits it, and changes nothing
+TEST 12/281 22.184 ms pass abi_scenarios.test.FP-0081 case 2: across the allocation-failure scenario through the limit, fp_engine_get_memory reports the bytes live in a recording allocator after every call
+TEST 13/281 0.027 ms pass abi_scenarios.test.Scenario null-required-pointer: a null required pointer returns FP_STATUS_INVALID_ARGUMENT and writes nothing
+TEST 14/281 0.011 ms pass abi_scenarios.test.Scenario short-structure: a structure or output size below the declared size returns FP_STATUS_INVALID_ARGUMENT and writes nothing
+TEST 15/281 0.010 ms pass abi_scenarios.test.Scenario response-body-bound: a body beyond max_response_body_bytes returns FP_STATUS_LIMIT_EXCEEDED and the request stays live
+TEST 16/281 0.017 ms pass abi_scenarios.test.Scenario load-bound: a load beyond max_outstanding_requests returns FP_STATUS_LIMIT_EXCEEDED, and a reload stays within the bound
+TEST 17/281 0.056 ms pass abi_scenarios.test.Scenario foreign-unwind: a host failure between calls never crosses the C ABI and leaves the engine usable
+TEST 18/281 0.000 ms pass c_api.test.the bootstrap reports no browser features
+TEST 19/281 0.000 ms pass c_api.test.invalid output leaves caller storage unchanged
+TEST 20/281 0.007 ms pass c_api.test.FP-0006 case 1: the C API creates and destroys an engine and a document, and a destroyed document is unknown
+TEST 21/281 0.345 ms pass c_api.test.FP-0006 case 14: a C call from another thread returns FP_STATUS_WRONG_THREAD and changes nothing
+TEST 22/281 0.145 ms pass c_api.test.FP-0006 case 16: injected allocation failure through the C entry points returns FP_STATUS_OUT_OF_MEMORY with unchanged state
+TEST 23/281 0.081 ms pass c_api.test.FP-0006 case 17: a document identifier from one engine is unknown in another engine
+TEST 24/281 0.007 ms pass c_api.test.FP-0050 case 3: fp_document_destroy cannot return FP_STATUS_OUT_OF_MEMORY
+TEST 25/281 0.023 ms pass c_api.test.FP-0081 case 3: createEngine with a limit below the bytes that creation needs returns FP_STATUS_OUT_OF_MEMORY, writes no engine, and allocates nothing
+TEST 26/281 0.302 ms pass c_api.test.FP-0081 case 4: a limit below the allocated bytes is accepted, every allocating call then returns FP_STATUS_OUT_OF_MEMORY, and a higher limit lets the same calls succeed
+TEST 27/281 0.245 ms pass c_api.test.FP-0081 case 5: invalid memory calls return FP_STATUS_INVALID_ARGUMENT and write nothing, and foreign calls return FP_STATUS_WRONG_THREAD first
+TEST 28/281 0.000 ms pass css.css.test_0
+TEST 29/281 0.179 ms pass dom.test.FP-0009 case 1: appendChild and insertBefore maintain parent, child, and sibling links for first, middle, and last positions
+TEST 30/281 3.332 ms pass dom.test.FP-0009 case 2: every condition of ensure pre-insert validity returns its standard error and changes nothing
+TEST 31/281 0.174 ms pass dom.test.FP-0098: the leaf shortcut of the inclusive-ancestor check agrees with the ancestor walk for every pair of nodes
+TEST 32/281 2.140 ms pass dom.test.FP-0009 case 3: every condition of the replace validity checks returns its standard error and changes nothing
+TEST 33/281 0.332 ms pass dom.test.FP-0009 case 4: removeChild with a child of another parent returns NotFound, and a valid removal unlinks the child completely
+TEST 34/281 0.418 ms pass dom.test.FP-0009 case 5: inserting a document fragment moves its children in order and empties it, and a document parent counts its element children
+TEST 35/281 0.183 ms pass dom.test.FP-0009 case 6: adopt removes the node from its old parent and changes the node document of every inclusive descendant
+TEST 36/281 0.189 ms pass dom.test.FP-0009 case 7: inserting a node that already has a parent moves it and leaves the old parent consistent
+TEST 37/281 0.205 ms pass dom.test.FP-0009 case 8: forEachRoot visits every document and retained node once, and sweep keeps exactly what the roots reach
+TEST 38/281 0.173 ms pass dom.test.FP-0009 case 9: removing the yielded child keeps iteration exact, and a child inserted before the recorded next sibling is not visited
+TEST 39/281 0.110 ms pass dom.test.FP-0009 case 10: destroying a store with documents, retained nodes, and detached subtrees leaks nothing
+TEST 40/281 3.223 ms pass dom.test.FP-0009 case 11: every induced allocation failure returns OutOfMemory, changes nothing, and leaks nothing
+TEST 41/281 0.765 ms pass dom.test.FP-0009 case 12: a handle from another store returns WrongOwner, and a handle to a swept node returns StaleHandle
+TEST 42/281 0.110 ms pass dom.test.FP-0014 case 18: setAttribute keeps list order, replaces in place, and honors namespaces, and removal reports its result
+TEST 43/281 0.155 ms pass dom.test.FP-0014 case 19: the ID follows the ID attribute change steps, and classes follow the ordered set parser
+TEST 44/281 0.667 ms pass dom.test.FP-0014 case 20: attribute operations reject bad handles, and each induced allocation failure changes nothing and leaks nothing
+TEST 45/281 0.247 ms pass dom.test.FP-0014 revision 1: classes deduplicate in order, hasClass agrees, and both reject non-elements
+TEST 46/281 0.036 ms pass engine.test.FP-0006 case 1: the Zig API creates and destroys an engine and a document, and a destroyed document is unknown
+TEST 47/281 0.057 ms pass engine.test.FP-0006 case 2: two engines and every table they create carry pairwise distinct owner identities
+TEST 48/281 0.087 ms pass engine.test.FP-0006 case 3: a load announces a version 1 resource request whose URL stays readable until the request ends
+TEST 49/281 0.040 ms pass engine.test.FP-0006 case 4: a response and a step load exactly that body and end the request
+TEST 50/281 0.034 ms pass engine.test.FP-0006 case 5: a queued response leaves the document loading until a step applies it
+TEST 51/281 0.086 ms pass engine.test.FP-0006 case 6: a version 2 response is unsupported and keeps the request live for a version 1 response
+TEST 52/281 0.030 ms pass engine.test.FP-0006 case 7: an unsupported-version rejection and a step fail the document and end the request
+TEST 53/281 0.034 ms pass engine.test.FP-0006 case 8: a cancellation and a step fail the document, and a later response is unknown
+TEST 54/281 0.042 ms pass engine.test.FP-0006 case 9: a second load cancels the first request and issues a second one
+TEST 55/281 0.044 ms pass engine.test.FP-0006 case 10: destroying a loading document with a queued response cancels it, applies nothing, and leaks nothing
+TEST 56/281 0.057 ms pass engine.test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing
+TEST 57/281 0.064 ms pass engine.test.FP-0006 case 12: the request bound and the body bound return LimitExceeded and change nothing
+TEST 58/281 0.055 ms pass engine.test.FP-0006 case 13: a budget of two applies two of three queued responses in arrival order
+TEST 59/281 0.287 ms pass engine.test.FP-0006 case 14: a Zig call from another thread returns WrongThread and changes nothing
+TEST 60/281 2.991 ms pass engine.test.FP-0006 case 15: every induced allocation failure returns OutOfMemory, changes nothing, and leaks nothing
+TEST 61/281 40.765 ms pass engine.test.FP-0050 case 1: destroying a loading document allocates nothing
+TEST 62/281 0.101 ms pass engine.test.FP-0050 case 2: a load that cannot reserve its cancellation slot returns OutOfMemory and changes nothing
+TEST 63/281 0.328 ms pass engine.test.FP-0050 case 5: removing the middle answer of a wrapped queue keeps the other answers in order
+TEST 64/281 0.000 ms pass font.opentype.test_0
+TEST 65/281 11.420 ms pass font.opentype.test.block word sums equal the direct checksum, the reference path, for every aligned table range
+TEST 66/281 0.002 ms pass html.root.test_0
+TEST 67/281 4.952 ms pass lab.test.FP-0007 case 1: a valid case parses, and each invalid fixture reports harness-error with a distinct message
+TEST 68/281 0.633 ms pass lab.test.FP-0007 case 2 and FP-0008 case 25: a matching fetch expectation passes, fetch completes, decode is unsupported without a byte order mark, tokenize is not reached, and every other stage is unsupported
+TEST 69/281 0.919 ms pass lab.test.FP-0007 case 3: a mismatching body hash or document state fails at the first differing check with both values
+TEST 70/281 0.422 ms pass lab.test.FP-0007 case 4: an expectation for the tree stage reports unsupported with stage tree
+TEST 71/281 0.531 ms pass lab.test.FP-0007 case 5: a null document body cancels the request as unavailable, fails the document, and a failed expectation passes
+TEST 72/281 0.872 ms pass lab.test.FP-0007 case 6: a document URL that names a loopback listener loads the case bytes, and the listener accepts no connection
+TEST 73/281 1.094 ms pass lab.test.FP-0007 case 7: two runs of one case produce byte-identical results without process-wide identifiers
+TEST 74/281 0.587 ms pass lab.test.FP-0007 case 8: max_steps 0 reports timeout
+TEST 75/281 1.163 ms pass lab.test.FP-0007 case 9: the result's case is the SHA-256 of the case bytes and its corpus equals the case's corpus
+TEST 76/281 1.068 ms pass lab.test.FP-0007 case 10: a replay passes, a changed event fails at its action, and a truncated transcript is a harness error
+TEST 77/281 0.027 ms pass lab.test.FP-0007 case 11: ddmin reduces xxaxxbxx to ab, its result is 1-minimal, and a false input is an error
+TEST 78/281 4.411 ms pass lab.test.FP-0007 case 12: each induced allocation failure in parsing and a complete run reports harness-error and leaks nothing
+TEST 79/281 0.911 ms pass lab.test.FP-0054 case 1: a sparse case file of 64 MiB + 1 bytes fails with FileTooLarge before any allocation
+TEST 80/281 2.091 ms pass lab.test.FP-0054 case 2: a transcript with a removed action or with version 1 reports harness-error
+TEST 81/281 1.589 ms pass lab.test.FP-0054 case 3: minimize writes a version 2 case derived from the original digest and corpus, with a null corpus
+TEST 82/281 0.660 ms pass lab.test.FP-0054 case 4: derived_from in version 1, its absence in version 2, and a version 2 corpus each report harness-error
+TEST 83/281 0.724 ms pass lab.test.FP-0008 case 18: a UTF-8 byte order mark body with a matching tokenize expectation passes, and both stages record their results
+TEST 84/281 8.732 ms pass lab.test.FP-0008 case 18: each induced allocation failure in a run that decodes and tokenizes reports harness-error and leaks nothing
+TEST 85/281 2.025 ms pass lab.test.FP-0008 case 19: a tokenize expectation fails at its first differing check with both values
+TEST 86/281 0.665 ms pass lab.test.FP-0008 case 20: a body with tokenizer parse errors records them in step order and passes
+TEST 87/281 1.728 ms pass lab.test.FP-0008 case 21: a body without a UTF-8 byte order mark makes decode and tokenize expectations unsupported at decode
+TEST 88/281 0.665 ms pass lab.test.FP-0008 case 22: a tokenize expectation for a failed document fails on document_state, and neither new stage is reached
+TEST 89/281 1.285 ms pass lab.test.FP-0008 case 23: a decode expectation passes for the case 18 body and fails on encoding when it names UTF-16LE
+TEST 90/281 0.604 ms pass lab.test.FP-0008 case 24: the UTF-8 decoder with replacement turns an invalid byte into U+FFFD
+TEST 91/281 0.023 ms pass handles.test.inserted values round-trip through get, getPtr, and remove
+TEST 92/281 0.018 ms pass handles.test.a handle from another owner returns WrongOwner even when its index is out of range
+TEST 93/281 0.009 ms pass handles.test.a removed handle is stale and the next insert reuses its index with a new generation
+TEST 94/281 0.010 ms pass handles.test.forged handles with an out-of-range index or generation zero return InvalidHandle
+TEST 95/281 0.025 ms pass handles.test.a two-bit generation retires its slot after generation three
+TEST 96/281 0.020 ms pass handles.test.retiring every two-bit index yields HandleSpaceExhausted without allocation
+TEST 97/281 0.023 ms pass handles.test.failed growth returns OutOfMemory and leaves the table unchanged
+TEST 98/281 0.072 ms pass handles.test.every induced allocation failure returns OutOfMemory, keeps invariants, and leaks nothing
+TEST 99/281 0.020 ms pass handles.test.every table error leaves a valid table that deinit releases completely
+TEST 100/281 0.001 ms pass handles.test.the process-wide source issues increasing nonzero engine owner identities
+TEST 101/281 0.000 ms pass handles.test.an owner source started near the maximum issues two identities and then stays exhausted
+TEST 102/281 0.806 ms pass handles.test.four threads that share one source receive four thousand distinct identities
+TEST 103/281 0.000 ms pass handles.test.table instantiations declare distinct handle types that contain no pointers
+TEST 104/281 0.023 ms pass handles.test.iteration visits each live value once and skips free and retired slots
+TEST 105/281 5.269 ms pass handles.test.fixed-seed random operations agree with a reference model of live, stale, and retired handles
+TEST 106/281 0.004 ms pass memory_budget.test.FP-0081 case 1: the budget admits exactly the remaining bytes, refuses one byte more, and never refuses a shrink or a free
+TEST 107/281 0.000 ms pass memory_budget.test.the budget refuses a request whose count would overflow
+TEST 108/281 61.787 ms pass js.runtime.test.FP-0011 case 6: every invocation leaves the counters of its missing effects unchanged
+TEST 109/281 155.015 ms pass js.runtime.test.FP-0011 case 11: every scenario gives the same results under collection stress and quarantine
+TEST 110/281 0.921 ms pass js.runtime.test.FP-0011 case 18: numbers round-trip bit for bit through numberValue and numberOf
+TEST 111/281 0.865 ms pass js.runtime.test.FP-0011 case 19: every NaN pattern boxes to a NaN number
+TEST 112/281 8.727 ms pass js.runtime.test.FP-0011 case 24: strings keep every code unit through concatenation, conversion, and keys
+TEST 113/281 2.003 ms pass js.runtime.test.FP-0011 case 25: call, get_method, is_callable, and same_value follow ECMA-262
+TEST 114/281 1.794 ms pass js.runtime.test.FP-0011 case 26: ordinary_define_own_property follows ValidateAndApplyPropertyDescriptor
+TEST 115/281 14.164 ms pass js.runtime.test.FP-0011 case 27: ordinary_get follows OrdinaryGet
+TEST 116/281 2.772 ms pass js.runtime.test.FP-0011 case 28: to_primitive follows ToPrimitive and OrdinaryToPrimitive
+TEST 117/281 1.653 ms pass js.runtime.test.FP-0011 case 29: to_number and to_numeric follow ECMA-262
+TEST 118/281 3.606 ms pass js.runtime.test.FP-0011 case 30: to_string and to_property_key follow ECMA-262
+TEST 119/281 27.578 ms pass js.runtime.test.FP-0011 case 31: addition follows ApplyStringOrNumericBinaryOperator
+TEST 120/281 1.592 ms pass js.runtime.test.FP-0011 case 32: engine-thrown errors are TypeError objects with the frozen messages
+TEST 121/281 0.000 ms pass js.runtime.test_0
+TEST 122/281 3.002 ms pass unicode.properties_test.test.FP-0013 case 5: every alias of the six enumerated properties resolves through fromAlias
+TEST 123/281 0.039 ms pass unicode.properties_test.test.FP-0013 case 6: unlisted code points take the @missing defaults
+TEST 124/281 0.004 ms pass unicode.properties_test.test.FP-0013 case 7: lookup rejects values above U+10FFFF and states version 18.0.0
+TEST 125/281 0.021 ms pass unicode.properties_test.test.FP-0108 case 8: lookup gives the cited Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic values
+TEST 126/281 389.650 ms pass unicode.properties_test.test.FP-0108 case 9: value counts over all code points equal the totals that the three files state
+TEST 127/281 0.010 ms pass unicode.properties_test.test.FP-0108 case 10: GraphemeClusterBreak and IndicConjunctBreak have exactly the assigned values and exact alias lookup
+TEST 128/281 3.115 ms pass unicode.reference_test.test.the field and binary reference parsers skip other properties and reject extra values
+TEST 129/281 2.982 ms pass unicode.reference_test.test.the reference parser fails when a file leaves a code point unassigned
+TEST 130/281 452.581 ms pass unicode.reference_test.test.FP-0013 case 3: lookup equals an independent parse of the embedded UCD files for every code point
+TEST 131/281 422.198 ms pass unicode.reference_test.test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point
+TEST 132/281 0.037 ms pass web_string.test.1: fromCodeUnits preserves zero and unpaired surrogates exactly
+TEST 133/281 0.009 ms pass web_string.test.2: empty input succeeds without allocating
+TEST 134/281 0.022 ms pass web_string.test.3: fromUtf8 preserves NUL and round-trips through toUtf8Alloc
+TEST 135/281 0.021 ms pass web_string.test.4: fromUtf8 decodes two-, four-byte, and maximum scalars
+TEST 136/281 0.001 ms pass web_string.test.5: fromUtf8 rejects ill-formed input
+TEST 137/281 0.010 ms pass web_string.test.6: fromUtf8Lossy restores the offending byte after each error
+TEST 138/281 0.024 ms pass web_string.test.7: fromUtf8Lossy substitutes maximal subparts
+TEST 139/281 0.030 ms pass web_string.test.8: toUtf8Alloc rejects unpaired surrogates and encodes pairs
+TEST 140/281 0.016 ms pass web_string.test.9: toUtf8LossyAlloc replaces each unpaired surrogate
+TEST 141/281 0.001 ms pass web_string.test.10: eql and order do not normalize
+TEST 142/281 0.000 ms pass web_string.test.11: order compares code units, not code points
+TEST 143/281 0.024 ms pass web_string.test.12: slice splits a pair and concat rejoins it
+TEST 144/281 0.010 ms pass web_string.test.13: slice rejects reversed and out-of-range bounds
+TEST 145/281 0.005 ms pass web_string.test.14: UTF-8 byte offsets map to code-unit indexes
+TEST 146/281 0.009 ms pass web_string.test.15: code-unit indexes reject pair interiors, unpaired prefixes, and overruns
+TEST 147/281 0.217 ms pass web_string.test.16: every allocating operation survives each induced allocation failure
+TEST 148/281 0.002 ms pass web_string.test.FP-0047 case 1: fromUtf8 rejects an F0 lead followed by a byte below 0x90
+TEST 149/281 0.014 ms pass web_string.test.FP-0047 case 2: fromUtf8Lossy emits four U+FFFD for an F0 lead followed by a byte below 0x90
+TEST 150/281 0.019 ms pass web_string.test.FP-0047 case 3: fromUtf8 decodes the scalars at the E0, ED, and F0 boundaries
+TEST 151/281 0.000 ms pass web_string.test.FP-0047 case 4: fromUtf8 rejects the F5 and C1 lead bytes
+TEST 152/281 0.014 ms pass web_string.test.FP-0047 case 5: fromUtf8Lossy replaces each byte after an F5 or C1 lead byte
+TEST 153/281 0.000 ms pass web_string.test.FP-0047 case 6: codeUnitIndexForUtf8Offset reports ill-formed input before an out-of-range offset
+TEST 154/281 0.010 ms pass web_string.test.code-unit indexes map back to UTF-8 byte offsets
+TEST 155/281 0.000 ms pass web_string.test.a view preserves isolated surrogate code units
+TEST 156/281 0.000 ms pass web_string.test.surrogate pairs occupy two indexed code units
+TEST 157/281 0.000 ms pass web_string.test.an empty view rejects every index
+TEST 158/281 0.003 ms pass web_string.test.FP-0013 case 8: View.codePoints pairs surrogates and keeps lone surrogates
+TEST 159/281 3.242 ms pass text.grapheme_test.test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries
+TEST 160/281 0.037 ms pass text.grapheme_test.test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser
+TEST 161/281 3.009 ms pass text.grapheme_test.test.FP-0108 case 14: boundaries of every case 11 and 12 input strictly increase from 0 to the length and never split a surrogate pair
+TEST 162/281 882.382 ms pass text.grapheme_test.test.FP-0108 case 15: segmentation work is linear in the code-unit length
+TEST 163/281 0.127 ms pass text.grapheme_test.test.FP-0108 case 16: the segmenter takes no allocator and its sources name none
+TEST 164/281 0.066 ms pass js.operations.test.FP-0011 case 1: writeTable renders the frozen catalog line for line
+TEST 165/281 0.004 ms pass js.operations.test.FP-0011 case 2: the catalog validates and permits is the subset relation
+TEST 166/281 0.002 ms pass js.operations.test.FP-0011 case 3: bindKernels binds 23 kernels in catalog order for every representation
+TEST 167/281 0.012 ms pass js.value.test.FP-0011 case 17: every representation passes the interface check and keeps its frozen encodings
+TEST 168/281 14.666 ms pass js.value.test.FP-0011 case 20: no value representation or js import reaches the C ABI sources
+TEST 169/281 0.047 ms pass js.heap_catalog.test.FP-0011 case 7: kind metadata and layouts render as the frozen catalog
+TEST 170/281 5668.703 ms pass js.heap.test.FP-0011 case 9: the generated and manual tracers visit and free the same cells
+TEST 171/281 0.825 ms pass js.heap.test.FP-0011 case 10: a collection frees unreachable cells and keeps every root
+TEST 172/281 0.541 ms pass js.heap.test.FP-0011 case 12: a quarantined cell resolves intact and counts one dead resolution
+TEST 173/281 0.620 ms pass js.heap.test.FP-0011 case 13: a platform object keeps its DOM tree until the heap collects it
+TEST 174/281 39.375 ms pass js.heap.test.FP-0011 case 14: every induced allocation failure returns OutOfMemory and leaks nothing
+TEST 175/281 0.958 ms pass js.heap.test.FP-0011 case 15: the cell limit collects first and then returns OutOfMemory
+TEST 176/281 0.998 ms pass js.heap.test.FP-0011 case 16: deinit frees every cell and releases every retain
+TEST 177/281 2.831 ms pass js.number.test.FP-0011 case 21: Number::add and Number::sameValue follow the frozen vectors
+TEST 178/281 515.527 ms pass js.number.test.FP-0011 case 22: Number::toString gives the frozen texts and shortest round trips
+TEST 179/281 2.325 ms pass js.number.test.FP-0011 case 23: StringToNumber follows the frozen vectors without allocating
+TEST 180/281 41.475 ms pass js.number.test.FP-0011 case 38: StringToNumber rounds literals whose scale or exponent exceeds 1,000,000
+TEST 181/281 96.515 ms pass js.measure.test.FP-0011 case 33: every workload runs at divisor 1000 with the scaled checksums
+TEST 182/281 0.034 ms pass js.parser.test.FP-0082 case 1: writeCodeTable writes the frozen code tables
+TEST 183/281 5.039 ms pass js.parser.test.FP-0082 case 2: each source produces exactly its syntax-tree dump
+TEST 184/281 0.266 ms pass js.parser.test.FP-0082 case 3: function nodes record their source ranges
+TEST 185/281 5238.774 ms pass js.parser.test.FP-0082 case 4: Number::toString of 100,000 random Numbers parses back to the same bits and text
+TEST 186/281 21.400 ms pass js.parser.test.FP-0082 case 5: one string of the 65,536 escapes \u0000 through \uFFFF produces every code unit in order
+TEST 187/281 3.286 ms pass js.parser.test.FP-0082 case 6: each source produces exactly its syntax error
+TEST 188/281 1.803 ms pass js.parser.test.FP-0082 case 7: each source produces exactly its unsupported outcome
+TEST 189/281 0.121 ms pass js.parser.test.FP-0082 case 8: the outcome is the first diagnostic in detection order
+TEST 190/281 4.510 ms pass js.parser.test.FP-0082 case 9: the strict prefix gives a strict script, a strict-mode syntax error, or an unsupported outcome
+FP-0082 case 10: measured stack use 21120 bytes for 1022 terms and 20992 bytes for 1021 parentheses
+TEST 191/281 8.852 ms pass js.parser.test.FP-0082 case 10: the depth bound holds at its boundaries on a 1 MiB stack
+TEST 192/281 154.487 ms pass js.parser.test.FP-0082 case 11: inputs nested 100,000 times give limit depth on a 1 MiB stack
+TEST 193/281 918.390 ms pass js.parser.test.FP-0082 case 12: the memory and source-length limits, and a million statements under the defaults
+TEST 194/281 4.462 ms pass js.parser.test.FP-0082 case 13: every induced allocation failure returns error.OutOfMemory without a leak
+TEST 195/281 1572.677 ms pass js.parser.test.FP-0082 case 14: random sources, prefixes, and deletions yield outcomes without a panic or a leak
+TEST 196/281 46.560 ms pass js.parser.test.FP-0082 revision 1 case 4: the duplicate-parameter check of 10,000 strict parameters makes at most 20,000 comparisons
+TEST 197/281 0.110 ms pass js.test262_metadata.test.FP-0082 case 15: the metadata reader reads its YAML subset and reports metadata errors
+TEST 198/281 0.085 ms pass html.tokenizer_test.test.FP-0008 case 1 and FP-0064 case 1: State has 84 tags in section order with the frozen headings, and every state has branches
+TEST 199/281 0.039 ms pass html.tokenizer_test.test.FP-0008 case 2 and FP-0064 case 2: ErrorCode has the 52 codes of the parse error table in order, and the tokenizer raises 51
+TEST 200/281 6.234 ms pass html.tokenizer_test.test.FP-0008 case 4: each error catalog input produces exactly its expected sequence, whole and one code unit per chunk
+TEST 201/281 3.035 ms pass html.tokenizer_test.test.FP-0008 case 5: tags and attributes, whole and one code unit per chunk
+TEST 202/281 2.514 ms pass html.tokenizer_test.test.FP-0008 case 6: markup declarations and comments, whole and one code unit per chunk
+TEST 203/281 6.201 ms pass html.tokenizer_test.test.FP-0008 case 7: DOCTYPE, whole and one code unit per chunk
+TEST 204/281 1.016 ms pass html.tokenizer_test.test.FP-0008 case 8: processing instructions, whole and one code unit per chunk
+TEST 205/281 1.637 ms pass html.tokenizer_test.test.FP-0008 case 9: character references, whole and one code unit per chunk
+TEST 206/281 1.091 ms pass html.tokenizer_test.test.FP-0008 case 10: input stream preprocessing, whole and one code unit per chunk, and N6's end-of-file position
+TEST 207/281 0.369 ms pass html.tokenizer_test.test.FP-0064 case 3: each error catalog input produces exactly its expected sequence, and both catalogs name the 51 raised codes
+TEST 208/281 2.676 ms pass html.tokenizer_test.test.FP-0064 case 4: RCDATA, whole and one code unit per chunk
+TEST 209/281 1.517 ms pass html.tokenizer_test.test.FP-0064 case 5: RAWTEXT, whole and one code unit per chunk
+TEST 210/281 1.941 ms pass html.tokenizer_test.test.FP-0064 case 6: script data and its escape states, whole and one code unit per chunk
+TEST 211/281 2.031 ms pass html.tokenizer_test.test.FP-0064 case 7: the script data escaped states, whole and one code unit per chunk
+TEST 212/281 2.736 ms pass html.tokenizer_test.test.FP-0064 case 8: the script data double escape states, whole and one code unit per chunk
+TEST 213/281 1.223 ms pass html.tokenizer_test.test.FP-0064 case 9: PLAINTEXT and CDATA sections, whole and one code unit per chunk
+TEST 214/281 1.266 ms pass html.tokenizer_test.test.FP-0064 case 10: the last start tag name, whole and one code unit per chunk
+TEST 215/281 35.111 ms pass html.tokenizer_test.test.FP-0008 case 11 and FP-0064 case 11: the error catalogs, the state walks, and the CDATA case execute every branch of every state
+TEST 216/281 0.489 ms pass html.tokenizer_test.test.FP-0008 case 12: each input produces exactly its dump with spans and errors
+TEST 217/281 0.349 ms pass html.tokenizer_test.test.FP-0064 case 12: each input produces exactly its dump with spans and errors
+TEST 218/281 0.057 ms pass html.tokenizer_test.test.FP-0008 case 15: interface edges
+TEST 219/281 0.602 ms pass html.tokenizer_test.test.FP-0064 case 14: interface edges of switchTo
+TEST 220/281 0.138 ms pass html.tokenizer_test.test.FP-0008 case 16 and FP-0064 case 15: a foreign adjusted current node makes [CDATA[ a CDATA section, whole and split at offset 6
+TEST 221/281 0.397 ms pass html.tokenizer_test.test.FP-0008 case 17: each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks
+TEST 222/281 0.125 ms pass html.tokenizer_test.test.FP-0064 case 16: with the content driver, each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks
+TEST 223/281 6738.758 ms pass html.partition_test.test.FP-0008 case 13: set P compares every composition of each input into nonempty chunks with the whole input
+TEST 224/281 683.086 ms pass html.partition_test.test.FP-0008 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input
+TEST 225/281 9952.745 ms pass html.partition_test.test.FP-0064 case 13: set P compares every composition of each input into nonempty chunks with the whole input
+TEST 226/281 1.017 ms pass html.partition_test.test.FP-0064 case 13: each set P input as one chunk executes every one of the 30 new states
+TEST 227/281 610.284 ms pass html.partition_test.test.FP-0064 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input
+TEST 228/281 1.793 ms pass html.partition_test.test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks
+TEST 229/281 19.752 ms pass html.entities_test.test.FP-0008 case 3: the embedded table matches its provenance, its generated form, and the frozen counts and lookups
+TEST 230/281 0.003 ms pass font.reader.test.reads stop at the end and offset sums do not wrap
+TEST 231/281 0.134 ms pass css.tests.test.FP-0014 case 1: filtering maps CR LF, CR, FF, NUL, and lone surrogates, and pairs surrogates
+TEST 232/281 0.193 ms pass css.tests.test.FP-0014 case 2: every token kind dumps in the frozen format
+TEST 233/281 0.335 ms pass css.tests.test.FP-0014 case 3: bad tokens, URLs, and escapes
+TEST 234/281 0.193 ms pass css.tests.test.FP-0014 case 4: numbers tokenize to the nearest f64 with type and sign
+TEST 235/281 0.284 ms pass css.tests.test.FP-0014 case 5: identifiers, hashes, at-keywords, delims, and comments
+TEST 236/281 0.223 ms pass css.tests.test.FP-0014 case 6: unicode-range tokens appear only when unicode ranges are allowed
+TEST 237/281 0.347 ms pass css.tests.test.FP-0014 case 7: parseStylesheet gives at-rules, qualified rules, and nested rules, and skips CDO and CDC
+TEST 238/281 0.187 ms pass css.tests.test.FP-0014 case 8: a block's contents recover from bad declarations and keep the trailing declaration
+TEST 239/281 0.687 ms pass css.tests.test.FP-0014 case 9: unclosed functions, blocks, and strings end at EOF
+TEST 240/281 0.556 ms pass css.tests.test.FP-0014 case 10: custom-property-like rules, custom property blocks, and nested declarations
+TEST 241/281 0.998 ms pass css.tests.test.FP-0014 case 11: every parser entry point
+TEST 242/281 0.512 ms pass css.tests.test.FP-0014 case 12: !important is recognized only as the last two non-whitespace tokens
+TEST 243/281 0.249 ms pass css.tests.test.FP-0014 case 13: a unicode-range declaration retokenizes its original text
+TEST 244/281 0.184 ms pass css.tests.test.FP-0014 case 14: a custom property keeps its tokens and its original text
+TEST 245/281 0.401 ms pass css.tests.test.FP-0014 case 15: unsupported selectors and every at-rule are dropped with diagnostics
+TEST 246/281 0.255 ms pass css.tests.test.FP-0014 case 16: unknown properties and invalid and unsupported values are dropped in order
+TEST 247/281 0.201 ms pass css.tests.test.FP-0014 case 17: nested rules, nested at-rules, and nested declarations are dropped
+TEST 248/281 110.248 ms pass css.tests.test.FP-0014 case 21: selectors parse with their specificity, which saturates at 65535
+TEST 249/281 1.361 ms pass css.tests.test.FP-0014 case 22: invalid and unsupported selectors report the first problem in token order
+TEST 250/281 2.337 ms pass css.tests.test.FP-0014 case 23: selectors match the fixture document exactly, in tree order
+TEST 251/281 0.082 ms pass css.tests.test.FP-0014 case 24: a detached element matches by its own compound and not through absent ancestors
+TEST 252/281 0.035 ms pass css.tests.test.FP-0014 case 25: the registry holds exactly the frozen properties, and lookup follows the name rules
+TEST 253/281 0.003 ms pass css.tests.test.FP-0014 case 26: registry validation rejects malformed tables and accepts the committed table
+TEST 254/281 0.449 ms pass css.tests.test.FP-0014 case 27: initial texts parse with their grammars, and an undeclared child computes initial values
+TEST 255/281 0.055 ms pass css.tests.test.FP-0014 case 28: diff reports the invalidation effects of each changed property
+TEST 256/281 6.554 ms pass css.tests.test.FP-0014 case 29: display values compute, blockify on the root, and reject invalid and unsupported forms
+TEST 257/281 3.386 ms pass css.tests.test.FP-0014 case 30: hex, named, system, transparent, and currentcolor values compute
+TEST 258/281 6.262 ms pass css.tests.test.FP-0014 case 31: rgb() and rgba() parse in the legacy and modern syntaxes and clamp at parse time
+TEST 259/281 9.420 ms pass css.tests.test.FP-0014 case 32: font-size keywords, lengths, and percentages compute against the parent and the root
+TEST 260/281 2.088 ms pass css.tests.test.FP-0014 case 33: margins compute lengths against the element's font size and the root's
+TEST 261/281 0.452 ms pass css.tests.test.FP-0014 case 34: inheritance reaches descendants and text nodes, and unconnected nodes are not styled
+TEST 262/281 3.942 ms pass css.tests.test.FP-0014 case 35: origin and importance decide before specificity, in the six-level order
+TEST 263/281 4.934 ms pass css.tests.test.FP-0014 case 36: specificity, then order of appearance, decide within an origin
+TEST 264/281 0.734 ms pass css.tests.test.FP-0014 case 37: initial, inherit, and unset follow explicit defaulting
+TEST 265/281 5.512 ms pass css.tests.test.FP-0014 case 38: revert, revert-layer, and revert-rule roll back the cascade
+TEST 266/281 1.214 ms pass css.tests.test.FP-0014 case 39: custom properties keep tokens, case, and original text, and empty values are valid
+TEST 267/281 5.014 ms pass css.tests.test.FP-0014 case 40: var() substitutes values, names, and fallbacks, and invalid substitutions unset properties
+TEST 268/281 0.342 ms pass css.tests.test.FP-0014 case 41: a substituted value that fails its grammar makes the property unset, not an earlier declaration
+TEST 269/281 1.182 ms pass css.tests.test.FP-0014 case 42: cycles make every participant guaranteed-invalid, in either declaration order
+TEST 270/281 1.472 ms pass css.tests.test.FP-0014 case 43: custom properties inherit computed values, and keywords in fallbacks act as keywords
+TEST 271/281 1.308 ms pass css.tests.test.FP-0014 case 44: malformed custom property values are dropped at parse time or become guaranteed-invalid
+TEST 272/281 51.142 ms pass css.tests.test.FP-0014 case 45: an expansion past 65536 component values is guaranteed-invalid
+TEST 273/281 3991.606 ms pass css.tests.test.FP-0014 case 46: nesting depth is bounded only by memory
+TEST 274/281 0.057 ms pass css.tests.test.FP-0014 case 47: the cascade and computed values take no DOM or selector input
+TEST 275/281 35.337 ms pass css.tests.test.FP-0014 case 48: every induced allocation failure returns OutOfMemory, leaves the store unchanged, and leaks nothing
+TEST 276/281 0.327 ms pass css.tests.test.FP-0014 case 49: a text node's style comes from defaulting, not from the parent's whole style
+TEST 277/281 0.218 ms pass css.tests.test.FP-0014 case 50: nothing inside an ignored at-rule's block reports a diagnostic
+TEST 278/281 0.384 ms pass css.tests.test.FP-0014 case 51: the other arbitrary substitution functions make a custom property unsupported
+TEST 279/281 0.988 ms pass css.tests.test.FP-0014 case 52: grid-lanes, the math inner type, and the column combinator are unsupported standard forms
+TEST 280/281 894.120 ms pass css.tests.test.FP-0014 case 53: selector matching exits early, and class tokens deduplicate in n log n time
+TEST 281/281 0.033 ms pass css.tests.test.FP-0014 case 54: the system color palette is opaque and each legible pair has a contrast ratio of at least 4.5
+SLOWEST (rank, ms, share of the total, test)
+RANK 1 9952.745 ms 24.7% html.partition_test.test.FP-0064 case 13: set P compares every composition of each input into nonempty chunks with the whole input
+RANK 2 6738.758 ms 16.7% html.partition_test.test.FP-0008 case 13: set P compares every composition of each input into nonempty chunks with the whole input
+RANK 3 5668.703 ms 14.1% js.heap.test.FP-0011 case 9: the generated and manual tracers visit and free the same cells
+RANK 4 5238.774 ms 13.0% js.parser.test.FP-0082 case 4: Number::toString of 100,000 random Numbers parses back to the same bits and text
+RANK 5 3991.606 ms 9.9% css.tests.test.FP-0014 case 46: nesting depth is bounded only by memory
+RANK 6 1572.677 ms 3.9% js.parser.test.FP-0082 case 14: random sources, prefixes, and deletions yield outcomes without a panic or a leak
+RANK 7 918.390 ms 2.2% js.parser.test.FP-0082 case 12: the memory and source-length limits, and a million statements under the defaults
+RANK 8 894.120 ms 2.2% css.tests.test.FP-0014 case 53: selector matching exits early, and class tokens deduplicate in n log n time
+RANK 9 882.382 ms 2.1% text.grapheme_test.test.FP-0108 case 15: segmentation work is linear in the code-unit length
+RANK 10 683.086 ms 1.6% html.partition_test.test.FP-0008 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input
+RANK 11 610.284 ms 1.5% html.partition_test.test.FP-0064 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input
+RANK 12 515.527 ms 1.2% js.number.test.FP-0011 case 22: Number::toString gives the frozen texts and shortest round trips
+RANK 13 452.581 ms 1.1% unicode.reference_test.test.FP-0013 case 3: lookup equals an independent parse of the embedded UCD files for every code point
+RANK 14 422.198 ms 1.0% unicode.reference_test.test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point
+RANK 15 389.650 ms 0.9% unicode.properties_test.test.FP-0108 case 9: value counts over all code points equal the totals that the three files state
+RANK 16 155.015 ms 0.3% js.runtime.test.FP-0011 case 11: every scenario gives the same results under collection stress and quarantine
+RANK 17 154.487 ms 0.3% js.parser.test.FP-0082 case 11: inputs nested 100,000 times give limit depth on a 1 MiB stack
+RANK 18 110.248 ms 0.2% css.tests.test.FP-0014 case 21: selectors parse with their specificity, which saturates at 65535
+RANK 19 96.515 ms 0.2% js.measure.test.FP-0011 case 33: every workload runs at divisor 1000 with the scaled checksums
+RANK 20 61.787 ms 0.1% js.runtime.test.FP-0011 case 6: every invocation leaves the counters of its missing effects unchanged
+RANK 21 51.142 ms 0.1% css.tests.test.FP-0014 case 45: an expansion past 65536 component values is guaranteed-invalid
+RANK 22 46.560 ms 0.1% js.parser.test.FP-0082 revision 1 case 4: the duplicate-parameter check of 10,000 strict parameters makes at most 20,000 comparisons
+RANK 23 41.475 ms 0.1% js.number.test.FP-0011 case 38: StringToNumber rounds literals whose scale or exponent exceeds 1,000,000
+RANK 24 40.765 ms 0.1% engine.test.FP-0050 case 1: destroying a loading document allocates nothing
+RANK 25 39.375 ms 0.0% js.heap.test.FP-0011 case 14: every induced allocation failure returns OutOfMemory and leaks nothing
+TOTAL 281 tests, 40185.477 ms; 0 failed, 0 skipped, 0 leaked, 0 logged errors
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--test-runner","tools/zig/test_profile_runner.zig","--cache-dir","out/test-profile","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T18:02:51.889Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":53323,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--test-runner","tools/zig/test_profile_runner.zig","--cache-dir","out/test-profile","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"]
+TEST 1/47 0.000 ms pass root.test_0
+TEST 2/47 2.760 ms pass seed_test.test.FP-0013 case 9: the seed format rejects malformed seeds, and each committed seed decodes to its code points
+TEST 3/47 1.517 ms pass seed_test.test.FP-0013 case 10: every property of every seed equals unicode.lookup
+TEST 4/47 12.839 ms pass seed_test.test.FP-0013 case 11: every coverage entry of every seed matches glyphIndex on the embedded fixture
+TEST 5/47 65.409 ms pass fixture_test.test.FP-0013 case 12: each embedded font's SHA-256 equals font_sha256, and its generator is the committed script and the declared fontTools
+TEST 6/47 91.141 ms pass fixture_test.test.FP-0013 case 13: each fixture parses under .reject and equals every field of its expectation file
+TEST 7/47 0.198 ms pass fixture_test.test.FP-0013 case 14: the CJK subset is a CFF font whose name table keeps only IDs 0, 7, 13, and 14
+TEST 8/47 0.493 ms pass synthetic_test.test.FP-0013 case 15: B_TT builds deterministically with a whole-file sum of 0xB1B0AFBA and clean integrity
+TEST 9/47 0.230 ms pass synthetic_test.test.FP-0013 case 16: B_TT maps, measures, and describes its glyphs and optional tables
+TEST 10/47 0.134 ms pass synthetic_test.test.FP-0013 case 17: B_CFF exposes its CFF table and maps U+0041
+TEST 11/47 2.474 ms pass malformed_test.test.FP-0013 case 18: every proper prefix of B_TT and B_CFF fails, and a cut directory is Truncated
+TEST 12/47 0.194 ms pass malformed_test.test.FP-0013 case 19: numTables 0xFFFF on B_TT returns Truncated
+TEST 13/47 1.359 ms pass malformed_test.test.FP-0013 case 20: collection, WOFF, WOFF2, Type 1, and unknown sfnt versions are rejected by name
+TEST 14/47 0.828 ms pass malformed_test.test.FP-0013 case 21: records past the end of the font return TableOutOfBounds
+TEST 15/47 0.265 ms pass malformed_test.test.FP-0013 case 22: a head offset moved by 2 returns MisalignedTable
+TEST 16/47 0.529 ms pass malformed_test.test.FP-0013 case 23: unsorted and duplicate directory tags are rejected
+TEST 17/47 0.578 ms pass malformed_test.test.FP-0013 case 24: overlapping known tables are rejected, and an unknown table may overlap
+TEST 18/47 1.365 ms pass malformed_test.test.FP-0013 case 25: missing required tables and mixed outline formats are rejected
+TEST 19/47 0.536 ms pass malformed_test.test.FP-0013 case 26: checksum mismatches are reported or rejected
+TEST 20/47 1.777 ms pass malformed_test.test.FP-0013 case 27: malformed head tables return InvalidHead
+TEST 21/47 1.405 ms pass malformed_test.test.FP-0013 case 28: malformed maxp tables return InvalidMaxp
+TEST 22/47 1.188 ms pass malformed_test.test.FP-0013 case 29: malformed hhea and hmtx tables return InvalidHhea and InvalidHmtx
+TEST 23/47 1.768 ms pass malformed_test.test.FP-0013 case 30: malformed loca tables fail parsing, and malformed glyph headers fail on access
+TEST 24/47 2.111 ms pass malformed_test.test.FP-0013 case 31: malformed cmap headers return InvalidCmap, and no Unicode subtable returns NoUnicodeCmap
+TEST 25/47 2.372 ms pass malformed_test.test.FP-0013 case 32: malformed format 4 subtables return InvalidCmap even when unselected
+TEST 26/47 1.231 ms pass malformed_test.test.FP-0013 case 33: malformed format 12 subtables return InvalidCmap
+TEST 27/47 1.798 ms pass malformed_test.test.FP-0013 case 34: malformed name tables are rejected with the matching defect without failing the font
+TEST 28/47 1.165 ms pass malformed_test.test.FP-0013 case 35: OS/2 versions and lengths
+TEST 29/47 2.187 ms pass malformed_test.test.FP-0013 case 36: post lengths, glyph counts, string indexes, and versions
+TEST 30/47 5.655 ms pass malformed_test.test.FP-0013 case 37: malformed GSUB and GPOS tables are rejected with the matching defect
+TEST 31/47 1.221 ms pass malformed_test.test.FP-0013 case 38: GDEF versions, lengths, and offsets
+TEST 32/47 4.255 ms pass malformed_test.test.FP-0013 case 39: malformed CFF tables return InvalidCff
+TEST 33/47 0.000 ms pass malformed_test.test.FP-0013 case 40: font.parse takes no allocator
+TEST 34/47 3.213 ms pass bounds_test.test.FP-0013 case 50: a cmap with 513 distinct valid subtables returns InvalidCmap, and 512 parse
+TEST 35/47 29.928 ms pass bounds_test.test.FP-0013 case 51: 65535 records that share one costly format 4 subtable parse with one validation
+TEST 36/47 0.345 ms pass bounds_test.test.FP-0013 case 52: accessors given an index out of range return null or an error
+TEST 37/47 0.316 ms pass bounds_test.test.FP-0013 case 52: a changed directory record length makes findTable return null
+TEST 38/47 0.300 ms pass bounds_test.test.FP-0013 case 52: a changed cmap encoding record offset makes cmapSubtable return null
+TEST 39/47 0.297 ms pass bounds_test.test.FP-0013 case 52: a changed format 12 group count makes glyphIndex return glyph 0
+TEST 40/47 0.302 ms pass bounds_test.test.FP-0013 case 52: a changed format 12 start glyph past numGlyphs makes glyphIndex return glyph 0
+TEST 41/47 0.432 ms pass bounds_test.test.FP-0013 case 52: a changed format 4 segment count or idRangeOffset makes glyphIndex return glyph 0
+TEST 42/47 0.313 ms pass bounds_test.test.FP-0013 case 52: changed loca entries make glyphHeader return InvalidGlyph
+TEST 43/47 0.300 ms pass bounds_test.test.FP-0013 case 52: a changed name record makes record and find return null
+TEST 44/47 0.299 ms pass bounds_test.test.FP-0013 case 52: a changed GSUB script count leaves the parsed counts and returns null past them
+TEST 45/47 113.136 ms pass bounds_test.test.FP-0013 case 52: every single-byte change after parse leaves every accessor in range
+TEST 46/47 2.121 ms pass grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries
+TEST 47/47 1.972 ms pass grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair
+SLOWEST (rank, ms, share of the total, test)
+RANK 1 113.136 ms 31.0% bounds_test.test.FP-0013 case 52: every single-byte change after parse leaves every accessor in range
+RANK 2 91.141 ms 25.0% fixture_test.test.FP-0013 case 13: each fixture parses under .reject and equals every field of its expectation file
+RANK 3 65.409 ms 17.9% fixture_test.test.FP-0013 case 12: each embedded font's SHA-256 equals font_sha256, and its generator is the committed script and the declared fontTools
+RANK 4 29.928 ms 8.2% bounds_test.test.FP-0013 case 51: 65535 records that share one costly format 4 subtable parse with one validation
+RANK 5 12.839 ms 3.5% seed_test.test.FP-0013 case 11: every coverage entry of every seed matches glyphIndex on the embedded fixture
+RANK 6 5.655 ms 1.5% malformed_test.test.FP-0013 case 37: malformed GSUB and GPOS tables are rejected with the matching defect
+RANK 7 4.255 ms 1.1% malformed_test.test.FP-0013 case 39: malformed CFF tables return InvalidCff
+RANK 8 3.213 ms 0.8% bounds_test.test.FP-0013 case 50: a cmap with 513 distinct valid subtables returns InvalidCmap, and 512 parse
+RANK 9 2.760 ms 0.7% seed_test.test.FP-0013 case 9: the seed format rejects malformed seeds, and each committed seed decodes to its code points
+RANK 10 2.474 ms 0.6% malformed_test.test.FP-0013 case 18: every proper prefix of B_TT and B_CFF fails, and a cut directory is Truncated
+RANK 11 2.372 ms 0.6% malformed_test.test.FP-0013 case 32: malformed format 4 subtables return InvalidCmap even when unselected
+RANK 12 2.187 ms 0.6% malformed_test.test.FP-0013 case 36: post lengths, glyph counts, string indexes, and versions
+RANK 13 2.121 ms 0.5% grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries
+RANK 14 2.111 ms 0.5% malformed_test.test.FP-0013 case 31: malformed cmap headers return InvalidCmap, and no Unicode subtable returns NoUnicodeCmap
+RANK 15 1.972 ms 0.5% grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair
+RANK 16 1.798 ms 0.4% malformed_test.test.FP-0013 case 34: malformed name tables are rejected with the matching defect without failing the font
+RANK 17 1.777 ms 0.4% malformed_test.test.FP-0013 case 27: malformed head tables return InvalidHead
+RANK 18 1.768 ms 0.4% malformed_test.test.FP-0013 case 30: malformed loca tables fail parsing, and malformed glyph headers fail on access
+RANK 19 1.517 ms 0.4% seed_test.test.FP-0013 case 10: every property of every seed equals unicode.lookup
+RANK 20 1.405 ms 0.3% malformed_test.test.FP-0013 case 28: malformed maxp tables return InvalidMaxp
+RANK 21 1.365 ms 0.3% malformed_test.test.FP-0013 case 25: missing required tables and mixed outline formats are rejected
+RANK 22 1.359 ms 0.3% malformed_test.test.FP-0013 case 20: collection, WOFF, WOFF2, Type 1, and unknown sfnt versions are rejected by name
+RANK 23 1.231 ms 0.3% malformed_test.test.FP-0013 case 33: malformed format 12 subtables return InvalidCmap
+RANK 24 1.221 ms 0.3% malformed_test.test.FP-0013 case 38: GDEF versions, lengths, and offsets
+RANK 25 1.188 ms 0.3% malformed_test.test.FP-0013 case 29: malformed hhea and hmtx tables return InvalidHhea and InvalidHmtx
+TOTAL 47 tests, 364.274 ms; 0 failed, 0 skipped, 0 leaked, 0 logged errors
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--test-runner","tools/zig/test_profile_runner.zig","--cache-dir","out/test-profile","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T18:03:45.294Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":4249,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

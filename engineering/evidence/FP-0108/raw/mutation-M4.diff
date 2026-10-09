@@ -1,0 +1,13 @@
+diff --git a/src/text/grapheme.zig b/src/text/grapheme.zig
+index 0ec7b8f..f07fdd4 100644
+--- a/src/text/grapheme.zig
++++ b/src/text/grapheme.zig
+@@ -114,7 +114,7 @@ pub const GraphemeBoundaries = struct {
+         if (n == .SM) return true; // GB9a
+         if (p == .PP) return true; // GB9b
+         if (self.linker and next_code_point.incb == .Consonant) return true; // GB9c
+-        if (self.pictographic_zwj and next_code_point.ext_pict) return true; // GB11
++        if (p == .ZWJ and next_code_point.ext_pict) return true; // Mutation M4: GB11 without `ExtPict EX*` before the ZWJ
+         if (self.odd_regional_indicators and n == .RI) return true; // GB12 and GB13
+         return false; // GB999
+     }

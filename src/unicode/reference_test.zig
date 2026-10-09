@@ -1,4 +1,4 @@
-//! FP-0013 case 3: an independent, test-only parser of the embedded UCD files.
+//! FP-0013 case 3 and FP-0108 case 7: an independent, test-only parser of the embedded UCD files.
 //! It is the generic reference path for the generated tables in `tables.zig`.
 //! It shares no code with `tools/ucd.mjs` or `properties.zig` and resolves values only through `std.meta.stringToEnum`.
 
@@ -19,6 +19,9 @@ const files = struct {
     const general_category = @embedFile("ucd/extracted/DerivedGeneralCategory.txt");
     const indic_syllabic = @embedFile("ucd/IndicSyllabicCategory.txt");
     const indic_positional = @embedFile("ucd/IndicPositionalCategory.txt");
+    const grapheme_break = @embedFile("ucd/auxiliary/GraphemeBreakProperty.txt");
+    const derived_core = @embedFile("ucd/DerivedCoreProperties.txt");
+    const emoji_data = @embedFile("ucd/emoji/emoji-data.txt");
 };
 
 /// Maps every alias of one property in `PropertyValueAliases.txt` to its short alias.
@@ -170,6 +173,84 @@ const Extensions = struct {
     }
 };
 
+/// One property of a file whose lines name their property in the first value field, as `InCB` lines do in
+/// `DerivedCoreProperties.txt`. A line for another property is skipped, and a line for this property has exactly one value.
+fn Selected(comptime T: type) type {
+    return struct {
+        property: []const u8,
+        values: []T,
+        aliases: std.StringHashMapUnmanaged([]const u8),
+        assigned: Assigned,
+
+        fn apply(self: *@This(), a: Assignment) anyerror!void {
+            var fields = std.mem.splitScalar(u8, a.value, ';');
+            if (!std.mem.eql(u8, std.mem.trim(u8, fields.first(), " \t"), self.property)) return;
+            const name = std.mem.trim(u8, fields.next() orelse return error.MissingValue, " \t");
+            if (fields.next() != null) return error.ExtraValue;
+            const short = self.aliases.get(name) orelse return error.UnknownValue;
+            const value = std.meta.stringToEnum(T, short) orelse return error.UnknownValue;
+            if (a.range.first > a.range.last) return error.ReversedRange;
+            @memset(self.values[a.range.first .. @as(usize, a.range.last) + 1], value);
+            self.assigned.mark(a.range);
+        }
+    };
+}
+
+fn selected(comptime T: type, arena: std.mem.Allocator, property: []const u8, text: []const u8) ![]T {
+    var state: Selected(T) = .{
+        .property = property,
+        .values = try arena.alloc(T, code_point_count),
+        .aliases = try shortAliases(arena, property),
+        .assigned = try .init(arena),
+    };
+    try forEachAssignment(text, &state, Selected(T).apply);
+    try state.assigned.expectComplete();
+    return state.values;
+}
+
+/// A binary property whose listed ranges are true. A line for another property is skipped.
+const Binary = struct {
+    property: []const u8,
+    values: []bool,
+
+    fn apply(self: *Binary, a: Assignment) anyerror!void {
+        var fields = std.mem.splitScalar(u8, a.value, ';');
+        if (!std.mem.eql(u8, std.mem.trim(u8, fields.first(), " \t"), self.property)) return;
+        if (fields.next() != null) return error.ExtraValue;
+        if (a.range.first > a.range.last) return error.ReversedRange;
+        @memset(self.values[a.range.first .. @as(usize, a.range.last) + 1], true);
+    }
+};
+
+/// Every code point takes the default false only when the file states that default, as `emoji-data.txt` does
+/// instead of an `@missing` line. The listed ranges then become true.
+fn binary(arena: std.mem.Allocator, comptime property: []const u8, text: []const u8) ![]bool {
+    if (std.mem.indexOf(u8, text, "# All omitted code points have " ++ property ++ "=No") == null) return error.NoDefault;
+    var assigned: Assigned = try .init(arena);
+    assigned.mark(.{ .first = 0, .last = code_point_count - 1 });
+    try assigned.expectComplete();
+    var state: Binary = .{ .property = property, .values = try arena.alloc(bool, code_point_count) };
+    @memset(state.values, false);
+    try forEachAssignment(text, &state, Binary.apply);
+    return state.values;
+}
+
+test "the field and binary reference parsers skip other properties and reject extra values" {
+    var arena_state = std.heap.ArenaAllocator.init(testing.allocator);
+    defer arena_state.deinit();
+    const arena = arena_state.allocator();
+    const incb = try selected(unicode.IndicConjunctBreak, arena, "InCB", "# @missing: 0000..10FFFF; InCB; None\n0041; Alphabetic\n094D; InCB; Linker\n");
+    try testing.expectEqual(unicode.IndicConjunctBreak.None, incb[0x41]);
+    try testing.expectEqual(unicode.IndicConjunctBreak.Linker, incb[0x94D]);
+    try testing.expectError(error.ExtraValue, selected(unicode.IndicConjunctBreak, arena, "InCB", "0000..10FFFF; InCB; None; Linker\n"));
+    try testing.expectError(error.UnassignedCodePoint, selected(unicode.IndicConjunctBreak, arena, "InCB", "0000..10FFFE; InCB; None\n"));
+    const stated = "# All omitted code points have Extended_Pictographic=No\n";
+    const pict = try binary(arena, "Extended_Pictographic", stated ++ "00A9; Extended_Pictographic\n0023; Emoji\n");
+    try testing.expect(pict[0xA9] and !pict[0x23] and !pict[0xAA]);
+    try testing.expectError(error.ExtraValue, binary(arena, "Extended_Pictographic", stated ++ "00A9; Extended_Pictographic; Y\n"));
+    try testing.expectError(error.NoDefault, binary(arena, "Extended_Pictographic", "00A9; Extended_Pictographic\n"));
+}
+
 test "the reference parser fails when a file leaves a code point unassigned" {
     var arena_state = std.heap.ArenaAllocator.init(testing.allocator);
     defer arena_state.deinit();
@@ -208,6 +289,27 @@ test "FP-0013 case 3: lookup equals an independent parse of the embedded UCD fil
         {
             std.debug.print("U+{X:0>4}: lookup {any}, reference gc={t} sc={t} scx={any} bc={t} jt={t} InSC={t} InPC={t}\n", .{
                 code_point, p, gc[i], sc[i], expected_scx, bc[i], jt[i], insc[i], inpc[i],
+            });
+            return error.TestUnexpectedResult;
+        }
+    }
+}
+
+test "FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point" {
+    var arena_state = std.heap.ArenaAllocator.init(testing.allocator);
+    defer arena_state.deinit();
+    const arena = arena_state.allocator();
+
+    const gcb = try dense(unicode.GraphemeClusterBreak, arena, "GCB", files.grapheme_break);
+    const incb = try selected(unicode.IndicConjunctBreak, arena, "InCB", files.derived_core);
+    const ext_pict = try binary(arena, "Extended_Pictographic", files.emoji_data);
+
+    for (0..code_point_count) |i| {
+        const code_point: u21 = @intCast(i);
+        const p = try unicode.lookup(code_point);
+        if (p.gcb != gcb[i] or p.incb != incb[i] or p.ext_pict != ext_pict[i]) {
+            std.debug.print("U+{X:0>4}: lookup GCB={t} InCB={t} ExtPict={}, reference GCB={t} InCB={t} ExtPict={}\n", .{
+                code_point, p.gcb, p.incb, p.ext_pict, gcb[i], incb[i], ext_pict[i],
             });
             return error.TestUnexpectedResult;
         }

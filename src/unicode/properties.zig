@@ -23,6 +23,10 @@ pub const JoiningType = tables.JoiningType;
 pub const IndicSyllabicCategory = tables.IndicSyllabicCategory;
 /// `Indic_Positional_Category` (`InPC`).
 pub const IndicPositionalCategory = tables.IndicPositionalCategory;
+/// `Grapheme_Cluster_Break` (`GCB`), limited to the 14 values that `auxiliary/GraphemeBreakProperty.txt` assigns.
+pub const GraphemeClusterBreak = tables.GraphemeClusterBreak;
+/// `Indic_Conjunct_Break` (`InCB`), from `DerivedCoreProperties.txt`.
+pub const IndicConjunctBreak = tables.IndicConjunctBreak;
 
 pub const Properties = struct {
     gc: GeneralCategory,
@@ -33,6 +37,10 @@ pub const Properties = struct {
     jt: JoiningType,
     insc: IndicSyllabicCategory,
     inpc: IndicPositionalCategory,
+    gcb: GraphemeClusterBreak,
+    incb: IndicConjunctBreak,
+    /// `Extended_Pictographic`, from `emoji/emoji-data.txt`.
+    ext_pict: bool,
 };
 
 /// One single-element `Script_Extensions` set for each `Script` value.
@@ -54,7 +62,7 @@ fn find(comptime R: type, ranges: []const R, code_point: u21) R {
     return ranges[low];
 }
 
-/// Returns the seven properties of `code_point`, or `error.NotCodePoint` above U+10FFFF.
+/// Returns the ten properties of `code_point`, or `error.NotCodePoint` above U+10FFFF.
 pub fn lookup(code_point: u21) error{NotCodePoint}!Properties {
     if (code_point > 0x10FFFF) return error.NotCodePoint;
     const sc = find(tables.Range(Script), &tables.script_ranges, code_point).value;
@@ -67,6 +75,9 @@ pub fn lookup(code_point: u21) error{NotCodePoint}!Properties {
         .jt = find(tables.Range(JoiningType), &tables.joining_type_ranges, code_point).value,
         .insc = find(tables.Range(IndicSyllabicCategory), &tables.indic_syllabic_category_ranges, code_point).value,
         .inpc = find(tables.Range(IndicPositionalCategory), &tables.indic_positional_category_ranges, code_point).value,
+        .gcb = find(tables.Range(GraphemeClusterBreak), &tables.grapheme_cluster_break_ranges, code_point).value,
+        .incb = find(tables.Range(IndicConjunctBreak), &tables.indic_conjunct_break_ranges, code_point).value,
+        .ext_pict = find(tables.Range(bool), &tables.extended_pictographic_ranges, code_point).value,
     };
 }
 
@@ -79,5 +90,8 @@ comptime {
         tables.indic_syllabic_category_ranges,
         tables.indic_positional_category_ranges,
         tables.script_extension_ranges,
+        tables.grapheme_cluster_break_ranges,
+        tables.indic_conjunct_break_ranges,
+        tables.extended_pictographic_ranges,
     }) |ranges| std.debug.assert(ranges[0].start == 0);
 }

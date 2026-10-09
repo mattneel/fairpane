@@ -1,0 +1,33 @@
+diff --git a/src/text/grapheme.zig b/src/text/grapheme.zig
+index 0ec7b8f..3467c94 100644
+--- a/src/text/grapheme.zig
++++ b/src/text/grapheme.zig
+@@ -64,6 +64,8 @@ pub const GraphemeBoundaries = struct {
+         while (self.index < self.units.len) {
+             const start = self.index;
+             const code_point = self.decode();
++            // Mutation M8: recount the RI run that ends at `start` at each RI.
++            if (code_point.gcb == .RI) self.odd_regional_indicators = self.regionalIndicatorsBefore(start) % 2 == 1;
+             const joined = self.joins(code_point);
+             self.consume(code_point);
+             if (!joined) return boundary(start);
+@@ -77,6 +79,19 @@ pub const GraphemeBoundaries = struct {
+         return @fromBackingInt(index);
+     }
+ 
++    /// Mutation M8: counts the RI code points that end at `end` by reading backward through the counting accessor.
++    fn regionalIndicatorsBefore(self: *GraphemeBoundaries, end: usize) usize {
++        var count: usize = 0;
++        var i = end;
++        while (i >= 2) : (i -= 2) {
++            const high = self.unitAt(i - 2);
++            const low = self.unitAt(i - 1);
++            if (high != 0xD83C or low < 0xDDE6 or low > 0xDDFF) break;
++            count += 1;
++        }
++        return count;
++    }
++
+     /// Reads one code unit. Every read of the string goes through this accessor, so test builds count the work.
+     fn unitAt(self: *GraphemeBoundaries, index: usize) u16 {
+         if (builtin.is_test) self.units_read += 1;

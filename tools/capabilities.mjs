@@ -4,11 +4,11 @@
  */
 import { invariant } from './lib.mjs';
 
-/** The frozen obligation set of the `text-fonts` family, from the FP-0013 contract. */
+/** The frozen obligation set of the `text-fonts` family, from the FP-0013 contract as FP-0108 amends it. */
 export const TEXT_FONT_OBLIGATIONS = Object.freeze([
   ['unicode-properties', 'implemented', 'FP-0013'], ['opentype-core-tables', 'implemented', 'FP-0013'],
   ['unicode-remaining-data', 'remaining', 'FP-0055'], ['bidi-algorithm', 'remaining', 'FP-0015'],
-  ['grapheme-segmentation', 'remaining', 'FP-0015'], ['line-breaking', 'remaining', 'FP-0015'], ['shaping', 'remaining', 'FP-0015'],
+  ['grapheme-segmentation', 'implemented', 'FP-0108'], ['line-breaking', 'remaining', 'FP-0015'], ['shaping', 'remaining', 'FP-0015'],
   ['font-fallback', 'remaining', 'FP-0015'], ['glyph-rasterization', 'remaining', 'FP-0056'], ['truetype-hinting', 'remaining', 'FP-0057'],
   ['woff', 'remaining', 'FP-0058'], ['woff2-brotli', 'remaining', 'FP-0058'], ['font-collections', 'remaining', 'FP-0059'],
   ['cff2-and-variations', 'remaining', 'FP-0059'], ['color-fonts', 'remaining', 'FP-0060'], ['vertical-metrics', 'remaining', 'FP-0061'],

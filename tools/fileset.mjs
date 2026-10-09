@@ -38,7 +38,8 @@ const CJK_RELEASE = { name: 'Sans2.004', repository: 'https://github.com/notofon
 export const CJK_SUBSET_UNICODES = 'U+0020,U+3001,U+3002,U+3053,U+3055,U+3061,U+306A,U+306B,U+306E,U+306F,U+307F,U+3093,U+30AB,U+30FC,U+4E16,U+754C,U+AD6D,U+C5B4,U+D55C,U+20BB7';
 
 /**
- * The frozen source sets of the FP-0013 contract. `size`, `published_digest`, `git_blob`, and `release.commit` are pins when not null.
+ * The frozen source sets of the FP-0013 contract, with the four `unicode` members that FP-0108 adds.
+ * `size`, `published_digest`, `git_blob`, and `release.commit` are pins when not null.
  * A `selected` font names its license with `license`. A `derived` entry is written by `corpus-derive`.
  */
 export const FILE_SET_RULES = Object.freeze({
@@ -55,6 +56,8 @@ export const FILE_SET_RULES = Object.freeze({
       ucdData('Scripts.txt'), ucdData('ScriptExtensions.txt'), ucdData('PropertyValueAliases.txt'),
       ucdData('extracted/DerivedBidiClass.txt'), ucdData('extracted/DerivedJoiningType.txt'), ucdData('extracted/DerivedGeneralCategory.txt'),
       ucdData('IndicSyllabicCategory.txt'), ucdData('IndicPositionalCategory.txt'),
+      ucdData('auxiliary/GraphemeBreakProperty.txt'), ucdData('DerivedCoreProperties.txt'), ucdData('emoji/emoji-data.txt'),
+      ucdData('auxiliary/GraphemeBreakTest.txt'),
       { source: 'unicode-license', member: null, path: 'src/unicode/ucd/license.txt', role: 'license', published_url: null },
     ],
     derived: [],

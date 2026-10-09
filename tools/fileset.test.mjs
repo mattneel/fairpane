@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * File-set corpus, record, and capability tests for FP-0013 cases 41 through 49, revision 1 cases 53 through 55, and the file-set part of FP-0052 case 6.
+ * File-set corpus, record, and capability tests for FP-0013 cases 41 through 49, revision 1 cases 53 through 55, the file-set part of FP-0052 case 6, and FP-0108 cases 5 and 6.
  * Run standalone with `node tools/fileset.test.mjs`, or through `node tools/fairpane.mjs test`.
  * Fetches read `file://` fixture sources that only these tests enable, and download cases pass an in-memory `fetch`; no case uses the network.
  */
@@ -392,14 +392,14 @@ export const fileSetCases = [
     }
     assert.ok(checked >= 9 + 7 + 1);
   }],
-  ['FP-0013 case 49: the committed capability record validates with exactly the frozen obligations and existing owner tasks', () => {
+  ['FP-0013 case 49 (amended by FP-0108 case 6): the committed capability record validates with exactly the frozen obligations and existing owner tasks', () => {
     const record = readJson(path.join(root, 'specs/capabilities/text-fonts.json'));
     const plan = readJson(path.join(root, 'engineering/plan.json'));
     assert.equal(validateCapabilityRecord(record, plan), true);
     const frozen = [
       ['unicode-properties', 'implemented', 'FP-0013'], ['opentype-core-tables', 'implemented', 'FP-0013'],
       ['unicode-remaining-data', 'remaining', 'FP-0055'], ['bidi-algorithm', 'remaining', 'FP-0015'],
-      ['grapheme-segmentation', 'remaining', 'FP-0015'], ['line-breaking', 'remaining', 'FP-0015'], ['shaping', 'remaining', 'FP-0015'],
+      ['grapheme-segmentation', 'implemented', 'FP-0108'], ['line-breaking', 'remaining', 'FP-0015'], ['shaping', 'remaining', 'FP-0015'],
       ['font-fallback', 'remaining', 'FP-0015'], ['glyph-rasterization', 'remaining', 'FP-0056'], ['truetype-hinting', 'remaining', 'FP-0057'],
       ['woff', 'remaining', 'FP-0058'], ['woff2-brotli', 'remaining', 'FP-0058'], ['font-collections', 'remaining', 'FP-0059'],
       ['cff2-and-variations', 'remaining', 'FP-0059'], ['color-fonts', 'remaining', 'FP-0060'], ['vertical-metrics', 'remaining', 'FP-0061'],
@@ -420,6 +420,36 @@ export const fileSetCases = [
       change(r);
       assert.throws(() => validateCapabilityRecord(r, plan), pattern);
     }
+  }],
+  ['FP-0108 case 5: the committed unicode records select 12 of 71 members, keep the source digests, and list the four FP-0108 members', () => {
+    const a = readJson(path.join(root, 'specs/applicability/unicode.json'));
+    assert.equal(a.discovered, 71);
+    assert.equal(a.selected, 12);
+    assert.equal(a.unclassified, 59);
+    assert.deepEqual(a.excluded, []);
+    assert.deepEqual(a.breakdown.counts, { '.': 45, auxiliary: 11, emoji: 3, extracted: 12 });
+    const record = readJson(path.join(root, 'specs/snapshots/unicode.json'));
+    const zip = record.sources.find(s => s.id === 'ucd-zip'), license = record.sources.find(s => s.id === 'unicode-license');
+    assert.equal(zip.size, 5657953);
+    assert.equal(zip.sha256, '7b3e555514060b92290d154f53655c5eb0fa62b16eb04c03434ff72d1a66a0d8');
+    assert.deepEqual(zip.inventory, { entry_count: 71, total_bytes: 39580113, sha256: '37761bcf3660066413756e978f9d5ec7c7be3c187738f5d95785203c8dd8b2f4' });
+    assert.equal(license.size, 1995);
+    assert.equal(license.sha256, 'e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96');
+    assert.equal(record.selected.filter(e => e.source === 'ucd-zip').length, 12);
+    for (const member of ['auxiliary/GraphemeBreakProperty.txt', 'DerivedCoreProperties.txt', 'emoji/emoji-data.txt', 'auxiliary/GraphemeBreakTest.txt']) {
+      const e = record.selected.find(x => x.member === member);
+      assert.ok(e, member);
+      assert.equal(e.source, 'ucd-zip', member);
+      assert.equal(e.path, `src/unicode/ucd/${member}`, member);
+      assert.equal(e.role, 'data', member);
+      assert.equal(e.published_url, `https://www.unicode.org/Public/18.0.0/ucd/${member}`, member);
+    }
+    const policy = readJson(path.join(root, 'specs/corpora.json')).corpora.find(c => c.id === 'unicode');
+    assert.deepEqual(policy, {
+      id: 'unicode', upstream: 'https://www.unicode.org/Public/', purpose: 'Unicode properties and conformance data', revision: '18.0.0',
+      license_record: 'specs/snapshots/unicode.json', inventory_sha256: '2511e5384857e35883ec38bd8c0d225d1ea7591f6ee6ba6347c572f6b47a59d7',
+      local_path: '<corpora-root>/unicode/sources', status: 'pinned',
+    });
   }],
   ['FP-0013 case 53: overlapping, inconsistent, symbolic-link, case-folded, oversized, corrupt, and drive-letter archives fail before any member is written', async () => {
     await parts(rejectedArchives().map(([label, bytes, pattern, structural]) => [label, async () => {

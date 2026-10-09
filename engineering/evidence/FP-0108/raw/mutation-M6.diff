@@ -1,0 +1,23 @@
+diff --git a/src/text/grapheme.zig b/src/text/grapheme.zig
+index 0ec7b8f..d86b128 100644
+--- a/src/text/grapheme.zig
++++ b/src/text/grapheme.zig
+@@ -86,15 +86,9 @@ pub const GraphemeBoundaries = struct {
+     /// Decodes the code point that starts at `index` without consuming it.
+     fn decode(self: *GraphemeBoundaries) CodePoint {
+         const first = self.unitAt(self.index);
+-        var code_point: u21 = first;
+-        var len: usize = 1;
+-        if (first >= 0xD800 and first <= 0xDBFF and self.index + 1 < self.units.len) {
+-            const second = self.unitAt(self.index + 1);
+-            if (second >= 0xDC00 and second <= 0xDFFF) {
+-                code_point = 0x10000 + ((@as(u21, first) - 0xD800) << 10) + (second - 0xDC00);
+-                len = 2;
+-            }
+-        }
++        // Mutation M6: every code unit is its own code point, so a surrogate pair is two code points.
++        const code_point: u21 = first;
++        const len: usize = 1;
+         // A decoded code point is at most U+10FFFF.
+         const properties = unicode.lookup(code_point) catch unreachable;
+         return .{ .gcb = properties.gcb, .incb = properties.incb, .ext_pict = properties.ext_pict, .len = len };

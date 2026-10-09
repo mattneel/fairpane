@@ -1,0 +1,23 @@
+diff --git a/src/text/grapheme.zig b/src/text/grapheme.zig
+index 0ec7b8f..e10918f 100644
+--- a/src/text/grapheme.zig
++++ b/src/text/grapheme.zig
+@@ -32,6 +32,8 @@ pub const GraphemeBoundaries = struct {
+     previous: Gcb = .XX,
+     /// GB9c: `InCB=Linker InCB=Extend*` ends at `index`.
+     linker: bool = false,
++    /// Mutation M2: `InCB=Consonant [InCB=Extend InCB=Linker]*` ends at `index`, as Unicode 15.1 required before the Linker.
++    consonant: bool = false,
+     /// GB11: `ExtPict EX*` ends at `index`.
+     pictographic: bool = false,
+     /// GB11: a ZWJ that follows `ExtPict EX*` ends at `index`.
+@@ -123,7 +125,8 @@ pub const GraphemeBoundaries = struct {
+     fn consume(self: *GraphemeBoundaries, code_point: CodePoint) void {
+         self.pictographic_zwj = code_point.gcb == .ZWJ and self.pictographic;
+         self.pictographic = code_point.ext_pict or (self.pictographic and code_point.gcb == .EX);
+-        self.linker = code_point.incb == .Linker or (self.linker and code_point.incb == .Extend);
++        self.linker = (code_point.incb == .Linker and self.consonant) or (self.linker and (code_point.incb == .Extend or code_point.incb == .Linker));
++        self.consonant = code_point.incb == .Consonant or (self.consonant and (code_point.incb == .Extend or code_point.incb == .Linker));
+         self.odd_regional_indicators = code_point.gcb == .RI and !self.odd_regional_indicators;
+         self.previous = code_point.gcb;
+         self.index += code_point.len;

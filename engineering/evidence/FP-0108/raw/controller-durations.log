@@ -1,0 +1,175 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/ucd.test.mjs"]
+TAP version 13
+ok 1 - FP-0013 case 1: @missing lines apply in order, then data lines, and every value resolves through PropertyValueAliases.txt
+ok 2 - FP-0013 case 2: a line without ";", a reversed range, 110000, and an unknown value each fail with a distinct message naming the line
+ok 3 - FP-0013 case 3 (amended by FP-0108 case 1): ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input
+ok 4 - FP-0013 case 4: one changed byte of tables.zig or of a UCD file makes ucd-check exit with status 1 and name the file and line
+ok 5 - FP-0108 case 2: parseFieldProperty reads only the InCB lines of a multi-property file and applies the @missing default
+ok 6 - FP-0108 case 3: parseBinaryProperty sets only the lines whose single field is the property, and every other code point is false
+ok 7 - FP-0108 case 4: a missing InCB value, an unknown value, an extra value, and a binary line with a value each fail with a distinct message naming the line
+1..7
+# tests 7
+# pass 7
+# fail 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/ucd.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T18:02:43.798Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1188}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fileset.test.mjs"]
+TAP version 13
+ok 1 - FP-0013 case 41: a zip with two stored members, one deflated member, and one directory yields the hand-computed inventory
+ok 2 - FP-0013 case 42: the zip reader rejects ZIP64, encryption, "../x", "a\b", duplicate paths, a truncated central directory, and method 12
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/UCD.zip: 336 bytes, SHA-256 4556baaf11e4318fef763a517296b7fc79cfadd0f9547ad305bf3690646cdfcb
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-kg5mQG/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+ok 3 - FP-0013 case 43: corpus-fetch of file sources writes the record and extracted files, honors pins, and changes nothing on failure
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-U4chgR/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-U4chgR/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-U4chgR/published/Scripts.txt equals member Scripts.txt.
+ok 4 - FP-0013 case 44: corpus-verify fails for changed extracted and derived files, a missing source, a license mismatch, a count mismatch, and an upstream mismatch
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-n7JnSz/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-n7JnSz/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-n7JnSz/published/Scripts.txt equals member Scripts.txt.
+ok 5 - FP-0013 case 45: file-set applicability reports the per-directory breakdown with an explicit denominator, and a zip without file members fails
+ok 6 - FP-0013 case 46: corpus-repin unicode exits with status 1 and names the contract decision
+ok 7 - FP-0013 case 47: record validation rejects missing license digests, releases, tool versions, input digests, argv, and reserved font names
+ok 8 - FP-0013 case 48: every selected, derived, and license path of the committed unicode and opentype-fixtures records matches its size and SHA-256
+ok 9 - FP-0013 case 49 (amended by FP-0108 case 6): the committed capability record validates with exactly the frozen obligations and existing owner tasks
+ok 10 - FP-0108 case 5: the committed unicode records select 12 of 71 members, keep the source digests, and list the four FP-0108 members
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-9V5ovA/UCD.zip: 198 bytes, SHA-256 764769ceca373d4fe149a6a2acb5600e8758c75358c2cf242fdbbc440c0a7b82
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-9V5ovA/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-pZ3j3C/UCD.zip: 109 bytes, SHA-256 65d40408a9f5b8aa9b193903b93edb7ebbd33d0f15954bf604652a25b6dab090
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-pZ3j3C/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-sB30V6/UCD.zip: 109 bytes, SHA-256 c0923c0636c78b36d53a19ffca4d95c3f28b32af962ebe5dffa20cb2a4106a03
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-sB30V6/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-eUiaJP/UCD.zip: 114 bytes, SHA-256 a9fce91fd00f227dd1d8be2c0c36e44534ca21cd3df6f960348178c2f19f45ea
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-eUiaJP/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Wiv65D/UCD.zip: 114 bytes, SHA-256 05c9c74fadab7c95de958c03ae3ee5e82640c6f070479587c2c25ea860e3da47
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-Wiv65D/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-9qBGUE/UCD.zip: 109 bytes, SHA-256 dd7763a9cdbebac51bfc05f48175727d1b843c55e0c0b38b987397cb1ac6826f
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-9qBGUE/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-OhY8VQ/UCD.zip: 129 bytes, SHA-256 68c7d1283c9531fbf2e3b85bc8046227148eb2eeb06e9f497ac4091d39de7928
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-OhY8VQ/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-uRKSpE/UCD.zip: 109 bytes, SHA-256 8b53d0800c31c3d4e80bd074e8ca7b60e7cdde62b35337fb8663890578a928bb
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-uRKSpE/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-nLHU3V/UCD.zip: 112 bytes, SHA-256 febd63b49b0baeb9de127875e2e2cc97b8bfd7bdfe826125975f68815e2cf7c1
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-nLHU3V/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-dFjc03/UCD.zip: 112 bytes, SHA-256 df60a703781713bc828e4e14106fcdd6f9b49b6667b81bd8d902f64d9895466b
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-dFjc03/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-R8kzdg/UCD.zip: 208 bytes, SHA-256 6a9d489d56fb45e2ea42ab5ab8e94b19cb3534744286e23fcc2ba491721804e0
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-R8kzdg/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-qQjmIl/UCD.zip: 1100452 bytes, SHA-256 3225e72c339ff70ec705d7a94a6aca3b5196b7354921a75d4f6e2c17d425db60
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-qQjmIl/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-QV3rnF/UCD.zip: 192 bytes, SHA-256 5781e884ef01073687e5d794fcf0f338e486aa2cb9db669907acb432a7346b3d
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-QV3rnF/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-YniCqS/UCD.zip: 109 bytes, SHA-256 f4ac38fe773c12809f23f77c33457d0abe7a7a1cc52d782724573f84d7e9061e
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-YniCqS/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-YHG1Nb/UCD.zip: 117 bytes, SHA-256 b6df152a01ebd1ed66e4e8ca05a4556485fc3d7d9ebc512458b23ed87a39a48e
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-YHG1Nb/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-eH56V3/UCD.zip: 117 bytes, SHA-256 18f6e3f993a59e5c633af11a5669b8b16d5b3343de88d5c689e4fbb5c755ca89
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-eH56V3/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-pNxBMm/UCD.zip: 115 bytes, SHA-256 816aebd39773c630b4c982a72e1db04bb2a386e1369d982753b610f13be11df7
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-pNxBMm/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-8YeCb6/UCD.zip: 113 bytes, SHA-256 e9f6f446256a80c82cdc0eb5a06e38961dd59f09386753e4ec79458a0c8ec3c2
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-8YeCb6/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+ok 11 - FP-0013 case 53: overlapping, inconsistent, symbolic-link, case-folded, oversized, corrupt, and drive-letter archives fail before any member is written
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-01n3ZM/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-01n3ZM/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-01n3ZM/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-01n3ZM/UCD.zip: 35 bytes, SHA-256 1dc83a4d0c719dfd9e45daeb5c0574afb5f10e59a66a1c29df301146cf0432ec
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-lt8ou3/UCD.zip: 35 bytes, SHA-256 1dc83a4d0c719dfd9e45daeb5c0574afb5f10e59a66a1c29df301146cf0432ec
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-lt8ou3/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+ok 12 - FP-0013 case 54: a fetch compares every known digest before parsing a source
+Download https://github.com/a
+Redirect to https://github.com/b
+Stored https://github.com/a: 4 bytes, SHA-256 230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5
+Download https://www.unicode.org/a
+Download https://github.com/a
+Download https://example.org/a
+Download https://raw.githubusercontent.com/a
+ok 13 - FP-0013 case 54: downloads follow redirects manually on allowlisted HTTPS hosts and stop at their size limit
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-ZUqtFf/published/Scripts.txt equals member Scripts.txt.
+ok 14 - FP-0013 case 54: a failure injected at each write step leaves every previous file, the source directory, and the record unchanged
+Verified 4 installed fontTools files against the RECORD of C:\Users\requi\AppData\Local\Temp\fairpane-fileset-TdIzaS\.tools\downloads\fonttools-4.66.1-py3-none-any.whl.
+ok 15 - FP-0013 case 55: corpus-derive refuses a fontTools installation with one changed file
+ok 16 - FP-0013 case 55: the Python child process sees PYTHONSAFEPATH=1, no other PYTHON* variable, and the staging directory
+ok 17 - FP-0013 case 55: sfntCopyright stops at the first name record and checks the name table header length
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-4WbuGz/UCD.zip: 536 bytes, SHA-256 02e0118fdad0dedbcb75b98a76f4893d9b45c5e4c8169b991db306edeb7aae1c
+Stored file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-4WbuGz/license.txt: 42 bytes, SHA-256 10e594c5d29a2f7e3a551fde5c24691ee6185ce2baa16ece09d5258314388acd
+Inventory of ucd: 3 file members, 649 bytes, SHA-256 b79ac400339307bed36d3f32a38dab2fcf4b0f3925079b30beb0db92418ccf99
+Published file:///C:/Users/requi/AppData/Local/Temp/fairpane-fileset-4WbuGz/published/Scripts.txt equals member Scripts.txt.
+ok 18 - FP-0052 case 6: of two fetches of one file set started together, one passes and one fails on the lock
+1..18
+# tests 18
+# pass 18
+# fail 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fileset.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T18:02:45.076Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1369}

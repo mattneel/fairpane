@@ -8,6 +8,7 @@ pub const font = @import("font/opentype.zig");
 pub const handles = @import("handles.zig");
 pub const html = @import("html/root.zig");
 pub const js = @import("js/runtime.zig");
+pub const text = @import("text/text.zig");
 pub const unicode = @import("unicode/properties.zig");
 pub const web_string = @import("web_string.zig");
 
@@ -32,4 +33,6 @@ test {
     _ = @import("unicode/properties_test.zig");
     _ = @import("unicode/reference_test.zig");
     _ = web_string;
+    _ = text;
+    _ = @import("text/grapheme_test.zig");
 }

@@ -1,0 +1,971 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:13.522Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":45}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0108/raw/mutation-M1.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0108/raw/mutation-M1.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:13.673Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":50}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+22894bf19ec62fdc688e6e6f8732d48aa96c47d9
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:13.833Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"]
+1/14 root.test_0...OK
+2/14 css.css.test_0...OK
+3/14 font.opentype.test_0...OK
+4/14 html.root.test_0...OK
+5/14 js.runtime.test_0...OK
+6/14 unicode.properties_test.test.FP-0108 case 8: lookup gives the cited Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic values...OK
+7/14 unicode.properties_test.test.FP-0108 case 9: value counts over all code points equal the totals that the three files state...OK
+8/14 unicode.properties_test.test.FP-0108 case 10: GraphemeClusterBreak and IndicConjunctBreak have exactly the assigned values and exact alias lookup...OK
+9/14 unicode.reference_test.test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point...OK
+10/14 text.grapheme_test.test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries...GraphemeBreakTest.txt line 179: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 180: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 659: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 660: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 852: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 853: expected { 0, 4 }, found { 0, 3, 4 }
+GraphemeBreakTest.txt line 854: expected { 0, 4 }, found { 0, 3, 4 }
+GraphemeBreakTest.txt line 855: expected { 0, 5 }, found { 0, 4, 5 }
+GraphemeBreakTest.txt line 856: expected { 0, 5 }, found { 0, 4, 5 }
+GraphemeBreakTest.txt line 857: expected { 0, 5 }, found { 0, 2, 4, 5 }
+GraphemeBreakTest.txt line 859: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 860: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 861: expected { 0, 4 }, found { 0, 3, 4 }
+GraphemeBreakTest.txt line 862: expected { 0, 5 }, found { 0, 3, 5 }
+GraphemeBreakTest.txt line 863: expected { 0, 3, 5 }, found { 0, 2, 3, 5 }
+GraphemeBreakTest.txt line 864: expected { 0, 6 }, found { 0, 3, 5, 6 }
+GraphemeBreakTest.txt line 865: expected { 0, 2, 5, 10, 14 }, found { 0, 2, 4, 5, 7, 9, 10, 12, 14 }
+GraphemeBreakTest.txt line 866: expected { 0, 6 }, found { 0, 2, 4, 6 }
+GraphemeBreakTest.txt line 867: expected { 0, 1, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 868: expected { 0, 1, 4, 6 }, found { 0, 1, 3, 4, 6 }
+GraphemeBreakTest.txt line 869: expected { 0, 3, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 870: expected { 0, 3, 5, 6 }, found { 0, 2, 3, 5, 6 }
+GraphemeBreakTest.txt line 871: expected { 0, 4 }, found { 0, 2, 4 }
+GraphemeBreakTest.txt line 875: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 876: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 879: expected { 0, 4 }, found { 0, 2, 4 }
+expected 0, found 26
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff65ceb3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff65cebeb30 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:155:5: 0x7ff65cebeb61 in test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), result.failures);
+    ^
+11/14 text.grapheme_test.test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser...row G1 line 852: expected { 0, 3 }, found { 0, 2, 3 }
+row G2 line 859: expected { 0, 3 }, found { 0, 2, 3 }
+row G4 line 875: expected { 0, 2 }, found { 0, 1, 2 }
+expected 0, found 3
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff65ceb3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff65cebdaf9 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:205:5: 0x7ff65cebdb2a in test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+12/14 text.grapheme_test.test.FP-0108 case 14: boundaries of every case 11 and 12 input strictly increase from 0 to the length and never split a surrogate pair...OK
+13/14 text.grapheme_test.test.FP-0108 case 15: segmentation work is linear in the code-unit length...expected 666667, found 2
+case 15 input conjuncts: TestExpectedEqual
+expected 0, found 1
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff65ceb3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff65ceb4889 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:294:5: 0x7ff65ceb48ea in test.FP-0108 case 15: segmentation work is linear in the code-unit length (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+14/14 text.grapheme_test.test.FP-0108 case 16: the segmenter takes no allocator and its sources name none...OK
+11 passed; 0 skipped; 3 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\00f6d7abefc10547e801afb03f268072\test.exe --seed=0xf3a7f8fa
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:13.980Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":7282,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"]
+1/3 root.test_0...OK
+2/3 grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries...seed devanagari-greeting: expected { 0, 1, 2, 6, 7, 9, 11, 13, 14, 15, 18, 20 }, found { 0, 1, 2, 4, 6, 7, 9, 11, 13, 14, 15, 18, 20 }
+expected 0, found 1
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff6b788332a in expectEqualInner__func_837 (root_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff6b78ac4d6 in expectEqual (root_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\tests\text\grapheme_seed_test.zig:59:5: 0x7ff6b78ac57f in test.FP-0108 case 13: each seed gives its derived code-unit boundaries (root_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+3/3 grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair...OK
+2 passed; 0 skipped; 1 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\1dc9369f7f3b54d1f541d0b5f665f8aa\root.exe --seed=0x681f9e19
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:21.378Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":6028,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0108/raw/mutation-M1.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0108/raw/mutation-M1.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:27.526Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":43}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:27.682Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":75}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:39.488Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0108/raw/mutation-M2.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0108/raw/mutation-M2.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:39.622Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+e10918f45f49bd2e47b29d72efc368573cc1cab9
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:39.754Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"]
+1/14 root.test_0...OK
+2/14 css.css.test_0...OK
+3/14 font.opentype.test_0...OK
+4/14 html.root.test_0...OK
+5/14 js.runtime.test_0...OK
+6/14 unicode.properties_test.test.FP-0108 case 8: lookup gives the cited Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic values...OK
+7/14 unicode.properties_test.test.FP-0108 case 9: value counts over all code points equal the totals that the three files state...OK
+8/14 unicode.properties_test.test.FP-0108 case 10: GraphemeClusterBreak and IndicConjunctBreak have exactly the assigned values and exact alias lookup...OK
+9/14 unicode.reference_test.test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point...OK
+10/14 text.grapheme_test.test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries...GraphemeBreakTest.txt line 179: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 180: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 659: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 660: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 859: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 860: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 871: expected { 0, 4 }, found { 0, 2, 4 }
+GraphemeBreakTest.txt line 875: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 876: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 879: expected { 0, 4 }, found { 0, 2, 4 }
+expected 0, found 10
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff7bd7d3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff7bd7dec00 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:155:5: 0x7ff7bd7dec31 in test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), result.failures);
+    ^
+11/14 text.grapheme_test.test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser...row G2 line 859: expected { 0, 3 }, found { 0, 2, 3 }
+row G4 line 875: expected { 0, 2 }, found { 0, 1, 2 }
+expected 0, found 2
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff7bd7d3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff7bd7ddbc9 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:205:5: 0x7ff7bd7ddbfa in test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+12/14 text.grapheme_test.test.FP-0108 case 14: boundaries of every case 11 and 12 input strictly increase from 0 to the length and never split a surrogate pair...OK
+13/14 text.grapheme_test.test.FP-0108 case 15: segmentation work is linear in the code-unit length...OK
+14/14 text.grapheme_test.test.FP-0108 case 16: the segmenter takes no allocator and its sources name none...OK
+12 passed; 0 skipped; 2 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\f090658082462ab95877497b506a8ec4\test.exe --seed=0x65a754ba
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:39.901Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":6615,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"]
+1/3 root.test_0...OK
+2/3 grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries...OK
+3/3 grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair...OK
+All 3 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:46.639Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":3929,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0108/raw/mutation-M2.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0108/raw/mutation-M2.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:50.665Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:50.805Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:50.943Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0108/raw/mutation-M3.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0108/raw/mutation-M3.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:51.081Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+5662022906bb7d20a2cd3d30ae0cb74f89d38c0d
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:51.222Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"]
+1/14 root.test_0...OK
+2/14 css.css.test_0...OK
+3/14 font.opentype.test_0...OK
+4/14 html.root.test_0...OK
+5/14 js.runtime.test_0...OK
+6/14 unicode.properties_test.test.FP-0108 case 8: lookup gives the cited Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic values...OK
+7/14 unicode.properties_test.test.FP-0108 case 9: value counts over all code points equal the totals that the three files state...OK
+8/14 unicode.properties_test.test.FP-0108 case 10: GraphemeClusterBreak and IndicConjunctBreak have exactly the assigned values and exact alias lookup...OK
+9/14 unicode.reference_test.test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point...OK
+10/14 text.grapheme_test.test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries...GraphemeBreakTest.txt line 834: expected { 0, 4, 6, 7 }, found { 0, 6, 7 }
+GraphemeBreakTest.txt line 835: expected { 0, 1, 5, 7, 8 }, found { 0, 1, 7, 8 }
+GraphemeBreakTest.txt line 838: expected { 0, 1, 5, 9, 10 }, found { 0, 1, 9, 10 }
+expected 0, found 3
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff78ac73c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff78ac7eb60 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:155:5: 0x7ff78ac7eb91 in test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), result.failures);
+    ^
+11/14 text.grapheme_test.test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser...row G5 line 835: expected { 0, 1, 5, 7, 8 }, found { 0, 1, 7, 8 }
+row G12 line 834: expected { 0, 4, 6, 7 }, found { 0, 6, 7 }
+expected 0, found 2
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff78ac73c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff78ac7db29 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:205:5: 0x7ff78ac7db5a in test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+12/14 text.grapheme_test.test.FP-0108 case 14: boundaries of every case 11 and 12 input strictly increase from 0 to the length and never split a surrogate pair...OK
+13/14 text.grapheme_test.test.FP-0108 case 15: segmentation work is linear in the code-unit length...expected 4, found 1000000
+case 15 input regional indicators: TestExpectedEqual
+expected 0, found 1
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff78ac73c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff78ac74889 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:294:5: 0x7ff78ac748ea in test.FP-0108 case 15: segmentation work is linear in the code-unit length (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+14/14 text.grapheme_test.test.FP-0108 case 16: the segmenter takes no allocator and its sources name none...OK
+11 passed; 0 skipped; 3 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\5cbe55897ae2313426fa734f84a571f6\test.exe --seed=0xf7e117f
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:51.356Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":7015,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"]
+1/3 root.test_0...OK
+2/3 grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries...OK
+3/3 grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair...OK
+All 3 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:55:58.487Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":4951,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0108/raw/mutation-M3.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0108/raw/mutation-M3.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:03.557Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:03.704Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:03.863Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":40}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0108/raw/mutation-M4.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0108/raw/mutation-M4.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:04.015Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+f07fdd4a5825a00717ea796a402276eef29ff7db
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:04.157Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"]
+1/14 root.test_0...OK
+2/14 css.css.test_0...OK
+3/14 font.opentype.test_0...OK
+4/14 html.root.test_0...OK
+5/14 js.runtime.test_0...OK
+6/14 unicode.properties_test.test.FP-0108 case 8: lookup gives the cited Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic values...OK
+7/14 unicode.properties_test.test.FP-0108 case 9: value counts over all code points equal the totals that the three files state...OK
+8/14 unicode.properties_test.test.FP-0108 case 10: GraphemeClusterBreak and IndicConjunctBreak have exactly the assigned values and exact alias lookup...OK
+9/14 unicode.reference_test.test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point...OK
+10/14 text.grapheme_test.test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries...GraphemeBreakTest.txt line 301: expected { 0, 1, 2 }, found { 0, 2 }
+GraphemeBreakTest.txt line 848: expected { 0, 2, 4 }, found { 0, 4 }
+expected 0, found 2
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff6019a3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff6019aeb60 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:155:5: 0x7ff6019aeb91 in test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), result.failures);
+    ^
+11/14 text.grapheme_test.test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser...row G7 line 848: expected { 0, 2, 4 }, found { 0, 4 }
+expected 0, found 1
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff6019a3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff6019adb29 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:205:5: 0x7ff6019adb5a in test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+12/14 text.grapheme_test.test.FP-0108 case 14: boundaries of every case 11 and 12 input strictly increase from 0 to the length and never split a surrogate pair...OK
+13/14 text.grapheme_test.test.FP-0108 case 15: segmentation work is linear in the code-unit length...OK
+14/14 text.grapheme_test.test.FP-0108 case 16: the segmenter takes no allocator and its sources name none...OK
+12 passed; 0 skipped; 2 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\eb2e6369ce2ac5947b62a1bcdf359577\test.exe --seed=0x7f733082
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:04.307Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":7549,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"]
+1/3 root.test_0...OK
+2/3 grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries...OK
+3/3 grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair...OK
+All 3 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:11.965Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":5145,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0108/raw/mutation-M4.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0108/raw/mutation-M4.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:17.240Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:17.407Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:17.607Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0108/raw/mutation-M5.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0108/raw/mutation-M5.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:17.768Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+a273b55b70a7d566fe0fc69f55413205e9af0069
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:17.948Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"]
+1/14 root.test_0...OK
+2/14 css.css.test_0...OK
+3/14 font.opentype.test_0...OK
+4/14 html.root.test_0...OK
+5/14 js.runtime.test_0...OK
+6/14 unicode.properties_test.test.FP-0108 case 8: lookup gives the cited Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic values...OK
+7/14 unicode.properties_test.test.FP-0108 case 9: value counts over all code points equal the totals that the three files state...OK
+8/14 unicode.properties_test.test.FP-0108 case 10: GraphemeClusterBreak and IndicConjunctBreak have exactly the assigned values and exact alias lookup...OK
+9/14 unicode.reference_test.test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point...OK
+10/14 text.grapheme_test.test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries...GraphemeBreakTest.txt line 46: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 86: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 126: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 165: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 166: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 205: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 206: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 245: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 246: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 285: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 286: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 325: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 326: expected { 0, 4 }, found { 0, 3, 4 }
+GraphemeBreakTest.txt line 366: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 405: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 406: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 445: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 446: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 485: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 486: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 525: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 526: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 565: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 566: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 605: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 606: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 645: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 646: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 685: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 686: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 725: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 726: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 765: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 766: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 805: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 806: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 841: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 868: expected { 0, 1, 4, 6 }, found { 0, 1, 4, 5, 6 }
+expected 0, found 38
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff7b8363c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff7b836eb50 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:155:5: 0x7ff7b836eb81 in test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), result.failures);
+    ^
+11/14 text.grapheme_test.test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser...row G10 line 841: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+expected 0, found 1
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff7b8363c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff7b836db19 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:205:5: 0x7ff7b836db4a in test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+12/14 text.grapheme_test.test.FP-0108 case 14: boundaries of every case 11 and 12 input strictly increase from 0 to the length and never split a surrogate pair...OK
+13/14 text.grapheme_test.test.FP-0108 case 15: segmentation work is linear in the code-unit length...OK
+14/14 text.grapheme_test.test.FP-0108 case 16: the segmenter takes no allocator and its sources name none...OK
+12 passed; 0 skipped; 2 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\de8a90b6183fc07910a738a56a2a4f9d\test.exe --seed=0x695f81fd
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:18.100Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":6427,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"]
+1/3 root.test_0...OK
+2/3 grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries...seed devanagari-greeting: expected { 0, 1, 2, 6, 7, 9, 11, 13, 14, 15, 18, 20 }, found { 0, 1, 2, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20 }
+expected 0, found 1
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff7bf2c332a in expectEqualInner__func_837 (root_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff7bf2ec4f6 in expectEqual (root_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\tests\text\grapheme_seed_test.zig:59:5: 0x7ff7bf2ec59f in test.FP-0108 case 13: each seed gives its derived code-unit boundaries (root_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+3/3 grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair...OK
+2 passed; 0 skipped; 1 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\7db04cca8839e06feed52b034895878a\root.exe --seed=0xd3526ac9
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:24.666Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":5220,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0108/raw/mutation-M5.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0108/raw/mutation-M5.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:30.014Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":40}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:30.167Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:30.314Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0108/raw/mutation-M6.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0108/raw/mutation-M6.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:30.465Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":58}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+d86b128cdeb0c8034ac4c17f8b8f59edc20970b6
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:30.632Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"]
+1/14 root.test_0...OK
+2/14 css.css.test_0...OK
+3/14 font.opentype.test_0...OK
+4/14 html.root.test_0...OK
+5/14 js.runtime.test_0...OK
+6/14 unicode.properties_test.test.FP-0108 case 8: lookup gives the cited Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic values...OK
+7/14 unicode.properties_test.test.FP-0108 case 9: value counts over all code points equal the totals that the three files state...OK
+8/14 unicode.properties_test.test.FP-0108 case 10: GraphemeClusterBreak and IndicConjunctBreak have exactly the assigned values and exact alias lookup...OK
+9/14 unicode.reference_test.test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point...OK
+10/14 text.grapheme_test.test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries...GraphemeBreakTest.txt line 41: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 42: expected { 0, 1, 2, 4 }, found { 0, 1, 2, 3, 4 }
+GraphemeBreakTest.txt line 81: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 82: expected { 0, 1, 2, 4 }, found { 0, 1, 2, 3, 4 }
+GraphemeBreakTest.txt line 121: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 122: expected { 0, 1, 2, 4 }, found { 0, 1, 2, 3, 4 }
+GraphemeBreakTest.txt line 161: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 162: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 201: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 202: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 241: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 242: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 281: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 282: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 307: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 308: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 309: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 310: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 311: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 312: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 313: expected { 0, 3 }, found { 0, 1, 3 }
+GraphemeBreakTest.txt line 314: expected { 0, 4 }, found { 0, 1, 4 }
+GraphemeBreakTest.txt line 315: expected { 0, 3 }, found { 0, 1, 3 }
+GraphemeBreakTest.txt line 316: expected { 0, 4 }, found { 0, 1, 4 }
+GraphemeBreakTest.txt line 317: expected { 0, 3 }, found { 0, 1, 3 }
+GraphemeBreakTest.txt line 318: expected { 0, 4 }, found { 0, 1, 4 }
+GraphemeBreakTest.txt line 319: expected { 0, 3 }, found { 0, 1, 3 }
+GraphemeBreakTest.txt line 320: expected { 0, 4 }, found { 0, 1, 4 }
+GraphemeBreakTest.txt line 321: expected { 0, 4 }, found { 0, 1, 2, 3, 4 }
+GraphemeBreakTest.txt line 322: expected { 0, 3, 5 }, found { 0, 1, 3, 4, 5 }
+GraphemeBreakTest.txt line 323: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 324: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 325: expected { 0, 3 }, found { 0, 1, 3 }
+GraphemeBreakTest.txt line 326: expected { 0, 4 }, found { 0, 1, 4 }
+GraphemeBreakTest.txt line 327: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 328: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 329: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 330: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 331: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 332: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 333: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 334: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 335: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 336: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 337: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 338: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 339: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 340: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 341: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 342: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 343: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 344: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 345: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 346: expected { 0, 3, 4 }, found { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 361: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 362: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 401: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 402: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 441: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 442: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 481: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 482: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 521: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 522: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 561: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 562: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 601: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 602: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 641: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 642: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 681: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 682: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 721: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 722: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 761: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 762: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 801: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 802: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 834: expected { 0, 4, 6, 7 }, found { 0, 1, 2, 3, 4, 5, 6, 7 }
+GraphemeBreakTest.txt line 835: expected { 0, 1, 5, 7, 8 }, found { 0, 1, 2, 3, 4, 5, 6, 7, 8 }
+GraphemeBreakTest.txt line 836: expected { 0, 1, 6, 8, 9 }, found { 0, 1, 2, 3, 4, 6, 7, 8, 9 }
+GraphemeBreakTest.txt line 837: expected { 0, 1, 4, 8, 9 }, found { 0, 1, 2, 4, 5, 6, 7, 8, 9 }
+GraphemeBreakTest.txt line 838: expected { 0, 1, 5, 9, 10 }, found { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
+GraphemeBreakTest.txt line 843: expected { 0, 4, 6 }, found { 0, 1, 2, 3, 4, 5, 6 }
+GraphemeBreakTest.txt line 844: expected { 0, 3, 5 }, found { 0, 1, 2, 3, 4, 5 }
+GraphemeBreakTest.txt line 845: expected { 0, 3, 8 }, found { 0, 1, 2, 3, 4, 6, 7, 8 }
+GraphemeBreakTest.txt line 846: expected { 0, 10 }, found { 0, 1, 2, 3, 6, 7, 8, 9, 10 }
+GraphemeBreakTest.txt line 847: expected { 0, 5 }, found { 0, 1, 3, 4, 5 }
+GraphemeBreakTest.txt line 848: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 879: expected { 0, 4 }, found { 0, 1, 2, 3, 4 }
+expected 0, found 90
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff691fe3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff691fee980 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:155:5: 0x7ff691fee9b1 in test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), result.failures);
+    ^
+11/14 text.grapheme_test.test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser...row G5 line 835: expected { 0, 1, 5, 7, 8 }, found { 0, 1, 2, 3, 4, 5, 6, 7, 8 }
+row G6 line 846: expected { 0, 10 }, found { 0, 1, 2, 3, 6, 7, 8, 9, 10 }
+row G7 line 848: expected { 0, 2, 4 }, found { 0, 2, 3, 4 }
+row G12 line 834: expected { 0, 4, 6, 7 }, found { 0, 1, 2, 3, 4, 5, 6, 7 }
+row U2: expected { 0, 3 }, found { 0, 1, 3 }
+expected 0, found 5
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff691fe3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff691fed949 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:205:5: 0x7ff691fed97a in test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+12/14 text.grapheme_test.test.FP-0108 case 14: boundaries of every case 11 and 12 input strictly increase from 0 to the length and never split a surrogate pair...GraphemeBreakTest.txt line 41: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 42: malformed boundaries { 0, 1, 2, 3, 4 }
+GraphemeBreakTest.txt line 81: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 82: malformed boundaries { 0, 1, 2, 3, 4 }
+GraphemeBreakTest.txt line 121: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 122: malformed boundaries { 0, 1, 2, 3, 4 }
+GraphemeBreakTest.txt line 161: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 162: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 201: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 202: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 241: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 242: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 281: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 282: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 307: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 308: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 309: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 310: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 311: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 312: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 313: malformed boundaries { 0, 1, 3 }
+GraphemeBreakTest.txt line 314: malformed boundaries { 0, 1, 4 }
+GraphemeBreakTest.txt line 315: malformed boundaries { 0, 1, 3 }
+GraphemeBreakTest.txt line 316: malformed boundaries { 0, 1, 4 }
+GraphemeBreakTest.txt line 317: malformed boundaries { 0, 1, 3 }
+GraphemeBreakTest.txt line 318: malformed boundaries { 0, 1, 4 }
+GraphemeBreakTest.txt line 319: malformed boundaries { 0, 1, 3 }
+GraphemeBreakTest.txt line 320: malformed boundaries { 0, 1, 4 }
+GraphemeBreakTest.txt line 321: malformed boundaries { 0, 1, 2, 3, 4 }
+GraphemeBreakTest.txt line 322: malformed boundaries { 0, 1, 3, 4, 5 }
+GraphemeBreakTest.txt line 323: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 324: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 325: malformed boundaries { 0, 1, 3 }
+GraphemeBreakTest.txt line 326: malformed boundaries { 0, 1, 4 }
+GraphemeBreakTest.txt line 327: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 328: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 329: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 330: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 331: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 332: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 333: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 334: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 335: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 336: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 337: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 338: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 339: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 340: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 341: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 342: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 343: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 344: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 345: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 346: malformed boundaries { 0, 1, 3, 4 }
+GraphemeBreakTest.txt line 361: malformed boundaries { 0, 2, 3 }
+GraphemeBreakTest.txt line 362: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 401: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 402: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 441: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 442: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 481: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 482: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 521: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 522: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 561: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 562: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 601: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 602: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 641: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 642: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 681: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 682: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 721: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 722: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 761: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 762: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 801: malformed boundaries { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 802: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 834: malformed boundaries { 0, 1, 2, 3, 4, 5, 6, 7 }
+GraphemeBreakTest.txt line 835: malformed boundaries { 0, 1, 2, 3, 4, 5, 6, 7, 8 }
+GraphemeBreakTest.txt line 836: malformed boundaries { 0, 1, 2, 3, 4, 6, 7, 8, 9 }
+GraphemeBreakTest.txt line 837: malformed boundaries { 0, 1, 2, 4, 5, 6, 7, 8, 9 }
+GraphemeBreakTest.txt line 838: malformed boundaries { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
+GraphemeBreakTest.txt line 843: malformed boundaries { 0, 1, 2, 3, 4, 5, 6 }
+GraphemeBreakTest.txt line 844: malformed boundaries { 0, 1, 2, 3, 4, 5 }
+GraphemeBreakTest.txt line 845: malformed boundaries { 0, 1, 2, 3, 4, 6, 7, 8 }
+GraphemeBreakTest.txt line 846: malformed boundaries { 0, 1, 2, 3, 6, 7, 8, 9, 10 }
+GraphemeBreakTest.txt line 847: malformed boundaries { 0, 1, 3, 4, 5 }
+GraphemeBreakTest.txt line 848: malformed boundaries { 0, 2, 3, 4 }
+GraphemeBreakTest.txt line 879: malformed boundaries { 0, 1, 2, 3, 4 }
+row G5 line 835: malformed boundaries { 0, 1, 2, 3, 4, 5, 6, 7, 8 }
+row G6 line 846: malformed boundaries { 0, 1, 2, 3, 6, 7, 8, 9, 10 }
+row G7 line 848: malformed boundaries { 0, 2, 3, 4 }
+row G12 line 834: malformed boundaries { 0, 1, 2, 3, 4, 5, 6, 7 }
+row U2: malformed boundaries { 0, 1, 3 }
+expected 0, found 95
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff691fe3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff691fea00e in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:221:5: 0x7ff691fea03f in test.FP-0108 case 14: boundaries of every case 11 and 12 input strictly increase from 0 to the length and never split a surrogate pair (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+13/14 text.grapheme_test.test.FP-0108 case 15: segmentation work is linear in the code-unit length...expected 4, found 1
+case 15 input regional indicators: TestExpectedEqual
+expected 0, found 1
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff691fe3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff691fe4889 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:294:5: 0x7ff691fe48ea in test.FP-0108 case 15: segmentation work is linear in the code-unit length (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+14/14 text.grapheme_test.test.FP-0108 case 16: the segmenter takes no allocator and its sources name none...OK
+10 passed; 0 skipped; 4 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\b8a0f98c0bf9ae3adf797387a8baacc1\test.exe --seed=0x73d069c3
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:30.798Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":7330,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"]
+1/3 root.test_0...OK
+2/3 grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries...seed cjk-greeting: expected { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23 }, found { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 }
+seed uncovered-emoji: expected { 0, 4, 6 }, found { 0, 1, 2, 3, 4, 5, 6 }
+expected 0, found 2
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff71630332a in expectEqualInner__func_837 (root_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff71632c326 in expectEqual (root_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\tests\text\grapheme_seed_test.zig:59:5: 0x7ff71632c3cf in test.FP-0108 case 13: each seed gives its derived code-unit boundaries (root_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+3/3 grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair...seed cjk-greeting: found { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 }
+FAIL (TestUnexpectedResult)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:584:14: 0x7ff7163032bf in expect (root_zcu.obj)
+    if (!ok) return error.TestUnexpectedResult;
+             ^
+C:\Users\requi\.omp\wt\tfbcb615b9\m\tests\text\grapheme_seed_test.zig:77:13: 0x7ff716303f3d in test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair (root_zcu.obj)
+            try testing.expect(!(isHighSurrogate(units[b - 1]) and isLowSurrogate(units[b])));
+            ^
+1 passed; 0 skipped; 2 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\0a536ff99614d2fc45fb0d24e64ca116\root.exe --seed=0x2226c7c2
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:38.231Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3652,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0108/raw/mutation-M6.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0108/raw/mutation-M6.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:42.017Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:42.141Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/unicode/tables.zig"]
+8d214b79f939d7395d7edd8f3042c5a871be50af
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/unicode/tables.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:51.219Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0108/raw/mutation-M7.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0108/raw/mutation-M7.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:51.314Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/unicode/tables.zig"]
+9558f6c93707a2e01f1036e6a4452ddb5ec2e3d5
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/unicode/tables.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:51.402Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"]
+1/14 root.test_0...OK
+2/14 css.css.test_0...OK
+3/14 font.opentype.test_0...OK
+4/14 html.root.test_0...OK
+5/14 js.runtime.test_0...OK
+6/14 unicode.properties_test.test.FP-0108 case 8: lookup gives the cited Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic values...expected .SM, found .XX
+at U+0903
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff72f12b343 in expectEqualInner__func_988 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff72f12eb69 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\unicode\properties_test.zig:82:5: 0x7ff72f12ecd5 in report (test_zcu.obj)
+    return e;
+    ^
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\unicode\properties_test.zig:126:55: 0x7ff72f12eba2 in test.FP-0108 case 8: lookup gives the cited Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic values (test_zcu.obj)
+        testing.expectEqual(row.gcb, p.gcb) catch |e| return report(row.code_point, e);
+                                                      ^
+7/14 unicode.properties_test.test.FP-0108 case 9: value counts over all code points equal the totals that the three files state...expected 381, found 380
+gcb SM
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff72f113c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff72f12e1e2 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\unicode\properties_test.zig:164:13: 0x7ff72f12e226 in test.FP-0108 case 9: value counts over all code points equal the totals that the three files state (test_zcu.obj)
+            return e;
+            ^
+8/14 unicode.properties_test.test.FP-0108 case 10: GraphemeClusterBreak and IndicConjunctBreak have exactly the assigned values and exact alias lookup...OK
+9/14 unicode.reference_test.test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point...U+0903: lookup GCB=XX InCB=None ExtPict=false, reference GCB=SM InCB=None ExtPict=false
+FAIL (TestUnexpectedResult)
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\unicode\reference_test.zig:314:13: 0x7ff72f124944 in test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point (test_zcu.obj)
+            return error.TestUnexpectedResult;
+            ^
+10/14 text.grapheme_test.test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries...GraphemeBreakTest.txt line 46: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 86: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 126: expected { 0, 1, 3 }, found { 0, 1, 2, 3 }
+GraphemeBreakTest.txt line 165: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 166: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 205: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 206: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 245: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 246: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 285: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 286: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 325: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 326: expected { 0, 4 }, found { 0, 3, 4 }
+GraphemeBreakTest.txt line 366: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 405: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 406: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 445: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 446: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 485: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 486: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 525: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 526: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 565: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 566: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 605: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 606: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 645: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 646: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 685: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 686: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 725: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 726: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 765: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 766: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 805: expected { 0, 2 }, found { 0, 1, 2 }
+GraphemeBreakTest.txt line 806: expected { 0, 3 }, found { 0, 2, 3 }
+GraphemeBreakTest.txt line 841: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+expected 0, found 37
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff72f113c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff72f11eb60 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:155:5: 0x7ff72f11eb91 in test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), result.failures);
+    ^
+11/14 text.grapheme_test.test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser...row G10 line 841: expected { 0, 2, 3 }, found { 0, 1, 2, 3 }
+expected 0, found 1
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff72f113c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff72f11db29 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:205:5: 0x7ff72f11db5a in test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+12/14 text.grapheme_test.test.FP-0108 case 14: boundaries of every case 11 and 12 input strictly increase from 0 to the length and never split a surrogate pair...OK
+13/14 text.grapheme_test.test.FP-0108 case 15: segmentation work is linear in the code-unit length...OK
+14/14 text.grapheme_test.test.FP-0108 case 16: the segmenter takes no allocator and its sources name none...OK
+9 passed; 0 skipped; 5 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\67ed1bc7056a7f380855d06820f6e69e\test.exe --seed=0xe57340e2
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:51.497Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":5023,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"]
+1/3 root.test_0...OK
+2/3 grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries...OK
+3/3 grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair...OK
+All 3 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:56:56.604Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":3374,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/ucd.test.mjs"]
+TAP version 13
+ok 1 - FP-0013 case 1: @missing lines apply in order, then data lines, and every value resolves through PropertyValueAliases.txt
+ok 2 - FP-0013 case 2: a line without ";", a reversed range, 110000, and an unknown value each fail with a distinct message naming the line
+not ok 3 - FP-0013 case 3 (amended by FP-0108 case 1): ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input
+  ---
+  message: "{\n  \"result\": \"stale\",\n  \"differences\": [\n    {\n      \"file\": \"src/unicode/tables.zig\",\n      \"line\": 11310,\n      \"problem\": \"differs from the generator output\"\n    }\n  ],\n  \"instruction\": \"Run node tools/fairpane.mjs ucd-generate and review the change.\"\n}\n\n\n1 !== 0\n"
+  ...
+not ok 4 - FP-0013 case 4: one changed byte of tables.zig or of a UCD file makes ucd-check exit with status 1 and name the file and line
+  ---
+  message: "{\n  \"result\": \"stale\",\n  \"differences\": [\n    {\n      \"file\": \"src/unicode/tables.zig\",\n      \"line\": 11310,\n      \"problem\": \"differs from the generator output\"\n    }\n  ],\n  \"instruction\": \"Run node tools/fairpane.mjs ucd-generate and review the change.\"\n}\n\n\n1 !== 0\n"
+  ...
+ok 5 - FP-0108 case 2: parseFieldProperty reads only the InCB lines of a multi-property file and applies the @missing default
+ok 6 - FP-0108 case 3: parseBinaryProperty sets only the lines whose single field is the property, and every other code point is false
+ok 7 - FP-0108 case 4: a missing InCB value, an unknown value, an extra value, and a binary line with a value each fail with a distinct message naming the line
+1..7
+# tests 7
+# pass 5
+# fail 2
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/ucd.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:57:00.046Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":345}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0108/raw/mutation-M7.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0108/raw/mutation-M7.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:57:00.471Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/unicode/tables.zig"]
+8d214b79f939d7395d7edd8f3042c5a871be50af
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/unicode/tables.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:57:00.561Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:57:10.856Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0108/raw/mutation-M8.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0108/raw/mutation-M8.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:57:10.964Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+3467c94fdaa658df9abab89faf5b026819388b80
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:57:11.057Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"]
+1/14 root.test_0...OK
+2/14 css.css.test_0...OK
+3/14 font.opentype.test_0...OK
+4/14 html.root.test_0...OK
+5/14 js.runtime.test_0...OK
+6/14 unicode.properties_test.test.FP-0108 case 8: lookup gives the cited Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic values...OK
+7/14 unicode.properties_test.test.FP-0108 case 9: value counts over all code points equal the totals that the three files state...OK
+8/14 unicode.properties_test.test.FP-0108 case 10: GraphemeClusterBreak and IndicConjunctBreak have exactly the assigned values and exact alias lookup...OK
+9/14 unicode.reference_test.test.FP-0108 case 7: lookup equals an independent parse of the embedded grapheme property files for every code point...OK
+10/14 text.grapheme_test.test.FP-0108 case 11: every test line of GraphemeBreakTest.txt gives exactly its boundaries...OK
+11/14 text.grapheme_test.test.FP-0108 case 12: hard-coded rows give their boundaries independently of the file parser...OK
+12/14 text.grapheme_test.test.FP-0108 case 14: boundaries of every case 11 and 12 input strictly increase from 0 to the length and never split a surrogate pair...OK
+13/14 text.grapheme_test.test.FP-0108 case 15: segmentation work is linear in the code-unit length...after next returned 8: 30 code units read, limit 20
+case 15 input regional indicators: TestUnexpectedResult
+expected 0, found 1
+FAIL (TestExpectedEqual)
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff654ad3c2a in expectEqualInner__func_837 (test_zcu.obj)
+                return error.TestExpectedEqual;
+                ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff654ad4889 in expectEqual (test_zcu.obj)
+    return expectEqualInner(T, expected, actual);
+
+C:\Users\requi\.omp\wt\tfbcb615b9\m\src\text\grapheme_test.zig:294:5: 0x7ff654ad48ea in test.FP-0108 case 15: segmentation work is linear in the code-unit length (test_zcu.obj)
+    try testing.expectEqual(@as(usize, 0), failures);
+    ^
+14/14 text.grapheme_test.test.FP-0108 case 16: the segmenter takes no allocator and its sources name none...OK
+13 passed; 0 skipped; 1 failed.
+error: the following test command failed with exit code 1:
+out\fp0108-mutation\o\c29e81c6fa69f6e27b0546f7b0f39d36\test.exe --seed=0x16a7511d
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:57:11.137Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3349,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"]
+1/3 root.test_0...OK
+2/3 grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries...OK
+3/3 grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair...OK
+All 3 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--cache-dir","out/fp0108-mutation","--test-filter","FP-0108","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:57:14.560Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":2897,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0108/raw/mutation-M8.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0108/raw/mutation-M8.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:57:17.515Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/text/grapheme.zig"]
+0ec7b8f13f7c32852a8cea0f7502d97430ecab2e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/text/grapheme.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tfbcb615b9\\m","started_at":"2026-10-09T17:57:17.595Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21}

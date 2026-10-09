@@ -292,21 +292,36 @@ FP-0066 case 3 is `node tools/fairpane.mjs abi-exports` on the installed Release
 
 ## Generate the Unicode property tables
 
-`tools/ucd.mjs` reads the eight Unicode 18.0.0 files under `src/unicode/ucd/` and generates `src/unicode/tables.zig`.
+`tools/ucd.mjs` reads the eleven Unicode 18.0.0 files under `src/unicode/ucd/` that `UCD_FILES` lists and generates `src/unicode/tables.zig`.
 It applies each `# @missing:` line in file order and then each data line, so a later line overrides earlier defaults for its range.
 It resolves every value, including a long `@missing` value such as `Left_To_Right`, through `PropertyValueAliases.txt`.
 A `ScriptExtensions.txt` value of `<script>` means that the code point's Script value is its Script_Extensions value.
 An unknown value, a reversed range, a code point above `10FFFF`, or a data line without `;` fails generation with the file and line number.
 The generated header lists each input's path, byte size, and SHA-256, and it reproduces `src/unicode/ucd/license.txt`.
 
+Two parse modes read files that hold several properties.
+Both strip comments before they split the fields, so `Extended_Pictographic# comment` names `Extended_Pictographic`.
+
+- `parseFieldProperty(text, { file, aliases, property })` reads one enumerated property, such as `InCB` in `DerivedCoreProperties.txt`.
+  A data or `@missing` line whose first field after the range is exactly `property` must have exactly one more field, the value, which resolves through `aliases`.
+  A line whose first field names another property is skipped.
+  A line without a value or with more than one value fails with the file and line number.
+- `parseBinaryProperty(text, { file, property })` reads one binary property, such as `Extended_Pictographic` in `emoji/emoji-data.txt`.
+  A line whose only field is exactly `property` makes its range true, and a line with another single field is skipped.
+  A line that gives `property` a value fails with the file and line number.
+  Every code point that no line lists is false, as `emoji-data.txt` states for each property instead of an `@missing` line.
+
+The generator reads `Grapheme_Cluster_Break` from `auxiliary/GraphemeBreakProperty.txt` in the single-property mode, `Indic_Conjunct_Break` through `parseFieldProperty`, and `Extended_Pictographic` through `parseBinaryProperty`.
+
 1. Run `node tools/fairpane.mjs corpus-fetch unicode` to replace the inputs from the pinned sources.
 2. Run `node tools/fairpane.mjs ucd-generate`.
 3. Run `node tools/fairpane.mjs ucd-check`.
 4. Read the reported line on exit status 1.
 
-`tools/ucd.test.mjs` holds FP-0013 cases 1 through 4.
-`src/unicode/reference_test.zig` holds the Zig part of case 3, which parses the embedded files independently and compares every code point.
+`tools/ucd.test.mjs` holds FP-0013 cases 1 through 4 and FP-0108 cases 1 through 4.
+`src/unicode/reference_test.zig` holds the Zig part of FP-0013 case 3 and FP-0108 case 7, which parse the embedded files independently and compare every code point.
 The reference parser marks each code point that a file assigns, and it fails when any code point stays unassigned.
+It applies the false default of `Extended_Pictographic` only because `emoji-data.txt` states that default.
 
 ## Import a file-set corpus
 
@@ -348,6 +363,7 @@ Do not run `font_expectations.py` directly, because a direct run keeps the inher
 The script's own usage line, which runs it from the repository root, predates this procedure.
 It stays unchanged, because each expectation file records the script's SHA-256 and case 12 compares that digest with the committed script.
 `tools/fileset.test.mjs` holds FP-0013 cases 41 through 49 and 53 through 55, which read `file://` or in-memory fixture sources and never use the network.
+It also holds FP-0108 case 5, which reads the committed `unicode` records, and the FP-0108 case 6 amendment of FP-0013 case 49.
 
 ## Profile the Zig tests
 

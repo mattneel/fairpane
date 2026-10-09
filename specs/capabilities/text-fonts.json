@@ -7,8 +7,8 @@
       "id": "unicode-properties",
       "status": "implemented",
       "owner_task": "FP-0013",
-      "summary": "General_Category, Script, Script_Extensions, Bidi_Class, Joining_Type, Indic_Syllabic_Category, and Indic_Positional_Category from the Unicode 18.0.0 UCD.",
-      "engine_behavior": "fairpane.unicode.lookup returns all seven properties for every code point from U+0000 to U+10FFFF without allocation and returns error.NotCodePoint above U+10FFFF."
+      "summary": "General_Category, Script, Script_Extensions, Bidi_Class, Joining_Type, Indic_Syllabic_Category, and Indic_Positional_Category from the Unicode 18.0.0 UCD, and Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic.",
+      "engine_behavior": "fairpane.unicode.lookup returns all ten properties for every code point from U+0000 to U+10FFFF without allocation and returns error.NotCodePoint above U+10FFFF."
     },
     {
       "id": "opentype-core-tables",
@@ -21,8 +21,8 @@
       "id": "unicode-remaining-data",
       "status": "remaining",
       "owner_task": "FP-0055",
-      "summary": "Every other file of the specs/IMPORT_REQUIREMENTS.md table, including case mapping, normalization, segmentation, line breaking, emoji, IDNA, and the conformance test files.",
-      "engine_behavior": "No API. The engine has no Unicode data beyond the seven properties above."
+      "summary": "Every other file of the specs/IMPORT_REQUIREMENTS.md table, including case mapping, normalization, word and sentence segmentation, line breaking, emoji sequences, IDNA, and the conformance test files other than GraphemeBreakTest.txt, and the properties of DerivedCoreProperties.txt and emoji-data.txt other than Indic_Conjunct_Break and Extended_Pictographic.",
+      "engine_behavior": "No API. The engine has no Unicode data beyond the ten properties above."
     },
     {
       "id": "bidi-algorithm",
@@ -33,10 +33,10 @@
     },
     {
       "id": "grapheme-segmentation",
-      "status": "remaining",
-      "owner_task": "FP-0015",
-      "summary": "Extended grapheme cluster boundaries (UAX #29) for caret movement and selection.",
-      "engine_behavior": "No API. The engine iterates code points only."
+      "status": "implemented",
+      "owner_task": "FP-0108",
+      "summary": "UAX #29 extended grapheme cluster boundaries from Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic, for caret movement and selection.",
+      "engine_behavior": "fairpane.text.GraphemeBoundaries yields the UAX #29 GB1 to GB999 extended grapheme cluster boundaries of a string as UTF-16 code-unit indexes, without allocation and in linear time. Legacy grapheme clusters, tailorings, and random-access boundary queries are not offered."
     },
     {
       "id": "line-breaking",
