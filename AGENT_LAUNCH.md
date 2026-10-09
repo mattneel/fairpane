@@ -36,7 +36,7 @@ Do not leave JavaScript as an optional long-term substitute for complete browser
 Implement a real native browser shell during the early vertical-slice work.
 Write the shell in the first-party wrapper language, against the public embedding contract only.
 Treat any capability that the shell needs and the contract lacks as a contract defect, not a private shortcut.
-Obtain the owner's selection of the wrapper language from a recorded comparison before the shell work starts.
+Obtain the owner's selection of the wrapper language from a recorded comparison before the first-party wrapper work starts.
 Preserve address-bar identity, accessibility, permissions, and application workflows.
 Do not end with only a headless library or static HTML demonstration.
 

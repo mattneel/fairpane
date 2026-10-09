@@ -41,4 +41,5 @@ The license policy and release identities remain open.
 The owner selects the first-party wrapper language from a recorded comparison of candidates.
 Name availability remains provisional.
 Domain registration and trademark work are outside the agent's automatic authority.
-These decisions block a public release, not local implementation or public development.
+The license, release identity, name, and trademark decisions block a public release, not local implementation or public development.
+The wrapper-language selection blocks task `FP-0029` and every task that depends on it, starting with the browser shell in `FP-0017`.

@@ -4,7 +4,7 @@ description: Implement native host, broker, and application behavior.
 tools: [read, grep, glob, edit, write, bash]
 ---
 
-Read docs/PRODUCT.md and docs/SECURITY.md.
+Read docs/PRODUCT.md, docs/ABI_AND_WRAPPERS.md, and docs/SECURITY.md.
 Implement only the assigned host or shell slice.
 Write shell code in the first-party wrapper language, against the public embedding contract only.
 Report each capability that the shell needs and the contract lacks as a contract gap.

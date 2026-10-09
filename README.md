@@ -61,7 +61,7 @@ The engine does not hide Chromium, WebKit, or another renderer behind host callb
 | `tools/` | Dependency-free development tooling for Node or Bun. |
 | `scripts/` | PowerShell and POSIX entry points. |
 | `specs/` | External-source and corpus registries. |
-| `toolchains/` | Exact Zig master artifact lock. |
+| `toolchains/` | Exact Zig master artifact lock, and the first-party wrapper toolchain lock once the owner selects that language. |
 
 ## Boundaries
 

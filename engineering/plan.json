@@ -778,8 +778,8 @@
       ],
       "acceptance": [
         "Create a first-party native window with an address bar and page surface.",
-        "Write the shell in the first-party wrapper language and reach the engine only through that wrapper and the public C ABI.",
-        "Record every capability gap that the shell meets in the public contract as a contract task, never as a private shortcut.",
+        "Write the shell in the first-party wrapper language and reach the engine only through that wrapper and the public embedding contract.",
+        "Record each capability that the shell needs and the public contract lacks as a contract task, never as a private shortcut.",
         "Implement keyboard focus, resize, close, and explicit unsupported-page states.",
         "Keep page content from controlling browser origin identity.",
         "Do not embed a system WebView or external browser engine.",
@@ -834,7 +834,8 @@
         "Present actual engine frames in the native page surface through the public embedding contract.",
         "Load the multilingual fixture through the resource contract.",
         "Exercise scrolling, resize, selection, and keyboard input where supported.",
-        "Keep unavailable behavior visible rather than simulated."
+        "Keep unavailable behavior visible rather than simulated.",
+        "Add each contract capability that the shell needs through a reviewed ABI schema change with C and first-party wrapper lifecycle tests, never through a shell-only entry point."
       ],
       "read": [
         "docs/PRODUCT.md",
@@ -930,7 +931,8 @@
         "Validate protocol sizes, request ownership, and cancellation.",
         "Implement explicit origin and redirect policy tests.",
         "Demonstrate a denied request and a contained renderer failure.",
-        "Declare the actual operating-system isolation boundary."
+        "Declare the actual operating-system isolation boundary.",
+        "Expose broker decisions to the shell only through the public embedding contract, so every embedder receives the same containment."
       ],
       "read": [
         "docs/SECURITY.md",
@@ -979,7 +981,7 @@
         "Detect stale generated files mechanically.",
         "Qualify C and Zig lifecycle callers against the actual engine.",
         "Define shared foreign-runtime failure scenarios before more wrappers.",
-        "Make the metadata sufficient to generate raw declarations for the first-party wrapper language."
+        "Keep the metadata language-neutral, with ownership, lifetime, thread, and error semantics expressed as data rather than C or Zig syntax."
       ],
       "read": [
         "docs/ABI_AND_WRAPPERS.md"
@@ -1043,6 +1045,7 @@
       "allowed_paths": [
         "ports",
         "apps",
+        "bindings",
         "tests",
         "tools",
         "build.zig",
@@ -1070,7 +1073,8 @@
         "Compile and execute the same engine behavior on actual Linux and macOS hosts.",
         "Declare platform APIs and system dependencies separately from the core.",
         "Exercise text input, resize, focus, and process teardown.",
-        "Keep cross-compilation results distinct from native execution evidence."
+        "Keep cross-compilation results distinct from native execution evidence.",
+        "Pin, build, and execute the first-party wrapper and the browser shell on actual Linux and macOS hosts through the public embedding contract."
       ],
       "read": [
         "docs/TOOLCHAIN.md",
@@ -1321,7 +1325,8 @@
         "bindings",
         "tests",
         "tools",
-        "toolchains",
+        "toolchains/wrapper.lock.json",
+        "engineering/dependencies.json",
         "build.zig",
         "engineering/decisions"
       ],
@@ -1350,7 +1355,9 @@
         "Implement engine and document lifecycle in the selected language over the public C ABI with idiomatic ownership, errors, and cancellation.",
         "Execute the wrapper against the actual native library on Windows and run the shared foreign-runtime failure scenarios.",
         "Keep generated declarations separate from the idiomatic layer and detect stale generated files.",
-        "Do not call generated source alone qualified support."
+        "Do not call generated source alone qualified support.",
+        "Generate the selected language's raw declarations from the FP-0021 metadata, and extend that metadata through a reviewed schema change where it falls short.",
+        "Declare the selected language's toolchain and shipped runtime in a reviewed change to engineering/dependencies.json, separate from the wrapper implementation."
       ],
       "read": [
         "docs/ABI_AND_WRAPPERS.md",

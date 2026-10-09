@@ -45,7 +45,7 @@ The compositor does not traverse mutable DOM objects.
 ## Application boundary
 
 The browser shell is an ordinary embedder.
-It is written in the first-party wrapper language and calls the engine through that wrapper and the public C ABI.
+It is written in the first-party wrapper language and calls the engine through that wrapper and the public embedding contract.
 It has no access to internal Zig interfaces.
 A capability that the shell needs becomes part of the public contract, or the shell does not have it.
 The engine never depends on the shell.

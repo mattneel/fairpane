@@ -1,0 +1,174 @@
+{
+  "verdict": "reject",
+  "verdict_reason": "The founding-policy edits add obligations and remove nothing. Three major defects remain in the dependent text and plan. (1) docs/ADOPTION_AND_GOVERNANCE.md now says that every owner decision, including the open wrapper-language choice, blocks only a public release. That is false, because the plan graph makes that choice block local implementation. (2) An FP-0021 acceptance criterion depends on a language that is selected only in FP-0029, which comes after FP-0021. (3) 'Public embedding contract' is never defined. Together with the protected 'Zig API' wording, that leaves a route for a Zig shell over internal interfaces. Each fix is a small text edit. None of them requires another protected-policy change.",
+  "method_and_limits": [
+    "Read-only review. I ran no commands. I could not run git diff, because the loose objects in .git are zlib-compressed and the read tool cannot open them.",
+    "For pre-change text I used out/book/*.html. That mdBook build is 13 minutes old, and .git/logs/HEAD shows both commits arriving later, so the build predates them. It covers docs/CHARTER.md, PRODUCT, ARCHITECTURE, ABI_AND_WRAPPERS, ADOPTION_AND_GOVERNANCE, ROADMAP, QUALIFICATION, and book/src/index.md.",
+    "No pre-change copy of AGENTS.md, ADR 0001, or engineering/qualification.json exists on disk. I judged those three files by their current content and by tools/lib.mjs."
+  ],
+  "acceptance_results": {
+    "1_protected_policy_only_adds": {
+      "result": "pass",
+      "evidence": [
+        "engineering/qualification.json has all 19 capability ids, and each has required:true and status 'unimplemented'. The ids match REQUIRED_CAPABILITIES in tools/lib.mjs:9-15. scope_rule, completion_policy, and the null release fields (standards_baseline, target_matrix, performance_budgets, applicability_review, release_authority) are still set, along with license_decision 'pending-owner'.",
+        "The browser-product description at qualification.json:122 and the embedding-wrappers description at :130 only gained text: 'delivered by a shell in the first-party wrapper language that uses only the public embedding contract' and 'the first-party wrapper that carries the browser shell'.",
+        "docs/CHARTER.md: every sentence of the old commitments, completion, and decision-class sections in out/book/charter.html:188-224 is still present word for word. The edit added lines 18 and 20-22. 'The public browser presents' became 'The browser presents' at line 23 after the new sentence at line 20, and the meaning is unchanged.",
+        "AGENTS.md:20 adds a rule. The other nine engineering rules, the evidence rules, and the authority rules are present and unweakened. The prior text could not be diffed.",
+        "ADR 0001 adds lines 11, 14, 22-23, and 29. The open design choices that remain are unchanged.",
+        "engineering/policy.json, gates.json, dependencies.json, toolchains/, and specs/ were not touched by these commits. Neither commit appears among their recent writes in the directory listing."
+      ]
+    },
+    "2_document_consistency": {
+      "result": "fail",
+      "see_findings": [
+        "F1",
+        "F3",
+        "F5",
+        "F6",
+        "F7",
+        "F8",
+        "F10",
+        "F11",
+        "F12"
+      ]
+    },
+    "3_plan_graph": {
+      "result": "partial",
+      "evidence": [
+        "FP-0017 depends on FP-0006 and FP-0029 (plan.json:749-752).",
+        "FP-0029 depends on FP-0021 (plan.json:1316-1318).",
+        "FP-0021 depends on FP-0006, which depends on FP-0004, which depends on FP-0001. Tracing the edges by hand finds no cycle. FP-0018, FP-0020, FP-0022, FP-0023, and FP-0026 reach FP-0029 only through FP-0017 or FP-0021.",
+        "state.json:218-226 has FP-0029 as planned, with a note. The gates it uses (repo-check, controller-test, zig-test, c-abi) exist in gates.json, and its workstream 'wrappers' exists. [INFERENCE] By static reading, validatePlan (tools/lib.mjs:135-170) accepts the graph. I did not execute it.",
+        "No acceptance text claims that a language has been chosen. FP-0029 acceptance 1 makes recording the owner's selection a deliverable.",
+        "Defect: one FP-0021 criterion cannot be checked under this ordering (F2)."
+      ]
+    },
+    "4_prose_rules": {
+      "result": "pass with nits",
+      "evidence": [
+        "A regex scan of all changed files found no British spellings.",
+        "The changed sentences are complete. A few are long or awkwardly built (F13). The README list items are fragments, which matches that list's existing style."
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "major",
+      "file": "docs/ADOPTION_AND_GOVERNANCE.md",
+      "line": 44,
+      "problem": "Line 41 adds the wrapper-language selection to 'Remaining owner decisions', and line 44 then says 'These decisions block a public release, not local implementation or public development.' The plan contradicts that. FP-0029 (authority 'owner-selects-language-then-routine-local-engineering') cannot finish without the selection. FP-0017 depends on FP-0029. FP-0018, FP-0019 (script/DOM integration), FP-0020 (broker), FP-0022, FP-0023, and FP-0026 all depend on FP-0017 directly or transitively.",
+      "reproduction": "Follow the dependencies: plan.json:850-853 (FP-0019 needs FP-0018), :800-802 (FP-0018 needs FP-0017), :749-752 (FP-0017 needs FP-0029), then FP-0029 acceptance 1 at plan.json:1347.",
+      "replacement": "Replace line 44 with: \"The license, release identity, name, and trademark decisions block a public release, not local implementation or public development.\nThe wrapper-language selection blocks task `FP-0029` and every task that depends on it, starting with the browser shell in `FP-0017`.\""
+    },
+    {
+      "id": "F2",
+      "severity": "major",
+      "file": "engineering/plan.json",
+      "line": 982,
+      "problem": "FP-0021 acceptance says: 'Make the metadata sufficient to generate raw declarations for the first-party wrapper language.' The language is selected and recorded only in FP-0029, and FP-0029 depends on FP-0021. The graph does not guarantee a selection exists when FP-0021 is reviewed, so the reviewer may have nothing to check this criterion against.",
+      "reproduction": "Set FP-0021 to implemented while no language ADR exists. Its reviewer then has no language against which to check line 982. The FP-0029 state note (state.json:224) places the selection only 'before implementation starts' of FP-0029.",
+      "replacement": "plan.json:982 → \"Keep the metadata language-neutral, with ownership, lifetime, thread, and error semantics expressed as data rather than C or Zig syntax.\" Then add to the FP-0029 acceptance list after plan.json:1352: \"Generate the selected language's raw declarations from the FP-0021 metadata, and extend that metadata through a reviewed schema change where it falls short.\""
+    },
+    {
+      "id": "F3",
+      "severity": "major",
+      "file": "docs/ABI_AND_WRAPPERS.md",
+      "line": 76,
+      "problem": "The documents never define 'public embedding contract', and they describe its scope differently. The protected texts say 'public embedding contract' (CHARTER.md:21, AGENTS.md:20, ADR 0001:14), and ADR 0001:10 says 'public embedding boundary'. ARCHITECTURE.md:22 says 'public C ABI and process protocol'. ARCHITECTURE.md:48, ABI_AND_WRAPPERS.md:76, and plan.json:781 (FP-0017) say 'wrapper and the public C ABI'. Meanwhile the protected embedding-wrappers capability (qualification.json:130) lists a 'Zig API' as an embedding surface, ADOPTION_AND_GOVERNANCE.md:27 calls it 'the direct Zig API', and ABI_AND_WRAPPERS.md:48 defines the Zig idiom as 'over native internal interfaces'. The language choice is open. If the owner selects Zig, an agent can therefore argue that the shell may use the direct Zig API, which sits over internal interfaces, and still meet 'only the public embedding contract'. That defeats the maxim.",
+      "reproduction": "Read qualification.json:130, ABI_AND_WRAPPERS.md:48, and CHARTER.md:21 together, assuming Zig is the selected language.",
+      "replacement": "Insert after ABI_AND_WRAPPERS.md:77: \"The public embedding contract is the versioned C ABI and the process protocol.\nThe direct Zig API is not part of that contract, because it sits over internal interfaces.\nIf the owner selects Zig, the first-party wrapper binds the C ABI like every other wrapper.\" Then change ARCHITECTURE.md:48 to \"It is written in the first-party wrapper language and calls the engine through that wrapper and the public embedding contract.\" Change plan.json:781 to \"Write the shell in the first-party wrapper language and reach the engine only through that wrapper and the public embedding contract.\""
+    },
+    {
+      "id": "F4",
+      "severity": "minor",
+      "file": "docs/QUALIFICATION.md",
+      "line": 81,
+      "problem": "'A browser shell that calls internal engine interfaces does not qualify the embedding contract.' This reads as if such a shell is allowed and merely fails to count as evidence. The maxim forbids it outright, and the protected browser-product description requires it.",
+      "replacement": "\"A browser shell that calls internal engine interfaces fails both browser-product and embedding-wrappers qualification.\""
+    },
+    {
+      "id": "F5",
+      "severity": "minor",
+      "file": "engineering/plan.json",
+      "line": 1070,
+      "problem": "FP-0023 (Linux and macOS lanes) still describes only engine execution. It requires shell behavior ('Exercise text input, resize, focus, and process teardown'). The shell is now written in the first-party wrapper language, but FP-0029 qualifies that wrapper only on Windows (plan.json:1351). FP-0023's allowed_paths (plan.json:1044-1050) do not include 'bindings', and nothing pins or qualifies the wrapper toolchain on Linux or macOS.",
+      "replacement": "Add to the FP-0023 acceptance list: \"Pin, build, and execute the first-party wrapper and the browser shell on actual Linux and macOS hosts through the public embedding contract.\" Add \"bindings\" to FP-0023 allowed_paths."
+    },
+    {
+      "id": "F6",
+      "severity": "minor",
+      "file": "engineering/plan.json",
+      "line": 834,
+      "problem": "FP-0018 is the first task where contract gaps will appear: frames and the resource contract. Its allowed_paths include api, include, and src (plan.json:806-813), and its only reviewer is fairpane-review. Nothing requires public-contract additions to follow the 'normal review path' (ABI_AND_WRAPPERS.md:78) or the CHARTER decision class for public API compatibility, which requires an interface owner and an independent reviewer. FP-0017:782 meanwhile requires gaps to become separate contract tasks. The two tasks handle gaps inconsistently.",
+      "replacement": "Add to the FP-0018 acceptance list: \"Add each contract capability that the shell needs through a reviewed ABI schema change with C and first-party wrapper lifecycle tests, never through a shell-only entry point.\""
+    },
+    {
+      "id": "F7",
+      "severity": "minor",
+      "file": "engineering/plan.json",
+      "line": 1324,
+      "problem": "FP-0029 allowed_paths include the whole 'toolchains' directory. engineering/policy.json lists 'toolchains' as a policy root. Adding the wrapper pin in a routine task therefore changes the policy digest, and the broad path also covers the protected toolchains/zig.lock.json. The selected language's runtime is also never declared in engineering/dependencies.json, although the shipped browser will carry it.",
+      "replacement": "Narrow the path to \"toolchains/wrapper.lock.json\". Add this FP-0029 criterion: \"Declare the selected language's toolchain and shipped runtime in a reviewed change to `engineering/dependencies.json`, separate from the wrapper implementation.\""
+    },
+    {
+      "id": "F8",
+      "severity": "minor",
+      "file": "engineering/HANDOFF.md",
+      "line": 58,
+      "problem": "The 'Owner decisions' section does not record the open wrapper-language selection. It also does not record that FP-0017 and its dependents wait on that selection. The frozen contracts for FP-0002, FP-0003, FP-0004, and FP-0028 name their base as the FP-0001 acceptance commit (7edca1e) at engineering/evidence/FP-0004/CONTRACT.md:7, for example. That commit predates this policy change, and the policy digest has changed since.",
+      "replacement": "After line 58 add: \"The first-party wrapper language remains open.\nTask `FP-0029` needs the owner's selection from a recorded comparison, and `FP-0017` waits on `FP-0029`.\nWorkers base on commit `1eae1f0` or later, which carries the current founding policy.\""
+    },
+    {
+      "id": "F9",
+      "severity": "minor",
+      "file": "engineering/plan.json",
+      "line": 902,
+      "problem": "FP-0020 (broker and origin policy) depends on the shell (FP-0017), and its allowed_paths include 'apps'. Nothing prevents the broker from being built as shell-only code. That would contradict ADR 0001:23 ('No private engine interface can serve the browser and remain unavailable to other embedders') and the ARCHITECTURE diagram, which places the broker below the C ABI.",
+      "replacement": "Add to the FP-0020 acceptance list: \"Expose broker decisions to the shell only through the public embedding contract, so every embedder receives the same containment.\""
+    },
+    {
+      "id": "F10",
+      "severity": "nit",
+      "file": "book/src/index.md",
+      "line": 3,
+      "problem": "'a planned first-party Zig web engine and minimal native browser' reads as if the browser is also written in Zig. Line 6 says otherwise.",
+      "replacement": "\"Fairpane is a planned first-party Zig web engine with a minimal native browser.\""
+    },
+    {
+      "id": "F11",
+      "severity": "nit",
+      "file": "docs/TOOLCHAIN.md",
+      "line": 1,
+      "problem": "The toolchain policy covers only Zig. FP-0029 requires pinning the wrapper toolchain 'to exact versions and verified artifact digests', but no policy text explains how. README.md:64 also describes `toolchains/` as 'Exact Zig master artifact lock.' That description becomes incomplete once FP-0029 lands.",
+      "replacement": "Add a section to TOOLCHAIN.md: \"## First-party wrapper toolchain\n\nThe owner-selected wrapper language uses an exact toolchain pin with verified artifact digests.\nIts upgrades follow the same separate-branch procedure as compiler upgrades.\""
+    },
+    {
+      "id": "F12",
+      "severity": "nit",
+      "file": ".omp/agents/fairpane-review.md",
+      "line": 9,
+      "problem": "The independent reviewer enforces the maxim, but neither the reviewer prompt nor .omp/RULES.md mentions it. .omp/agents/fairpane-platform.md:7 also omits docs/ABI_AND_WRAPPERS.md from its read list, although the platform agent writes code in the wrapper language. AGENT_LAUNCH.md:39 says the selection must precede 'the shell work'. The selection actually has to precede the wrapper work in FP-0029.",
+      "replacement": "fairpane-review.md, after line 9: \"Reject shell code that reaches the engine outside the public embedding contract.\" fairpane-platform.md:7 → \"Read docs/PRODUCT.md, docs/ABI_AND_WRAPPERS.md, and docs/SECURITY.md.\" AGENT_LAUNCH.md:39 → \"Obtain the owner's selection of the wrapper language from a recorded comparison before the first-party wrapper work starts.\""
+    },
+    {
+      "id": "F13",
+      "severity": "nit",
+      "file": "engineering/workstreams.json",
+      "line": 85,
+      "problem": "'A first-party wrapper qualified first and used by the browser shell, then qualified ownership, errors, ...' does not parse cleanly. plan.json:782 'every capability gap that the shell meets in the public contract' is also awkward. The rest of the repository's wording is 'needs and the contract lacks'.",
+      "replacement": "workstreams.json:85 → \"The first-party wrapper, qualified first and used by the browser shell, followed by qualified ownership, errors, cancellation, and runtime behavior across the published language adapter contract.\" plan.json:782 → \"Record each capability that the shell needs and the public contract lacks as a contract task, never as a private shortcut.\""
+    }
+  ],
+  "informational": [
+    "Editing AGENTS.md, CHARTER.md, and qualification.json changes the policy fingerprint (policy.json policy_roots). The FP-0001 receipts are therefore stale under evidence-check --current. That is expected, and their historical validity at 97c01b9 still holds.",
+    "BOOTSTRAP_MANIFEST.sha256 lists the original archive digests, so files these commits changed no longer match it. That is also true of files that earlier commits changed. It is not a new defect.",
+    "The protected-policy commit (ad7ff17) is separate from the dependent-documentation commit (1eae1f0), as AGENTS.md requires. This review is the independent approval step."
+  ],
+  "checks_main_agent_should_run": [
+    "node tools/fairpane.mjs check",
+    "node tools/fairpane.mjs test",
+    "node tools/fairpane.mjs next (confirm that FP-0029 is not ready before FP-0021 is accepted, and FP-0017 is not ready before FP-0029 is accepted)",
+    "mdbook build book (confirm that the {{#include}} chapters render the changed docs)"
+  ]
+}

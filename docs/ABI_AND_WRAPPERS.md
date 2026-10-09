@@ -73,8 +73,13 @@ One wrapper language is first-party.
 The project maintains that wrapper with the engine and qualifies it before any other wrapper.
 The browser shell is written in that language, so Fairpane's own application is the wrapper's first and heaviest user.
 
-The shell reaches the engine only through this wrapper and the public C ABI.
+The shell reaches the engine only through this wrapper and the public embedding contract.
 It never calls internal Zig interfaces.
+
+The public embedding contract is the versioned C ABI and the process protocol.
+The direct Zig API is not part of that contract, because it sits over internal interfaces.
+If the owner selects Zig, the first-party wrapper binds the C ABI like every other wrapper.
+
 When the shell needs a capability that the contract lacks, the contract gains that capability through the normal review path.
 Other embedders then receive the same capability.
 

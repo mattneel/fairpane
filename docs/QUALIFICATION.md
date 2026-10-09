@@ -78,5 +78,5 @@ A success status without actual execution is a failure.
 A test that asserts a constant instead of the requested behavior is a failure.
 A hardcoded fixture screenshot is not renderer qualification.
 A wrapper around another engine violates the first-party profile even when compatibility results improve.
-A browser shell that calls internal engine interfaces does not qualify the embedding contract.
+A browser shell that calls internal engine interfaces fails both browser-product and embedding-wrappers qualification.
 Bootstrap success never implies completion of a higher stage.

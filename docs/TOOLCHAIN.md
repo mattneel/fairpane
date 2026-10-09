@@ -36,6 +36,11 @@ Bun is an alternative host, with its own required qualification before CI adopti
 OMP is external development infrastructure.
 External conformance harness dependencies remain isolated from the renderer package.
 
+## First-party wrapper toolchain
+
+The owner-selected wrapper language uses an exact toolchain pin with verified artifact digests.
+Its upgrades follow the same separate-branch procedure as compiler upgrades.
+
 ## Upgrade procedure
 
 1. Fetch the official Zig index through an approved network path.
