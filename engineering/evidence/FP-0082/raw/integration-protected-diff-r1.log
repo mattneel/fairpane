@@ -1,0 +1,24 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","a3e5cf9","9a68167","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains","specs"]
+ engineering/policy.json      |  6 ++++++
+ specs/IMPORT_REQUIREMENTS.md |  6 +++---
+ specs/README.md              |  2 ++
+ specs/applicability/wpt.json |  2 +-
+ specs/sources.json           | 16 ++++++++++++----
+ 5 files changed, 24 insertions(+), 8 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","a3e5cf9","9a68167","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains","specs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:25:55.421Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","log","--format=%h %s","a3e5cf9..9a68167","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains","specs"]
+2e07f89 policy: protect rust-toolchain.toml (P2)
+775d988 FP-0052: share the snapshot write phase, lock fetches, and fix specs
+9fb8d8f policy: protect the Rust pin and its selection file
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["log","--format=%h %s","a3e5cf9..9a68167","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains","specs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:28:57.604Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","5d41509^","5d41509","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains","specs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","5d41509^","5d41509","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains","specs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:28:57.724Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","9a68167^","9a68167","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains","specs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","9a68167^","9a68167","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains","specs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:28:57.807Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":23}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","a3e5cf9","9a68167","--","specs/applicability/test262.json"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","a3e5cf9","9a68167","--","specs/applicability/test262.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:28:57.884Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}

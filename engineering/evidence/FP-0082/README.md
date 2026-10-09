@@ -312,3 +312,15 @@ Review 1 found that `raw/mutation.log` had no recorded `git apply --check`, so t
 - The hashed parameter set is emptied by removing the names that a check inserted, so a later check never pays for the capacity that an earlier, larger function left.
   [INFERENCE] Each removal compares about one name, and case 4's bound counts those comparisons too.
 - The census file's SHA-256 equals the one in `raw/census.log`, so the E96 change altered no census run.
+
+### Revision 1 integration
+
+The integrator applied the worker's own patch `out/fp0082-r1.patch` (blob `aa77e387`, base `a695d51`) without conflicts and committed it as `9a68167`.
+
+- `raw/integration-binding-r1.log` records `HEAD` `1a15063`, which contains `9a68167`, and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
+- `gates/2026-10-09T17-22-04-124Z-repo-check-c8cd2194.json`, `gates/2026-10-09T17-22-04-499Z-controller-test-6ac0f68c.json`, `gates/2026-10-09T17-23-21-279Z-zig-fmt-8c4aa033.json`, and `gates/2026-10-09T17-23-21-639Z-zig-test-51499c4c.json` pass.
+- `raw/integration-tests-r1.log` runs `zig build test --summary all` with the fresh cache `out/fp0082-r1-integration`: 100 of 100 build steps and 322 of 322 tests pass.
+- `raw/bun-selftest-r1.log` records Bun and `tools/selftest.mjs` with 236 of 236 tests.
+- `raw/integration-protected-diff-r1.log` first records the diff of the protected paths and `specs` from `a3e5cf9` to `9a68167`, as the revision asks.
+  It is not empty, because the range holds other tasks' commits: P1 `9fb8d8f`, P2 `2e07f89`, and FP-0052's `775d988`, as the log's `git log` lists.
+  The same log shows that neither FP-0082 commit, `5d41509` or `9a68167`, changes a protected path or `specs`, and that `specs/applicability/test262.json` is unchanged across the range.
