@@ -1,0 +1,12 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..8a770e2 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -309,7 +309,6 @@ pub fn decode(source: Source, gpa: Allocator, glyph: u16, limits: Limits) Outlin
+         if (flags & we_have_instructions != 0) top.instructions = true;
+         top.records += 1;
+ 
+-        for (frames[0..level]) |frame| if (frame.glyph == child) return error.CompositeCycle;
+         const child_data = try source.glyphData(loca, child);
+         if (isComposite(child_data)) {
+             // The top-level composite is level 1, so the child's level is `level + 1`.

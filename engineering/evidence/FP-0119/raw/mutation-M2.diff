@@ -1,0 +1,13 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..47ec37c 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -393,7 +393,7 @@ fn nextFlagRun(data: Reader, at: *u64) OutlineError!FlagRun {
+     at.* += 1;
+     var count: u32 = 1;
+     if (flag & repeat_flag != 0) {
+-        count += data.u8At(at.*) orelse return error.InvalidGlyph;
++        count += @as(u32, data.u8At(at.*) orelse return error.InvalidGlyph) + 1;
+         at.* += 1;
+     }
+     return .{ .flag = flag, .count = count };

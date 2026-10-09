@@ -1,0 +1,15 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..143deeb 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -286,8 +286,8 @@ pub fn decode(source: Source, gpa: Allocator, glyph: u16, limits: Limits) Outlin
+             placement.arg1 = if (xy) top.data.i16At(at + 4).? else top.data.u16At(at + 4).?;
+             placement.arg2 = if (xy) top.data.i16At(at + 6).? else top.data.u16At(at + 6).?;
+         } else {
+-            placement.arg1 = if (xy) @as(i8, @bitCast(top.data.u8At(at + 4).?)) else top.data.u8At(at + 4).?;
+-            placement.arg2 = if (xy) @as(i8, @bitCast(top.data.u8At(at + 5).?)) else top.data.u8At(at + 5).?;
++            placement.arg1 = @as(i8, @bitCast(top.data.u8At(at + 4).?));
++            placement.arg2 = @as(i8, @bitCast(top.data.u8At(at + 5).?));
+         }
+         const t = at + 4 + args_len;
+         switch (transform_len) {

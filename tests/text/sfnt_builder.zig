@@ -566,7 +566,7 @@ pub const tt_cmap_format4_offset = 28;
 pub const tt_cmap_format12_offset = 68;
 
 /// One simple glyph whose points all lie on the curve, with 16-bit coordinate deltas.
-fn simpleGlyph(w: *Writer, bbox: [4]i16, points: []const [2]i16) !void {
+pub fn simpleGlyph(w: *Writer, bbox: [4]i16, points: []const [2]i16) !void {
     try w.i16_(1);
     for (bbox) |v| try w.i16_(v);
     try w.u16_(@intCast(points.len - 1)); // endPtsOfContours[0]

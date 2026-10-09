@@ -1,0 +1,20 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..a79a179 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -366,7 +366,6 @@ fn pointIndex(number: i32, count: u64) OutlineError!u64 {
+ /// Applies the component matrix to the child's points, then moves them by the component offset.
+ fn place(b: *Builder, placement: Placement, parent_first: u32) OutlineError!void {
+     const child = b.points.items[placement.child_start..];
+-    for (child) |*q| q.* = placement.matrix.apply(q.*);
+     var offset: Point = undefined;
+     if (placement.flags & args_are_xy_values != 0) {
+         offset = .{ .x = @floatFromInt(placement.arg1), .y = @floatFromInt(placement.arg2) };
+@@ -381,6 +380,7 @@ fn place(b: *Builder, placement: Placement, parent_first: u32) OutlineError!void
+         const l = try pointIndex(placement.arg2, child.len);
+         offset = .{ .x = parent[k].x - child[l].x, .y = parent[k].y - child[l].y };
+     }
++    for (child) |*q| q.* = placement.matrix.apply(q.*);
+     for (child) |*q| q.* = .{ .x = q.x + offset.x, .y = q.y + offset.y };
+ }
+ 

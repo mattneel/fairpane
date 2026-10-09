@@ -1,8 +1,10 @@
-//! An allocation-free OpenType parser for a frozen table set.
-//! `parse` borrows the font bytes, checks the table directory and every required table, and records checksum integrity.
-//! Optional tables are checked on access and never fail the font. Outlines, hinting, and layout lookups are not interpreted.
-//! Every read goes through `Reader`, offset sums use 64-bit arithmetic, no loop runs more often than a count read from the input
-//! after that count is checked against the remaining bytes, and no function recurses.
+//! An OpenType parser for a frozen table set, and a TrueType outline decoder.
+//! `parse` borrows the font bytes, takes no allocator, and allocates nothing. It checks the table directory and every required
+//! table, and records checksum integrity. Optional tables are checked on access and never fail the font.
+//! `Font.trueTypeGlyph` decodes TrueType outlines and allocates only through its `gpa`. Hinting, CFF charstrings, and layout
+//! lookups are not interpreted. Every read goes through `Reader`, offset sums use 64-bit arithmetic, no loop runs more often
+//! than a count read from the input after that count is checked against the remaining bytes or a caller's budget,
+//! and no function recurses.
 
 const std = @import("std");
 const reader = @import("reader.zig");
@@ -10,6 +12,8 @@ const tables = @import("tables.zig");
 const cmap_mod = @import("cmap.zig");
 const cff_mod = @import("cff.zig");
 const layout = @import("layout.zig");
+pub const outline_model = @import("outline.zig");
+pub const glyf_decoder = @import("glyf.zig");
 
 const Reader = reader.Reader;
 pub const Tag = reader.Tag;
@@ -300,6 +304,15 @@ pub const Font = struct {
         return tables.glyphHeader(self.glyf_table.sub(start, end - start) orelse return error.InvalidGlyph);
     }
 
+    /// The unhinted TrueType outline of `glyph`, in font units with y pointing up, flattened across its components.
+    /// `GlyphOutOfRange` means `glyph` is at or past numGlyphs, and `NotTrueType` means the font has CFF outlines.
+    /// A zero-length `loca` range is an empty glyph. `InvalidGlyph` also means that a `loca` range no longer lies inside
+    /// `glyf`, because the bytes changed after `parse`. Point matching against a phantom point returns
+    /// `UnsupportedPhantomPoint`. Every allocation goes through `gpa`, and the caller frees the result with `deinit`.
+    pub fn trueTypeGlyph(self: *const Font, gpa: std.mem.Allocator, glyph: u16, limits: outline_model.Limits) outline_model.OutlineError!glyf_decoder.TrueTypeGlyph {
+        return glyf_decoder.decode(.{ .glyf = self.glyf_table, .loca = self.loca_table, .num_glyphs = self.glyphCount() }, gpa, glyph, limits);
+    }
+
     /// Each call checks the `name` table again, in time linear in its length.
     pub fn name(self: *const Font) TableStatus(Name) {
         return tables.parseName(self.knownTable(.name) orelse return .absent);
@@ -441,6 +454,8 @@ pub fn parse(bytes: []const u8, options: ParseOptions) ParseError!Font {
 
 test {
     _ = reader;
+    _ = outline_model;
+    _ = glyf_decoder;
 }
 
 test "block word sums equal the direct checksum, the reference path, for every aligned table range" {

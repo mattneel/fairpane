@@ -64,7 +64,7 @@
       "status": "remaining",
       "owner_task": "FP-0056",
       "summary": "glyf outline and composite decoding, CFF Type 2 charstrings, and scan conversion.",
-      "engine_behavior": "No API. glyphHeader returns only the 10-byte glyf header, and no outline point, flag, component, or charstring is decoded."
+      "engine_behavior": "Font.trueTypeGlyph decodes TrueType simple and composite outlines in font units without hinting. It returns error.UnsupportedPhantomPoint for point matching against a phantom point and error.NotTrueType for a CFF font. CFF charstrings are not interpreted, and no scan converter exists."
     },
     {
       "id": "truetype-hinting",

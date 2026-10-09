@@ -1,0 +1,13 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..e18cb83 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -156,7 +156,7 @@ const Matrix = struct {
+     yscale: f64 = 1,
+ 
+     fn apply(m: Matrix, p: Point) Point {
+-        return .{ .x = m.xscale * p.x + m.scale10 * p.y, .y = m.scale01 * p.x + m.yscale * p.y };
++        return .{ .x = m.xscale * p.x + m.scale01 * p.y, .y = m.scale10 * p.x + m.yscale * p.y };
+     }
+ };
+ 

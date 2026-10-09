@@ -1,0 +1,13 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..5fa21a0 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -313,7 +313,7 @@ pub fn decode(source: Source, gpa: Allocator, glyph: u16, limits: Limits) Outlin
+         const child_data = try source.glyphData(loca, child);
+         if (isComposite(child_data)) {
+             // The top-level composite is level 1, so the child's level is `level + 1`.
+-            if (level + 1 > max_composite_depth) return error.CompositeTooDeep;
++            if (level + 1 >= max_composite_depth) return error.CompositeTooDeep;
+             top.pending = placement;
+             frames[level] = startFrame(child, child_data, placement.child_start);
+             level += 1;

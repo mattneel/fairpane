@@ -1,0 +1,13 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..292835f 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -73,7 +73,7 @@ pub const TrueTypeGlyph = struct {
+                 start = q[m - 1];
+                 rest_to = m - 1;
+             } else {
+-                start = midpoint(q[m - 1], q[0]);
++                start = q[0];
+             }
+             verbs.appendAssumeCapacity(.move);
+             points.appendAssumeCapacity(start);

@@ -1,0 +1,13 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..a8ddc14 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -411,7 +411,7 @@ fn coordinate(data: Reader, at: *u64, flag: u8, short: u8, same_or_positive: u8)
+     if (flag & short != 0) {
+         const magnitude: i64 = data.u8At(at.*) orelse return error.InvalidGlyph;
+         at.* += 1;
+-        return if (flag & same_or_positive != 0) magnitude else -magnitude;
++        return if ((flag & same_or_positive != 0) != (short == x_short_vector)) magnitude else -magnitude;
+     }
+     if (flag & same_or_positive != 0) return 0;
+     const delta = data.i16At(at.*) orelse return error.InvalidGlyph;

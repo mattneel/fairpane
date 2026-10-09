@@ -1,0 +1,13 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..2ab9eb8 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -371,7 +371,7 @@ fn place(b: *Builder, placement: Placement, parent_first: u32) OutlineError!void
+     if (placement.flags & args_are_xy_values != 0) {
+         offset = .{ .x = @floatFromInt(placement.arg1), .y = @floatFromInt(placement.arg2) };
+         // Both flags together fall back to the unscaled default.
+-        const scaled = placement.flags & scaled_component_offset != 0 and placement.flags & unscaled_component_offset == 0;
++        const scaled = false;
+         if (scaled) offset = placement.matrix.apply(offset);
+     } else {
+         // Point matching needs points already incorporated, so it cannot place the first component.

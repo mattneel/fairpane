@@ -1,0 +1,13 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..60a20c7 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -270,7 +270,7 @@ pub fn decode(source: Source, gpa: Allocator, glyph: u16, limits: Limits) Outlin
+         if (transforms > 1) return error.InvalidGlyph;
+         if (child >= source.num_glyphs) return error.InvalidGlyph;
+         components += 1;
+-        if (components > limits.max_components) return error.OutlineTooLarge;
++        if (components >= limits.max_components) return error.OutlineTooLarge;
+         countWork();
+ 
+         const xy = flags & args_are_xy_values != 0;

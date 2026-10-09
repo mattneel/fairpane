@@ -1,0 +1,13 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..a5aefe9 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -359,7 +359,7 @@ fn pointIndex(number: i32, count: u64) OutlineError!u64 {
+     if (number < 0) return error.InvalidGlyph;
+     const index: u64 = @intCast(number);
+     if (index < count) return index;
+-    if (index < count + 4) return error.UnsupportedPhantomPoint;
++    if (index < count + 4) return error.InvalidGlyph;
+     return error.InvalidGlyph;
+ }
+ 

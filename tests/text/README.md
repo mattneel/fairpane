@@ -2,10 +2,10 @@
 
 ## Scope
 
-These tests cover task FP-0013: Unicode 18.0.0 properties and allocation-free OpenType parsing.
+These tests cover task FP-0013, Unicode 18.0.0 properties and allocation-free OpenType parsing, and task FP-0119, TrueType outline decoding.
 `build.zig` roots a test artifact at `root.zig`, which imports the library module as `fairpane`.
 `zig build test` runs them.
-Each test is named `FP-0013 case N: ...` after the case list in `engineering/evidence/FP-0013/CONTRACT.md`.
+Each test is named `FP-0013 case N: ...` or `FP-0119 case N: ...` after the case list in `engineering/evidence/FP-0013/CONTRACT.md` or `engineering/evidence/FP-0119/CONTRACT.md`.
 No test here shapes, segments, rasterizes, or selects a fallback font; `specs/capabilities/text-fonts.json` names the tasks that own that work.
 
 ## Font fixtures
@@ -69,8 +69,28 @@ U+2068 and U+2069 stay unasserted in the `mixed-direction` coverage.
 Named overrides change directory fields after layout and checksumming, so malformed variants stay small and exact.
 Cases 15 through 40 build every malformed font from these two definitions.
 
+## TrueType outlines
+
+`glyf_test.zig` holds the FP-0119 cases, and `glyf_builder.zig` writes their fixture font, F_GLYF.
+F_GLYF is `B_TT` with `indexToLocFormat` 1, a long `loca`, `maxp` 1.0 with 45 glyphs, one long horizontal metric, and 45 `glyf` entries.
+The entries are the contract's hex strings and `simpleGlyph` calls, laid out in glyph order with no padding.
+They cover flag repetition, every coordinate form, all-off-curve contours, every component transform, both offset-scaling flags,
+point matching with byte and word point numbers, composite instructions, depth 8 and 9 chains, cycles, and the points and component budgets.
+Variants replace one entry with changed or truncated bytes, and case 11 also changes single bytes of a built font in place.
+Case 7 reads `glyf_decoder.work`, a counter that exists only in test builds.
+Case 13 decodes on a thread with a 256 KiB stack.
+
+Case 14 decodes every glyph of the three TrueType fixtures and compares the points with each glyph header and the `maxp` maxima.
+The composite header bounds are compared with the rounded point bounds, an [INFERENCE] about how fontTools wrote them.
+`engineering/evidence/FP-0119/raw/observations.log` records, without asserting them, the counts of simple, composite, and empty glyphs,
+how many component records set each flag, and whether each `maxp` maximum is reached.
+Every component of the three fixtures uses `ARGS_ARE_XY_VALUES` and `ROUND_XY_TO_GRID`, so none uses point matching.
+
 ## Stop rules
 
 Some expected values are inferences about upstream content: zip member paths, coverage claims, U+20BB7 being in the CJK source, and release checksums.
 If such a value fails, stop and report the observed value to the integrator.
 Never edit an expectation file, a seed, or an upstream byte to pass a case.
+If a case 14 invariant fails, stop and report the font, the glyph ID, and both values.
+If any fixture glyph returns `UnsupportedPhantomPoint`, stop and report it.
+If an F_GLYF expectation contradicts the OpenType `glyf` chapter, stop and report it instead of changing it.

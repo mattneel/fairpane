@@ -1,0 +1,12 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..a7aff65 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -430,7 +430,6 @@ fn appendSimple(b: *Builder, data: Reader) OutlineError!void {
+     // The last end point gives the point count, which is checked against the budget before any point is decoded.
+     const last = data.u16At(10 + 2 * (contours - 1)) orelse return error.InvalidGlyph;
+     const point_count: u32 = @as(u32, last) + 1;
+-    if (b.points.items.len + @as(u64, point_count) > b.limits.max_points) return error.OutlineTooLarge;
+     var previous: i32 = -1;
+     var i: u64 = 0;
+     while (i < contours) : (i += 1) {

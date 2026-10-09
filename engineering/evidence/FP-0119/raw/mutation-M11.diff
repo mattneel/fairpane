@@ -1,0 +1,12 @@
+diff --git a/src/font/glyf.zig b/src/font/glyf.zig
+index 0be55a6..8f8d443 100644
+--- a/src/font/glyf.zig
++++ b/src/font/glyf.zig
+@@ -373,6 +373,7 @@ fn place(b: *Builder, placement: Placement, parent_first: u32) OutlineError!void
+         // Both flags together fall back to the unscaled default.
+         const scaled = placement.flags & scaled_component_offset != 0 and placement.flags & unscaled_component_offset == 0;
+         if (scaled) offset = placement.matrix.apply(offset);
++        if (placement.flags & 0x0004 != 0) offset = .{ .x = @round(offset.x), .y = @round(offset.y) };
+     } else {
+         // Point matching needs points already incorporated, so it cannot place the first component.
+         if (placement.first) return error.InvalidGlyph;
