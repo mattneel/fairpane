@@ -140,3 +140,32 @@ The integrator records these runs under `engineering/evidence/FP-0027/raw/` on t
 4. `provenance` for every file that the release build installs, and a copy of the statement.
 5. `reproduce-check`, whatever its result.
 6. `repo-check` and `controller-test` with `--evidence-dir engineering/evidence/FP-0027/gates`.
+
+## Revision 2
+
+Base: the commit that freezes this revision.
+Source finding: `engineering/evidence/FP-0027/reviews/review-2-reject.json`.
+Every section above stays in force except where this revision replaces it.
+The root integrator implements this revision.
+
+### Changes
+
+- ADR 0009's "Build type 1" section documents the `externalParameters` schema: `source.commit`, `source.tree`, `command`, `toolchain.zig_version`, `toolchain.platform`, and `toolchain.archive_sha256`.
+- Step 4 of the release procedure in `tools/README.md` states the fresh caches, the removal of inherited `ZIG_*` variables, and the tar digest check before extraction.
+- Case 5 also asserts that the report's `build_type_command` equals `BUILD_COMMAND`.
+- The README row for `raw/reproduce-diagnosis.log` states what the log shows, without claiming a fresh build.
+
+### Revision 2 evidence
+
+The integrator replaces the revision 1 release records with one uninterrupted sequence on the commit that implements this revision, from the main checkout, with no commit or source edit during the sequence.
+The revision 1 records stay in place as superseded records.
+
+1. `HEAD`, a status that includes ignored files for every source root, `git --version`, `node --version`, the locked compiler's version, and the list of inherited `ZIG_*` variables, which must be empty.
+2. `repo-check` and `controller-test` with `--evidence-dir engineering/evidence/FP-0027/gates`.
+3. `source-archive` into a new directory outside the repository, with `sha256sum` of its tar and manifest.
+4. The release build in a directory that did not exist before: the tar's SHA-256 before extraction, the extraction, the build with only the two cache overrides added, a recursive listing of the installed files, and `sha256sum` of each installed file, all recorded before any later step.
+5. `provenance` for every listed file, and the copies of the statement and the manifest with `sha256sum` of each copy beside its source.
+6. `reproduce-check`.
+7. `HEAD` and the status again after the last step.
+
+A step that stops responding stays in the record as its own log with the time and the way it was stopped.

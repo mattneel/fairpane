@@ -1,0 +1,156 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "ea3433abcc09ef22dec71b4e03e697e61f21cb16",
+    "aeebdf1072a925c9f9c09d071410437301c74aee"
+  ],
+  "summary": "Verdict: reject, because of one major finding. Revision 1's code and document changes are correct. The builder ID is now the required https URI (tools/release.mjs:20), and buildType uses the same ADR base (release.mjs:21). Both are TypeURIs with a lowercase scheme and authority and a version number in the anchor, which in-toto field_types.md and SLSA v1.0 (buildType at line 248 and builder.id at line 336 of the rendered spec) require. Case 4 checks the exact literal and parses both buildType and builder.id with `new URL` as https (release.test.mjs:236-241). The manifest records `git_version` (release.mjs:179), case 1 checks it (release.test.mjs:157), and the copied manifest carries `git version 2.54.0.windows.1`. ADR 0009 states that the tar depends on the Git implementation (line 29-30), that the toolchain fields are not observed from the build (58-59), and that the anchors never change (50-51, 71-72). tools/README.md:230-231 and 240 repeat these statements. `build_type_command` replaced `build_command` everywhere (release.mjs:362, ADR:81, README:247, r1-reproduce-check.log), and no stale `build_command` or `fairpane-local-unsigned` remains in tools, docs, decisions, state, handoff, or plan. tests-before-r1 fails exactly cases 1 and 4, and tests-after-r1 passes 9 of 9. The controller-test gate at 09:50, bound to ea3433a by r1-binding.log, passes 180 of 180, including every FP-0027 case. Most release evidence holds. source-archive wrote outside the repository, and sha256sum agreed with it. The release build used a directory created with a non-recursive mkdir, checked the tar's SHA-256 before extraction, and set fresh ZIG_LOCAL/GLOBAL caches inside that directory. reproduce-check of ea3433a regenerated the same tar digest (d5514c5e…), reported `different` with only lib/fairpane.lib, exited with status 1, and removed both trees. ea3433a changed no protected policy: the policy digest 70e1709e… with 22 files matches FP-0013's 09:37:48 receipts from before 3531b1a. The major finding is in evidence item 4. The README asserts that include/fairpane.h and lib/fairpane.lib are 'the only installed files' of the release build, and that their digests 'equal sha256sum of the installed files'. No committed log records the installed-file set of out/fp0027-r1-release or any sha256sum of those files. The README says the step that would have done this, listing the installed files, is the one that hung and was dropped. The README also says the committed manifest copy has 'the same SHA-256', and no log records that either. That is a claim of a check with no recorded output, which AGENTS.md's evidence rules forbid. As a non-record check, glob shows out/fp0027-r1-release/zig-out holds exactly those two files today, so the problem is the missing record, not a likely coverage gap. The split of the hung job is acceptable for provenance and reproduce-check, because both take the commit ID, read the commit's lock from its tree, and ran with a release-tool import closure (release.mjs, attest.mjs, lib.mjs, fairpane.mjs) whose logged `git diff --stat ea3433a HEAD` is empty. They ran from a 60c0c90 checkout, though, and state.json says 'ran on ea3433a' without that qualification. Review 1's minor findings 2 and 3 and all three notes are resolved. Its major finding and minor finding 4 are resolved for the r1 records. The old README row (line 35) still calls the worker's diagnosis build 'fresh', which is the wording review 1 flagged. I reviewed the working-tree contents at HEAD c283c70 (from .git/logs/HEAD), which descends from both reviewed commits. I had no git tool, so I did not view the commit diffs directly.",
+  "criteria": [
+    {
+      "criterion": "R1 Identifiers: builder ID is https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#unsigned-local-builder-1 and is a URI as SLSA Provenance v1 requires",
+      "met": true,
+      "evidence": "tools/release.mjs:15-21 define BUILDER_ID and BUILD_TYPE on the ADR base. raw/r1-provenance.log and raw/provenance-ea3433a….json carry the exact ID. SLSA v1.0 types runDetails.builder.id and buildType as in-toto TypeURI. field_types.md requires RFC 3986 with a lowercase scheme and authority, and recommends a version, which `-1` supplies. The branch is master (.git/HEAD), and the GitHub heading anchors #unsigned-local-builder-1 and #build-type-1 match ADR headings 'Unsigned local builder 1' and 'Build type 1'."
+    },
+    {
+      "criterion": "R1 ADR section 'Unsigned local builder 1' states that no verifier trusts this builder, and both anchors are immutable",
+      "met": true,
+      "evidence": "ADR 0009 lines 67-72: 'Any workspace writer can produce a statement with this builder ID, so no verifier trusts it. The meaning of this anchor never changes…'. Lines 50-51 say the same for build type 1, and line 51 states that an existing statement keeps the anchor that it names."
+    },
+    {
+      "criterion": "R1 Case 4: URI builder ID, and buildType and builder.id parse as absolute https: URLs",
+      "met": true,
+      "evidence": "tools/release.test.mjs:236-241 compare the builder ID with an independent literal and parse both fields with `new URL` (which throws for a relative reference) and protocol 'https:'. tests-before-r1.log shows case 4 failing on 'fairpane-local-unsigned', and tests-after-r1.log and controller-test fc421308 (ok 93) show it passing."
+    },
+    {
+      "criterion": "R1 Source archive inputs: manifest records git_version from the hardened Git calls, and case 1 expects the 'git version ' prefix",
+      "met": true,
+      "evidence": "release.mjs:43-47 (gitVersion via readGit) and :179. release.test.mjs:157. tests-before-r1.log fails case 1 with 'The manifest does not record the Git version', and tests-after-r1.log passes it. The copied manifest (line 6) has 'git version 2.54.0.windows.1', which matches r1-binding.log."
+    },
+    {
+      "criterion": "R1 ADR 0009 and tools/README.md state that the tar depends on the commit and on the Git implementation; the tar is not committed",
+      "met": true,
+      "evidence": "ADR lines 29-30. tools/README.md:230-231. No .tar exists under engineering/evidence/FP-0027 (glob). README line 74 states the tar is not stored."
+    },
+    {
+      "criterion": "R1 ADR states that the toolchain fields come from the commit's lock and the recording host, and that a protected runner must bind them",
+      "met": true,
+      "evidence": "ADR lines 58-59. tools/README.md:240. release.mjs commitLock reads toolchains/zig.lock.json from the commit's tree."
+    },
+    {
+      "criterion": "R1 report field renamed to build_type_command, and builds keep exact per-tree arguments",
+      "met": true,
+      "evidence": "release.mjs:362. ADR:81. tools/README.md:247. r1-reproduce-check.log shows build_type_command and absolute per-tree --prefix arguments. A grep for build_command in tools, docs, and engineering decisions, state, handoff, and plan finds nothing."
+    },
+    {
+      "criterion": "R1 evidence 1: HEAD, status with ignored files for every source root, git/node/zig versions",
+      "met": true,
+      "evidence": "r1-binding.log, 09:50:12-13Z: HEAD ea3433a, empty `status --porcelain --untracked-files=all --ignored` over the policy.json source roots, git 2.54.0.windows.1, node v26.7.0, and zig 0.18.0-dev.120+9fe22a29b."
+    },
+    {
+      "criterion": "R1 evidence 2: source-archive with an output directory outside the repository, plus a manifest copy",
+      "met": true,
+      "evidence": "r1-source-archive.log: output in %TEMP%, exit 0, 917 files, tar d5514c5e…, and manifest 9fa150fb…. Both are confirmed by a logged sha256sum. The committed manifest has 5516 lines, which is consistent with a 12-line header, 917 six-line entries, and 2 closing lines. No log records the claimed equal SHA-256 of the committed copy."
+    },
+    {
+      "criterion": "R1 evidence 3: release build in a new directory, tar SHA-256 before extraction, extraction, fresh local and global caches inside the directory",
+      "met": true,
+      "evidence": "r1-release-build.log: a non-recursive `fs.mkdirSync` (it would fail with EEXIST on an existing path) exits 0. sha256sum of the tar gives d5514c5e…, which equals the manifest. tar.exe -xf … --strip-components 1 exits 0. zig build -Doptimize=ReleaseSafe --prefix …\\zig-out exits 0 with ZIG_LOCAL_CACHE_DIR and ZIG_GLOBAL_CACHE_DIR inside out\\fp0027-r1-release. The reflog places the next commit (d55b300) at 09:53:11Z, after the build ended at about 09:51:55Z, so HEAD was ea3433a during the build. Caveat: other inherited ZIG_* variables were not scrubbed (minor finding)."
+    },
+    {
+      "criterion": "R1 evidence 4: provenance for every file the release build installs, with matching digests, and a copy of the statement",
+      "met": false,
+      "evidence": "r1-provenance.log runs provenance on include/fairpane.h and lib/fairpane.lib, exits 0, and records subjects 845b602f… and 45afa4da…, with a byte-identical committed copy. No log records the installed-file set of out/fp0027-r1-release/zig-out or any sha256sum of the installed files, yet README line 76 asserts both. The listing step hung and was dropped. A non-record check with glob shows the directory now holds exactly these two files, and fairpane.h matches both reproduce-check trees."
+    },
+    {
+      "criterion": "R1 evidence 5: reproduce-check on ea3433a, whatever its result",
+      "met": true,
+      "evidence": "r1-reproduce-check.log: commit ea3433a, source_tar_sha256 d5514c5e… (equal to the source-archive tar), both builds exit 0 with fresh caches, differing ['lib/fairpane.lib'], removal.removed true, and exit 1. It was executed from a 60c0c90 checkout (r1-binding.log 10:10:32), and the logged diff of the release-tool closure from ea3433a is empty."
+    },
+    {
+      "criterion": "R1 evidence 6: repo-check and controller-test with --evidence-dir engineering/evidence/FP-0027/gates",
+      "met": true,
+      "evidence": "gates/2026-10-09T09-50-13-341Z-repo-check-20faffbf.json and 09-50-13-648Z-controller-test-fc421308.json are both 'pass', with unchanged source and policy fingerprints. They are bound to ea3433a by r1-binding.log at 09:50:12-13Z. The controller log shows 180 of 180 passing, including ok 90-98 for FP-0027."
+    },
+    {
+      "criterion": "No protected-policy change in revision 1",
+      "met": true,
+      "evidence": "The policy fingerprint 70e1709e… with 22 files at 09:50:13 equals the FP-0013 gate receipts at 09:37:48, which predate 3531b1a and ea3433a. Every protected path lies inside policy_roots (engineering/policy.json:36-54). Tools and engineering/decisions are not policy roots. The change from b142ba… with 17 files predates this revision."
+    },
+    {
+      "criterion": "Integrator's split of the stuck shell job, and the claim that later commits changed no release tool",
+      "met": true,
+      "evidence": "r1-binding.log (10:10:32) logs `git diff --stat ea3433a HEAD -- tools/release.mjs tools/attest.mjs tools/lib.mjs tools/fairpane.mjs` with empty output and exit 0. release.mjs imports only attest.mjs and lib.mjs, and neither imports another local module (grep). Both commands take the full commit ID, and the lock is read from the commit. Gaps: the hung command is not preserved, and fairpane.mjs's other startup imports (corpus.mjs, abi.mjs, ucd.mjs) were not in the diff. Both are lesser findings."
+    },
+    {
+      "criterion": "Review 1 minor findings and notes resolved",
+      "met": false,
+      "evidence": "Resolved: the URI builder ID (minor 2), the Git dependence and git_version (minor 3), the toolchain-field statement (note 1), the immutable anchors (note 2), and the build_type_command rename (note 3). The state.json correction from the major finding is made at line 356. Minor 4 is resolved for the r1 records (a new directory and a tar digest before extraction), but README line 35 still describes the worker's diagnosis as a 'second fresh extraction', the unsupported wording that review 1 flagged."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "engineering/evidence/FP-0027/README.md",
+      "line": 76,
+      "issue": "Revision 1 evidence item 4 requires provenance for every file that the release build installs. README line 76 asserts that fairpane.h and fairpane.lib are 'the only installed files' and that the subject digests 'equal `sha256sum` of the installed files'. raw/r1-provenance.log contains only the provenance invocation. No committed log records a listing of out/fp0027-r1-release/zig-out or any sha256sum of the installed files. README line 80 says that step is exactly the one that hung, and the integrator stopped it and never re-recorded it. Line 74 likewise claims that the committed manifest copy has 'the same SHA-256' as 9fa150fb…, with no recorded hash of the copy. These are claims of checks without actual output, contrary to AGENTS.md's evidence rules. To reproduce, search raw/ for 'zig-out\\\\lib' or for a sha256sum of fairpane.lib. Only the provenance command line matches. (As a non-record check, glob shows the install tree now holds exactly lib/fairpane.lib and include/fairpane.h, so coverage is probably complete but unrecorded.)",
+      "recommendation": "Use recordCommand to log a recursive listing of out/fp0027-r1-release/zig-out and `sha256sum` of each installed file. The directory still exists. Also log `sha256sum` of raw/fairpane-ea3433a….manifest.json. Alternatively, remove the unsupported claims from lines 74 and 76 and state the coverage basis that is actually recorded."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0027/README.md",
+      "line": 81,
+      "issue": "The hung command's invocation, the time it was stopped, and the way it was stopped are not preserved in any raw log. The README says 'the logs contain only completed commands'. [INFERENCE] If the listing went through recordCommand, its COMMAND line was written first (lib.mjs openLog) and later removed. AGENTS.md requires that failures, crashes, and timeouts stay distinct records. About 18.5 minutes passed between the end of the build (~09:51:55Z) and provenance (10:10:32Z), with no digest of the installed files recorded at build time, and out/ is not a fingerprinted source root.",
+      "recommendation": "Record the hung command and its termination as an explicit incomplete entry, or as a separate log with the reason it was stopped. In future runs, hash the install tree in the same step as the build."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/state.json",
+      "line": 358,
+      "issue": "The note says 'The revision 1 release records ran on ea3433a', but provenance and reproduce-check ran from a checkout at 60c0c90 (r1-binding.log 10:10:32Z), with ea3433a only as the subject argument. The README discloses this at line 70, but state.json does not. Contract revision 1 asks for these runs 'on the commit that implements this revision'. The logged diff covers release.mjs's full import closure but not the other modules that fairpane.mjs imports at startup (tools/fairpane.mjs:9-13: corpus.mjs, abi.mjs, ucd.mjs). Commit 78c8f7d (FP-0054, which may write tools) lies between the two commits.",
+      "recommendation": "State in state.json that provenance and reproduce-check executed from 60c0c90 with an unchanged release-tool closure. Either extend the diff to every module that tools/fairpane.mjs imports, or rerun from a checkout of ea3433a."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0027/raw/r1-release-build.log",
+      "line": 12,
+      "issue": "ADR 0009 line 47 defines build type 1 with 'no other inherited `ZIG_*` variable', and the provenance statement claims build type 1. The manual release build went through runProcess, which spawns with `{ ...process.env, ...env }` (tools/lib.mjs:387). Inherited ZIG_* variables were therefore not removed, and the log records only the two overrides. reproduce-check strips them (release.mjs runBuild), but this build did not.",
+      "recommendation": "Run the release build with an environment that strips ZIG_* (as runBuild does), and record that, or record the absence of ZIG_* variables in the build environment."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0027/README.md",
+      "line": 35,
+      "issue": "Review 1's minor finding about reproduce-diagnosis.log is not corrected for the old record. The row still says 'A second fresh extraction and build at the same path', and the log shows extraction into the existing out/fp0027-build/a with no removal of the previous tree or caches.",
+      "recommendation": "Reword the row to say what the log shows, which is an extraction and build in the existing path, without claiming freshness."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/state.json",
+      "line": 343,
+      "issue": "The FP-0027 evidence list omits raw/r1-binding.log, raw/tests-after-r1.log, the copied manifest, and the copied provenance statement, which the revision 1 evidence relies on.",
+      "recommendation": "Add them to the evidence list."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0027/raw/tests-after-r1.log",
+      "line": 2,
+      "issue": "The log ran at 09:49:29Z, before commit ea3433a (09:49:38Z per the reflog), with no HEAD or status recorded. The bound controller-test gate (180/180, ok 90-98) covers the same cases on ea3433a, so this is only a binding gap.",
+      "recommendation": "Cite the gate as the binding record for the after state, or record HEAD and diff alongside such runs."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/decisions/0009-release-and-stewardship.md",
+      "line": 44,
+      "issue": "SLSA v1.0 says that a buildType URI SHOULD resolve to a specification that includes the externalParameters schema. 'Build type 1' does not describe the externalParameters fields (source.commit, source.tree, command, toolchain.zig_version, platform, archive_sha256). The release procedure in tools/README.md (step 4, line 228) also omits the fresh caches, the ZIG_* stripping, and the tar digest check that build type 1 and revision 1 rely on.",
+      "recommendation": "Document the externalParameters schema under 'Build type 1', and make README step 4 state the cache and environment requirements."
+    },
+    {
+      "severity": "note",
+      "path": "tools/release.test.mjs",
+      "line": null,
+      "issue": "No test asserts the `build_type_command` field name or value in a reproduce-check report. Revision 1 did not require one, and the rename is visible only in the real run log.",
+      "recommendation": "Optionally assert report.build_type_command in case 5."
+    }
+  ],
+  "commands_run": []
+}
