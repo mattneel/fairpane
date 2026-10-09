@@ -23,9 +23,9 @@ A trust policy is a JSON file with the schema `fairpane-trust-policy`, version 1
 It names the digest of the acceptance policy that results must use.
 It lists trusted runner keys, each an Ed25519 public key in base64 SPKI DER form with a key ID.
 The trust policy lives outside the candidate repository.
-`attest-verify` rejects a trust-policy path as `unprotected-policy` when its spelling or its real path lies inside the repository or its Git directory.
+`attest-verify` rejects a trust-policy path as `unprotected-policy` when the path, or any directory on the way to it, resolves inside the repository or its Git directory.
 That check is a guard against an obvious mistake, not a security boundary.
-It compares paths, so it cannot detect a UNC or administrative-share alias of the candidate, such as `\\localhost\C$\...`.
+It compares real paths, so it cannot detect a UNC or administrative-share alias of the candidate, such as `\\localhost\C$\...`.
 Operating-system permissions on a separate runner account supply the actual boundary.
 
 ### Candidate identity
@@ -44,7 +44,8 @@ This repository uses SHA-1 object IDs, so a SHA-256 object format or content dig
 The forged-receipt argument applies to the verifier code too.
 A workspace writer can edit the verifier inside the candidate checkout and make it report success.
 Release verification therefore runs a verifier copy that the candidate workspace cannot modify, against the candidate repository named by `--repository`.
-A verifier that runs from inside the candidate repository or its Git directory, or from another work tree of that repository, reports `verified-advisory` with exit status 3.
+A verifier that runs from inside the candidate repository or its Git directory, or from any work tree of that repository, reports `verified-advisory` with exit status 3.
+The verifier finds those work trees through every `.git` entry on its own path, and a layout that Git finds only through `GIT_DIR` or `core.worktree` is not detected.
 Its result is advisory only, and automation that reads only the exit status cannot mistake it for an authoritative result.
 
 ### Signed result records
@@ -72,9 +73,9 @@ Controller test case 16 demonstrates the substitution, and the recorded mutation
 | `zero-denominator` | `discovered` or `selected` is zero. |
 | `inconsistent-counts` | A count is not a nonnegative safe integer, `selected` exceeds `discovered`, or the outcomes do not sum to `selected`. |
 | `unprotected-policy` | The trust policy lies inside the candidate repository or its Git directory. |
-| `unknown-candidate` | The candidate is not a full commit ID of a commit object in the candidate repository. |
+| `unknown-candidate` | The candidate is not a full commit ID of an existing commit object in the candidate repository. |
 
-An unreadable candidate repository, a corrupt or unreadable object, a Git spawn failure, a signal, or a timeout is a tool error with exit status 1, not a rejection code.
+An unreadable candidate repository, a commit object that exists but cannot be read, an unreadable tree, a Git spawn failure, a signal, or a timeout is a tool error with exit status 1, not a rejection code.
 Signature-encoding failures report `malformed` before any signature check, because they are format failures.
 
 The verifier imports nothing from the local receipt code, and `tools/attest.test.mjs` runs its tests standalone.

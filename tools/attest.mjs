@@ -78,22 +78,37 @@ export function isInside(target, directory) {
   const relative = path.relative(fs.realpathSync.native(directory), fs.realpathSync.native(target));
   return !(path.isAbsolute(relative) || relative === '..' || relative.startsWith(`..${path.sep}`));
 }
-/** Report whether a path lies inside a directory by its spelling alone, before any link is resolved. */
-function isLexicallyInside(target, directory) {
-  const relative = path.relative(path.resolve(directory), path.resolve(target));
+/** Report whether one real path lies inside another real path. */
+function realInside(target, directory) {
+  const relative = path.relative(directory, target);
   return !(path.isAbsolute(relative) || relative === '..' || relative.startsWith(`..${path.sep}`));
+}
+/**
+ * Report whether a path, or any existing directory on the way to it, resolves inside a directory.
+ * Resolving every ancestor means that an alias of the candidate root, such as a short name, a junction,
+ * a symbolic link to an ancestor, or a substituted drive, cannot spell a path from outside the candidate.
+ */
+function passesInside(target, directory) {
+  const resolvedDirectory = fs.realpathSync.native(directory);
+  for (let current = path.resolve(target); ; current = path.dirname(current)) {
+    let real = null;
+    try { real = fs.realpathSync.native(current); } catch (e) { if (e.code !== 'ENOENT' && e.code !== 'ENOTDIR') throw e; }
+    if (real !== null && realInside(real, resolvedDirectory)) return true;
+    if (path.dirname(current) === current) return false;
+  }
 }
 /**
  * Load a trust policy that lies outside every protected location of the candidate.
  * A workspace writer can edit any file inside those locations, so such a file cannot be protected input.
- * The path fails when its spelling or its real path lies inside a location, so a link inside the candidate cannot lead the check outside.
+ * The path fails when it or any directory on the way to it resolves inside a location,
+ * so neither an alias of the candidate nor a link inside it can lead the check outside.
  * The policy is read from the real path that was checked.
  * This location check is a guard against an obvious mistake, not a security boundary.
  */
 export function loadTrustPolicy(policyPath, protectedLocations) {
   const resolved = fs.realpathSync.native(path.resolve(policyPath));
   for (const location of [protectedLocations].flat()) {
-    if (isLexicallyInside(policyPath, location) || isInside(resolved, location)) {
+    if (passesInside(policyPath, location)) {
       fail('unprotected-policy', 'The trust policy must come from outside the candidate repository and its Git directory.');
     }
   }
@@ -139,42 +154,54 @@ export function candidateRepository(repositoryPath) {
   if (common.status !== 0) throw new Error(`The candidate Git directory cannot be read: ${common.stderr.trim()}`);
   return { root, gitDirectory: fs.realpathSync.native(common.stdout.trim()) };
 }
+/** Strip trailing CR and LF characters only, as Git does for `.git` files and `commondir` files. */
+function stripLineEnd(text) { return text.replace(/[\r\n]+$/, ''); }
+/** The common directory of a Git directory, through its `commondir` file when one exists. */
+function commonDirectoryOf(gitDirectory) {
+  const commonFile = path.join(gitDirectory, 'commondir');
+  const common = fs.existsSync(commonFile) ? path.resolve(gitDirectory, stripLineEnd(fs.readFileSync(commonFile, 'utf8'))) : gitDirectory;
+  return fs.realpathSync.native(common);
+}
 /**
- * Find the Git common directory of the work tree that contains `directory`, or null outside every work tree.
- * It walks up from the real path to the first `.git` entry, as Git's discovery does, and it runs no Git command,
- * so Git's ownership checks and message language cannot change the answer.
- * A `.git` file names a linked work tree's Git directory, whose `commondir` file names the common directory.
+ * Collect the Git common directory of every `.git` entry from `directory` up to the file system root, nearest first.
+ * A nested repository therefore cannot hide the work tree that contains it.
+ * A `.git` file names a linked work tree's Git directory, and a `commondir` file in a Git directory names its common directory.
+ * It runs no Git command, so Git's ownership checks and message language cannot change the answer.
+ * Layouts that Git finds only through GIT_DIR or core.worktree are outside its reach.
  */
-export function enclosingGitDirectory(directory) {
-  for (let dir = fs.realpathSync.native(directory); ;) {
+export function enclosingGitDirectories(directory) {
+  const found = [];
+  for (let dir = fs.realpathSync.native(directory); ; dir = path.dirname(dir)) {
     const entry = path.join(dir, '.git');
     let stat = null;
     try { stat = fs.statSync(entry); } catch (e) { if (e.code !== 'ENOENT') throw e; }
-    if (stat?.isDirectory()) return fs.realpathSync.native(entry);
-    if (stat) {
-      const named = /^gitdir: (.+?)\r?\n?$/.exec(fs.readFileSync(entry, 'utf8'));
-      if (!named) throw new Error(`${entry} does not name a Git directory.`);
-      const gitDirectory = path.resolve(dir, named[1]), commonFile = path.join(gitDirectory, 'commondir');
-      const common = fs.existsSync(commonFile) ? path.resolve(gitDirectory, fs.readFileSync(commonFile, 'utf8').trim()) : gitDirectory;
-      return fs.realpathSync.native(common);
+    if (stat?.isDirectory()) found.push(commonDirectoryOf(fs.realpathSync.native(entry)));
+    else if (stat) {
+      const named = /^gitdir: (.+)$/s.exec(stripLineEnd(fs.readFileSync(entry, 'utf8')));
+      if (!named || named[1].includes('\n')) throw new Error(`${entry} does not name a Git directory.`);
+      found.push(commonDirectoryOf(fs.realpathSync.native(path.resolve(dir, named[1]))));
     }
-    const parent = path.dirname(dir);
-    if (parent === dir) return null;
-    dir = parent;
+    if (path.dirname(dir) === dir) return found;
   }
 }
 /**
  * Resolve an immutable candidate identity from the Git object database, never from the working tree.
  * The candidate must be a full commit ID, because a ref or an abbreviated ID is a mutable pointer.
- * The repository must already be readable, so a missing commit object is a rejection.
- * Any other Git failure, such as a corrupt object or an unreadable tree, is a tool error.
+ * A missing object, or an object of another type, is a rejection.
+ * A commit object that exists but cannot be read, and any other Git failure, is a tool error.
  */
 export function candidateIdentity(repository, commit) {
   if (!matches(HEX40, commit)) fail('unknown-candidate', 'The candidate must be a full 40-hex commit ID.');
   const resolved = readGit(repository, ['rev-parse', '--verify', '--quiet', `${commit}^{commit}`]);
-  // With --verify --quiet, Git exits with status 1 for a name that resolves to no object of the requested type.
-  if (resolved.status === 1 || (resolved.status === 0 && resolved.stdout.trim() !== commit)) {
-    fail('unknown-candidate', `No commit object ${commit} exists in the candidate repository.`);
+  if (resolved.status === 0 && resolved.stdout.trim() !== commit) fail('unknown-candidate', `Object ${commit} is not a commit object.`);
+  if (resolved.status === 1) {
+    // Git also exits with status 1 for a commit that exists but fails its hash check or does not parse, so ask whether it exists.
+    const exists = readGit(repository, ['cat-file', '-e', commit]);
+    if (exists.status === 1) fail('unknown-candidate', `No object ${commit} exists in the candidate repository.`);
+    if (exists.status !== 0) throw new Error(`Git could not look up the candidate commit: ${exists.stderr.trim()}`);
+    const type = readGit(repository, ['cat-file', '-t', commit]);
+    if (type.status === 0 && type.stdout.trim() !== 'commit') fail('unknown-candidate', `Object ${commit} is a ${type.stdout.trim()}, not a commit.`);
+    throw new Error(`Commit ${commit} exists, but Git cannot read it: ${resolved.stderr.trim() || type.stderr.trim()}`);
   }
   if (resolved.status !== 0) throw new Error(`Git could not look up the candidate commit: ${resolved.stderr.trim()}`);
   const tree = readGit(repository, ['rev-parse', '--verify', '--quiet', `${commit}^{tree}`]);

@@ -62,3 +62,37 @@ Required reviewer: `fairpane-review`.
 ## Non-goals
 
 - No protected runner, signing key, or file-identity comparison by volume serial number exists in this task.
+
+## Revisions
+
+Revision 1 follows the rejecting review `reviews/review-1-reject.json` of commit `199b279`.
+
+### Trust-policy location
+
+`loadTrustPolicy` resolves every existing directory on the way to the policy path, from the path itself up to the file system root.
+It rejects the policy as `unprotected-policy` when any of those real paths lies inside a protected location.
+An alias of the candidate root, such as a short name, a junction, a symbolic link to an ancestor, or a substituted drive, therefore cannot spell a path from outside the candidate.
+
+### Candidate lookup
+
+When the commit lookup exits with status 1, the verifier asks `git cat-file -e` whether the object exists.
+A missing object, or an existing object of another type, fails as `unknown-candidate`.
+An existing commit object that Git cannot read, such as one with a hash mismatch or a malformed body, is a tool error.
+
+### Verifier location
+
+`enclosingGitDirectories` replaces `enclosingGitDirectory`.
+It walks from the directory's real path to the file system root and collects the common directory of every `.git` entry on the way, not only the first.
+A `.git` directory that contains a `commondir` file yields the directory that the file names.
+It strips only trailing CR and LF characters from `.git` files and `commondir` files, as Git does.
+The verifier is advisory when any collected common directory is the candidate's.
+Layouts that Git finds only through `GIT_DIR` or `core.worktree` are not detected, and the documentation says so.
+
+### Revision test cases
+
+6. A policy path spelled through a link outside the candidate that resolves to the candidate root, followed by a link inside the candidate to an outside file, fails as `unprotected-policy`.
+7. A commit object overwritten by another commit's object, and a commit object with a malformed body, are tool errors, and a tree object ID fails as `unknown-candidate`.
+8. A `.git` directory with a `commondir` file, and a repository nested inside a linked work tree of the candidate, both yield the candidate's common directory among the collected directories.
+9. Case 14 derives its expected outside-repository error from `git rev-parse --show-toplevel` run without inherited `GIT_*` variables.
+
+The revision evidence records a status that includes ignored files for every source root.

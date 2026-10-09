@@ -1,0 +1,52 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD","HEAD:tools/attest.mjs"]
+a033de3c7f93d31e10b7c53e56abbaea0bc78a9a
+24d3060c81f77d5dd9d8226960f73e2cc900330d
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD","HEAD:tools/attest.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:25:49.582Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","out/fp0051r1-before/tools/attest.mjs"]
+24d3060c81f77d5dd9d8226960f73e2cc900330d
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","out/fp0051r1-before/tools/attest.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:25:49.646Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","process.stdout.write(require('fs').readFileSync(process.argv[1],'utf8').split('\\n').slice(-3).join('\\n'))","out/fp0051r1-before/tools/attest.mjs"]
+/** Baseline stub: the base verifier found only the first enclosing .git entry. */
+export function enclosingGitDirectories(d) { const x = enclosingGitDirectory(d); return x === null ? [] : [x]; }
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","process.stdout.write(require('fs').readFileSync(process.argv[1],'utf8').split('\\n').slice(-3).join('\\n'))","out/fp0051r1-before/tools/attest.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:25:49.707Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0051r1-before/tools/attest.test.mjs"]
+TAP version 13
+ok 1 - 2: A valid envelope signed by a trusted key verifies
+ok 2 - 3: RFC 8032 test vector 1 verifies through the same key decoding path
+ok 3 - 4: A key outside the trust policy fails, whether it names itself or a trusted key
+ok 4 - 5: One changed payload byte fails as bad-signature
+ok 5 - 6: A truncated envelope and a truncated payload each fail
+ok 6 - 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+ok 7 - 8: A payload for another commit or tree fails as stale-candidate
+ok 8 - 9: A payload with another policy digest fails as changed-policy
+ok 9 - 10: Zero discovered and zero selected each fail as zero-denominator
+ok 10 - 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+ok 11 - 12: A runner key that differs from the signature key fails as key-mismatch
+not ok 12 - 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+  ---
+  message: "Fairpane: The --repository path must be the top-level directory of a Git work tree, C:\\src\\fairpane.\n\n\n1 !== 3\n"
+  ...
+ok 13 - 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+ok 14 - 16: A trusted signature over a noncanonical payload fails as malformed
+ok 15 - FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result
+not ok 16 - FP-0051 2: enclosingGitDirectories collects the common directory of every enclosing .git entry
+  ---
+  message: "[\"C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-attest-gQ1i93\\\\linked\\\\nested\\\\.git\"]"
+  ...
+not ok 17 - FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+  ---
+  message: "The input did not match the regular expression /^error: Commit \\w+ exists, but Git cannot read it/. Input:\n\n'unknown-candidate'\n"
+  ...
+not ok 18 - FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled
+  ---
+  message: "Expected rejection unprotected-policy, got success"
+  ...
+1..18
+# tests 18
+# pass 14
+# fail 4
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0051r1-before/tools/attest.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:25:49.786Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":2870}
