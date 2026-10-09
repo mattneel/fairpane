@@ -417,7 +417,21 @@ The runs share the host with other work, which the spread of the before runs sho
 | `raw/bun-selftest-r3.log` | `git rev-parse HEAD`, `git hash-object` of the three test files, `bun --version` (1.4.2), and `bun tools/selftest.mjs` (0): 254 of 254. |
 | `raw/cost-r3.log` | `raw/r3-cost.mjs` over the ten CI receipt logs, the two Windows profiles, and the Linux profile, then `raw/r3-probe.mjs` (0 each). |
 
+### Revision 3 integration
+
+Commit `c7d1830` applies the worker's `out/fp0107-r3.patch`, blob `f72a6a0dfa9f95fc8fe74928435b24a0ad2cd55e`, on `46e7ffb`, and all 22 files apply cleanly.
+That base also holds FP-0111 and FP-0106, which add no controller case.
+
+`raw/integration-binding-r3-binding.log` records `HEAD` `c7d1830` and a status that includes ignored files for every source root before and after these runs:
+
+| Run | Record | Result |
+| --- | --- | --- |
+| `repo-check` | `gates/2026-10-09T21-10-12-095Z-repo-check-b618fa5e.json` | pass, 247 ms |
+| `controller-test` | `gates/2026-10-09T21-10-12-688Z-controller-test-81433aa0.json` | pass, 254 of 254, 40,487 ms |
+| Bun 1.4.2 | `raw/bun-selftest-r3-binding.log` | 254 of 254 |
+
+Another worker was running controller tests and toolchain installs on the same host during these runs, so their durations are not measurements of revision 3.
+
 ### Open items
 
 - The integrator dispatches the ten runs of criterion 3 on a head that contains revision 3 and records them with their receipts.
-- The integrator records `HEAD` and a status that includes ignored files before and after it runs `repo-check` and `controller-test`.
