@@ -216,4 +216,17 @@ These belong to other tasks, as the contract states:
 
 ## Integration
 
-The integrator records `raw/integration-binding.log`, runs `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` with `--evidence-dir engineering/evidence/FP-0111/gates`, and records an uncached `raw/integration-tests.log`.
+Commit `0484339` applies the worker's `out/fp0111.patch`, blob `178e84c033867b8f0fdea9ae688e22f70fb21d0b`, on `0df569a`, and all 64 files apply cleanly.
+
+`raw/integration-binding.log` records `HEAD` `0484339` and a status that includes ignored files for every source root before and after these runs:
+
+| Run | Record | Result |
+| --- | --- | --- |
+| `repo-check` | `gates/2026-10-09T21-05-51-618Z-repo-check-95183668.json` | pass, 241 ms |
+| `controller-test` | `gates/2026-10-09T21-05-52-148Z-controller-test-31491190.json` | pass, 253 of 253, 54,530 ms |
+| `zig-fmt` | `gates/2026-10-09T21-06-46-990Z-zig-fmt-71ae8bac.json` | pass, 87 ms |
+| `zig-test` | `gates/2026-10-09T21-06-47-439Z-zig-test-3df3e7a7.json` | pass, 4,787 ms on the warm local cache |
+| Uncached `zig build test --summary all` | `raw/integration-tests.log`, with the fresh cache directory `out/fp0111-integration` | exit 0; `Build Summary: 104/104 steps succeeded; 422/422 tests passed` |
+| Bun 1.4.2 | `raw/bun-selftest.log` | 253 of 253 |
+
+The master base holds FP-0106's three laboratory tests, so the uncached count is 422, three more than the worker's 419 at `ca026e8`.
