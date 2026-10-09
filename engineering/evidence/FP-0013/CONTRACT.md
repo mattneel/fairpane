@@ -607,3 +607,88 @@ Required reviewer: `fairpane-review`.
 - No C ABI, platform font discovery, or CLDR import exists in this task.
 - No Unicode file outside the eight listed files is imported.
 - No acceptance threshold, gate, or protected corpus pin changes in this task.
+
+## Revision 1
+
+Base: the commit that freezes this revision.
+Source findings: `engineering/evidence/FP-0013/reviews/review-1-reject.json` and `engineering/evidence/FP-0013/reviews/security-review-1-reject.json`.
+Every section above stays in force except where this revision replaces it.
+Writable paths stay as above.
+
+### cmap work bound
+
+The set of validated cmap subtable offsets keeps its capacity of 512.
+An encoding record that names an offset outside a full set makes `parse` return `InvalidCmap` instead of validating that subtable again.
+Each distinct subtable offset is therefore validated at most once.
+The README states the validation cost of each subtable format, the total bound across all encoding records, and the bound when distinct subtables overlap, and it cites the regression cases.
+
+### Accessors after parse
+
+The `Font` documentation states that the bytes must stay unchanged for the lifetime of the `Font`, so a loader of script-visible memory must copy them first.
+No accessor may reach illegal behavior when that rule is broken.
+Each `.?`, `unreachable`, and unchecked `@intCast` that depends on an invariant from `parse` becomes a checked path with a documented result: `null`, glyph 0, zero, or an error, as each accessor's documentation states.
+A public accessor that takes an index returns `null` or an error for an index out of range, instead of asserting.
+The documentation of `gsub`, `gpos`, `post`, and `name` states that each call parses its table again in time linear in the table length.
+
+### ZIP reading
+
+`tools/fileset.mjs` rejects an archive in these cases before it inflates any member.
+
+- Two members' ranges from local header to the end of compressed data overlap, or a range lies outside the central directory's region rules.
+- A local header disagrees with its central directory entry in method, flags, CRC-32, or sizes, or it carries a ZIP64 extra field or flag bit 13.
+- An entry's external attributes mark a symbolic link.
+- Two entry names are equal after ASCII case folding.
+- The sum of declared uncompressed sizes exceeds 1 GiB, or one member's declared uncompressed size exceeds 1024 times its compressed size.
+
+Inflation still stops at each member's declared size, and a CRC-32 or size mismatch still fails.
+
+### Fetch order
+
+`corpus-fetch` compares each downloaded source with every known digest before it parses it.
+The known digests are the published digest, the previous record's SHA-256, and any `specs/corpora.json` pin.
+A mismatch fails before `readZip`, and `corpus-verify` stops before parsing a source whose digest does not match its record.
+
+### Network
+
+Each download follows redirects manually.
+Every hop must use `https:` on one of the hosts `www.unicode.org`, `github.com`, `objects.githubusercontent.com`, `release-assets.githubusercontent.com`, and `raw.githubusercontent.com`.
+A download stops when it exceeds the source's pinned size or, without a pinned size, 256 MiB.
+
+### Atomic replacement
+
+The write phase of `corpus-fetch` stages every new file beside its target, keeps the old files, and restores every replaced file and the source directory when any step fails.
+The record is written last.
+A failure leaves no staged or temporary file behind.
+
+### fontTools invocation
+
+`corpus-derive` and the documented `font_expectations.py` procedure run Python with the staging directory as the working directory, `PYTHONSAFEPATH=1`, and an environment without any other `PYTHON*` variable.
+Before it runs, `corpus-derive` checks every installed fontTools file against the wheel's `RECORD` digests.
+The README states that fontTools runs without an operating-system sandbox, on inputs pinned by Git blob or SHA-256 only.
+`sfntCopyright` stops at the first `name` record and checks the `name` table header length before it reads.
+
+### Evidence integrity
+
+Case 12 also compares `generator.script_sha256` with the SHA-256 of the committed `tools/fonts/font_expectations.py`, and the recorded fontTools version with `engineering/dependencies.json`.
+The reference test marks every code point that a parsed file assigns, and it fails when any code point stays unassigned.
+The README and `specs/README.md` state that the UCD files and the `noto-sans` archive were trusted on first use, and that the `specs/corpora.json` pins check later fetches.
+
+### Revision 1 test cases
+
+50. A font with 513 encoding records that name 513 distinct valid subtables returns `InvalidCmap`.
+51. A font with 65535 encoding records that all name one format 4 subtable, whose 256 segments share one glyph ID array, parses, and a validation counter that exists only in test builds shows one validation.
+52. Accessors given an index out of range return `null` or an error, and accessors over a `Font` whose bytes were changed after `parse` neither panic nor read out of bounds, for each changed field that a `.?`, `unreachable`, or `@intCast` used to trust.
+53. Controller: archives with overlapping members, a local and central header mismatch, a symbolic-link member, names equal under case folding, a declared total over 1 GiB, a ratio over 1024, a CRC-32 mismatch, an inflated-size mismatch, and a drive-letter name each fail before any member is written.
+54. Controller: a fetch whose downloaded bytes mismatch a known digest fails without calling `readZip`; an `http:` hop and a hop to another host each fail; a download over its size limit stops; and a failure injected during the write phase leaves every previous file, the source directory, and the record unchanged.
+55. Controller: `corpus-derive` refuses a fontTools installation with one changed file, and its child process sees `PYTHONSAFEPATH=1` and no other `PYTHON*` variable.
+
+Cases 50 to 52 must fail before the fix, and so must every part of cases 53 to 55 that the current code does not already meet.
+A mutation control that removes the full-set rejection must fail case 50 or 51.
+
+### Revision 1 evidence
+
+Record `tests-before-r1.log`, `mutation-cmap-r1.log` with its diff, an uncached `tests-after-r1.log`, `controller-tests-after-r1.log`, `ucd-check-r1.log`, and `corpus-verify-r1.log` for both corpora under `engineering/evidence/FP-0013/raw/`.
+Run every Zig command through `node tools/fairpane.mjs record --env ZIG_GLOBAL_CACHE_DIR=C:\src\fairpane\.zig-cache\global`.
+Record `font-expectations-r1.log`, which reruns `font_expectations.py` under the hardened invocation for all four fixtures and shows byte equality with the committed expectation files.
+The README gains a `## Revision 1` section and the rewritten bounded-work argument.
+The integrator records a search of the CJK subset's bytes for `Source` in ASCII and in UTF-16BE.

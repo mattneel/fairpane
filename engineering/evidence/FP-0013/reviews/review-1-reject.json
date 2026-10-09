@@ -1,0 +1,169 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "b1fdb8c",
+    "c5f7f2b"
+  ],
+  "summary": "FP-0013 meets most of its contract. One frozen requirement fails, and that failure blocks acceptance. CONTRACT.md:209 says parse time is linear in the input length. The cmap validation in src/font/cmap.zig breaks this bound once a font has more than 512 distinct subtable offsets. The README's bounded-work argument (README.md:179-186) does not mention that case, so its linear-work claim is unsupported. I found the defect independently. It is the same issue that reviews/security-review-1-reject.json reports.\n\nThe rest checks out against the primary sources.\n- The Unicode generator and the reference parser apply @missing lines in order before data lines (UAX #44 4.2.10). They resolve values through PropertyValueAliases, and Script_Extensions falls back to Script through '<script>'.\n- The OpenType directory, checksum, checksumAdjustment, cmap 4/12, CFF INDEX/DICT (TN5176), and GSUB/GPOS/GDEF header rules match the specification and the contract.\n- The reference test parses the UCD files with code that shares nothing with tools/ucd.mjs or with fromAlias.\n- The expectation files are produced by fontTools only.\n- The proposed corpora.json pins agree with the records under fileSetPinProblems' definition.\n- The Unicode License v3 and OFL records are adequate, and the integrator's reserved-font-name resolution is sound.\n- The gate receipts bind to b1fdb8c through integration-binding.log.\n\nFour minor or note-level gaps remain:\n- integration-tests.log does not record the ZIG_GLOBAL_CACHE_DIR override.\n- Nothing checks the generator script digest stored in the expectation files.\n- The reference test reads uninitialized arrays, which only works if the UCD files cover every code point.\n- The RFN resolution does not cover CFF Top DICT strings.\n\nI had no shell, so I ran no commands. The checkout is HEAD d55b300, not b1fdb8c. .git/logs/HEAD shows only FP-0054, FP-0011, FP-0027, and plan commits after c5f7f2b, so the FP-0013 files I read are probably identical to b1fdb8c [INFERENCE]. I did not confirm this with git.",
+  "criteria": [
+    {
+      "criterion": "Plan: Import only provenance-recorded Unicode data and redistributable fixtures",
+      "met": true,
+      "evidence": "Provenance and verification:\n- specs/snapshots/unicode.json and specs/snapshots/opentype-fixtures.json record the URL, release, size, SHA-256, published digest or Git blob, and zip inventory of each source.\n- They also record every selected and derived file with its license path.\n- fileset.mjs verifyFileSet rehashes the sources and re-extracts each member to compare it with the extracted file.\n- integration-corpus.log shows corpus-verify unicode and corpus-verify opentype-fixtures passing at exit 0 at b1fdb8c.\n\nLicenses and approval:\n- The license texts sit beside the data: src/unicode/ucd/license.txt, OFL.txt in each fixture directory, and the noto-cjk LICENSE.\n- The owner's approval is in owner-answers.log and LICENSE-DECISION.md:29-32.\n\nTests: controller cases 41-48 pass in the controller-test gate log (ok 103-110)."
+    },
+    {
+      "criterion": "Plan: Parse a frozen OpenType table set with checked offsets and sizes",
+      "met": true,
+      "evidence": "Every read goes through Reader.fits and slice with u64 offsets (src/font/reader.zig:20-45).\n\nTable rules:\n- The directory rules are at opentype.zig parse.\n- head, maxp, hhea, hmtx, loca, and the glyf header follow the contract table (tables.zig).\n- cmap 4/12 are validated in full, including unselected subtables (cmap.zig:125-158, 183-246).\n- CFF covers the header, the 4 INDEXes, the Top DICT, and CharStrings (cff.zig).\n- The optional name, OS/2, post, and layout tables return TableStatus.\n\nTest evidence:\n- Cases 13 and 15-17 and 19-39 run in tests/text: 33 of 33 pass in integration-tests.log and the zig-test gate.\n- Case 13 compares every field of all 4 real fixtures."
+    },
+    {
+      "criterion": "Plan: Reject malformed tables without unbounded allocation",
+      "met": true,
+      "evidence": "parse takes no allocator. Case 40 checks this at comptime (malformed_test.zig:670-678), and I found no heap use in src/font. Stack use is fixed: 16 KiB WordSums, 4 KiB ValidatedOffsets, and 48 CFF operands. Cases 18-39 pass. Allocation is bounded, but the contract's time bound is not; see the next criterion."
+    },
+    {
+      "criterion": "Contract: Parse time is linear in the input length (CONTRACT.md:209) and the README bounded-work argument (README.md:179-186)",
+      "met": false,
+      "evidence": "cmap.zig:111 stops inserting offsets once 512 are stored. cmap.zig:142 then validates again on every encoding record whose offset is missing from the set. The work therefore grows as records × subtable cost. One format 4 subtable can cost 65536 reads (cmap.zig:206) even when it is only about 2.6 KB, because 256 segments can point their idRangeOffset at one 256-entry glyphIdArray. A format 12 subtable costs numGroups reads per validation (cmap.zig:237). The README's argument covers only the case of 512 or fewer distinct subtables."
+    },
+    {
+      "criterion": "Plan: Create Arabic, Indic, CJK, and mixed-direction qualification seeds",
+      "met": true,
+      "evidence": "tests/text/seeds has six seeds that match the contract code points: latin-baseline, arabic-greeting, devanagari-greeting, cjk-greeting, mixed-direction, and uncovered-emoji.\n- Case 9 checks the format and the UTF-8 decoding.\n- Case 10 compares every property with unicode.lookup, which case 3 checks against an independent parse.\n- Case 11 checks coverage against glyphIndex.\n- All three pass in the zig-test gate (tests/text 33 of 33)."
+    },
+    {
+      "criterion": "Plan: Keep shaping, fallback, and rasterization as explicit remaining obligations",
+      "met": true,
+      "evidence": "specs/capabilities/text-fonts.json holds exactly the 19 frozen obligations. shaping and font-fallback belong to FP-0015, and glyph-rasterization belongs to FP-0056. Each has an engine_behavior that states 'No API'. tools/capabilities.mjs enforces the frozen set and checks that each owner task exists. FP-0055 to FP-0063 exist in plan.json:2727-2893. Case 49 passes (controller gate ok 111)."
+    },
+    {
+      "criterion": "UAX #44: @missing defaults, PropertyValueAliases resolution, Script_Extensions",
+      "met": true,
+      "evidence": "Both parsers apply @missing lines in order before data lines:\n- tools/ucd.mjs assignments() returns [...missing, ...data], so later entries override earlier ones, as UAX #44 4.2.10 requires.\n- reference_test.zig forEachAssignment makes the same two passes.\n\nValues resolve through PropertyValueAliases:\n- Every value, including @missing long names, resolves through the parseAliases lookup.\n- An unknown value fails with the file and line number (case 2).\n\nScript_Extensions: '<script>' maps to script_value, and lookup then returns the singleton for the code point's Script (properties.zig:64).\n\nTests:\n- Case 6 checks the defaults hard-coded in properties_test.zig: DerivedBidiClass R, AL, ET, and BN, plus Cn, Cs, and Co.\n- Case 3 compares all seven properties for all 1,114,112 code points."
+    },
+    {
+      "criterion": "OpenType sfnt directory and checksums",
+      "met": true,
+      "evidence": "Directory:\n- Tags must strictly ascend.\n- Every record needs offset + length <= len and offset % 4 == 0.\n- searchRange, entrySelector, and rangeShift are ignored.\n\nChecksums:\n- A table checksum is the wrapping uint32 sum, zero-padded.\n- For head, bytes 8-11 count as zero.\n- The whole-file sum must equal 0xB1B0AFBA (opentype.zig checksum and checkIntegrity).\n- Unknown tables are summed through prefix sums. Known tables cannot overlap, so their checksums read each byte at most once.\n\nTests: cases 15 and 26 pass. The builder uses its own checksum implementation (sfnt_builder.zig checksum), separate from the parser's."
+    },
+    {
+      "criterion": "cmap formats 4 and 12",
+      "met": true,
+      "evidence": "Header field positions:\n- Formats 0/2/4/6 read u16 length and language at +2 and +4.\n- Formats 8/10/12/13 read u32 length and language at +4 and +8.\n- Format 14 reads its length at +2.\n\nRecord order: records must be strictly sorted by (platform, encoding, language).\n\nFormat 4:\n- The arrays must fit in 16 + 8*segCount bytes.\n- endCode must strictly ascend, start <= end, segments must not overlap, and the last endCode must be 0xFFFF.\n- glyphId = *(&idRangeOffset[i] + idRangeOffset[i] + 2*(c - start)); a nonzero value has idDelta added, mod 65536.\n\nFormat 12: 16 + 12*numGroups bytes are checked before the loop, groups must be ascending and nonoverlapping, and every mapped glyph must be below numGlyphs.\n\nTests: cases 31-33 pass."
+    },
+    {
+      "criterion": "CFF INDEX and DICT encoding (Adobe TN #5176)",
+      "met": true,
+      "evidence": "INDEX: count; offSize 1-4; first offset 1; offsets nondecreasing; data base at the byte before the data (cff.zig readIndex).\n\nDICT:\n- Operands: 32-246 is b0-139; 247-250 and 251-254 use the ±108 forms; 28 is int16; 29 is int32.\n- 30 is a real number. Nibble 0xD is rejected, and the number must end with 0xF.\n- Operators are 0-21, with 12 as escape. The reserved bytes 22-27, 31, and 255 are rejected.\n- At most 48 operands are allowed.\n\nOpenType rules: Name and Top DICT counts must be 1, CharstringType must be 2, and the CharStrings count must equal numGlyphs.\n\nTests: case 39 passes, including a well-formed 48-operand boundary."
+    },
+    {
+      "criterion": "GSUB, GPOS, and GDEF headers",
+      "met": true,
+      "evidence": "GSUB and GPOS:\n- Version 1.0 uses a 10-byte header and version 1.1 a 14-byte header, with an Offset32 FeatureVariations field.\n- Each ScriptList and FeatureList record is 6 bytes (Tag, Offset16); the LookupList holds Offset16 entries.\n- Script tags must strictly ascend (layout.zig).\n\nGDEF: version 1.0 is 12 bytes, 1.2 is 14, and 1.3 is 18 with an Offset32 itemVarStore.\n\nTests: cases 37 and 38 pass."
+    },
+    {
+      "criterion": "Reference test independent of the generator",
+      "met": true,
+      "evidence": "src/unicode/reference_test.zig embeds the 8 files. It builds its own alias map from PropertyValueAliases and parses the ranges itself. It resolves values only through std.meta.stringToEnum on the generated enum types, and it shares no code with tools/ucd.mjs. Controller case 3 asserts that the reference test never calls fromAlias. A manual mutation from Lu to Ll made cases 3 and 10 fail; this is reported in README.md and is not a recorded log. A coverage caveat is listed under findings."
+    },
+    {
+      "criterion": "Parsing allocates nothing",
+      "met": true,
+      "evidence": "font.parse(bytes, options) has two parameters and no Allocator (case 40). The module uses no std.heap or allocator. The fixed stack buffers are in opentype.zig WordSums and cmap.zig ValidatedOffsets."
+    },
+    {
+      "criterion": "Expectations come from fontTools, not from the parser under test",
+      "met": true,
+      "evidence": "tools/fonts/font_expectations.py reads each font only through fontTools TTFont and SFNTDirectoryEntry. It requires fontTools 4.66.1 and opens the font with recalcBBoxes and recalcTimestamp disabled. font-expectations.log records 4 runs, each exit 0, with fontTools 4.66.1 and Python 3.13.15. Case 13 compares every field, and the field count must match. A gap in mechanically detecting hand edits is listed under findings."
+    },
+    {
+      "criterion": "Proposed specs/corpora.json pins match the records",
+      "met": true,
+      "evidence": "Under fileSetPinProblems (fileset.mjs:438-447), revision is compared with record.version, which is '18.0.0' or 'fixtures-1'. license_record is compared with specs/snapshots/<id>.json, and inventory_sha256 with sourceListingDigest.\n\nproposed-pins.log computed 2511e538…47a59d7 for unicode and ce84ce97…cb150e34 for opentype-fixtures, matching README.md. The log's source sizes and digests equal those in the committed records. I did not recompute the SHA-256 values because I had no shell.\n\nspecs/corpora.json still holds null pins (lines 27-55), and specs/README.md:74-78 documents what the pins mean for a file-set corpus."
+    },
+    {
+      "criterion": "Unicode License v3 satisfied",
+      "met": true,
+      "evidence": "src/unicode/ucd/license.txt is the Unicode License v3 text, 1995 bytes, SHA-256 e7a93b00…, sitting beside the data. src/unicode/tables.zig:16-56 reproduces the full notice, and the header records the digest of every input. This meets condition (a), that the notice appear with all copies, for the repository. A binary-distribution note is listed under findings."
+    },
+    {
+      "criterion": "OFL 1.1 and the integrator's reserved-font-name resolution",
+      "met": true,
+      "evidence": "Noto Sans fonts:\n- The three Noto Sans fonts are unmodified, each with its own OFL.txt that carries the copyright line.\n- The records hold reserved_font_names [].\n\nCJK subset:\n- The subset is a Modified Version shipped with the upstream LICENSE under the OFL only.\n- The copyright notice stays in name ID 0, which OFL condition 2 allows as machine-readable metadata.\n- name ID 0, '© 2014-2021 Adobe (http://www.adobe.com/).', states no Reserved Font Name.\n\nRFN resolution: the subset's name table keeps only IDs 0, 7, 13, and 14 (case 14 and the expectation name records), and its CFF Name INDEX is 'NotoSansCJKjp-Regular'. No name contains 'Source', so OFL condition 3 holds even if 'Source' is reserved. The resolution is sound; a note on CFF Top DICT strings is listed under findings."
+    },
+    {
+      "criterion": "Evidence binds to b1fdb8c",
+      "met": true,
+      "evidence": "integration-binding.log records git rev-parse HEAD = b1fdb8cfea612aed53697eb9aa999cbe5268607f and an empty --ignored status at 09:37:48.858Z, before the gates. It records an empty status again at 09:39:52.817Z, after the last run.\n\nAll four gate receipts ran between those two points, with:\n- source sha256 cdbfbad1… equal before and after, over 230 files;\n- policy sha256 70e1709e… equal before and after;\n- status pass.\n\nintegration-tests.log (177 of 177), integration-bun.log (180 of 180), and integration-corpus.log also ran in that window. The gaps in recorded environment overrides are listed under findings."
+    },
+    {
+      "criterion": "All 49 contract cases exist and pass",
+      "met": true,
+      "evidence": "case-inventory.log finds cases 1-49 (exit 0).\n- The controller-test gate log shows ok 99-111 for cases 1-4 and 41-49, with 180 of 180 passing.\n- The zig-test gate and integration-tests.log show 144 of 144 library tests (cases 3 and 5-8) and 33 of 33 tests/text tests (cases 9-40).\n- mutation-directory-order.log shows that the directory-order mutation fails only case 23.\n\nCase 18 checks every proper prefix of both synthetic fonts."
+    },
+    {
+      "criterion": "Protected paths unchanged and no shell code reaching the engine outside the embedding contract",
+      "met": true,
+      "evidence": "specs/corpora.json keeps null pins for unicode and opentype-fixtures. The policy digest is the same in every FP-0013 receipt. The patch touches no Rust shell or ABI code; its file list is in README.md 'Files changed'.\n\nI did not diff b1fdb8c against its parent, because I had no git access [INFERENCE]."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "src/font/cmap.zig",
+      "line": 111,
+      "issue": "The ValidatedOffsets set stops inserting at 512 offsets (lines 90-93 and 111). cmap.parse at line 142 then runs validateFormat4 or validateFormat12 again on every encoding record whose offset is not in the set. Total work is therefore O(records × subtable cost), not linear. This contradicts CONTRACT.md:209, 'Parse time is linear in the input length'.\n\nReproduction:\n1. Build B_TT with a cmap whose first 512 encoding records are (0, 0..511). Each points to its own 6-byte header-only subtable, such as format 0 with length 6, which passes subtableHeader and fills the set.\n2. Add records (3, 0..64999), language 0. They stay strictly sorted, and all point to one format 4 subtable with 256 segments [256k, 256k+255].\n3. Set each segment's idRangeOffset to 2*(segCount-k), so every segment reads the same 256-entry glyphIdArray of zeros. The subtable is 16 + 8*256 + 512 = 2576 bytes, and the last endCode is 0xFFFF.\n4. Every record now costs 65536 reads at line 206. The total is about 65000 × 65536 ≈ 4.3e9 bounds-checked reads from about 530 KB of input.\n5. A shared format 12 subtable with G groups gives 65000 × G at line 237.\n\nThis is my estimate; I did not run it. No test exercises more than 512 distinct offsets or repeated large subtables. font.parse is the designated web-font parser, so this is a latent denial-of-service once FP-0015 or FP-0058 feed it web fonts.",
+      "recommendation": "Make total cmap validation work linear:\n- One option is to fail closed with InvalidCmap when a new offset arrives after the set is full. Real fonts use far fewer than 512 distinct subtables.\n- Another is to charge validation against a budget proportional to the cmap length.\n\nAmend the contract if the error behavior changes. Add a malformed case that builds the cmap above and asserts rejection or a work bound. Then rerun zig-test and record the new evidence."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0013/README.md",
+      "line": 179,
+      "issue": "The 'Bounded work' section claims that the parser bounds every input that could make work grow faster than the input length (line 180). It describes the cmap set only for 512 or fewer distinct subtables (line 183) and leaves out the re-validation path. It also says format 4 validation 'reads at most 65536 entries' (line 185), which implies a bound proportional to subtable size. In fact, segments that share a glyphIdArray reach 65536 reads from a 2.6 KB subtable. These are unsupported success claims about the contract's linear-time statement.",
+      "recommendation": "Rewrite the bounded-work argument after the cmap fix. State the per-subtable constant (≤ 65536 reads) and the total bound across all records, and cite the regression test."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0013/raw/integration-tests.log",
+      "line": 62,
+      "issue": "The RESULT line of the integration `zig build test --summary all --cache-dir out/fp0013-integration-cache` run has no environment_overrides. The record command emits that field only for `--env` overrides (tools/fairpane.mjs:126-139, lib.mjs:353), so the shared rule's ZIG_GLOBAL_CACHE_DIR=C:\\src\\fairpane\\.zig-cache\\global is not shown for this run. integration-corpus.log likewise has no FAIRPANE_CORPORA_DIR override. Its default, <root>/.tools/corpora (corpus.mjs:26-27), equals the worker's override path, so that log's result is unaffected. The zig-test gate receipt does record the override.",
+      "recommendation": "Re-record integration-tests.log with `node tools/fairpane.mjs record --env ZIG_GLOBAL_CACHE_DIR=C:\\src\\fairpane\\.zig-cache\\global …`. Alternatively, cite only the gate receipt as the Zig evidence and drop the claim."
+    },
+    {
+      "severity": "minor",
+      "path": "tests/text/fixture_test.zig",
+      "line": 19,
+      "issue": "Case 12 checks font_sha256 and the font path but not generator.script_sha256. No test or controller check compares it with tools/fonts/font_expectations.py, and the snapshot records do not record the *.expect.json files. The contract rule 'No expectation file is edited by hand' (CONTRACT.md, Font expectation files) therefore has no mechanical enforcement. A hand edit to an expectation file, made together with a parser change, would go undetected by any check.",
+      "recommendation": "In case 12, or in a controller case, compare generator.script_sha256 with the SHA-256 of the committed script and check the fontTools version. Better still, add a controller check that reruns font_expectations.py in the pinned environment and requires byte equality when that environment is present."
+    },
+    {
+      "severity": "note",
+      "path": "src/unicode/reference_test.zig",
+      "line": 108,
+      "issue": "The reference parser allocates dense arrays without initializing them (lines 108 and 159), and it never asserts that every code point received a value. The Script enum has more than 170 tags, so a 0xAA fill byte from a debug allocator can be a valid Script value. A gap in a future UCD file's coverage could then compare equal by accident. The generator does check coverage (tools/ucd.mjs parseProperty gap check), but the reference path should not rely on it.",
+      "recommendation": "Initialize each dense array with a sentinel, such as a separate 'unset' bitmap. Assert after parsing that every code point was assigned, so the reference test stays independent."
+    },
+    {
+      "severity": "note",
+      "path": "specs/snapshots/opentype-fixtures.json",
+      "line": 158,
+      "issue": "rfn_resolution covers the sfnt name table, the CFF Name INDEX, and the file name. It does not mention the CFF Top DICT FullName, FamilyName, Notice, and Copyright strings, or the FDArray FontName strings, which fontTools.subset keeps. They probably contain 'Noto Sans CJK JP' and not 'Source' [INFERENCE: not verified; the grep tool skipped the binary]. The integrator's conclusion still holds, because neither the LICENSE nor name ID 0 states a Reserved Font Name.",
+      "recommendation": "Add the CFF Top DICT name strings to the cff block of cjk-subset.expect.json, or record them in the derived entry, so that the claim that no name contains 'Source' is checked mechanically."
+    },
+    {
+      "severity": "note",
+      "path": "src/unicode/tables.zig",
+      "line": 16,
+      "issue": "The Unicode License v3 notice appears in source and beside the data. The data is also compiled into the engine library, and nothing yet tracks putting the notice in the documentation that ships with binary distributions, which Unicode License v3 condition (b) requires.",
+      "recommendation": "Add a third-party notices obligation for release packaging, for example in the FP-0027 release records, that includes src/unicode/ucd/license.txt."
+    },
+    {
+      "severity": "note",
+      "path": ".git/logs/HEAD",
+      "line": null,
+      "issue": "The checked-out HEAD is d55b300, not b1fdb8c. Later commits, such as 'FP-0027: make the builder ID a URI and record the Git version', may touch tools/*.mjs. I could not run git to confirm that the FP-0013 files are unchanged since b1fdb8c.",
+      "recommendation": "Rerun this review's checks at b1fdb8c, or diff b1fdb8c..HEAD for src/font, src/unicode, tests/text, and tools/{ucd,fileset,capabilities,corpus}.mjs."
+    }
+  ],
+  "commands_run": []
+}
