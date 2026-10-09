@@ -10,11 +10,11 @@ The root integrator implemented it in commit `199b279`.
 
 | Criterion | Evidence |
 | --- | --- |
-| Report a verifier in a linked work tree of the candidate repository as advisory, with a test. | `enclosingGitDirectory` in `tools/attest.mjs`, the advisory check in `tools/fairpane.mjs`, and cases FP-0051 1 and 2. |
-| Reserve `unknown-candidate` for a missing commit object, and report other Git failures as tool errors, with a corrupted-object fixture. | `candidateIdentity` and case FP-0051 3. |
-| Reject a policy path whose spelling or real path lies inside the candidate, and read the checked real path. | `loadTrustPolicy` and case FP-0051 4, which uses a junction on Windows. |
+| Report a verifier in a linked work tree of the candidate repository as advisory, with a test. | `enclosingGitDirectories` in `tools/attest.mjs`, the advisory check in `tools/fairpane.mjs`, and cases FP-0051 1 and 2. |
+| Reserve `unknown-candidate` for a missing commit object, and report other Git failures as tool errors, with a corrupted-object fixture. | `candidateIdentity` and case FP-0051 3, with an invalid zlib stream, a hash mismatch, a malformed commit body, a missing object, and a tree ID. |
+| Reject a policy path whose spelling or real path lies inside the candidate, and read the checked real path. | `loadTrustPolicy`, which resolves every directory on the way to the path, and case FP-0051 4, with a link inside the candidate and an alias of its root. |
 | Document the UNC and administrative-share alias limit. | ADR 0002, "Protected trust input", and `tools/README.md`. |
-| Make the outside-repository test independent of the temporary directory's location. | Case 14 chooses its expected tool error from `enclosingGitDirectory`. |
+| Make the outside-repository test independent of the temporary directory's location. | Case 14 asks Git itself, through `git rev-parse --show-toplevel` without inherited `GIT_*` variables, which tool error to expect. |
 
 ## Records
 
@@ -35,5 +35,23 @@ Case 13 also fails there, because that copy sits in a subdirectory of the reposi
 
 ## Limits
 
-`enclosingGitDirectory` follows Git's `.git` discovery without its ceiling directories and file system boundaries, so it can report a repository that Git itself would not search.
-That error direction only makes a result advisory.
+The verifier finds work trees of the candidate through every `.git` entry on its own path, but a layout that Git finds only through `GIT_DIR` or `core.worktree` is not detected.
+Path comparison cannot detect a UNC or administrative-share alias of the candidate.
+
+## Revision 1
+
+`reviews/review-1-reject.json` rejected commit `199b279` for three defects.
+A policy path spelled through an alias of the candidate root passed the lexical check, status 1 from the commit lookup also covered existing commits that Git cannot read, and the discovery stopped at the first `.git` entry.
+Commit `9b878bc` implements contract revision 1.
+
+`raw/revision-1-tests-before.log` records the staging of the baseline copy: `HEAD`, the blob ID of `tools/attest.mjs`, the matching `git hash-object` of the staged copy, and the stub that wraps the base function.
+In that run, revision cases 2, 3, and 4 fail, and case 13 fails because the copy sits in a subdirectory of the repository.
+
+| Log | Result |
+| --- | --- |
+| `raw/revision-1-binding.log` | `HEAD` `9b878bc`, and an empty status, including untracked and ignored files, for every source root. |
+| `raw/revision-1-tests-after.log` | `node tools/attest.test.mjs` passes 18 of 18 cases. |
+| `raw/revision-1-tests-bun.log` | Bun runs 143 of 143 controller tests. |
+
+- `gates/2026-10-09T04-27-14-161Z-repo-check-602ded0e.json`
+- `gates/2026-10-09T04-27-14-360Z-controller-test-72b7bc63.json`, with 143 of 143 controller tests.
