@@ -1,0 +1,196 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","add","--detach","out/wt-89109be-recheck","89109be"]
+Preparing worktree (detached HEAD 89109be)
+HEAD is now at 89109be Import the Fairpane bootstrap archive
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","add","--detach","out/wt-89109be-recheck","89109be"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":48}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/wt-89109be-recheck","ls-files","--error-unmatch","out/evidence"]
+error: pathspec 'out/evidence' did not match any file(s) known to git
+Did you forget to 'git add'?
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/wt-89109be-recheck","ls-files","--error-unmatch","out/evidence"],"exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require(\"fs\"), path=require(\"path\"), crypto=require(\"crypto\"); const [manifest, fromDir, toDir] = process.argv.slice(1); let bad=0, n=0; fs.mkdirSync(toDir, {recursive:true}); for (const line of fs.readFileSync(manifest,\"utf8\").split(\"\\n\")) { const m=/^([a-f0-9]{64})  (out\\/evidence\\/[^\\n]+)$/.exec(line); if (!m) continue; n++; const name=path.basename(m[2]); fs.copyFileSync(path.join(fromDir,name), path.join(toDir,name)); const h=crypto.createHash(\"sha256\").update(fs.readFileSync(path.join(toDir,name))).digest(\"hex\"); console.log((h===m[1]?\"OK \":\"MISMATCH \")+path.join(toDir,name)+\" \"+h); if (h!==m[1]) bad++; } console.log(\"manifest out/evidence entries: \"+n+\", mismatches: \"+bad); process.exitCode = bad || n !== 6 ? 1 : 0;","BOOTSTRAP_MANIFEST.sha256","engineering/evidence/bootstrap-preparation","out/wt-89109be-recheck/out/evidence"]
+OK out\wt-89109be-recheck\out\evidence\2026-10-08T23-09-34-005Z-repo-check-d8d2c96e.json 037e92ccb65be871aab95e71115bc8e20c8f4e19e3eb0778fe3d983d3b77b826
+OK out\wt-89109be-recheck\out\evidence\2026-10-08T23-09-34-005Z-repo-check-d8d2c96e.log a0a3b950dd89e16d918ce6dd1e13c8b2f8acd2efeeceb0236cb09497e5f1c4b9
+OK out\wt-89109be-recheck\out\evidence\2026-10-08T23-09-34-107Z-controller-test-69c613b5.json facad5a7740017528eed9158265122feaea52a4339c4ad1649e99e3d1dd064ee
+OK out\wt-89109be-recheck\out\evidence\2026-10-08T23-09-34-107Z-controller-test-69c613b5.log 19de30142d98b497401c30bb104f7e771a403cc56aed9f54cd8413fae1b947e0
+OK out\wt-89109be-recheck\out\evidence\2026-10-08T23-11-23-342Z-zig-test-b9dff59e.json aad3d5a7c6ea1fd1562de52a47e168e6722342f5229a2e76f925a6c338c8be0c
+OK out\wt-89109be-recheck\out\evidence\2026-10-08T23-11-23-342Z-zig-test-b9dff59e.log 988ea499f511a7784a0bc8b65252997850f5ce43900dadc1b4f9492a012c59e4
+manifest out/evidence entries: 6, mismatches: 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require(\"fs\"), path=require(\"path\"), crypto=require(\"crypto\"); const [manifest, fromDir, toDir] = process.argv.slice(1); let bad=0, n=0; fs.mkdirSync(toDir, {recursive:true}); for (const line of fs.readFileSync(manifest,\"utf8\").split(\"\\n\")) { const m=/^([a-f0-9]{64})  (out\\/evidence\\/[^\\n]+)$/.exec(line); if (!m) continue; n++; const name=path.basename(m[2]); fs.copyFileSync(path.join(fromDir,name), path.join(toDir,name)); const h=crypto.createHash(\"sha256\").update(fs.readFileSync(path.join(toDir,name))).digest(\"hex\"); console.log((h===m[1]?\"OK \":\"MISMATCH \")+path.join(toDir,name)+\" \"+h); if (h!==m[1]) bad++; } console.log(\"manifest out/evidence entries: \"+n+\", mismatches: \"+bad); process.exitCode = bad || n !== 6 ? 1 : 0;","BOOTSTRAP_MANIFEST.sha256","engineering/evidence/bootstrap-preparation","out/wt-89109be-recheck/out/evidence"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","-c","BOOTSTRAP_MANIFEST.sha256"]
+.editorconfig: OK
+.gitattributes: OK
+.gitignore: OK
+.omp/RULES.md: OK
+.omp/agents/fairpane-adversary.md: OK
+.omp/agents/fairpane-bindings.md: OK
+.omp/agents/fairpane-compiler.md: OK
+.omp/agents/fairpane-core.md: OK
+.omp/agents/fairpane-js.md: OK
+.omp/agents/fairpane-platform.md: OK
+.omp/agents/fairpane-review.md: OK
+.omp/agents/fairpane-security.md: OK
+.omp/agents/fairpane-spec.md: OK
+.omp/agents/fairpane-text.md: OK
+.omp/config.yml: OK
+.omp/prompts/fairpane-audit.md: OK
+.omp/prompts/fairpane-handoff.md: OK
+.omp/prompts/fairpane-resume.md: OK
+.omp/prompts/fairpane-start.md: OK
+AGENTS.md: OK
+AGENT_LAUNCH.md: OK
+CONTRIBUTING.md: OK
+LICENSE-DECISION.md: OK
+README.md: OK
+SECURITY.md: OK
+START_HERE.md: OK
+api/README.md: OK
+api/bootstrap.json: OK
+build.zig: OK
+docs/ABI_AND_WRAPPERS.md: OK
+docs/ADOPTION_AND_GOVERNANCE.md: OK
+docs/AGENT_OPERATIONS.md: OK
+docs/ARCHITECTURE.md: OK
+docs/CHARTER.md: OK
+docs/JAVASCRIPT_RUNTIME.md: OK
+docs/PRODUCT.md: OK
+docs/QUALIFICATION.md: OK
+docs/RENDERING_AND_TEXT.md: OK
+docs/ROADMAP.md: OK
+docs/SECURITY.md: OK
+docs/SOURCES.md: OK
+docs/TOOLCHAIN.md: OK
+engineering/BOOTSTRAP_VALIDATION.json: OK
+engineering/BOOTSTRAP_VALIDATION.md: OK
+engineering/HANDOFF.md: OK
+engineering/decisions/0001-foundation.md: OK
+engineering/dependencies.json: OK
+engineering/gates.json: OK
+engineering/plan.json: OK
+engineering/policy.json: OK
+engineering/qualification.json: OK
+engineering/state.json: OK
+engineering/templates/decision.md: OK
+engineering/templates/experiment.md: OK
+engineering/templates/review.md: OK
+engineering/templates/task.md: OK
+engineering/workstreams.json: OK
+include/fairpane.h: OK
+out/evidence/2026-10-08T23-09-34-005Z-repo-check-d8d2c96e.json: OK
+out/evidence/2026-10-08T23-09-34-005Z-repo-check-d8d2c96e.log: OK
+out/evidence/2026-10-08T23-09-34-107Z-controller-test-69c613b5.json: OK
+out/evidence/2026-10-08T23-09-34-107Z-controller-test-69c613b5.log: OK
+out/evidence/2026-10-08T23-11-23-342Z-zig-test-b9dff59e.json: OK
+out/evidence/2026-10-08T23-11-23-342Z-zig-test-b9dff59e.log: OK
+scripts/Get-Zig.ps1: OK
+scripts/fp.ps1: OK
+scripts/fp.sh: OK
+specs/README.md: OK
+specs/corpora.json: OK
+specs/sources.json: OK
+src/AGENTS.md: OK
+src/c_api.zig: OK
+src/root.zig: OK
+src/web_string.zig: OK
+tests/AGENTS.md: OK
+tests/c/abi_smoke.c: OK
+tests/fixtures/README.md: OK
+tests/fixtures/app-shell.html: OK
+tests/fixtures/multilingual.html: OK
+toolchains/omp-baseline.json: OK
+toolchains/zig-version.txt: OK
+toolchains/zig.lock.json: OK
+tools/README.md: OK
+tools/fairpane.mjs: OK
+tools/lib.mjs: OK
+tools/selftest.mjs: OK
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["-c","BOOTSTRAP_MANIFEST.sha256"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","remove","--force","out/wt-89109be-recheck"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","remove","--force","out/wt-89109be-recheck"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","ls-tree","-r","--name-only","89109be"]
+.editorconfig
+.gitattributes
+.gitignore
+.omp/RULES.md
+.omp/agents/fairpane-adversary.md
+.omp/agents/fairpane-bindings.md
+.omp/agents/fairpane-compiler.md
+.omp/agents/fairpane-core.md
+.omp/agents/fairpane-js.md
+.omp/agents/fairpane-platform.md
+.omp/agents/fairpane-review.md
+.omp/agents/fairpane-security.md
+.omp/agents/fairpane-spec.md
+.omp/agents/fairpane-text.md
+.omp/config.yml
+.omp/prompts/fairpane-audit.md
+.omp/prompts/fairpane-handoff.md
+.omp/prompts/fairpane-resume.md
+.omp/prompts/fairpane-start.md
+AGENTS.md
+AGENT_LAUNCH.md
+BOOTSTRAP_MANIFEST.sha256
+CONTRIBUTING.md
+LICENSE-DECISION.md
+README.md
+SECURITY.md
+START_HERE.md
+api/README.md
+api/bootstrap.json
+build.zig
+docs/ABI_AND_WRAPPERS.md
+docs/ADOPTION_AND_GOVERNANCE.md
+docs/AGENT_OPERATIONS.md
+docs/ARCHITECTURE.md
+docs/CHARTER.md
+docs/JAVASCRIPT_RUNTIME.md
+docs/PRODUCT.md
+docs/QUALIFICATION.md
+docs/RENDERING_AND_TEXT.md
+docs/ROADMAP.md
+docs/SECURITY.md
+docs/SOURCES.md
+docs/TOOLCHAIN.md
+engineering/BOOTSTRAP_VALIDATION.json
+engineering/BOOTSTRAP_VALIDATION.md
+engineering/HANDOFF.md
+engineering/decisions/0001-foundation.md
+engineering/dependencies.json
+engineering/gates.json
+engineering/plan.json
+engineering/policy.json
+engineering/qualification.json
+engineering/state.json
+engineering/templates/decision.md
+engineering/templates/experiment.md
+engineering/templates/review.md
+engineering/templates/task.md
+engineering/workstreams.json
+include/fairpane.h
+scripts/Get-Zig.ps1
+scripts/fp.ps1
+scripts/fp.sh
+specs/README.md
+specs/corpora.json
+specs/sources.json
+src/AGENTS.md
+src/c_api.zig
+src/root.zig
+src/web_string.zig
+tests/AGENTS.md
+tests/c/abi_smoke.c
+tests/fixtures/README.md
+tests/fixtures/app-shell.html
+tests/fixtures/multilingual.html
+toolchains/omp-baseline.json
+toolchains/zig-version.txt
+toolchains/zig.lock.json
+tools/README.md
+tools/fairpane.mjs
+tools/lib.mjs
+tools/selftest.mjs
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["ls-tree","-r","--name-only","89109be"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}

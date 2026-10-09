@@ -1,0 +1,218 @@
+{
+  "verdict": "reject",
+  "summary": "I recommend reject. The evidence holds up for all seven criteria, but one major issue blocks acceptance. Each of the seven acceptance criteria now has committed raw records in the COMMAND/output/RESULT format, and the review-1 blocker and its three majors are fixed. The figures I recounted from the raw files match the README. The controller code has no defect that could make a failed command or gate report a pass. The major issue is SHA256SUMS. README lines 26-28 say the standard verifier (`sha256sum -c`) reports 7 of the 90 entries as FAILED, and that a Node check matched all 90. That Node check has no committed output or exit status. AGENTS.md:43 forbids this, and it is the same kind of defect that caused the review-1 reject. The explanation given (CRLF bytes) does not hold for binary-mode `*` entries, so either the explanation or 7 digests are wrong. Secondary gaps: the clean-checkout check and the protected-path listing were taken before two later amends to the head commit (05d2d42), and some README provenance claims are overstated. All are cheap to fix.",
+  "review1_findings": [
+    {
+      "finding": "blocker README:111. OMP schema, prompt and grant evidence was deleted or never committed.",
+      "status": "resolved",
+      "evidence": "raw/omp.log:2-52 holds `omp --version` and `omp config get <key> --json` for all 8 task keys plus tools.approvalMode, each with a schema type and exit 0. raw/omp.log:53-70 lists the frontmatter of every agent and prompt. raw/omp-prompt-expansion.log:6 shows the user message equal to the fairpane-resume.md body, and the RESULT at line 132 has exit 0. raw/omp-prompt-expansion-check.log reports equality true and literal-sent false. probes/*.json holds 12 verbatim yields across 10 agents. Residual (minor): the probes are model self-reports. The agent type for each probe file comes from probes/INDEX.md prose (lines 5-7 and 24) because the task-tool headers were not preserved, and two probes report agent null."
+    },
+    {
+      "finding": "major README:14. Host versions were not preserved.",
+      "status": "resolved",
+      "evidence": "raw/host-versions.log records Node v26.7.0, Bun 1.4.2, git 2.54.0.windows.1, omp/18.8.6, PATH zig 0.17.0-dev.2453+zigpp, locked zig 0.18.0-dev.120+9fe22a29b, PS 5.1.26100.9444, pwsh 7.6.6, and win32/x64/10.0.26200/Windows 11 Pro/x86_64, each with absolute paths and exit 0. raw/doctor.log holds the same values from `doctor`."
+    },
+    {
+      "finding": "major README:63. The pre-repair zig fmt failure was not preserved.",
+      "status": "resolved",
+      "evidence": "raw/zig-fmt-before-repair.log:2-4 shows `fmt --check` on the base worktree exiting 1 and naming src\\c_api.zig. Lines 6-8 show zig fmt rewriting the copy. Lines 10-29 show a diff of only the 3 @intFromEnum→@backingInt lines. Lines 31-32 show `git diff --no-index` against the committed src/c_api.zig exiting 0. Lines 34-38 quote the langref deprecation at line 11118."
+    },
+    {
+      "finding": "major receipts c-abi:95. Receipts could not be checked from a clean checkout.",
+      "status": "resolved (residual minor)",
+      "evidence": "All 9 gates/*.json have outputs[].path under engineering/evidence/FP-0001/gates/. raw/clean-checkout-evidence-check.log shows the 93de2e3 worktree fingerprint f2d2e0e6…/76 and ec150588…/12, and all 9 evidence-checks pass with exit 0. Residual: .git/logs/HEAD shows 93de2e3 was amended twice (727ef5e, then 05d2d42). README:122 describes one amend, and no raw record shows what either amend changed."
+    },
+    {
+      "finding": "minor zig-test-summary.log:1. Hand-written logs omit the executable.",
+      "status": "resolved",
+      "evidence": "raw/zig-test-summary.log:2 and raw/c-assert-negative-control.log:2,5 name the absolute pinned compiler and record environment_overrides. The old logs were moved to superseded/hand-captured/."
+    },
+    {
+      "finding": "minor README:128. The prompt-discovery claim was too strong.",
+      "status": "resolved",
+      "evidence": "The claim is replaced by the recorded `omp -p … \"/fairpane-resume\"` run (raw/omp-prompt-expansion.log:6,132) and the comparison log."
+    },
+    {
+      "finding": "minor README:143. Unsupported claim about the eval tool.",
+      "status": "resolved",
+      "evidence": "The only remaining mention of eval is the resolution table at README:203."
+    },
+    {
+      "finding": "minor README:29. Other prose-only claims.",
+      "status": "mostly resolved",
+      "evidence": "The manifest check and preparation receipts are in raw/bootstrap-baseline.log. The independent sha256sum is in raw/compiler-archive.log:2-4. The global-cache scan is in raw/global-cache-isolation.log. The per-receipt checks are in raw/gate-evidence-check.log. The Bun runs are in raw/controller-hosts.log. The git diff is in raw/protected-paths.log. New prose-only claims replaced them: README:27-28 (SHA256SUMS checks), README:118 (cache deletion before the final run), and README:122 (amend contents)."
+    },
+    {
+      "finding": "minor lib.mjs:328. New gate behavior had no test.",
+      "status": "resolved (with gaps)",
+      "evidence": "tools/selftest.mjs:279-322 adds 5 tests, bringing the total to 60. raw/controller-hosts.log and the controller-test gate log show 60/60 passing. The gaps are listed under findings."
+    },
+    {
+      "finding": "minor HANDOFF.md:8. The handoff was stale.",
+      "status": "resolved",
+      "evidence": "engineering/HANDOFF.md:5-20 states that the task is implemented and awaiting review 2, and gives the next actions."
+    },
+    {
+      "finding": "notes F11-F15 (Get-Zig hashing, env scoping, doctor output, agent declarations, @backingInt)",
+      "status": "still valid",
+      "evidence": "Get-Zig.ps1 still uses .NET SHA256 with fail-closed checks. Env is still set only in the zig and c-abi branch (lib.mjs:393). The probes after the repair match the declarations of fairpane-spec and fairpane-compiler (raw/omp.log:55,61)."
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": 1,
+      "status": "supported",
+      "evidence": "raw/host-versions.log and raw/doctor.log cover every tool with absolute paths and exit 0. Every gate receipt's host block records win32/x64/10.0.26200/v26.7.0, and the zig gates also record zig_version 0.18.0-dev.120+9fe22a29b."
+    },
+    {
+      "id": 2,
+      "status": "supported",
+      "evidence": "raw/compiler-archive.log:2-4 gives sha256sum a48ff20a… and line 7 gives size 102765659. Both equal the lock entry printed at line 11. The fairpane-install.json at lines 14-20 and `zig version` at lines 23-25 match. install-zig-attempt1.log shows the honest failure (install-exit=1) and attempt2.log the pass (install-exit=0). These two are tee captures, not record format. raw/global-cache-isolation.log scanned 364229 entries twice under %LOCALAPPDATA%/zig and found 0 changed after the marker at 23:49:01.709Z, which predates the final run at 23:49:19. The scan does not cover the install itself. 'No global change' during the install rests on reading Get-Zig.ps1 (Assert-LocalPath confines writes to .tools, and PATH is not modified). The scans carry no timestamp, so the record cannot show that they ran after the final gates."
+    },
+    {
+      "id": 3,
+      "status": "supported",
+      "evidence": "The zig-build and zig-test receipts have exit 0, name the pinned compiler by absolute path, and have source and policy unchanged before and after. raw/zig-test-summary.log:3 reports '7/7 tests passed' from a fresh cache directory, and 7 equals the test blocks in src. build.zig:5-8 panics under any other compiler. The zig-test run took 4407 ms against 64 ms in the cached superseded run, which is consistent with a rebuild. The cache deletion itself is prose only (README:118)."
+    },
+    {
+      "id": 4,
+      "status": "supported",
+      "evidence": "The c-abi receipt records 3 commands, all exit 0: build, `zig cc -std=c11 -Wall -Wextra -Werror tests/c/abi_smoke.c … fairpane.lib`, and execution of C:\\src\\fairpane\\out\\c-abi-smoke.exe on win32/x64. raw/c-assert-negative-control.log:6-7 shows `Assertion failed … line 5` with exit 3221226505 under the same flags, so the assertions are live."
+    },
+    {
+      "id": 5,
+      "status": "supported",
+      "evidence": "raw/omp.log: the keys exist in the installed schema with types and values matching .omp/config.yml. raw/omp-prompt-expansion*.log: the project prompt was discovered and expanded by the installed OMP. probes/: the grants match the frontmatter in raw/omp.log:53-62, plus yield, plus wait for agents with bash. Review and security have no write or shell tool. My own grant in this session (read, grep, glob, yield) also matches. Residual: the probe-to-agent-type mapping is prose."
+    },
+    {
+      "id": 6,
+      "status": "supported (with an overclaim)",
+      "evidence": "Failures are preserved: install-zig-attempt1.log, the Get-FileHash exit 1 in raw/powershell-diagnosis.log, the fmt check exit 1, the first manifest check exit 1 (MSYS2 handle), the zig-test preparation receipt rejected in raw/bootstrap-baseline.log, and superseded runs 1 and 2. Identity: raw/git.log shows user.name and user.email from C:/Users/requi/.gitconfig, no remote, and both commits authored and committed by Matt Neel <m@neel.codes>. .git/logs/HEAD shows the same identity for 93de2e3, 727ef5e and 05d2d42. Overclaim: README:52,68 calls 89109be the verbatim archive 'without changes', but 89109be does not track the 6 gitignored out/evidence manifest entries (see findings)."
+    },
+    {
+      "id": 7,
+      "status": "supported up to staging time; needs confirmation at head",
+      "evidence": "raw/protected-paths.log:2-3 shows `git diff --cached --stat 89109be` over the protected paths plus zig-version.txt printing nothing, with exit 0. The name-status list at lines 5-103 contains only allowed paths. The only policy-root change in that list is toolchains/omp-baseline.json, which is allowed. gate_sha256 for repo-check, controller-test and zig-test equals the preparation values, and compiler-archive.log shows the lock entry unchanged. This listing was taken before commit 93de2e3 and both amends, so no raw record covers head 05d2d42."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "file": "engineering/evidence/FP-0001/README.md",
+      "line": 27,
+      "title": "SHA256SUMS fails the standard verifier for 7 entries, and the 'all 90 match' check has no recorded output",
+      "reasoning": "The README says Git for Windows `sha256sum -c` reports the 7 files containing CR bytes as FAILED. I confirmed exactly 7 such files: both install-zig logs, raw/c-assert-negative-control.log, raw/compiler-archive.log, raw/host-versions.log, raw/powershell-diagnosis.log and superseded/hand-captured/c-assert-negative-control.log. The counter-claim that 'a Node check that reads each file as bytes matched all 90 entries' has no log, command or exit status. That violates AGENTS.md:43 and docs/AGENT_OPERATIONS.md:53. The explanation offered is implausible [INFERENCE]: every entry uses the binary `*` flag, and Git for Windows mounts are binary, so CRLF should not change sha256sum's digest. Either the explanation is wrong or the 7 digests were computed on normalized text and do not match the raw bytes. These 7 files include primary evidence for criteria 1 and 2. Every SHA256SUMS digest that also appears as a gate receipt output (all 9 final gate logs) matches its receipt.",
+      "reproduction": "cd engineering/evidence/FP-0001 && sha256sum -c SHA256SUMS. Then compare `certutil -hashfile install-zig-attempt1.log SHA256` and `node -e \"console.log(require('crypto').createHash('sha256').update(require('fs').readFileSync('install-zig-attempt1.log')).digest('hex'))\"` against 91bb06db…. Fix: commit both checks as `record` logs. Then either regenerate SHA256SUMS from raw bytes or correct the explanation."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/evidence/FP-0001/README.md",
+      "line": 122,
+      "title": "The clean-checkout and protected-path evidence predate the head commit; the README describes one amend where the reflog shows two",
+      "reasoning": ".git/logs/HEAD shows 70b876a→93de2e3 (commit), →727ef5e (amend), →05d2d42 (amend). raw/clean-checkout-evidence-check.log checked 93de2e3, and raw/protected-paths.log was taken while staging before 93de2e3. No raw record shows what the two amends changed. tools/README.md and the other files under tools/ are in a source root, so any amend there would make every receipt stale.",
+      "reproduction": "git diff --name-only 93de2e3 05d2d42. Then, at head, run node tools/fairpane.mjs fingerprint (expect f2d2e0e6…/76 and ec150588…/12) and evidence-check on each gates/*.json."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/evidence/FP-0001/README.md",
+      "line": 68,
+      "title": "Commit 89109be is not the full archive, and the worktree manifest check needed an unrecorded copy",
+      "reasoning": "[INFERENCE] .gitignore excludes out/. The head index (.git/index) has no out/evidence paths. The name-status listing against 89109be in raw/protected-paths.log has no 'D out/evidence/…' lines. So 89109be does not contain the 6 out/evidence entries listed at lines 59-64 of BOOTSTRAP_MANIFEST.sha256. Yet raw/bootstrap-baseline.log reports those 6 as OK in the base worktree, and evidence-check read them there, so someone copied them in without recording it. The digests still prove the bytes match the manifest. The README claims 'the verbatim archive' (line 52) and 'without changes' (line 68) overstate what is in Git history.",
+      "reproduction": "git ls-tree -r --name-only 89109be -- out | wc -l (expect 0), then git ls-tree -r --name-only 89109be | wc -l."
+    },
+    {
+      "severity": "minor",
+      "file": "tools/lib.mjs",
+      "line": 301,
+      "title": "Command records omit the working directory and timestamps",
+      "reasoning": "COMMAND (line 301) and RESULT (lines 315-318) record the executable, arguments, status and duration, but not the cwd or a start time. `record --cwd` (fairpane.mjs:88) changes how relative arguments resolve. So raw/bootstrap-baseline.log does not show that the `sha256sum -c BOOTSTRAP_MANIFEST.sha256` records ran in out/wt-89109be. The worktree can only be inferred from modified files reporting OK. raw/global-cache-isolation.log cannot show that its scans followed the final gate run.",
+      "reproduction": "Read raw/bootstrap-baseline.log:2-3 and the record at line 25. No cwd appears."
+    },
+    {
+      "severity": "minor",
+      "file": "tools/lib.mjs",
+      "line": 305,
+      "title": "Failure paths around output capture can leak descriptors or crash without a RESULT",
+      "reasoning": "(a) If fs.openSync(capture,'wx') throws at line 305, runProcess throws synchronously after the log fd (line 300) is opened. That fd leaks, and the log keeps a COMMAND line with no RESULT. runGate's catch still writes a failed receipt, but the commands array lacks the record. (b) Capture-copy failure is handled correctly in the normal case: the record gets an error, the gate fails, and the capture file is removed (lines 312-314). But if the failure comes from writing the log fd itself (for example, a full disk), the writeSync on line 318 also throws inside the 'close' handler. That crashes the controller with no RESULT, no receipt and an open fd. (c) `processError ??=` silently drops the capture error when a spawn error already exists. None of these can produce a false pass.",
+      "reproduction": "Point os.tmpdir() at an unwritable TMP and call runProcess, or make copyFileToDescriptor's writeSync fail (for example, a read-only log). Observe the leaked fd and the missing RESULT line."
+    },
+    {
+      "severity": "minor",
+      "file": "tools/selftest.mjs",
+      "line": 302,
+      "title": "The new tests miss several plausible regressions",
+      "reasoning": "(1) Line 302 'ignores the working directory' passes the temporary directory as resolveExecutable's root argument, not as process.cwd(). A regression that searched process.cwd() would still pass. (2) Line 312 passes the absolute process.execPath, so a regression that logged the unresolved name instead of the resolved path for bare names would pass. Only the failing bare-name path is covered. (3) Line 287 checks that ran.txt is absent but not that nothing was written. A regression that created the log under `tools/` before validating would pass. (4) No test covers capture-copy failure, removal of the temporary capture file, stderr capture, run/record CLI parsing, or runGate's ZIG_GLOBAL_CACHE_DIR injection (the actual repair). The tests do catch an ignored evidenceDir, a missing environment_overrides, PATH order, failure exit preservation and unapproved log roots.",
+      "reproduction": "Mutate resolveExecutable to search process.cwd() first, or change recordCommand to pass `executable` instead of `resolved`. The suite still reports 60/60."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/evidence/FP-0001/probes/INDEX.md",
+      "line": 5,
+      "title": "Probe attribution and contracts are prose",
+      "reasoning": "The agent type, status and duration columns, and the statement that each probe could call only yield, come from task-tool headers that were not preserved. The fairpane-spec run2 probe and the fairpane-spec run1 probe report no agent name. The tool lists themselves agree with the declared frontmatter.",
+      "reproduction": "Search probes/*.json for agent type. It is absent or null in several files."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/evidence/FP-0001/README.md",
+      "line": 118,
+      "title": "The local cache deletion before the final run is prose only",
+      "reasoning": "No record shows the deletion. The zig-test duration (4407 ms against 64 ms cached) and raw/zig-test-summary.log (fresh --cache-dir, 'run test 7 pass') support the outcome indirectly. zig-build took 112 ms, which suggests the library step may have been a cache hit.",
+      "reproduction": "Search raw/ for a delete or remove record. There is none."
+    },
+    {
+      "severity": "note",
+      "file": "toolchains/omp-baseline.json",
+      "line": 7,
+      "title": "installed_check_evidence cites README prose",
+      "reasoning": "It points to README.md rather than raw/omp.log or raw/host-versions.log. This is an allowed path, and the policy digest change it causes is explained."
+    },
+    {
+      "severity": "note",
+      "file": "tools/lib.mjs",
+      "line": 304,
+      "title": "Temporary capture file handling",
+      "reasoning": "The capture is created in the shared os.tmpdir() with the default mode, so on POSIX other users can read it under the usual umask. The catch at line 314 silently swallows a failed removal, which leaves child output in %TEMP%. Output only reaches the log after the child exits, so an external kill of the controller loses it. The watchdog path still copies output."
+    },
+    {
+      "severity": "note",
+      "file": "tools/lib.mjs",
+      "line": 338,
+      "title": "resolveExecutable edge cases",
+      "reasoning": "Quoted PATH entries are not unquoted. Relative PATH entries resolve against process.cwd(). On Windows a name such as 'python3.12' is treated as having an extension. `record --env PATH=…` resolves through the parent's PATH. The record stays truthful in every case, because the absolute path it logs is the one spawned."
+    },
+    {
+      "severity": "note",
+      "file": "tools/lib.mjs",
+      "line": 371,
+      "title": "Properties the brief asked me to verify all hold",
+      "reasoning": "evidencePath confines the log path before any command runs (line 376). safePath rejects traversal, absolute paths, ':' and symlinks or junctions. allowed_evidence_roots are matched by prefix plus '/'. spawn uses shell:false, and resolution tries only .com and .exe, so there is no implicit .cmd shell. commands.push runs before the pass invariant, so failure records are kept. The watchdog (taskkill /T /F, then SIGKILL, or a process-group kill on POSIX) is intact, and output from a timed-out child is still copied. On a copy failure the record gets an error, so a pass is impossible. run --evidence-dir parsing rejects a missing or empty value and extra arguments. record parsing consumes only options before the log path, and its exit status is nonzero for any failed record."
+    }
+  ],
+  "readme_claim_checks": {
+    "manifest_ok_lines": "I counted 86 OK lines in raw/bootstrap-baseline.log, ending with RESULT exit 0. BOOTSTRAP_MANIFEST.sha256 has 86 lines. Matches.",
+    "zig_tests": "7/7 in raw/zig-test-summary.log:3. Matches.",
+    "controller_tests": "60/60 under Node and Bun in raw/controller-hosts.log, and '# tests 60 / # pass 60 / # fail 0' in the controller-test gate log. Matches.",
+    "sha256sums_entries": "90 entries, equal to the 92 files in the directory minus README.md and SHA256SUMS. Matches. All 9 final gate log digests and sizes in SHA256SUMS equal the receipt outputs. I recomputed the zig-test log size by hand as 479, which matches its receipt. The raw-byte correctness of the 7 CRLF entries is unverified (major finding).",
+    "global_cache": "364229 scanned, 0 changed, marker 23:49:01.709Z, two scans with identical output. Matches.",
+    "gate_table": "All 9 receipts have status pass, the stated receipt file names, exit codes 0 (c-abi 0,0,0), source f2d2e0e6…/76 and policy ec150588…/12 before and after. Matches.",
+    "probe_table": "12 probe files across 10 agents. The tool lists match the frontmatter plus _yield, plus _wait for agents with bash. web_search appears only for spec and compiler. No browser tool appears, before or after the repair. Matches.",
+    "other": "The archive size and sha equal the lock entry. Git identity, branch origin and the empty remote list match raw/git.log. The PSModulePath ordering and Get-FileHash failure match raw/powershell-diagnosis.log. The negative-control status 3221226505 matches."
+  },
+  "protected_policy_changes": "I found none. raw/protected-paths.log shows the protected paths and zig-version.txt unchanged against 89109be at staging. The policy digest changed only through toolchains/omp-baseline.json, which is an allowed path. This is unconfirmed for head 05d2d42.",
+  "unmet_criteria": [],
+  "blocking_items": [
+    "The SHA256SUMS discrepancy needs recorded verification, or corrected digests and a corrected explanation (README:27-28).",
+    "A record that head 05d2d42 still matches the receipt fingerprints and protected-path state would close the minor finding at README:122."
+  ],
+  "checks_for_main_agent": [
+    "git diff --name-only 93de2e3 05d2d42 (expect only README.md, SHA256SUMS and raw/clean-checkout-evidence-check.log under engineering/evidence/FP-0001)",
+    "node tools/fairpane.mjs fingerprint at head (expect f2d2e0e6…/76 and ec150588…/12)",
+    "node tools/fairpane.mjs evidence-check engineering/evidence/FP-0001/gates/<each>.json at head",
+    "git diff --stat 89109be 05d2d42 -- AGENTS.md docs/CHARTER.md engineering/qualification.json engineering/policy.json engineering/gates.json toolchains/zig.lock.json toolchains/zig-version.txt specs/corpora.json (expect empty)",
+    "git diff --name-only 89109be 05d2d42 (confirm every path is in allowed_paths)",
+    "cd engineering/evidence/FP-0001 && sha256sum -c SHA256SUMS, plus a raw-byte Node or certutil hash of the 7 CRLF files, captured with `node tools/fairpane.mjs record`",
+    "git ls-tree -r --name-only 89109be -- out (confirm the 6 out/evidence manifest entries are untracked)",
+    "node tools/fairpane.mjs check and node tools/fairpane.mjs test"
+  ]
+}

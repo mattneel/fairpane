@@ -18,14 +18,15 @@ All commands ran on October 8, 2026.
 | `controls/assert_fail.c` | Source of the assertion negative control. |
 | `install-zig-attempt1.log`, `install-zig-attempt2.log` | Installer console output captured with `tee`. |
 | `superseded/` | Earlier evidence that later records replace. |
-| `SHA256SUMS` | Digests of every file in this directory except this file and `SHA256SUMS`. |
+| `SHA256SUMS` | Raw-byte digests of every file here except this file, `SHA256SUMS`, and `raw/sha256sums-check.log`. |
 
 Each `record` log contains a `COMMAND` line with the absolute executable path, the actual output, and a `RESULT` line.
 The `RESULT` line contains the exit status, signal, watchdog outcome, duration, and any environment override.
 
 `SHA256SUMS` uses binary-mode entries.
-On this host, Git for Windows `sha256sum -c` reports the seven files that contain CRLF bytes as `FAILED`.
-A Node check that reads each file as bytes matched all 90 entries.
+`raw/sha256sums-check.log` records GNU coreutils 8.32 `sha256sum -c SHA256SUMS`, and every entry reports `OK`.
+An earlier revision of this file said that Git for Windows `sha256sum -c` failed seven entries.
+That statement was wrong; the recorded GNU check passes them.
 
 ## Host and tools
 
@@ -49,12 +50,19 @@ Every Zig command in `raw/` and `gates/` names the locked compiler by absolute p
 
 ## Archive integrity
 
-`raw/bootstrap-baseline.log` ran in a detached worktree of commit `89109be`, the verbatim archive.
+Commit `89109be` tracks the archive's 81 files that `.gitignore` does not exclude.
+The archive's six preparation receipts and logs under `out/evidence` are ignored, so that commit does not contain them.
+`raw/bootstrap-preparation-copy.log` copies those six files into `engineering/evidence/bootstrap-preparation/` and matches each copy to its manifest digest.
+
+`raw/bootstrap-baseline.log` ran in a detached worktree of commit `89109be`.
+The six ignored files were copied into that worktree without a record before the check.
 The first `sha256sum -c BOOTSTRAP_MANIFEST.sha256` record exited with status 1 and no output.
 That failure came from a controller defect, which the controller repairs section describes.
 The repeated check printed `OK` for all 86 manifest entries and exited with status 0.
+`raw/bootstrap-manifest-recheck.log` repeats the check with every step recorded.
+It creates the worktree, shows that `out/evidence` is untracked, copies the preserved files, and prints `OK` for all 86 entries.
 
-The supplied `repo-check` and `controller-test` preparation receipts passed `evidence-check` in that worktree.
+The supplied `repo-check` and `controller-test` preparation receipts passed `evidence-check` in the first worktree.
 The supplied `zig-test` preparation receipt failed with "The receipt does not report a passed gate."
 That receipt records the missing compiler on the preparation host, so the failure is the expected result.
 
@@ -63,9 +71,10 @@ That receipt records the missing compiler on the preparation host, so the failur
 `raw/git.log` records the identity source, the default branch, the remotes, and the commit authors.
 The identity `Matt Neel <m@neel.codes>` comes from `C:/Users/requi/.gitconfig`.
 `init.defaultBranch` is `master` from `C:/Program Files/Git/etc/gitconfig`.
-`git remote -v` printed nothing, so no remote exists.
+When `raw/git.log` ran, `git remote -v` printed nothing, so no remote existed.
+The owner configured the public remote `origin` after this task's implementation commits.
 No repository existed before this task, so no history was overwritten.
-Commit `89109be156eecd356ff59bf9d6508977e76a6b2b` records the verified archive without changes.
+Commit `89109be156eecd356ff59bf9d6508977e76a6b2b` records the archive's tracked files without changes.
 
 ## Compiler installation
 
@@ -115,11 +124,20 @@ No permanent test reproduces the MSYS2 handle defect, because it needs an MSYS2 
 
 Every receipt in `gates/` binds source digest `f2d2e0e6d03370c93235066bb420fb81419448f05e97b7af54483579c4c46087` with 76 files.
 Every receipt binds policy digest `ec1505889dbe8cc3aef2fa1e6a9d9da2afd5a7f847fcbe23e1559761d35f3e91` with 12 files.
-The local Zig cache entries were deleted before this run, so the test binary compiled and ran again.
+The local Zig cache entries were deleted before this run, but no record shows the deletion.
+The `zig-test` gate took 4407 ms here against 64 ms in the cached run, and `raw/zig-test-summary.log` ran with a fresh cache directory.
 `raw/gate-evidence-check.log` shows `evidence-check` passing for each receipt with `current_source: true`.
 `raw/clean-checkout-evidence-check.log` repeats that check from a detached worktree of commit `93de2e3`, which has no `out` directory.
 That worktree reported the same source and policy digests, and all nine receipts passed.
-Commit `93de2e3` was then amended to add only this log, README text, and `SHA256SUMS`, which lie outside the source and policy roots.
+
+Commit `93de2e3` was amended twice before it was pushed: first to `727ef5e`, then to `05d2d42`.
+`raw/head-05d2d42-verification.log` records both amend diffs.
+The first amend changed only this file, `SHA256SUMS`, and `raw/clean-checkout-evidence-check.log`.
+The second amend changed only this file.
+The same log checks reviewed commit `05d2d42` from a detached worktree.
+That worktree reports the receipt digests, and all nine receipts pass `evidence-check`.
+The first amend changed a commit whose ID this file already recorded, which left `93de2e3` off the branch.
+`docs/GIT_OPERATIONS.md` now forbids amending a commit after its ID appears in evidence.
 
 | Gate | Result | Receipt | Command exits |
 | --- | --- | --- | --- |
@@ -191,6 +209,8 @@ That file is an allowed path for this task.
 `reviews/review-1-reject.json` rejected commit `70b876a`.
 The review found no code defect.
 It required durable raw evidence for criteria 1, 5, 6, and 7.
+`reviews/review-2-reject.json` rejected commit `05d2d42`.
+It found every criterion supported but blocked acceptance on two evidence gaps.
 
 | Review finding | Resolution |
 | --- | --- |
@@ -204,6 +224,12 @@ It required durable raw evidence for criteria 1, 5, 6, and 7.
 | Other prose-only claims | `raw/bootstrap-baseline.log`, `raw/compiler-archive.log`, `raw/global-cache-isolation.log`, `raw/controller-hosts.log`, and `raw/protected-paths.log` |
 | New gate behavior lacks tests | Five controller tests |
 | Stale handoff | `engineering/HANDOFF.md` updated |
+| Review 2: unrecorded check behind the `SHA256SUMS` explanation | `raw/sha256sums-check.log` and the corrected layout section |
+| Review 2: no record for the reviewed head | `raw/head-05d2d42-verification.log` |
+| Review 2: commit `89109be` lacks the ignored preparation files | `raw/bootstrap-preparation-copy.log`, `raw/bootstrap-manifest-recheck.log`, and corrected wording |
+| Review 2: probe attribution was prose | `raw/probe-attribution.log` extracts the spawn arguments and result headers from the session transcript |
+| Review 2: cache deletion was prose | Marked as unrecorded above |
+| Review 2: controller record and test gaps | Deferred to task `FP-0028` |
 
 ## Superseded evidence
 
@@ -219,3 +245,7 @@ Its receipts name logs under the ignored `out/evidence` directory.
   A separate acceptance-policy change can add `--summary all` to that protected gate definition.
 - No HTML, CSS, JavaScript, WPT, Test262, GPU, or application conformance suite ran.
 - Linux, macOS, and AArch64 execution did not run.
+- Command records lack the working directory and start time.
+  Some output-capture failure paths can leak a descriptor or omit a `RESULT` line.
+  The new controller tests miss several plausible regressions.
+  Task `FP-0028` owns these controller hardening items from review 2.

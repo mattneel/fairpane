@@ -3,6 +3,7 @@
 Each file is the verbatim yielded output of one OMP subagent.
 The root session copied each output with `cp agent://<job> <file>`.
 The task tool reported the agent type, status, and duration in each result header.
+`../raw/probe-attribution.log` extracts each spawn's requested agent type and each result header from the session transcript.
 Each probe received a contract that allowed only its result tool.
 
 | File | Job | Agent type | Status | Duration | Agent file state |

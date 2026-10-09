@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "repo-check",
+  "gate_sha256": "83889f6c10672d867afaf998faeda5b700c86ef1730d7dbff34c22e2062cc69e",
+  "status": "pass",
+  "started_at": "2026-10-08T23:09:34.006Z",
+  "finished_at": "2026-10-08T23:09:34.062Z",
+  "host": {
+    "platform": "linux",
+    "architecture": "x64",
+    "os_release": "6.18.44",
+    "runtime": "v22.16.0",
+    "bun_version": null,
+    "zig_version": null
+  },
+  "source_before": {
+    "sha256": "cc433c683fca0689283bf0022d1ae4a9db333ee8b06af660844834818245c2e4",
+    "file_count": 76
+  },
+  "source_after": {
+    "sha256": "cc433c683fca0689283bf0022d1ae4a9db333ee8b06af660844834818245c2e4",
+    "file_count": 76
+  },
+  "policy_before": {
+    "sha256": "3b9a828a8a1e26a715c051b7cd29f8322df4f1eb944afec8e635f5dd19c4b483",
+    "file_count": 12
+  },
+  "policy_after": {
+    "sha256": "3b9a828a8a1e26a715c051b7cd29f8322df4f1eb944afec8e635f5dd19c4b483",
+    "file_count": 12
+  },
+  "commands": [
+    {
+      "executable": "/opt/nvm/versions/node/v22.16.0/bin/node",
+      "arguments": [
+        "/mnt/data/fairpane-bootstrap/tools/fairpane.mjs",
+        "check"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 50
+    }
+  ],
+  "error": null,
+  "outputs": [
+    {
+      "path": "out/evidence/2026-10-08T23-09-34-005Z-repo-check-d8d2c96e.log",
+      "size": 889,
+      "sha256": "a0a3b950dd89e16d918ce6dd1e13c8b2f8acd2efeeceb0236cb09497e5f1c4b9"
+    }
+  ]
+}
