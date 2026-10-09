@@ -659,4 +659,12 @@ Required reviewer: `fairpane-review`.
    The integrator decision on `SwitchError` says that the error set of `next`, `feed`, and `finish` names no error that they cannot return.
    The frozen signatures keep the shared `Error` set for all three, and `next` and `finish` never return `ChunkPending` or `InputFinished`; only `switchTo` has its own set.
    `FP-0010` must confirm that no character token can change the adjusted current node's namespace before it relies on `adjusted_current_node_is_foreign` across `need_input`.
+3. The confirmation that amendment 2 asks of `FP-0010` fails in general, as the FP-0010 split draft by agent `FP0010Contract` found.
+   A character token can change the adjusted current node from a foreign element to an HTML element.
+   At a MathML text integration point or an HTML integration point, tree construction processes a character in the in body insertion mode, which reconstructs the active formatting elements and so can push an HTML element.
+   The tokenizer also reads `adjusted_current_node_is_foreign` in the markup declaration open state while characters from before the `<` are still pending.
+   With the input `<math><mi><p><b></p>x<![CDATA[y]]>`, one chunk then gives the text `xy` in the new `b` element, while a split inside `[CDATA[` gives the text `x` and the comment `[CDATA[y]]`; the HTML standard gives the second result [INFERENCE: from the draft's reading of the pinned standard, not yet run].
+   No FP-0064 case can reach this, because tree construction, which alone sets the flag from the stack, does not exist yet.
+   `FP-0104` owns the fix: the markup declaration open state returns the pending characters to tree construction before it reads the flag, and a chunk-partition case runs the witness.
+   `FP-0100` never sets the flag, because it constructs no foreign content.
 
