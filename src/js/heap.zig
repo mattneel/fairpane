@@ -138,39 +138,11 @@ pub fn Heap(comptime Rt: type) type {
 
         pub const Persistent = struct { index: u32 };
 
-        /// A scope-stack entry.
-        pub const Local = struct {
-            heap: *Self,
-            index: usize,
-
-            pub fn get(local: Local) Value {
-                return local.heap.scope_stack.items[local.index];
-            }
-
-            pub fn set(local: Local, v: Value) void {
-                local.heap.scope_stack.items[local.index] = v;
-            }
-        };
-
-        /// Roots every value pushed until `close`. Scopes close in reverse order of opening.
-        pub const Scope = struct {
-            heap: *Self,
+        /// The extent of one open scope on the scope stack. It holds no heap pointer, so a scope
+        /// that a context opens gives its holder no way to reach the heap.
+        pub const ScopeFrame = struct {
             base: usize,
             depth: usize,
-
-            pub fn push(scope: *Scope, v: Value) error{OutOfMemory}!Local {
-                const heap = scope.heap;
-                std.debug.assert(scope.depth == heap.scope_depth);
-                try heap.scope_stack.append(heap.gpa, v);
-                return .{ .heap = heap, .index = heap.scope_stack.items.len - 1 };
-            }
-
-            pub fn close(scope: *Scope) void {
-                const heap = scope.heap;
-                std.debug.assert(scope.depth == heap.scope_depth);
-                heap.scope_stack.shrinkRetainingCapacity(scope.base);
-                heap.scope_depth -= 1;
-            }
         };
 
         gpa: Allocator,
@@ -476,10 +448,10 @@ pub fn Heap(comptime Rt: type) type {
         /// Throws a new `error_object` whose prototype is `%TypeError.prototype%` and whose own
         /// `"message"` property is `message`.
         pub fn throwTypeError(self: *Self, message: []const u8) error{ OutOfMemory, Throw } {
-            var scope = try self.openScope();
-            defer scope.close();
+            const frame = try self.openScope();
+            defer self.closeScope(frame);
             const text = try self.allocateAsciiString(message);
-            _ = try scope.push(E.fromCell(@backingInt(text)));
+            _ = try self.pushScoped(frame, E.fromCell(@backingInt(text)));
             const thrown = try self.allocateErrorObject(self.intrinsics.type_error_prototype);
             try self.appendProperty(thrown, .{
                 .key = self.intrinsics.message_string,
@@ -498,10 +470,33 @@ pub fn Heap(comptime Rt: type) type {
 
         // Roots.
 
-        pub fn openScope(self: *Self) error{OutOfMemory}!Scope {
+        /// Opens a scope. Scopes close in reverse order of opening.
+        pub fn openScope(self: *Self) error{OutOfMemory}!ScopeFrame {
             try self.scope_stack.ensureUnusedCapacity(self.gpa, 4);
             self.scope_depth += 1;
-            return .{ .heap = self, .base = self.scope_stack.items.len, .depth = self.scope_depth };
+            return .{ .base = self.scope_stack.items.len, .depth = self.scope_depth };
+        }
+
+        /// Roots `v` in the innermost open scope `frame` and returns its index on the scope stack.
+        pub fn pushScoped(self: *Self, frame: ScopeFrame, v: Value) error{OutOfMemory}!usize {
+            std.debug.assert(frame.depth == self.scope_depth);
+            try self.scope_stack.append(self.gpa, v);
+            return self.scope_stack.items.len - 1;
+        }
+
+        /// Pops every entry of the innermost open scope `frame`.
+        pub fn closeScope(self: *Self, frame: ScopeFrame) void {
+            std.debug.assert(frame.depth == self.scope_depth);
+            self.scope_stack.shrinkRetainingCapacity(frame.base);
+            self.scope_depth -= 1;
+        }
+
+        pub fn scopedValue(self: *const Self, index: usize) Value {
+            return self.scope_stack.items[index];
+        }
+
+        pub fn setScopedValue(self: *Self, index: usize, v: Value) void {
+            self.scope_stack.items[index] = v;
         }
 
         pub fn addPersistent(self: *Self, v: Value) error{OutOfMemory}!Persistent {
@@ -759,11 +754,11 @@ fn TestSupport(comptime Rt: type) type {
             list.appendAssumeCapacity(v);
         }
 
-        /// Builds the random heap of case 9 and returns the persistent roots that it adds.
-        fn buildRandomHeap(heap: *Rt.Heap, store: *dom.Store, document: dom.NodeHandle, seed: u64) !void {
+        /// Builds the random heap of case 9 in the heap that `rt` owns and adds 64 persistent roots.
+        fn buildRandomHeap(rt: *Rt, store: *dom.Store, document: dom.NodeHandle, seed: u64) !void {
             var prng = std.Random.DefaultPrng.init(seed);
             const random = prng.random();
-            var ctx = Rt.rootContext(heap);
+            var ctx = rt.rootContext();
             const intrinsics = ctx.intrinsics();
             var cells: std.ArrayList(CellRef) = .empty;
             defer cells.deinit(testing.allocator);
@@ -839,7 +834,7 @@ fn TestSupport(comptime Rt: type) type {
                 _ = try ctx.invoke(.ordinary_define_own_property, .{ object, key, descriptor });
             }
             for (0..64) |_| {
-                _ = try heap.addPersistent(Rt.cellValue(cells.items[random.uintLessThan(usize, cells.items.len)]));
+                _ = try rt.heap.addPersistent(Rt.cellValue(cells.items[random.uintLessThan(usize, cells.items.len)]));
             }
         }
     };
@@ -854,12 +849,14 @@ test "FP-0011 case 9: the generated and manual tracers visit and free the same c
             var store = try dom.Store.init(testing.allocator);
             defer store.deinit();
             const document = try store.createDocument();
-            var generated = try Rt.Heap.init(testing.allocator, .{ .dom = &store, .tracer = .generated });
-            defer generated.deinit();
-            var manual = try Rt.Heap.init(testing.allocator, .{ .dom = &store, .tracer = .manual });
-            defer manual.deinit();
-            try S.buildRandomHeap(&generated, &store, document, seed);
-            try S.buildRandomHeap(&manual, &store, document, seed);
+            var generated_runtime = try Rt.init(testing.allocator, .{ .dom = &store, .tracer = .generated });
+            defer generated_runtime.deinit();
+            var manual_runtime = try Rt.init(testing.allocator, .{ .dom = &store, .tracer = .manual });
+            defer manual_runtime.deinit();
+            try S.buildRandomHeap(&generated_runtime, &store, document, seed);
+            try S.buildRandomHeap(&manual_runtime, &store, document, seed);
+            const generated = &generated_runtime.heap;
+            const manual = &manual_runtime.heap;
             try generated.expectInvariants();
             try manual.expectInvariants();
 
@@ -907,9 +904,10 @@ test "FP-0011 case 10: a collection frees unreachable cells and keeps every root
     inline for (test_representations) |r| {
         const Rt = runtime.Runtime(r);
         const S = TestSupport(Rt);
-        var heap = try Rt.Heap.init(testing.allocator, .{});
-        defer heap.deinit();
-        var ctx = Rt.rootContext(&heap);
+        var rt = try Rt.init(testing.allocator, .{});
+        defer rt.deinit();
+        const heap = &rt.heap;
+        var ctx = rt.rootContext();
         const intrinsics = ctx.intrinsics();
         const key = intrinsics.name_string;
 
@@ -974,9 +972,10 @@ test "FP-0011 case 10: a collection frees unreachable cells and keeps every root
 test "FP-0011 case 12: a quarantined cell resolves intact and counts one dead resolution" {
     inline for (test_representations) |r| {
         const Rt = runtime.Runtime(r);
-        var heap = try Rt.Heap.init(testing.allocator, .{ .quarantine_freed_cells = true });
-        defer heap.deinit();
-        var ctx = Rt.rootContext(&heap);
+        var rt = try Rt.init(testing.allocator, .{ .quarantine_freed_cells = true });
+        defer rt.deinit();
+        const heap = &rt.heap;
+        var ctx = rt.rootContext();
         const object = try ctx.allocateObject(ctx.intrinsics().object_prototype);
         heap.collect();
         try heap.expectInvariants();
@@ -997,9 +996,10 @@ test "FP-0011 case 13: a platform object keeps its DOM tree until the heap colle
         const text = try store.createText(document, .{ .units = testUnits("t") });
         try store.appendChild(element, text);
 
-        var heap = try Rt.Heap.init(testing.allocator, .{ .dom = &store });
-        defer heap.deinit();
-        var ctx = Rt.rootContext(&heap);
+        var rt = try Rt.init(testing.allocator, .{ .dom = &store });
+        defer rt.deinit();
+        const heap = &rt.heap;
+        var ctx = rt.rootContext();
         const platform = try ctx.allocatePlatformObject(ctx.intrinsics().object_prototype, element);
         try heap.expectInvariants();
         const root = try heap.addPersistent(Rt.cellValue(platform));
@@ -1019,9 +1019,10 @@ test "FP-0011 case 13: a platform object keeps its DOM tree until the heap colle
     }
 }
 
-fn allocationFailureBody(comptime Rt: type, heap: *Rt.Heap, element: dom.NodeHandle) !void {
+fn allocationFailureBody(comptime Rt: type, rt: *Rt, element: dom.NodeHandle) !void {
     const S = TestSupport(Rt);
-    var ctx = Rt.rootContext(heap);
+    const heap = &rt.heap;
+    var ctx = rt.rootContext();
     const intrinsics = ctx.intrinsics();
     var scope = try ctx.openScope();
     defer scope.close();
@@ -1076,10 +1077,10 @@ fn AllocationFailure(comptime Rt: type) type {
             const element = try store.createElement(document, null, .{ .units = testUnits("p") });
             try store.appendChild(document, element);
             const nodes = store.nodeCount();
-            var heap = try Rt.Heap.init(gpa, .{ .dom = &store });
-            const outcome = allocationFailureBody(Rt, &heap, element);
-            const verified = heap.expectInvariants();
-            heap.deinit();
+            var rt = try Rt.init(gpa, .{ .dom = &store });
+            const outcome = allocationFailureBody(Rt, &rt, element);
+            const verified = rt.heap.expectInvariants();
+            rt.deinit();
             try testing.expectError(error.NotRetained, store.release(element));
             try testing.expectEqual(0, store.sweep());
             try testing.expectEqual(nodes, store.nodeCount());
@@ -1098,10 +1099,11 @@ test "FP-0011 case 14: every induced allocation failure returns OutOfMemory and 
 test "FP-0011 case 15: the cell limit collects first and then returns OutOfMemory" {
     inline for (test_representations) |r| {
         const Rt = runtime.Runtime(r);
-        var heap = try Rt.Heap.init(testing.allocator, .{ .max_cells = Rt.Heap.intrinsic_cell_count + 8 });
-        defer heap.deinit();
+        var rt = try Rt.init(testing.allocator, .{ .max_cells = Rt.Heap.intrinsic_cell_count + 8 });
+        defer rt.deinit();
+        const heap = &rt.heap;
         try testing.expectEqual(Rt.Heap.intrinsic_cell_count, heap.liveCount());
-        var ctx = Rt.rootContext(&heap);
+        var ctx = rt.rootContext();
         {
             var scope = try ctx.openScope();
             defer scope.close();
@@ -1133,8 +1135,9 @@ test "FP-0011 case 16: deinit frees every cell and releases every retain" {
         var nodes: [3]dom.NodeHandle = undefined;
         for (&nodes) |*node| node.* = try store.createElement(document, null, .{ .units = testUnits("span") });
 
-        var heap = try Rt.Heap.init(testing.allocator, .{ .dom = &store, .quarantine_freed_cells = true });
-        var ctx = Rt.rootContext(&heap);
+        var rt = try Rt.init(testing.allocator, .{ .dom = &store, .quarantine_freed_cells = true });
+        const heap = &rt.heap;
+        var ctx = rt.rootContext();
         const proto = ctx.intrinsics().object_prototype;
         var scope = try ctx.openScope();
         _ = try scope.push(Rt.cellValue(try ctx.allocatePlatformObject(proto, nodes[0])));
@@ -1148,7 +1151,7 @@ test "FP-0011 case 16: deinit frees every cell and releases every retain" {
         _ = try ctx.allocateString(testUnits("unrooted"));
         _ = try ctx.allocateObject(proto);
         try heap.expectInvariants();
-        heap.deinit();
+        rt.deinit();
         for (nodes) |node| try testing.expectError(error.NotRetained, store.release(node));
     }
 }

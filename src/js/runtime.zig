@@ -1,9 +1,18 @@
 //! The JavaScript runtime, instantiated once per value representation.
 //!
-//! `Runtime(r).Context(effects)` is the only way for a kernel to reach the heap.
-//! Each heap primitive requires an effect set, and each kernel's first parameter is a context with
-//! exactly its operation's effects. `invoke` narrows a context to an operation's effects, so a
-//! context can invoke only operations whose effects it holds.
+//! `Runtime(r)` owns one heap. Its owner obtains the only root context through `rootContext`, which
+//! takes the runtime, never a heap pointer or a context. A context holds its heap sealed as an opaque
+//! pointer whose type depends on the context's effects. Only this file converts it back to a heap
+//! pointer, and that conversion is not `pub`. Code that holds a context therefore reaches the heap
+//! only through the context's methods, and each method that allocates, mutates an existing cell,
+//! throws, collects, or calls user code requires an effect set at compile time. No method gives a
+//! heap pointer, a runtime pointer, or a wider context. The kernels live in `kernels.zig`.
+//!
+//! This boundary stops accidental reach. It does not stop code that deliberately converts integers
+//! or pointers with `@ptrFromInt` or `@ptrCast`.
+//!
+//! Each kernel's first parameter is a context with exactly its operation's effects. `invoke` narrows a
+//! context to an operation's effects, so a context can invoke only operations whose effects it holds.
 //!
 //! Rooting protocol: a caller keeps every `Value` and `CellRef` argument rooted for the duration of
 //! the call, a kernel returns its result unrooted, and a kernel roots each intermediate that it holds
@@ -14,11 +23,10 @@ const builtin = @import("builtin");
 const testing = std.testing;
 const dom = @import("../dom.zig");
 const heap_module = @import("heap.zig");
-const number = @import("number.zig");
+const kernels = @import("kernels.zig");
 const number_vectors = @import("number_vectors.zig");
 const web_string = @import("../web_string.zig");
 const Allocator = std.mem.Allocator;
-const Limb = std.math.big.Limb;
 
 pub const operations = @import("operations.zig");
 pub const value = @import("value.zig");
@@ -35,17 +43,11 @@ pub const LanguageType = enum { undefined, null, boolean, string, symbol, number
 
 pub const PreferredType = enum { string, number };
 
-/// The messages of engine-thrown TypeErrors.
-const Message = struct {
-    const primitive_object = "Symbol.toPrimitive method returned an object";
-    const not_callable_method = "method is not callable";
-    const no_primitive = "cannot convert object to primitive value";
-    const symbol_to_string = "cannot convert a Symbol value to a string";
-    const symbol_to_number = "cannot convert a Symbol value to a number";
-    const bigint_to_number = "cannot convert a BigInt value to a number";
-    const mixed_addition = "cannot mix BigInt and other types in addition";
-    const not_function = "value is not a function";
-};
+const allocating: Effects = .{ .allocation = true };
+const throwing: Effects = .{ .allocation = true, .exception = true };
+const raising: Effects = .{ .exception = true };
+const mutating: Effects = .{ .heap_mutation = true };
+const defining: Effects = .{ .allocation = true, .heap_mutation = true };
 
 /// One entry of a bound kernel table.
 pub const BoundKernel = struct {
@@ -53,13 +55,6 @@ pub const BoundKernel = struct {
     name: []const u8,
     kernel: *const anyopaque,
 };
-
-const leaf: Effects = .none;
-const allocating: Effects = .{ .allocation = true };
-const throwing: Effects = .{ .allocation = true, .exception = true };
-const raising: Effects = .{ .exception = true };
-const mutating: Effects = .{ .heap_mutation = true };
-const defining: Effects = .{ .allocation = true, .heap_mutation = true };
 
 pub fn Runtime(comptime r: Representation) type {
     return struct {
@@ -85,15 +80,15 @@ pub fn Runtime(comptime r: Representation) type {
             enumerable: ?bool = null,
             configurable: ?bool = null,
 
-            fn isAccessor(descriptor: PropertyDescriptor) bool {
+            pub fn isAccessor(descriptor: PropertyDescriptor) bool {
                 return descriptor.get != null or descriptor.set != null;
             }
 
-            fn isData(descriptor: PropertyDescriptor) bool {
+            pub fn isData(descriptor: PropertyDescriptor) bool {
                 return descriptor.value != null or descriptor.writable != null;
             }
 
-            fn isEmpty(descriptor: PropertyDescriptor) bool {
+            pub fn isEmpty(descriptor: PropertyDescriptor) bool {
                 return !descriptor.isAccessor() and !descriptor.isData() and
                     descriptor.enumerable == null and descriptor.configurable == null;
             }
@@ -116,13 +111,6 @@ pub fn Runtime(comptime r: Representation) type {
 
         fn accessorOf(ref: ?CellRef) Accessor {
             return if (ref) |function| .{ .function = function } else .undefined;
-        }
-
-        fn accessorCell(accessor: ?Accessor) ?CellRef {
-            return switch (accessor orelse return null) {
-                .undefined => null,
-                .function => |function| function,
-            };
         }
 
         pub fn OperandType(comptime t: operations.Type) type {
@@ -154,17 +142,86 @@ pub fn Runtime(comptime r: Representation) type {
             return T;
         }
 
-        /// Returns a context with every effect, for the host that owns `heap`.
-        pub fn rootContext(heap: *Heap) Context(.all) {
-            return .{ .heap = heap };
+        /// The heap that this runtime owns. Only the runtime's owner holds it; no context exposes it.
+        heap: Heap,
+
+        pub fn init(gpa: Allocator, options: Heap.Options) error{OutOfMemory}!Rt {
+            return .{ .heap = try Heap.init(gpa, options) };
         }
+
+        pub fn deinit(rt: *Rt) void {
+            rt.heap.deinit();
+            rt.* = undefined;
+        }
+
+        /// Returns a context with every effect over the heap that `rt` owns. This is the only source
+        /// of a root context. The runtime must not move while one of its contexts is in use.
+        pub fn rootContext(rt: *Rt) Context(.all) {
+            return .{ .heap = seal(.all, &rt.heap) };
+        }
+
+        /// The type of a sealed heap pointer that a context with `effects` holds. Each effect set
+        /// has its own type, so the field of one context cannot initialize a context with other effects.
+        fn SealedHeap(comptime effects: Effects) type {
+            return opaque {
+                pub const sealed_representation = r;
+                pub const sealed_effects = effects;
+            };
+        }
+
+        /// The type of a sealed heap pointer that a scope or a local holds; it initializes no context.
+        const SealedScopeHeap = opaque {
+            pub const sealed_representation = r;
+        };
+
+        fn seal(comptime effects: Effects, heap: *Heap) *SealedHeap(effects) {
+            return @ptrCast(heap);
+        }
+
+        /// The only conversion from a sealed heap pointer back to a heap pointer. It is not `pub`.
+        fn unseal(sealed: *anyopaque) *Heap {
+            return @ptrCast(@alignCast(sealed));
+        }
+
+        /// Roots every value pushed until `close`. Scopes close in reverse order of opening.
+        pub const Scope = struct {
+            heap: *SealedScopeHeap,
+            frame: Heap.ScopeFrame,
+
+            pub fn push(scope: *Scope, v: Value) error{OutOfMemory}!Local {
+                return .{ .heap = scope.heap, .index = try unseal(scope.heap).pushScoped(scope.frame, v) };
+            }
+
+            pub fn close(scope: *Scope) void {
+                unseal(scope.heap).closeScope(scope.frame);
+            }
+        };
+
+        /// A scope-stack entry.
+        pub const Local = struct {
+            heap: *SealedScopeHeap,
+            index: usize,
+
+            pub fn get(local: Local) Value {
+                return unseal(local.heap).scopedValue(local.index);
+            }
+
+            pub fn set(local: Local, v: Value) void {
+                unseal(local.heap).setScopedValue(local.index, v);
+            }
+        };
 
         pub fn Context(comptime effects: Effects) type {
             return struct {
                 const Self = @This();
                 pub const context_effects = effects;
 
-                heap: *Heap,
+                /// The heap, sealed. Only this file converts it back to a heap pointer.
+                heap: *SealedHeap(effects),
+
+                fn heapOf(self: *const Self) *Heap {
+                    return unseal(self.heap);
+                }
 
                 fn require(comptime method: []const u8, comptime needed: Effects) void {
                     if (!operations.permits(effects, needed)) {
@@ -183,13 +240,13 @@ pub fn Runtime(comptime r: Representation) type {
                                 operation.name ++ ", which has effects " ++ operations.effectsName(operation.effects));
                         }
                     }
-                    const heap = self.heap;
+                    const heap = self.heapOf();
                     if (heap.invoke_depth == 0) heap.invoke_boundary = heap.next_serial;
                     heap.invoke_depth += 1;
                     defer heap.invoke_depth -= 1;
                     const before = if (builtin.is_test) heap.stats else {};
                     defer if (builtin.is_test) heap.checkEffects(id, before);
-                    var narrowed: Context(operation.effects) = .{ .heap = heap };
+                    var narrowed: Context(operation.effects) = .{ .heap = seal(operation.effects, heap) };
                     return @call(.auto, @field(Kernels, @tagName(id)), .{&narrowed} ++ args);
                 }
 
@@ -199,17 +256,17 @@ pub fn Runtime(comptime r: Representation) type {
                         @compileError("fairpane-js: a context with effects " ++ operations.effectsName(effects) ++
                             " cannot narrow to effects " ++ operations.effectsName(narrower));
                     }
-                    return .{ .heap = self.heap };
+                    return .{ .heap = seal(narrower, self.heapOf()) };
                 }
 
                 // Reading requires no effect.
 
                 pub fn intrinsics(self: *const Self) Heap.Intrinsics {
-                    return self.heap.intrinsics;
+                    return self.heapOf().intrinsics;
                 }
 
                 pub fn kindOf(self: *const Self, ref: CellRef) Heap.Kind {
-                    return self.heap.kindOf(ref);
+                    return self.heapOf().kindOf(ref);
                 }
 
                 pub fn typeOf(self: *const Self, v: Value) LanguageType {
@@ -218,7 +275,7 @@ pub fn Runtime(comptime r: Representation) type {
                         .null => .null,
                         .boolean => .boolean,
                         .number => .number,
-                        .cell => switch (self.heap.kindOf(@fromBackingInt(V.asCell(v)))) {
+                        .cell => switch (self.heapOf().kindOf(@fromBackingInt(V.asCell(v)))) {
                             .string => .string,
                             .symbol => .symbol,
                             .bigint => .bigint,
@@ -229,40 +286,40 @@ pub fn Runtime(comptime r: Representation) type {
                 }
 
                 pub fn numberOf(self: *const Self, v: Value) f64 {
-                    return self.heap.numberOf(v);
+                    return self.heapOf().numberOf(v);
                 }
 
                 pub fn stringUnits(self: *const Self, string: CellRef) []const u16 {
-                    return self.heap.stringUnits(string);
+                    return self.heapOf().stringUnits(string);
                 }
 
                 pub fn bigIntOf(self: *const Self, big: CellRef) std.math.big.int.Const {
-                    return self.heap.bigIntOf(big);
+                    return self.heapOf().bigIntOf(big);
                 }
 
                 pub fn isCallable(self: *const Self, v: Value) bool {
                     const ref = cellOf(v) orelse return false;
-                    return heap_catalog.info(self.heap.kindOf(ref)).callable;
+                    return heap_catalog.info(self.heapOf().kindOf(ref)).callable;
                 }
 
                 pub fn prototypeOf(self: *const Self, object: CellRef) ?CellRef {
-                    return self.heap.header(object).prototype;
+                    return self.heapOf().header(object).prototype;
                 }
 
                 pub fn isExtensible(self: *const Self, object: CellRef) bool {
-                    return self.heap.header(object).extensible;
+                    return self.heapOf().header(object).extensible;
                 }
 
                 pub fn findOwnProperty(self: *const Self, object: CellRef, key: CellRef) ?usize {
-                    return self.heap.findProperty(object, key);
+                    return self.heapOf().findProperty(object, key);
                 }
 
                 pub fn propertyAt(self: *const Self, object: CellRef, index: usize) Heap.Property {
-                    return self.heap.header(object).properties.items[index];
+                    return self.heapOf().header(object).properties.items[index];
                 }
 
                 pub fn ownPropertyCount(self: *const Self, object: CellRef) usize {
-                    return self.heap.header(object).properties.items.len;
+                    return self.heapOf().header(object).properties.items.len;
                 }
 
                 /// Returns the fully populated descriptor of an own property.
@@ -287,11 +344,11 @@ pub fn Runtime(comptime r: Representation) type {
 
                 /// Returns the built-in function whose behavior runs.
                 pub fn activeFunction(self: *const Self) CellRef {
-                    return self.heap.active_function orelse std.debug.panic("fairpane-js: no built-in function is running", .{});
+                    return self.heapOf().active_function orelse std.debug.panic("fairpane-js: no built-in function is running", .{});
                 }
 
                 pub fn hostData(self: *const Self) Value {
-                    return self.heap.resolve(self.activeFunction()).payload.builtin_function.host_data;
+                    return self.heapOf().resolve(self.activeFunction()).payload.builtin_function.host_data;
                 }
 
                 pub fn hostContext(self: *const Self) ?*anyopaque {
@@ -299,7 +356,7 @@ pub fn Runtime(comptime r: Representation) type {
                 }
 
                 pub fn hostContextOf(self: *const Self, function: CellRef) ?*anyopaque {
-                    return self.heap.resolve(function).payload.builtin_function.host_context;
+                    return self.heapOf().resolve(function).payload.builtin_function.host_context;
                 }
 
                 // Allocation.
@@ -307,96 +364,97 @@ pub fn Runtime(comptime r: Representation) type {
                 /// Returns the heap's allocator for buffers that a kernel frees before it returns.
                 pub fn allocator(self: *const Self) Allocator {
                     comptime require("allocator", allocating);
-                    return self.heap.gpa;
+                    return self.heapOf().gpa;
                 }
 
                 pub fn allocateString(self: *const Self, units: []const u16) error{OutOfMemory}!CellRef {
                     comptime require("allocateString", allocating);
-                    return self.heap.allocateString(units);
+                    return self.heapOf().allocateString(units);
                 }
 
                 pub fn allocateAsciiString(self: *const Self, bytes: []const u8) error{OutOfMemory}!CellRef {
                     comptime require("allocateAsciiString", allocating);
-                    return self.heap.allocateAsciiString(bytes);
+                    return self.heapOf().allocateAsciiString(bytes);
                 }
 
                 pub fn allocateConcatenation(self: *const Self, a: CellRef, b: CellRef) error{OutOfMemory}!CellRef {
                     comptime require("allocateConcatenation", allocating);
-                    return self.heap.allocateConcatenation(a, b);
+                    return self.heapOf().allocateConcatenation(a, b);
                 }
 
                 pub fn allocateObject(self: *const Self, prototype: ?CellRef) error{OutOfMemory}!CellRef {
                     comptime require("allocateObject", allocating);
-                    return self.heap.allocateObject(prototype);
+                    return self.heapOf().allocateObject(prototype);
                 }
 
                 pub fn allocateErrorObject(self: *const Self, prototype: ?CellRef) error{OutOfMemory}!CellRef {
                     comptime require("allocateErrorObject", allocating);
-                    return self.heap.allocateErrorObject(prototype);
+                    return self.heapOf().allocateErrorObject(prototype);
                 }
 
                 pub fn allocateSymbol(self: *const Self, description: ?CellRef) error{OutOfMemory}!CellRef {
                     comptime require("allocateSymbol", allocating);
-                    return self.heap.allocateSymbol(description);
+                    return self.heapOf().allocateSymbol(description);
                 }
 
                 pub fn allocateBigInt(self: *const Self, big: std.math.big.int.Const) error{OutOfMemory}!CellRef {
                     comptime require("allocateBigInt", allocating);
-                    return self.heap.allocateBigInt(big);
+                    return self.heapOf().allocateBigInt(big);
                 }
 
                 pub fn allocateNumber(self: *const Self, x: f64) error{OutOfMemory}!Value {
                     comptime require("allocateNumber", allocating);
-                    return self.heap.numberValue(x);
+                    return self.heapOf().numberValue(x);
                 }
 
                 pub fn allocateFunction(self: *const Self, behavior: Behavior, host_data: Value, host_context: ?*anyopaque) error{OutOfMemory}!CellRef {
                     comptime require("allocateFunction", allocating);
-                    return self.heap.allocateFunction(behavior, host_data, host_context);
+                    return self.heapOf().allocateFunction(behavior, host_data, host_context);
                 }
 
                 pub fn allocatePlatformObject(self: *const Self, prototype: ?CellRef, node: dom.NodeHandle) Heap.PlatformObjectError!CellRef {
                     comptime require("allocatePlatformObject", allocating);
-                    return self.heap.allocatePlatformObject(prototype, node);
+                    return self.heapOf().allocatePlatformObject(prototype, node);
                 }
 
-                pub fn openScope(self: *const Self) error{OutOfMemory}!Heap.Scope {
+                pub fn openScope(self: *const Self) error{OutOfMemory}!Scope {
                     comptime require("openScope", allocating);
-                    return self.heap.openScope();
+                    const heap = self.heapOf();
+                    return .{ .heap = @ptrCast(heap), .frame = try heap.openScope() };
                 }
 
                 pub fn collect(self: *const Self) void {
                     comptime require("collect", allocating);
-                    self.heap.collect();
+                    self.heapOf().collect();
                 }
 
                 // Exceptions.
 
                 pub fn throwTypeError(self: *const Self, message: []const u8) error{ OutOfMemory, Throw } {
                     comptime require("throwTypeError", throwing);
-                    return self.heap.throwTypeError(message);
+                    return self.heapOf().throwTypeError(message);
                 }
 
                 pub fn throwValue(self: *const Self, thrown: Value) error{Throw} {
                     comptime require("throwValue", raising);
-                    return self.heap.throwValue(thrown);
+                    return self.heapOf().throwValue(thrown);
                 }
 
                 // Mutation of existing cells.
 
                 pub fn preventExtensions(self: *const Self, object: CellRef) void {
                     comptime require("preventExtensions", mutating);
-                    self.heap.preventExtensions(object);
+                    self.heapOf().preventExtensions(object);
                 }
 
                 pub fn appendProperty(self: *const Self, object: CellRef, property: Heap.Property) error{OutOfMemory}!void {
                     comptime require("appendProperty", defining);
-                    return self.heap.appendProperty(object, property);
+                    return self.heapOf().appendProperty(object, property);
                 }
 
                 pub fn writeProperty(self: *const Self, object: CellRef, index: usize, property: Heap.Property) void {
                     comptime require("writeProperty", defining);
-                    self.heap.writeProperty(object, index, property);
+                    self.heapOf().writeProperty(object, index, property);
                 }
 
                 // User code.
@@ -404,7 +462,7 @@ pub fn Runtime(comptime r: Representation) type {
                 /// Runs a built-in function's behavior. The caller keeps `function`, `this`, and `args` rooted.
                 pub fn callBehavior(self: *Self, function: CellRef, this: Value, args: []const Value) error{ OutOfMemory, Throw }!Value {
                     comptime require("callBehavior", .all);
-                    const heap = self.heap;
+                    const heap = self.heapOf();
                     const behavior = heap.resolve(function).payload.builtin_function.behavior;
                     heap.stats.behaviors_invoked += 1;
                     const caller = heap.active_function;
@@ -417,6 +475,9 @@ pub fn Runtime(comptime r: Representation) type {
 
         /// Checks at compile time that `Kernels` declares exactly one kernel per entry, with a context
         /// of the entry's effects, the entry's operand types, and the return type that its effects imply.
+        /// The locked compiler's `decl_names` lists only `pub` declarations, as `raw/probe-r1.log` of
+        /// FP-0011 records, and a kernel without `pub` is reported as missing because `@hasDecl` does
+        /// not see it from this file. `invoke` dispatches by catalog id, so no unlisted declaration runs.
         pub fn bindKernels(comptime entries: []const operations.Operation, comptime Kernels_: type) [entries.len]BoundKernel {
             comptime {
                 @setEvalBranchQuota(20_000);
@@ -482,315 +543,7 @@ pub fn Runtime(comptime r: Representation) type {
         /// The bound kernel table, one entry per catalog entry in catalog order.
         pub const kernel_table = bindKernels(operations.catalog, Kernels);
 
-        const Kernels = struct {
-            pub fn number_add(_: *Context(leaf), x: f64, y: f64) f64 {
-                return number.add(x, y);
-            }
-
-            pub fn number_same_value(_: *Context(leaf), x: f64, y: f64) bool {
-                return number.sameValue(x, y);
-            }
-
-            pub fn same_value(ctx: *Context(leaf), x: Value, y: Value) bool {
-                const kind = ctx.typeOf(x);
-                if (kind != ctx.typeOf(y)) return false;
-                return switch (kind) {
-                    .number => number.sameValue(ctx.numberOf(x), ctx.numberOf(y)),
-                    .undefined, .null => true,
-                    .boolean => V.asBoolean(x) == V.asBoolean(y),
-                    .string => std.mem.eql(u16, ctx.stringUnits(cellOf(x).?), ctx.stringUnits(cellOf(y).?)),
-                    .bigint => ctx.bigIntOf(cellOf(x).?).eql(ctx.bigIntOf(cellOf(y).?)),
-                    .symbol, .object => cellOf(x).? == cellOf(y).?,
-                };
-            }
-
-            pub fn is_callable(ctx: *Context(leaf), arg: Value) bool {
-                return ctx.isCallable(arg);
-            }
-
-            pub fn string_to_number(_: *Context(leaf), string: web_string.View) f64 {
-                return number.stringToNumber(string.units);
-            }
-
-            pub fn ordinary_get_own_property(ctx: *Context(leaf), obj: CellRef, key: CellRef) ?PropertyDescriptor {
-                return ctx.ownProperty(obj, key);
-            }
-
-            pub fn ordinary_get_prototype_of(ctx: *Context(leaf), obj: CellRef) ?CellRef {
-                return ctx.prototypeOf(obj);
-            }
-
-            pub fn ordinary_prevent_extensions(ctx: *Context(mutating), obj: CellRef) bool {
-                ctx.preventExtensions(obj);
-                return true;
-            }
-
-            /// Allocates a new string for every input.
-            pub fn number_to_string(ctx: *Context(allocating), x: f64) error{OutOfMemory}!CellRef {
-                var buffer: [number.max_string_units]u16 = undefined;
-                return ctx.allocateString(number.toString(x, &buffer));
-            }
-
-            pub fn bigint_add(ctx: *Context(allocating), x: CellRef, y: CellRef) error{OutOfMemory}!CellRef {
-                const left = ctx.bigIntOf(x);
-                const right = ctx.bigIntOf(y);
-                const gpa = ctx.allocator();
-                const limbs = try gpa.alloc(Limb, @max(left.limbs.len, right.limbs.len) + 1);
-                defer gpa.free(limbs);
-                var sum: std.math.big.int.Mutable = .{ .limbs = limbs, .len = 1, .positive = true };
-                sum.add(left, right);
-                return ctx.allocateBigInt(sum.toConst());
-            }
-
-            pub fn bigint_to_string(ctx: *Context(allocating), x: CellRef) error{OutOfMemory}!CellRef {
-                const gpa = ctx.allocator();
-                const text = try ctx.bigIntOf(x).toStringAlloc(gpa, 10, .lower);
-                defer gpa.free(text);
-                return ctx.allocateAsciiString(text);
-            }
-
-            pub fn string_concat(ctx: *Context(allocating), a: CellRef, b: CellRef) error{OutOfMemory}!CellRef {
-                return ctx.allocateConcatenation(a, b);
-            }
-
-            /// `OrdinaryDefineOwnProperty`, with `ValidateAndApplyPropertyDescriptor` for an ordinary object.
-            pub fn ordinary_define_own_property(ctx: *Context(defining), obj: CellRef, key: CellRef, desc: PropertyDescriptor) error{OutOfMemory}!bool {
-                const reader = ctx.narrow(leaf);
-                const index = ctx.findOwnProperty(obj, key) orelse {
-                    // Step 2: current is undefined.
-                    if (!ctx.isExtensible(obj)) return false;
-                    const slot: Heap.catalog.Slot = if (desc.isAccessor())
-                        .{ .accessor = .{ .getter = accessorCell(desc.get), .setter = accessorCell(desc.set) } }
-                    else
-                        .{ .data = .{ .value = desc.value orelse undefined_value, .writable = desc.writable orelse false } };
-                    try ctx.appendProperty(obj, .{
-                        .key = key,
-                        .enumerable = desc.enumerable orelse false,
-                        .configurable = desc.configurable orelse false,
-                        .slot = slot,
-                    });
-                    return true;
-                };
-                const current = ctx.propertyAt(obj, index);
-                // Step 4: a descriptor with no fields changes nothing.
-                if (desc.isEmpty()) return true;
-                // Step 5: a non-configurable property accepts only compatible changes.
-                if (!current.configurable) {
-                    if (desc.configurable == true) return false;
-                    if (desc.enumerable) |enumerable| {
-                        if (enumerable != current.enumerable) return false;
-                    }
-                    const generic = !desc.isAccessor() and !desc.isData();
-                    if (!generic and desc.isAccessor() != (current.slot == .accessor)) return false;
-                    switch (current.slot) {
-                        .accessor => |accessor| {
-                            if (desc.get != null and accessorCell(desc.get) != accessor.getter) return false;
-                            if (desc.set != null and accessorCell(desc.set) != accessor.setter) return false;
-                        },
-                        .data => |data| if (!data.writable) {
-                            if (desc.writable == true) return false;
-                            if (desc.value) |new_value| {
-                                var same = reader;
-                                if (!same.invoke(.same_value, .{ new_value, data.value })) return false;
-                            }
-                        },
-                    }
-                }
-                // Step 6: apply the descriptor.
-                var next = current;
-                if (current.slot == .data and desc.isAccessor()) {
-                    next.slot = .{ .accessor = .{ .getter = accessorCell(desc.get), .setter = accessorCell(desc.set) } };
-                } else if (current.slot == .accessor and desc.isData()) {
-                    next.slot = .{ .data = .{ .value = desc.value orelse undefined_value, .writable = desc.writable orelse false } };
-                } else switch (next.slot) {
-                    .data => |*data| {
-                        if (desc.value) |new_value| data.value = new_value;
-                        if (desc.writable) |writable| data.writable = writable;
-                    },
-                    .accessor => |*accessor| {
-                        if (desc.get != null) accessor.getter = accessorCell(desc.get);
-                        if (desc.set != null) accessor.setter = accessorCell(desc.set);
-                    },
-                }
-                if (desc.enumerable) |enumerable| next.enumerable = enumerable;
-                if (desc.configurable) |configurable| next.configurable = configurable;
-                ctx.writeProperty(obj, index, next);
-                return true;
-            }
-
-            pub fn call(ctx: *Context(.all), func: Value, this: Value, args: []const Value) error{ OutOfMemory, Throw }!Value {
-                if (!ctx.isCallable(func)) return ctx.throwTypeError(Message.not_function);
-                return ctx.callBehavior(cellOf(func).?, this, args);
-            }
-
-            /// `GetMethod` of an Object, as `ToPrimitive` calls it.
-            pub fn get_method(ctx: *Context(.all), obj: CellRef, key: CellRef) error{ OutOfMemory, Throw }!?CellRef {
-                const func = try ctx.invoke(.ordinary_get, .{ obj, key, cellValue(obj) });
-                switch (ctx.typeOf(func)) {
-                    .undefined, .null => return null,
-                    else => {},
-                }
-                if (!ctx.isCallable(func)) return ctx.throwTypeError(Message.not_callable_method);
-                return cellOf(func).?;
-            }
-
-            pub fn ordinary_get(ctx: *Context(.all), obj: CellRef, key: CellRef, receiver: Value) error{ OutOfMemory, Throw }!Value {
-                var holder = obj;
-                while (true) {
-                    if (ctx.findOwnProperty(holder, key)) |index| {
-                        switch (ctx.propertyAt(holder, index).slot) {
-                            .data => |data| return data.value,
-                            .accessor => |accessor| {
-                                const getter = accessor.getter orelse return undefined_value;
-                                // A getter can redefine the accessor, so root it for the call.
-                                var scope = try ctx.openScope();
-                                defer scope.close();
-                                _ = try scope.push(cellValue(getter));
-                                return ctx.invoke(.call, .{ cellValue(getter), receiver, @as([]const Value, &.{}) });
-                            },
-                        }
-                    }
-                    holder = ctx.prototypeOf(holder) orelse return undefined_value;
-                }
-            }
-
-            pub fn ordinary_to_primitive(ctx: *Context(.all), obj: CellRef, hint: PreferredType) error{ OutOfMemory, Throw }!Value {
-                const names = ctx.intrinsics();
-                const order = switch (hint) {
-                    .string => [_]CellRef{ names.to_string_string, names.value_of_string },
-                    .number => [_]CellRef{ names.value_of_string, names.to_string_string },
-                };
-                var scope = try ctx.openScope();
-                defer scope.close();
-                for (order) |name| {
-                    const method = try ctx.invoke(.ordinary_get, .{ obj, name, cellValue(obj) });
-                    if (ctx.isCallable(method)) {
-                        _ = try scope.push(method);
-                        const result = try ctx.invoke(.call, .{ method, cellValue(obj), @as([]const Value, &.{}) });
-                        if (ctx.typeOf(result) != .object) return result;
-                    }
-                }
-                return ctx.throwTypeError(Message.no_primitive);
-            }
-
-            pub fn to_primitive(ctx: *Context(.all), input: Value, preferred: ?PreferredType) error{ OutOfMemory, Throw }!Value {
-                if (ctx.typeOf(input) != .object) return input;
-                const obj = cellOf(input).?;
-                const names = ctx.intrinsics();
-                if (try ctx.invoke(.get_method, .{ obj, names.symbol_to_primitive })) |exotic| {
-                    var scope = try ctx.openScope();
-                    defer scope.close();
-                    _ = try scope.push(cellValue(exotic));
-                    const hint = if (preferred) |kind| switch (kind) {
-                        .string => names.string_string,
-                        .number => names.number_string,
-                    } else names.default_string;
-                    const hint_argument = [_]Value{cellValue(hint)};
-                    const result = try ctx.invoke(.call, .{ cellValue(exotic), input, @as([]const Value, &hint_argument) });
-                    if (ctx.typeOf(result) != .object) return result;
-                    return ctx.throwTypeError(Message.primitive_object);
-                }
-                return ctx.invoke(.ordinary_to_primitive, .{ obj, preferred orelse .number });
-            }
-
-            pub fn to_numeric(ctx: *Context(.all), arg: Value) error{ OutOfMemory, Throw }!Numeric {
-                const primitive = try ctx.invoke(.to_primitive, .{ arg, .number });
-                switch (ctx.typeOf(primitive)) {
-                    .bigint => return .{ .bigint = cellOf(primitive).? },
-                    // ToNumber returns a Number unchanged.
-                    .number => return .{ .number = ctx.numberOf(primitive) },
-                    else => {},
-                }
-                var scope = try ctx.openScope();
-                defer scope.close();
-                _ = try scope.push(primitive);
-                return .{ .number = try ctx.invoke(.to_number, .{primitive}) };
-            }
-
-            pub fn to_number(ctx: *Context(.all), arg: Value) error{ OutOfMemory, Throw }!f64 {
-                switch (ctx.typeOf(arg)) {
-                    .number => return ctx.numberOf(arg),
-                    .symbol => return ctx.throwTypeError(Message.symbol_to_number),
-                    .bigint => return ctx.throwTypeError(Message.bigint_to_number),
-                    .undefined => return std.math.nan(f64),
-                    .null => return 0,
-                    .boolean => return if (V.asBoolean(arg)) 1 else 0,
-                    .string => return ctx.invoke(.string_to_number, .{web_string.View{ .units = ctx.stringUnits(cellOf(arg).?) }}),
-                    .object => {
-                        const primitive = try ctx.invoke(.to_primitive, .{ arg, .number });
-                        if (ctx.typeOf(primitive) == .number) return ctx.numberOf(primitive);
-                        var scope = try ctx.openScope();
-                        defer scope.close();
-                        _ = try scope.push(primitive);
-                        return ctx.invoke(.to_number, .{primitive});
-                    },
-                }
-            }
-
-            pub fn to_string(ctx: *Context(.all), arg: Value) error{ OutOfMemory, Throw }!CellRef {
-                const names = ctx.intrinsics();
-                switch (ctx.typeOf(arg)) {
-                    .string => return cellOf(arg).?,
-                    .symbol => return ctx.throwTypeError(Message.symbol_to_string),
-                    .undefined => return names.undefined_string,
-                    .null => return names.null_string,
-                    .boolean => return if (V.asBoolean(arg)) names.true_string else names.false_string,
-                    .number => return ctx.invoke(.number_to_string, .{ctx.numberOf(arg)}),
-                    .bigint => return ctx.invoke(.bigint_to_string, .{cellOf(arg).?}),
-                    .object => {
-                        const primitive = try ctx.invoke(.to_primitive, .{ arg, .string });
-                        var scope = try ctx.openScope();
-                        defer scope.close();
-                        _ = try scope.push(primitive);
-                        return ctx.invoke(.to_string, .{primitive});
-                    },
-                }
-            }
-
-            pub fn to_property_key(ctx: *Context(.all), arg: Value) error{ OutOfMemory, Throw }!CellRef {
-                const key = try ctx.invoke(.to_primitive, .{ arg, .string });
-                switch (ctx.typeOf(key)) {
-                    // ToString returns a String unchanged.
-                    .symbol, .string => return cellOf(key).?,
-                    else => {},
-                }
-                var scope = try ctx.openScope();
-                defer scope.close();
-                _ = try scope.push(key);
-                return ctx.invoke(.to_string, .{key});
-            }
-
-            /// `ApplyStringOrNumericBinaryOperator` with the operator `+`.
-            pub fn addition(ctx: *Context(.all), left: Value, right: Value) error{ OutOfMemory, Throw }!Value {
-                var scope = try ctx.openScope();
-                defer scope.close();
-                const left_primitive = try ctx.invoke(.to_primitive, .{ left, null });
-                _ = try scope.push(left_primitive);
-                const right_primitive = try ctx.invoke(.to_primitive, .{ right, null });
-                _ = try scope.push(right_primitive);
-                if (ctx.typeOf(left_primitive) == .string or ctx.typeOf(right_primitive) == .string) {
-                    const left_string = try ctx.invoke(.to_string, .{left_primitive});
-                    _ = try scope.push(cellValue(left_string));
-                    const right_string = try ctx.invoke(.to_string, .{right_primitive});
-                    _ = try scope.push(cellValue(right_string));
-                    return cellValue(try ctx.invoke(.string_concat, .{ left_string, right_string }));
-                }
-                // A BigInt left numeric is the rooted left primitive itself.
-                const left_numeric = try ctx.invoke(.to_numeric, .{left_primitive});
-                const right_numeric = try ctx.invoke(.to_numeric, .{right_primitive});
-                switch (left_numeric) {
-                    .number => |x| switch (right_numeric) {
-                        .number => |y| return ctx.allocateNumber(ctx.invoke(.number_add, .{ x, y })),
-                        .bigint => {},
-                    },
-                    .bigint => |x| switch (right_numeric) {
-                        .bigint => |y| return cellValue(try ctx.invoke(.bigint_add, .{ x, y })),
-                        .number => {},
-                    },
-                }
-                return ctx.throwTypeError(Message.mixed_addition);
-            }
-        };
+        const Kernels = kernels.Kernels(Rt);
     };
 }
 
@@ -850,7 +603,9 @@ fn Harness(comptime Rt: type) type {
         gpa: std.mem.Allocator,
         store: dom.Store,
         document: dom.NodeHandle,
-        heap: Rt.Heap,
+        rt: Rt,
+        /// The heap that `rt` owns, which the harness reaches as the runtime's owner.
+        heap: *Rt.Heap,
         c: Context,
         transcript: std.ArrayList(u8) = .empty,
         calls: std.ArrayList(u8) = .empty,
@@ -861,6 +616,7 @@ fn Harness(comptime Rt: type) type {
                 .gpa = testing.allocator,
                 .store = try dom.Store.init(testing.allocator),
                 .document = undefined,
+                .rt = undefined,
                 .heap = undefined,
                 .c = undefined,
             };
@@ -868,12 +624,13 @@ fn Harness(comptime Rt: type) type {
             h.document = try h.store.createDocument();
             var heap_options = options;
             heap_options.dom = &h.store;
-            h.heap = try Rt.Heap.init(h.gpa, heap_options);
-            h.c = Rt.rootContext(&h.heap);
+            h.rt = try Rt.init(h.gpa, heap_options);
+            h.heap = &h.rt.heap;
+            h.c = h.rt.rootContext();
         }
 
         fn deinit(h: *H) void {
-            h.heap.deinit();
+            h.rt.deinit();
             h.store.deinit();
             for (h.records.items) |record| h.gpa.destroy(record);
             h.records.deinit(h.gpa);
@@ -1710,11 +1467,11 @@ test "FP-0011 case 6: every invocation leaves the counters of its missing effect
             try testing.expectEqual(0, h.heap.effect_monitor.violations);
             for (&checked, h.heap.effect_monitor.checked) |*total, count| total.* += count;
         }
-        var heap = try Rt.Heap.init(testing.allocator, .{});
-        defer heap.deinit();
-        try testing.expectEqual(0, try number_vectors.selfCheck(Rt, &heap));
-        try testing.expectEqual(0, heap.effect_monitor.violations);
-        for (&checked, heap.effect_monitor.checked) |*total, count| total.* += count;
+        var rt = try Rt.init(testing.allocator, .{});
+        defer rt.deinit();
+        try testing.expectEqual(0, try number_vectors.selfCheck(Rt, &rt));
+        try testing.expectEqual(0, rt.heap.effect_monitor.violations);
+        for (&checked, rt.heap.effect_monitor.checked) |*total, count| total.* += count;
         for (checked, operations.catalog) |count, entry| {
             if (count == 0) std.debug.print("{s} was never invoked\n", .{entry.name});
             try testing.expect(count > 0);
@@ -1790,6 +1547,7 @@ test {
     _ = @import("value.zig");
     _ = @import("heap_catalog.zig");
     _ = @import("heap.zig");
+    _ = @import("kernels.zig");
     _ = @import("number.zig");
     _ = @import("number_vectors.zig");
     _ = @import("measure.zig");

@@ -19,18 +19,57 @@ An engine-thrown error object is a new cell, so `exception` requires `allocation
 `validate` rejects an entry that breaks either rule, and it rejects a duplicate id or name.
 `permits(context, operation)` holds exactly when the operation's flags are a subset of the context's flags.
 
-`Runtime(r).Context(effects)` is the only way for a kernel to reach the heap.
+`Runtime(r)` owns one heap, and `Runtime(r).Context(effects)` is the only way for code that does not own the runtime to reach it.
+Revision 1 of the contract makes that boundary hold in the type system.
+
+- A context stores its heap as a pointer to an opaque type, `SealedHeap(effects)`, with one type per representation and effect set.
+  Only `src/js/runtime.zig` converts that pointer back to a heap pointer, and the conversion is not `pub`.
+- The kernels live in `src/js/kernels.zig`, which cannot reach the conversion.
+- Allocation, property mutation, throwing, collection, and calls reach the heap only through context methods, each of which requires an effect set at compile time.
+- A scope or a local stores its heap as a pointer to another opaque type, which initializes no context.
+- `rootContext` takes the runtime, `*Runtime(r)`, and is the only source of a root context.
+  Neither a heap pointer nor a context's field can stand in for it, and the field of one context cannot initialize a context with other effects.
+
+No context method returns a heap pointer, a runtime pointer, or a wider context.
+The owner of the runtime, such as a test harness or the measurement harness, holds the heap itself and uses its roots, its pending exception, its counters, and the test-only verifier.
+Data that such an owner stores in a built-in function's host context is the owner's choice.
+
+This boundary stops accidental reach.
+It does not stop code that deliberately converts integers or pointers with `@ptrFromInt` or `@ptrCast`, because Zig has no private fields.
+
+Case 34 shows that a `{}` context cannot allocate through its stored heap: the locked compiler reports `no field or member function named 'allocateString' in 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'`.
+Case 35 shows that a `{}` context cannot obtain a root context from its stored heap, either through `rootContext` or by initializing a `Context(.all)`.
+The compiler names `@fromBackingInt(0)` and `@fromBackingInt(15)` for the effect sets `{}` and every effect, because `Effects` is a packed struct.
+`raw/probe-r1.log` records each diagnostic before `build.zig` froze it, and `raw/tests-before-r1.log` shows both fixtures compiling with exit status 0 on the revision base.
+
 Each kernel's first parameter is a context with exactly its entry's effects, and `bindKernels` checks every kernel's parameters and return type at compile time.
 `invoke` narrows a context to the operation's effects, so a context can invoke only operations whose effects it holds.
 Each heap primitive requires an effect set, and a built-in behavior's first parameter is a context with every effect.
-The compile-failure fixtures of cases 4, 5, and 8 show each rejected form with its diagnostic.
+The compile-failure fixtures of cases 4, 5, 8, and 34 through 37 show each rejected form with its diagnostic.
+
+`bindKernels` checks both directions between the catalog and the kernels.
+The original contract stated that `@typeInfo` gives no way to enumerate declarations, which is wrong for the locked compiler: `std.builtin.Type.Struct` has `decl_names`.
+The probe in `raw/probe-r1.log` shows that `decl_names` lists only `pub` declarations, both for a struct in the same file and for one in another file.
+A second probe shows that `bindKernels` reports a kernel without `pub` as `operation Number::add has no kernel`, because `@hasDecl` does not see it from `runtime.zig`.
+A declaration without `pub` is therefore never bound, and `invoke` dispatches by catalog id, so no unlisted declaration runs.
+The fixtures of case 36 show both messages, and `raw/mutation-r1.log` shows each fixture failing when the binding check skips its direction.
+The binding check proves kernel signatures, not kernel bodies; the sealed heap is what keeps a kernel body inside its context's effects.
 
 The rooting protocol has three rules.
 A caller keeps every `Value` and `CellRef` argument rooted for the duration of the call.
 A kernel returns its result unrooted.
 A kernel roots each intermediate that it holds across an invocation with the `allocation` effect.
 Case 11 enforces the protocol at run time with a collection before every allocation and a quarantine of freed cells.
-The mutation control `raw/mutation-left-root.diff` removes the root of the left primitive in `addition`, and `raw/mutation-left-root.log` shows case 11 failing on scenario AD19 under `reference` with `dead_resolutions 4` while every other test, including case 31, passes.
+The mutation control `raw/mutation-left-root-r1.diff` removes the root of the left primitive in `addition` in `src/js/kernels.zig`.
+`raw/mutation-left-root-r1.log` records the commands that apply and reverse it and the file hash before and after, and it shows case 11 failing on scenario AD19 under `reference` with `dead_resolutions 4` while every other test, including case 31, passes.
+The control `raw/mutation-left-root.diff` of the first submission showed the same result on the kernels before they moved.
+
+`StringToNumber` returns RoundMVResult of the exact value of every StrDecimalLiteral.
+The first submission saturated the ExponentPart at 1,000,000, while the scale from leading fractional zeros or integer digits had no bound, so a literal such as `"0."`, 1,000,001 zeros, and `"1e1000005"` gave 0.01 instead of 1000.
+The literal's value is 0.D × 10^(scale + exponent) with 0.1 ≤ 0.D < 1, and the magnitude of the scale is at most the literal's length.
+The ExponentPart therefore saturates at the literal's length plus 400, where the result is zero or infinity whatever the digits, and the scale and exponent arithmetic saturates.
+Case 38 checks five such literals against values that the integrator took from Node v26.7.0, and `raw/tests-before-r1.log` shows four of them failing on the revision base; the third already held.
+The comment on the longest `Number::toString` result now names 25 code units, as in `-0.0000012345678901234567`.
 
 ## 2. Heap catalog, collector baseline, and DOM bridge
 

@@ -1,0 +1,152 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cat.exe","out/fp0011-r1-probe/decl_names.zig","out/fp0011-r1-probe/decl_names_other.zig"]
+//! FP-0011 revision 1 probe: does `@typeInfo(T).@"struct".decl_names` list declarations without `pub`?
+
+const Local = struct {
+    pub fn public_function() void {}
+    fn private_function() void {}
+    const private_constant = 1;
+    pub const public_constant = 2;
+};
+
+fn render(comptime T: type) []const u8 {
+    comptime {
+        var text: []const u8 = "";
+        for (@typeInfo(T).@"struct".decl_names) |name| text = text ++ " " ++ name;
+        return text;
+    }
+}
+
+comptime {
+    @compileError("probe: same file:" ++ render(Local) ++ "; other file:" ++ render(@import("decl_names_other.zig").Other));
+}
+pub const Other = struct {
+    pub fn public_function() void {}
+    fn private_function() void {}
+    const private_constant = 1;
+    pub const public_constant = 2;
+};
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cat.exe","arguments":["out/fp0011-r1-probe/decl_names.zig","out/fp0011-r1-probe/decl_names_other.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:50:14.472Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-fno-emit-bin","out/fp0011-r1-probe/decl_names.zig"]
+out\fp0011-r1-probe\decl_names.zig:19:5: error: probe: same file: public_function public_constant; other file: public_function public_constant
+    @compileError("probe: same file:" ++ render(Local) ++ "; other file:" ++ render(@import("decl_names_other.zig").Other));
+    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+    comptime: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:20:9
+    2 reference(s) hidden; use '-freference-trace=4' to see all references
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-fno-emit-bin","out/fp0011-r1-probe/decl_names.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:50:14.540Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":42,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/leaf_reaches_heap.zig","-Mfairpane=src/root.zig"]
+tests\compile_fail\leaf_reaches_heap.zig:7:17: error: no field or member function named 'allocateString' in 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+    _ = ctx.heap.allocateString(&.{'x'}) catch unreachable;
+        ~~~~~~~~^~~~~~~~~~~~~~~
+src\js\runtime.zig:166:20: note: opaque declared here
+            return opaque {
+                   ^~~~~~
+tests\compile_fail\leaf_reaches_heap.zig:7:17: note: method invocation only supports up to one level of implicit pointer dereferencing
+tests\compile_fail\leaf_reaches_heap.zig:7:17: note: use '.*' to dereference pointer
+referenced by:
+    comptime: tests\compile_fail\leaf_reaches_heap.zig:11:10
+    root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+    3 reference(s) hidden; use '-freference-trace=5' to see all references
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/leaf_reaches_heap.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:57:05.788Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":166,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/leaf_widens_context.zig","-Mfairpane=src/root.zig"]
+tests\compile_fail\leaf_widens_context.zig:8:30: error: expected type '*js.runtime.Runtime(.reference)', found '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+    return Rt.rootContext(ctx.heap);
+                          ~~~^~~~~
+tests\compile_fail\leaf_widens_context.zig:8:30: note: pointer type child 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))' cannot cast into pointer type child 'js.runtime.Runtime(.reference)'
+src\js\runtime.zig:166:20: note: opaque declared here
+            return opaque {
+                   ^~~~~~
+src\js\runtime.zig:60:12: note: struct declared here
+    return struct {
+           ^~~~~~
+src\js\runtime.zig:159:32: note: parameter type declared here
+        pub fn rootContext(rt: *Rt) Context(.all) {
+                               ^~~
+referenced by:
+    comptime: tests\compile_fail\leaf_widens_context.zig:17:10
+    root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+    3 reference(s) hidden; use '-freference-trace=5' to see all references
+tests\compile_fail\leaf_widens_context.zig:13:26: error: expected type '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(15))', found '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+    return .{ .heap = ctx.heap };
+                      ~~~^~~~~
+tests\compile_fail\leaf_widens_context.zig:13:26: note: pointer type child 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))' cannot cast into pointer type child 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(15))'
+src\js\runtime.zig:166:20: note: opaque declared here (2 times)
+            return opaque {
+                   ^~~~~~
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/leaf_widens_context.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:57:06.003Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":156,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/binding_missing_kernel.zig","-Mfairpane=src/root.zig"]
+src\js\runtime.zig:490:25: error: fairpane-js: operation StubOperation has no kernel
+                        @compileError("fairpane-js: operation " ++ operation.name ++ " has no kernel");
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests\compile_fail\binding_missing_kernel.zig:9:23: note: called at comptime here
+    _ = Rt.bindKernels(&.{.{
+        ~~~~~~~~~~~~~~^
+referenced by:
+    root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+    comptime: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:20:9
+    2 reference(s) hidden; use '-freference-trace=4' to see all references
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/binding_missing_kernel.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:57:06.207Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":155,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/binding_stray_kernel.zig","-Mfairpane=src/root.zig"]
+src\js\runtime.zig:484:28: error: fairpane-js: kernel stub_kernel belongs to no operation
+                    } else @compileError("fairpane-js: kernel " ++ declared ++ " belongs to no operation");
+                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests\compile_fail\binding_stray_kernel.zig:18:23: note: called at comptime here
+    _ = Rt.bindKernels(js.operations.catalog[0..1], Kernels);
+        ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+    comptime: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:20:9
+    2 reference(s) hidden; use '-freference-trace=4' to see all references
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/binding_stray_kernel.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:57:06.412Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":158,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/leaf_calls_behavior.zig","-Mfairpane=src/root.zig"]
+tests\compile_fail\leaf_calls_behavior.zig:8:18: error: expected type '*js.runtime.Runtime(.reference).Context(@fromBackingInt(15))', found '*js.runtime.Runtime(.reference).Context(@fromBackingInt(0))'
+    _ = behavior(ctx, Rt.undefined_value, no_arguments) catch unreachable;
+                 ^~~
+tests\compile_fail\leaf_calls_behavior.zig:8:18: note: pointer type child 'js.runtime.Runtime(.reference).Context(@fromBackingInt(0))' cannot cast into pointer type child 'js.runtime.Runtime(.reference).Context(@fromBackingInt(15))'
+src\js\runtime.zig:215:20: note: struct declared here (2 times)
+            return struct {
+                   ^~~~~~
+referenced by:
+    comptime: tests\compile_fail\leaf_calls_behavior.zig:12:10
+    root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+    3 reference(s) hidden; use '-freference-trace=5' to see all references
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/leaf_calls_behavior.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:57:06.617Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":186,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=out/fp0011-r1-probe/private_kernel.zig","-Mfairpane=src/root.zig"]
+src\js\runtime.zig:490:25: error: fairpane-js: operation Number::add has no kernel
+                        @compileError("fairpane-js: operation " ++ operation.name ++ " has no kernel");
+                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+out\fp0011-r1-probe\private_kernel.zig:14:23: note: called at comptime here
+    _ = Rt.bindKernels(js.operations.catalog[0..1], Kernels);
+        ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+    comptime: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:20:9
+    2 reference(s) hidden; use '-freference-trace=4' to see all references
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=out/fp0011-r1-probe/private_kernel.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:57:06.851Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":179,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cat.exe","out/fp0011-r1-probe/private_kernel.zig"]
+//! FP-0011 revision 1 probe: what does bindKernels report for a kernel declared without `pub`?
+
+const js = @import("fairpane").js;
+const Rt = js.Runtime(.reference);
+
+const Kernels = struct {
+    fn number_add(ctx: *Rt.Context(.{}), x: f64, y: f64) f64 {
+        _ = ctx;
+        return x + y;
+    }
+};
+
+comptime {
+    _ = Rt.bindKernels(js.operations.catalog[0..1], Kernels);
+}
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cat.exe","arguments":["out/fp0011-r1-probe/private_kernel.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:57:18.843Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":14}

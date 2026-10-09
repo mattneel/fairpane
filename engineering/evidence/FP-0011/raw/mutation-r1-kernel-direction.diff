@@ -1,0 +1,14 @@
+--- a/src/js/runtime.zig
++++ b/src/js/runtime.zig
+@@ -481,11 +481,6 @@
+         pub fn bindKernels(comptime entries: []const operations.Operation, comptime Kernels_: type) [entries.len]BoundKernel {
+             comptime {
+                 @setEvalBranchQuota(20_000);
+-                for (@typeInfo(Kernels_).@"struct".decl_names) |declared| {
+-                    for (entries) |operation| {
+-                        if (std.mem.eql(u8, @tagName(operation.id), declared)) break;
+-                    } else @compileError("fairpane-js: kernel " ++ declared ++ " belongs to no operation");
+-                }
+                 var table: [entries.len]BoundKernel = undefined;
+                 for (entries, &table) |operation, *bound| {
+                     const prefix = "fairpane-js: kernel for " ++ operation.name;

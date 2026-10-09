@@ -1,0 +1,201 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/js/runtime.zig"]
+3fcecbbdf61794354868c0d6ca8adb1914bcb5856fa19b5b944e1053ac4f23ac *src/js/runtime.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/js/runtime.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:28.071Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0011/raw/mutation-r1-kernel-direction.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0011/raw/mutation-r1-kernel-direction.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:28.146Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/js/runtime.zig"]
+7aa6d0ee8fcfe7d7258846a4e8d2d61719a49a6136ceb7a3134fdffe15ddbcca *src/js/runtime.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/js/runtime.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:28.226Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0011-r1-cache-mutation-kernel-direction"]
+test
++- FP-0011 case 36: binding_stray_kernel.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel stub_kernel belongs to no operation
+       ========= but stderr does not contain it: =====
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/binding_stray_kernel.zig -Mfairpane=src/root.zig
+
+Build Summary: 42/44 steps succeeded (1 failed); 178/178 tests passed
+test transitive failure
++- run test 145 pass (145 total) 5s MaxRSS:19M
+|  +- compile test debug native success 7s MaxRSS:680M
++- run test 33 pass (33 total) 214ms MaxRSS:15M
+|  +- compile test debug native success 3s MaxRSS:408M
++- FP-0007 case 13: case 2 passes with exit status 0 success 42ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:334M
++- FP-0007 case 13: case 3 fails with exit status 1 success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 41ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 37ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 74ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 6ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 12ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:313M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 29ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 39ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 37ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 444ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 488ms
++- FP-0011 case 4: allocation_invokes_call.zig success 427ms
++- FP-0011 case 4: leaf_allocates.zig success 416ms
++- FP-0011 case 4: mutation_throws.zig success 416ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 443ms
++- FP-0011 case 4: leaf_positive.zig success 452ms
++- FP-0011 case 5: catalog_callback_alone.zig success 426ms
++- FP-0011 case 5: catalog_exception_alone.zig success 432ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 388ms
++- FP-0011 case 5: kernel_wider_context.zig success 443ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 421ms
++- FP-0011 case 8: layout_undescribed_field.zig success 392ms
++- FP-0011 case 8: layout_plain_reference.zig success 378ms
++- FP-0011 case 8: layout_missing_field.zig success 407ms
++- FP-0011 case 20: abi_reference_value.zig success 390ms
++- FP-0011 case 20: abi_nan_box_value.zig success 383ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 419ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 407ms
++- FP-0011 case 35: leaf_widens_context.zig success 406ms
++- FP-0011 case 36: binding_missing_kernel.zig success 412ms
++- FP-0011 case 36: binding_stray_kernel.zig failure
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x5040eacf test --summary all --cache-dir out/fp0011-r1-cache-mutation-kernel-direction
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0011-r1-cache-mutation-kernel-direction"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:28.313Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":16706,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0011/raw/mutation-r1-kernel-direction.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0011/raw/mutation-r1-kernel-direction.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:45.079Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/js/runtime.zig"]
+3fcecbbdf61794354868c0d6ca8adb1914bcb5856fa19b5b944e1053ac4f23ac *src/js/runtime.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/js/runtime.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:45.173Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/js/runtime.zig"]
+3fcecbbdf61794354868c0d6ca8adb1914bcb5856fa19b5b944e1053ac4f23ac *src/js/runtime.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/js/runtime.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:45.249Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","engineering/evidence/FP-0011/raw/mutation-r1-entry-direction.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","engineering/evidence/FP-0011/raw/mutation-r1-entry-direction.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:45.322Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/js/runtime.zig"]
+15d2237af832472506d98d1b52d4348fe302e62596264b3d6b148e12038992d8 *src/js/runtime.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/js/runtime.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:45.420Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0011-r1-cache-mutation-entry-direction"]
+test
++- FP-0011 case 36: binding_missing_kernel.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation StubOperation has no kernel
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:492:36: error: struct 'binding_missing_kernel.Kernels' has no member named 'number_add'
+                           const kernel = @field(Kernels_, @tagName(operation.id));
+                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       tests\compile_fail\binding_missing_kernel.zig:6:17: note: struct declared here
+       const Kernels = struct {};
+                       ^~~~~~~~~
+       tests\compile_fail\binding_missing_kernel.zig:9:23: note: called at comptime here
+           _ = Rt.bindKernels(&.{.{
+               ~~~~~~~~~~~~~~^
+       referenced by:
+           root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+           comptime: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:20:9
+           2 reference(s) hidden; use '-freference-trace=4' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/binding_missing_kernel.zig -Mfairpane=src/root.zig
+
+Build Summary: 42/44 steps succeeded (1 failed); 178/178 tests passed
+test transitive failure
++- run test 145 pass (145 total) 4s MaxRSS:19M
+|  +- compile test debug native success 6s MaxRSS:684M
++- run test 33 pass (33 total) 211ms MaxRSS:15M
+|  +- compile test debug native success 3s MaxRSS:404M
++- FP-0007 case 13: case 2 passes with exit status 0 success 40ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:335M
++- FP-0007 case 13: case 3 fails with exit status 1 success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 39ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 75ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 6ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 12ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:315M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 32ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 38ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 441ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 458ms
++- FP-0011 case 4: allocation_invokes_call.zig success 421ms
++- FP-0011 case 4: leaf_allocates.zig success 371ms
++- FP-0011 case 4: mutation_throws.zig success 383ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 389ms
++- FP-0011 case 4: leaf_positive.zig success 434ms
++- FP-0011 case 5: catalog_callback_alone.zig success 382ms
++- FP-0011 case 5: catalog_exception_alone.zig success 387ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 382ms
++- FP-0011 case 5: kernel_wider_context.zig success 367ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 392ms
++- FP-0011 case 8: layout_undescribed_field.zig success 411ms
++- FP-0011 case 8: layout_plain_reference.zig success 383ms
++- FP-0011 case 8: layout_missing_field.zig success 421ms
++- FP-0011 case 20: abi_reference_value.zig success 368ms
++- FP-0011 case 20: abi_nan_box_value.zig success 379ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 397ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 388ms
++- FP-0011 case 35: leaf_widens_context.zig success 389ms
++- FP-0011 case 36: binding_missing_kernel.zig failure
++- FP-0011 case 36: binding_stray_kernel.zig success 421ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x10d32378 test --summary all --cache-dir out/fp0011-r1-cache-mutation-entry-direction
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0011-r1-cache-mutation-entry-direction"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:45.497Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":14360,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","apply","-R","engineering/evidence/FP-0011/raw/mutation-r1-entry-direction.diff"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["apply","-R","engineering/evidence/FP-0011/raw/mutation-r1-entry-direction.diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:59.915Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/js/runtime.zig"]
+3fcecbbdf61794354868c0d6ca8adb1914bcb5856fa19b5b944e1053ac4f23ac *src/js/runtime.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/js/runtime.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:00:59.995Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}

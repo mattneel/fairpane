@@ -177,9 +177,10 @@ fn Workloads(comptime Rt: type) type {
             for (keys, offsets) |key, offset| try defineData(ctx, object, key, try ctx.allocateNumber(base + offset));
         }
 
-        /// Runs one workload on `heap` and times only its steps.
-        fn runWorkload(heap: *Rt.Heap, workload: Workload, divisor: u32, io: std.Io, sample: *Sample) Error!void {
-            var ctx = Rt.rootContext(heap);
+        /// Runs one workload on the heap that `rt` owns and times only its steps.
+        fn runWorkload(rt: *Rt, workload: Workload, divisor: u32, io: std.Io, sample: *Sample) Error!void {
+            const heap = &rt.heap;
+            var ctx = rt.rootContext();
             var scope = try ctx.openScope();
             defer scope.close();
             const iterations: u64 = 1_000_000 / divisor;
@@ -276,11 +277,11 @@ fn Workloads(comptime Rt: type) type {
             sample.* = .{ .ns = 0, .cells_allocated = 0, .bytes_allocated = 0, .peak_live_bytes = 0, .collections = 0, .checksum = .{ .count = 0 } };
             {
                 const tracer: runtime.Tracer = if (workload == .mark_manual) .manual else .generated;
-                var heap = try Rt.Heap.init(counting.allocator(), .{ .tracer = tracer });
-                defer heap.deinit();
-                try runWorkload(&heap, workload, divisor, io, sample);
-                sample.cells_allocated = heap.stats.cells_allocated;
-                sample.collections = heap.stats.collections;
+                var rt = try Rt.init(counting.allocator(), .{ .tracer = tracer });
+                defer rt.deinit();
+                try runWorkload(&rt, workload, divisor, io, sample);
+                sample.cells_allocated = rt.heap.stats.cells_allocated;
+                sample.collections = rt.heap.stats.collections;
             }
             if (counting.live != 0) return error.LeakedMemory;
             sample.bytes_allocated = counting.requested;
@@ -306,9 +307,9 @@ fn writeChecksum(writer: *std.Io.Writer, checksum: Checksum) std.Io.Writer.Error
 pub fn run(comptime r: runtime.Representation, io: std.Io, writer: *std.Io.Writer, options: Options) !Outcome {
     const Rt = runtime.Runtime(r);
     {
-        var heap = try Rt.Heap.init(std.heap.smp_allocator, .{});
-        defer heap.deinit();
-        if (try number_vectors.selfCheck(Rt, &heap) != 0) return .vector_mismatch;
+        var rt = try Rt.init(std.heap.smp_allocator, .{});
+        defer rt.deinit();
+        if (try number_vectors.selfCheck(Rt, &rt) != 0) return .vector_mismatch;
     }
     const target = @tagName(builtin.cpu.arch) ++ "-" ++ @tagName(builtin.os.tag) ++ "-" ++ @tagName(builtin.abi);
     try std.json.Stringify.value(.{

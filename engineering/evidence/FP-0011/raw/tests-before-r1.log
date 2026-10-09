@@ -1,0 +1,391 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+f95fab676429bbea0be085f5076ccdef620a9562
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:46.740Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cat.exe","out/fp0011-r1-overlay/make-overlay.mjs"]
+// FP-0011 revision 1: writes the case 38 test additions over the revision base's number files.
+// Usage: node make-overlay.mjs <base-commit> <output-directory>
+// The output holds the base's src/js/number.zig and src/js/number_vectors.zig with exactly the
+// case 38 vectors and test of the working tree appended, and nothing else changed.
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const [base, output] = process.argv.slice(2);
+if (!base || !output) throw new Error('Usage: node make-overlay.mjs <base-commit> <output-directory>');
+
+function cut(text, start, end) {
+  const from = text.indexOf(start);
+  if (from < 0) throw new Error(`missing ${JSON.stringify(start)}`);
+  const to = end === undefined ? text.length : text.indexOf(end, from);
+  if (to < 0) throw new Error(`missing ${JSON.stringify(end)}`);
+  return text.slice(from, to);
+}
+
+const show = (path) => execFileSync('git', ['show', `${base}:${path}`], { encoding: 'utf8' });
+
+const testBlock = cut(readFileSync('src/js/number.zig', 'utf8'), '\ntest "FP-0011 case 38');
+const vectorBlock = cut(readFileSync('src/js/number_vectors.zig', 'utf8'), '\n/// A literal of `prefix`', '\nfn matches(');
+
+const baseNumber = show('src/js/number.zig');
+const baseVectors = show('src/js/number_vectors.zig');
+const anchor = baseVectors.indexOf('\nfn matches(');
+if (anchor < 0) throw new Error('missing fn matches in the base vectors');
+
+mkdirSync(join(output, 'src', 'js'), { recursive: true });
+writeFileSync(join(output, 'src', 'js', 'number.zig'), baseNumber + testBlock);
+writeFileSync(join(output, 'src', 'js', 'number_vectors.zig'), baseVectors.slice(0, anchor) + vectorBlock + baseVectors.slice(anchor));
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cat.exe","arguments":["out/fp0011-r1-overlay/make-overlay.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:46.826Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","archive","-o","out/fp0011-r1-base.tar","f95fab6"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["archive","-o","out/fp0011-r1-base.tar","f95fab6"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:46.893Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":85}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\mkdir.exe","out/fp0011-r1-base","out/fp0011-r1-before"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\mkdir.exe","arguments":["out/fp0011-r1-base","out/fp0011-r1-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:47.032Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\tar.exe","-xf","out/fp0011-r1-base.tar","-C","out/fp0011-r1-base"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\tar.exe","arguments":["-xf","out/fp0011-r1-base.tar","-C","out/fp0011-r1-base"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:47.106Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":193}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\tar.exe","-xf","out/fp0011-r1-base.tar","-C","out/fp0011-r1-before"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\tar.exe","arguments":["-xf","out/fp0011-r1-base.tar","-C","out/fp0011-r1-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:47.351Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":192}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0011-r1-overlay/make-overlay.mjs","f95fab6","out/fp0011-r1-overlay/tree"]
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0011-r1-overlay/make-overlay.mjs","f95fab6","out/fp0011-r1-overlay/tree"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:47.598Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":69}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","out/fp0011-r1-overlay/tree/src/js/number.zig","out/fp0011-r1-overlay/tree/src/js/number_vectors.zig","out/fp0011-r1-before/src/js/"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["out/fp0011-r1-overlay/tree/src/js/number.zig","out/fp0011-r1-overlay/tree/src/js/number_vectors.zig","out/fp0011-r1-before/src/js/"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:47.719Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","build.zig","out/fp0011-r1-before/build.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["build.zig","out/fp0011-r1-before/build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:47.793Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":14}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","tests/compile_fail/leaf_reaches_heap.zig","tests/compile_fail/leaf_widens_context.zig","tests/compile_fail/binding_missing_kernel.zig","tests/compile_fail/binding_stray_kernel.zig","out/fp0011-r1-before/tests/compile_fail/"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["tests/compile_fail/leaf_reaches_heap.zig","tests/compile_fail/leaf_widens_context.zig","tests/compile_fail/binding_missing_kernel.zig","tests/compile_fail/binding_stray_kernel.zig","out/fp0011-r1-before/tests/compile_fail/"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:47.859Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\diff.exe","-ruN","out/fp0011-r1-base","out/fp0011-r1-before"]
+diff -ruN out/fp0011-r1-base/build.zig out/fp0011-r1-before/build.zig
+--- out/fp0011-r1-base/build.zig	2026-10-09 05:46:29.000000000 -0400
++++ out/fp0011-r1-before/build.zig	2026-10-09 05:58:47.807064600 -0400
+@@ -47,7 +47,7 @@
+     .{ .case = 4, .file = "allocation_invokes_call.zig", .status = 1, .stderr = &.{"fairpane-js: a context with effects {allocation} cannot invoke Call, which has effects {callback, allocation, exception, heap_mutation}"} },
+     .{ .case = 4, .file = "leaf_allocates.zig", .status = 1, .stderr = &.{"fairpane-js: allocateString requires effects {allocation}; the context has effects {}"} },
+     .{ .case = 4, .file = "mutation_throws.zig", .status = 1, .stderr = &.{"fairpane-js: throwTypeError requires effects {allocation, exception}; the context has effects {heap_mutation}"} },
+-    .{ .case = 4, .file = "leaf_calls_behavior.zig", .status = 1, .stderr = &.{"expected type"} },
++    .{ .case = 4, .file = "leaf_calls_behavior.zig", .status = 1, .stderr = &.{ "expected type", "expected type '*js.runtime.Runtime(.reference).Context(@fromBackingInt(15))', found '*js.runtime.Runtime(.reference).Context(@fromBackingInt(0))'" } },
+     .{ .case = 4, .file = "leaf_positive.zig", .status = 0, .stderr = &.{} },
+     .{ .case = 5, .file = "catalog_callback_alone.zig", .status = 1, .stderr = &.{"fairpane-js: operation BadCallback declares callback without allocation, exception, and heap_mutation"} },
+     .{ .case = 5, .file = "catalog_exception_alone.zig", .status = 1, .stderr = &.{"fairpane-js: operation BadException declares exception without allocation"} },
+@@ -60,6 +60,13 @@
+     .{ .case = 20, .file = "abi_reference_value.zig", .status = 1, .stderr = abi_errors },
+     .{ .case = 20, .file = "abi_nan_box_value.zig", .status = 1, .stderr = abi_errors },
+     .{ .case = 20, .file = "abi_tagged_index_value.zig", .status = 1, .stderr = abi_errors },
++    .{ .case = 34, .file = "leaf_reaches_heap.zig", .status = 1, .stderr = &.{"no field or member function named 'allocateString' in 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'"} },
++    .{ .case = 35, .file = "leaf_widens_context.zig", .status = 1, .stderr = &.{
++        "expected type '*js.runtime.Runtime(.reference)', found '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'",
++        "expected type '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(15))', found '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'",
++    } },
++    .{ .case = 36, .file = "binding_missing_kernel.zig", .status = 1, .stderr = &.{"fairpane-js: operation StubOperation has no kernel"} },
++    .{ .case = 36, .file = "binding_stray_kernel.zig", .status = 1, .stderr = &.{"fairpane-js: kernel stub_kernel belongs to no operation"} },
+ };
+ 
+ const measured_representations = [_][]const u8{ "reference", "nan_box", "tagged_index" };
+diff -ruN out/fp0011-r1-base/src/js/number.zig out/fp0011-r1-before/src/js/number.zig
+--- out/fp0011-r1-base/src/js/number.zig	2026-10-09 05:46:29.000000000 -0400
++++ out/fp0011-r1-before/src/js/number.zig	2026-10-09 05:58:47.741603500 -0400
+@@ -374,3 +374,20 @@
+         try testing.expectEqual(before, heap.stats.cells_allocated);
+     }
+ }
++
++test "FP-0011 case 38: StringToNumber rounds literals whose scale or exponent exceeds 1,000,000" {
++    var differences: usize = 0;
++    for (vectors.long_string_to_number_vectors, 1..) |v, row| {
++        const units = try testing.allocator.alloc(u16, v.prefix.len + v.zeros + v.suffix.len);
++        defer testing.allocator.free(units);
++        for (units[0..v.prefix.len], v.prefix) |*unit, byte| unit.* = byte;
++        @memset(units[v.prefix.len..][0..v.zeros], '0');
++        for (units[v.prefix.len + v.zeros ..], v.suffix) |*unit, byte| unit.* = byte;
++        const bits: u64 = @bitCast(stringToNumber(units));
++        if (bits != v.result) {
++            differences += 1;
++            std.debug.print("case 38 vector {d}: expected 0x{X:0>16}, got 0x{X:0>16}\n", .{ row, v.result, bits });
++        }
++    }
++    try testing.expectEqual(0, differences);
++}
+diff -ruN out/fp0011-r1-base/src/js/number_vectors.zig out/fp0011-r1-before/src/js/number_vectors.zig
+--- out/fp0011-r1-base/src/js/number_vectors.zig	2026-10-09 05:46:29.000000000 -0400
++++ out/fp0011-r1-before/src/js/number_vectors.zig	2026-10-09 05:58:47.741603500 -0400
+@@ -185,6 +185,19 @@
+     .{ .input = &[_]u16{ '1', 0x0000 }, .result = null },
+ };
+ 
++/// A literal of `prefix`, then `zeros` copies of `0`, then `suffix`.
++pub const LongStringToNumberVector = struct { prefix: []const u8, zeros: usize, suffix: []const u8, result: u64 };
++
++/// The vectors of FP-0011 case 38, which the integrator checked against Node v26.7.0 on 2026-10-09.
++/// Each literal's digit scale or exponent exceeds 1,000,000 in magnitude.
++pub const long_string_to_number_vectors = [_]LongStringToNumberVector{
++    .{ .prefix = "0.", .zeros = 1_000_001, .suffix = "1e1000005", .result = 0x408F400000000000 },
++    .{ .prefix = "1", .zeros = 1_000_000, .suffix = "e-1000001", .result = 0x3FB999999999999A },
++    .{ .prefix = "0.", .zeros = 1_000_001, .suffix = "1e1000000", .result = 0x3F847AE147AE147B },
++    .{ .prefix = "0.", .zeros = 1_000_001, .suffix = "1e" ++ repeat('9', 25), .result = 0x7FF0000000000000 },
++    .{ .prefix = "1", .zeros = 1_000_000, .suffix = "e-" ++ repeat('9', 25), .result = 0x0000000000000000 },
++};
++
+ fn matches(expected: ?u64, actual: f64) bool {
+     const bits = expected orelse return std.math.isNan(actual);
+     return bits == @as(u64, @bitCast(actual));
+diff -ruN out/fp0011-r1-base/tests/compile_fail/binding_missing_kernel.zig out/fp0011-r1-before/tests/compile_fail/binding_missing_kernel.zig
+--- out/fp0011-r1-base/tests/compile_fail/binding_missing_kernel.zig	1969-12-31 19:00:00.000000000 -0500
++++ out/fp0011-r1-before/tests/compile_fail/binding_missing_kernel.zig	2026-10-09 05:58:47.873404500 -0400
+@@ -0,0 +1,17 @@
++//! FP-0011 case 36: bindKernels rejects a catalog entry without a kernel.
++
++const js = @import("fairpane").js;
++const Rt = js.Runtime(.reference);
++
++const Kernels = struct {};
++
++comptime {
++    _ = Rt.bindKernels(&.{.{
++        .id = .number_add,
++        .name = "StubOperation",
++        .anchor = "sec-numeric-types-number-add",
++        .operands = &.{},
++        .result = .number,
++        .effects = .{},
++    }}, Kernels);
++}
+diff -ruN out/fp0011-r1-base/tests/compile_fail/binding_stray_kernel.zig out/fp0011-r1-before/tests/compile_fail/binding_stray_kernel.zig
+--- out/fp0011-r1-base/tests/compile_fail/binding_stray_kernel.zig	1969-12-31 19:00:00.000000000 -0500
++++ out/fp0011-r1-before/tests/compile_fail/binding_stray_kernel.zig	2026-10-09 05:58:47.873404500 -0400
+@@ -0,0 +1,19 @@
++//! FP-0011 case 36: bindKernels rejects a kernel that belongs to no catalog entry.
++
++const js = @import("fairpane").js;
++const Rt = js.Runtime(.reference);
++
++const Kernels = struct {
++    pub fn number_add(ctx: *Rt.Context(.{}), x: f64, y: f64) f64 {
++        _ = ctx;
++        return x + y;
++    }
++
++    pub fn stub_kernel(ctx: *Rt.Context(.{})) void {
++        _ = ctx;
++    }
++};
++
++comptime {
++    _ = Rt.bindKernels(js.operations.catalog[0..1], Kernels);
++}
+diff -ruN out/fp0011-r1-base/tests/compile_fail/leaf_reaches_heap.zig out/fp0011-r1-before/tests/compile_fail/leaf_reaches_heap.zig
+--- out/fp0011-r1-base/tests/compile_fail/leaf_reaches_heap.zig	1969-12-31 19:00:00.000000000 -0500
++++ out/fp0011-r1-before/tests/compile_fail/leaf_reaches_heap.zig	2026-10-09 05:58:47.872902600 -0400
+@@ -0,0 +1,12 @@
++//! FP-0011 case 34: a context with no effects cannot allocate a string through its stored heap.
++
++const js = @import("fairpane").js;
++const Rt = js.Runtime(.reference);
++
++fn probe(ctx: *Rt.Context(.{})) void {
++    _ = ctx.heap.allocateString(&.{'x'}) catch unreachable;
++}
++
++comptime {
++    _ = &probe;
++}
+diff -ruN out/fp0011-r1-base/tests/compile_fail/leaf_widens_context.zig out/fp0011-r1-before/tests/compile_fail/leaf_widens_context.zig
+--- out/fp0011-r1-base/tests/compile_fail/leaf_widens_context.zig	1969-12-31 19:00:00.000000000 -0500
++++ out/fp0011-r1-before/tests/compile_fail/leaf_widens_context.zig	2026-10-09 05:58:47.873404500 -0400
+@@ -0,0 +1,19 @@
++//! FP-0011 case 35: a context with no effects cannot obtain a root context from what it exposes.
++
++const js = @import("fairpane").js;
++const Rt = js.Runtime(.reference);
++
++/// Passes the context's stored heap where `rootContext` expects the owning runtime.
++fn throughRootContext(ctx: *Rt.Context(.{})) Rt.Context(.all) {
++    return Rt.rootContext(ctx.heap);
++}
++
++/// Initializes a context with every effect from the context's stored heap.
++fn throughInitialization(ctx: *Rt.Context(.{})) Rt.Context(.all) {
++    return .{ .heap = ctx.heap };
++}
++
++comptime {
++    _ = &throughRootContext;
++    _ = &throughInitialization;
++}
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\diff.exe","arguments":["-ruN","out/fp0011-r1-base","out/fp0011-r1-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T09:58:47.945Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":199}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0011-r1-before-cache"]
+test
++- FP-0011 case 35: leaf_widens_context.zig failure
+error: ========= expected to find in stderr: =========
+       expected type '*js.runtime.Runtime(.reference)', found '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+       ========= but stderr does not contain it: =====
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_widens_context.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 34: leaf_reaches_heap.zig failure
+error: ========= expected to find in stderr: =========
+       no field or member function named 'allocateString' in 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+       ========= but stderr does not contain it: =====
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_reaches_heap.zig -Mfairpane=src/root.zig
+
+test
++- run test 144 pass, 1 fail (145 total)
+error: 'js.number.test.FP-0011 case 38: StringToNumber rounds literals whose scale or exponent exceeds 1,000,000' failed:
+       case 38 vector 1: expected 0x408F400000000000, got 0x3F847AE147AE147B
+       case 38 vector 2: expected 0x3FB999999999999A, got 0x3FF0000000000000
+       case 38 vector 4: expected 0x7FF0000000000000, got 0x3F847AE147AE147B
+       case 38 vector 5: expected 0x0000000000000000, got 0x3FF0000000000000
+       expected 0, found 4
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:727:46: 0x7ff6cf65cf15 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:728:70: 0x7ff6cf657e0d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf65a102 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:728:70: 0x7ff6cf657e0d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf65a102 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf65a102 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:727:46: 0x7ff6cf657db5 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\handles.zig:730:69: 0x7ff6cf657e82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff6cf4a53ea in expectEqualInner__func_843 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff6cf60afaf in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\ta89c1c0c8\m\out\fp0011-r1-before\src\js\number.zig:392:5: 0x7ff6cf60afe3 in test.FP-0011 case 38: StringToNumber rounds literals whose scale or exponent exceeds 1,000,000 (test_zcu.obj)
+           try testing.expectEqual(0, differences);
+           ^
+failed command: cd . && ".\\out\\fp0011-r1-before-cache\\o\\0aba86eb879a5e62a442261e03ab4c0b\\test.exe" "--cache-dir=.\\out\\fp0011-r1-before-cache" --seed=0xa4a3e4e6 --listen=-
+
+Build Summary: 40/44 steps succeeded (3 failed); 177/178 tests passed (1 failed)
+test transitive failure
++- run test 144 pass, 1 fail (145 total)
+|  +- compile test debug native success 5s MaxRSS:678M
++- run test 33 pass (33 total) 209ms MaxRSS:15M
+|  +- compile test debug native success 3s MaxRSS:407M
++- FP-0007 case 13: case 2 passes with exit status 0 success 42ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:335M
++- FP-0007 case 13: case 3 fails with exit status 1 success 41ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 39ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 72ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 6ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 9ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:315M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 32ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 35ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 400ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 410ms
++- FP-0011 case 4: allocation_invokes_call.zig success 408ms
++- FP-0011 case 4: leaf_allocates.zig success 331ms
++- FP-0011 case 4: mutation_throws.zig success 378ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 365ms
++- FP-0011 case 4: leaf_positive.zig success 402ms
++- FP-0011 case 5: catalog_callback_alone.zig success 397ms
++- FP-0011 case 5: catalog_exception_alone.zig success 363ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 398ms
++- FP-0011 case 5: kernel_wider_context.zig success 398ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 371ms
++- FP-0011 case 8: layout_undescribed_field.zig success 371ms
++- FP-0011 case 8: layout_plain_reference.zig success 331ms
++- FP-0011 case 8: layout_missing_field.zig success 369ms
++- FP-0011 case 20: abi_reference_value.zig success 362ms
++- FP-0011 case 20: abi_nan_box_value.zig success 372ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 357ms
++- FP-0011 case 34: leaf_reaches_heap.zig failure
++- FP-0011 case 35: leaf_widens_context.zig failure
++- FP-0011 case 36: binding_missing_kernel.zig success 400ms
++- FP-0011 case 36: binding_stray_kernel.zig success 357ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xa4a3e4e6 test --summary all --cache-dir out/fp0011-r1-before-cache
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0011-r1-before-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m\\out\\fp0011-r1-before","started_at":"2026-10-09T09:58:54.209Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":13799,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/leaf_reaches_heap.zig","-Mfairpane=src/root.zig"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/leaf_reaches_heap.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m\\out\\fp0011-r1-before","started_at":"2026-10-09T09:59:15.803Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":168,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/leaf_widens_context.zig","-Mfairpane=src/root.zig"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-fno-emit-bin","--dep","fairpane","-Mroot=tests/compile_fail/leaf_widens_context.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m\\out\\fp0011-r1-before","started_at":"2026-10-09T09:59:16.021Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":152,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}

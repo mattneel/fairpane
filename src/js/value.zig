@@ -149,6 +149,7 @@ test "FP-0011 case 20: no value representation or js import reaches the C ABI so
         @embedFile("value_tagged_index.zig"),
         @embedFile("heap_catalog.zig"),
         @embedFile("heap.zig"),
+        @embedFile("kernels.zig"),
         @embedFile("number.zig"),
         @embedFile("number_vectors.zig"),
         @embedFile("runtime.zig"),

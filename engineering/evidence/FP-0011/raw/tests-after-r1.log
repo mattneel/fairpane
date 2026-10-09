@@ -1,0 +1,108 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0011-r1-cache-after"]
+Build Summary: 44/44 steps succeeded; 178/178 tests passed
+test success
++- run test 145 pass (145 total) 4s MaxRSS:19M
+|  +- compile test debug native success 6s MaxRSS:679M
++- run test 33 pass (33 total) 209ms MaxRSS:15M
+|  +- compile test debug native success 3s MaxRSS:408M
++- FP-0007 case 13: case 2 passes with exit status 0 success 39ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 3s MaxRSS:337M
++- FP-0007 case 13: case 3 fails with exit status 1 success 39ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 35ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 37ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 71ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 10ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 14ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:315M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 32ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 41ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 35ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 466ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 439ms
++- FP-0011 case 4: allocation_invokes_call.zig success 519ms
++- FP-0011 case 4: leaf_allocates.zig success 426ms
++- FP-0011 case 4: mutation_throws.zig success 398ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 436ms
++- FP-0011 case 4: leaf_positive.zig success 448ms
++- FP-0011 case 5: catalog_callback_alone.zig success 422ms
++- FP-0011 case 5: catalog_exception_alone.zig success 455ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 412ms
++- FP-0011 case 5: kernel_wider_context.zig success 430ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 467ms
++- FP-0011 case 8: layout_undescribed_field.zig success 453ms
++- FP-0011 case 8: layout_plain_reference.zig success 428ms
++- FP-0011 case 8: layout_missing_field.zig success 440ms
++- FP-0011 case 20: abi_reference_value.zig success 446ms
++- FP-0011 case 20: abi_nan_box_value.zig success 426ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 488ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 400ms
++- FP-0011 case 35: leaf_widens_context.zig success 430ms
++- FP-0011 case 36: binding_missing_kernel.zig success 440ms
++- FP-0011 case 36: binding_stray_kernel.zig success 431ms
+
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0011-r1-cache-after"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:01:10.162Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":14738,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","build.zig","src/root.zig","src/js/heap.zig","src/js/heap_catalog.zig","src/js/kernels.zig","src/js/measure.zig","src/js/measure_main_nan_box.zig","src/js/measure_main_reference.zig","src/js/measure_main_tagged_index.zig","src/js/number.zig","src/js/number_vectors.zig","src/js/operations.zig","src/js/runtime.zig","src/js/value.zig","src/js/value_nan_box.zig","src/js/value_reference.zig","src/js/value_tagged_index.zig","tests/compile_fail/abi_nan_box_value.zig","tests/compile_fail/abi_reference_value.zig","tests/compile_fail/abi_tagged_index_value.zig","tests/compile_fail/allocation_invokes_call.zig","tests/compile_fail/binding_missing_kernel.zig","tests/compile_fail/binding_stray_kernel.zig","tests/compile_fail/catalog_callback_alone.zig","tests/compile_fail/catalog_duplicate_id.zig","tests/compile_fail/catalog_exception_alone.zig","tests/compile_fail/kernel_undeclared_throw.zig","tests/compile_fail/kernel_wider_context.zig","tests/compile_fail/layout_missing_field.zig","tests/compile_fail/layout_plain_reference.zig","tests/compile_fail/layout_undescribed_field.zig","tests/compile_fail/leaf_allocates.zig","tests/compile_fail/leaf_calls_behavior.zig","tests/compile_fail/leaf_invokes_number_to_string.zig","tests/compile_fail/leaf_invokes_to_number.zig","tests/compile_fail/leaf_positive.zig","tests/compile_fail/leaf_reaches_heap.zig","tests/compile_fail/leaf_widens_context.zig","tests/compile_fail/mutation_throws.zig"]
+212e1d4a9dab1c911ee03bb1c58abeb45db2c97cf452040b7e749b34fd3b9e20 *build.zig
+6b8bfa6a9c3f03f640a729f41c08c0ab28c0752faf51d1954ea632626de317b7 *src/root.zig
+b807801060f4bf91352db4193c347fdfb11e4a750a5357069821d90fa96ed0c7 *src/js/heap.zig
+163a364ac75186f8b95b752ec4ef5cdb9d86621f4ab877c12a65a46d34dff38d *src/js/heap_catalog.zig
+24160216f60c2dc595ae7bdbb469b1730bc7b6f0c944f92ca279259b5f261082 *src/js/kernels.zig
+25e2a29fc563c2b1f66d0b50e334b77ccdfcab75889228ed4b30b602a8642b0e *src/js/measure.zig
+09f7bdea610ff6256a8068bb694f3802112fe2693543c36620b0a573bf1534da *src/js/measure_main_nan_box.zig
+c24b92078fe3d982bdba1e742c10cb984108b27aab25b100935456dc59ca89c8 *src/js/measure_main_reference.zig
+34bef7dd05acc56a64d4b8632117eec61efe01b44aa1a01f7e8aff40c8112d97 *src/js/measure_main_tagged_index.zig
+da5e5332002bfc8572a65fc5adfd8a865ef7ff25f12dfc463a43f66b79daa990 *src/js/number.zig
+8578470a3fb3222de7d198ef53350a952c23d7e10018107a29ad19474a1d5c7c *src/js/number_vectors.zig
+90986bb5fc4b9447a3b54f79f83767228870059a102e0285180e45693f827ee2 *src/js/operations.zig
+3fcecbbdf61794354868c0d6ca8adb1914bcb5856fa19b5b944e1053ac4f23ac *src/js/runtime.zig
+2fb059be5cbf64c7cf836c948bff043febc2ed9dcd9e6dd7220ad80f24445638 *src/js/value.zig
+cb04927eddb2be7a8c5eec06aebf885eebe9245794301b689242777f61585a50 *src/js/value_nan_box.zig
+fa0171920249754666e14468802cb3ad1a954f562a516e164ea09dc075ba543c *src/js/value_reference.zig
+95fe2e83fad3fe7e3ffb971d84ee77c9ba40bbd009463623fe66f6357af31ebf *src/js/value_tagged_index.zig
+d54ce0604af17fe7299ce51b2fec7c98502712a6672c8b0d4e5f422aaaa8c14c *tests/compile_fail/abi_nan_box_value.zig
+d56e66bf4224b9d3c89fab726ecbab110fe446d37536a8c1a1feb69b95570538 *tests/compile_fail/abi_reference_value.zig
+196231798b65791a787a9bb566c4ee5632f6a862e2288aaa3db2fed22664169a *tests/compile_fail/abi_tagged_index_value.zig
+f903bdcecb8d6e1d7b3697548bfc67a525d5a6f4af2320174e7fe6af19e955da *tests/compile_fail/allocation_invokes_call.zig
+149d91386b358a226935a1c9c48a5b662a55cce2ac7dc250d68d0a6b367145c1 *tests/compile_fail/binding_missing_kernel.zig
+4d919f013149d78091d942b56cfa6d80779203c9b771ccf5becef7a2a73e8bb8 *tests/compile_fail/binding_stray_kernel.zig
+8c430207fb3343edd5fd73b63328d2a3c348d6d24a9aae3052893c3693e768fa *tests/compile_fail/catalog_callback_alone.zig
+cf4bc931dc6c83e6880eeb9f2f8609dff9c5af3a2b802017c3033e9b836d1906 *tests/compile_fail/catalog_duplicate_id.zig
+809e22ec68b1a5539eb46608e9c7677c50917921ed431050e0d11a0309cd0294 *tests/compile_fail/catalog_exception_alone.zig
+c6e8643a2de0596fb4624161a8b927584b7bb1e2e6a0bf63d03d88a999130a82 *tests/compile_fail/kernel_undeclared_throw.zig
+9d8d04021bac4097a2f898ad0e19f85a714505432180eac4cffa4eec361ec282 *tests/compile_fail/kernel_wider_context.zig
+32d26d508f090e87ed9c96ebe057a5d88df83d2f1760647d46637e80f7b98b28 *tests/compile_fail/layout_missing_field.zig
+f6df71f8a5f18b37f3e71576ece457339c7dbcdc6d32c645283da2a934a17dc1 *tests/compile_fail/layout_plain_reference.zig
+6cdf0c4d0c4dd62dd54440d191a87c7b3e712c275ec304df50b1b6d5d9698fdc *tests/compile_fail/layout_undescribed_field.zig
+a7821371157421f05bdcf3965db3a2b1c0ec9ed74a02d2f111790be1114af526 *tests/compile_fail/leaf_allocates.zig
+9b7a13232639e0f4ab499727b92eab89927b3c6e856e1f8e95cfe66541fddca1 *tests/compile_fail/leaf_calls_behavior.zig
+496c3258105309f61e3544471d780cc01568fa5ebf1f8579886624a218bce148 *tests/compile_fail/leaf_invokes_number_to_string.zig
+6833ccc2486faf9153883eef1dd317327aed3b0ee5265afac7f07d3acace1780 *tests/compile_fail/leaf_invokes_to_number.zig
+60ccaa33d143453eb2b2856523e67c8134ecce9d3213dd1f0816b9b3c2803735 *tests/compile_fail/leaf_positive.zig
+7501d710f912f5db95a72f0fdf79fe87908d69881a23cdfc9573974c502dfbc5 *tests/compile_fail/leaf_reaches_heap.zig
+96902574be6c7baeb313f08ab1150fb8c635e2134028e382fa389c1be3304d94 *tests/compile_fail/leaf_widens_context.zig
+eb20eb04ce45a5923cd48722d128a95a6108d148cbb247e19fb09b78a4770565 *tests/compile_fail/mutation_throws.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["build.zig","src/root.zig","src/js/heap.zig","src/js/heap_catalog.zig","src/js/kernels.zig","src/js/measure.zig","src/js/measure_main_nan_box.zig","src/js/measure_main_reference.zig","src/js/measure_main_tagged_index.zig","src/js/number.zig","src/js/number_vectors.zig","src/js/operations.zig","src/js/runtime.zig","src/js/value.zig","src/js/value_nan_box.zig","src/js/value_reference.zig","src/js/value_tagged_index.zig","tests/compile_fail/abi_nan_box_value.zig","tests/compile_fail/abi_reference_value.zig","tests/compile_fail/abi_tagged_index_value.zig","tests/compile_fail/allocation_invokes_call.zig","tests/compile_fail/binding_missing_kernel.zig","tests/compile_fail/binding_stray_kernel.zig","tests/compile_fail/catalog_callback_alone.zig","tests/compile_fail/catalog_duplicate_id.zig","tests/compile_fail/catalog_exception_alone.zig","tests/compile_fail/kernel_undeclared_throw.zig","tests/compile_fail/kernel_wider_context.zig","tests/compile_fail/layout_missing_field.zig","tests/compile_fail/layout_plain_reference.zig","tests/compile_fail/layout_undescribed_field.zig","tests/compile_fail/leaf_allocates.zig","tests/compile_fail/leaf_calls_behavior.zig","tests/compile_fail/leaf_invokes_number_to_string.zig","tests/compile_fail/leaf_invokes_to_number.zig","tests/compile_fail/leaf_positive.zig","tests/compile_fail/leaf_reaches_heap.zig","tests/compile_fail/leaf_widens_context.zig","tests/compile_fail/mutation_throws.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta89c1c0c8\\m","started_at":"2026-10-09T10:01:33.616Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}

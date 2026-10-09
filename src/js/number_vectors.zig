@@ -1,4 +1,4 @@
-//! The frozen number vectors of FP-0011 cases 21 through 23.
+//! The frozen number vectors of FP-0011 cases 21 through 23 and 38.
 //!
 //! Node v26.7.0 cross-checked every vector on 2026-10-08, as the task contract records.
 //! A null result means any NaN.
@@ -185,6 +185,19 @@ pub const string_to_number_vectors = [_]StringToNumberVector{
     .{ .input = &[_]u16{ '1', 0x0000 }, .result = null },
 };
 
+/// A literal of `prefix`, then `zeros` copies of `0`, then `suffix`.
+pub const LongStringToNumberVector = struct { prefix: []const u8, zeros: usize, suffix: []const u8, result: u64 };
+
+/// The vectors of FP-0011 case 38, which the integrator checked against Node v26.7.0 on 2026-10-09.
+/// Each literal's digit scale or exponent exceeds 1,000,000 in magnitude.
+pub const long_string_to_number_vectors = [_]LongStringToNumberVector{
+    .{ .prefix = "0.", .zeros = 1_000_001, .suffix = "1e1000005", .result = 0x408F400000000000 },
+    .{ .prefix = "1", .zeros = 1_000_000, .suffix = "e-1000001", .result = 0x3FB999999999999A },
+    .{ .prefix = "0.", .zeros = 1_000_001, .suffix = "1e1000000", .result = 0x3F847AE147AE147B },
+    .{ .prefix = "0.", .zeros = 1_000_001, .suffix = "1e" ++ repeat('9', 25), .result = 0x7FF0000000000000 },
+    .{ .prefix = "1", .zeros = 1_000_000, .suffix = "e-" ++ repeat('9', 25), .result = 0x0000000000000000 },
+};
+
 fn matches(expected: ?u64, actual: f64) bool {
     const bits = expected orelse return std.math.isNan(actual);
     return bits == @as(u64, @bitCast(actual));
@@ -198,10 +211,10 @@ fn sameText(expected: []const u8, actual: []const u16) bool {
     return true;
 }
 
-/// Runs every vector through the kernels of `Rt` and returns the number of differences.
+/// Runs every vector through the kernels of the runtime `rt` and returns the number of differences.
 /// A measurement executable runs it in its own optimize mode before it measures.
-pub fn selfCheck(comptime Rt: type, heap: *Rt.Heap) error{OutOfMemory}!usize {
-    var ctx = Rt.rootContext(heap);
+pub fn selfCheck(comptime Rt: type, rt: *Rt) error{OutOfMemory}!usize {
+    var ctx = rt.rootContext();
     var differences: usize = 0;
     for (add_vectors) |v| {
         const sum = ctx.invoke(.number_add, .{ @as(f64, @bitCast(v.x)), @as(f64, @bitCast(v.y)) });

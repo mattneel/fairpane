@@ -47,7 +47,7 @@ const compile_fixtures = [_]CompileFixture{
     .{ .case = 4, .file = "allocation_invokes_call.zig", .status = 1, .stderr = &.{"fairpane-js: a context with effects {allocation} cannot invoke Call, which has effects {callback, allocation, exception, heap_mutation}"} },
     .{ .case = 4, .file = "leaf_allocates.zig", .status = 1, .stderr = &.{"fairpane-js: allocateString requires effects {allocation}; the context has effects {}"} },
     .{ .case = 4, .file = "mutation_throws.zig", .status = 1, .stderr = &.{"fairpane-js: throwTypeError requires effects {allocation, exception}; the context has effects {heap_mutation}"} },
-    .{ .case = 4, .file = "leaf_calls_behavior.zig", .status = 1, .stderr = &.{"expected type"} },
+    .{ .case = 4, .file = "leaf_calls_behavior.zig", .status = 1, .stderr = &.{ "expected type", "expected type '*js.runtime.Runtime(.reference).Context(@fromBackingInt(15))', found '*js.runtime.Runtime(.reference).Context(@fromBackingInt(0))'" } },
     .{ .case = 4, .file = "leaf_positive.zig", .status = 0, .stderr = &.{} },
     .{ .case = 5, .file = "catalog_callback_alone.zig", .status = 1, .stderr = &.{"fairpane-js: operation BadCallback declares callback without allocation, exception, and heap_mutation"} },
     .{ .case = 5, .file = "catalog_exception_alone.zig", .status = 1, .stderr = &.{"fairpane-js: operation BadException declares exception without allocation"} },
@@ -60,6 +60,13 @@ const compile_fixtures = [_]CompileFixture{
     .{ .case = 20, .file = "abi_reference_value.zig", .status = 1, .stderr = abi_errors },
     .{ .case = 20, .file = "abi_nan_box_value.zig", .status = 1, .stderr = abi_errors },
     .{ .case = 20, .file = "abi_tagged_index_value.zig", .status = 1, .stderr = abi_errors },
+    .{ .case = 34, .file = "leaf_reaches_heap.zig", .status = 1, .stderr = &.{"no field or member function named 'allocateString' in 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'"} },
+    .{ .case = 35, .file = "leaf_widens_context.zig", .status = 1, .stderr = &.{
+        "expected type '*js.runtime.Runtime(.reference)', found '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'",
+        "expected type '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(15))', found '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'",
+    } },
+    .{ .case = 36, .file = "binding_missing_kernel.zig", .status = 1, .stderr = &.{"fairpane-js: operation StubOperation has no kernel"} },
+    .{ .case = 36, .file = "binding_stray_kernel.zig", .status = 1, .stderr = &.{"fairpane-js: kernel stub_kernel belongs to no operation"} },
 };
 
 const measured_representations = [_][]const u8{ "reference", "nan_box", "tagged_index" };

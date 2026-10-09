@@ -41,7 +41,8 @@ pub fn shortest(x: f64) Decimal {
     return .{ .significand = significand, .exponent = exponent };
 }
 
-/// The longest result of `toString`, `-1.7976931348623157e+308` and its kin, is 24 code units.
+/// The longest result of `toString` is 25 code units, such as `-0.0000012345678901234567`:
+/// a sign, `0.`, five zeros, and 17 significant digits.
 pub const max_string_units = 25;
 
 /// `Number::toString(x, 10)`. Steps 6 through 12 write into `buffer`.
@@ -204,7 +205,9 @@ fn decimalLiteral(text: []const u16) f64 {
     if (matchesAscii(text[index..], "Infinity")) {
         return if (negative) -std.math.inf(f64) else std.math.inf(f64);
     }
-    // The literal's value is 0.D × 10^scale, where D holds its significant digits.
+    // The literal's value is 0.D × 10^(scale + exponent), where D holds its significant digits, so
+    // 0.1 ≤ 0.D < 1. Every leading zero after the point and every digit before it moves `scale` by one,
+    // so the magnitude of `scale` is at most the literal's length.
     var digits: [max_significant_digits + 1]u8 = undefined;
     var count: usize = 0;
     var sticky = false;
@@ -222,7 +225,7 @@ fn decimalLiteral(text: []const u16) f64 {
         const digit: u8 = @intCast(unit);
         if (count == 0 and !sticky and digit == '0') {
             // A leading zero after the point lowers the scale; one before it changes nothing.
-            if (after_point) scale -= 1;
+            if (after_point) scale -|= 1;
             continue;
         }
         if (count < max_significant_digits) {
@@ -231,9 +234,14 @@ fn decimalLiteral(text: []const u16) f64 {
         } else if (digit != '0') {
             sticky = true;
         }
-        if (!after_point) scale += 1;
+        if (!after_point) scale +|= 1;
     }
     if (!saw_digit) return std.math.nan(f64);
+    // An exponent whose magnitude reaches the literal's length plus 400 makes the magnitude of
+    // `scale + exponent` at least 400, so the value is at least 10^399, which rounds to infinity, or
+    // below 10^-400, which rounds to zero, whatever the digits. Saturating there keeps the result exact.
+    const length = std.math.cast(i64, text.len) orelse std.math.maxInt(i64);
+    const exponent_bound = length +| 400;
     var exponent: i64 = 0;
     if (index < text.len and (text[index] == 'e' or text[index] == 'E')) {
         index += 1;
@@ -244,8 +252,7 @@ fn decimalLiteral(text: []const u16) f64 {
         }
         const exponent_start = index;
         while (index < text.len and isDecimalDigit(text[index])) : (index += 1) {
-            // Saturate: any exponent beyond this bound already gives zero or infinity.
-            exponent = @min(exponent * 10 + (text[index] - '0'), 1_000_000);
+            exponent = @min((exponent *| 10) +| (text[index] - '0'), exponent_bound);
         }
         if (index == exponent_start) return std.math.nan(f64);
         if (exponent_negative) exponent = -exponent;
@@ -256,7 +263,8 @@ fn decimalLiteral(text: []const u16) f64 {
         digits[count] = '1';
         count += 1;
     }
-    const clamped = std.math.clamp(scale + exponent, -2000, 2000);
+    // Beyond ±400 the result is already zero or infinity, so clamping to ±2000 keeps it.
+    const clamped = std.math.clamp(scale +| exponent, -2000, 2000);
     var literal: [max_significant_digits + 16]u8 = undefined;
     const rendered = std.fmt.bufPrint(&literal, "0.{s}e{d}", .{ digits[0..count], clamped }) catch unreachable;
     const magnitude = std.fmt.parseFloat(f64, rendered) catch unreachable;
@@ -288,9 +296,10 @@ test "FP-0011 case 21: Number::add and Number::sameValue follow the frozen vecto
     const runtime = @import("runtime.zig");
     inline for (test_representations) |r| {
         const Rt = runtime.Runtime(r);
-        var heap = try Rt.Heap.init(testing.allocator, .{});
-        defer heap.deinit();
-        var ctx = Rt.rootContext(&heap);
+        var rt = try Rt.init(testing.allocator, .{});
+        defer rt.deinit();
+        const heap = &rt.heap;
+        var ctx = rt.rootContext();
         for (vectors.add_vectors) |v| {
             const sum = ctx.invoke(.number_add, .{ @as(f64, @bitCast(v.x)), @as(f64, @bitCast(v.y)) });
             try heap.expectInvariants();
@@ -301,7 +310,7 @@ test "FP-0011 case 21: Number::add and Number::sameValue follow the frozen vecto
             try heap.expectInvariants();
             try testing.expectEqual(v.result, same);
         }
-        try testing.expectEqual(0, try vectors.selfCheck(Rt, &heap));
+        try testing.expectEqual(0, try vectors.selfCheck(Rt, &rt));
         try heap.expectInvariants();
     }
 }
@@ -314,9 +323,10 @@ test "FP-0011 case 22: Number::toString gives the frozen texts and shortest roun
     const runtime = @import("runtime.zig");
     inline for (test_representations) |r| {
         const Rt = runtime.Runtime(r);
-        var heap = try Rt.Heap.init(testing.allocator, .{});
-        defer heap.deinit();
-        var ctx = Rt.rootContext(&heap);
+        var rt = try Rt.init(testing.allocator, .{});
+        defer rt.deinit();
+        const heap = &rt.heap;
+        var ctx = rt.rootContext();
         for (vectors.to_string_vectors) |v| {
             const before = heap.stats.cells_allocated;
             const string = try ctx.invoke(.number_to_string, .{@as(f64, @bitCast(v.bits))});
@@ -362,9 +372,10 @@ test "FP-0011 case 23: StringToNumber follows the frozen vectors without allocat
     const View = @import("../web_string.zig").View;
     inline for (test_representations) |r| {
         const Rt = runtime.Runtime(r);
-        var heap = try Rt.Heap.init(testing.allocator, .{});
-        defer heap.deinit();
-        var ctx = Rt.rootContext(&heap);
+        var rt = try Rt.init(testing.allocator, .{});
+        defer rt.deinit();
+        const heap = &rt.heap;
+        var ctx = rt.rootContext();
         const before = heap.stats.cells_allocated;
         for (vectors.string_to_number_vectors) |v| {
             const result = ctx.invoke(.string_to_number, .{View{ .units = v.input }});
@@ -373,4 +384,21 @@ test "FP-0011 case 23: StringToNumber follows the frozen vectors without allocat
         }
         try testing.expectEqual(before, heap.stats.cells_allocated);
     }
+}
+
+test "FP-0011 case 38: StringToNumber rounds literals whose scale or exponent exceeds 1,000,000" {
+    var differences: usize = 0;
+    for (vectors.long_string_to_number_vectors, 1..) |v, row| {
+        const units = try testing.allocator.alloc(u16, v.prefix.len + v.zeros + v.suffix.len);
+        defer testing.allocator.free(units);
+        for (units[0..v.prefix.len], v.prefix) |*unit, byte| unit.* = byte;
+        @memset(units[v.prefix.len..][0..v.zeros], '0');
+        for (units[v.prefix.len + v.zeros ..], v.suffix) |*unit, byte| unit.* = byte;
+        const bits: u64 = @bitCast(stringToNumber(units));
+        if (bits != v.result) {
+            differences += 1;
+            std.debug.print("case 38 vector {d}: expected 0x{X:0>16}, got 0x{X:0>16}\n", .{ row, v.result, bits });
+        }
+    }
+    try testing.expectEqual(0, differences);
 }

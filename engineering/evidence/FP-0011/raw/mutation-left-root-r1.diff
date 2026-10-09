@@ -1,0 +1,10 @@
+--- a/src/js/kernels.zig
++++ b/src/js/kernels.zig
+@@ -335,7 +335,6 @@
+             var scope = try ctx.openScope();
+             defer scope.close();
+             const left_primitive = try ctx.invoke(.to_primitive, .{ left, null });
+-            _ = try scope.push(left_primitive);
+             const right_primitive = try ctx.invoke(.to_primitive, .{ right, null });
+             _ = try scope.push(right_primitive);
+             if (ctx.typeOf(left_primitive) == .string or ctx.typeOf(right_primitive) == .string) {

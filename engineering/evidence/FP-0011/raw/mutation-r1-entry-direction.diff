@@ -1,0 +1,12 @@
+--- a/src/js/runtime.zig
++++ b/src/js/runtime.zig
+@@ -489,9 +489,6 @@
+                 var table: [entries.len]BoundKernel = undefined;
+                 for (entries, &table) |operation, *bound| {
+                     const prefix = "fairpane-js: kernel for " ++ operation.name;
+-                    if (!@hasDecl(Kernels_, @tagName(operation.id))) {
+-                        @compileError("fairpane-js: operation " ++ operation.name ++ " has no kernel");
+-                    }
+                     const kernel = @field(Kernels_, @tagName(operation.id));
+                     const info = @typeInfo(@TypeOf(kernel)).@"fn";
+                     const First = if (info.param_types.len == 0) void else info.param_types[0].?;
