@@ -449,3 +449,15 @@ The worker's development compilations and test runs, including the runs that fou
 - The letter-case check compares `toLowerCase` keys, as the Rust archive reader does. [INFERENCE] NTFS compares names through its own upper-case table, so a pair such as final and medial sigma may still collide on disk without a rejection; the pinned Test262 paths are ASCII. `FP-0099` owns the shared path rule.
 - The adjacent-rule rows cannot put an empty component and a `.` or `..` component in one component, so that row places the empty component first, and it shows the component order.
 - [INFERENCE] `resetSet` uses the capacity that the pinned `std.HashMapUnmanaged` reports; `capacityForSize(n)` is at most `2.5n + 2`, which is why a set sized for `n` stays within `4 * @max(n, 8)`.
+
+### Revision 2 integration
+
+The integrator applied the worker's own patch `out/fp0082-r2.patch` (blob `86f441db`, base `7715859`) on `246e6de` without conflicts and committed it as `84ffa53`.
+That head holds `FP-0107`'s four-worker controller runner, `FP-0108`, and `FP-0119`; the revision's new controller cases change no process-wide state.
+Commit `f397d8d` adds revision 2 amendment 2, which accepts the `Limiter` change and corrects evidence item 3.
+
+- `raw/integration-binding-r2.log` records `HEAD` `f397d8d` and a status that includes ignored files for every source root, before and after the runs below.
+- `gates/2026-10-09T18-32-36-667Z-repo-check-e6465c00.json`, `gates/2026-10-09T18-32-37-317Z-controller-test-689e63d9.json` (247 of 247, 43,808 ms), `gates/2026-10-09T18-33-21-382Z-zig-fmt-7eda6663.json`, and `gates/2026-10-09T18-33-21-705Z-zig-test-55f261ce.json` pass.
+- `raw/integration-tests-r2.log` runs `zig build test --summary all` with the fresh cache `out/fp0082-r2-integration`: 100 of 100 build steps and 350 of 350 tests pass.
+- `raw/bun-selftest-r2.log` records Bun 1.4.2 and `tools/selftest.mjs` with 247 of 247 tests.
+- `raw/integration-protected-paths-r2.log` records `git diff --stat --exit-code 7715859 f397d8d` over the nine protected paths, which exits with status 0 and prints nothing.
