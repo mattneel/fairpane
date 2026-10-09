@@ -1,0 +1,48 @@
+{
+  "verdict": "approve",
+  "summary": "Plan review 11: I approve local commit 831bbd1 ('plan: route the FP-0100, FP-0119, FP-0131, and FP-0082 review findings'). Every new criterion is testable and follows its finding. No existing criterion is weakened, and FP-0136 lists all nine protected paths and has a sound dependency. Two minor routing gaps remain, plus some unrouted notes.\n\nHow I checked: this commit is not pushed, and I have no shell, so I could not run `git show HEAD`. Instead I read plan.json and state.json in the working tree with jq. That the tree matches HEAD 831bbd1 for these two files is [INFERENCE]. I compared them with the task text I reviewed in plan reviews 4 to 10 and with the five cited review records. I ran nothing.\n\nWhere each change routes:\n\n**FP-0100 review 1**\n- Minor 1, the 8194-record reservation: FP-0101 criterion 11 (plan.json:3652). It grows the records with the input and records the peak allocation of a one-character document before and after.\n- Minor 4, no test past the 4096-unit flush threshold: FP-0101 criterion 12 (3653).\n- Minors 2 and 3 are evidence fixes. The FP-0100 README now marks the cost attribution [INFERENCE] (README:106) and cites raw/test-diff-after-review.log (README:114).\n\n**FP-0100 spec review 1**\n- The scope-comment note, the unreachable table-scope arm, and the trailing-solidus note go to FP-0102's state note.\n- The ruby (rb, rtc, rp, rt) note goes to FP-0101's state note.\n- The reservation note goes to FP-0101 criterion 11.\n\n**FP-0119 security review 1**\n- The minor (second pass rereads the font bytes) and note 2 (hand-built TrueTypeGlyph invariants) go to FP-0121 criterion 6 (4111).\n- FP-0121 gains fairpane-security and reads the review. It depends on FP-0119 and may write src.\n\n**FP-0131 spec review 1**\n- The minor and the commit-snapshot note go to the new FP-0136 (4437).\n- FP-0136 depends on FP-0131, which edits the same rows. It may write specs, tools, tests, and evidence, and requires fairpane-review and fairpane-spec.\n- Its three criteria are testable: correct attribution in S41 and three import rows, a SHA-256-bound commit snapshot with section and line, and a controller case that fails on the current texts.\n\n**FP-0082 spec review 3**\n- The Limiter note goes to FP-0128's state note.\n- The CatchParameter early-error note goes to FP-0088's state note. FP-0088 owns destructuring_binding, the only way to reach that early error.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/state.json",
+      "line": 969,
+      "issue": "FP-0102's new note says the trailing-solidus behavior for start tags with an unsupported outcome is frozen 'for the table branches it implements, as FP-0103 and FP-0104 do for theirs'. The notes for FP-0103 (state.json:970) and FP-0104 (971) were not changed and say nothing about it. FP-0100 spec review 1 (spec-review-1-accept.json:21) asks 'the FP-0102 to FP-0104 contracts' to freeze it. As written, the obligation is routed only to FP-0102, and FP-0102's note points at owners that do not carry it.",
+      "recommendation": "Add the same note to FP-0103 and FP-0104, naming their template, frameset, and foreign-content branches. Add it to FP-0105 as well if fragment parsing reaches those branches."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3652,
+      "issue": "FP-0100 review 1 asks for the 8194-record reservation to be fixed 'before FP-0019 or FP-0105 wires the parser in'. FP-0101 criterion 11 fixes it, and FP-0105 reaches FP-0101 through FP-0102. FP-0019 (913) depends on FP-0009, FP-0012, FP-0018, and FP-0100, but not on FP-0101. So readyTasks can release FP-0019 while every tokenizer still reserves about 320 KiB [INFERENCE: the review's estimate from field sizes].",
+      "recommendation": "Add \"FP-0101\" to FP-0019's depends_on. FP-0101 depends on FP-0100, FP-0003, and FP-0052, so this adds no cycle. Alternatively, move the reservation fix into a task that FP-0019 already depends on."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3653,
+      "issue": "FP-0101 criterion 12 checks 'the record bound that the tokenizer's debug assertion guards'. That assertion protects the fixed reservation through appendAssumeCapacity (FP-0100 review 1 at tokenizer.zig:411). Criterion 11 removes the fixed reservation. After criterion 11, the guard may no longer exist in that form, so criterion 12 could test a bound that no longer applies.",
+      "recommendation": "In FP-0101's contract, restate criterion 12 in terms of the pending-record count that compaction keeps below 2 × (text_flush_threshold + 1). Test that bound, and the positions, with a run of more than 4096 units in chunks after criterion 11's change."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0100/reviews/review-1-accept.json",
+      "line": null,
+      "issue": "Two FP-0100 review 1 notes have no owner:\n- FP-0019 should assert directly how much the tokenizer has consumed at a script boundary (tree_test.zig:1418). FP-0019's state notes are empty.\n- tree_dump's writeAttributes is quadratic in an element's attribute count, which matters 'before FP-0068 exposes the dump to arbitrary laboratory input'. FP-0068's note does not mention it.",
+      "recommendation": "Add one state note to FP-0019 for the consumption assertion, and one to FP-0068 to make writeAttributes linear in the attribute count before the laboratory exposes the dump."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0119/reviews/security-review-1-accept.json",
+      "line": null,
+      "issue": "FP-0119 security review 1 notes 3 to 5 have no owner:\n- the test-only work counter is only a proxy for CPU work;\n- no case measures the peak allocation of a decode that fills the 65536-point budget;\n- hostile-input containment rests on deterministic prefix and substitution tests in a Debug build, with no fuzzer and no ReleaseSafe or ReleaseFast run.\nThe review rates them notes, and FP-0119 is still active.",
+      "recommendation": "Either close notes 3 and 4 in FP-0119's own evidence before acceptance, or route them to FP-0121 or FP-0122 with the saturation measurement. Route the missing fuzzing and release-mode coverage to whichever laboratory task owns fuzzing, or to FP-0026's note."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/state.json",
+      "line": 955,
+      "issue": "The CatchParameter early error of ECMA-262 14.15.1, as Annex B.3.4 modifies it, is routed to FP-0088 only as a state note. FP-0088's criteria require destructuring binding and Test262 runs, but no criterion names this early error, so it binds only through the contract freeze.",
+      "recommendation": "When freezing FP-0088's contract, add that early error and its row as a frozen case, as the note says, so acceptance can check it."
+    }
+  ]
+}
