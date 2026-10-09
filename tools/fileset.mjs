@@ -595,12 +595,16 @@ function checkExtractionPath(root, p) {
  * Download every source of a file-set corpus into a staging directory and compare each with every known digest:
  * its pinned size, published digest, and Git blob ID, the previous record's size and SHA-256, and the `specs/corpora.json` pins.
  * Only then parse the archives, extract the selected members in memory, and check the remaining pins.
- * The write phase stages every new file beside its target, keeps the old files, and restores them on any failure; the record is written last.
+ * The fetch holds `<id>.lock` throughout, and `commitSnapshot` writes the extracted files, the sources, and the record or restores the old ones.
  * A failure leaves the existing sources, record, and extracted files unchanged and no staged or temporary file behind.
  * `onWriteStep(label)`, which only tests pass, runs before each write step and may throw to inject a failure.
  */
-export async function fetchFileSet(root, id, { corporaDir, policy, rule, allowFileSources = false, onWriteStep }) {
-  invariant(rule, `No file-set rule exists for corpus ${id}.`);
+export async function fetchFileSet(root, id, options) {
+  invariant(options.rule, `No file-set rule exists for corpus ${id}.`);
+  return withFetchLock(options.corporaDir, id, () => fetchFileSetLocked(root, id, options));
+}
+/** The body of `fetchFileSet`, which runs while the fetch holds the lock of corpus `id`. */
+async function fetchFileSetLocked(root, id, { corporaDir, policy, rule, allowFileSources = false, onWriteStep }) {
   const recordFile = path.join(root, 'specs', 'snapshots', `${id}.json`);
   let previous = null;
   if (fs.existsSync(recordFile)) {
@@ -687,8 +691,8 @@ export async function fetchFileSet(root, id, { corporaDir, policy, rule, allowFi
     invariant(problems.length === 0, pinFailure(problems));
 
     // Every check passed. Replace the extracted files, then the sources, then the record, or restore all of them.
-    fs.rmSync(old, { recursive: true, force: true, maxRetries: 3 });
-    commitFileSet({ root, extracted, target, staging, old, recordFile, record, onWriteStep });
+    const files = [...extracted].map(([p, bytes]) => ({ label: p, file: checkExtractionPath(root, p), bytes }));
+    commitSnapshot({ files, target, staging, old, recordFile, record, onWriteStep });
     return { result: 'pass', corpus: id, kind: 'file-set', record: `specs/snapshots/${id}.json`, version: record.version,
       sources: sources.map(s => ({ id: s.id, size: s.size, sha256: s.sha256, release: s.release, inventory: s.inventory })),
       selected: selected.map(e => ({ path: e.path, size: e.size, sha256: e.sha256 })), source_listing_sha256: sourceListingDigest(record) };
@@ -699,12 +703,57 @@ export async function fetchFileSet(root, id, { corporaDir, policy, rule, allowFi
 }
 
 /**
- * The write phase of `fetchFileSet`. It stages each extracted file and the record beside its target, moves each old file aside,
- * installs the staged files, swaps the source directory, and writes the record last. On any failure it restores every old file,
- * the old source directory, and the old record, and it removes every staged file and every directory that it created.
- * After success it removes the old files and the old source directory.
+ * Run `fn` while holding the fetch lock of corpus `id`, the file `<id>.lock` in `corporaDir`, created exclusively with this process's ID and start time.
+ * A fetch takes the lock before it touches `<id>.fetch` and releases it after it removes `<id>.old`, so two fetches never share a staging directory.
+ * A held lock fails at once and changes nothing. The lock is removed after success and after failure.
  */
-function commitFileSet({ root, extracted, target, staging, old, recordFile, record, onWriteStep }) {
+export async function withFetchLock(corporaDir, id, fn) {
+  const lock = path.join(corporaDir, `${id}.lock`);
+  fs.mkdirSync(corporaDir, { recursive: true });
+  let fd;
+  try { fd = fs.openSync(lock, 'wx'); }
+  catch (e) {
+    if (e.code !== 'EEXIST') throw e;
+    throw new Error(`Another fetch of ${id} holds the lock file ${lock}: ${lockHolder(lock)}. This fetch changed nothing. ` +
+      'If that process no longer runs, remove the lock file and fetch again.');
+  }
+  try {
+    try { fs.writeFileSync(fd, `${JSON.stringify({ pid: process.pid, started_at: new Date().toISOString() })}\n`); }
+    finally { fs.closeSync(fd); }
+  } catch (e) {
+    fs.rmSync(lock, { force: true });
+    throw e;
+  }
+  let result, failure = null;
+  try { result = await fn(); } catch (e) { failure = e; }
+  try { fs.rmSync(lock, { force: true, maxRetries: 3 }); }
+  catch (e) {
+    const message = `The fetch could not remove its lock file ${lock}: ${e.message}`;
+    if (failure) failure.message += `\n${message}`; else failure = new Error(message);
+  }
+  if (failure) throw failure;
+  return result;
+}
+/** The process ID and start time that a lock file names, or why they cannot be read. */
+function lockHolder(lock) {
+  let text;
+  try { text = fs.readFileSync(lock, 'utf8'); } catch (e) { return `the lock file could not be read: ${e.message}`; }
+  try {
+    const { pid, started_at } = JSON.parse(text);
+    if (Number.isSafeInteger(pid) && typeof started_at === 'string') return `process ${pid}, started at ${started_at}`;
+  } catch { /* Reported below. */ }
+  return `the lock file holds no process ID and start time: ${JSON.stringify(text.slice(0, 200))}`;
+}
+
+/**
+ * The write phase of a corpus fetch, which the Git corpus fetch and the file-set fetch share.
+ * It removes a stale `old`, stages each file of `files` (`{ label, file, bytes }`) and the record beside its target, moves each old file aside,
+ * installs the staged files, moves the old `target` directory to `old`, renames `staging` to `target`, and renames the staged record last.
+ * On any failure it restores every old file, the old directory, and the old record, and it removes every staged file and every directory that it created.
+ * After success it removes the old files and `old`. `onWriteStep(label)`, which only tests pass, runs before each write step and may throw.
+ */
+export function commitSnapshot({ files = [], target, staging, old, recordFile, record, onWriteStep }) {
+  fs.rmSync(old, { recursive: true, force: true, maxRetries: 3 });
   const tag = crypto.randomUUID();
   const step = label => onWriteStep?.(label);
   const staged = [], replaced = [], created = [], dirs = [];
@@ -727,18 +776,16 @@ function commitFileSet({ root, extracted, target, staging, old, recordFile, reco
     return temporary;
   };
   try {
-    const files = [];
-    for (const [p, bytes] of extracted) files.push({ p, file: checkExtractionPath(root, p), temporary: null, bytes });
-    for (const f of files) f.temporary = stage(`stage ${f.p}`, f.file, f.bytes);
+    const stagedFiles = files.map(f => ({ ...f, temporary: stage(`stage ${f.label}`, f.file, f.bytes) }));
     const recordTemporary = stage('stage the record', recordFile, `${JSON.stringify(record, null, 2)}\n`);
-    for (const f of files) {
+    for (const f of stagedFiles) {
       if (fs.existsSync(f.file)) {
-        step(`back up ${f.p}`);
+        step(`back up ${f.label}`);
         const backup = `${f.file}.${tag}.old`;
         fs.renameSync(f.file, backup);
         replaced.push({ file: f.file, backup });
       } else created.push(f.file);
-      step(`replace ${f.p}`);
+      step(`replace ${f.label}`);
       fs.renameSync(f.temporary, f.file);
     }
     if (fs.existsSync(target)) {

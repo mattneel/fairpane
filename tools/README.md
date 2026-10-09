@@ -130,6 +130,9 @@ Child commands receive argument arrays without shell interpolation.
 Each child writes its output to a file in a new private temporary directory, which the controller copies into the log and removes.
 If the removal fails, the command record carries that error, and the command fails.
 A watchdog terminates a hung process group on POSIX or a process tree on Windows.
+On Windows, it stops the tree with `taskkill.exe`, which the controller starts by its full path under `%SystemRoot%\System32`, so a program of that name in the working directory cannot replace it.
+The controller resolves that path before it starts the command, and an unset, empty, or relative `SystemRoot` fails the command before it starts.
+The corpus commands' Git watchdog and the Windows compiler installer, which starts Windows PowerShell, use the same system-directory path.
 Before it stops a timed-out command, it writes a timeout section to the log.
 The section lists the command and each live descendant as a `PROCESS` line with the process ID, the parent process ID, and the command line.
 On Windows, the list comes from `Win32_Process` through Windows PowerShell, which the controller starts by its full path under `%SystemRoot%\System32`.

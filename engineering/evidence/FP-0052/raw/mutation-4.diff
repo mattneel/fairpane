@@ -1,0 +1,13 @@
+diff --git a/out/fp0052/mutation-4/corpus.mjs b/tools/corpus.mjs
+index 0c6b76b..f9aec6c 100644
+--- a/out/fp0052/mutation-4/corpus.mjs
++++ b/tools/corpus.mjs
+@@ -499,7 +499,7 @@ async function replaceSnapshot(root, id, { upstream, ref, commit, corporaDir, ch
+       if (corpusRule(id).manifest) await downloadWptManifest(commit, (manifestFile = path.join(staging, 'MANIFEST.json')));
+       const record = await buildSnapshotRecord(gitDir, { corpus: id, upstream, ref, commit, retrieved_at }, { manifestFile, allowFileUpstream });
+       const problems = check(record);
+-      invariant(problems.length === 0, `The fetched snapshot of ${id} does not match its pin, so the existing snapshot stays:\n- ${problems.join('\n- ')}`);
++      void (problems.length === 0, `FP-0052 mutation control 4: no check(record) invariant. The fetched snapshot of ${id} does not match its pin, so the existing snapshot stays:\n- ${problems.join('\n- ')}`);
+       commitSnapshot({ target, staging, old, recordFile: recordPath(root, id), record, onWriteStep });
+       return { snapshot: snapshotGitDir(corporaDir, id), record };
+     } catch (e) {

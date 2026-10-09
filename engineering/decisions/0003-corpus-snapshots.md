@@ -17,6 +17,9 @@ The fetch stores the commit at the upstream branch ref name, such as `refs/heads
 The snapshot keeps no history before the pinned commit.
 A WPT snapshot also keeps the wpt.fyi manifest at `<corpora-root>/wpt/MANIFEST.json`.
 A fetch uses `<corpora-root>/<corpus-id>.fetch` and `<corpora-root>/<corpus-id>.old` only while it replaces a snapshot.
+It holds the lock file `<corpora-root>/<corpus-id>.lock`, which names its process ID and start time, from before it touches `<corpus-id>.fetch` until after it removes `<corpus-id>.old`.
+A fetch that finds the lock file fails at once with the holder's process ID and start time, and it changes nothing.
+A lock file that a crashed fetch leaves behind stays until someone removes it.
 
 ### Git process hardening
 
@@ -24,12 +27,19 @@ Every Git child process runs with `--no-replace-objects`, so a `refs/replace/` e
 Every Git child process starts without the caller's `GIT_*` environment variables.
 Variables such as `GIT_DIR`, `GIT_OBJECT_DIRECTORY`, and `GIT_CONFIG_PARAMETERS` therefore cannot redirect object reads or change configuration.
 Git prompts are disabled, and every Git process has a watchdog that stops its whole process tree.
+On Windows, the watchdog stops the tree with `taskkill.exe` from `%SystemRoot%\System32`, which it resolves before the Git process starts, never by a bare name that Windows would first look up in the working directory.
 
 `corpus-fetch` and `corpus-repin` fetch into a fresh, empty repository.
 The fetch sets both `fetch.fsckObjects=true` and `transfer.fsckObjects=true` on its command line.
 Git gives `fetch.fsckObjects` precedence over `transfer.fsckObjects`, so a `fetch.fsckObjects=false` in user or system configuration cannot disable the checks.
 The controller replaces the snapshot only after the record validates and matches its pin.
 A failed fetch removes its staging directory and leaves the existing snapshot and record unchanged.
+The Git fetch and the file-set fetch share one write phase.
+It stages the new record beside `specs/snapshots/<corpus-id>.json`, moves the snapshot directory to `<corpus-id>.old`, renames the staging directory into place, and renames the staged record over the old record.
+Only then does it remove `<corpus-id>.old`.
+A failure at any of those steps restores the old snapshot directory and the old record and removes the staged record.
+If the removal of `<corpus-id>.old` fails, the command fails, and the new snapshot and record stay.
+The write phase has no crash recovery between its renames.
 
 #### What the fetch checks
 
@@ -85,14 +95,17 @@ The controller enforces no operating-system network policy; it simply opens no c
 1. Read the HTTPS upstream URL from `specs/corpora.json`.
 2. Run `git ls-remote --symref <upstream> HEAD` and read the branch ref for `HEAD`.
 3. Select the commit: the pin for `corpus-fetch`, or the reported head for `corpus-repin`.
-4. Create a fresh bare repository at `<corpora-root>/<corpus-id>.fetch/repository.git`.
-5. Run `git fetch --depth=1 --no-tags --no-write-fetch-head <upstream> +<commit>:<ref>` with `fetch.fsckObjects=true` and `transfer.fsckObjects=true`.
-6. Confirm that the local ref resolves to the selected commit.
-7. For WPT, download and bind the manifest as described below.
-8. Derive the tree, committer date, license record, inventory, and manifest fields from the fetched objects and the stored manifest.
-9. For `corpus-fetch`, compare the record with its pin.
-10. Replace `<corpora-root>/<corpus-id>` with the staging directory.
-11. Write `specs/snapshots/<corpus-id>.json`.
+4. Create the lock file `<corpora-root>/<corpus-id>.lock`, or fail when it exists.
+5. Create a fresh bare repository at `<corpora-root>/<corpus-id>.fetch/repository.git`.
+6. Run `git fetch --depth=1 --no-tags --no-write-fetch-head <upstream> +<commit>:<ref>` with `fetch.fsckObjects=true` and `transfer.fsckObjects=true`.
+7. Confirm that the local ref resolves to the selected commit.
+8. For WPT, download and bind the manifest as described below.
+9. Derive the tree, committer date, license record, inventory, and manifest fields from the fetched objects and the stored manifest.
+10. For `corpus-fetch`, compare the record with its pin.
+11. Stage `specs/snapshots/<corpus-id>.json` beside the record.
+12. Replace `<corpora-root>/<corpus-id>` with the staging directory, keeping the old directory as `<corpus-id>.old`.
+13. Replace the record with the staged record.
+14. Remove `<corpus-id>.old` and then the lock file.
 
 Each network operation has a one-hour watchdog.
 Only `wpt` and `test262` have Git fetch rules, because only they are Git corpora with known license files.
@@ -207,8 +220,9 @@ The record reports counts for each item type.
 
 These item-type decisions apply.
 
-- Upstream gives the `test262` type to every `.js` file with a `test262` directory component, not only to the vendored copy. [S47]
-  The type therefore does not identify the vendored copy; the path does.
+- Upstream gives the `test262` type to a `.js` file with a `test262` directory component only when no earlier rule of `manifest_items` applies to it, its name does not end in `_FIXTURE.js`, and it contains a `/*---` to `---*/` frontmatter block. [S47]
+  Any other such file becomes a `support` item.
+  Files outside the vendored copy also meet these conditions, so the type does not identify the vendored copy; the path does.
   The `test262` items under `third_party/test262/` come from the vendored Test262 copy.
   The record reports them separately, counted by their directory under `third_party/test262/`.
   Only these items are tied to the revision in `third_party/test262/vendored.toml`.

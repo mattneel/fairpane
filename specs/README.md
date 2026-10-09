@@ -61,6 +61,8 @@ It extracts the selected members unedited, only under `src/unicode/ucd/` and `te
 It writes the record only after every check passes, and it writes the record last.
 The write phase stages each new file beside its target and keeps the old files until the record is written.
 A failure at any step restores every old file, the old source directory, and the old record, and leaves no staged file behind.
+The Git fetch uses the same write phase for its snapshot directory and record.
+Each fetch holds the lock file `<corpora-root>/<corpus>.lock` while it stages and replaces files, so a second fetch of the same corpus fails at once and changes nothing.
 An existing record acts as a pin for each source and file digest.
 `corpus-verify` and `corpus-applicability` parse no local source whose size or SHA-256 differs from the record.
 

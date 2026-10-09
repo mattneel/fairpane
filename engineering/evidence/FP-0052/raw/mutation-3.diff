@@ -1,0 +1,13 @@
+diff --git a/out/fp0052/mutation-3/lib.mjs b/tools/lib.mjs
+index b037dcc..589ac27 100644
+--- a/out/fp0052/mutation-3/lib.mjs
++++ b/tools/lib.mjs
+@@ -461,7 +461,7 @@ export function windowsSystemProgram(relative, env = process.env) {
+  * Each caller resolves it before it starts its child, so a resolution failure starts nothing.
+  */
+ export function treeStopProgram(platform = process.platform) {
+-  return platform === 'win32' ? windowsSystemProgram('taskkill.exe') : null;
++  return platform === 'win32' ? 'taskkill.exe' : null; // FP-0052 mutation control 3: bare name.
+ }
+ /** Stop a child and its descendants with the program from `treeStopProgram`. */
+ export function stopProcessTree(child, taskkill) {

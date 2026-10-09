@@ -1,0 +1,9 @@
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","-e","bash","-c","set -eu; dest=\"$HOME/fairpane-linux/work/FP-0052\"; mkdir -p \"$HOME/fairpane-linux/work\"; mkdir \"$dest\"; cd /mnt/c/Users/requi/.omp/wt/t5accd974d/m; tar --exclude=./.git --exclude=./.tools --exclude=./out -cf - . | tar -xf - -C \"$dest\"; echo \"copied $PWD to $dest\"; cd \"$dest\"; for f in tools/lib.mjs tools/corpus.mjs tools/fileset.mjs tools/selftest.mjs tools/fileset.test.mjs; do printf \"%s %s\\n\" \"$(git hash-object --no-filters -- \"$f\")\" \"$f\"; done"]
+copied /mnt/c/Users/requi/.omp/wt/t5accd974d/m to /home/autark/fairpane-linux/work/FP-0052
+b037dcc632eab9b3c60f83f8d2d28554e7001dfc tools/lib.mjs
+0c6b76b52e935d4cb1eb6345266d6e73d76ca1a4 tools/corpus.mjs
+5aab6c1f23c49e4a057a470a379d2783683ee0c8 tools/fileset.mjs
+435410157b5831548b23e1c708d271dc90dd0bad tools/selftest.mjs
+04cc975ae2d07c8a99e6407e1e7fb07b1e863c0d tools/fileset.test.mjs
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","set -eu; dest=\"$HOME/fairpane-linux/work/FP-0052\"; mkdir -p \"$HOME/fairpane-linux/work\"; mkdir \"$dest\"; cd /mnt/c/Users/requi/.omp/wt/t5accd974d/m; tar --exclude=./.git --exclude=./.tools --exclude=./out -cf - . | tar -xf - -C \"$dest\"; echo \"copied $PWD to $dest\"; cd \"$dest\"; for f in tools/lib.mjs tools/corpus.mjs tools/fileset.mjs tools/selftest.mjs tools/fileset.test.mjs; do printf \"%s %s\\n\" \"$(git hash-object --no-filters -- \"$f\")\" \"$f\"; done"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5accd974d\\m","started_at":"2026-10-09T14:37:48.228Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1668}

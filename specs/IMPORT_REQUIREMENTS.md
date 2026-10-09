@@ -59,11 +59,11 @@ The directory layout below was observed in the Unicode 18.0.0 directory. [S43]
 | `ucd/auxiliary/SentenceBreakProperty.txt` | Sentence boundaries (UAX #29) for `Intl.Segmenter` | [S36], [S27], [S32] |
 | `ucd/emoji/emoji-data.txt` | `Extended_Pictographic` for UAX #29 and UAX #14; emoji binary properties for RegExp property escapes | [S27], [S36], [S37], [S40] |
 | `ucd/LineBreak.txt` | Line breaking classes (UAX #14) | [S37], [S27] |
-| `ucd/EastAsianWidth.txt` | `East_Asian_Width`, which UAX #14 uses to resolve class AI and uses directly in rules LB15a, LB15b, LB19, LB19a, LB21a, LB30, and LB30b | [S37], [S27] |
+| `ucd/EastAsianWidth.txt` | `East_Asian_Width`, which UAX #14 uses to resolve class AI, uses directly in rules LB19a and LB30, and uses in rule LB10, which gives a remaining CM or ZWJ the value `Na` | [S37], [S27] |
 | `ucd/BidiBrackets.txt` | Paired bracket properties for the Unicode Bidirectional Algorithm (UAX #9) | [S14], [S27] |
 | `ucd/BidiMirroring.txt` | `Bidi_Mirroring_Glyph` for bidirectional mirroring (UAX #9) | [S14], [S27] |
-| `ucd/extracted/DerivedBidiClass.txt` | `Bidi_Class` values, including defaults for unassigned code points (UAX #9) | [S14], [S27] |
-| `ucd/extracted/DerivedGeneralCategory.txt` | `General_Category`, listed explicitly for every range including `Cn`; the qualification seeds and the Universal Shaping Engine categories; imported by FP-0013 | [S27], [S50] |
+| `ucd/extracted/DerivedBidiClass.txt` | `Bidi_Class` values, including defaults for unassigned code points (UAX #9); UTS #46 `CheckBidi`, which applies RFC 5893 section 2 to the labels of a Bidi domain name, for URL host parsing, because the URL Standard sets `CheckBidi` to true for domain to ASCII and domain to Unicode | [S14], [S27], [S39], [S101], [S41] |
+| `ucd/extracted/DerivedGeneralCategory.txt` | `General_Category`, listed explicitly for every range including `Cn`; the qualification seeds and the Universal Shaping Engine categories; UAX #14 rules LB15a and LB15b (`Pi` and `Pf`), LB19 (`Pi` and `Pf`), and LB30b (`Cn`), and rule LB10, which gives a remaining CM or ZWJ the value `Lu`; UTS #46 section 4.1 criterion 6, which rejects a label that begins with `General_Category=Mark`, for URL host parsing; imported by FP-0013 | [S27], [S50], [S37], [S39], [S41] |
 | `ucd/Scripts.txt` | `Script` (UAX #24) and RegExp `Script` property escapes | [S38], [S30] |
 | `ucd/ScriptExtensions.txt` | `Script_Extensions` (UAX #24) and RegExp `Script_Extensions` property escapes | [S38], [S30] |
 | `ucd/VerticalOrientation.txt` | `Vertical_Orientation` (UAX #50) for CSS `text-orientation: mixed` | [S42], [S27] |

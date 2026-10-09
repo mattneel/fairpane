@@ -18,6 +18,8 @@ import {
   verifyCorpus, classifyCorpus, snapshotGitDir, test262Applicability,
 } from './corpus.mjs';
 import * as corpus from './corpus.mjs';
+// FP-0052 functions are read through the namespace, so a missing export fails only the case that uses it.
+import * as lib from './lib.mjs';
 import { attestationCases, removeAttestationFixtures } from './attest.test.mjs';
 import { workflowCases } from './workflow-check.test.mjs';
 import { abiCases, removeAbiFixtures } from './abi.test.mjs';
@@ -1153,6 +1155,116 @@ test('corpus-repin against a local fixture upstream moves the snapshot to the ne
   assert.equal((await u.classify()).discovered, 2);
   await assert.rejects(() => u.verify(policyFile), e => /pin revision: pinned/.test(e.message) && /pin inventory_sha256: pinned/.test(e.message));
   assert.equal((await u.verify(u.policy({ revision: head, inventory_sha256: r.inventory.sha256 }))).result, 'pass');
+});
+// FP-0052: system programs by full path, the shared write phase of the Git corpus fetch, and the fetch lock.
+test('FP-0052 case 1: the system-directory resolver returns the System32 path and names SystemRoot when it cannot', () => {
+  assert.equal(lib.windowsSystemProgram('taskkill.exe', { SystemRoot: 'C:\\Windows' }), 'C:\\Windows\\System32\\taskkill.exe');
+  for (const env of [{}, { SystemRoot: '' }, { SystemRoot: 'Windows' }])
+    assert.throws(() => lib.windowsSystemProgram('taskkill.exe', env), /SystemRoot/, JSON.stringify(env));
+});
+test('FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command', async () => {
+  const dir = temp(), saved = process.cwd(), fake = path.join(dir, 'taskkill.exe'), pidFile = path.join(dir, 'child.pid');
+  // The contract fixes this program. On Windows, the copy of whoami.exe exits with status 1 for taskkill's arguments,
+  // so the watchdog's direct-child fallback also stops the command; engineering/evidence/FP-0052/README.md records that defect.
+  if (process.platform === 'win32') fs.copyFileSync(path.join(process.env.SystemRoot, 'System32', 'whoami.exe'), fake);
+  else { fs.writeFileSync(fake, '#!/bin/sh\nexit 0\n'); fs.chmodSync(fake, 0o755); }
+  const script = `require('node:fs').writeFileSync(${JSON.stringify(pidFile)}, String(process.pid)); setTimeout(() => {}, 60000);`;
+  let timer;
+  process.chdir(dir);
+  try {
+    const run = runProcess(process.execPath, ['-e', script], { cwd: dir, logPath: path.join(dir, 'log'), timeoutMs: 1000 });
+    const limit = new Promise(resolve => { timer = setTimeout(() => resolve(null), 15000); });
+    const r = await Promise.race([run, limit]);
+    assert.ok(r, 'runProcess did not return within 15 seconds, so the watchdog did not stop its command.');
+    assert.equal(r.timed_out, true);
+  } finally {
+    clearTimeout(timer);
+    process.chdir(saved);
+    // A command that the watchdog failed to stop must not outlive the test.
+    if (fs.existsSync(pidFile)) try { process.kill(Number(fs.readFileSync(pidFile, 'utf8')), 'SIGKILL'); } catch { /* It has ended. */ }
+  }
+});
+test('FP-0052: a SystemRoot that cannot locate taskkill.exe fails runProcess on Windows before its command starts', async () => {
+  const dir = temp(), marker = path.join(dir, 'started'), saved = process.env.SystemRoot;
+  process.env.SystemRoot = 'Windows';
+  let r;
+  try {
+    r = await runProcess(process.execPath, ['-e', `require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'started')`],
+      { cwd: dir, logPath: path.join(dir, 'log') });
+  } finally { if (saved === undefined) delete process.env.SystemRoot; else process.env.SystemRoot = saved; }
+  if (process.platform === 'win32') {
+    assert.equal(r.exit_code, null); assert.match(r.error, /SystemRoot/);
+    assert.equal(fs.existsSync(marker), false, 'The command started although its watchdog had no taskkill.exe.');
+  } else {
+    // Only Windows needs a system program to stop a process tree.
+    assert.equal(r.exit_code, 0); assert.equal(r.error, null); assert.equal(fs.existsSync(marker), true);
+  }
+});
+const GIT_WRITE_STEPS = ['stage the record', 'back up the sources', 'replace the sources', 'replace the record'];
+test('FP-0052 case 3: a Git corpus repin that fails at any write step leaves the snapshot and the record unchanged', async () => {
+  const u = upstreamFixture(), policyFile = u.policy({ revision: u.first });
+  await u.fetch(policyFile);
+  u.move();
+  const snapshots = path.dirname(u.recordFile), recordBytes = fs.readFileSync(u.recordFile);
+  const before = directoryDigest(path.join(u.corporaDir, 'test262')), listing = fs.readdirSync(snapshots);
+  for (const label of GIT_WRITE_STEPS) {
+    const seen = [];
+    const onWriteStep = step => { seen.push(step); if (step === label) throw new Error(`injected failure at ${step}`); };
+    await assert.rejects(() => corpus.repinCorpus(u.dir, 'test262', { ...u.options(policyFile), onWriteStep }),
+      e => e.message === `injected failure at ${label}`, label);
+    assert.equal(seen.at(-1), label);
+    assert.equal(directoryDigest(path.join(u.corporaDir, 'test262')), before, `snapshot after a failure at ${label}`);
+    assert.deepEqual(fs.readFileSync(u.recordFile), recordBytes, `record after a failure at ${label}`);
+    assert.deepEqual(fs.readdirSync(snapshots), listing, `specs/snapshots after a failure at ${label}`);
+    assert.deepEqual(fs.readdirSync(u.corporaDir), ['test262'], `corpora directory after a failure at ${label}`);
+  }
+  const steps = [];
+  const r = await corpus.repinCorpus(u.dir, 'test262', { ...u.options(policyFile), onWriteStep: step => steps.push(step) });
+  assert.deepEqual(steps, GIT_WRITE_STEPS);
+  assert.equal(readJson(u.recordFile).commit, r.commit); assert.notEqual(r.commit, u.first);
+  assert.deepEqual(fs.readdirSync(u.corporaDir), ['test262']);
+});
+test('FP-0052 case 4: a fetch that cannot remove the old snapshot after it replaces the record fails, and the new snapshot and record stay', async () => {
+  const u = upstreamFixture();
+  await u.fetch(u.policy({ revision: u.first }));
+  const moved = u.move(), old = path.join(u.corporaDir, 'test262.old'), rmSync = fs.rmSync;
+  // The removal of the previous snapshot fails; every other removal runs.
+  fs.rmSync = function rmSyncExceptOld(target, ...rest) {
+    if (path.resolve(String(target)) === old && fs.existsSync(old)) throw Object.assign(new Error('injected removal failure'), { code: 'EPERM' });
+    return rmSync.call(this, target, ...rest);
+  };
+  try {
+    await assert.rejects(() => u.fetch(u.policy({ revision: moved })),
+      e => /could not remove the old copies/.test(e.message) && e.message.includes('injected removal failure'));
+  } finally { fs.rmSync = rmSync; }
+  assert.equal(readJson(u.recordFile).commit, moved);
+  assert.equal(fixtureGit(u.snapshot, ['rev-parse', 'refs/heads/main']), moved);
+  assert.equal(fs.existsSync(path.join(u.corporaDir, 'test262.lock')), false);
+});
+test('FP-0052 case 5: a fetch fails while test262.lock exists and changes nothing', async () => {
+  const u = upstreamFixture(), policyFile = u.policy({ revision: u.first });
+  await u.fetch(policyFile);
+  const lockFile = path.join(u.corporaDir, 'test262.lock');
+  const lockText = `${JSON.stringify({ pid: 4242, started_at: '2026-10-09T01:02:03.004Z' })}\n`;
+  fs.writeFileSync(lockFile, lockText);
+  const recordBytes = fs.readFileSync(u.recordFile), before = directoryDigest(path.join(u.corporaDir, 'test262'));
+  await assert.rejects(() => u.fetch(policyFile),
+    e => e.message.includes(lockFile) && /\b4242\b/.test(e.message) && e.message.includes('2026-10-09T01:02:03.004Z'));
+  assert.equal(directoryDigest(path.join(u.corporaDir, 'test262')), before);
+  assert.deepEqual(fs.readFileSync(u.recordFile), recordBytes);
+  assert.equal(fs.readFileSync(lockFile, 'utf8'), lockText);
+  assert.deepEqual(fs.readdirSync(u.corporaDir).sort(), ['test262', 'test262.lock']);
+});
+test('FP-0052 case 6: of two Git corpus fetches started together, one passes and one fails on the lock', async () => {
+  const u = upstreamFixture(), policyFile = u.policy({ revision: u.first });
+  const results = await Promise.allSettled([u.fetch(policyFile), u.fetch(policyFile)]);
+  const passed = results.filter(r => r.status === 'fulfilled' && r.value.result === 'pass');
+  const locked = results.filter(r => r.status === 'rejected' && /holds the lock file/.test(r.reason.message));
+  assert.equal(passed.length, 1, JSON.stringify(results.map(r => r.status === 'fulfilled' ? r.value.result : r.reason.message)));
+  assert.equal(locked.length, 1, JSON.stringify(results.map(r => r.status === 'fulfilled' ? r.value.result : r.reason.message)));
+  assert.deepEqual(fs.readdirSync(u.corporaDir), ['test262']);
+  await u.classify();
+  assert.equal((await u.verify(policyFile)).result, 'pass');
 });
 test('The actual bootstrap repository passes its integrity check', () => {
   const r = checkRepository(root); assert.equal(r.result, 'pass'); assert.equal(r.level, 'bootstrap-integrity-only');

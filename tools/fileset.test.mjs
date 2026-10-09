@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * File-set corpus, record, and capability tests for FP-0013 cases 41 through 49 and revision 1 cases 53 through 55.
+ * File-set corpus, record, and capability tests for FP-0013 cases 41 through 49, revision 1 cases 53 through 55, and the file-set part of FP-0052 case 6.
  * Run standalone with `node tools/fileset.test.mjs`, or through `node tools/fairpane.mjs test`.
  * Fetches read `file://` fixture sources that only these tests enable, and download cases pass an in-memory `fetch`; no case uses the network.
  */
@@ -612,6 +612,17 @@ export const fileSetCases = [
       ['no name table', () => assert.throws(() => sfntCopyright(sfnt([['post', Buffer.alloc(32)]])), /no name table/)],
       ['a truncated sfnt header', () => assert.throws(() => sfntCopyright(Buffer.alloc(8)), /shorter than an sfnt header/)],
     ]);
+  }],
+  ['FP-0052 case 6: of two fetches of one file set started together, one passes and one fails on the lock', async () => {
+    const f = fileSetFixture();
+    const results = await Promise.allSettled([f.fetch(), f.fetch()]);
+    const summary = JSON.stringify(results.map(r => r.status === 'fulfilled' ? r.value.result : r.reason.message));
+    assert.equal(results.filter(r => r.status === 'fulfilled' && r.value.result === 'pass').length, 1, summary);
+    assert.equal(results.filter(r => r.status === 'rejected' && /holds the lock file/.test(r.reason.message)).length, 1, summary);
+    assert.equal(fs.readdirSync(f.corporaDir).join(), 'unicode');
+    otherApplicability(f.dir, 'unicode');
+    await f.classify();
+    assert.equal((await f.verify()).result, 'pass');
   }],
 ].map(([name, fn]) => ({ name, fn }));
 

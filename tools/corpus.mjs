@@ -2,9 +2,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { spawn, spawnSync } from 'node:child_process';
-import { invariant, readJson, writeJson, sha256, resolveExecutable } from './lib.mjs';
-import { FILE_SET_IDS, FILE_SET_RULES, classifyFileSet, deriveFileSet, fetchFileSet, verifyFileSet } from './fileset.mjs';
+import { spawn } from 'node:child_process';
+import { invariant, readJson, writeJson, sha256, resolveExecutable, treeStopProgram, stopProcessTree } from './lib.mjs';
+import { FILE_SET_IDS, FILE_SET_RULES, classifyFileSet, commitSnapshot, deriveFileSet, fetchFileSet, verifyFileSet, withFetchLock } from './fileset.mjs';
 
 const OID = /^[0-9a-f]{40}$/, HASH = /^[0-9a-f]{64}$/;
 const COMMIT_DATE = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d[+-]\d\d:\d\d$/;
@@ -57,24 +57,18 @@ function gitEnv() {
   return { ...env, GIT_TERMINAL_PROMPT: '0' };
 }
 const gitArgv = (gitDir, args) => ['--no-replace-objects', ...(gitDir ? [`--git-dir=${gitDir}`] : []), ...args];
-function killTree(child) {
-  if (!child.pid || child.exitCode !== null) return;
-  if (process.platform === 'win32') {
-    const k = spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 10000 });
-    if (k.error || k.status !== 0) child.kill('SIGKILL');
-  } else {
-    try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
-  }
-}
 function watchedGit(argv, { timeoutMs, stdio }) {
+  // The watchdog's stop program is resolved first, so a resolution failure starts no git process.
+  const taskkill = treeStopProgram();
   const child = spawn(gitExecutable(), argv, { stdio, env: gitEnv(), shell: false, windowsHide: true, detached: process.platform !== 'win32' });
   let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; killTree(child); }, timeoutMs);
+  const stop = () => { if (child.exitCode === null) stopProcessTree(child, taskkill); };
+  const timer = setTimeout(() => { timedOut = true; stop(); }, timeoutMs);
   const done = new Promise(resolve => {
     child.on('error', error => { clearTimeout(timer); resolve({ code: null, signal: null, timedOut, error }); });
     child.on('close', (code, signal) => { clearTimeout(timer); resolve({ code, signal, timedOut, error: null }); });
   });
-  return { child, done };
+  return { child, done, stop };
 }
 function describeExit(label, r, stderr = '') {
   if (r.timedOut) return `${label} exceeded its watchdog and was stopped.`;
@@ -127,10 +121,10 @@ export async function listTree(gitDir, commit) {
  */
 export async function streamBlobs(gitDir, oids, handlers, { timeoutMs = LOCAL_TIMEOUT_MS } = {}) {
   if (oids.length === 0) return;
-  const { child, done } = watchedGit(gitArgv(gitDir, ['cat-file', '--batch']), { timeoutMs, stdio: ['pipe', 'pipe', 'pipe'] });
+  const { child, done, stop } = watchedGit(gitArgv(gitDir, ['cat-file', '--batch']), { timeoutMs, stdio: ['pipe', 'pipe', 'pipe'] });
   const err = [];
   let failure = null, index = 0, state = 'header', header = [], remaining = 0;
-  const fail = e => { failure ??= e; killTree(child); };
+  const fail = e => { failure ??= e; stop(); };
   child.stderr.on('data', c => err.push(c));
   child.stdin.on('error', e => fail(e));
   child.stdout.on('data', chunk => {
@@ -260,8 +254,10 @@ function walkManifest(manifest, visit) {
   }
 }
 /**
- * Upstream assigns the "test262" type to every ".js" file with a "test262" directory component, not only to the vendored copy.
- * Only the vendored Test262 copy under third_party/test262/ stays outside WPT discovery; "spec" and "support" items are not tests.
+ * Upstream gives the "test262" type to a ".js" file with a "test262" directory component only when no earlier rule of `manifest_items` applies to it,
+ * its name does not end in "_FIXTURE.js", and it contains a "/*---" to "---*\/" frontmatter block; any other such file becomes a "support" item.
+ * The type is not limited to the vendored copy, so only the vendored Test262 copy under third_party/test262/ stays outside WPT discovery.
+ * "spec" and "support" items are not tests.
  */
 const WPT_NOT_TESTS = new Set(['spec', 'support']);
 const WPT_VENDORED_TEST262_DIR = 'third_party/test262/';
@@ -394,7 +390,9 @@ const WPT_VENDORED_TEST262_CONTENT = Object.freeze({
 export const WPT_RULE = 'Read the manifest that wpt.fyi publishes for the pinned commit after binding every manifest path and hash to the Git blob IDs of the pinned tree. ' +
   'Count the items of each manifest item type; each file entry contributes its array length minus one, because the first element is the file hash and each other element is one test URL. ' +
   `Discovered tests are the items of every type except "spec" and "support", minus the "test262" items whose path starts with "${WPT_VENDORED_TEST262_DIR}", the vendored Test262 copy. ` +
-  'Upstream assigns the "test262" type to every ".js" file with a "test262" directory component, so "test262" items elsewhere, such as the WPT tests under "infrastructure/test262/", count in discovery. ' +
+  'Upstream gives the "test262" type to a ".js" file with a "test262" directory component only when no earlier rule of manifest_items applies to it, ' +
+  'its name does not end in "_FIXTURE.js", and it contains a "/*---" to "---*/" frontmatter block; any other such file becomes a "support" item. ' +
+  'The "test262" type therefore does not identify the vendored copy, and "test262" items elsewhere, such as the WPT tests under "infrastructure/test262/", count in discovery. ' +
   `The record reports the vendored "test262" items separately, counted by their directory under "${WPT_VENDORED_TEST262_DIR}", with the vendored Test262 revision from ${WPT_VENDORED_TEST262}.`;
 /** The vendored-copy directory of a manifest path under third_party/test262/, such as "third_party/test262/test/". */
 function vendoredPrefix(file) {
@@ -481,40 +479,40 @@ async function resolveHead(upstream) {
  * Fetch `commit` into a fresh repository beside the snapshot, build and check its record, and only then replace the snapshot.
  * The new repository starts empty, so `fetch.fsckObjects` and `transfer.fsckObjects` check every fetched object.
  * Setting both keeps a `fetch.fsckObjects=false` from user or system configuration from disabling those checks.
+ * The fetch holds `<id>.lock` throughout, and `commitSnapshot`, the write phase that file sets share, replaces the snapshot and the record.
+ * `onWriteStep(label)`, which only tests pass, runs before each write step and may throw to inject a failure.
  */
-async function replaceSnapshot(root, id, { upstream, ref, commit, corporaDir, check, allowFileUpstream }) {
+async function replaceSnapshot(root, id, { upstream, ref, commit, corporaDir, check, allowFileUpstream, onWriteStep }) {
   const target = path.join(corporaDir, id), staging = path.join(corporaDir, `${id}.fetch`), old = path.join(corporaDir, `${id}.old`);
   const gitDir = path.join(staging, 'repository.git');
-  fs.rmSync(staging, { recursive: true, force: true, maxRetries: 3 });
-  fs.mkdirSync(gitDir, { recursive: true });
-  try {
-    await gitVisible(null, ['init', '--bare', '--quiet', gitDir], LOCAL_TIMEOUT_MS);
-    await gitVisible(gitDir, ['-c', 'fetch.fsckObjects=true', '-c', 'transfer.fsckObjects=true', '-c', 'protocol.version=2', 'fetch', '--depth=1', '--no-tags',
-      '--no-write-fetch-head', upstream, `+${commit}:${ref}`], NETWORK_TIMEOUT_MS);
-    const retrieved_at = new Date().toISOString();
-    const fetched = (await git(gitDir, ['rev-parse', '--verify', `${ref}^{commit}`])).toString('latin1').trim();
-    invariant(fetched === commit, `The fetch produced ${fetched}, not the requested commit ${commit}.`);
-    let manifestFile;
-    if (corpusRule(id).manifest) await downloadWptManifest(commit, (manifestFile = path.join(staging, 'MANIFEST.json')));
-    const record = await buildSnapshotRecord(gitDir, { corpus: id, upstream, ref, commit, retrieved_at }, { manifestFile, allowFileUpstream });
-    const problems = check(record);
-    invariant(problems.length === 0, `The fetched snapshot of ${id} does not match its pin, so the existing snapshot stays:\n- ${problems.join('\n- ')}`);
-    fs.rmSync(old, { recursive: true, force: true, maxRetries: 3 });
-    if (fs.existsSync(target)) fs.renameSync(target, old);
-    try { fs.renameSync(staging, target); } catch (e) { if (fs.existsSync(old)) fs.renameSync(old, target); throw e; }
-    fs.rmSync(old, { recursive: true, force: true, maxRetries: 3 });
-    writeJson(recordPath(root, id), record);
-    return { snapshot: snapshotGitDir(corporaDir, id), record };
-  } catch (e) {
+  return withFetchLock(corporaDir, id, async () => {
     fs.rmSync(staging, { recursive: true, force: true, maxRetries: 3 });
-    throw e;
-  }
+    fs.mkdirSync(gitDir, { recursive: true });
+    try {
+      await gitVisible(null, ['init', '--bare', '--quiet', gitDir], LOCAL_TIMEOUT_MS);
+      await gitVisible(gitDir, ['-c', 'fetch.fsckObjects=true', '-c', 'transfer.fsckObjects=true', '-c', 'protocol.version=2', 'fetch', '--depth=1', '--no-tags',
+        '--no-write-fetch-head', upstream, `+${commit}:${ref}`], NETWORK_TIMEOUT_MS);
+      const retrieved_at = new Date().toISOString();
+      const fetched = (await git(gitDir, ['rev-parse', '--verify', `${ref}^{commit}`])).toString('latin1').trim();
+      invariant(fetched === commit, `The fetch produced ${fetched}, not the requested commit ${commit}.`);
+      let manifestFile;
+      if (corpusRule(id).manifest) await downloadWptManifest(commit, (manifestFile = path.join(staging, 'MANIFEST.json')));
+      const record = await buildSnapshotRecord(gitDir, { corpus: id, upstream, ref, commit, retrieved_at }, { manifestFile, allowFileUpstream });
+      const problems = check(record);
+      invariant(problems.length === 0, `The fetched snapshot of ${id} does not match its pin, so the existing snapshot stays:\n- ${problems.join('\n- ')}`);
+      commitSnapshot({ target, staging, old, recordFile: recordPath(root, id), record, onWriteStep });
+      return { snapshot: snapshotGitDir(corporaDir, id), record };
+    } catch (e) {
+      fs.rmSync(staging, { recursive: true, force: true, maxRetries: 3 });
+      throw e;
+    }
+  });
 }
 
 /**
  * Fetch the pinned commit: the `specs/corpora.json` revision, or else the commit of the existing snapshot record.
- * A file-set corpus downloads its frozen sources instead; controller tests pass `rules` and `allowFileSources` for `file://` fixture sources,
- * and `onWriteStep` to inject a failure into the file-set write phase.
+ * A file-set corpus downloads its frozen sources instead; controller tests pass `rules` and `allowFileSources` for `file://` fixture sources.
+ * Tests also pass `onWriteStep` to inject a failure into the write phase of either kind of corpus.
  */
 export async function fetchCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false,
   rules = FILE_SET_RULES, allowFileSources = false, onWriteStep } = {}) {
@@ -535,19 +533,24 @@ export async function fetchCorpus(root, id, { corporaDir = corporaRoot(root), po
   console.log(`Pinned commit ${pins.revision} from ${pinSource}.`);
   const { ref } = await resolveHead(policy.upstream);
   const { snapshot, record } = await replaceSnapshot(root, id, { upstream: policy.upstream, ref, commit: pins.revision, corporaDir,
-    check: r => pinProblems(pins, id, r), allowFileUpstream });
+    check: r => pinProblems(pins, id, r), allowFileUpstream, onWriteStep });
   return { result: 'pass', corpus: id, snapshot, pinned_by: pinSource, record: recordRelative(id), ...record };
 }
 
-/** Move a snapshot to the upstream branch head. The new commit needs a protected `specs/corpora.json` change before verification passes. */
-export async function repinCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false } = {}) {
+/**
+ * Move a snapshot to the upstream branch head. The new commit needs a protected `specs/corpora.json` change before verification passes.
+ * Tests pass `onWriteStep` to inject a failure into the write phase.
+ */
+export async function repinCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false,
+  onWriteStep } = {}) {
   invariant(!FILE_SET_IDS.includes(id), `corpus-repin does not apply to the file-set corpus ${id}: version selection is a contract decision. ` +
     'A task contract freezes the sources in tools/fileset.mjs, and corpus-fetch downloads exactly those sources.');
   corpusRule(id);
   const policy = corpusPolicy(policyFile, id, allowFileUpstream);
   console.log(`Git: ${gitExecutable()} (${(await git(null, ['--version'])).toString('utf8').trim()})`);
   const head = await resolveHead(policy.upstream);
-  const { snapshot, record } = await replaceSnapshot(root, id, { upstream: policy.upstream, ...head, corporaDir, check: () => [], allowFileUpstream });
+  const { snapshot, record } = await replaceSnapshot(root, id, { upstream: policy.upstream, ...head, corporaDir, check: () => [], allowFileUpstream,
+    onWriteStep });
   const pending = pinProblems(policy, id, record);
   return { result: 'pass', corpus: id, snapshot, record: recordRelative(id), ...record, pin_differences: pending,
     note: `Run corpus-applicability ${id}. ` + (pending.length ? 'corpus-verify fails until a protected change to specs/corpora.json records the new pin.' :

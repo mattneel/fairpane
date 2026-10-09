@@ -1,0 +1,13 @@
+diff --git a/out/fp0052/mutation-2/fileset.mjs b/tools/fileset.mjs
+index 5aab6c1..5296a4a 100644
+--- a/out/fp0052/mutation-2/fileset.mjs
++++ b/tools/fileset.mjs
+@@ -711,7 +711,7 @@ export async function withFetchLock(corporaDir, id, fn) {
+   const lock = path.join(corporaDir, `${id}.lock`);
+   fs.mkdirSync(corporaDir, { recursive: true });
+   let fd;
+-  try { fd = fs.openSync(lock, 'wx'); }
++  try { fd = fs.openSync(lock, 'w'); /* FP-0052 mutation control 2: no lock check. */ }
+   catch (e) {
+     if (e.code !== 'EEXIST') throw e;
+     throw new Error(`Another fetch of ${id} holds the lock file ${lock}: ${lockHolder(lock)}. This fetch changed nothing. ` +

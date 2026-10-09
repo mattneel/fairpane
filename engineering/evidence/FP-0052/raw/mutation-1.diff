@@ -1,0 +1,13 @@
+diff --git a/out/fp0052/mutation-1/fileset.mjs b/tools/fileset.mjs
+index 5aab6c1..172dd74 100644
+--- a/out/fp0052/mutation-1/fileset.mjs
++++ b/tools/fileset.mjs
+@@ -802,7 +802,7 @@ export function commitSnapshot({ files = [], target, staging, old, recordFile, r
+     const problems = [];
+     const attempt = (what, fn) => { try { fn(); } catch (err) { problems.push(`${what}: ${err.message}`); } };
+     if (sources === 'replaced' || sources === 'created') attempt('move the new sources back to staging', () => fs.renameSync(target, staging));
+-    if (sources === 'replaced' || sources === 'backed-up') attempt('restore the old sources', () => fs.renameSync(old, target));
++    if (sources === 'replaced' || sources === 'backed-up') void 'FP-0052 mutation control 1: the old snapshot directory is not restored.';
+     for (const r of replaced.reverse()) attempt(`restore ${r.file}`, () => fs.renameSync(r.backup, r.file));
+     for (const file of created.reverse()) attempt(`remove ${file}`, () => fs.rmSync(file, { force: true }));
+     for (const file of staged) attempt(`remove ${file}`, () => fs.rmSync(file, { force: true }));

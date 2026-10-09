@@ -444,11 +444,34 @@ const PROCESS_TABLE_SCRIPT = '[Console]::OutputEncoding = [System.Text.UTF8Encod
   + 'ConvertTo-Json -Compress -InputObject @(Get-CimInstance -ClassName Win32_Process | ForEach-Object { '
   + '[pscustomobject]@{ pid = [long]$_.ProcessId; ppid = [long]$_.ParentProcessId; '
   + 'created = $(if ($_.CreationDate) { [string]$_.CreationDate.ToFileTimeUtc() } else { "0" }); command_line = $_.CommandLine } })';
-/** Windows PowerShell by its full path under the system directory, never through PATH. */
-function windowsPowerShellPath() {
-  const systemRoot = process.env.SystemRoot;
-  if (!systemRoot) throw new Error('SystemRoot is not set, so Windows PowerShell cannot be located.');
-  return path.join(systemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+const WINDOWS_POWERSHELL = 'WindowsPowerShell\\v1.0\\powershell.exe';
+/**
+ * The full path of `relative` under the Windows system directory, `<SystemRoot>\System32`.
+ * A bare program name would let Windows search the working directory before PATH, so every Windows system program starts through this path.
+ */
+export function windowsSystemProgram(relative, env = process.env) {
+  const systemRoot = env.SystemRoot;
+  const problem = systemRoot === undefined ? 'is not set' : systemRoot === '' ? 'is empty'
+    : /^(?:[A-Za-z]:[\\/]|[\\/]{2}[^\\/]+[\\/][^\\/]+)/.test(systemRoot) ? null : `is not an absolute Windows path: ${JSON.stringify(systemRoot)}`;
+  if (problem) throw new Error(`SystemRoot ${problem}, so ${relative} cannot be located in the Windows system directory.`);
+  return path.win32.join(systemRoot, 'System32', relative);
+}
+/**
+ * The program that stops a process tree: `taskkill.exe` in the Windows system directory, or null on a host that signals the process group.
+ * Each caller resolves it before it starts its child, so a resolution failure starts nothing.
+ */
+export function treeStopProgram(platform = process.platform) {
+  return platform === 'win32' ? windowsSystemProgram('taskkill.exe') : null;
+}
+/** Stop a child and its descendants with the program from `treeStopProgram`. */
+export function stopProcessTree(child, taskkill) {
+  if (!child.pid) return;
+  if (taskkill) {
+    const k = spawnSync(taskkill, ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 10000 });
+    if (k.error || k.status !== 0) child.kill('SIGKILL');
+  } else {
+    try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
+  }
 }
 function windowsProcessTable(powershell, limitMs) {
   return new Promise((resolve, reject) => {
@@ -500,7 +523,7 @@ export async function listProcessTree(rootPid, { platform = process.platform, po
   let timer;
   const limit = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`The process listing did not finish within ${limitMs} ms.`)), limitMs); });
   try {
-    const read = platform === 'win32' ? windowsProcessTable(powershell ?? windowsPowerShellPath(), limitMs)
+    const read = platform === 'win32' ? windowsProcessTable(powershell ?? windowsSystemProgram(WINDOWS_POWERSHELL), limitMs)
       : platform === 'linux' ? linuxProcessTable(procRoot)
       : Promise.reject(new Error(`No process listing exists for platform ${platform}.`));
     const table = await Promise.race([read, limit]);
@@ -524,15 +547,6 @@ async function timeoutSection(pid, timeoutMs, processListing) {
   } catch (e) { lines = [`TIMEOUT after ${timeoutMs} ms: the process listing failed: ${e.message}`]; }
   return [...lines, `TIMEOUT Stopping PID ${pid} and its descendants.`].join('\n') + '\n';
 }
-/** Stop a command and its descendants. */
-function stopProcessTree(child) {
-  if (process.platform === 'win32' && child.pid) {
-    const k = spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 10000 });
-    if (k.error || k.status !== 0) child.kill('SIGKILL');
-  } else if (child.pid) {
-    try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
-  }
-}
 /**
  * Execute without a shell. OS sandboxing and disk quotas remain separate. Never rejects after argument validation.
  * At the timeout, the log first receives the command's live process tree, and then the command and its descendants stop.
@@ -554,6 +568,13 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, 
   catch (e) {
     errors.push(`Log write failed: ${e.message}`);
     return Promise.resolve(result(null, null, false));
+  }
+  // The watchdog's stop program is resolved before anything starts, so a resolution failure starts no command.
+  let taskkill;
+  try { taskkill = treeStopProgram(); }
+  catch (e) {
+    errors.push(e.message);
+    return Promise.resolve(finishRecord(io, fd, result(null, null, false)));
   }
   // The child writes to a fresh file in a private directory, not to the append-only log handle.
   // MSYS2 programs on Windows exit with status 1 and no output when given an append-only handle.
@@ -592,7 +613,7 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, 
           try { writeLog(io, fd, Buffer.from(section)); }
           catch (e) { errors.push(`Log write failed: ${e.message}`); }
         }
-        stopProcessTree(child);
+        stopProcessTree(child, taskkill);
       }, timeoutMs);
     } catch (e) { errors.push(e.message); finish(null, null); }
   });
@@ -707,7 +728,8 @@ export async function installZig(root) {
   const dest = safePath(root, `.tools/zig/${lock.version}/${key}`, { mustExist: false });
   if (fs.existsSync(dest)) return { compiler: checkCompiler(root), downloaded: false };
   if (process.platform === 'win32') {
-    const r = spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-File', path.join(root, 'scripts/Get-Zig.ps1')],
+    const powershell = windowsSystemProgram(WINDOWS_POWERSHELL);
+    const r = spawnSync(powershell, ['-NoProfile', '-NonInteractive', '-File', path.join(root, 'scripts/Get-Zig.ps1')],
       { cwd: root, stdio: 'inherit', timeout: 900000 });
     invariant(!r.error && r.status === 0, 'The Windows compiler installer failed.');
     return { compiler: checkCompiler(root), downloaded: true };
