@@ -62,16 +62,21 @@ For WPT, verification covers these checks.
 - The local ref, tree, committer date, license record, and inventory match the record.
 - The stored manifest's size and SHA-256 match the record, every manifest path and hash matches the pinned tree, and the manifest has at least one test item.
 - The recomputed applicability record, including every per-type count and the vendored `test262` counts, matches `specs/applicability/wpt.json`.
-- The record matches every pin in `specs/corpora.json`; the current file pins nothing, so this check passes vacuously.
+- The record matches every pin in `specs/corpora.json`, which policy commit `e70bba1` set to the ADR 0003 values.
 
 WPT verification does not prove that wpt.fyi classified each file the way the pinned manifest tool would.
 ADR 0003 records that trust decision.
 
-`raw/corpus-verify.log` keeps the first patch's runs and the integration acceptance runs.
-Its last two runs are the exact acceptance commands from `CONTRACT.md`, run from `C:\src\fairpane` without environment overrides after the revision 1 integration.
-`corpus-verify test262` started at 2026-10-09T01:30:55.818Z and exited with status 0, as line 84 records.
-`corpus-verify wpt` started at 2026-10-09T01:30:57.870Z and exited with status 0, as line 118 records.
-Those runs verified the revision 1 records, with WPT at 76600 discovered tests, so they predate revision 2.
+`raw/corpus-verify.log` keeps the first patch's runs and every integration acceptance run.
+Each acceptance run is an exact command from `CONTRACT.md`, run from `C:\src\fairpane` without environment overrides.
+
+| Lines | Commit | Runs |
+| --- | --- | --- |
+| 84 and 118 | Revision 1 integration | `test262` and `wpt` exit with status 0, with WPT at 76600 discovered tests. |
+| 148 and 182 | Revision 2, `d185b5e` | `test262` and `wpt` exit with status 0, with WPT at 76620 discovered tests. |
+| 212 and 246 | Pin commit `e70bba1` | `test262` and `wpt` exit with status 0 against the pins. |
+| 276 and 310 | Fix commit `b3000c4` | `test262` and `wpt` exit with status 0 against the pins, with 53616 and 76620 discovered tests. |
+
 `raw/rework-corpus-verify-test262.log` and `raw/rework-corpus-verify-wpt.log` record the revision 1 worker's runs.
 `raw/corpus-verify-test262.log` and `raw/corpus-verify-wpt.log` keep the first patch's runs as history; their WPT `pass` covered only the snapshot, not applicability.
 `raw/corpus-verify-missing-snapshot.log` shows `corpus-verify` failing with status 1 when the snapshot is absent.
@@ -112,13 +117,24 @@ The acceptance commands in `CONTRACT.md` run without overrides from the reposito
 `gates/` keeps the first patch's `repo-check` and `controller-test` receipts from 2026-10-09T00:48:44 as history.
 They bind source digest `95d74b67ef7b7d1b234c1cdba198af30861d9fc66b76b5ab050afc23e5ba30cf`.
 The revision 1 integration receipts are `gates/2026-10-09T01-30-40-258Z-repo-check-77f92948.json` and `gates/2026-10-09T01-30-40-501Z-controller-test-0964454f.json`.
-Both have status `pass` and bind source digest `9aedf581e65e9966043b8c09faf008e88d8a18171df196252012260e75e487d5`.
-The controller-test log for that receipt records 86 tests, 86 passing, and 0 failing.
-Those receipts predate revision 2 and no longer match its source.
-The integrator reruns both gates and the acceptance commands at the revision 2 commit.
+Both have status `pass` and bind source digest `9aedf581e65e9966043b8c09faf008e88d8a18171df196252012260e75e487d5`, with 86 of 86 controller tests.
+`raw/rev2-integration-binding.log` records `HEAD` `1944d65` and the staged files of revision 2.
+The revision 2 receipts `gates/2026-10-09T02-05-37-528Z-repo-check-a3a77af6.json` and `gates/2026-10-09T02-05-37-751Z-controller-test-abfa9710.json` pass with source digest `f1d4684ff245c29a3b55ff91c6420e2c3284fabe9fedf57070839988f97a0f4a` and 107 of 107 controller tests.
 
-## Open items
+### Pinned acceptance
 
-- `fairpane-review` and `fairpane-spec` review revision 2.
-- `fairpane-spec` approves `specs/applicability/wpt.json` and the new `specs/IMPORT_REQUIREMENTS.md` and `specs/sources.json` entries.
-- The integrator applies the `specs/corpora.json` pins from ADR 0003 in a separate commit after both approvals.
+`raw/pinned-binding.log` records `HEAD` and a status with untracked files before each pinned run.
+On pin commit `e70bba1`, `repo-check` passed, and `controller-test` failed with 117 of 126 tests passing.
+Nine corpus tests failed, because their fixtures copied the repository's `specs/corpora.json` and so met the real pins.
+`gates/2026-10-09T02-32-10-071Z-controller-test-431d9c99.json` keeps that failure.
+Commit `b3000c4` starts each fixture from the policy with every pin removed.
+On `b3000c4`, both gates pass, with 126 of 126 controller tests.
+
+- `gates/2026-10-09T02-34-18-772Z-repo-check-f769dec8.json`
+- `gates/2026-10-09T02-34-18-971Z-controller-test-44a3d9cd.json`
+
+## Reviews
+
+`reviews/review-3-accept.json` from `fairpane-review` and `reviews/spec-review-3-accept.json` from `fairpane-spec` accept revision 2.
+The `fairpane-spec` review approves the policy-root additions under `specs/` and the ADR 0003 pin values.
+Task `FP-0052` carries the remaining minor findings and notes.

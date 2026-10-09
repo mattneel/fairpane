@@ -1,0 +1,112 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "d185b5e93c3b6d2506ff01b02be9fe2546f1b82a"
+  ],
+  "summary": "I accept revision 2 as the fairpane-spec reviewer. I made no repository changes and ran no shell, git, or test commands. I read the files at the current working tree. The reflog (.git/logs/HEAD) shows d185b5e as the FP-0003 commit, followed by six commits for FP-0033, FP-0047, the plan, and FP-0002. [INFERENCE] Going by their messages, none of them touches the FP-0003 files. I also ran read-only jq queries with the read tool against the stored manifest at .tools/corpora/wpt/MANIFEST.json.\n\nThe review-2 major finding is resolved:\n- The `test262` items in the manifest sit under only two roots, `infrastructure` and `third_party`.\n- Counted by file entry, they are 20 files and 20 items under infrastructure/test262/, 43 and 43 under third_party/test262/harness/ (including a harness/sm/ subdirectory), and 53597 and 53597 under third_party/test262/test/.\n- These match specs/applicability/wpt.json, where the breakdown has `test262` 20, discovery is 76620 (76600 + 20), and `reported_separately.test262` has 53640 items with by_prefix 43 and 53597.\n- Only the third_party/test262/ items are tied to vendored.toml revision 7ab7faf.\n- The upstream rule checks out: `name_is_test262` is `\"test262\" in self.dir_path.split(os.path.sep) and self.ext == \".js\"` (https://raw.githubusercontent.com/web-platform-tests/wpt/b60c4b349d9d167bf354a40bc0d4cbed15174606/tools/manifest/sourcefile.py, lines 428-431).\n- The harness naming is correct. Test262 INTERPRETING.md at the vendored revision says `includes` files \"are located within the `harness/` directory\" (https://raw.githubusercontent.com/tc39/test262/7ab7fafa0003f73fc85c1b95d88094d33f7eb8bd/INTERPRETING.md, lines 253-260).\n\nThe new import requirements check out against their primary sources:\n- ucd/extracted/DerivedJoiningType.txt, ucd/IndicSyllabicCategory.txt, ucd/IndicPositionalCategory.txt, and uca/allkeys.txt all exist under https://www.unicode.org/Public/18.0.0/.\n- UAX #44 says the DerivedJoiningType.txt values \"should be taken as definitive\".\n- RFC 5892 A.1 and A.2 use Canonical_Combining_Class Virama and Joining_Type L, D, T, and R.\n- UTS #46 §4.1 step 8 applies ContextJ when CheckJoiners is set, and the URL Standard sets CheckJoiners to true.\n- The USE document derives classes from Joining_Type (AJT), Indic_Syllabic_Category (UISC), Indic_Positional_Category (UIPC), and General_Category (UGC), plus Microsoft's supplementary files.\n- At CLDR release-48-2, common/uca/FractionalUCA.txt, allkeys_CLDR.txt, UCA_Rules.txt, common/collation/root.xml (an empty `standard` collation), and the three plural files all exist. FractionalUCA.txt states UCA=17.0.0, and allkeys_CLDR.txt states @version 17.0.0.\n- UTS #35 Part 5 says the DUCET order is \"slightly different from the CLDR root collation order\".\n- ECMA-402 recommends CLDR tailorings for CompareStrings and CLDR data for Intl.PluralRules, and it defines PluralRuleSelectRange.\n\nEvidence at d185b5e:\n- Gate receipts 2026-10-09T02-05-37 pass with source f1d4684f...; the controller-test log shows 107 tests, 107 passing.\n- The last two runs in raw/corpus-verify.log (lines 148 and 182) are the exact acceptance commands. They exit 0 with no environment overrides and report WPT discovery of 76620.\n\nNo blocker or major finding remains. Four non-blocking findings remain, three minor and one note:\n(a) The East_Asian_Width rule list is wrong. This error came from my own review-2 note.\n(b) The text describing the upstream `test262` type omits the frontmatter and `_FIXTURE.js` conditions.\n(c) The evidence README is stale about the revision-2 integration runs.\n(d) The consumer descriptions for Bidi_Class and General_Category miss the UTS #46 uses.\n\nPolicy-root decision under specs/:\n- I APPROVE the additions: specs/applicability/wpt.json as regenerated at d185b5e, specs/applicability/test262.json, specs/snapshots/test262.json, specs/snapshots/wpt.json, specs/README.md, specs/IMPORT_REQUIREMENTS.md, and specs/sources.json S25-S55.\n- I APPROVE the proposed specs/corpora.json values in ADR 0003 (engineering/decisions/0003-corpus-snapshots.md:265-289). For test262 these are revision 2e0a5676..., license_record specs/snapshots/test262.json, inventory_sha256 4d86002f..., local_path <corpora-root>/test262/repository.git, and status pinned. For wpt they add manifest_sha256 86d55bee..., with revision b60c4b34... and inventory_sha256 0be4a67e....\n- These values match the snapshot records and the 02:06 acceptance runs. pinProblems (tools/corpus.mjs:450-461) reads exactly these field names.\n- The minor findings do not change any pinned value, count, or digest. If WPT_RULE is reworded, the integrator must regenerate specs/applicability/wpt.json, because verification compares the whole record. The manifest and inventory pins stay the same.",
+  "criteria": [
+    {
+      "criterion": "Record exact WPT and Test262 revisions without inventing hashes.",
+      "met": true,
+      "evidence": "The snapshot records are unchanged from the revision that review 2 checked. raw/corpus-verify.log:120-182 (02:06:01Z and 02:06:03Z) recomputes commits 2e0a5676... and b60c4b34..., trees 6a4268a9... and a499343a..., and both inventory digests. Both runs exit 0 without overrides."
+    },
+    {
+      "criterion": "Record license and inventory data before corpus import.",
+      "met": true,
+      "evidence": "Unchanged from review 2. The license and inventory fields recompute in the 02:06 runs: LICENSE 2213 bytes, \"BSD License\"; LICENSE.md 1500 bytes, \"The 3-Clause BSD License\"."
+    },
+    {
+      "criterion": "Create separate local applicability metadata with explicit denominators.",
+      "met": true,
+      "evidence": "specs/applicability/wpt.json has discovered 76620, selected 0, excluded [], and unclassified 76620. The breakdown sums to 76620 and includes test262 20. reported_separately.test262 has items 53640 and by_prefix harness/ 43 and test/ 53597, and ties only these to vendored 7ab7faf. My jq recount from the stored manifest reproduces 20, 43, and 53597. validateApplicability now rejects discovered 0 (tools/corpus.mjs:351). bindWptManifest requires at least one test item (tools/corpus.mjs:281). Test262: 53616, unchanged."
+    },
+    {
+      "criterion": "Path-based treatment of WPT test262 items (Revision 2, cases 17-18).",
+      "met": true,
+      "evidence": "isVendoredTest262 tests type === 'test262' and the path prefix 'third_party/test262/' (tools/corpus.mjs:267-268). Case 17 (tools/selftest.mjs:891-909) asserts discovery 6 with test262 1, reported items 3 with harness 1 and test 2, and that 'infrastructure' does not appear in reported_separately. Case 18 (selftest.mjs:910-927) covers an empty manifest, a manifest with only spec, support, and vendored items, and a record with zero discovered tests. Gate log 2026-10-09T02-05-37-751Z lines 110-111: ok 102 and ok 103."
+    },
+    {
+      "criterion": "Fetch integrity and local fetch fixtures (Revision 2, cases 19-21).",
+      "met": true,
+      "evidence": "replaceSnapshot passes -c fetch.fsckObjects=true and -c transfer.fsckObjects=true (tools/corpus.mjs:483-484). git-config says fetch.fsckObjects falls back to transfer.fsckObjects only 'If not set' (https://git-scm.com/docs/git-config#Documentation/git-config.txt-fetchfsckObjects). ADR 0003:31-46 states the reachability limit and the fetch.fsck.<msg-id> and skipList limits, which match the git-config documentation. Gate log lines 130, 158, and 176: ok 104, 105, and 106."
+    },
+    {
+      "criterion": "Record Unicode, CLDR, and font-fixture import requirements without bundling unauthorized fonts.",
+      "met": true,
+      "evidence": "IMPORT_REQUIREMENTS.md:42 adds Virama, :63-66 add the Joining_Type and Indic rows, :82-90 add the DerivedJoiningType rationale and USE supplementary files, :123-128 add collation and plural rows, and :135-150 add the collation source and UCA version. Every claim matches its source (see summary). Minor inaccuracies are reported as findings."
+    },
+    {
+      "criterion": "Applicability notes for wdspec, aamtest, and visual (Revision 2).",
+      "met": true,
+      "evidence": "ADR 0003:219-225 matches docs/writing-tests at b60c4b3. wdspec.md describes WebDriver Classic and BiDi tests in Python. aamtest.md says the type 'is built on the wdspec test type'. visual.md says 'many browser vendors treat them identically to manual tests' (https://raw.githubusercontent.com/web-platform-tests/wpt/b60c4b349d9d167bf354a40bc0d4cbed15174606/docs/writing-tests/visual.md, lines 6-9)."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "major specs/applicability/wpt.json:45: all 53660 `test262` items attributed to the vendored copy, and 20 WPT tests left out of the denominator.",
+      "resolved": true,
+      "evidence": "wpt.json counts the 20 infrastructure/test262 items in discovery and reports 53640 vendored items by prefix (harness/ 43 'Test262 harness includes, not tests'; test/ 53597). WPT_RULE (tools/corpus.mjs:384-389), the reason string (corpus.mjs:419-420), ADR 0003:208-214, README:29-34, and S47 are updated. Case 17 covers it. The jq recount matches."
+    },
+    {
+      "finding": "minor specs/IMPORT_REQUIREMENTS.md:62: IDNA row missing Joining_Type for ContextJ, and missing USE shaping inputs.",
+      "resolved": true,
+      "evidence": "Rows at :63-66 and text at :82-90 cite S49 (RFC 5892 Appendix A), S39 (UTS #46 §4.1 step 8), S41 (URL Standard CheckJoiners true), S27, and S50. The UnicodeData row (:42) adds Virama. Every file exists under Public/18.0.0."
+    },
+    {
+      "finding": "minor specs/IMPORT_REQUIREMENTS.md:116: no collation or plural data.",
+      "resolved": true,
+      "evidence": "Rows at :123-128 and the 'Collation source' section at :135-150 choose the CLDR root collation plus CLDR tailorings. They reject combining the DUCET with CLDR tailorings, and they record the UCA 17.0.0 versus UCD 18.0.0 gap under rule 6. The paths and versions were verified at release-48-2. S51-S54 were added."
+    },
+    {
+      "finding": "note specs/IMPORT_REQUIREMENTS.md:55: East_Asian_Width and DerivedCoreProperties consumer descriptions too narrow.",
+      "resolved": true,
+      "evidence": "DerivedCoreProperties (:47) now names Indic_Conjunct_Break for GB9c. The East_Asian_Width row (:55) was widened, but its rule list is inaccurate. My review-2 note supplied most of that list, so the error is mine. See the new minor finding."
+    },
+    {
+      "finding": "note engineering/decisions/0003-corpus-snapshots.md:184: no notes for wdspec, aamtest, and visual.",
+      "resolved": true,
+      "evidence": "ADR 0003:219-225 adds all three notes, cited to S55 and verified at the pin."
+    },
+    {
+      "finding": "note engineering/evidence/FP-0003/README.md:81: Gates and Verification sections did not cite the integration receipts and acceptance runs.",
+      "resolved": false,
+      "evidence": "README:70-74 and :112-118 now cite the revision 1 receipts (01:30:40) and the 01:30:55 and 01:30:57 runs. However, the revision 2 integration added gate receipts 2026-10-09T02-05-37-528Z and -751Z (107/107) and acceptance runs at corpus-verify.log:148 and :182. These came after the README was staged, as raw/rev2-integration-binding.log shows. The README still says the last two runs 'predate revision 2' and that the integrator 'reruns' the gates. See the new minor finding."
+    },
+    {
+      "finding": "spec-review-1 findings and notes that review 2 marked resolved: the WPT blocker, pins, UCD algorithm files, emoji files, sanctioned units, the CLDR directory and license, the WPT third-party license scope, OFL condition 5, the _FIXTURE substring, the exit status, the local path, the scenario-count note, local_path and the patent notice, and leaf length.",
+      "resolved": true,
+      "evidence": "No regression. The IMPORT_REQUIREMENTS text for these is unchanged or extended, TEST262_RULE is unchanged (tools/corpus.mjs:21-23), and the pin handling is unchanged (corpus.mjs:450-461, 506-523). Test262 still counts 53616."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 55,
+      "issue": "The row says UAX #14 uses East_Asian_Width 'directly in rules LB15a, LB15b, LB19, LB19a, LB21a, LB30, and LB30b'. In UAX #14 revision 57 (Unicode 18.0.0, https://www.unicode.org/reports/tr14/), $EastAsian appears only in LB19a and LB30. LB15a and LB15b use \\p{Pi} and \\p{Pf}, LB19 uses QU minus \\p{Pi} or \\p{Pf}, LB21a is 'HL (HY | HH) × [^HL]', and LB30b uses \\p{Extended_Pictographic}&\\p{Cn}. The UAX's parenthetical list covers rules that use any of East_Asian_Width, General_Category, or Extended_Pictographic. My review-2 note misread that list. The same text appears in specs/sources.json:306 (S37 purpose).",
+      "recommendation": "Say that East_Asian_Width is used directly in LB19a and LB30. Add General_Category (LB15a, LB15b, LB19, LB30b) to the UnicodeData.txt consumer column, or to a DerivedGeneralCategory row. Fix the S37 purpose to match."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 388,
+      "issue": "WPT_RULE says 'Upstream assigns the \"test262\" type to every \".js\" file with a \"test262\" directory component'. The same wording appears in corpus.mjs:262, the committed discovery.rule in specs/applicability/wpt.json, ADR 0003:208, sources.json:386 (S47), and CONTRACT.md:208. Upstream also requires parseable Test262 frontmatter and a name that does not end in `_FIXTURE.js`. Otherwise the file becomes a `support` item (sourcefile.py:1155-1162 and test262.py `parse` at https://raw.githubusercontent.com/web-platform-tests/wpt/b60c4b349d9d167bf354a40bc0d4cbed15174606/tools/manifest/test262.py). At the pin, infrastructure/test262/support/invalid-module.js, infrastructure/test262/support/module-helper.js, resources/test262/test262-{provider,reporter}.js, and the vendored *_FIXTURE.js files are `support` items. The operative rule, which uses the manifest type plus the path prefix, and every count are unaffected.",
+      "recommendation": "Reword to 'every \".js\" file with a \"test262\" directory component that has Test262 frontmatter and whose name does not end in \"_FIXTURE.js\"; other such files are support items'. Then regenerate specs/applicability/wpt.json, because verification compares the whole record. Make the same change in ADR 0003:208, S47, and the corpus.mjs:262 comment. Leave the frozen contract text as is, or note the correction in the next revision."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0003/README.md",
+      "line": 71,
+      "issue": "README:71-74 says the last two runs in raw/corpus-verify.log are the 01:30 runs and that they 'predate revision 2'. README:117-118 says the integrator 'reruns' the gates. At d185b5e, corpus-verify.log ends with the revision 2 acceptance runs: line 148 (test262, 02:06:01.741Z, exit 0) and line 182 (wpt, 02:06:03.742Z, exit 0, 76620 discovered), with no overrides. gates/ also holds 2026-10-09T02-05-37-528Z-repo-check and -751Z-controller-test (pass, source f1d4684f..., 107/107). raw/rev2-integration-binding.log, which shows HEAD 1944d65 and the staged file list, is not mentioned. The README was staged before these runs and was not updated afterward.",
+      "recommendation": "Update the Verification and Gates sections to cite the 02:05:37 receipts, the source digest, the 107/107 log, corpus-verify.log:148 and :182, and raw/rev2-integration-binding.log. Drop the 'predate revision 2' and 'reruns' statements."
+    },
+    {
+      "severity": "note",
+      "path": "specs/IMPORT_REQUIREMENTS.md",
+      "line": 58,
+      "issue": "The DerivedBidiClass.txt consumer names only UAX #9. The URL Standard also sets CheckBidi to true, and UTS #46 §4.1 step 9 then applies RFC 5893 §2, which needs Bidi_Class. Step 6 needs General_Category=Mark (https://www.unicode.org/reports/tr46/ §4.1; https://url.spec.whatwg.org/ 'domain parser ToASCII'). Both files are already listed, so there is no import gap.",
+      "recommendation": "Add 'UTS #46 CheckBidi (RFC 5893 §2) for URL host parsing' to the DerivedBidiClass row, and the General_Category leading-mark check to the UnicodeData row."
+    }
+  ],
+  "commands_run": []
+}

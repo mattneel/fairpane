@@ -1,0 +1,171 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "d185b5e93c3b6d2506ff01b02be9fe2546f1b82a"
+  ],
+  "summary": "Verdict: accept. Revision 2 (commit d185b5e, parent 1944d65) has no blocker or major defect. Cases 17 through 21 exist and test what CONTRACT.md Revision 2 says they test. The integration gates and the last two acceptance runs show the claimed results. One minor finding is new: the evidence README is stale about the acceptance runs and the gate receipts.\n\n**What changed and why it holds**\n- **Path-based exclusion.** WPT discovery now leaves out `test262` items only when their path starts with `third_party/test262/` (tools/corpus.mjs:265-268). The excluded items are reported by directory (corpus.mjs:387-404, 412-421).\n- **Recorded counts.** I checked the counts in specs/applicability/wpt.json with read-only jq queries against `.tools/corpora/wpt/MANIFEST.json`, run through the read tool:\n  - The `test262` items sit under exactly two top-level paths, `infrastructure/test262` and `third_party/test262`.\n  - `infrastructure/test262` has 20 items.\n  - The vendored copy has 43 harness items and 53597 test items.\n  - The per-type breakdown sums to 76620, and 53640 + 20 = 53660 `test262` items in total.\n- **Empty manifests and zero denominators.** Binding now fails when a manifest has no test item (corpus.mjs:281). Validation now rejects a record with zero discovered tests (corpus.mjs:350).\n- **Fetch checks.** The fetch now passes `-c fetch.fsckObjects=true` as well as `transfer.fsckObjects` (corpus.mjs:483). The gate log shows both flags on every fixture fetch.\n- **What the fetch cannot check.** ADR 0003:34-50 lists what the fetch checks and what it cannot check, including reachability of the pinned commit from the upstream branch and the remaining `fetch.fsck.<msg-id>` settings that can relax individual checks.\n- **Test-only `file://` option.** `allowFileUpstream` must be strictly `true` (corpus.mjs:39-40), and `corpusCommand` (corpus.mjs:615-620) never passes it. A `file://` upstream therefore stays test-only.\n\n**Other checks**\n- Protected paths and `specs/corpora.json` are unchanged in d185b5e.\n- No shell code reaches the engine; this task touches no engine or shell code.\n- No earlier behavior regressed. All 102 earlier tests pass. The only edit to an earlier fixture, `otherApplicability` changing from 0 to 1 discovered tests, is required by the new zero-denominator rule and makes no check weaker.\n\n**Limitations**\n- I had only read, grep, and glob tools, so I ran no shell, git, or test command.\n- I read the working tree at HEAD 2736fcd. GitHub's d185b5e...2736fcd diff shows that tools/corpus.mjs, specs/, ADR 0003, and engineering/evidence/FP-0003/ did not change after d185b5e. tools/selftest.mjs only gained FP-0031 and FP-0033 tests, so its corpus tests moved by about 148 lines.\n- Line numbers for selftest.mjs below are as of d185b5e (raw.githubusercontent.com/mattneel/fairpane/d185b5e/tools/selftest.mjs). Line numbers for corpus.mjs are the same at both commits.",
+  "criteria": [
+    {
+      "criterion": "Case 17: test262 items under third_party/test262/test/, third_party/test262/harness/, and infrastructure/test262/; only the infrastructure item counts in discovery, and the others are reported by path.",
+      "met": true,
+      "evidence": "selftest.mjs@d185b5e:734-761. The fixture adds harness/assert.js and infrastructure/test262/basic.js to the vendored test/t.js entry, which has 2 URLs. It asserts item_counts test262 = 4, breakdown test262 = 1, and discovered = 6. It asserts the exact by_prefix value {harness: 1, test: 2} with content labels. It asserts that `infrastructure` appears nowhere in reported_separately and that the rule names infrastructure/test262/. Verify passes. The red baseline in raw/rev2-tests-before.log:128-131 failed on the missing test262: 1 count. The gate log has `ok 102` at line 110."
+    },
+    {
+      "criterion": "Case 18: a manifest without test items fails binding, and an applicability record with zero discovered tests fails validation.",
+      "met": true,
+      "evidence": "selftest.mjs@d185b5e:762-779. It checks an empty manifest and a manifest with only spec, support, and vendored test262 items, each with bindWptManifest, verifyCorpus, and classifyCorpus. It checks a hand-built zero record, and a real Test262 tree with only a _FIXTURE file, against validateApplicability. Implementation: corpus.mjs:281 and :350. The red baseline failed with `Missing expected exception.` (rev2-tests-before.log:132-135). The gate log has `ok 103`."
+    },
+    {
+      "criterion": "Case 19: corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves.",
+      "met": true,
+      "evidence": "selftest.mjs@d185b5e:814-833. The upstream moves to a child commit before the fetch. The test asserts that commit, ref, and upstream are as expected, and that the snapshot ref equals the pin. It asserts that the moved head is absent from the snapshot through `cat-file -e`. It asserts that the record matches the result field by field, that verify passes, and that a refetch pinned by the record ignores the moved branch. Gate log lines 112-130 show ls-remote reporting head 8895baf, then a fetch of `+cc0f937…:refs/heads/main`, once with `from specs/corpora.json` and once with `from specs/snapshots/test262.json`. This answers my review 2 finding that the policy-pin branch had never run."
+    },
+    {
+      "criterion": "Case 20: a fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged.",
+      "met": true,
+      "evidence": "selftest.mjs@d185b5e:834-847. It plants a stale `test262.fetch/stale.txt`. For an `inventory_sha256` pin mismatch and for a `license_record` pin mismatch, it asserts the `does not match its pin` error and byte-identical record bytes. It asserts an identical per-file SHA-256 digest of the snapshot directory and that corporaDir lists only `test262`. The stale staging directory is therefore removed. Gate log `ok 105`."
+    },
+    {
+      "criterion": "Case 21: corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences.",
+      "met": true,
+      "evidence": "selftest.mjs@d185b5e:848-864. It asserts the new head commit and the exact pin_differences for `revision` and `inventory_sha256`, and the note text. It asserts the snapshot ref, the record commit, and that no staging remains. It asserts that verify fails against the old pins and passes against the new ones. Gate log lines 159-176 show the repin fetching `+8895baf…`."
+    },
+    {
+      "criterion": "fetch.fsckObjects is set, and ADR 0003 states what the fetch checks and cannot check, including reachability.",
+      "met": true,
+      "evidence": "corpus.mjs:483 passes `-c fetch.fsckObjects=true -c transfer.fsckObjects=true`. ADR 0003:29-30, 34-50, and 89 cover this. A command-line `-c` value overrides user and system config, so a `fetch.fsckObjects=false` there no longer disables the checks. The ADR openly lists `fetch.fsck.<msg-id>`/skipList as a remaining relaxation, and states that reachability from the branch cannot be checked."
+    },
+    {
+      "criterion": "No earlier behavior regressed.",
+      "met": true,
+      "evidence": "The integration gate log has `# tests 107 # pass 107 # fail 0` (lines 179-181). raw/rev2-tests-before.log:150-152 shows that the 102 earlier tests passed before the implementation change. Earlier cases 13 and 14 still assert test262 items = 2 and `{ paths: 7 }`. The only edit to an earlier fixture is otherApplicability discovered 0 to 1 (selftest.mjs@d185b5e:548), which the new zero-denominator rule requires. No assertion was removed from the existing cases in the d185b5e diff."
+    },
+    {
+      "criterion": "Integration gates gates/2026-10-09T02-05-37-* show the claimed results.",
+      "met": true,
+      "evidence": "The repo-check receipt shows status pass and `check` exit 0. The controller-test receipt shows status pass, selftest exit 0, and 107 of 107 tests. Both bind source f1d4684f… and policy 782bc403…, with identical before and after values. raw/rev2-integration-binding.log shows HEAD 1944d65, which is d185b5e's parent per .git/logs/HEAD:52, with exactly the revision 2 tool, specs, ADR, and README changes staged and no unstaged modification. state.json is outside source_roots (engineering/policy.json:4-33)."
+    },
+    {
+      "criterion": "The last two raw/corpus-verify.log runs show the claimed results.",
+      "met": true,
+      "evidence": "corpus-verify.log:120-148 is `corpus-verify test262`: started 02:06:01.741Z, result pass, 53616 discovered, missing_denominators [], exit_code 0. corpus-verify.log:150-182 is `corpus-verify wpt`: started 02:06:03.742Z, result pass, manifest sha256 86d55bee…, 76620 discovered, missing_denominators [], exit_code 0. Both ran with cwd C:\\src\\fairpane and no environment_overrides, which are the exact acceptance commands."
+    },
+    {
+      "criterion": "Expected test denominator: the existing controller tests plus cases 17 through 21.",
+      "met": true,
+      "evidence": "102 + 5 = 107: rev2-tests-before.log shows 107 tests with 5 failing, and the gate shows 107 of 107 passing."
+    },
+    {
+      "criterion": "The evidence README cites the integration receipts and the appended acceptance runs (Revision 2, 'Import requirements and notes').",
+      "met": false,
+      "evidence": "README.md:70-74 says the last two runs in raw/corpus-verify.log are the 01:30 revision 1 runs at lines 84 and 118. In the committed log, the last two runs are the 02:06 revision 2 runs at lines 148 and 182. README.md:110-118 cites only the 00:48 and 01:30 receipts and says the integrator 'reruns both gates … at the revision 2 commit'. It never cites the 02:05:37 receipts that state.json lists. See the minor finding."
+    },
+    {
+      "criterion": "Protected paths are untouched.",
+      "met": true,
+      "evidence": "The d185b5e file list contains only ADR 0003, the FP-0003 README, gates, and raw logs, engineering/state.json, specs/IMPORT_REQUIREMENTS.md, specs/applicability/wpt.json, specs/sources.json, tools/corpus.mjs, and tools/selftest.mjs. It does not touch specs/corpora.json, AGENTS.md, gates.json, policy.json, qualification.json, or the Zig lock."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "minor: user or system `fetch.fsckObjects=false` overrides `-c transfer.fsckObjects=true`, and ADR 0003:29 overstated the check.",
+      "resolved": true,
+      "evidence": "corpus.mjs:483 sets `-c fetch.fsckObjects=true`. ADR 0003:29-30 is corrected, and ADR 0003:47-50 discloses the remaining `fetch.fsck.<msg-id>`/skipList relaxation. No fsck of the staging repository runs before the swap, but verify still runs `fsck --full --strict`."
+    },
+    {
+      "finding": "minor: replaceSnapshot, fetchCorpus, and repinCorpus had no automated test; the specs/corpora.json pin branch and the pin-mismatch branch had never run.",
+      "resolved": true,
+      "evidence": "Cases 19-21 (selftest.mjs@d185b5e:814-864) cover the pinned fetch, the record-pin fallback, the pin mismatch, stale staging cleanup, and repin pin_differences against a real `file://` Git upstream. Only the rename-rollback branch (corpus.mjs:495) is still untested; see the notes."
+    },
+    {
+      "finding": "minor: the pinned commit is not checked to be reachable from the upstream branch.",
+      "resolved": true,
+      "evidence": "Resolved by documentation, which my recommendation allowed. ADR 0003:44-46 states the limit and rests provenance on the ls-remote evidence and the protected review of specs/corpora.json."
+    },
+    {
+      "finding": "note: an empty or truncated manifest binds and yields a valid denominator of 0.",
+      "resolved": true,
+      "evidence": "Empty manifests and test-free manifests now fail (corpus.mjs:281, case 18), and zero denominators fail validation (corpus.mjs:350). A truncated manifest that keeps at least one test item still binds. ADR 0003:123 documents that its SHA-256 pin detects this once the pins land."
+    },
+    {
+      "finding": "note: every specs/corpora.json pin is null, so pin enforcement has no effect.",
+      "resolved": false,
+      "evidence": "Still open by design. README.md:121-123 and state.json defer the pin commit until both approvals. This is the acceptance gate for the integrator, not a defect in revision 2."
+    },
+    {
+      "finding": "note: the record is written after the directory swap, and concurrent fetches share `<id>.fetch` without a lock.",
+      "resolved": false,
+      "evidence": "Unchanged at corpus.mjs:493-497 (rmSync old, rename, rename, rmSync old, then writeJson). Revision 2 did not take this up."
+    },
+    {
+      "finding": "note: killTree runs `taskkill.exe` by bare name.",
+      "resolved": false,
+      "evidence": "Unchanged at corpus.mjs:62."
+    },
+    {
+      "finding": "note: the README Gates section cited no integration receipts or exact acceptance runs.",
+      "resolved": false,
+      "evidence": "Partly fixed: it now cites the 01:30 revision 1 receipts and runs (README.md:70-74, 112-116). It is stale again for revision 2; see the new minor finding."
+    },
+    {
+      "finding": "note: ADR 0003's 'can rebuild every recorded field' claim was unproven for the manifest bytes.",
+      "resolved": true,
+      "evidence": "ADR 0003:304-306 now words it as an expectation and states the fail-closed behavior if wpt.fyi serves different bytes."
+    },
+    {
+      "finding": "note: case 11's red baseline failed because of GIT_OBJECT_DIRECTORY, not the replace ref.",
+      "resolved": true,
+      "evidence": "No action was required. The positive control still stands."
+    },
+    {
+      "finding": "note: user-profile worktree paths in raw logs.",
+      "resolved": false,
+      "evidence": "The revision 2 logs again record cwd `C:\\Users\\requi\\.omp\\wt\\td559a5711\\m` (for example rev2-tests-after.log:181), and the gate log records `C:/Users/requi/AppData/Local/Temp/...` fixture URLs. fairpane-spec has still not ruled on whether 'No committed record contains a local user path' covers raw logs. specs/ records stay clean."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0003/README.md",
+      "line": 71,
+      "issue": "The README is stale about the revision 2 acceptance evidence, and the contract requires it to cite that evidence. Lines 71-74 say the last two runs in raw/corpus-verify.log are the exact acceptance commands from 01:30:55 and 01:30:57, at lines 84 and 118. In the same commit, the integrator appended the revision 2 runs at 02:06:01 and 02:06:03 (corpus-verify.log:148 and :182, WPT 76620), so that statement is false at d185b5e. Lines 110-118 cite only the 00:48 and 01:30 receipts and describe the revision 2 gate rerun as future work. They never name gates/2026-10-09T02-05-37-528Z-repo-check-a3a77af6.json or gates/2026-10-09T02-05-37-751Z-controller-test-abfa9710.json (107 of 107, source f1d4684f…), which state.json already lists. The raw evidence is correct; only the narrative misdirects a reader.",
+      "recommendation": "State that the last two runs in raw/corpus-verify.log are the revision 2 acceptance runs at lines 148 and 182, exit status 0, with WPT at 76620. Keep the 01:30 runs as revision 1 history. Cite the 02:05:37 receipts with their source digest and the 107 of 107 count, and remove the future-tense rerun sentence."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 495,
+      "issue": "The rename-rollback branch, which restores `<id>.old` when `renameSync(staging, target)` fails, is still the only replaceSnapshot branch that no test exercises. Cases 19-21 also failed in the red baseline only on the `file://` restriction ('Corpus test262 has no HTTPS Git upstream.', rev2-tests-before.log:138-146), not on a fetch defect. Their assertions would plausibly catch a regression that fetches the head or replaces the snapshot before the pin check [INFERENCE], but no observed red-to-green run demonstrates it.",
+      "recommendation": "No action is required for acceptance. Optionally record one mutation run, such as dropping the `check(record)` invariant, to show that case 20 kills it."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0003/raw/rev2-integration-binding.log",
+      "line": 5,
+      "issue": "The binding log runs `git status --porcelain --untracked-files=no`. hashInputs reads the working tree under source_roots, so an untracked file under tools/, specs/, or engineering/decisions/ would enter the f1d4684f… digest without any disclosure. FP-0002 revision 3 moved to fresh work trees for this reason. I found no evidence that any such file existed [INFERENCE].",
+      "recommendation": "For the post-pin acceptance rerun, run the gates in a fresh work tree of the accepting commit, as FP-0002 revision 3 does, or record the untracked status."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 62,
+      "issue": "Carried over from review 2: `taskkill.exe` still resolves by bare name, so on Windows the current directory is searched first [INFERENCE from libuv search_path].",
+      "recommendation": "Use `%SystemRoot%\\System32\\taskkill.exe` or resolveExecutable."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 497,
+      "issue": "Carried over from review 2: the record is written after the swap and after `rmSync(old)`. Concurrent fetches share `<id>.fetch` without a lock. Both cases fail closed.",
+      "recommendation": "Write the record before removing `<id>.old`, and use a unique or locked staging directory."
+    },
+    {
+      "severity": "note",
+      "path": "specs/corpora.json",
+      "line": null,
+      "issue": "Carried over from review 2: every pin is null, so cases 15, 19, 20, and 21 show that enforcement works, but the real snapshots are not yet pinned.",
+      "recommendation": "Apply the pins in ADR 0003 in the separate protected commit, rerun the four acceptance commands there, and accept FP-0003 only on that result."
+    }
+  ],
+  "commands_run": []
+}
