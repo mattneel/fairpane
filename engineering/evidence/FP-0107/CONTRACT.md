@@ -131,3 +131,13 @@ On a host with case-sensitive names, both values are absent, so case 3 passes th
 4. `bun-selftest-r1.log`: Bun runs the suite.
 5. `mutation-r1.log` and its diff for M3, with the hash of `tools/test-runner.mjs` before, during, and after.
 6. The ten dispatched runs of criterion 3 repeat on a head that contains this revision, and `ci/README.md` also records the failed series on `3e7128c`.
+
+### Revision 1 amendments
+
+1. The integrator implemented revision 1, and `SHARE_ENV` failed in two attempts, which `raw/` keeps as `*-attempt-1.log` and `*-attempt-2.log`.
+   With `SHARE_ENV`, the seven cases that point `TMPDIR`, `TMP`, and `TEMP` at a private directory through `withPrivateTemp` see the directories of concurrent cases, and three failed under Node (`tests-after-r1-attempt-1.log`).
+   Declaring the five undeclared ones `processWide` fixed Node, but Bun 1.4.2 then failed four of them, because after a worker starts with `SHARE_ENV`, Bun's `os.tmpdir()` on the main thread no longer follows `process.env` (`bun-selftest-r1-attempt-2.log`).
+   `raw/r1-share-env-probe.log` runs `raw/r1-share-env-probe.mjs` under Bun and Node and shows that defect only for Bun with `SHARE_ENV`.
+   The revision therefore keeps each worker's own copy of the environment, and `casePool` passes the copy that `workerEnvironment` returns: on Windows, it names the search path `PATH` and the system root `SystemRoot`, the spellings that the tools read.
+   No case gains a declaration, and case 3 and M3 stay as frozen.
+   `bun-r1-repro-after.log` adds a Bun run of the suite with the search path named `Path`, and `tests-after-r1-repeat-1.log` to `-3.log` add three more Node runs.
