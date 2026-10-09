@@ -141,3 +141,25 @@ On a host with case-sensitive names, both values are absent, so case 3 passes th
    The revision therefore keeps each worker's own copy of the environment, and `casePool` passes the copy that `workerEnvironment` returns: on Windows, it names the search path `PATH` and the system root `SystemRoot`, the spellings that the tools read.
    No case gains a declaration, and case 3 and M3 stay as frozen.
    `bun-r1-repro-after.log` adds a Bun run of the suite with the search path named `Path`, and `tests-after-r1-repeat-1.log` to `-3.log` add three more Node runs.
+
+## Revision 2
+
+Base: the commit that freezes this revision.
+Source: `reviews/review-1-reject.json`, which rejects revision 1 for one major finding and lists five minor findings and four notes.
+Every section above stays in force except where this revision replaces it.
+
+### Revision 2 integrator decisions
+
+- The base decision that every case that changes process-wide state gets the declaration stays in force, and amendment 1's sentence "No case gains a declaration" is withdrawn.
+  The five `withPrivateTemp` cases without a declaration gain `{ processWide: 'TMPDIR, TMP, and TEMP in process.env' }`, and the README lists them; `raw/r1-share-env-probe.log` shows that Bun's main-thread `os.tmpdir()` follows `process.env` when each worker has its own copy.
+- `abi.test.mjs`, `fileset.test.mjs`, `rust.test.mjs`, `ucd.test.mjs`, and `workflow-check.test.mjs` pass a case's declaration through, as `attest.test.mjs` and `release.test.mjs` do, so a declaration in a module's case array cannot be dropped.
+- ADR 0011 records the worker environment of revision 1 and why `SHARE_ENV` was rejected.
+- Every revision 2 log records `HEAD` and the blob IDs of `tools/test-runner.mjs` and `tools/selftest.mjs` before its suite run.
+- The README cites recorded `gh run view` logs for its claims about the runs of `3e7128c`, marks the runner's spelling `Path` as an inference that the reproduction supports, and records the SHA-256 of each withheld log.
+- M3's diff is recorded against the committed fixed blob.
+
+### Revision 2 evidence
+
+1. `tests-after-r2.log`, `r2-repro-after.log` with the search path named `Path`, `bun-selftest-r2.log`, and `bun-r2-repro-after.log`, each passing every case.
+2. `mutation-r2.log` and `mutation-r2-M3.diff`, with the hash of `tools/test-runner.mjs` before, during, and after.
+3. A recorded run listing of the `3e7128c` series with each job's conclusion and each gate step's duration.

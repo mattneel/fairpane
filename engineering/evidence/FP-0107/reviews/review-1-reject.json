@@ -1,0 +1,66 @@
+{
+  "verdict": "reject",
+  "summary": "I am rejecting FP-0107 on one major finding. Five existing cases change TMPDIR, TMP, and TEMP in process.env through withPrivateTemp, but none of them declares processWide. The base contract's decision is still in force, and it requires every existing case that changes process.env to be declared and listed. tools/README.md and ADR 0011 state the same rule, and the README's declaration list claims to be complete. Amendment 1 says only that 'no case gains a declaration' and never retracts that rule. Nothing technical forces the omission: in raw/r1-share-env-probe.log, Bun's main-thread os.tmpdir() still follows process.env when each worker gets a copy, so declaring the five cases is feasible on both hosts. Everything else holds. runCases keeps result lines in case-number order. It writes each '# duration_ms' line directly after its result line, followed by the summary, '# slowest', and '# duration_ms total' lines as frozen. It starts a declared case only when nothing else runs, and it starts nothing else until that case ends. Cases 1 and 2 match the contract, and mutation controls 1, 2, and M3 kill their targets with hashes recorded before, during, and after. Revision 1's workerEnvironment fixes the reproduced failure without changing any assertion. The before reproduction failed 45 of 247 cases with the missing-git errors, and case 3 is red before the fix and green after. Node and Bun each pass 248 of 248 with the search path named Path, and Node also passes the gate and three repeat runs. gate_sha256 43baf0f8… is unchanged, so the 120000 ms timeout stands. The r1 binding log records HEAD d4de685 with clean status before and after passing repo-check, controller-test, zig-fmt, and zig-test receipts. To close criteria 1 to 4, the CI record must show the following. First, it must show at least ten 'gh workflow run Gates --ref master' dispatches, each logged with its exit status and run URL, on a head that contains d4de685. Second, it must show 'gh run view' for each run with that head SHA and every job and step conclusion, plus downloaded Windows and Linux receipts with gate_sha256 43baf0f8…. Third, every run must pass both jobs, and no failed or retried attempt may be omitted. Fourth, ci/README.md must list for each run the Windows and Linux controller-test step time and receipt duration_ms. It must also list the ten '# slowest' lines of each job and show that revision 1 case 3 passed on the hosted Windows runner. Fifth, the README must name the tests that dominate the Windows CI time, and the cause of each, from those CI records rather than only from local profiles. Sixth, the slowest Windows controller-test step must take at most 80,000 ms. Finally, the record must cover the failed series on 3e7128c with run views. Those run views must back the README's claims about Linux passes and the Path spelling.",
+  "findings": [
+    {
+      "severity": "major",
+      "path": "tools/selftest.mjs",
+      "line": 472,
+      "issue": "Five cases change TMPDIR, TMP, and TEMP in process.env through withPrivateTemp but do not declare processWide. In tools/selftest.mjs they are 'A capture-start failure…' (line 570), 'A failed capture-directory removal…' (line 641), and the three FP-0054 case 6 cases at lines 674, 687, and 697. Cases 173 and 175, which use the same helper, are declared. The base contract decision 'Each existing test that changes such state gets the declaration, and the README lists them' is still in force, and revision 1 repeats it. Amendment 1's 'No case gains a declaration' contradicts that decision without retracting it. A minimal reproduction is to search for processWide in tools/selftest.mjs: only seven declarations appear, and none is on these five cases. The fix is either to declare the five cases, which works with per-worker environment copies under Node and Bun as raw/r1-share-env-probe.log 'copy' mode shows, or to amend the contract, ADR 0011, and tools/README.md to say that a process.env change on a worker thread stays in that thread."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0107/README.md",
+      "line": 59,
+      "issue": "'Process-wide declarations' says that the listed cases are the existing cases that change process-wide state, and line 76 says a search found them. The list omits the five withPrivateTemp cases that assign process.env through a helper, so the completeness claim is unsupported."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/abi.test.mjs",
+      "line": 559,
+      "issue": "tools/README.md tells authors to add the declaration object as the third element of a case's array in any case module. The abi, fileset, rust, ucd, and workflow-check modules map only ([name, fn]), so a declaration added there is dropped silently and the case runs concurrently. Only attest.test.mjs and release.test.mjs keep the third element."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0011-concurrent-controller-tests.md",
+      "line": 26,
+      "issue": "The ADR does not record revision 1: workers receive case-sensitive environment copies, and on Windows WINDOWS_ENVIRONMENT_NAMES normalizes PATH and SystemRoot. It also does not record that SHARE_ENV was rejected. Its consequence that any process.env change must be declared conflicts with the five undeclared cases."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0107/raw/r1-repro-before.log",
+      "line": 2,
+      "issue": "r1-repro-before.log, r1-repro-after.log, bun-r1-repro-after.log, tests-after-r1.log, and the three repeat logs record no HEAD and no blob ID of tools/test-runner.mjs or tools/selftest.mjs. The README's 'at 9dfb13e', and the binding of the after runs to the code committed in d4de685, can only be inferred from timestamps and mutation-r1.log. That conflicts with the rule 'Bind test evidence to the tested source'."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0107/README.md",
+      "line": 222,
+      "issue": "Several claims rest on no recorded command in FP-0107 evidence: that every Linux job of the 3e7128c series passed, that all ten dispatched runs failed on Windows, and that the hosted Windows runner names the search path Path. Only two Windows receipt downloads exist under engineering/evidence/ci, and the README does not cite them. The claims need gh run view logs or an [INFERENCE] label."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0107/README.md",
+      "line": 241,
+      "issue": "Two red-baseline recordings of tests-before-r1.log are withheld because they printed the host's search path. The README discloses this, but it departs from 'keep each failed attempt as its own log'. A redacted copy, or the hash of each withheld log, would preserve the record."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0107/raw/mutation-r1-M3.diff",
+      "line": 2,
+      "issue": "The M3 diff compares the mutant against the pre-fix index blob 0bde364, not the fixed blob 02fc9919. The removed env option therefore shows only implicitly: workerEnvironment is defined but the Worker call is unchanged."
+    },
+    {
+      "severity": "note",
+      "path": "tools/test-runner.mjs",
+      "line": 92,
+      "issue": "workerEnvironment fixes letter case only for PATH and SystemRoot, and case 3 covers only PATH. No case tests the SystemRoot rename. A tool that later reads another Windows variable on a worker thread under a different spelling would silently read nothing. tools/README.md documents how to extend the list."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0107/README.md",
+      "line": null,
+      "issue": "The 'Test cost / After' figures (37,968 ms total) predate revision 1. The later local Node runs took 47 to 53 s, and the r1 controller-test gate took 61,330 ms while other builds ran on the host. Only the dispatched CI runs can decide criterion 3."
+    }
+  ]
+}
