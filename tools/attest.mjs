@@ -187,21 +187,26 @@ export function enclosingGitDirectories(directory) {
 /**
  * Resolve an immutable candidate identity from the Git object database, never from the working tree.
  * The candidate must be a full commit ID, because a ref or an abbreviated ID is a mutable pointer.
- * A missing object, or an object of another type, is a rejection.
- * A commit object that exists but cannot be read, and any other Git failure, is a tool error.
+ * A missing object, or a readable object of another type, is a rejection.
+ * An object that exists but cannot be read, and any other Git failure, is a tool error.
  */
 export function candidateIdentity(repository, commit) {
   if (!matches(HEX40, commit)) fail('unknown-candidate', 'The candidate must be a full 40-hex commit ID.');
   const resolved = readGit(repository, ['rev-parse', '--verify', '--quiet', `${commit}^{commit}`]);
   if (resolved.status === 0 && resolved.stdout.trim() !== commit) fail('unknown-candidate', `Object ${commit} is not a commit object.`);
   if (resolved.status === 1) {
-    // Git also exits with status 1 for a commit that exists but fails its hash check or does not parse, so ask whether it exists.
+    // Git also exits with status 1 for an object that exists but fails its hash check or does not parse, so ask whether it exists.
     const exists = readGit(repository, ['cat-file', '-e', commit]);
     if (exists.status === 1) fail('unknown-candidate', `No object ${commit} exists in the candidate repository.`);
     if (exists.status !== 0) throw new Error(`Git could not look up the candidate commit: ${exists.stderr.trim()}`);
+    // cat-file -t reads only the stored header, so first peel to ^{object}, which parses the object and checks its hash.
+    const object = readGit(repository, ['rev-parse', '--verify', '--quiet', `${commit}^{object}`]);
+    if (object.status !== 0 || object.stdout.trim() !== commit) {
+      throw new Error(`Object ${commit} exists, but Git cannot read it: ${object.stderr.trim() || resolved.stderr.trim()}`);
+    }
     const type = readGit(repository, ['cat-file', '-t', commit]);
     if (type.status === 0 && type.stdout.trim() !== 'commit') fail('unknown-candidate', `Object ${commit} is a ${type.stdout.trim()}, not a commit.`);
-    throw new Error(`Commit ${commit} exists, but Git cannot read it: ${resolved.stderr.trim() || type.stderr.trim()}`);
+    throw new Error(`Object ${commit} exists, but Git cannot read it: ${resolved.stderr.trim() || type.stderr.trim()}`);
   }
   if (resolved.status !== 0) throw new Error(`Git could not look up the candidate commit: ${resolved.stderr.trim()}`);
   const tree = readGit(repository, ['rev-parse', '--verify', '--quiet', `${commit}^{tree}`]);

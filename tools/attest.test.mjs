@@ -262,15 +262,20 @@ export const attestationCases = [
     assert.match(codeOf(() => candidateIdentity(candidate.dir, candidate.first)), /^error: Git could not look up the candidate commit/);
     rejects(() => candidateIdentity(candidate.dir, 'f'.repeat(40)), 'unknown-candidate');
     rejects(() => candidateIdentity(candidate.dir, candidate.secondTree), 'unknown-candidate');
-    // Another commit's object under this commit's ID fails Git's hash check, so the commit exists but cannot be read.
-    const mismatch = fixtureRepository();
+    // Each object below exists under the candidate's ID but fails Git's hash check or does not parse.
+    // One assertion reports every fixture's outcome, so no fixture's result hides another's.
+    const unreadable = /^error: Object \w+ exists, but Git cannot read it/;
+    const mismatch = fixtureRepository(), treeHeader = fixtureRepository();
     fs.chmodSync(looseOf(mismatch, mismatch.first), 0o644);
     fs.copyFileSync(looseOf(mismatch, mismatch.second), looseOf(mismatch, mismatch.first));
-    assert.match(codeOf(() => candidateIdentity(mismatch.dir, mismatch.first)), /^error: Commit \w+ exists, but Git cannot read it/);
+    fs.chmodSync(looseOf(treeHeader, treeHeader.first), 0o644);
+    fs.copyFileSync(looseOf(treeHeader, treeHeader.secondTree), looseOf(treeHeader, treeHeader.first));
     const bogus = spawnSync('git', ['-C', candidate.dir, 'hash-object', '-t', 'commit', '--literally', '-w', '--stdin'],
       { input: 'not a commit\n', encoding: 'utf8', windowsHide: true });
     assert.equal(bogus.status, 0, bogus.stderr);
-    assert.match(codeOf(() => candidateIdentity(candidate.dir, bogus.stdout.trim())), /^error: Commit \w+ exists, but Git cannot read it/);
+    const outcomes = [[mismatch.dir, mismatch.first], [treeHeader.dir, treeHeader.first], [candidate.dir, bogus.stdout.trim()]]
+      .map(([dir, id]) => codeOf(() => candidateIdentity(dir, id)));
+    assert.deepEqual(outcomes.map(outcome => unreadable.test(outcome)), [true, true, true], JSON.stringify(outcomes));
   }],
   ['FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled', () => {
     const candidate = fixtureRepository(), outside = temp();

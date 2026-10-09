@@ -107,7 +107,8 @@ A trust policy fails as `unprotected-policy` when its path, or any directory on 
 That location check is a guard, not a security boundary; operating-system permissions on a separate runner supply the boundary.
 It compares real paths, so it cannot detect a UNC or administrative-share alias of the candidate.
 A verifier that runs from inside the candidate, or from any work tree of the candidate repository, reports `verified-advisory` with exit status 3, and its result is advisory only.
-The verifier finds those work trees through every `.git` entry on its own path; a layout that Git finds only through `GIT_DIR` or `core.worktree` is not detected.
+The verifier finds those work trees through every `.git` entry on its own path.
+It does not detect a layout that Git finds only through `GIT_DIR` or `core.worktree`, or a bare Git directory on that path, and a broken `.git` entry on that path is a tool error.
 `node tools/attest.test.mjs` runs the verifier's own tests without the rest of the controller.
 
 A verified result authenticates one record and is not release qualification.

@@ -96,3 +96,11 @@ Layouts that Git finds only through `GIT_DIR` or `core.worktree` are not detecte
 9. Case 14 derives its expected outside-repository error from `git rev-parse --show-toplevel` run without inherited `GIT_*` variables.
 
 The revision evidence records a status that includes ignored files for every source root.
+
+Revision 2 follows `reviews/review-2-reject.json` of commit `9b878bc`.
+`git cat-file -t` reads only the stored header, so a corrupt object under the candidate's ID with a tree, blob, or tag header looked like a readable non-commit object.
+After `cat-file -e` finds an object, the verifier peels it with `rev-parse --verify --quiet <id>^{object}`, which parses the object and checks its hash.
+Only a readable object of another type fails as `unknown-candidate`, and every unreadable object is a tool error.
+The documentation states that a bare Git directory on the verifier's path is not detected, and that a broken `.git` entry above the nearest repository is a tool error.
+
+10. A tree's object stored under a commit's ID is a tool error, and case FP-0051 3 reports the outcome of every corruption fixture in one assertion.
