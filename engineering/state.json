@@ -219,7 +219,7 @@
       "notes": []
     },
     "FP-0013": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-text workers FP0013Text and FP0013R1, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0013/README.md",
@@ -233,13 +233,14 @@
         "engineering/evidence/FP-0013/raw/r1-integration-corpus.log",
         "engineering/evidence/FP-0013/raw/integrator-rfn-search-r1.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0013/reviews/review-2-accept.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0013/CONTRACT.md, drafted by worker FP0013Contract and frozen on commit 28e2195.",
         "The owner approved Unicode data and OFL fonts in the repository; engineering/evidence/FP-0013/owner-answers.log records it.",
         "Commit b1fdb8c implements it with 180 of 180 controller tests and 177 of 177 Zig tests; the unicode and opentype-fixtures pins wait for acceptance.",
         "fairpane-security and fairpane-review rejected b1fdb8c and c5f7f2b in reviews/security-review-1-reject.json and reviews/review-1-reject.json because cmap validation work is not linear in the input length. Contract revision 1 is frozen in bdcc84c.",
-        "Commit 4a09ed5 implements revision 1 with 188 of 188 controller tests and 191 of 191 Zig tests. Awaiting fairpane-review and fairpane-security."
+        "Commit 4a09ed5 implements revision 1 with 188 of 188 controller tests and 191 of 191 Zig tests.",
+        "fairpane-review accepted 4a09ed5 and 24b8a35 in reviews/review-2-accept.json, and fairpane-security accepted them in reviews/security-review-2-accept.json; FP-0078 carries their minor findings and notes. The unicode and opentype-fixtures pins wait for a fairpane-spec approval and a separate protected commit."
       ]
     },
     "FP-0014": {
@@ -859,6 +860,13 @@
       "evidence": [],
       "review": null,
       "notes": ["Created because the FP-0008 contract draft found that the pinned WPT tree holds no html5lib tokenizer tests and that html5lib-tests differs from the standard on two error conventions."]
+    },
+    "FP-0078": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created from the minor findings and notes in the FP-0013 review-2 and security-review-2 records."]
     }
   }
 }

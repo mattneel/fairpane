@@ -81,7 +81,7 @@ If the integrator changes `upstream`, the record no longer matches, so `corpus-f
 The UCD files and the `noto-sans` archive were trusted on first use: TLS and, for `noto-sans`, a size pin were their only authentication at the first fetch.
 The `published_url` comparison for the UCD files is same-origin with `UCD.zip`, so it checks consistency, not independent authenticity.
 Every later fetch compares each source with the SHA-256 in the existing record before it parses it, and the proposed `specs/corpora.json` pins check the source listing independently of that record once the integrator applies them.
-ADR 0003 still says that only `wpt` and `test262` have fetch rules; that path is outside this task's writable paths, so the integrator may amend it to point at the file-set kind that `specs/README.md` now describes.
+ADR 0003 said that only `wpt` and `test262` had fetch rules; the integrator amended it to point at the file-set kind that `specs/README.md` now describes, as "Integration" below records.
 `raw/corpus-fetch-unicode.log` also shows that each `published_url` under `https://www.unicode.org/Public/18.0.0/ucd/` served bytes equal to its `UCD.zip` member.
 
 ## Observed stop-rule values

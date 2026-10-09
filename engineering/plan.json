@@ -3205,6 +3205,27 @@
       "read": ["engineering/evidence/FP-0008/CONTRACT.md", "engineering/decisions/0003-corpus-snapshots.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0078",
+      "title": "Close the FP-0013 review findings",
+      "workstream": "text",
+      "depends_on": ["FP-0013"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Check each fixture font against its recorded SHA-256 before fontTools reads it in font-expectations.",
+        "Bind every Python child process of corpus-derive and font-expectations to the hardened invocation in a test, and state the full residual of the installation check.",
+        "Recover a file-set snapshot after a process dies between the rename steps of the write phase.",
+        "Add a regression case for overlapping format 12 subtables and correct the description of case 50's third block."
+      ],
+      "read": ["engineering/evidence/FP-0013/reviews/review-2-accept.json", "engineering/evidence/FP-0013/reviews/security-review-2-accept.json"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
   ]
 }

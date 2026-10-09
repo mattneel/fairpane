@@ -1,0 +1,174 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "4a09ed5",
+    "24b8a35"
+  ],
+  "summary": "Revision 1 of FP-0013 meets every Revision 1 requirement and case in CONTRACT.md. I found no blocker or major defect, so the verdict is accept.\n\nThe earlier major finding is fixed. ValidatedOffsets.insert now returns InvalidCmap when the set is full (src/font/cmap.zig:124), and cmap.parse validates a subtable only on first insertion (cmap.zig:155-162). As a result, each distinct offset is validated at most once, and at most 512 offsets are validated. Each encoding record costs a constant amount of work: three header reads and at most 1024 probe slots. I checked both per-format bounds against the code. Format 4 is capped at 65536 glyphIdArray reads because segments are strictly ascending and disjoint (cmap.zig:221-235), and segCount is at most 8189 because the u16 length bounds the subtable reader. Format 12 is checked as 16 + 12·numGroups ≤ L before its loop (cmap.zig:267). The README's per-format, total, and overlap bounds therefore hold, and they cite cases 50 and 51 and the mutation log (README.md:195-221).\n\nThe accessor hardening is complete:\n- src/font contains no `.?` and no `unreachable`.\n- Every remaining `@intCast` follows a range check: cmap.zig:67, cmap.zig:111, reader.zig:26-37, cff.zig:170, tables.zig:249, and opentype.zig:139-164.\n- Fixed records are copied with Reader.fixed.\n- Every index accessor returns null or an error.\n- The Font documentation states the unchanged-bytes rule (opentype.zig:192-195).\n- The re-parse cost of name, post, gsub, and gpos is documented (opentype.zig:303-331).\n\nThe tool-side requirements are all present in tools/fileset.mjs:\n- readZip rejects archives structurally before any inflation (lines 151-239).\n- fetchFileSet compares every digest before calling readZip (lines 614-640), and verify and applicability skip parsing a source whose digest does not match (lines 818-831 and 868-879).\n- Downloads follow redirects manually on allowlisted HTTPS hosts and stop at a size limit (lines 437-517).\n- The write phase stages, backs up, and rolls back (lines 707-772).\n- Python runs through runPython, pythonEnvironment, verifyToolInstallation, and probeTool (lines 950-1066). Every Python child process in tools/ goes through runPython.\n- sfntCopyright stops at the first name record and checks lengths before reading (lines 403-434).\n\nThe evidence supports each claim:\n- Case 12 compares the script digest and the fontTools version (tests/text/fixture_test.zig:24-47; build.zig:139-142).\n- The reference test fails on any unassigned code point (src/unicode/reference_test.zig:94-114, 126-135, 172-179).\n- tests-before-r1.log shows cases 50-52 failing, and it reports each failing part of cases 53-55, consistent with the README's accounting.\n- mutation-cmap-r1.log shows that removing the full-set rejection fails case 50 (189/190).\n- font-expectations-r1.log shows all four outputs byte-identical to the committed files, three times.\n- r1-integration-binding.log records HEAD 4a09ed5 and an empty --ignored status at 10:43:59.1Z and again at 10:45:45.8Z. All four gate receipts (10-43 and 10-44, same source hash 82f9897d… and policy hash b075f8f4… before and after) and the r1 integration test, bun, and corpus logs fall inside that window.\n\nAll earlier findings are resolved. r1-integration-tests.log now records the ZIG_GLOBAL_CACHE_DIR override. The reference arrays stay uninitialized, but a bitset now proves full coverage before any value is read. The integrator's RFN byte search covers the CFF strings.\n\nThe integrator's acceptance of the worker's open questions is reasonable, with two caveats. Case 55 does not bind corpus-derive to runPython. The stated residual of the installation check is narrower than the real one. One minor documentation claim is wrong: font-expectations runs fontTools on fixtures whose digests it never checks first. The other items are notes.\n\nI had no shell, so I ran no command. HEAD is now 9fe40c4, three commits after 24b8a35. I infer, without git, that the reviewed files are unchanged since 4a09ed5.",
+  "criteria": [
+    {
+      "criterion": "cmap: a record naming a new offset when the 512-offset set is full makes parse return InvalidCmap; each distinct offset is validated at most once",
+      "met": true,
+      "evidence": "cmap.zig:124 returns InvalidCmap when count == capacity (512). cmap.zig:155-162 validates only after a successful insert, so a repeated offset is never validated again. The probe loops stop because at least 512 of the 1024 slots stay empty. Case 50 (tests/text/bounds_test.zig:54-82): 512 distinct offsets parse, while 513, and 512 followed by 4096 shared records, both return InvalidCmap."
+    },
+    {
+      "criterion": "README per-format, total, and overlap bounds, citing the regression cases",
+      "met": true,
+      "evidence": "README.md:195-221 gives the bounds:\n- format 4: 1+4·segCount+65536 ≤ 98293 reads\n- format 12: 1+L/12\n- other formats: three reads\n- total: 65535·C + 512·98293 plus the format 12 term\n- overlapping format 12 subtables: 512·(1+L/12)\nIt cites cases 50 and 51 and mutation-cmap-r1.log. I checked the bounds against cmap.zig:211-277. The format 4 sum holds because segments are strictly ascending (line 221). segCount ≤ 8189 holds because the subtable Reader is bounded by the u16 length (line 153)."
+    },
+    {
+      "criterion": "Accessors stay safe after the bytes change: the unchanged-bytes rule is documented, and every .?, unreachable, and unchecked @intCast on a parse invariant becomes a checked path",
+      "met": true,
+      "evidence": "opentype.zig:192-195 states the rule and the copy requirement. A grep finds no `.?` or `unreachable` in src/font. Each remaining @intCast is guarded:\n- cmap.zig:67, after glyph < num_glyphs\n- cmap.zig:111, a >>54 shift\n- reader.zig:26-37, after fits\n- cff.zig:170, after ≥0\n- tables.zig:249, after ≥0\n- opentype.zig:139-164, offsets within the input\nThe four before-panics in tests-before-r1.log (cmap.zig format12Lookup and Format4.end `.?`, format12 @intCast, and opentype glyphHeader end-start overflow) all pass after the fix. Case 52's ten tests include a single-byte sweep over B_TT and B_CFF (bounds_test.zig:323-337)."
+    },
+    {
+      "criterion": "Index accessors return null or an error for an out-of-range index",
+      "met": true,
+      "evidence": "These accessors return null for an out-of-range index:\n- tableRecord (opentype.zig:220-224)\n- cmapSubtable (cmap.zig:44-55)\n- Name.record (tables.zig, `if (i >= self.record_count) return null`)\n- Layout.scriptTag and Layout.featureTag (layout.zig:27-41)\nadvance and glyphHeader return GlyphOutOfRange (opentype.zig:265-300). Case 52, the first test in bounds_test.zig, checks these accessors."
+    },
+    {
+      "criterion": "gsub, gpos, post, and name document the per-call re-parse in time linear in the table length",
+      "met": true,
+      "evidence": "opentype.zig:303-331 documents a per-call re-check in linear time for name, post, gsub, and gpos, and a constant-time read for OS/2 and GDEF."
+    },
+    {
+      "criterion": "ZIP: overlap and region, local/central agreement, ZIP64 extra field and flag bit 13, symbolic link, case folding, >1 GiB total, >1024 ratio, all rejected before inflation",
+      "met": true,
+      "evidence": "Each rule is in fileset.mjs:\n- flag bit 13: line 182\n- case folding: lines 187-189\n- symbolic link and reparse point: line 190\n- ratio: lines 194-195\n- total: lines 196-197\n- local header inside the region: line 199\n- local/central agreement on method, flags, CRC-32, and sizes: lines 203-209\n- local ZIP64 extra field: line 210\n- data before the central directory: line 211\n- sorted adjacent overlap check: lines 216-220\nread() still caps inflation at the declared size and checks size and CRC-32 (lines 229-235). Case 53 (fileset.test.mjs:424-438) passes 18 parts, and each part also checks that a fetch writes nothing."
+    },
+    {
+      "criterion": "Fetch order: every known digest is compared before readZip; verify and applicability do not parse a mismatched source",
+      "met": true,
+      "evidence": "fetchFileSet (fileset.mjs:614-640) checks, before the first readZip at line 652:\n- the size pin\n- the published digest\n- the previous record's size and SHA-256\n- the Git blob ID\n- the corpora.json pins, through fileSetPinProblems on the source listing\nloadZips (lines 818-831) and verifyFileSet (lines 868-879) skip parsing on a mismatch. Case 54 (fileset.test.mjs:439-484) passes 4 of 4 parts."
+    },
+    {
+      "criterion": "Network: manual redirects, https on five allowlisted hosts for every hop, and a stop at the pinned size or 256 MiB",
+      "met": true,
+      "evidence": "These rules are in fileset.mjs:437-517:\n- DOWNLOAD_HOSTS at line 438\n- checkHop rejects any non-https: URL, other hosts, a port, and credentials\n- redirect: 'manual' with at most 10 hops\n- the limit applies to Content-Length and to the streamed byte count\n- downloadLimit is the pinned size, else the previous record's size, else 256 MiB\nCase 54 (lines 485-534) passes 6 of 6 parts with a fake fetch. No real-network fetch ran in r1."
+    },
+    {
+      "criterion": "Atomic replacement: stage beside the targets, keep the old files, restore everything on failure, write the record last, and leave nothing behind",
+      "met": true,
+      "evidence": "commitFileSet (fileset.mjs:707-772) stages with the wx flag, renames each old file to .old, swaps the source directory, renames the record last, and in its catch block reverses every step and removes the staged files and the directories it created. The case 54 injection test (fileset.test.mjs:535-562) requires at least 10 steps and checks an identical snapshot of corporaDir, src, and specs after a failure at each step. It failed before the fix ('only 0 write steps') and passes after."
+    },
+    {
+      "criterion": "fontTools invocation: staging cwd, PYTHONSAFEPATH=1 and no other PYTHON* variable, a RECORD check before corpus-derive runs, the README sandbox statement, and sfntCopyright hardening",
+      "met": true,
+      "evidence": "runPython and pythonEnvironment are at fileset.mjs:950-963. verifyToolInstallation (lines 996-1044) runs before probeTool and before any subset run in deriveFileSet (lines 1069-1118) and in fontExpectations (lines 1133-1169). A grep confirms that every Python spawn in tools/ goes through runPython. sfntCopyright is at lines 403-434. tools/README.md:301 contains the sandbox statement, but it is not accurate for font-expectations; see the findings. Case 55 passes 3 tests in the controller gate."
+    },
+    {
+      "criterion": "Case 12 compares generator.script_sha256 with the committed script and the fontTools version with engineering/dependencies.json",
+      "met": true,
+      "evidence": "tests/text/fixture_test.zig:24-47 hashes tools/fonts/font_expectations.py and reads the fontTools version from dependencies.json. build.zig:139-142 sets the run cwd to the build root and declares both files as inputs. font-expectations-r1.log records script SHA-256 ea1ee96f…c350c51b."
+    },
+    {
+      "criterion": "The reference test marks assigned code points and fails on any gap",
+      "met": true,
+      "evidence": "reference_test.zig:94-114 (the Assigned bitset), 133-135 (expectComplete after each dense property), and 186-187 (scx). A unit test (lines 172-179) shows UnassignedCodePoint for one-code-point gaps at U+0041 and U+10FFFF. Library tests are 145/145 in tests-after-r1.log and 146/146 at integration."
+    },
+    {
+      "criterion": "Trust-on-first-use statements in the README and specs/README.md",
+      "met": true,
+      "evidence": "README.md:72-83 and specs/README.md:67-70 state that the UCD files and the noto-sans archive were trusted on first use, and that the corpora.json pins, once applied, check later fetches. specs/corpora.json pins are still null, as the text says."
+    },
+    {
+      "criterion": "Cases 50-52 fail before the fix, and so does every unmet part of cases 53-55",
+      "met": true,
+      "evidence": "tests-before-r1.log:\n- Case 50 fails with TestExpectedError (lines 180-193).\n- Cases 51 and 52 fail to compile on the missing counter and the optional APIs (lines 75-117).\n- Four case 52 tests panic (lines 195-322).\n- Case 53 fails 13 of 18 parts. The other 5 parts (CRC-32, two size mismatches, two drive-letter names) were already met, as the README says.\n- Case 54 fails 4/4, 6/6, and 0 injection steps.\n- Case 55 fails 5/5, the runPython test, and 4 of 5 sfntCopyright parts.\nCase 51 fails only for lack of the contract-mandated counter, and the README states this."
+    },
+    {
+      "criterion": "A mutation control that removes the full-set rejection fails case 50 or 51",
+      "met": true,
+      "evidence": "mutation-cmap-r1.diff turns cmap.zig:124 into a silent return. mutation-cmap-r1.log shows two runs, both exit 1, with only case 50 failing (189/190 tests)."
+    },
+    {
+      "criterion": "font-expectations-r1.log reruns all four fixtures under the hardened invocation with byte equality",
+      "met": true,
+      "evidence": "Three `font-expectations --check` runs, each exit 0. Each verified 350 files against the wheel RECORD, ran in a fresh %TEMP% staging directory, and reported equals_committed true for all four expectation files. sha256sum of the committed files matches the produced digests."
+    },
+    {
+      "criterion": "Evidence binds to 4a09ed5, with HEAD and status recorded before and after",
+      "met": true,
+      "evidence": "r1-integration-binding.log records rev-parse 4a09ed5fdae4… and an empty --ignored status over every source root at 10:43:59.12Z and again at 10:45:45.82Z. Four gate receipts fall inside that window:\n- repo-check 10:43:59.33\n- controller-test 10:43:59.65, 188/188\n- zig-fmt 10:44:36.96\n- zig-test 10:44:37.23\nEach has identical before and after source hashes (82f9897d…, 236 files) and policy hashes (b075f8f4…). r1-integration-tests.log (10:44:52.5, 191/191, with the ZIG_GLOBAL_CACHE_DIR override recorded), r1-integration-bun.log (188/188), and r1-integration-corpus.log (10:45:43-45, all pass) also ran inside it."
+    },
+    {
+      "criterion": "The Revision 1 evidence list is complete, and every Zig command records the ZIG_GLOBAL_CACHE_DIR override",
+      "met": true,
+      "evidence": "Present: tests-before-r1, mutation-cmap-r1 with its diff, tests-after-r1 (uncached cache dir, 190/190), controller-tests-after-r1 (187/187 twice), ucd-check-r1, corpus-verify-r1 (both corpora, twice), font-expectations-r1, corpus-derive-r1, fonttools-install-r1, integrator-rfn-search-r1, and README '## Revision 1'. Every Zig RESULT line I inspected carries the environment_overrides ZIG_GLOBAL_CACHE_DIR."
+    },
+    {
+      "criterion": "Earlier review findings resolved",
+      "met": true,
+      "evidence": "Status of each earlier finding:\n- cmap major: fixed.\n- Bounded-work README minor: rewritten.\n- ZIG_GLOBAL_CACHE_DIR minor: recorded in r1-integration-tests.log:114.\n- Generator digest minor: checked in case 12.\n- Uninitialized reference arrays note: the arrays stay uninitialized, but the Assigned bitset proves full coverage before any read.\n- CFF RFN strings note: the integrator searched the whole file in ASCII and UTF-16BE (integrator-rfn-search-r1.log: Source 0, Source in UTF-16BE 0, control NotoSans 1).\n- Binary notices note: owned by FP-0075 (plan.json:3147-3161).\n- HEAD mismatch note: addressed by the binding log, though HEAD has moved again; see the findings."
+    },
+    {
+      "criterion": "No protected-policy change, and no shell code reaches the engine outside the embedding contract",
+      "met": true,
+      "evidence": "The README file list (README.md:276-280) names no protected path, no Rust, and no ABI file. The policy hash is constant across all four r1 receipts. specs/corpora.json pins are still null. The capability record change (specs/capabilities/text-fonts.json:18) is in a writable path. I did not diff 4a09ed5 against its parent [INFERENCE]."
+    },
+    {
+      "criterion": "The integrator's acceptance of the worker's open questions is justified",
+      "met": true,
+      "evidence": "Each open question:\n- Case 55 runs through runPython: acceptable. Every Python spawn uses runPython (fileset.mjs:962, 1050, 1104, 1153), and the real runs' probe asserts safe_path and the import location.\n- The __pycache__ and .pth limits: acceptable as residual risk at venv-write trust level, but understated; see the findings.\n- The unchanged usage line: acceptable, and tools/README.md:312-314 documents it.\n- The RFN search: done."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/fileset.mjs",
+      "line": 1149,
+      "issue": "fontExpectations copies each fixture font from the working tree and runs fontTools on it without first comparing it with the SHA-256 in specs/snapshots/opentype-fixtures.json. tools/README.md:301, the fileset.mjs:958 comment, and README.md (Revision 1 Changes) state that fontTools runs 'on inputs pinned by Git blob or SHA-256 only'. That is true for corpus-derive (fileset.mjs:1085-1086) but not for font-expectations.\n\nReproduction:\n1. Append one byte to tests/text/fonts/noto-sans/NotoSans-Regular.ttf.\n2. Run `node tools/fairpane.mjs font-expectations --check`.\n3. fontTools parses the changed bytes before any digest check. The run then reports a differing file instead of refusing the input.\n\nThe security review also reports this as minor.",
+      "recommendation": "Before copying each font in fontExpectations, compare its size and SHA-256 with the selected or derived entry of the opentype-fixtures record, and refuse on a mismatch. Alternatively, narrow the documentation statement to corpus-derive."
+    },
+    {
+      "severity": "note",
+      "path": "tests/text/bounds_test.zig",
+      "line": 75,
+      "issue": "The third block of case 50 is described as 'the review's construction ... one costly subtable', and README.md:220 repeats this. distinctSubtablesCmap(512, 4096) shares builder.ttFormat4, which is the two-segment B_TT subtable (sfnt_builder.zig:540-543), not a costly one. The assertion still holds, because the first shared offset is the 513th distinct offset. No regression test exercises a costly subtable after a full set, or the overlapping format 12 amplification that the README bounds by argument.",
+      "recommendation": "Use sharedFormat4Cmap's 256-segment subtable in that block, or correct the comment and the README sentence."
+    },
+    {
+      "severity": "note",
+      "path": "tools/fileset.test.mjs",
+      "line": 594,
+      "issue": "Case 55 tests runPython directly with Node standing in for Python. Nothing in the test binds deriveFileSet or fontExpectations to runPython, so a later direct spawnSync of the interpreter would not fail case 55. Today every Python spawn goes through runPython (fileset.mjs:962, 1050, 1104, 1153), and the real-run probe asserts sys.flags.safe_path. The integrator's acceptance is therefore correct for the current code.",
+      "recommendation": "Add a controller check that deriveFileSet and fontExpectations spawn only through runPython, for example by injecting the spawn function, or by grepping fileset.mjs for spawnSync of toolPython."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0013/README.md",
+      "line": 342,
+      "issue": "The integrator accepts only '__pycache__ bytecode or .pth files' as outside the installation check. The real residual is wider. verifyToolInstallation walks only the package directories that RECORD names (fileset.mjs:1033-1042), so a planted top-level module in site-packages also escapes the check, such as sitecustomize.py or an optional dependency that fontTools imports. pyvenv.cfg and the base interpreter's standard library also go unchecked. A planted .pyc whose header matches the source is loaded in place of the verified .py. The trust-level argument still holds, so this is not blocking.",
+      "recommendation": "State the full residual in the README. Consider passing `-X pycache_prefix=<fresh staging dir>` on the interpreter command line, which is not a PYTHON* variable, so installed __pycache__ files are never read."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0013/README.md",
+      "line": 84,
+      "issue": "Line 84 still says ADR 0003 names only wpt and test262 and that the integrator 'may amend it'. Line 246 says ADR 0003 now points at the file-set kind. The README contradicts itself.",
+      "recommendation": "Remove or update line 84."
+    },
+    {
+      "severity": "note",
+      "path": "tools/fileset.mjs",
+      "line": 690,
+      "issue": "fetchFileSet deletes any existing `<id>.old` before the write phase. Suppose a process is killed between commitFileSet's rename of target to old and its rename of staging to target. The previous sources then exist only in `<id>.old`, and the next fetch deletes them. In-process failures roll back correctly. The security review notes that crash recovery is absent.",
+      "recommendation": "Before deleting `<id>.old`, refuse when `<id>.old` exists and `<id>` does not, and report a recovery step."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0013/raw/r1-integration-corpus.log",
+      "line": 44,
+      "issue": "The corpus-verify RESULT lines record no FAIRPANE_CORPORA_DIR override. They rely on the default, <root>/.tools/corpora, which equals the worker's override path. The result is unaffected. This is carried over from the earlier review.",
+      "recommendation": "Record the --env override in future integration corpus logs."
+    },
+    {
+      "severity": "note",
+      "path": ".git/logs/HEAD",
+      "line": 140,
+      "issue": "HEAD is 9fe40c4 (FP-0008 tokenizer), three commits after 24b8a35. I could not run git to confirm that src/font, src/unicode/reference_test.zig, tests/text, and tools/fileset.mjs are unchanged since 4a09ed5. The files I reviewed are the current checkout.",
+      "recommendation": "Run `git diff 4a09ed5 HEAD -- src/font src/unicode tests/text tools/fileset.mjs tools/fileset.test.mjs tools/corpus.mjs build.zig` before recording acceptance."
+    }
+  ],
+  "commands_run": []
+}
