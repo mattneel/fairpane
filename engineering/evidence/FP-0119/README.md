@@ -172,10 +172,21 @@ These belong to other tasks, as the contract states:
 - `FP-0121` and `FP-0122` own rasterization.
 - `FP-0058` compares the strictness choices with web-font practice.
 
-## Integrator steps
+## Integration
 
-The contract names these steps:
+Commit `077ad63` applies the worker's `out/fp0119.patch`, blob `fa6ad65967f57740475be62eee4515541ebbecd5`, on `f76662a`.
+That head already holds `FP-0108`, so `tests/text/root.zig` conflicted in two additive places; the integrator kept both imports, `grapheme_seed_test.zig` and `glyf_test.zig`, and named FP-0013, FP-0108, and FP-0119 in its header.
+Every other file applied cleanly.
+The head also holds `FP-0107`'s four-worker controller runner; FP-0119 adds no controller case.
 
-1. Record `raw/integration-binding.log`.
-2. Run `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` with `--evidence-dir engineering/evidence/FP-0119/gates`.
-3. Record an uncached `integration-tests.log`.
+`raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache directory `out/fp0119-integration`: `Build Summary: 100/100 steps succeeded; 348/348 tests passed`.
+`raw/integration-binding.log` records `HEAD` `077ad63` and a status that includes ignored files before and after these gates:
+
+| Gate | Receipt | Status | Duration |
+| --- | --- | --- | --- |
+| `repo-check` | `gates/2026-10-09T18-27-20-192Z-repo-check-46ac5466.json` | pass | 202 ms |
+| `controller-test` | `gates/2026-10-09T18-27-20-621Z-controller-test-ec21cb66.json` | pass, 244 of 244 | 43,609 ms |
+| `zig-fmt` | `gates/2026-10-09T18-28-04-554Z-zig-fmt-f6414bca.json` | pass | 83 ms |
+| `zig-test` | `gates/2026-10-09T18-28-04-966Z-zig-test-f7bac9fe.json` | pass | 46,114 ms |
+
+Bun 1.4.2 passes 244 of 244 controller cases in `raw/bun-selftest.log`.
