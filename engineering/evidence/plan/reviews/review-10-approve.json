@@ -1,0 +1,41 @@
+{
+  "verdict": "approve",
+  "summary": "Plan review 10: I approve b24dcab. It closes review 9's major finding and both of its minors, weakens no accepted obligation, keeps the graph acyclic, and gives FP-0135 testable criteria. Four notes follow, none blocking.\n\nHow I checked: I read the commit's patch on GitHub, then queried plan.json at HEAD with jq. I ran nothing, so `node tools/fairpane.mjs check` is [INFERENCE].\n\n**Review 9's findings:**\n1. **Major, closed.** FP-0072 criterion 5 now covers only :host, :host(), and :host-context() (plan.json:3244). These need only the shadow roots and host-including ancestors that FP-0127 provides. New criterion 6 (3245) reports ::slotted() as unsupported until slot assignment has an owner, and FP-0026's note now lists ::slotted() matching. Criterion 5 was new in cf67a28, so narrowing it weakens no accepted obligation.\n2. **Minor, closed.** FP-0026's note now carries the shadow-root DOM bindings: attachShadow(), the shadowRoot getter, closed-mode hiding, event retargeting, and composed paths. This is the alternative the FP-0127 check offered.\n3. **Minor, closed.** FP-0057 criterion 6 (2915) gives Device tables and contour-point anchors an owner. FP-0057 now depends on FP-0111 and FP-0113.\n4. **Notes.** FP-0058 and FP-0059 now read FP-0111's contract. The hash-flooding note became FP-0135, and FP-0026's note now hands that work to it.\n\n**The graph stays acyclic.** FP-0057 depends on FP-0056, FP-0061, FP-0111, and FP-0113. Those reach only FP-0013, FP-0119 to FP-0122, FP-0112, and FP-0111, and none of them reaches FP-0057. FP-0135 depends only on FP-0082, which depends on FP-0011 and FP-0003.\n\n**FP-0135's criteria are testable:**\n- an inventory of every input-filled hash map;\n- a per-instance seed or bounded probing, so that no input makes total lookup work superlinear in the number of keys;\n- a crafted colliding-key test with bounded work for each map;\n- preservation of FP-0082 revision 2's per-body bounds.\n\nIts paths, its gates (zig-fmt and zig-test), and its reviewers (fairpane-security included) fit.",
+  "commits": [
+    {
+      "commit": "b24dcab",
+      "verdict": "approve",
+      "notes": "**FP-0072.**\n- Criterion 5 now reads 'Match :host, :host(), and :host-context() within the encapsulation contexts of criterion 1, as the pinned CSS Scoping specification states.'\n- Criterion 6 reads 'Report ::slotted() as unsupported with its owner task until a task implements slot assignment.'\n- FP-0026's note now names ::slotted() matching, so criterion 6 has an owner to cite.\n- The FP-0072 state note records the change.\n\n**FP-0026's note.**\n- It adds the shadow-root DOM bindings, closing review 9's FP-0019 minor.\n- It moves hash-flooding resistance to FP-0135.\n\n**FP-0057 criterion 6** reads 'Apply non-variation Device table adjustments and contour-point anchors (AnchorFormat 2) at hinted sizes, replacing the reports of FP-0111 and FP-0113 that leave them unapplied.'\n- FP-0057 gains dependencies on FP-0111 and FP-0113, which provide the parsed Device and anchor data.\n- It keeps its writable paths and its five earlier criteria.\n\n**Read lists.** FP-0058 and FP-0059 add engineering/evidence/FP-0111/CONTRACT.md.\n\n**FP-0135 (plan.json:4413)** depends on FP-0082 and is reviewed by fairpane-review and fairpane-security. Its paths are src, tests, build.zig, engineering/decisions, and engineering/evidence. Its four criteria are listed in the summary. Its state note records that it replaces FP-0082 revision 2's routing to FP-0026.\n\nThe commit also carries engineering/evidence/FP-0100/reviews/review-1-accept.json (see notes)."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 2915,
+      "issue": "FP-0057 criterion 6 applies Device tables and contour-point anchors 'at hinted sizes'. Criterion 1 still lets FP-0057 decide whether hinting runs at all. Device-table deltas apply at a ppem whether or not outlines are hinted. Without hinting, AnchorFormat 2 falls back to its x and y coordinates. If FP-0057 decides on no hinting, 'at hinted sizes' could be read as making criterion 6 vacuous.",
+      "recommendation": "In FP-0057's contract, freeze that Device-table deltas apply at every rendered ppem regardless of the hinting decision. Freeze that AnchorFormat 2 uses the hinted contour point when hinting runs and its design coordinates otherwise, with a test of each case."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 4425,
+      "issue": "FP-0135 criterion 2 allows 'a per-instance seed from a first-party source'. A random seed changes the iteration order of each map between runs. If any output iterates a map, such as tree dumps, census records, diagnostics order, or laboratory results, the output becomes nondeterministic, and evidence may no longer reproduce. Criterion 1's inventory covers the maps that exist when FP-0135 runs, but nothing makes later tasks use the protected map type.",
+      "recommendation": "In FP-0135's contract:\n- require that no recorded output depends on map iteration order;\n- give tests a seed hook so the crafted collisions are deterministic;\n- record the rule for future maps in ADR form, for example by adding the protected type to a lint or to docs/ARCHITECTURE.md, so new input-filled maps cannot bypass it."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 2917,
+      "issue": "FP-0057's read list (2917) does not name the FP-0111 or FP-0113 contracts, although its new criterion 6 replaces their reports. FP-0059 reads FP-0111's contract but not FP-0113's, although its criterion 8 replaces FP-0113's VariationIndex report.",
+      "recommendation": "When those contracts are frozen, add engineering/evidence/FP-0111/CONTRACT.md and FP-0113/CONTRACT.md to FP-0057's read list, and FP-0113/CONTRACT.md to FP-0059's."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0100/reviews/review-1-accept.json",
+      "line": null,
+      "issue": "b24dcab is a plan commit, but it also adds FP-0100's review 1 record, which is task evidence unrelated to the plan change. docs/AGENT_OPERATIONS.md asks that plan changes land in their own plan: commits. Plan reviews have been recorded inside plan commits, but a task's review record is task evidence. The commit message names it, and it changes no plan text.",
+      "recommendation": "Commit task review records in that task's own evidence commit, and keep plan commits to plan, state, and plan review records."
+    }
+  ]
+}
