@@ -247,6 +247,8 @@ The "before" and "after" blobs equal `tools/lib.mjs` in both "after" logs.
 
 - Amendment 1 resolves the case 2 defect on Windows under Node, and amendment 2 under Bun; see "Amendment 1" and "Amendment 2".
   The revised case has not run on Linux.
-- The integrator records `HEAD` and a status that includes ignored files for every source root before and after `repo-check` and `controller-test`.
-- The integrator runs and records `corpus-verify test262` and `corpus-verify wpt` at the integration commit.
+- Integration of amendment 2: the integrator applied the worker's own patch `out/fp0052-a2.patch` (blob `82561b31`, base `0954a37`) and committed it as `05001ab`.
+  `raw/integration-binding-a2.log` records `HEAD` `1a15063` and an empty status that includes ignored files for every source root, before and after the runs; `gates/2026-10-09T17-19-26-668Z-repo-check-c2373e32.json` and `gates/2026-10-09T17-19-27-081Z-controller-test-ea92c287.json` pass, and `raw/bun-selftest-a2.log` passes 236 of 236 tests under Bun.
+  The earlier binding at `a342961` (`raw/integration-binding.log` and `raw/bun-selftest.log`) passed both gates but failed case 2 under Bun, which amendment 2 fixed.
+- `raw/integration-corpus-verify-test262.log` and `raw/integration-corpus-verify-wpt.log` run `corpus-verify` at `1a15063` with `FAIRPANE_CORPORA_DIR` set to the integrator's corpora directory, and both exit with status 0.
 - The contract says that the plan criterion names all three system programs; `engineering/plan.json` is outside this task's writable paths.
