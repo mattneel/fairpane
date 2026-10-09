@@ -206,3 +206,13 @@ Case 4 must fail before the change only if a builder's output changes; it passes
 5. `assertions-r3.log`: `git diff --stat` and `git diff` of the test files, with every changed line accounted for in the README as a fixture change, never an assertion change.
 6. `mutation-r3.log` with M4, and `bun-selftest-r3.log`.
 7. After integration, the ten dispatched runs of criterion 3 repeat on a head that contains revision 3.
+
+### Revision 3 amendments
+
+1. Worker `FP0107Revision3` showed that the local target "falls by at least half" cannot be met within the authorized scope.
+   Its worker-aware probe counts 1975 child processes in the base suite: the tools under test start 987 of them, 735 in `tools/corpus.mjs`, and the test files start 988.
+   Both local targets therefore become measurements without a bound; the README reports them before and after, and criterion 3's dispatched runs stay the only acceptance bound.
+   Tool code may also change where the recorded probe shows a tool starting one `git` process per object or query that one batched call can serve.
+   Every tool output, error message, exit status, ordering, and on-disk effect stays identical, every digest and object-ID check stays exactly as strict, and every existing case passes unchanged.
+   The README lists each tool change with the cases that cover it and its effect on the process count.
+   A change to corpus or attestation verification also needs a `fairpane-security` review before acceptance.
