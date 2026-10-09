@@ -270,3 +270,26 @@ Because of this change, it now decides whether `install-rust` reuses an existing
 - Windows 11, x86_64, Bun 1.4.2: `tools/rust.test.mjs` (`bun-rust-tests-r3.log`).
 - WSL Ubuntu, x86_64, Node v26.7.0 at `$HOME/fairpane-linux/node`, host `x86_64-unknown-linux-gnu`: the Linux install, the toolchain checks, the probe, and `tools/rust.test.mjs`.
 - The cross target `i686-unknown-linux-gnu`: metadata builds of the probe only. Nothing linked or ran i686 code.
+
+## Integration
+
+The integrator landed worker FP0132Cost's revision 3 patches in the contract's order, on `61eae9a`.
+Each blob matched the worker's report: `fp0132-a-r3.patch` `17ca0022…`, `fp0132-p1-r3.patch` `dc357906…`, which is the frozen P1 blob, and `fp0132-b-r3.patch` `e50aff23…`.
+
+| Commit | Content | Checks before the commit |
+| --- | --- | --- |
+| `4013d7e` | Commit A: six files, with the lock unchanged | `check` passes, and the controller suite passes 260 of 260 |
+| `96d2966` | `reviews/policy-p1-approve.json`, the fairpane-security approval of P1 | `check` passes |
+| `e13b7bf` | `policy:` commit P1, whose staged hunks equal `raw/p1-rust-lock.diff` | `check` passes, and the controller suite passes 260 of 260 |
+| `0a774f8` | Commit B: `tools/rust.test.mjs` only | `check` passes, and the controller suite passes 260 of 260 |
+| `af7380a` | Commit E: this directory without `gates/` | `check` passes |
+
+`raw/integration-binding.log` records `HEAD` `af7380a` and a status that includes ignored files for every source root before and after these runs:
+
+| Run | Record | Result |
+| --- | --- | --- |
+| `repo-check` | `gates/2026-10-09T21-50-44-384Z-repo-check-495ecfad.json` | pass, 216 ms |
+| `controller-test` | `gates/2026-10-09T21-50-44-881Z-controller-test-94a32da8.json` | pass, 260 of 260, 44,524 ms |
+| Bun 1.4.2 | `raw/bun-selftest.log` | 260 of 260 |
+
+The integration base also holds FP-0107 revision 3, FP-0111, and FP-0106, so its controller suite has 254 cases before FP-0132's six.
