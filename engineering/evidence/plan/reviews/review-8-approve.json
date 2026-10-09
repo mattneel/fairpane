@@ -1,0 +1,53 @@
+{
+  "verdict": "approve",
+  "summary": "Plan review 8: I approve 194739e and d945fa7. Neither commit weakens a criterion, and every FP-0080 criterion is carried by a slice, with criteria 9 and 10 split into named halves. There is one minor finding: the three new tasks' protected-path lists omit rust-toolchain.toml, which policy.json protects. Five notes follow.\n\nHow I checked: I read both diffs on GitHub, the current entries for FP-0034, FP-0080, FP-0111, and FP-0114 to FP-0115, policy.json, and the worker's draft at out/drafts/FP-0080-split.json. I ran nothing; that `node tools/fairpane.mjs check` passes is [INFERENCE].\n\n**194739e applies plan review 7.**\n- **FP-0114 criterion 4** now pins text-rendering-tests with a license record and per-file inventory through a separate protected change. It imports every redistributable case and compares the cases that exercise its engines.\n- **FP-0115 criterion 3** compares the Devanagari cases that FP-0114 imports, and FP-0115 depends on FP-0114.\n- **FP-0111** gains the tools path and criterion 6. That criterion checks parsed GDEF, GSUB, and GPOS lists against dumps from tools/fonts/font_expectations.py, which exists, under the hardened font-expectations invocation that FP-0078 criterion 2 binds.\n- The commit also adds the ISOAdobe note and the comparison rules to state.json, and records review 7.\n\n**d945fa7 splits FP-0080, which keeps its 13 criteria and depends on FP-0132, FP-0133, and FP-0134.**\n- **FP-0133** carries criteria 1 to 8 and 13 word for word.\n- **FP-0134** carries criteria 11 and 12 word for word.\n- **Criterion 9 (source inventory and gate registry):** the source-inventory half is FP-0133 criterion 11, and the gate-registry half is FP-0134 criterion 3. Both go through separate protected changes.\n- **Criterion 10 (layout assertions and lock change):** the reviewed lock change is FP-0132 criterion 1, and the assertions compiled for i686 are FP-0133 criterion 10.\n- **Chain and paths:** the dependency chain is FP-0079 → FP-0132 → FP-0133 → FP-0134 → FP-0080, with FP-0021 in FP-0133. The writable paths fit each slice, and fairpane-security reviews all three.\n- **The integrator's decisions in the state notes are sound:**\n  - No targets line in rust-toolchain.toml, so no rustup proxy fires.\n  - The installer swaps in a new toolchain only after it passes its checks.\n  - The workspace holds only fairpane-sys until FP-0029, so there is no stub crate.\n  - FP-0134 adds the Gates workflow, because FP-0034 waits for FP-0017's browser window. That adds CI coverage that FP-0080 did not require, and weakens nothing.",
+  "commits": [
+    {
+      "commit": "194739e",
+      "verdict": "approve",
+      "notes": "**FP-0114 criterion 4 (plan.json:3862).**\n- It keeps the seed comparisons against first-party expectations.\n- Adds 'Pin Unicode's text-rendering-tests at a commit with a license record and a per-file inventory, import every case whose files carry a recorded license that permits redistribution, apply the pin through a separate protected change'.\n- Compares every imported case that exercises its engines.\n- Keeps 'freeze no other third-party fixture without owner approval'.\n\nThis fixes both review 7 minors, and FP-0114 already lists specs/corpora.json as protected.\n\n**FP-0115 criterion 3.** It now compares 'every Devanagari case that FP-0114 imports'. FP-0115 depends on FP-0114, so its src, tests, and build.zig paths suffice.\n\n**FP-0111 criterion 6 (3797).** It gains the tools path and checks each fixture font's parsed GDEF classes and its GSUB and GPOS script, feature, and lookup lists against the fontTools dumps. This is within the approved use: dumps as expectation files, never shaping output, import time only.\n\n**State notes.**\n- FP-0059 records that ISOAdobe follows the identity rule and is not an imported table.\n- FP-0114 and FP-0115 bind their contracts to review 7's comparison rules.\n- FP-0111 records why it owns the dumps.\n\nThe commit records review 7 and changes only plan, state, and that record."
+    },
+    {
+      "commit": "d945fa7",
+      "verdict": "approve",
+      "notes": "**FP-0080 (closing task).** Its acceptance is unchanged, and its depends_on is now [\"FP-0021\", \"FP-0079\", \"FP-0132\", \"FP-0133\", \"FP-0134\"].\n\n**FP-0132 (4254, depends on FP-0079).**\n- Criterion 1 adds the i686 rust-std entry from the committed signed manifest through a separate protected change with independent approval. That is FP-0080 criterion 10's lock half.\n- Criteria 2 to 6 are testable: install targets into every host and check the receipt first, replace a toolchain only after the new one passes, no targets in rust-toolchain.toml and no rustup, a no_std probe on both hosts, and FP-0079 cases amended with no assertion dropped and at most one second of added case time.\n- Its paths are tools, tests/rust, docs/TOOLCHAIN.md, and evidence. The draft's three-commit landing (A, P1, B) keeps check green at each commit.\n\n**FP-0133 (4277, depends on FP-0021 and FP-0132).**\n- It carries FP-0080 criteria 1 to 8 and 13 verbatim.\n- Criterion 10 compiles the layout assertions for the host and i686, which is criterion 10's assertion half.\n- Criterion 11 adds the crate roots to the policy source inventory through a separate protected change, which is criterion 9's inventory half.\n- It requires the c-abi and zig-test gates.\n\n**FP-0134 (4305, depends on FP-0133).**\n- It carries criteria 11 and 12 verbatim.\n- Criterion 3 registers the rust-fmt and rust-wrapper gates through a separate protected change and reruns the dependency proof, which is criterion 9's registry half.\n- Criterion 4 runs both gates in the Gates workflow on Windows and Linux.\n- Its paths add .github/workflows and build.zig.\n\nFP-0080's state note says criteria 9 and 10 are shared, and the slice texts name each half.\n\nThe state-note decisions are sound:\n- rust-toolchain.toml gets no targets line, so rustup users' proxies are not triggered.\n- The installer swaps in a new toolchain only after its checks pass.\n- The workspace holds only fairpane-sys until FP-0029; this narrows the FP-0079 decision to avoid a stub crate.\n- FP-0134 owns the CI run, because FP-0034 depends on FP-0017.\n\nNo FP-0080 criterion is weakened. Minor: the three new protected lists omit rust-toolchain.toml."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 4254,
+      "issue": "FP-0132, FP-0133, and FP-0134 list protected_paths [AGENTS.md, docs/CHARTER.md, engineering/qualification.json, engineering/policy.json, engineering/gates.json, toolchains/zig.lock.json, toolchains/rust.lock.json, specs/corpora.json] without rust-toolchain.toml. engineering/policy.json:56 protects it, and every other task created since plan review 3 lists it. FP-0132 criterion 4 governs that file's content ('Keep rust-toolchain.toml free of targets'). The worker's draft notes the same gap in FP-0080's own list.",
+      "recommendation": "In the next plan commit, add \"rust-toolchain.toml\" to the protected_paths of FP-0080, FP-0132, FP-0133, and FP-0134."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 4305,
+      "issue": "FP-0134's read list names engineering/evidence/FP-0080/CONTRACT.md, which does not exist. The worker's split contract is only in the ignored out/drafts/FP-0080-split.json, whose contract_markdown is the S1 (FP-0132) contract.",
+      "recommendation": "Freeze and commit each slice contract (FP-0132, FP-0133, FP-0134) and the FP-0080 closing contract before dispatch. Point FP-0134's read list at FP-0133's and its own contract."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 4305,
+      "issue": "The rust-fmt and rust-wrapper gates do not exist yet, so no task can list them in required_gates; validatePlan rejects unknown gate IDs. After FP-0134 registers them, FP-0080's closing review and FP-0029 still require only repo-check, controller-test, zig-test, and c-abi. The Rust gates would then not be a condition of either acceptance.",
+      "recommendation": "In the plan commit that follows FP-0134's protected gate registration, add \"rust-fmt\" and \"rust-wrapper\" to the required_gates of FP-0080 and FP-0029."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 4305,
+      "issue": "FP-0134 criterion 4 adds a Rust install and two Rust gates to both Gates jobs. The Windows controller-test step has run at 120 s against its 120 s timeout (FP-0107), and zig-test has a 400 s budget (FP-0098). FP-0134 states no CI time bound for the new steps, and its workflow change also edits the gate list that tools/workflow-check.mjs checks, which FP-0099 criteria 1 and 6 also change.",
+      "recommendation": "In FP-0134's contract, freeze the timeout of each new gate and record its CI duration over several runs, as FP-0098 and FP-0107 do. Sequence FP-0134's workflow-checker change after FP-0099, or have its contract name the merge with FP-0099's JOB_GATES changes."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3797,
+      "issue": "FP-0111 criterion 6 runs a new fontTools dump through font-expectations' hardened invocation. FP-0078 criterion 2 adds the test that binds every Python child process of corpus-derive and font-expectations to that invocation, and FP-0078 is still planned, with no ordering between the two tasks. If FP-0078 lands first, its binding test may not cover the new dump path. If FP-0111 lands first, nothing tests that the new path uses the hardened invocation until FP-0078 lands.",
+      "recommendation": "In FP-0111's contract, either extend the existing binding test to the dump path, if FP-0078 is accepted first, or record that FP-0078's binding test must include it."
+    }
+  ]
+}
