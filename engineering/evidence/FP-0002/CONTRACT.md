@@ -71,8 +71,15 @@ It returns a verified record or throws an error with one of these codes.
 A truncated envelope fails as `malformed`.
 A truncated payload fails as `bad-signature`, or as `malformed` when a trusted key signed it.
 
+The payload must equal the `JSON.stringify` serialization of its own parsed value.
+A payload with an unpaired surrogate, a duplicate key, or any other noncanonical spelling fails as `malformed`.
+This rule gives each signed byte string exactly one meaning.
+
 The controller command `attest-verify --trust-policy <path> --candidate <commit> <envelope>` runs the verifier.
 It exits with status 1 and the error code on any rejection.
+It adds two codes for its own inputs.
+`unprotected-policy` reports a trust policy inside the repository.
+`unknown-candidate` reports a candidate name that does not resolve to a commit.
 
 ### Release check
 
@@ -97,6 +104,8 @@ No metadata edit can produce release success.
 13. `attest-verify` rejects a trust policy stored inside the repository.
 14. Candidate identity resolution returns the commit and tree from a fixture repository and rejects an unknown commit.
 15. `release-check` still exits with status 1.
+16. A trusted signature over a noncanonical payload fails as `malformed`.
+    The fixtures include an unpaired surrogate, a duplicate key, and added whitespace.
 
 ## Authority
 
@@ -113,7 +122,10 @@ node tools/fairpane.mjs record engineering/evidence/FP-0002/raw/release-check.lo
 ```
 
 Required target execution: Windows x86_64 host execution.
-Expected test denominator: the existing controller tests plus the fifteen cases above.
+Expected test denominator: the existing controller tests plus the sixteen cases above.
+
+`tools/attest.test.mjs` holds the verifier's cases, and it runs both standalone and inside the controller test run.
+It imports nothing from the local receipt code.
 
 ## Non-goals
 
@@ -121,3 +133,12 @@ Expected test denominator: the existing controller tests plus the fifteen cases 
 - The verifier does not decide release qualification; it authenticates and checks result records.
 - Git object identity uses SHA-1 commit and tree IDs in this repository format.
   A SHA-256 object format or content digest is a later hardening step.
+
+## Revisions
+
+Revision 1 precedes the first committed implementation.
+It adds the canonical payload rule and case 16.
+A JavaScript string can hold an unpaired surrogate, which the UTF-8 conversion replaces with U+FFFD.
+Two different payload texts could then share signed bytes and carry different meanings.
+Duplicate keys create the same ambiguity across JSON parsers.
+Revision 1 also names the two controller codes and the standalone test module.
