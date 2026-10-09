@@ -24,11 +24,13 @@ An abbreviated ID, a ref name, a missing commit, and an output directory inside 
 The tar is the output of `git archive --format=tar --prefix=fairpane-<commit>/ <commit>`.
 Git runs through the hardened calls of `tools/attest.mjs`, without replace objects, inherited `GIT_*` variables, or prompts.
 The command also sets `core.autocrlf=false`, `core.eol=lf`, and `tar.umask=0002`, because user or repository configuration would otherwise change line ends or tar permissions.
-`git archive` records the commit time as each entry's modification time and the commit ID in a global pax header, so the tar depends only on the commit.
+`git archive` records the commit time as each entry's modification time and the commit ID in a global pax header.
 The commit time serves as the archive's `SOURCE_DATE_EPOCH`, so no clock value enters the tar.
+The tar therefore depends on the commit and on the Git implementation that writes it.
+Configuration cannot change its bytes, but another Git version may.
 
 The manifest has the format `fairpane-source-manifest`, version 1.
-It records the commit ID, the tree ID, and the tar's name, size, and SHA-256.
+It records the commit ID, the tree ID, `git_version`, which is the first line of `git --version`, and the tar's name, size, and SHA-256.
 It lists every regular file and symbolic link of the commit's tree with its path, Git mode, size, and SHA-256, sorted by UTF-8 path bytes.
 Contents come from the Git object database, never from the working tree.
 A submodule entry has no content in the archive, so the manifest omits it.
@@ -45,19 +47,29 @@ It runs `zig build -Doptimize=ReleaseSafe --prefix zig-out` from the archive roo
 The build uses fresh local and global Zig caches, set through `ZIG_LOCAL_CACHE_DIR` and `ZIG_GLOBAL_CACHE_DIR`, and no other inherited `ZIG_*` variable.
 Its outputs are the files installed under `zig-out`.
 The URI `https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#build-type-1` names this definition in a provenance statement.
+The meaning of build type 1 never changes.
+A changed build definition gets a new numbered section, such as build type 2, with its own anchor, and an existing statement keeps the anchor that it names.
 
 ### Build provenance
 
 `node tools/fairpane.mjs provenance <commit> <artifact>...` writes an in-toto Statement version 1 with the SLSA Provenance version 1 predicate to standard output.
 Its subjects are the artifacts, each named by its file name with its SHA-256 digest.
 Its build definition names build type 1, the commit, the tree, the build command, and the Zig version, host platform, and archive digest from the commit's own lock.
+These toolchain fields come from the commit's lock and from the host that runs `provenance`, not from an observation of the build.
+A protected runner must bind them to the build that it performs.
 Its resolved dependencies name the source by `gitCommit` and `gitTree` digests and the compiler archive by its locked URL and SHA-256.
-Its run details name the builder `fairpane-local-unsigned`.
+Its run details name unsigned local builder 1.
 
 The statement is unsigned.
 It is a record format for a later protected runner, not an attestation.
-No verifier treats `fairpane-local-unsigned` as a trusted builder, because any workspace writer can produce the same statement.
-A protected runner replaces the builder ID with its own and signs the statement as the next section describes.
+A protected runner replaces the builder ID with its own and signs the statement as the section on release signatures describes.
+
+### Unsigned local builder 1
+
+The URI `https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#unsigned-local-builder-1` is the builder ID of a statement that `provenance` writes in an unprotected workspace.
+SLSA Provenance version 1 requires a builder ID to be a URI, and this anchor gives the ID a fixed meaning.
+Any workspace writer can produce a statement with this builder ID, so no verifier trusts it.
+The meaning of this anchor never changes, and a changed definition gets a new numbered section.
 
 ### Reproducibility check
 
@@ -66,6 +78,7 @@ It extracts the archive into two fresh work trees under `out/reproduce/`.
 In each tree, it runs `zig build -Doptimize=ReleaseSafe --prefix <tree>/zig-out` with the locked compiler.
 `ZIG_LOCAL_CACHE_DIR` and `ZIG_GLOBAL_CACHE_DIR` name fresh cache directories inside that tree, because the locked compiler's build runner rejects a `--global-cache-dir` argument.
 It then compares the SHA-256 of every installed file.
+The report's `build_type_command` is the canonical command of build type 1, and each entry of `builds` keeps the exact arguments of its tree.
 
 The result is `reproducible` when the trees installed the same paths with the same digests, and the command exits with status 0 only then.
 The result is `different`, with the differing paths, when any path or digest differs, and the command exits with status 1.

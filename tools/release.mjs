@@ -12,9 +12,13 @@ import { checkCompiler, fileHash, hostPlatform, invariant, sha256, validateLock 
 
 export const MANIFEST_FORMAT = 'fairpane-source-manifest';
 export const MANIFEST_VERSION = 1;
-/** The builder ID of a statement from an unprotected workspace. No verifier treats it as a trusted builder. */
-export const BUILDER_ID = 'fairpane-local-unsigned';
-const BUILD_TYPE = 'https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#build-type-1';
+const ADR_0009 = 'https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md';
+/**
+ * The builder ID of a statement from an unprotected workspace, a URI as SLSA Provenance v1 requires.
+ * No verifier treats it as a trusted builder, and ADR 0009 never changes the meaning of its anchor.
+ */
+export const BUILDER_ID = `${ADR_0009}#unsigned-local-builder-1`;
+const BUILD_TYPE = `${ADR_0009}#build-type-1`;
 const BUILD_ARGUMENTS = Object.freeze(['build', '-Doptimize=ReleaseSafe']);
 /** The release build, run from the root of the extracted source archive with the locked compiler as `zig`. */
 export const BUILD_COMMAND = Object.freeze(['zig', ...BUILD_ARGUMENTS, '--prefix', 'zig-out']);
@@ -36,6 +40,12 @@ function gitBytes(repository, args, input) {
   const r = readGit(repository, args, { raw: true, input, maxBuffer: OUTPUT_LIMIT, timeout: GIT_TIMEOUT_MS });
   invariant(r.status === 0, `git ${args.find(a => !a.startsWith('-') && !a.includes('='))} exited with status ${r.status}: ${r.stderr.toString('utf8').trim()}`);
   return r.stdout;
+}
+/** The first line of `git --version` from the Git that writes the tar, because the tar bytes can depend on that version. */
+function gitVersion(repository) {
+  const r = readGit(repository, ['--version']);
+  invariant(r.status === 0, `git --version exited with status ${r.status}: ${r.stderr.trim()}`);
+  return r.stdout.split(/\r?\n/)[0].trim();
 }
 
 /** The SHA-256 and size of each blob, read through one `git cat-file --batch` process. */
@@ -166,7 +176,7 @@ export function buildSourceArchive(repository, commit) {
   const tar = gitBytes(repository, [...ARCHIVE_CONFIG, 'archive', '--format=tar', `--prefix=${prefix}`, commit]);
   const files = treeFiles(repository, commit), entries = readTar(tar);
   checkArchive(entries, Buffer.from(prefix), files);
-  const manifest = { format: MANIFEST_FORMAT, version: MANIFEST_VERSION, commit, tree,
+  const manifest = { format: MANIFEST_FORMAT, version: MANIFEST_VERSION, commit, tree, git_version: gitVersion(repository),
     tar: { name: `fairpane-${commit}.tar`, size: tar.length, sha256: sha256(tar) },
     files: files.map(f => ({ path: f.path, mode: f.mode, size: f.size, sha256: f.sha256 })) };
   return { tar, entries, prefix, manifest };
@@ -349,7 +359,7 @@ export function reproduceCheck(repositoryPath, commit, { compiler, fileSystem, t
   const runDir = fs.mkdtempSync(path.join(parent, `${commit.slice(0, 12)}-`));
   const trees = ['a', 'b'].map(name => path.join(runDir, name));
   const report = { result: 'error', commit, tree: source.manifest.tree, source_tar_sha256: source.manifest.tar.sha256,
-    build_command: [...BUILD_COMMAND], work_trees: trees, builds: [], files: [], differing: [], error: null, removal: null };
+    build_type_command: [...BUILD_COMMAND], work_trees: trees, builds: [], files: [], differing: [], error: null, removal: null };
   try {
     const installed = trees.map(tree => {
       extractTree(source.entries, source.prefix, tree);

@@ -228,25 +228,29 @@ These commands write local records only, and none of them signs, publishes, or u
 
 `source-archive` takes the tar from `git archive --format=tar --prefix=fairpane-<commit>/ <commit>` through the verifier's hardened Git calls.
 It also pins `core.autocrlf`, `core.eol`, and `tar.umask`, so user configuration cannot change the bytes.
+The bytes still depend on the Git implementation, so the manifest records `git_version`, the first line of `git --version`.
 The manifest lists every regular file and symbolic link of the commit's tree with its path, mode, size, and SHA-256, sorted by path bytes.
-It records the commit, the tree, and the tar's SHA-256 in the format `fairpane-source-manifest`, version 1.
+It records the commit, the tree, the Git version, and the tar's SHA-256 in the format `fairpane-source-manifest`, version 1.
 The command parses the tar and fails before any write when the tar does not hold exactly the manifest's files, as an `export-ignore` or `export-subst` attribute would cause.
 An abbreviated ID, a ref name, a missing commit, and an output directory inside the repository or its Git directory also fail before any write.
 
 `provenance` reads the Zig lock from the commit's tree, not from the working tree, and names the host platform's compiler archive digest.
 Each subject is an artifact's file name with its SHA-256, so two artifacts with the same file name fail.
-The statement names the builder `fairpane-local-unsigned`.
+The statement names the builder ID `https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#unsigned-local-builder-1`, a URI as SLSA requires.
+Its toolchain fields come from the commit's lock and from the host that runs `provenance`, not from an observation of the build.
 It is a record format for a later protected runner, not an attestation, and no verifier may trust that builder.
 
 `reproduce-check` extracts the source archive into two fresh work trees and builds each with the commit's locked compiler.
 `ZIG_LOCAL_CACHE_DIR` and `ZIG_GLOBAL_CACHE_DIR` name fresh caches inside each tree, and no other inherited `ZIG_*` variable reaches the build.
 It compares the SHA-256 of every file under each tree's `zig-out`.
 It reports `reproducible` with exit status 0, `different` with the differing paths, or `error` for a failed extraction, a failed build, or an empty installation.
+The report's `build_type_command` is the canonical command of build type 1, and each entry of `builds` keeps the exact arguments of its tree.
 It removes both work trees afterward, and a removal failure appears in the report's `removal` field and makes the exit status 1.
 The two trees have different paths, so an output that embeds its build path reports `different`.
 `tools/release.test.mjs` holds the FP-0027 cases, and `node tools/fairpane.mjs test` runs them.
 `node tools/release.test.mjs` runs those cases without the rest of the controller.
 They run `reproduce-check` with a stand-in compiler that runs the fixture commit's own `build.mjs`, so they need no Zig installation.
+
 ## Generate the Unicode property tables
 
 `tools/ucd.mjs` reads the eight Unicode 18.0.0 files under `src/unicode/ucd/` and generates `src/unicode/tables.zig`.

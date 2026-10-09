@@ -154,6 +154,7 @@ export const releaseCases = [
     const m = readManifest(first, id);
     assert.equal(m.format, 'fairpane-source-manifest');
     assert.equal(m.version, 1);
+    assert.match(m.git_version, /^git version /, 'The manifest does not record the Git version that wrote the tar.');
     assert.equal(m.commit, id);
     assert.equal(m.tree, git(dir, ['rev-parse', `${id}^{tree}`]));
     assert.equal(m.tar.sha256, sha256(tar(first)));
@@ -232,7 +233,12 @@ export const releaseCases = [
       { zig_version: lock.version, platform: hostPlatform(), archive_sha256: locked.sha256 });
     assert.ok(definition.resolvedDependencies.some(d => d.digest.gitCommit === id && d.digest.gitTree === tree));
     assert.ok(definition.resolvedDependencies.some(d => d.uri === locked.url && d.digest.sha256 === locked.sha256));
-    assert.equal(statement.predicate.runDetails.builder.id, 'fairpane-local-unsigned');
+    assert.equal(statement.predicate.runDetails.builder.id,
+      'https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#unsigned-local-builder-1');
+    const httpsUrl = uri => { try { return new URL(uri).protocol === 'https:'; } catch { return false; } };
+    for (const uri of [definition.buildType, statement.predicate.runDetails.builder.id]) {
+      assert.ok(httpsUrl(uri), `${uri} is not an absolute https URL, which SLSA requires.`);
+    }
     assert.equal(JSON.stringify(statement).includes('signature'), false, 'An unsigned statement carries a signature field.');
     rejects(() => provenanceStatement(dir, id, []), /at least one artifact/);
     rejects(() => provenanceStatement(dir, id, [path.join(out, 'absent.bin')]), /regular file/);
