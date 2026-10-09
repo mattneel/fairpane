@@ -1035,3 +1035,8 @@ Record each command with `node tools/fairpane.mjs record` under `engineering/evi
    The worker chooses the mechanism, such as a census option that replaces the file and that only these two steps pass, or a step whose output path cannot exist before it runs, and the README states why the mechanism cannot hide a census failure.
    Case 3 of revision 2 repeats the reproduction with recorded commands: a passing `zig build test --summary all` with a fresh `--cache-dir`, a recorded deletion of both census steps' manifests in that cache that keeps their outputs, and a second run in that cache, which must pass with both census steps executed rather than cached.
    It must fail before the change, as `raw/census-rerun-6.log` shows, and its logs are `census-rerun-before-r2.log` and `census-rerun-after-r2.log`.
+2. Worker `FP0082Revision2` found that case 13 failed with `NondeterministicMemoryUsage` after the set rework.
+   `raw/probe-allocations-r2.log` shows that the base's allocation count already varied from 29 to 31 across twelve perturbed runs, so the base passed case 13 only because its runs happened to get the same placement.
+   The integrator accepts the worker's change outside the list above: the parser's `Limiter` refuses every resize and remap, so that its allocation count does not depend on the backing allocator's state.
+   A new test asserts that determinism, and control M17, which restores resize and remap, must fail case 13 and that test.
+   Evidence item 3 names M1 to M13, but this contract defines no M13; the recorded `git apply --check` covers M1 to M12 and M7-r1, and M6-r2 and M11-r2 replace the two controls that no longer apply to the revised parser.
