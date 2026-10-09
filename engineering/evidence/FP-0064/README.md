@@ -182,3 +182,13 @@ The restored file is byte-identical to the saved fixed file, and `raw/tests-afte
 - The last start tag name is empty before the first start tag, because a tag name is never empty, so no separate flag is needed.
 - The sticky `OutOfMemory` failure is a `failed` flag, because it is the only error that fails the tokenizer.
 - `git worktree add` registered the two baseline trees under `out/` in the working tree's own repository, not in `C:\src\fairpane`.
+
+## Integration
+
+The integrator applied the worker's patch to `493143b` and committed it alone as `cb8427d`, after checking that the index held only this task's files.
+The binding ran at `HEAD` `ed95bc5`; `raw/integration-head-diff.log` shows that it adds only plan, state, and FP-0014 evidence changes to `cb8427d`.
+
+- `raw/integration-binding.log` records `HEAD` and a status that includes ignored files for every source root, before and after the runs below; `HEAD` is `ed95bc5` both times, and both statuses are empty.
+- `gates/2026-10-09T13-12-29-122Z-repo-check-f57f5dcd.json`, `gates/2026-10-09T13-12-29-520Z-controller-test-4fc456f4.json`, `gates/2026-10-09T13-13-10-018Z-zig-fmt-825ad6f2.json`, and `gates/2026-10-09T13-13-10-278Z-zig-test-261a8ecf.json` all pass.
+- `raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0064-integration`: 65 of 65 build steps and 292 of 292 tests pass, which adds this task's 14 tests to the 278 of the integrated tree.
+- `raw/bun-selftest.log` records Bun 1.4.2 and `tools/selftest.mjs` with 202 of 202 tests.
