@@ -113,7 +113,8 @@ Contract amendment 1 (`3bea7a6`) exempts case 4 from the red baseline and requir
 - Case 7's failing run uses the check executable in place of the laboratory, so every laboratory check fails with the usage status 2 on every host and the helper's removal path runs in every build.
   The mutation controls show the same removal with the real laboratory.
 - `RESULT` lines record each command's working directory and resolved executable, and the controller suite prints temporary paths under the user profile, as earlier evidence does.
-  No recorded command lists a home directory or a user profile.
+  Some `COMMAND` lines name an executable under the user profile: the laboratory in the worker's worktree in `raw/probe.log`, and Bun's WinGet link in `raw/bun-selftest.log`.
+  No recorded command lists the contents of a home directory or a user profile; review 1 corrected this sentence.
 
 ## Integration
 
@@ -121,7 +122,8 @@ The integrator applied the worker's patch on `3bea7a6` with `git apply --3way`.
 It applied without conflicts, merged with the FP-0066 and FP-0082 changes to `build.zig`, and changed no contract text.
 The implementation is commit `d56bc5f`.
 
-- `raw/integration-binding.log` records `HEAD` `d56bc5f` and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
+- `raw/integration-binding.log` records `HEAD` `d56bc5f` and a status that includes ignored files for every source root, before and after the four gates, the Windows suite, and Bun below; both statuses are empty.
+  The WSL suite and amendment 1's control ran after that window, and each is bound by its own records: the WSL clone's `HEAD` and empty status, and the control's file hashes and final status.
 - `gates/2026-10-09T15-42-32-017Z-repo-check-2d0c24b7.json`, `gates/2026-10-09T15-42-32-440Z-controller-test-6d02f1a6.json`, `gates/2026-10-09T15-43-27-009Z-zig-fmt-1e374c06.json`, and `gates/2026-10-09T15-43-27-307Z-zig-test-db8aab34.json` pass.
 - `raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0076-integration`: 100 of 100 build steps and 321 of 321 tests pass.
 - `raw/bun-selftest.log` records Bun and `tools/selftest.mjs` with 224 of 224 tests.

@@ -1,0 +1,62 @@
+{
+  "verdict": "accept",
+  "summary": "Accept. No blocker or major finding remains. I had no shell, so I ran no commands. Every statement below comes from reading the files, the GitHub diffs of 3bea7a6, d56bc5f, and a6ac7aa, and the pinned standard library under .tools/zig, except where it is marked [INFERENCE].\n\nCheck 1 is met. `fileIdentity` (src/lab_main.zig:178-268) never opens a file for reading.\n- Linux calls `statx(AT_FDCWD, path, 0, {INO})`, reads dev_major, dev_minor, and ino, and requires mask.INO.\n- Other POSIX systems call `fstatat(AT_FDCWD, path, &stat, 0)`.\n- Windows calls `NtCreateFile` with access `{SYNCHRONIZE, FILE_READ_ATTRIBUTES}`, every share mode, `OPEN`, and `SYNCHRONOUS_NONALERT`, without `OPEN_REPARSE_POINT`, and then reads FILE_ID_INFORMATION.\n- Every branch follows symbolic links.\n- `refuseInputAsOutput` keeps its order and subjects. The pinned `OpenFileOptions.allow_directory` defaults to true (Dir.zig:515), so the old Windows open also accepted directories, and the guard's directory decision is unchanged.\n- The main error names match: BadPathName, FileNotFound, NetworkNotFound, NoDevice, AccessDenied, NotDir, SymLinkLoop, NameTooLong, and SystemResources. A few rare Windows statuses now map differently (minor finding).\n\nCheck 2 is met. build.zig:605-705 adds cases 1, 2, and 5 only on non-Windows hosts, case 3 only on Windows, and cases 4 and 7 on both.\n- FIFO helper (tests/lab/check.zig:324-384):\n  - It creates the FIFO and opens it O_RDONLY|O_NONBLOCK before it spawns the laboratory.\n  - It reads stdout, stderr, and the FIFO through one MultiReader against a fixed 30-second deadline. The pinned `fill` returns EndOfStream only when every stream has ended.\n  - On timeout it prints the frozen message, and `defer child.kill` kills the laboratory.\n  - It requires exit status 1, result `fail`, version 2, action_count equal to the number of actions, and a `pass` from the laboratory's own replay.\n- Unreadable layout: it refuses root with `case 2 needs a non-root user` and requires that opening out.json for reading fails with AccessDenied before the laboratory runs. On Windows it sets `D:(D;;0x1;;;WD)` with an unprotected DACL, and `readable` removes the ACE by setting `D:`.\n- `fresh` deletes and recreates the directory, and every step that uses it has `has_side_effects` set.\n- Case 7 replaces the laboratory with the check executable, expects the exact report, and then checks that the directory is empty.\n\nCheck 3 is met.\n- tests-before.log (Windows): 67 of 71 steps succeed, and case 3 fails with `output file: AccessDenied`.\n- tests-before-linux.log: 68 of 73 steps succeed. Case 1 fails with the 30-second message, and case 2 fails with AccessDenied.\n- Case 5 control (both rounds, WSL): 70 of 73 steps succeed, and only case 5 fails. `minimize` reports `pass` and writes 888 bytes.\n- Case 7 control (both rounds): 69 of 71 steps succeed on Windows and 71 of 73 on WSL. Only the revision 1 case 5 helper fails, and its directory then holds 0 entries on both hosts.\n- Amendment 1 control: 97 of 100 steps succeed on Windows and 99 of 102 on WSL. Only case 4 fails, with `case file: BadPathName` on Windows and `case file: NotDir` on WSL. The hashes go ce2657d, then a6b1a07, then ce2657d.\n\nCheck 4 is met. `checkOversized` removes both files, confirms that neither remains, and only then writes its report. It also has an errdefer that removes created files on an unexpected error. FP-0054 case 5 now runs in `fp0054-case-5` from `check fresh`.\n\nCheck 5 is met.\n- integration-tests.log (Windows, fresh cache, no cached steps): 100 of 100 steps and 321 of 321 tests pass, exit 0.\n- integration-tests-linux.log (clone at d56bc5f, 0 status lines, uid 1000, cache absent): 102 of 102 steps and 321 of 321 tests pass, exit 0.\n- Every FP-0007 case 13 and 14 step and every FP-0054 step passes. FP-0054 revision 1 case 3 runs on Windows only.\n\nCheck 6 is met for protected paths. d56bc5f touches only build.zig, src/lab_main.zig, tests/lab/check.zig, tests/lab/README.md, and engineering/evidence/FP-0076. 3bea7a6 touches only CONTRACT.md. a6ac7aa touches only FP-0076 evidence. None of these is in policy.json `protected_paths`, and the gate receipts show the same policy digest ea066910…/24 before and after. Two README claims are inaccurate (minor findings below), and the other README claims each match a log.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0076/README.md",
+      "line": 116,
+      "issue": "The README says 'No recorded command lists a home directory or a user profile.' The logs contradict this. raw/probe.log records `COMMAND [\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\te45f1e897\\\\m\\\\out\\\\fp0076\\\\base\\\\zig-out\\\\bin\\\\fairpane-lab.exe\", ...]` and `COMMAND [\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\te45f1e897\\\\m\\\\zig-out\\\\bin\\\\fairpane-lab.exe\", ...]`. raw/bun-selftest.log records `COMMAND [\"C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Microsoft\\\\WinGet\\\\Links\\\\bun.EXE\", ...]`. Reproduction: grep the raw logs for `COMMAND \\[\"C:\\\\\\\\Users`.",
+      "recommendation": "Correct the sentence to say that some commands name executables under the user profile, or rerun those commands through a relative or tool-resolved path."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0076/README.md",
+      "line": 124,
+      "issue": "The README says integration-binding.log records HEAD and an empty status 'before and after the runs below'. The second record is at 15:45:06.100Z. raw/integration-tests-linux.log starts at 15:45:21.931Z, and raw/integration-mutation-4.log starts at 15:47:41Z, so neither falls inside the binding window. The contract's requirement holds: HEAD and status were recorded before and after repo-check, controller-test, zig-fmt, zig-test, the Windows suite, and Bun. The WSL run is bound separately by its clone at d56bc5f with 0 status lines, and the mutation log records a clean status afterward.",
+      "recommendation": "Say that the binding window covers the four gates, the Windows suite, and Bun, and that the WSL run and amendment 1's control are bound by their own HEAD, hash, and status records."
+    },
+    {
+      "severity": "minor",
+      "path": "src/lab_main.zig",
+      "line": 206,
+      "issue": "The Windows status mapping covers only part of what the replaced open mapped (pinned Threaded.zig:5161-5219). DELETE_PENDING used to be retried with backoff and then reported as FileBusy. PIPE_BUSY was PipeBusy, PIPE_NOT_AVAILABLE was NoDevice, VIRUS_INFECTED and VIRUS_DELETED were AntivirusInterference, and CANCELLED was retried. All of these now reach `windows.unexpectedStatus`, so the detail becomes `<subject>: Unexpected`. For DELETE_PENDING the decision can also change: the old guard could retry until the file was gone and then treat it as missing, but the new guard reports a harness error at once. The exit status stays 3, and the frozen cases cannot reach these statuses. Check 1 asks for unchanged messages. [INFERENCE: these statuses are reachable only in races or with named-pipe or antivirus paths; not executed.]",
+      "recommendation": "Mirror the old mapping for the statuses that a READ_ATTRIBUTES open can still return: DELETE_PENDING with the same bounded retry or FileBusy, PIPE_BUSY to PipeBusy, PIPE_NOT_AVAILABLE to NoDevice, and VIRUS_* to AntivirusInterference."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0076/raw/integration-mutation-4.log",
+      "line": 10,
+      "issue": "The Windows half of amendment 1's control records the file hash before (ce2657d), during (a6b1a07), and after (ce2657d), plus the `git diff` output. It does not record the commands that applied the mutation or restored the file. The worker's mutation.log records both steps.",
+      "recommendation": "Record the mutation and restoration commands with `node tools/fairpane.mjs record`, as mutation.log does."
+    },
+    {
+      "severity": "note",
+      "path": "tests/lab/check.zig",
+      "line": 358,
+      "issue": "If the laboratory exits without ever opening the FIFO, for example after a refusal or a crash before the write, the FIFO never reports a hang-up. The helper then waits the full 30 seconds and reports 'the laboratory did not finish within 30 seconds', although the laboratory did finish. `child.wait` after end of file has no deadline. Both behaviors fail the case, so the case cannot pass vacuously. [INFERENCE: derived from the code and the pinned MultiReader; not executed.]",
+      "recommendation": "Optionally, when the FIFO is the only stream still open, check whether the laboratory has exited, and report its exit status and stdout instead of a timeout."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0076/README.md",
+      "line": 54,
+      "issue": "The README says out/fp0076-after 'did not exist before'. tests-after.log records no absence check for that directory, unlike the WSL run, which runs `test ! -e`. The summary has no `cached` step, which supports the claim.",
+      "recommendation": "Record an absence check before uncached Windows runs."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/state.json",
+      "line": 899,
+      "issue": "FP-0076 is still `planned`, with no owner, no evidence, and no review. HANDOFF.md:16 and :43 still list it as a contract waiting for dispatch, although d56bc5f and a6ac7aa implement it and record its evidence. The FP-0054 review flagged the same stale handoff.",
+      "recommendation": "When this review is recorded, update state.json and HANDOFF.md with the implementation and evidence commits and the next action."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0076/CONTRACT.md",
+      "line": 98,
+      "issue": "Amendment 1 relaxes an acceptance criterion: case 4 no longer has to fail before the change. The integrator made it in its own commit, 3bea7a6, which touches only CONTRACT.md. The justification has evidence: probe.log shows the base and changed laboratories report identical details on both hosts, and the required control kills case 4 on both hosts. This review counts as the independent approval of that change.",
+      "recommendation": "None. Record the approval with the review."
+    }
+  ]
+}
