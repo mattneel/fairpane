@@ -561,21 +561,44 @@ export async function listProcessTree(rootPid, { platform = process.platform, po
     return tree.map(({ pid, ppid, command_line }) => ({ pid, ppid, command_line }));
   } finally { clearTimeout(timer); }
 }
-/** The timeout section of a command log: the live process tree, or the reason that the listing failed. */
-async function timeoutSection(pid, timeoutMs, processListing) {
-  let lines;
+/** Whether a process exists. A signal-0 probe reports a process that ended, even before its exit event arrives on Windows. */
+function processExists(pid) {
+  try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; }
+}
+/**
+ * Stop the listed descendants of a command that has ended, with their own descendants.
+ * On Windows, the ended command's PID no longer reaches its tree, so each listed descendant is stopped by its own PID.
+ * Elsewhere, the command's process group is signaled, and each listed descendant too, in case it left the group.
+ */
+function stopDescendants(rootPid, tree, taskkill) {
+  const descendants = tree.filter(p => p.pid !== rootPid).map(p => p.pid);
+  if (taskkill) {
+    if (descendants.length) spawnSync(taskkill, [...descendants.flatMap(pid => ['/PID', String(pid)]), '/T', '/F'], { windowsHide: true, timeout: 10000 });
+    return;
+  }
+  for (const pid of [-rootPid, ...descendants]) {
+    try { process.kill(pid, 'SIGKILL'); } catch { /* The process or group has already ended. */ }
+  }
+}
+/**
+ * The timeout listing: the lines of the log's timeout section, without the closing line, and the listed tree.
+ * `processListing` is either the options of `listProcessTree` or a function that replaces it and returns the same tree.
+ */
+async function timeoutListing(pid, timeoutMs, processListing) {
   try {
-    const tree = await listProcessTree(pid, processListing);
-    lines = [`TIMEOUT after ${timeoutMs} ms: the live process tree of PID ${pid} follows.`,
+    const tree = await (typeof processListing === 'function' ? processListing(pid) : listProcessTree(pid, processListing));
+    const lines = [`TIMEOUT after ${timeoutMs} ms: the live process tree of PID ${pid} follows.`,
       ...tree.map(p => `PROCESS ${JSON.stringify(p)}`)];
     if (!tree.some(p => p.pid === pid)) lines.push(`TIMEOUT PID ${pid} is no longer running.`);
-  } catch (e) { lines = [`TIMEOUT after ${timeoutMs} ms: the process listing failed: ${e.message}`]; }
-  return [...lines, `TIMEOUT Stopping PID ${pid} and its descendants.`].join('\n') + '\n';
+    return { lines, tree };
+  } catch (e) { return { lines: [`TIMEOUT after ${timeoutMs} ms: the process listing failed: ${e.message}`], tree: [] }; }
 }
 /**
  * Execute without a shell. OS sandboxing and disk quotas remain separate. Never rejects after argument validation.
  * At the timeout, the log first receives the command's live process tree, and then the command and its descendants stop.
- * `processListing` passes `powershell` or `procRoot` to `listProcessTree`.
+ * A command that ends during the listing still gets its timeout section, which then ends with a line that says so,
+ * and its listed descendants stop; the log closes only after that.
+ * `processListing` passes `powershell` or `procRoot` to `listProcessTree`, or is a function that replaces the listing.
  */
 export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env, copyOutput, fileSystem, processListing } = {}) {
   invariant(typeof executable === 'string' && Array.isArray(args), 'An executable and argument array are required.');
@@ -614,9 +637,11 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, 
     return Promise.resolve(finishRecord(io, fd, result(null, null, false)));
   }
   return new Promise(resolve => {
-    let child, timer, timedOut = false, settled = false;
+    // `listing` is set while the timeout listing runs; an exit during it waits there, so the timeout section precedes the output.
+    let child, timer, timedOut = false, settled = false, listing = null;
     const finish = (code, signal) => {
       if (settled) return;
+      if (listing) { listing.exit ??= [code, signal]; return; }
       settled = true; clearTimeout(timer);
       closeQuietly(io, outFd);
       try { copy(capture, fd); }
@@ -631,14 +656,19 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, 
       child.on('close', (code, signal) => finish(code, signal));
       timer = setTimeout(async () => {
         timedOut = true;
-        if (child.pid) {
-          const section = await timeoutSection(child.pid, timeoutMs, processListing);
-          // A command that ended during the listing has already closed its log and needs no stop.
-          if (settled) return;
-          try { writeLog(io, fd, Buffer.from(section)); }
-          catch (e) { errors.push(`Log write failed: ${e.message}`); }
-        }
-        stopProcessTree(child, taskkill);
+        if (!child.pid) return;
+        listing = {};
+        const { lines, tree } = await timeoutListing(child.pid, timeoutMs, processListing);
+        const { exit } = listing;
+        listing = null;
+        // On Windows, the probe sees an ended command before its exit event arrives.
+        const ended = exit !== undefined || child.exitCode !== null || child.signalCode !== null || !processExists(child.pid);
+        lines.push(ended ? 'TIMEOUT The command ended during the listing.' : `TIMEOUT Stopping PID ${child.pid} and its descendants.`);
+        try { writeLog(io, fd, Buffer.from(lines.join('\n') + '\n')); }
+        catch (e) { errors.push(`Log write failed: ${e.message}`); }
+        if (ended) stopDescendants(child.pid, tree, taskkill);
+        else stopProcessTree(child, taskkill);
+        if (exit) finish(...exit);
       }, timeoutMs);
     } catch (e) { errors.push(e.message); finish(null, null); }
   });
@@ -686,7 +716,7 @@ export function gateEnvironment(root, gate) {
   // Keep compiler caches inside the repository's ignored build directory, not the user's global cache.
   return gate.kind === 'zig' || gate.kind === 'c-abi' ? { ZIG_GLOBAL_CACHE_DIR: path.join(root, '.zig-cache', 'global') } : undefined;
 }
-/** Run one gate. `processListing` reaches `runProcess` for each command, so a test can make the timeout listing fail. */
+/** Run one gate. `processListing` reaches `runProcess` for each command, so a test can make the timeout listing fail or replace it. */
 export async function runGate(root, id, { evidenceDir = 'out/evidence', processListing } = {}) {
   const gate = readJson(safePath(root, 'engineering/gates.json')).gates.find(g => g.id === id);
   invariant(gate, `Unknown gate: ${id}`);

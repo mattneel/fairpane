@@ -357,11 +357,32 @@ export const workflowCases = [
       /^Line \d+: The actions\/upload-artifact step of job windows sets if-no-files-found to warn\./);
   }],
   ['FP-0067 5: A Linux job that omits zig-test or runs it after the cross builds is a problem', () => {
-    const zigTest = '      - name: Run gate zig-test\n        run: node tools/fairpane.mjs run zig-test\n\n';
+    const zigTest = '      - name: Run gate zig-test\n        run: node tools/fairpane.mjs run zig-test\n        env:\n          ZIG_BUILD_SUMMARY: all\n\n';
     const lastCross = '      - name: Run gate cross-macos-aarch64\n        run: node tools/fairpane.mjs run cross-macos-aarch64\n\n';
     const order = /^Line \d+: Job linux runs the gates .*\. It must run repo-check, controller-test, zig-fmt, zig-test, cross-windows-x86_64, cross-linux-aarch64, and cross-macos-aarch64, in that order\.$/;
     onlyProblem(linuxVariant(zigTest, ''), order);
     onlyProblem(linuxVariant(zigTest, '').replace(lastCross, `${lastCross}${zigTest}`), order);
+  }],
+  ['FP-0098 revision 1 case 3: Each zig-test gate step must set env: ZIG_BUILD_SUMMARY: all, and no other step or level may set it', () => {
+    assert.deepEqual(checkWorkflow(GATES), []);
+    assert.deepEqual(gateWorkflowProblems(parseWorkflow(GATES)), []);
+    const zigTest = '      - name: Run gate zig-test\n        run: node tools/fairpane.mjs run zig-test\n';
+    const summary = '        env:\n          ZIG_BUILD_SUMMARY: all\n';
+    const missing = job => new RegExp(`^Line \\d+: The step "Run gate zig-test" of job ${job} does not set env:\\. It must set env: with only ZIG_BUILD_SUMMARY: all\\.$`);
+    onlyProblem(gatesVariant(`${zigTest}${summary}`, zigTest), missing('windows'));
+    onlyProblem(linuxVariant(`${zigTest}${summary}`, zigTest), missing('linux'));
+    const wrong = /^Line \d+: The step "Run gate zig-test" of job windows sets env: to .*\. It must set env: with only ZIG_BUILD_SUMMARY: all\.$/;
+    onlyProblem(gatesVariant(summary, '        env:\n          ZIG_BUILD_SUMMARY: none\n'), wrong);
+    onlyProblem(gatesVariant(summary, `${summary}          ZIG_GLOBAL_CACHE_DIR: elsewhere\n`), wrong);
+    // The key on every other step of both jobs, on a job, and on the workflow is one problem each.
+    const names = [...GATES.matchAll(/^ {6}- name: (.*)\n/gm)].filter(m => m[1] !== 'Run gate zig-test');
+    assert.equal(names.length, 19);
+    for (const m of names) {
+      const text = GATES.slice(0, m.index) + m[0] + summary + GATES.slice(m.index + m[0].length);
+      onlyProblem(text, /^Line \d+: (?:A run step|The actions\/[a-z-]+ step) of job (?:windows|linux) sets env:\./);
+    }
+    onlyProblem(gatesVariant('    timeout-minutes: 90\n', `    timeout-minutes: 90\n    env:\n      ZIG_BUILD_SUMMARY: all\n`), /^Line \d+: Job windows sets env:\./);
+    onlyProblem(gatesVariant('\njobs:\n', '\nenv:\n  ZIG_BUILD_SUMMARY: all\n\njobs:\n'), /^Line \d+: The Gates workflow sets env:\./);
   }],
 ].map(([name, fn]) => ({ name, fn }));
 

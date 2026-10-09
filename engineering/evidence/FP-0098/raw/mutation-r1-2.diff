@@ -1,0 +1,13 @@
+diff --git a/out/fp0098-r1/mutation-2/lib.mjs b/tools/lib.mjs
+index 22e7886..d12a7a7 100644
+--- a/out/fp0098-r1/mutation-2/lib.mjs
++++ b/tools/lib.mjs
+@@ -638,7 +638,7 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000,
+         listing = null;
+         // On Windows, the probe sees an ended command before its exit event arrives.
+         const ended = exit !== undefined || child.exitCode !== null || child.signalCode !== null || !processExists(child.pid);
+-        lines.push(ended ? 'TIMEOUT The command ended during the listing.' : `TIMEOUT Stopping PID ${child.pid} and its descendants.`);
++        if (!ended) lines.push(ended ? 'TIMEOUT The command ended during the listing.' : `TIMEOUT Stopping PID ${child.pid} and its descendants.`);
+         try { writeLog(io, fd, Buffer.from(lines.join('\n') + '\n')); }
+         catch (e) { errors.push(`Log write failed: ${e.message}`); }
+         if (ended) stopDescendants(child.pid, tree, taskkill);

@@ -141,6 +141,10 @@ On Linux, it comes from `/proc/<pid>/stat` and `/proc/<pid>/cmdline`, and the co
 The listing has a 10-second limit.
 If it fails, the section names the reason, and the watchdog still stops the command, which still fails with `timed_out: true`.
 The section precedes the command's output in the log, because the output is copied in when the command ends.
+If the command ends while the listing runs, the section still precedes the output and ends with `TIMEOUT The command ended during the listing.` instead of the stop line, and the receipt keeps `timed_out: true`.
+The watchdog then stops each descendant that the listing found, because on Windows an ended command's process ID no longer reaches its tree.
+On Linux, it also signals the command's process group.
+If that listing failed on Windows, no descendant is known, so none is stopped.
 The caller still needs operating-system isolation and resource quotas for hostile inputs.
 The tool does not enforce disk quotas or a network policy.
 Zig and C ABI gates set `ZIG_GLOBAL_CACHE_DIR` to `.zig-cache/global` inside the repository.
@@ -158,6 +162,7 @@ A protected runner supplies the separate release boundary.
 The Windows job runs `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, `zig-build`, and `c-abi`.
 The Linux job runs `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, and the three cross-compilation gates.
 Each job installs the locked compiler with `install-zig` and uploads `out/evidence` as an artifact, including after a failure.
+Both `zig-test` steps set `ZIG_BUILD_SUMMARY: all`, which the locked build runner reads as `--summary all`, so the gate log shows each build step's result and duration without a change to the gate's arguments.
 Those receipts remain unsigned local integrity records, and a hosted runner is not a protected release runner.
 
 A pull request runs its own copy of the workflow, the checker, and the controller.
@@ -192,12 +197,14 @@ It also rejects a block scalar whose leading blank line has more spaces than its
 - A job may set only `name`, `runs-on`, `timeout-minutes`, and `steps`.
 - A run step may set only `name` and `run`.
   Its command must be `node tools/fairpane.mjs install-zig` or `node tools/fairpane.mjs run <gate>`.
+- A step that runs `zig-test` must also set `env:` to exactly `ZIG_BUILD_SUMMARY: all`, and each problem names the step.
+  No other step, job, or workflow may set `env:`.
 - An action step may set only `name`, `uses`, and `with`.
   An `actions/upload-artifact` step must also set `if: ${{ always() }}`, `path: out/evidence/`, and `if-no-files-found: error`, and no other step may set `if:`.
 - The only accepted actions are `actions/checkout` with the input `persist-credentials`, `actions/setup-node` with `node-version`, and `actions/upload-artifact` with `name`, `path`, and `if-no-files-found`.
 - The `linux` job must run exactly `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, `cross-windows-x86_64`, `cross-linux-aarch64`, and `cross-macos-aarch64`, in that order.
 
-No default shell, environment variable, working directory, container, or other action can therefore change what a gate step runs.
+No default shell, other environment variable, working directory, container, or other action can therefore change what a gate step runs.
 `tools/workflow-check.test.mjs` fixes the Gates step order, runner labels, Windows gate list, and concurrency expressions, and it checks the Linux gate list too.
 It also checks every workflow file against its reviewed problem list, and `node tools/fairpane.mjs test` runs its cases.
 The `pages.yml` list names the deploy job's `pages: write` and `id-token: write` grants, so any other grant fails it.

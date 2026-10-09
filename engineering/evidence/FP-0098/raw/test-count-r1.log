@@ -1,0 +1,73 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","grep","-c","-E","^test \"","937a06b","--","src","tests"]
+937a06b:src/abi_scenarios.zig:14
+937a06b:src/c_api.zig:7
+937a06b:src/css/tests.zig:51
+937a06b:src/dom.zig:16
+937a06b:src/engine.zig:18
+937a06b:src/font/opentype.zig:1
+937a06b:src/font/reader.zig:1
+937a06b:src/handles.zig:15
+937a06b:src/html/entities_test.zig:1
+937a06b:src/html/partition_test.zig:6
+937a06b:src/html/tokenizer_test.zig:25
+937a06b:src/js/heap.zig:7
+937a06b:src/js/heap_catalog.zig:1
+937a06b:src/js/measure.zig:1
+937a06b:src/js/number.zig:4
+937a06b:src/js/operations.zig:3
+937a06b:src/js/runtime.zig:13
+937a06b:src/js/value.zig:2
+937a06b:src/lab.zig:24
+937a06b:src/unicode/properties_test.zig:3
+937a06b:src/unicode/reference_test.zig:2
+937a06b:src/web_string.zig:27
+937a06b:tests/text/bounds_test.zig:12
+937a06b:tests/text/fixture_test.zig:3
+937a06b:tests/text/malformed_test.zig:23
+937a06b:tests/text/seed_test.zig:3
+937a06b:tests/text/synthetic_test.zig:3
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["grep","-c","-E","^test \"","937a06b","--","src","tests"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m","started_at":"2026-10-09T17:11:13.607Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","grep","-c","-E","^test \"","9d5638b~1","--","src","tests"]
+9d5638b~1:src/abi_scenarios.zig:16
+9d5638b~1:src/c_api.zig:10
+9d5638b~1:src/css/tests.zig:51
+9d5638b~1:src/dom.zig:16
+9d5638b~1:src/engine.zig:18
+9d5638b~1:src/font/opentype.zig:1
+9d5638b~1:src/font/reader.zig:1
+9d5638b~1:src/handles.zig:15
+9d5638b~1:src/html/entities_test.zig:1
+9d5638b~1:src/html/partition_test.zig:6
+9d5638b~1:src/html/tokenizer_test.zig:25
+9d5638b~1:src/js/heap.zig:7
+9d5638b~1:src/js/heap_catalog.zig:1
+9d5638b~1:src/js/measure.zig:1
+9d5638b~1:src/js/number.zig:4
+9d5638b~1:src/js/operations.zig:3
+9d5638b~1:src/js/runtime.zig:13
+9d5638b~1:src/js/value.zig:2
+9d5638b~1:src/lab.zig:24
+9d5638b~1:src/memory_budget.zig:2
+9d5638b~1:src/unicode/properties_test.zig:3
+9d5638b~1:src/unicode/reference_test.zig:2
+9d5638b~1:src/web_string.zig:27
+9d5638b~1:tests/text/bounds_test.zig:12
+9d5638b~1:tests/text/fixture_test.zig:3
+9d5638b~1:tests/text/malformed_test.zig:23
+9d5638b~1:tests/text/seed_test.zig:3
+9d5638b~1:tests/text/synthetic_test.zig:3
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["grep","-c","-E","^test \"","9d5638b~1","--","src","tests"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m","started_at":"2026-10-09T17:11:13.719Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","937a06b","9d5638b~1","--","src","tests","build.zig"]
+ src/abi_generated.zig |  37 ++++++-
+ src/abi_scenarios.zig | 259 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ src/c_api.zig         | 234 +++++++++++++++++++++++++++++++++++++++++++-
+ src/engine.zig        | 122 ++++++++++++++++++++---
+ src/memory_budget.zig | 153 +++++++++++++++++++++++++++++
+ src/root.zig          |   1 +
+ tests/c/abi_layout.h  |   9 +-
+ tests/c/abi_smoke.c   | 263 ++++++++++++++++++++++++++++++++++++++++++++++++--
+ 8 files changed, 1051 insertions(+), 27 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","937a06b","9d5638b~1","--","src","tests","build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m","started_at":"2026-10-09T17:11:13.843Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":63}

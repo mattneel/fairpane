@@ -1,0 +1,280 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","zig-test"]
+Execute gate zig-test.
+{
+  "gate": "zig-test",
+  "status": "pass",
+  "receipt": "out/evidence/2026-10-09T17-09-33-641Z-zig-test-6b2f7345.json",
+  "error": null
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","zig-test"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m","started_at":"2026-10-09T17:09:33.420Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":113703,"environment_overrides":{"ZIG_BUILD_SUMMARY":"all"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","for (const f of process.argv.slice(1)) process.stdout.write(require('node:fs').readFileSync(f))","out/evidence/2026-10-09T17-09-33-641Z-zig-test-6b2f7345.log","out/evidence/2026-10-09T17-09-33-641Z-zig-test-6b2f7345.json"]
+Fairpane local gate: zig-test
+Trust: unsigned-local-integrity-only
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test"]
+test
++- FP-0082 case 16: a missing path exits with status 3 w
+fairpane-js-parse: tests/js/parse/missing.js: FileNotFound
+failed command: cd . && ".\\zig-out\\bin\\fairpane-js-parse.exe" file tests/js/parse/missing.js
+
+test
++- FP-0082 case 16: invalid-utf8.js exits with status 3 w
+fairpane-js-parse: .\tests\js\parse\invalid-utf8.js: InvalidUtf8
+failed command: ".\\zig-out\\bin\\fairpane-js-parse.exe" file ".\\tests\\js\\parse\\invalid-utf8.js"
+
+test
++- FP-0082 case 17: the census refuses an existing output file and exits with status 3 w
+fairpane-js-parse: census: cannot create .\.zig-cache\o\0c925f44918d6f5adba948a0455992d0\existing.jsonl: PathAlreadyExists
+failed command: ".\\zig-out\\bin\\fairpane-js-parse.exe" census ".\\tests\\js\\census\\sound" ".\\.zig-cache\\o\\0c925f44918d6f5adba948a0455992d0\\existing.jsonl"
+
+test
++- run test w
+FP-0082 case 10: measured stack use 21232 bytes for 1022 terms and 21152 bytes for 1021 parentheses
+failed command: cd . && ".\\.zig-cache\\o\\5e0b7dc7fbef0510c49f875bb1c7e429\\test.exe" "--cache-dir=.\\.zig-cache" --seed=0xcbf6296d --listen=-
+
+Build Summary: 100/100 steps succeeded; 321/321 tests passed
+test success
++- run test 270 pass (270 total) 30s MaxRSS:394M
+|  +- compile test debug native success 13s MaxRSS:924M
++- run test 45 pass (45 total) 427ms MaxRSS:16M
+|  +- compile test debug native success 5s MaxRSS:432M
++- FP-0007 case 13: case 2 passes with exit status 0 success 81ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 4s MaxRSS:373M
++- FP-0007 case 13: case 3 fails with exit status 1 success 78ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 79ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 73ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 79ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 73ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 70ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 72ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 77ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 117ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 12ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 18ms
+|  +- compile exe fairpane-lab-check debug native success 4s MaxRSS:362M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 82ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 9ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 73ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 case 5: create a fresh directory success 65ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 27ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 72ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 59ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 25ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 78ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 63ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 24ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 52ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 62ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 43ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 73ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 60ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 26ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: run, minimize, and replay report files one byte above the size limit success 126ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 55ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0076 case 3: minimize writes over an existing out.json whose ACL denies read-data access to Everyone success 76ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0076 case 3: create a fresh directory success 61ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0076 case 3: out.json is a version 2 case derived from the input digest success 7ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0076 case 3: restore read access to out.json success 26ms
+|     +- compile exe fairpane-lab-check debug native (reused)
+|     +- FP-0076 case 3: create a fresh directory (+1 more reused dependencies)
+|     +- FP-0076 case 3: minimize writes over an existing out.json whose ACL denies read-data access to Everyone (+2 more reused dependencies)
++- FP-0076 case 4: minimize reports the output path out|.json, which cannot be identified success 52ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0076 case 4: create a fresh directory success 55ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0076 case 4: the directory gains no file success 43ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0076 case 4: minimize reports the output path out|.json, which cannot be identified (+2 more reused dependencies)
++- FP-0076 case 7: the revision 1 case 5 helper reports failing checks and removes both oversized files success 61ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 7: create a fresh directory success 54ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- compile exe fairpane-lab-check debug native (reused)
++- FP-0076 case 7: no file remains after the failing run success 41ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 7: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0076 case 7: the revision 1 case 5 helper reports failing checks and removes both oversized files (+3 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 906ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 1s
++- FP-0011 case 4: allocation_invokes_call.zig success 1s
++- FP-0011 case 4: leaf_allocates.zig success 1s
++- FP-0011 case 4: mutation_throws.zig success 1s
++- FP-0011 case 4: leaf_calls_behavior.zig success 775ms
++- FP-0011 case 4: leaf_positive.zig success 1s
++- FP-0011 case 5: catalog_callback_alone.zig success 942ms
++- FP-0011 case 5: catalog_exception_alone.zig success 940ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 1s
++- FP-0011 case 5: kernel_wider_context.zig success 1s
++- FP-0011 case 5: kernel_undeclared_throw.zig success 1s
++- FP-0011 case 8: layout_undescribed_field.zig success 1s
++- FP-0011 case 8: layout_plain_reference.zig success 1s
++- FP-0011 case 8: layout_missing_field.zig success 854ms
++- FP-0011 case 20: abi_reference_value.zig success 1s
++- FP-0011 case 20: abi_nan_box_value.zig success 1s
++- FP-0011 case 20: abi_tagged_index_value.zig success 1s
++- FP-0011 case 34: leaf_reaches_heap.zig success 855ms
++- FP-0011 case 35: leaf_widens_context.zig success 1s
++- FP-0011 case 36: binding_missing_kernel.zig success 898ms
++- FP-0011 case 36: binding_stray_kernel.zig success 858ms
++- library-test success
+|  +- run test 6 pass (6 total) 35ms MaxRSS:4M
+|  |  +- compile test debug native success 3s MaxRSS:299M
+|  +- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical success 12ms
+|  |  +- compile exe fairpane-library-check debug native success 3s MaxRSS:293M
+|  |  +- archive fairpane.lib safe success 20ms
+|  |  |  +- compile obj fairpane_zcu safe native success 4s MaxRSS:175M
+|  |  |     +- WriteFile fp0066-tree-a/src success
+|  |  +- archive fairpane.lib safe success 21ms
+|  |     +- compile obj fairpane_zcu safe native success 3s MaxRSS:176M
+|  |        +- WriteFile fp0066-tree-a/src (reused)
+|  +- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory success 77ms
+|  |  +- compile exe fairpane-library-check debug native (reused)
+|  |  +- archive fairpane.lib safe (+1 more reused dependencies)
+|  |  +- WriteFile fp0066-tree-a/src (reused)
+|  +- FP-0066 case 4: the Debug library keeps debug information that names the absolute source directory success 84ms
+|  |  +- compile exe fairpane-library-check debug native (reused)
+|  |  +- archive fairpane.lib debug success 23ms
+|  |     +- compile obj fairpane_zcu debug native success 2s MaxRSS:280M
+|  +- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory success 34ms
+|  |  +- compile exe fairpane-library-check debug native (reused)
+|  |  +- archive fairpane.lib safe (+1 more reused dependencies)
+|  +- FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group success 32ms
+|     +- compile exe fairpane-library-check debug native (reused)
+|     +- archive fairpane.lib safe (+1 more reused dependencies)
++- FP-0082 case 16: valid.js exits with status 0 and prints the T9 dump success 46ms
+|  +- install fairpane-js-parse success
+|     +- compile exe fairpane-js-parse debug native success 4s MaxRSS:354M
+|        +- WriteFile src success
++- FP-0082 case 16: syntax.js exits with status 1 and prints its syntax error success 48ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: unsupported.js exits with status 2 and prints its unsupported outcome success 44ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: invalid-utf8.js exits with status 3 success 48ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: a missing path exits with status 3 success 51ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: no arguments exits with status 3 and writes the usage success 44ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census of the sound fixture exits with status 0 success 53ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census of the unsound fixture exits with status 1 success 50ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census refuses an existing output file and exits with status 3 success 49ms
+   +- install fairpane-js-parse (+1 more reused dependencies)
+   +- WriteFile existing.jsonl success
+
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m","started_at":"2026-10-09T17:09:33.675Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":113328,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m\\.zig-cache\\global"}}
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "zig-test",
+  "gate_sha256": "277b10a2093d94ae93804224c4c90141d92b0d336dca27034bf0a7b27b9ad789",
+  "status": "pass",
+  "started_at": "2026-10-09T17:09:33.644Z",
+  "finished_at": "2026-10-09T17:11:27.113Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "os_release": "10.0.26200",
+    "runtime": "v26.7.0",
+    "bun_version": null,
+    "zig_version": "0.18.0-dev.120+9fe22a29b"
+  },
+  "source_before": {
+    "sha256": "4d3c53e8173abbd58a2c0b895b00c3fef80a762f8a6fb8e27ff11b8ba0165d99",
+    "file_count": 313
+  },
+  "source_after": {
+    "sha256": "4d3c53e8173abbd58a2c0b895b00c3fef80a762f8a6fb8e27ff11b8ba0165d99",
+    "file_count": 313
+  },
+  "policy_before": {
+    "sha256": "ea0669104222d035a4cf5318aab1824d6fccce518ac8a6704d14965d7b99724e",
+    "file_count": 24
+  },
+  "policy_after": {
+    "sha256": "ea0669104222d035a4cf5318aab1824d6fccce518ac8a6704d14965d7b99724e",
+    "file_count": 24
+  },
+  "commands": [
+    {
+      "executable": "C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "test"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m",
+      "started_at": "2026-10-09T17:09:33.675Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 113328,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m\\.zig-cache\\global"
+      }
+    }
+  ],
+  "error": null,
+  "outputs": [
+    {
+      "path": "out/evidence/2026-10-09T17-09-33-641Z-zig-test-6b2f7345.log",
+      "size": 14725,
+      "sha256": "cba9f7cea145aacc6fd0d396ff3341ad9c61bbd7760760e9d85bc090ad95cf6d"
+    }
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","for (const f of process.argv.slice(1)) process.stdout.write(require('node:fs').readFileSync(f))","out/evidence/2026-10-09T17-09-33-641Z-zig-test-6b2f7345.log","out/evidence/2026-10-09T17-09-33-641Z-zig-test-6b2f7345.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6769ece61\\m","started_at":"2026-10-09T17:11:35.767Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":61}

@@ -1,0 +1,13 @@
+diff --git a/out/fp0098-r1/mutation-1/lib.mjs b/tools/lib.mjs
+index 22e7886..c716ab8 100644
+--- a/out/fp0098-r1/mutation-1/lib.mjs
++++ b/tools/lib.mjs
+@@ -619,7 +619,7 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000,
+       if (listing) { listing.exit ??= [code, signal]; return; }
+       settled = true; clearTimeout(timer);
+       closeQuietly(io, outFd);
+-      try { copy(capture, fd); }
++      try { if (!timedOut) copy(capture, fd); }
+       catch (e) { errors.push(`Output capture failed: ${e.message}`); }
+       removeCapture(io, captureDir, errors);
+       resolve(finishRecord(io, fd, result(code, signal, timedOut)));

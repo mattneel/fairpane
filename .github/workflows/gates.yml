@@ -46,6 +46,8 @@ jobs:
 
       - name: Run gate zig-test
         run: node tools/fairpane.mjs run zig-test
+        env:
+          ZIG_BUILD_SUMMARY: all
 
       - name: Run gate zig-build
         run: node tools/fairpane.mjs run zig-build
@@ -90,6 +92,8 @@ jobs:
 
       - name: Run gate zig-test
         run: node tools/fairpane.mjs run zig-test
+        env:
+          ZIG_BUILD_SUMMARY: all
 
       - name: Run gate cross-windows-x86_64
         run: node tools/fairpane.mjs run cross-windows-x86_64

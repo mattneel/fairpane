@@ -365,6 +365,10 @@ const JOB_GATES = new Map([
   ['linux', ['repo-check', 'controller-test', 'zig-fmt', 'zig-test', 'cross-windows-x86_64', 'cross-linux-aarch64', 'cross-macos-aarch64']],
 ]);
 const GATE_RUN = /^node tools\/fairpane\.mjs run ([a-z0-9][a-z0-9_-]*)$/;
+/** The gate whose run steps must set exactly this env:, so its log shows each build step's result and duration. */
+const SUMMARY_GATE = 'zig-test';
+const SUMMARY_ENV = new Map([['ZIG_BUILD_SUMMARY', 'all']]);
+const SUMMARY_REQUIRED = `It must set env: with only ${[...SUMMARY_ENV].map(([k, v]) => `${k}: ${v}`).join(', ')}.`;
 const series = items => items.length < 3 ? items.join(' and ') : `${items.slice(0, -1).join(', ')}, and ${items.at(-1)}`;
 const flow = n => n.kind === 'seq' ? `[${n.items.map(word).join(', ')}]` : word(n);
 
@@ -374,11 +378,12 @@ const flow = n => n.kind === 'seq' ? `[${n.items.map(word).join(', ')}]` : word(
  * The push and pull_request triggers must each set exactly branches: [master] and nothing else, and workflow_dispatch must have no value.
  * So no filter can narrow the pushes and pull requests that run the gates.
  * A run step may set only name and run, and it runs `node tools/fairpane.mjs install-zig` or `node tools/fairpane.mjs run <gate>`.
+ * A step that runs the zig-test gate must also set env: to exactly ZIG_BUILD_SUMMARY: all, and no other step, job, or workflow may set env:.
  * An action step may set only name, uses, and with, and it uses an accepted action with only that action's accepted inputs.
  * workflowProblems binds each action to its reviewed commit, so a commit from a fork of the action's repository fails.
  * An actions/upload-artifact step must also set if: to exactly ${{ always() }}, path: out/evidence/, and if-no-files-found: error.
  * No other step may set if:.
- * So no default, environment, working directory, container, condition, or unreviewed action code can change what a gate step runs.
+ * So no default, other environment, working directory, container, condition, or unreviewed action code can change what a gate step runs.
  * The linux job must run exactly the gates that JOB_GATES lists, in that order.
  * The other step order, the runner labels, and the Windows gate list are fixed by the gates.yml test, not by this function.
  */
@@ -444,13 +449,24 @@ export function gateWorkflowProblems(root) {
           else if (e.value.kind !== 'scalar' || e.value.value !== value) add(e.line, `The ${action} step of job ${id} sets ${input} to ${flow(e.value)}. It must set ${input}: ${value}.`);
         }
       } else if (run) {
+        const command = run.value.kind === 'scalar' ? run.value.value : null;
+        const summary = command === `node tools/fairpane.mjs run ${SUMMARY_GATE}`;
+        const label = `The step ${step.entries.get('name')?.value.kind === 'scalar' ? JSON.stringify(step.entries.get('name').value.value) : '(unnamed)'} of job ${id}`;
         for (const e of step.entries.values()) {
           if (e.key === 'if') add(e.line, CONDITION_PROBLEM);
-          else if (!GATE_RUN_KEYS.includes(e.key)) add(e.line, `A run step of job ${id} sets ${e.key}:. A run step may set only ${series(GATE_RUN_KEYS)}.`);
+          else if (!GATE_RUN_KEYS.includes(e.key) && !(summary && e.key === 'env')) {
+            add(e.line, `A run step of job ${id} sets ${e.key}:. A run step may set only ${series(GATE_RUN_KEYS)}, and a ${SUMMARY_GATE} gate step also env:.`);
+          }
         }
-        const command = run.value.kind === 'scalar' ? run.value.value : null;
         if (command === null || !GATE_COMMAND.test(command)) {
           add(run.line, `Job ${id} runs ${command === null ? '(not a scalar)' : JSON.stringify(command)}, which is not node tools/fairpane.mjs install-zig or node tools/fairpane.mjs run <gate>.`);
+        }
+        if (summary) {
+          const env = step.entries.get('env'), given = env?.value.kind === 'map' ? env.value.entries : null;
+          if (!env) add(run.line, `${label} does not set env:. ${SUMMARY_REQUIRED}`);
+          else if (!given || given.size !== SUMMARY_ENV.size || [...SUMMARY_ENV].some(([k, v]) => given.get(k)?.value.kind !== 'scalar' || given.get(k).value.value !== v)) {
+            add(env.line, `${label} sets env: to ${grants(env.value)}. ${SUMMARY_REQUIRED}`);
+          }
         }
       } else add(step.line, `A step of job ${id} sets neither run nor uses.`);
     }

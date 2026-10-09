@@ -318,11 +318,12 @@ test('A removed input still produces a failed gate receipt', async () => {
 test('Unknown gates fail before execution', async () => {
   const dir = gateFixture(); await assert.rejects(() => runGate(dir, 'unknown'), /Unknown gate/);
 });
-/** A gate command that starts a child with `marker` in its command line, records the child's PID, and then hangs. */
+/** A gate command that starts a child with `marker` in its command line, records the child's PID, prints `fp0098-output <marker>`, and then hangs. */
 function hungGateFixture(marker) {
   return gateFixture(`import { spawn } from 'node:child_process'; import fs from 'node:fs';
 const child = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)', ${JSON.stringify(marker)}], { stdio: 'ignore', windowsHide: true });
 fs.writeFileSync('child.pid', String(child.pid));
+console.log(${JSON.stringify(`fp0098-output ${marker}`)});
 setInterval(() => {}, 1000);`);
 }
 function processAlive(pid) {
@@ -336,6 +337,13 @@ async function expectStopped(pid) {
   assert.fail(`Process ${pid} kept running after the gate stopped its command.`);
 }
 const timeoutLines = log => log.split(/\r?\n/).filter(l => l.startsWith('TIMEOUT ') || l.startsWith('PROCESS '));
+/** Assert that the command's output line follows the last TIMEOUT line, so a stopped command keeps its output in the log. */
+function expectOutputAfterTimeout(log, marker) {
+  const lines = log.split(/\r?\n/), output = lines.indexOf(`fp0098-output ${marker}`);
+  const lastTimeout = lines.findLastIndex(l => l.startsWith('TIMEOUT '));
+  assert.ok(lastTimeout >= 0 && output > lastTimeout,
+    `The log lacks the line "fp0098-output ${marker}" after its TIMEOUT section (line ${output}, last TIMEOUT line ${lastTimeout}).`);
+}
 test('FP-0098 case 1: a timed-out gate lists its live descendants before it stops them', async () => {
   const marker = `fp0098-marker-${process.pid}-${Date.now()}`, dir = hungGateFixture(marker);
   const r = await runGate(dir, 'fixture');
@@ -350,6 +358,7 @@ test('FP-0098 case 1: a timed-out gate lists its live descendants before it stop
   assert.ok(processes.some(p => p.pid === child.ppid), 'The log lists the child\'s parent, the gate command.');
   assert.match(log, /^TIMEOUT after 2000 ms: the live process tree of PID \d+ follows\.$/m);
   assert.match(log, /^TIMEOUT Stopping PID \d+ and its descendants\.$/m);
+  expectOutputAfterTimeout(log, marker);
 });
 test('FP-0098 case 2: a failed listing is named in the log, and the gate still stops the command and fails', async () => {
   const marker = `fp0098-marker-${process.pid}-${Date.now()}`, dir = hungGateFixture(marker);
@@ -362,6 +371,7 @@ test('FP-0098 case 2: a failed listing is named in the log, and the gate still s
   assert.match(log, /^TIMEOUT after 2000 ms: the process listing failed: .*ENOENT.*$/m);
   assert.equal(log.split(/\r?\n/).filter(l => l.startsWith('PROCESS ')).length, 0);
   assert.match(log, /^TIMEOUT Stopping PID \d+ and its descendants\.$/m);
+  expectOutputAfterTimeout(log, marker);
 });
 test('FP-0098 case 3: an ordinary pass or fail gate record has no timeout section and is not timed out', async () => {
   for (const [script, status, code] of [['console.log("Fixture command ran.");', 'pass', 0], ['process.exit(8);', 'fail', 8]]) {
@@ -370,6 +380,43 @@ test('FP-0098 case 3: an ordinary pass or fail gate record has no timeout sectio
     assert.equal(r.commands[0].exit_code, code); assert.equal(r.commands[0].timed_out, false);
     assert.deepEqual(timeoutLines(fs.readFileSync(path.join(dir, r.outputs[0].path), 'utf8')), []);
   }
+});
+test('FP-0098 revision 1 case 2: a command that ends during the timeout listing gets a line that says so, and its descendants stop', async () => {
+  const dir = temp(), marker = `fp0098-marker-${process.pid}-${Date.now()}`, pidFile = path.join(dir, 'child.pid');
+  const script = put(dir, 'hung.cjs', `const { spawn } = require('node:child_process'); const fs = require('node:fs');
+const child = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)', ${JSON.stringify(marker)}], { stdio: 'ignore', windowsHide: true });
+fs.writeFileSync(${JSON.stringify(pidFile)}, String(child.pid));
+setInterval(() => {}, 1000);`);
+  const pause = ms => new Promise(r => setTimeout(r, ms));
+  const childPid = async () => {
+    for (let waited = 0; waited < 5000; waited += 20) {
+      const pid = fs.existsSync(pidFile) ? Number(fs.readFileSync(pidFile, 'utf8')) : 0;
+      if (pid > 0) return pid;
+      await pause(20);
+    }
+    throw new Error('The command wrote no child PID within 5 seconds.');
+  };
+  // The stand-in lists the command and its child, then stops only the command and resolves after the command has exited.
+  let listedPid = null;
+  const standIn = async pid => {
+    const child = await childPid();
+    process.kill(pid, 'SIGKILL');
+    for (let waited = 0; processAlive(pid); waited += 20) {
+      if (waited >= 5000) throw new Error(`The command ${pid} did not exit within 5 seconds.`);
+      await pause(20);
+    }
+    listedPid = pid;
+    return [{ pid, ppid: process.pid, command_line: 'stand-in command' }, { pid: child, ppid: pid, command_line: ['stand-in child', marker] }];
+  };
+  const logPath = path.join(dir, 'command.log');
+  const r = await runProcess(process.execPath, [script], { cwd: dir, logPath, timeoutMs: 400, processListing: standIn });
+  await expectStopped(await childPid());
+  assert.equal(r.timed_out, true);
+  const lines = fs.readFileSync(logPath, 'utf8').split(/\r?\n/);
+  const ended = lines.indexOf('TIMEOUT The command ended during the listing.');
+  assert.ok(ended >= 0, `The log lacks the line for a command that ended during the listing:\n${timeoutLines(lines.join('\n')).join('\n')}`);
+  assert.ok(ended < lines.findIndex(l => l.startsWith('RESULT ')), 'The line comes after the RESULT line, so the log closed first.');
+  assert.ok(listedPid !== null && !processAlive(listedPid), 'The stand-in did not run, or the command is still alive.');
 });
 test('Evidence paths cannot escape their approved roots', async () => {
   const { dir } = await goodReceipt(); assert.throws(() => validateReceipt(dir, 'input.txt'), /outside an allowed directory/);
