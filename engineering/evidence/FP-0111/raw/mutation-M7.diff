@@ -1,0 +1,13 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..26505e6 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -165,7 +165,7 @@ pub const Layout = struct {
+             .feature_variations = self.feature_variations != 0,
+         };
+ 
+-        const index = self.findScript(request.script) orelse self.findScript("DFLT".*) orelse return .{ .valid = selection };
++        const index = self.findScript(request.script) orelse return .{ .valid = selection };
+         const s = switch (self.script(index) orelse unreachable) { // findScript returns an index below scriptCount.
+             .valid => |v| v,
+             .rejected => |defect| return .{ .rejected = defect },

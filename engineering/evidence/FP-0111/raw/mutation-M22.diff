@@ -1,0 +1,22 @@
+diff --git a/src/font/gdef.zig b/src/font/gdef.zig
+index 8d9ca05..0591d4b 100644
+--- a/src/font/gdef.zig
++++ b/src/font/gdef.zig
+@@ -44,7 +44,7 @@ pub const Gdef = struct {
+         const format = header.int(u16, 0);
+         if (format != 1) return .{ .unsupported_version = format };
+         const count = header.int(u16, 2);
+-        if (!self.table.fits(at + 4, 4 * @as(u64, count))) return .{ .rejected = .count_out_of_bounds };
++        if (!self.table.fits(at + 4, 2 * @as(u64, count))) return .{ .rejected = .count_out_of_bounds };
+         return .{ .valid = .{ .count = count, .table = self.table, .offset = at } };
+     }
+ 
+@@ -113,7 +113,7 @@ pub const MarkGlyphSets = struct {
+     /// Mark glyph set `i`, or null when `i` is at or past `count`. A NULL coverage offset is `null_offset`.
+     pub fn set(self: MarkGlyphSets, i: u16) ?TableStatus(Coverage) {
+         if (i >= self.count) return null;
+-        const offset = self.table.u32At(self.offset + 4 + 4 * @as(u64, i)) orelse return .{ .rejected = .count_out_of_bounds };
++        const offset = self.table.u16At(self.offset + 4 + 2 * @as(u64, i)) orelse return .{ .rejected = .count_out_of_bounds };
+         if (offset == 0) return .{ .rejected = .null_offset };
+         return common.parseCoverage(self.table, self.offset + offset);
+     }

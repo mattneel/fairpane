@@ -1,0 +1,12 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..b62ee2a 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -187,6 +187,7 @@ pub const Layout = struct {
+                     };
+                 }
+             }
++            if (request.language != null) return .{ .valid = selection };
+             switch (s.defaultLangSys()) {
+                 .valid => |v| {
+                     selection.lang_sys = .default;

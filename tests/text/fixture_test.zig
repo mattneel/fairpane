@@ -1,4 +1,5 @@
 //! FP-0013 cases 12, 13, and 14: the real font fixtures against their fontTools expectation files.
+//! FP-0111 amends case 13 for the version 2 files, whose layout fields FP-0111 case 25 compares.
 
 const std = @import("std");
 const testing = std.testing;
@@ -118,12 +119,13 @@ fn expectLayout(what: []const u8, expected: Value, status: font.TableStatus(font
     try testing.expectEqual(int(o.get("version").?), layout.version);
     const scripts = o.get("scripts").?.array.items;
     try testing.expectEqual(scripts.len, layout.scriptCount());
-    for (scripts, 0..) |s, i| try testing.expectEqualStrings(s.string, &(layout.scriptTag(@intCast(i)) orelse return error.TestUnexpectedResult));
+    for (scripts, 0..) |s, i| try testing.expectEqualStrings(s.object.get("tag").?.string, &(layout.scriptTag(@intCast(i)) orelse return error.TestUnexpectedResult));
     const features = o.get("features").?.array.items;
     try testing.expectEqual(features.len, layout.featureCount());
-    for (features, 0..) |s, i| try testing.expectEqualStrings(s.string, &(layout.featureTag(@intCast(i)) orelse return error.TestUnexpectedResult));
-    try testing.expectEqual(int(o.get("lookup_count").?), layout.lookupCount());
-    try testing.expectEqual(@as(usize, 4), o.count());
+    for (features, 0..) |s, i| try testing.expectEqualStrings(s.object.get("tag").?.string, &(layout.featureTag(@intCast(i)) orelse return error.TestUnexpectedResult));
+    try testing.expectEqual(o.get("lookups").?.array.items.len, layout.lookupCount());
+    try testing.expectEqual(@as(usize, 5), o.count());
+    for ([_][]const u8{ "version", "feature_variations", "scripts", "features", "lookups" }) |key| try testing.expect(o.get(key) != null);
 }
 
 const expectation_fields = [_][]const u8{
@@ -137,7 +139,7 @@ fn checkFixture(arena: std.mem.Allocator, f: fixtures.Font) !void {
     try testing.expectEqual(expectation_fields.len, e.count());
     for (expectation_fields) |name| if (e.get(name) == null) return error.TestUnexpectedResult;
     try testing.expectEqualStrings("fairpane-font-expectation", e.get("format").?.string);
-    try testing.expectEqual(@as(i64, 1), int(e.get("version").?));
+    try testing.expectEqual(@as(i64, 2), int(e.get("version").?));
 
     const parsed = try font.parse(f.bytes, .{ .checksums = .reject });
     try testing.expect(parsed.integrity().clean());
@@ -245,7 +247,10 @@ fn checkFixture(arena: std.mem.Allocator, f: fixtures.Font) !void {
         .absent => try testing.expect(gdef == .null),
         .valid => |g| {
             try testing.expectEqual(int(gdef.object.get("version").?), g.version);
-            try testing.expectEqual(@as(usize, 1), gdef.object.count());
+            try testing.expectEqual(@as(usize, 6), gdef.object.count());
+            for ([_][]const u8{ "version", "glyph_class_def", "mark_attach_class_def", "mark_glyph_sets", "lig_caret_list", "item_var_store" }) |key| {
+                try testing.expect(gdef.object.get(key) != null);
+            }
         },
         else => |s| {
             std.debug.print("gdef: {any}\n", .{s});

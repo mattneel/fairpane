@@ -1,0 +1,16 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..bdf3ee3 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -232,11 +232,6 @@ pub const Layout = struct {
+             if (bits == 0) continue;
+             if (self.addFeature(f, bits, masks, budget)) |status| return status;
+         }
+-        if (lang_sys.required_feature) |r| {
+-            if (r >= self.feature_count) return .{ .rejected = .index_out_of_range };
+-            const tag = self.featureTag(r) orelse return .{ .rejected = .count_out_of_bounds };
+-            if (self.addFeature(r, required_bit | requestBits(features, tag), masks, budget)) |status| return status;
+-        }
+         return null;
+     }
+ 

@@ -1,0 +1,27 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..3c0bada 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -192,7 +192,21 @@ pub const Layout = struct {
+                     selection.lang_sys = .default;
+                     break :found v;
+                 },
+-                .absent => return .{ .valid = selection },
++                .absent => {
++                    const fallback = self.findScript("DFLT".*) orelse return .{ .valid = selection };
++                    const d = switch (self.script(fallback) orelse unreachable) {
++                        .valid => |v| v,
++                        else => return .{ .valid = selection },
++                    };
++                    selection.script = d.tag;
++                    switch (d.defaultLangSys()) {
++                        .valid => |v| {
++                            selection.lang_sys = .default;
++                            break :found v;
++                        },
++                        else => return .{ .valid = selection },
++                    }
++                },
+                 .rejected => |defect| return .{ .rejected = defect },
+                 .unsupported_version => unreachable, // openLangSys never reports it.
+             }

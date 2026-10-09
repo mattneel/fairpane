@@ -1,0 +1,116 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-ODebug","--test-runner","tools/zig/test_profile_runner.zig","--cache-dir","out/test-profile","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"]
+TEST 1/86 0.000 ms pass root.test_0
+TEST 2/86 2.387 ms pass seed_test.test.FP-0013 case 9: the seed format rejects malformed seeds, and each committed seed decodes to its code points
+TEST 3/86 1.347 ms pass seed_test.test.FP-0013 case 10: every property of every seed equals unicode.lookup
+TEST 4/86 12.314 ms pass seed_test.test.FP-0013 case 11: every coverage entry of every seed matches glyphIndex on the embedded fixture
+TEST 5/86 70.846 ms pass fixture_test.test.FP-0013 case 12: each embedded font's SHA-256 equals font_sha256, and its generator is the committed script and the declared fontTools
+TEST 6/86 86.530 ms pass fixture_test.test.FP-0013 case 13: each fixture parses under .reject and equals every field of its expectation file
+TEST 7/86 0.128 ms pass fixture_test.test.FP-0013 case 14: the CJK subset is a CFF font whose name table keeps only IDs 0, 7, 13, and 14
+TEST 8/86 0.556 ms pass synthetic_test.test.FP-0013 case 15: B_TT builds deterministically with a whole-file sum of 0xB1B0AFBA and clean integrity
+TEST 9/86 0.265 ms pass synthetic_test.test.FP-0013 case 16: B_TT maps, measures, and describes its glyphs and optional tables
+TEST 10/86 0.166 ms pass synthetic_test.test.FP-0013 case 17: B_CFF exposes its CFF table and maps U+0041
+TEST 11/86 2.315 ms pass malformed_test.test.FP-0013 case 18: every proper prefix of B_TT and B_CFF fails, and a cut directory is Truncated
+TEST 12/86 0.157 ms pass malformed_test.test.FP-0013 case 19: numTables 0xFFFF on B_TT returns Truncated
+TEST 13/86 0.951 ms pass malformed_test.test.FP-0013 case 20: collection, WOFF, WOFF2, Type 1, and unknown sfnt versions are rejected by name
+TEST 14/86 0.480 ms pass malformed_test.test.FP-0013 case 21: records past the end of the font return TableOutOfBounds
+TEST 15/86 0.185 ms pass malformed_test.test.FP-0013 case 22: a head offset moved by 2 returns MisalignedTable
+TEST 16/86 0.334 ms pass malformed_test.test.FP-0013 case 23: unsorted and duplicate directory tags are rejected
+TEST 17/86 0.332 ms pass malformed_test.test.FP-0013 case 24: overlapping known tables are rejected, and an unknown table may overlap
+TEST 18/86 0.838 ms pass malformed_test.test.FP-0013 case 25: missing required tables and mixed outline formats are rejected
+TEST 19/86 0.306 ms pass malformed_test.test.FP-0013 case 26: checksum mismatches are reported or rejected
+TEST 20/86 1.058 ms pass malformed_test.test.FP-0013 case 27: malformed head tables return InvalidHead
+TEST 21/86 0.859 ms pass malformed_test.test.FP-0013 case 28: malformed maxp tables return InvalidMaxp
+TEST 22/86 0.747 ms pass malformed_test.test.FP-0013 case 29: malformed hhea and hmtx tables return InvalidHhea and InvalidHmtx
+TEST 23/86 1.094 ms pass malformed_test.test.FP-0013 case 30: malformed loca tables fail parsing, and malformed glyph headers fail on access
+TEST 24/86 1.319 ms pass malformed_test.test.FP-0013 case 31: malformed cmap headers return InvalidCmap, and no Unicode subtable returns NoUnicodeCmap
+TEST 25/86 1.370 ms pass malformed_test.test.FP-0013 case 32: malformed format 4 subtables return InvalidCmap even when unselected
+TEST 26/86 0.782 ms pass malformed_test.test.FP-0013 case 33: malformed format 12 subtables return InvalidCmap
+TEST 27/86 1.265 ms pass malformed_test.test.FP-0013 case 34: malformed name tables are rejected with the matching defect without failing the font
+TEST 28/86 0.689 ms pass malformed_test.test.FP-0013 case 35: OS/2 versions and lengths
+TEST 29/86 1.268 ms pass malformed_test.test.FP-0013 case 36: post lengths, glyph counts, string indexes, and versions
+TEST 30/86 3.354 ms pass malformed_test.test.FP-0013 case 37: malformed GSUB and GPOS tables are rejected with the matching defect
+TEST 31/86 0.697 ms pass malformed_test.test.FP-0013 case 38: GDEF versions, lengths, and offsets
+TEST 32/86 2.843 ms pass malformed_test.test.FP-0013 case 39: malformed CFF tables return InvalidCff
+TEST 33/86 0.000 ms pass malformed_test.test.FP-0013 case 40: font.parse takes no allocator
+TEST 34/86 1.967 ms pass bounds_test.test.FP-0013 case 50: a cmap with 513 distinct valid subtables returns InvalidCmap, and 512 parse
+TEST 35/86 18.808 ms pass bounds_test.test.FP-0013 case 51: 65535 records that share one costly format 4 subtable parse with one validation
+TEST 36/86 0.211 ms pass bounds_test.test.FP-0013 case 52: accessors given an index out of range return null or an error
+TEST 37/86 0.194 ms pass bounds_test.test.FP-0013 case 52: a changed directory record length makes findTable return null
+TEST 38/86 0.192 ms pass bounds_test.test.FP-0013 case 52: a changed cmap encoding record offset makes cmapSubtable return null
+TEST 39/86 0.181 ms pass bounds_test.test.FP-0013 case 52: a changed format 12 group count makes glyphIndex return glyph 0
+TEST 40/86 0.209 ms pass bounds_test.test.FP-0013 case 52: a changed format 12 start glyph past numGlyphs makes glyphIndex return glyph 0
+TEST 41/86 0.387 ms pass bounds_test.test.FP-0013 case 52: a changed format 4 segment count or idRangeOffset makes glyphIndex return glyph 0
+TEST 42/86 0.292 ms pass bounds_test.test.FP-0013 case 52: changed loca entries make glyphHeader return InvalidGlyph
+TEST 43/86 0.262 ms pass bounds_test.test.FP-0013 case 52: a changed name record makes record and find return null
+TEST 44/86 0.195 ms pass bounds_test.test.FP-0013 case 52: a changed GSUB script count leaves the parsed counts and returns null past them
+TEST 45/86 73.895 ms pass bounds_test.test.FP-0013 case 52: every single-byte change after parse leaves every accessor in range
+TEST 46/86 1.492 ms pass grapheme_seed_test.test.FP-0108 case 13: each seed gives its derived code-unit boundaries
+TEST 47/86 1.411 ms pass grapheme_seed_test.test.FP-0108 case 14: boundaries of every seed strictly increase from 0 to the length and never split a surrogate pair
+TEST 48/86 0.480 ms pass glyf_test.test.FP-0119 case 1: B_TT glyphs decode, a CFF font is not TrueType, and glyphs past numGlyphs are out of range
+TEST 49/86 0.582 ms pass glyf_test.test.FP-0119 case 2: T1 expands repeated flags and decodes short, same, and 16-bit coordinates
+TEST 50/86 0.775 ms pass glyf_test.test.FP-0119 case 3: contours become closed paths with the frozen start-point rule
+TEST 51/86 0.713 ms pass glyf_test.test.FP-0119 case 4: component offsets, scales, and the 2 by 2 matrix transform the child
+TEST 52/86 0.696 ms pass glyf_test.test.FP-0119 case 5: point matching, composite instructions, nested composites, and word point numbers
+TEST 53/86 0.533 ms pass glyf_test.test.FP-0119 case 6: depth 8 decodes, depth 9 is too deep, and cycles are refused
+TEST 54/86 33.034 ms pass glyf_test.test.FP-0119 case 7: the points and component budgets bound every decode
+TEST 55/86 7.633 ms pass glyf_test.test.FP-0119 case 8: malformed simple glyphs return InvalidGlyph
+TEST 56/86 10.310 ms pass glyf_test.test.FP-0119 case 9: malformed composite glyphs return InvalidGlyph, and phantom point matching is unsupported
+TEST 57/86 3.249 ms pass glyf_test.test.FP-0119 case 10: reserved bits, overlap flags, other negative contour counts, and trailing bytes are ignored
+TEST 58/86 68.540 ms pass glyf_test.test.FP-0119 case 11: every prefix and every changed byte of T1, C6, and C7 decodes without a panic or a leak
+TEST 59/86 7.824 ms pass glyf_test.test.FP-0119 case 12: every induced allocation failure returns OutOfMemory without a leak, and E7 stays within its peak
+TEST 60/86 28.276 ms pass glyf_test.test.FP-0119 case 13: deep, cyclic, and over-budget composites decode on a 256 KiB stack
+TEST 61/86 294.580 ms pass glyf_test.test.FP-0119 case 14: every glyph of the three TrueType fixtures decodes within its header bounds and maxp maxima
+TEST 62/86 0.018 ms pass layout_test.test.FP-0111 case 1: Coverage formats 1 and 2, chapter2 Examples 5 and 6, and edge blobs
+TEST 63/86 0.003 ms pass layout_test.test.FP-0111 case 2: malformed Coverage blobs are rejected or unsupported
+TEST 64/86 0.006 ms pass layout_test.test.FP-0111 case 3: ClassDef formats 1 and 2, chapter2 Examples 7 and 8, gdef Example 7, and edge blobs
+TEST 65/86 0.003 ms pass layout_test.test.FP-0111 case 4: malformed ClassDef blobs, including the gdef Example 2 bytes, are rejected or unsupported
+TEST 66/86 0.002 ms pass layout_test.test.FP-0111 case 5: Device and VariationIndex tables are reported as unsupported with their fields
+TEST 67/86 0.000 ms pass layout_test.test.FP-0111 case 6: malformed Device tables are rejected
+TEST 68/86 0.441 ms pass layout_test.test.FP-0111 case 7: the chapter2 script examples, with DFLT and default LangSys fallback
+TEST 69/86 0.228 ms pass layout_test.test.FP-0111 case 8: chapter2 Examples 3 and 4, a FeatureList and a LookupList
+TEST 70/86 0.247 ms pass layout_test.test.FP-0111 case 9: the G ScriptList, LangSys tables, and FeatureList
+TEST 71/86 0.413 ms pass layout_test.test.FP-0111 case 10: lookup selection on G, P, and B_TT
+TEST 72/86 0.221 ms pass layout_test.test.FP-0111 case 11: selection errors and a 63-tag request
+TEST 73/86 0.204 ms pass layout_test.test.FP-0111 case 12: a FeatureVariations table is reported, and the default lookups are selected
+TEST 74/86 0.231 ms pass layout_test.test.FP-0111 case 13: the G lookups, flags, mark filtering sets, extensions, and subtable formats
+TEST 75/86 0.190 ms pass layout_test.test.FP-0111 case 14: the P lookups, including mark coverages, extensions, and unknown types
+TEST 76/86 2.295 ms pass layout_test.test.FP-0111 case 15: malformed Script, LangSys, and Feature fields reject the selection
+TEST 77/86 2.328 ms pass layout_test.test.FP-0111 case 16: malformed Lookup tables and subtables are rejected
+TEST 78/86 45.596 ms pass layout_test.test.FP-0111 case 17: selection work is counted and limited
+TEST 79/86 0.413 ms pass layout_test.test.FP-0111 case 18: GDEF glyph classes, mark attachment classes, mark glyph sets, and ligature carets
+TEST 80/86 0.178 ms pass layout_test.test.FP-0111 case 19: the gdef Example 4 ligature carets follow the bytes
+TEST 81/86 2.123 ms pass layout_test.test.FP-0111 case 20: malformed GDEF subtables are rejected or unsupported
+TEST 82/86 319.091 ms pass layout_test.test.FP-0111 case 21: every truncation and byte change of G, P, and F_GDEF parses and walks deterministically
+TEST 83/86 37.695 ms pass layout_test.test.FP-0111 case 22: handles taken before the font bytes change never panic or read outside the font
+TEST 84/86 41.831 ms pass layout_test.test.FP-0111 case 23: selection and the walk run on a 256 KiB stack
+TEST 85/86 0.000 ms pass layout_test.test.FP-0111 case 24: no function of font.layout or of its public types takes an allocator
+TEST 86/86 82.479 ms pass layout_fixture_test.test.FP-0111 case 25: each fixture's GDEF, GSUB, and GPOS structures equal its version 2 fontTools dump
+SLOWEST (rank, ms, share of the total, test)
+RANK 1 319.091 ms 24.7% layout_test.test.FP-0111 case 21: every truncation and byte change of G, P, and F_GDEF parses and walks deterministically
+RANK 2 294.580 ms 22.8% glyf_test.test.FP-0119 case 14: every glyph of the three TrueType fixtures decodes within its header bounds and maxp maxima
+RANK 3 86.530 ms 6.7% fixture_test.test.FP-0013 case 13: each fixture parses under .reject and equals every field of its expectation file
+RANK 4 82.479 ms 6.3% layout_fixture_test.test.FP-0111 case 25: each fixture's GDEF, GSUB, and GPOS structures equal its version 2 fontTools dump
+RANK 5 73.895 ms 5.7% bounds_test.test.FP-0013 case 52: every single-byte change after parse leaves every accessor in range
+RANK 6 70.846 ms 5.4% fixture_test.test.FP-0013 case 12: each embedded font's SHA-256 equals font_sha256, and its generator is the committed script and the declared fontTools
+RANK 7 68.540 ms 5.3% glyf_test.test.FP-0119 case 11: every prefix and every changed byte of T1, C6, and C7 decodes without a panic or a leak
+RANK 8 45.596 ms 3.5% layout_test.test.FP-0111 case 17: selection work is counted and limited
+RANK 9 41.831 ms 3.2% layout_test.test.FP-0111 case 23: selection and the walk run on a 256 KiB stack
+RANK 10 37.695 ms 2.9% layout_test.test.FP-0111 case 22: handles taken before the font bytes change never panic or read outside the font
+RANK 11 33.034 ms 2.5% glyf_test.test.FP-0119 case 7: the points and component budgets bound every decode
+RANK 12 28.276 ms 2.1% glyf_test.test.FP-0119 case 13: deep, cyclic, and over-budget composites decode on a 256 KiB stack
+RANK 13 18.808 ms 1.4% bounds_test.test.FP-0013 case 51: 65535 records that share one costly format 4 subtable parse with one validation
+RANK 14 12.314 ms 0.9% seed_test.test.FP-0013 case 11: every coverage entry of every seed matches glyphIndex on the embedded fixture
+RANK 15 10.310 ms 0.7% glyf_test.test.FP-0119 case 9: malformed composite glyphs return InvalidGlyph, and phantom point matching is unsupported
+RANK 16 7.824 ms 0.6% glyf_test.test.FP-0119 case 12: every induced allocation failure returns OutOfMemory without a leak, and E7 stays within its peak
+RANK 17 7.633 ms 0.5% glyf_test.test.FP-0119 case 8: malformed simple glyphs return InvalidGlyph
+RANK 18 3.354 ms 0.2% malformed_test.test.FP-0013 case 37: malformed GSUB and GPOS tables are rejected with the matching defect
+RANK 19 3.249 ms 0.2% glyf_test.test.FP-0119 case 10: reserved bits, overlap flags, other negative contour counts, and trailing bytes are ignored
+RANK 20 2.843 ms 0.2% malformed_test.test.FP-0013 case 39: malformed CFF tables return InvalidCff
+RANK 21 2.387 ms 0.1% seed_test.test.FP-0013 case 9: the seed format rejects malformed seeds, and each committed seed decodes to its code points
+RANK 22 2.328 ms 0.1% layout_test.test.FP-0111 case 16: malformed Lookup tables and subtables are rejected
+RANK 23 2.315 ms 0.1% malformed_test.test.FP-0013 case 18: every proper prefix of B_TT and B_CFF fails, and a cut directory is Truncated
+RANK 24 2.295 ms 0.1% layout_test.test.FP-0111 case 15: malformed Script, LangSys, and Feature fields reject the selection
+RANK 25 2.123 ms 0.1% layout_test.test.FP-0111 case 20: malformed GDEF subtables are rejected or unsupported
+TOTAL 86 tests, 1290.976 ms; 0 failed, 0 skipped, 0 leaked, 0 logged errors
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-ODebug","--test-runner","tools/zig/test_profile_runner.zig","--cache-dir","out/test-profile","--dep","fairpane","-Mroot=tests/text/root.zig","-Mfairpane=src/root.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te63ab7b1b\\m","started_at":"2026-10-09T20:32:17.901Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":5912,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

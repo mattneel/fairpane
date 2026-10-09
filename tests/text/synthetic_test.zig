@@ -1,4 +1,4 @@
-//! FP-0013 cases 15, 16, and 17: the synthetic fonts B_TT and B_CFF.
+//! FP-0013 cases 15, 16, and 17: the synthetic fonts B_TT and B_CFF. FP-0111 amends case 16, because `Gdef` gains `table`.
 
 const std = @import("std");
 const testing = std.testing;
@@ -108,7 +108,12 @@ test "FP-0013 case 16: B_TT maps, measures, and describes its glyphs and optiona
     try testing.expectEqual(@as(u16, 0), gpos.lookupCount());
     const gdef = f.gdef().valid;
     try testing.expectEqual(@as(u32, 0x00010000), gdef.version);
-    try testing.expectEqual(font.Gdef{ .version = 0x00010000, .glyph_class_def = 0, .attach_list = 0, .lig_caret_list = 0, .mark_attach_class_def = 0, .mark_glyph_sets_def = null, .item_var_store = null }, gdef);
+    try testing.expectEqual(@as(u16, 0), gdef.glyph_class_def);
+    try testing.expectEqual(@as(u16, 0), gdef.attach_list);
+    try testing.expectEqual(@as(u16, 0), gdef.lig_caret_list);
+    try testing.expectEqual(@as(u16, 0), gdef.mark_attach_class_def);
+    try testing.expectEqual(@as(?u16, null), gdef.mark_glyph_sets_def);
+    try testing.expectEqual(@as(?u32, null), gdef.item_var_store);
     try testing.expectEqual(@as(?font.Cff, null), f.cff());
 }
 

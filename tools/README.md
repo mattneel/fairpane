@@ -365,6 +365,17 @@ It stays unchanged, because each expectation file records the script's SHA-256 a
 `tools/fileset.test.mjs` holds FP-0013 cases 41 through 49 and 53 through 55, which read `file://` or in-memory fixture sources and never use the network.
 It also holds FP-0108 case 5, which reads the committed `unicode` records, and the FP-0108 case 6 amendment of FP-0013 case 49.
 
+The expectation files have format version 2, and FP-0111 case 25 compares their layout fields with Fairpane's parser.
+Their `gsub` and `gpos` objects hold `version`, `feature_variations`, every script with its default and other LangSys tables, every feature with its lookup indices, and every lookup.
+Each lookup records its stored `type`, `flag`, `mark_filtering_set`, and `subtables`.
+Each subtable records whether it is an extension, its effective type, its format, and its primary coverage, glyph by glyph.
+The `gdef` object holds `version`, the glyph class and mark attachment class definitions as nonzero `[glyph_id, class]` pairs, the mark glyph set coverages, the ligature carets in coverage order, and `item_var_store`.
+fontTools deletes the stored format of some tables after it reads them.
+The script therefore wraps `postRead` of `Coverage`, `ClassDef`, `SingleSubst`, `MultipleSubst`, `AlternateSubst`, and `LigatureSubst` once at import, before it opens any font.
+Each wrapper keeps the format, and the four substitution wrappers also keep the raw Coverage; each calls the original method with identical arguments and catches no exception.
+A `logging.Handler` on the `fontTools` logger records every record at level WARNING or above.
+If any record was recorded, the script prints each message and exits with status 1 without writing the file.
+
 ## Profile the Zig tests
 
 `tools/zig/test_profile_runner.zig` is a test runner that prints the wall time of each test.

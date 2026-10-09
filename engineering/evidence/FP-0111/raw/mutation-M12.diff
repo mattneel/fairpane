@@ -1,0 +1,21 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..843cf56 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -251,7 +251,6 @@ pub const Layout = struct {
+         while (k < opened.lookup_index_count) : (k += 1) {
+             if (!budget.charge()) return .limit_exceeded;
+             const i = self.table.u16At(opened.offset + 4 + 2 * @as(u64, k)) orelse return .{ .rejected = .count_out_of_bounds };
+-            if (i >= self.lookup_count) return .{ .rejected = .index_out_of_range };
+             masks[i] |= bits;
+         }
+         return null;
+@@ -439,7 +438,7 @@ fn openFeature(t: Reader, at: u64, tag: Tag, lookup_count: u16) TableStatus(Feat
+     var k: u64 = 0;
+     while (k < count) : (k += 1) {
+         const i = t.u16At(at + 4 + 2 * k) orelse return .{ .rejected = .count_out_of_bounds };
+-        if (i >= lookup_count) return .{ .rejected = .index_out_of_range };
++        _ = i;
+     }
+     return .{ .valid = .{
+         .tag = tag,

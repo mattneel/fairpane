@@ -1,0 +1,12 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..f60c541 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -549,7 +549,6 @@ fn openLookup(t: Reader, kind: Kind, at: u64) LookupStatus {
+             const target_type = ext.int(u16, 2);
+             if (target_type == extensionType(kind)) return .{ .rejected = .nested_extension };
+             if (!definesType(kind, target_type)) return .{ .unsupported_type = target_type };
+-            if (k > 0 and target_type != lookup_type) return .{ .rejected = .mixed_lookup_types };
+             lookup_type = target_type;
+             if (sub + ext.int(u32, 4) >= t.len()) return .{ .rejected = .offset_out_of_bounds };
+         }

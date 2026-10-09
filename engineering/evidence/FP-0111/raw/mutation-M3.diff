@@ -1,0 +1,13 @@
+diff --git a/src/font/layout_common.zig b/src/font/layout_common.zig
+index 2ae8181..39683a8 100644
+--- a/src/font/layout_common.zig
++++ b/src/font/layout_common.zig
+@@ -111,7 +111,7 @@ pub fn parseCoverage(t: Reader, offset: u64) TableStatus(Coverage) {
+             var i: u64 = 0;
+             while (i < count) : (i += 1) {
+                 const glyph = t.u16At(offset + 4 + 2 * i) orelse return .{ .rejected = .count_out_of_bounds };
+-                if (i > 0 and glyph <= previous) return .{ .rejected = .unsorted_records };
++                if (i > 0 and glyph < previous) return .{ .rejected = .unsorted_records };
+                 previous = glyph;
+             }
+             return .{ .valid = .{ .format = 1, .table = t, .offset = offset, .count = count, .glyph_count = count } };

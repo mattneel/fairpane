@@ -1,0 +1,13 @@
+diff --git a/src/font/layout_common.zig b/src/font/layout_common.zig
+index 2ae8181..84e8367 100644
+--- a/src/font/layout_common.zig
++++ b/src/font/layout_common.zig
+@@ -224,7 +224,7 @@ pub fn parseDevice(t: Reader, offset: u64) DeviceStatus {
+     const start = header.int(u16, 0);
+     const end = header.int(u16, 2);
+     const format = header.int(u16, 4);
+-    if (format == 0x8000) return .{ .unsupported_variation_index = .{ .outer = start, .inner = end } };
++    if (format == 0x8000) return .{ .unsupported_device = .{ .start_size = start, .end_size = end, .delta_format = format } };
+     const bits: u64 = switch (format) {
+         1 => 2,
+         2 => 4,

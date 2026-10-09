@@ -1,0 +1,13 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..cc11a54 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -591,6 +591,8 @@ pub const Subtable = struct {
+             const input = t.u16At(self.offset + 4 + 2 * backtrack) orelse return .{ .rejected = .too_short };
+             if (input == 0) return .{ .rejected = .count_out_of_bounds };
+             field = 6 + 2 * backtrack;
++        } else if (self.kind == .gpos and self.lookup_type >= 4 and self.lookup_type <= 6) {
++            field = 4;
+         }
+         const offset = t.u16At(self.offset + field) orelse return .{ .rejected = .too_short };
+         if (offset == 0) return .{ .rejected = .null_offset };

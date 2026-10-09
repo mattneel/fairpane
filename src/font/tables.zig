@@ -16,6 +16,20 @@ pub const Defect = enum {
     glyph_count_mismatch,
     invalid_string_index,
     odd_utf16_length,
+    /// An index names a record past the end of its list: a feature, a required feature, a lookup, or a ligature glyph.
+    index_out_of_range,
+    /// A range whose start is after its end.
+    invalid_range,
+    /// A Coverage range whose startCoverageIndex is not the number of glyphs in the earlier ranges.
+    inconsistent_coverage_index,
+    /// An extension subtable whose extension lookup type is the extension type itself.
+    nested_extension,
+    /// The extension subtables of one lookup name different lookup types.
+    mixed_lookup_types,
+    /// A `DFLT` script without a default LangSys table.
+    missing_default_lang_sys,
+    /// A NULL offset to a required structure.
+    null_offset,
 };
 
 /// The result of reading an optional table.

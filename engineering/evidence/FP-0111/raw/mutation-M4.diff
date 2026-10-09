@@ -1,0 +1,13 @@
+diff --git a/src/font/layout_common.zig b/src/font/layout_common.zig
+index 2ae8181..b9a8eb4 100644
+--- a/src/font/layout_common.zig
++++ b/src/font/layout_common.zig
+@@ -152,7 +152,7 @@ pub const ClassDef = struct {
+     pub fn class(self: ClassDef, glyph: u16) u16 {
+         if (self.format == 1) {
+             if (glyph < self.start) return 0;
+-            const k = glyph - self.start;
++            const k = glyph - self.start + 1;
+             if (k >= self.count) return 0;
+             return self.table.u16At(self.offset + 6 + 2 * @as(u64, k)) orelse 0;
+         }

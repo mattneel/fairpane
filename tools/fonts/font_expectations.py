@@ -4,12 +4,13 @@ Usage, from the repository root:
 
     .tools/python/fonttools-4.66.1/Scripts/python tools/fonts/font_expectations.py tests/text/fonts/<dir>/<font>
 
-The expectation file is the reference that FP-0013 case 13 compares with Fairpane's own OpenType parser.
+The expectation file is the reference that FP-0013 case 13 and FP-0111 case 25 compare with Fairpane's own OpenType parser.
 No expectation file is edited by hand; rerun this script instead.
 """
 
 import hashlib
 import json
+import logging
 import platform
 import sys
 from pathlib import Path
@@ -18,6 +19,7 @@ import fontTools
 from fontTools.misc.textTools import tobytes
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.sfnt import SFNTDirectoryEntry, sfntDirectoryEntrySize, sfntDirectorySize
+from fontTools.ttLib.tables import otTables
 
 FONT_ROOT = Path("tests/text/fonts")
 SEED_ROOT = Path("tests/text/seeds")
@@ -26,6 +28,45 @@ FONTTOOLS_VERSION = "4.66.1"
 
 # Selection order: (3, 10) format 12, (0, 4) format 12, (3, 1) format 4, then (0, 3) format 4.
 CMAP_PRECEDENCE = [(3, 10, 12), (0, 4, 12), (3, 1, 4), (0, 3, 4)]
+
+# The stored lookup type of an extension lookup in each table.
+EXTENSION_TYPE = {"GSUB": 7, "GPOS": 9}
+
+
+def record_format(cls, coverage):
+    """Wrap `cls.postRead` so that it keeps the format that fontTools read, which fontTools' own `postRead` deletes.
+
+    The wrapper calls the original method with identical arguments and catches no exception. With `coverage`, it also keeps
+    the subtable's raw Coverage, which the converted table no longer holds.
+    """
+    original = cls.postRead
+
+    def postRead(self, rawTable, font):
+        self.fairpane_format = self.Format
+        if coverage:
+            self.fairpane_coverage = rawTable["Coverage"]
+        return original(self, rawTable, font)
+
+    cls.postRead = postRead
+
+
+# Installed once at import, before any TTFont is opened.
+for _cls in (otTables.Coverage, otTables.ClassDef):
+    record_format(_cls, coverage=False)
+for _cls in (otTables.SingleSubst, otTables.MultipleSubst, otTables.AlternateSubst, otTables.LigatureSubst):
+    record_format(_cls, coverage=True)
+
+
+class WarningRecorder(logging.Handler):
+    """Records every fontTools log record at level WARNING or above."""
+
+    def __init__(self):
+        super().__init__(level=logging.WARNING)
+        self.messages = []
+
+    def emit(self, record):
+        self.messages.append(record.getMessage())
+
 
 
 def fixed(value):
@@ -204,20 +245,111 @@ def glyf_entries(font, mapped):
     return out
 
 
+def coverage_fields(font, coverage):
+    """A Coverage table in coverage order, glyph by glyph."""
+    return {"format": coverage.fairpane_format, "glyphs": font.getGlyphIDMany(coverage.glyphs)}
+
+
+def primary_coverage(tag, lookup_type, subtable, subtable_format):
+    """The subtable's first Coverage, which the OpenType layout common table formats chapter calls its Coverage table."""
+    if tag == "GSUB" and lookup_type in (1, 2, 3, 4):
+        coverage = subtable.fairpane_coverage
+    elif (tag, lookup_type) in (("GSUB", 5), ("GPOS", 7)) and subtable_format == 3:
+        coverage = subtable.Coverage[0]
+    elif (tag, lookup_type) in (("GSUB", 6), ("GPOS", 8)) and subtable_format == 3:
+        coverage = subtable.InputCoverage[0]
+    elif tag == "GPOS" and lookup_type in (4, 5):
+        coverage = subtable.MarkCoverage
+    elif tag == "GPOS" and lookup_type == 6:
+        coverage = subtable.Mark1Coverage
+    else:
+        coverage = getattr(subtable, "Coverage", None)
+    if coverage is None:
+        raise ValueError(f"{tag} lookup type {lookup_type} format {subtable_format} has no primary Coverage")
+    return coverage
+
+
+def subtable_fields(font, tag, lookup_type, subtable):
+    extension = lookup_type == EXTENSION_TYPE[tag]
+    if extension:
+        lookup_type = subtable.ExtensionLookupType
+        subtable = subtable.ExtSubTable
+    subtable_format = getattr(subtable, "fairpane_format", None)
+    if subtable_format is None:
+        subtable_format = subtable.Format
+    coverage = primary_coverage(tag, lookup_type, subtable, subtable_format)
+    return {"extension": extension, "type": lookup_type, "format": subtable_format, "coverage": coverage_fields(font, coverage)}
+
+
+def lang_sys_fields(lang_sys):
+    required = lang_sys.ReqFeatureIndex
+    return {"required_feature": None if required == 0xFFFF else required, "features": list(lang_sys.FeatureIndex)}
+
+
 def layout_fields(font, tag):
     if tag not in font:
         return None
     table = font[tag].table
-    scripts = [r.ScriptTag for r in table.ScriptList.ScriptRecord] if table.ScriptList else []
-    features = [r.FeatureTag for r in table.FeatureList.FeatureRecord] if table.FeatureList else []
-    lookups = len(table.LookupList.Lookup) if table.LookupList else 0
-    return {"version": fixed(table.Version), "scripts": scripts, "features": features, "lookup_count": lookups}
+    scripts = []
+    for record in table.ScriptList.ScriptRecord if table.ScriptList else []:
+        script = record.Script
+        default = script.DefaultLangSys
+        scripts.append({
+            "tag": record.ScriptTag,
+            "default_lang_sys": None if default is None else lang_sys_fields(default),
+            "lang_sys": [{"tag": r.LangSysTag, **lang_sys_fields(r.LangSys)} for r in script.LangSysRecord],
+        })
+    features = [{"tag": r.FeatureTag, "lookups": list(r.Feature.LookupListIndex)}
+                for r in (table.FeatureList.FeatureRecord if table.FeatureList else [])]
+    lookups = [{"type": lookup.LookupType, "flag": lookup.LookupFlag, "mark_filtering_set": getattr(lookup, "MarkFilteringSet", None),
+                "subtables": [subtable_fields(font, tag, lookup.LookupType, s) for s in lookup.SubTable]}
+               for lookup in (table.LookupList.Lookup if table.LookupList else [])]
+    return {"version": fixed(table.Version), "feature_variations": getattr(table, "FeatureVariations", None) is not None,
+            "scripts": scripts, "features": features, "lookups": lookups}
+
+
+def class_def_fields(font, class_def):
+    if class_def is None:
+        return None
+    classes = sorted((font.getGlyphID(name), cls) for name, cls in class_def.classDefs.items())
+    return {"format": class_def.fairpane_format, "classes": [[gid, cls] for gid, cls in classes]}
+
+
+def caret_fields(caret):
+    if caret.Format == 1:
+        return {"format": 1, "coordinate": caret.Coordinate}
+    if caret.Format == 2:
+        return {"format": 2, "point": caret.CaretValuePoint}
+    if caret.Format == 3:
+        device = caret.DeviceTable
+        return {"format": 3, "coordinate": caret.Coordinate, "device": None if device is None else
+                {"delta_format": device.DeltaFormat, "start_size": device.StartSize, "end_size": device.EndSize}}
+    raise ValueError(f"CaretValue format {caret.Format}")
+
+
+def lig_caret_fields(font, lig_caret_list):
+    if lig_caret_list is None:
+        return None
+    glyphs = font.getGlyphIDMany(lig_caret_list.Coverage.glyphs)
+    if len(glyphs) != len(lig_caret_list.LigGlyph):
+        raise ValueError(f"LigCaretList covers {len(glyphs)} glyphs but has {len(lig_caret_list.LigGlyph)} LigGlyph tables")
+    return [{"glyph": gid, "carets": [caret_fields(c) for c in lig.CaretValue]} for gid, lig in zip(glyphs, lig_caret_list.LigGlyph)]
 
 
 def gdef_fields(font):
     if "GDEF" not in font:
         return None
-    return {"version": fixed(font["GDEF"].table.Version)}
+    gdef = font["GDEF"].table
+    sets = getattr(gdef, "MarkGlyphSetsDef", None)
+    return {
+        "version": fixed(gdef.Version),
+        "glyph_class_def": class_def_fields(font, gdef.GlyphClassDef),
+        "mark_attach_class_def": class_def_fields(font, gdef.MarkAttachClassDef),
+        "mark_glyph_sets": None if sets is None else
+        {"format": sets.MarkSetTableFormat, "sets": [coverage_fields(font, c) for c in sets.Coverage]},
+        "lig_caret_list": lig_caret_fields(font, gdef.LigCaretList),
+        "item_var_store": getattr(gdef, "VarStore", None) is not None,
+    }
 
 
 def cff_fields(font):
@@ -248,11 +380,13 @@ def main(argv):
         sys.exit(f"fontTools {FONTTOOLS_VERSION} is required, not {fontTools.version}")
     path = Path(argv[1])
     data = path.read_bytes()
+    warnings = WarningRecorder()
+    logging.getLogger("fontTools").addHandler(warnings)
     font = TTFont(path, lazy=False, recalcBBoxes=False, recalcTimestamp=False)
     cmap, mapped = cmap_fields(font)
     expectation = {
         "format": "fairpane-font-expectation",
-        "version": 1,
+        "version": 2,
         "font": path.relative_to(FONT_ROOT).as_posix(),
         "font_sha256": hashlib.sha256(data).hexdigest(),
         "generator": {"script": SCRIPT.as_posix(), "script_sha256": hashlib.sha256(SCRIPT.read_bytes()).hexdigest(),
@@ -273,6 +407,10 @@ def main(argv):
         "gpos": layout_fields(font, "GPOS"),
         "cff": cff_fields(font),
     }
+    if warnings.messages:
+        for message in warnings.messages:
+            print(f"fontTools warning: {message}")
+        sys.exit(1)
     out = path.with_name(f"{path.stem}.expect.json")
     out.write_text(json.dumps(expectation, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(f"Wrote {out.as_posix()}: font SHA-256 {expectation['font_sha256']}, {len(expectation['tables'])} tables, "

@@ -1,0 +1,12 @@
+diff --git a/src/font/layout_common.zig b/src/font/layout_common.zig
+index 2ae8181..110e456 100644
+--- a/src/font/layout_common.zig
++++ b/src/font/layout_common.zig
+@@ -196,7 +196,6 @@ pub fn parseClassDef(t: Reader, offset: u64) TableStatus(ClassDef) {
+                 const start = record.int(u16, 0);
+                 const end = record.int(u16, 2);
+                 if (start > end) return .{ .rejected = .invalid_range };
+-                if (i > 0 and start <= previous_end) return .{ .rejected = .unsorted_records };
+                 previous_end = end;
+             }
+             return .{ .valid = .{ .format = 2, .table = t, .offset = offset, .start = 0, .count = count } };

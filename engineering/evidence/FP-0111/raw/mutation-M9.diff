@@ -1,0 +1,14 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..09162ac 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -201,6 +201,9 @@ pub const Layout = struct {
+ 
+         var budget: Budget = .{ .max = limits.max_work };
+         if (self.addLangSys(lang_sys, request.features, masks, &budget)) |status| return status;
++        if (selection.lang_sys == .requested and s.defaultLangSys() == .valid) {
++            if (self.addLangSys(s.defaultLangSys().valid, request.features, masks, &budget)) |status| return status;
++        }
+ 
+         for (masks[0..self.lookup_count]) |m| {
+             if (m != 0) selection.lookup_count += 1;

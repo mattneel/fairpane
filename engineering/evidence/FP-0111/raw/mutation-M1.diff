@@ -1,0 +1,13 @@
+diff --git a/src/font/layout_common.zig b/src/font/layout_common.zig
+index 2ae8181..7d4875e 100644
+--- a/src/font/layout_common.zig
++++ b/src/font/layout_common.zig
+@@ -46,7 +46,7 @@ pub const Coverage = struct {
+             } else if (glyph > record.int(u16, 2)) {
+                 low = middle + 1;
+             } else {
+-                const i = @as(u32, record.int(u16, 4)) + (glyph - start);
++                const i = @as(u32, glyph - start);
+                 return if (i < self.glyph_count) @intCast(i) else null;
+             }
+         }

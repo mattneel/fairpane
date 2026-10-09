@@ -1,0 +1,63 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","font-expectations"]
+Verified 350 installed fontTools files against the RECORD of C:\Users\requi\.omp\wt\te63ab7b1b\m\.tools\downloads\fonttools-4.66.1-py3-none-any.whl.
+Run ["C:\\Users\\requi\\.omp\\wt\\te63ab7b1b\\m\\.tools\\python\\fonttools-4.66.1\\Scripts\\python.exe","tools/fonts/font_expectations.py","tests/text/fonts/noto-sans/NotoSans-Regular.ttf"] in C:\Users\requi\AppData\Local\Temp\fairpane-font-expectations-l5qzva
+Wrote tests/text/fonts/noto-sans/NotoSans-Regular.expect.json: font SHA-256 f3961a9cde016d41a4879aecda1474d3a36d6bf54fa0e4643de029cc2248b0e8, 13 tables, 67 seed code points, 2966 mapped glyphs
+tests/text/fonts/noto-sans/NotoSans-Regular.expect.json: 1042753 bytes, SHA-256 ca7555c21dfc4a4a0ca285ce0b983fb4bfdc5409bda4eb4182d0ad16da1610de, different from the committed file
+Run ["C:\\Users\\requi\\.omp\\wt\\te63ab7b1b\\m\\.tools\\python\\fonttools-4.66.1\\Scripts\\python.exe","tools/fonts/font_expectations.py","tests/text/fonts/noto-sans-arabic/NotoSansArabic-Regular.ttf"] in C:\Users\requi\AppData\Local\Temp\fairpane-font-expectations-l5qzva
+Wrote tests/text/fonts/noto-sans-arabic/NotoSansArabic-Regular.expect.json: font SHA-256 bd86ca02f087d7f3c3788ba458fb6b73744c7639ed276b8d870dba6def6c40d0, 13 tables, 67 seed code points, 1163 mapped glyphs
+tests/text/fonts/noto-sans-arabic/NotoSansArabic-Regular.expect.json: 388897 bytes, SHA-256 4e4b18e0d8ff4b5adaba6074ed7129d709a7a411aa30c34e088c29735f08570e, different from the committed file
+Run ["C:\\Users\\requi\\.omp\\wt\\te63ab7b1b\\m\\.tools\\python\\fonttools-4.66.1\\Scripts\\python.exe","tools/fonts/font_expectations.py","tests/text/fonts/noto-sans-devanagari/NotoSansDevanagari-Regular.ttf"] in C:\Users\requi\AppData\Local\Temp\fairpane-font-expectations-l5qzva
+Wrote tests/text/fonts/noto-sans-devanagari/NotoSansDevanagari-Regular.expect.json: font SHA-256 9c7d935139ea6a1e6ad9dbac4f6d27ece1e04bca8123c8888d00a0f9df4724cd, 13 tables, 67 seed code points, 282 mapped glyphs
+tests/text/fonts/noto-sans-devanagari/NotoSansDevanagari-Regular.expect.json: 291107 bytes, SHA-256 a980b4d567be50c9f5436138e10c6ed05cbb3dec87745f28d698d561057f7502, different from the committed file
+Run ["C:\\Users\\requi\\.omp\\wt\\te63ab7b1b\\m\\.tools\\python\\fonttools-4.66.1\\Scripts\\python.exe","tools/fonts/font_expectations.py","tests/text/fonts/noto-sans-cjk-jp-subset/cjk-subset.otf"] in C:\Users\requi\AppData\Local\Temp\fairpane-font-expectations-l5qzva
+Wrote tests/text/fonts/noto-sans-cjk-jp-subset/cjk-subset.expect.json: font SHA-256 3f435bdd8198e124e9cbbbad75fa1fb4156dac25ba163d0d1386e3afb682a83c, 15 tables, 67 seed code points, 21 mapped glyphs
+tests/text/fonts/noto-sans-cjk-jp-subset/cjk-subset.expect.json: 33917 bytes, SHA-256 ec2a9ec3645792cc0837e93634dc65eb390e662d1c40379aac3c7b6ee286b4b2, different from the committed file
+{
+  "result": "pass",
+  "mode": "write",
+  "tool": {
+    "name": "fontTools",
+    "version": "4.66.1",
+    "wheel_sha256": "7234ae9e28db64273fbbfa72caebd0a97e3bdba6b05064114741b9539ef339d0",
+    "verified_files": 350,
+    "python": "3.13.15"
+  },
+  "environment": {
+    "PYTHONSAFEPATH": "1",
+    "other_python_variables": "removed"
+  },
+  "expectations": [
+    {
+      "path": "tests/text/fonts/noto-sans/NotoSans-Regular.expect.json",
+      "size": 1042753,
+      "sha256": "ca7555c21dfc4a4a0ca285ce0b983fb4bfdc5409bda4eb4182d0ad16da1610de",
+      "equals_committed": false
+    },
+    {
+      "path": "tests/text/fonts/noto-sans-arabic/NotoSansArabic-Regular.expect.json",
+      "size": 388897,
+      "sha256": "4e4b18e0d8ff4b5adaba6074ed7129d709a7a411aa30c34e088c29735f08570e",
+      "equals_committed": false
+    },
+    {
+      "path": "tests/text/fonts/noto-sans-devanagari/NotoSansDevanagari-Regular.expect.json",
+      "size": 291107,
+      "sha256": "a980b4d567be50c9f5436138e10c6ed05cbb3dec87745f28d698d561057f7502",
+      "equals_committed": false
+    },
+    {
+      "path": "tests/text/fonts/noto-sans-cjk-jp-subset/cjk-subset.expect.json",
+      "size": 33917,
+      "sha256": "ec2a9ec3645792cc0837e93634dc65eb390e662d1c40379aac3c7b6ee286b4b2",
+      "equals_committed": false
+    }
+  ],
+  "differing": [
+    "tests/text/fonts/noto-sans/NotoSans-Regular.expect.json",
+    "tests/text/fonts/noto-sans-arabic/NotoSansArabic-Regular.expect.json",
+    "tests/text/fonts/noto-sans-devanagari/NotoSansDevanagari-Regular.expect.json",
+    "tests/text/fonts/noto-sans-cjk-jp-subset/cjk-subset.expect.json"
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","font-expectations"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te63ab7b1b\\m","started_at":"2026-10-09T19:59:28.220Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1544}

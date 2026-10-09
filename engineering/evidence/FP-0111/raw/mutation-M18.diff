@@ -1,0 +1,15 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..8fe383e 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -276,9 +276,9 @@ const Budget = struct {
+ 
+     /// Charges one unit before a counted read, or returns false when the limit is already reached.
+     fn charge(self: *Budget) bool {
+-        if (self.used == self.max) return false;
+         self.used += 1;
+         if (builtin.is_test) work = self.used;
++        if (self.used == self.max) return false;
+         return true;
+     }
+ };

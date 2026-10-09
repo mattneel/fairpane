@@ -11,11 +11,11 @@ const reader = @import("reader.zig");
 const tables = @import("tables.zig");
 const cmap_mod = @import("cmap.zig");
 const cff_mod = @import("cff.zig");
-const layout = @import("layout.zig");
+pub const layout = @import("layout.zig");
 pub const outline_model = @import("outline.zig");
 pub const glyf_decoder = @import("glyf.zig");
 
-const Reader = reader.Reader;
+pub const Reader = reader.Reader;
 pub const Tag = reader.Tag;
 pub const Outline = tables.Outline;
 pub const Defect = tables.Defect;
@@ -328,19 +328,24 @@ pub const Font = struct {
         return tables.parsePost(self.knownTable(.post) orelse return .absent, self.glyphCount());
     }
 
-    /// Each call reads the `GDEF` header again, in constant time.
+    /// Each call reads the `GDEF` header again, in constant time. Each `Gdef` method opens its structure again and checks
+    /// it in time linear in that structure's length.
     pub fn gdef(self: *const Font) TableStatus(Gdef) {
         return layout.parseGdef(self.knownTable(.GDEF) orelse return .absent);
     }
 
-    /// Each call checks the `GSUB` table again, in time linear in its length.
+    /// Each call checks the `GSUB` table again, in time linear in its length. Opening a Script, Feature, Lookup, Coverage,
+    /// or ClassDef costs time linear in that structure's length, and `selectLookups` costs at most its work limit plus
+    /// the structures that it opens.
     pub fn gsub(self: *const Font) TableStatus(Layout) {
-        return layout.parseLayout(self.knownTable(.GSUB) orelse return .absent);
+        return layout.parseLayout(self.knownTable(.GSUB) orelse return .absent, .gsub);
     }
 
-    /// Each call checks the `GPOS` table again, in time linear in its length.
+    /// Each call checks the `GPOS` table again, in time linear in its length. Opening a Script, Feature, Lookup, Coverage,
+    /// or ClassDef costs time linear in that structure's length, and `selectLookups` costs at most its work limit plus
+    /// the structures that it opens.
     pub fn gpos(self: *const Font) TableStatus(Layout) {
-        return layout.parseLayout(self.knownTable(.GPOS) orelse return .absent);
+        return layout.parseLayout(self.knownTable(.GPOS) orelse return .absent, .gpos);
     }
 
     /// The CFF table of a CFF font, or null for a TrueType font.

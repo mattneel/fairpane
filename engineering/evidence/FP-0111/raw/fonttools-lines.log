@@ -1,0 +1,32 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\grep.exe","-n","-e","^from fontTools.config import OPTIONS","-e","self.postRead(table, font)","-e","self.Format = reader.readUShort()","C:\\Users\\requi\\.omp\\wt\\t2dec3085f\\m\\.tools\\python\\fonttools-4.66.1\\Lib\\site-packages\\fontTools\\ttLib\\tables\\otBase.py"]
+1:from fontTools.config import OPTIONS
+1003:            self.postRead(table, font)
+1237:        self.Format = reader.readUShort()
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\grep.exe","arguments":["-n","-e","^from fontTools.config import OPTIONS","-e","self.postRead(table, font)","-e","self.Format = reader.readUShort()","C:\\Users\\requi\\.omp\\wt\\t2dec3085f\\m\\.tools\\python\\fonttools-4.66.1\\Lib\\site-packages\\fontTools\\ttLib\\tables\\otBase.py"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te63ab7b1b\\m","started_at":"2026-10-09T20:33:42.425Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\grep.exe","-n","-e","^class Coverage(","-e","^class SingleSubst(","-e","^class MultipleSubst(","-e","^class ClassDef(","-e","^class AlternateSubst(","-e","^class LigatureSubst(","-e","def postRead(self, rawTable, font):","-e","del self.Format","-e","Coverage is not sorted by glyph ids","C:\\Users\\requi\\.omp\\wt\\t2dec3085f\\m\\.tools\\python\\fonttools-4.66.1\\Lib\\site-packages\\fontTools\\ttLib\\tables\\otTables.py"]
+940:class Coverage(FormatSwitchingBaseTable):
+947:    def postRead(self, rawTable, font):
+958:                log.warning("GSUB/GPOS Coverage is not sorted by glyph ids.")
+970:        del self.Format  # Don't need this anymore
+1004:                    log.warning("GSUB/GPOS Coverage is not sorted by glyph ids.")
+1038:    def postRead(self, rawTable, font):
+1114:    def postRead(self, rawTable, font):
+1182:class SingleSubst(FormatSwitchingBaseTable):
+1187:    def postRead(self, rawTable, font):
+1207:        del self.Format  # Don't need this anymore
+1262:class MultipleSubst(FormatSwitchingBaseTable):
+1267:    def postRead(self, rawTable, font):
+1276:        del self.Format  # Don't need this anymore
+1337:class ClassDef(FormatSwitchingBaseTable):
+1342:    def postRead(self, rawTable, font):
+1371:        del self.Format  # Don't need this anymore
+1442:class AlternateSubst(FormatSwitchingBaseTable):
+1447:    def postRead(self, rawTable, font):
+1458:        del self.Format  # Don't need this anymore
+1511:class LigatureSubst(FormatSwitchingBaseTable):
+1516:    def postRead(self, rawTable, font):
+1527:        del self.Format  # Don't need this anymore
+1777:    def postRead(self, rawTable, font):
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\grep.exe","arguments":["-n","-e","^class Coverage(","-e","^class SingleSubst(","-e","^class MultipleSubst(","-e","^class ClassDef(","-e","^class AlternateSubst(","-e","^class LigatureSubst(","-e","def postRead(self, rawTable, font):","-e","del self.Format","-e","Coverage is not sorted by glyph ids","C:\\Users\\requi\\.omp\\wt\\t2dec3085f\\m\\.tools\\python\\fonttools-4.66.1\\Lib\\site-packages\\fontTools\\ttLib\\tables\\otTables.py"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te63ab7b1b\\m","started_at":"2026-10-09T20:33:42.517Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}

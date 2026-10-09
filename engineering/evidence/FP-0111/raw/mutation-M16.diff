@@ -1,0 +1,13 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..5d83e5e 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -557,7 +557,7 @@ fn openLookup(t: Reader, kind: Kind, at: u64) LookupStatus {
+     return .{ .valid = .{
+         .lookup_type = lookup_type,
+         .extension = extension,
+-        .flag = flag,
++        .flag = flag & 0x00FF,
+         .subtable_count = count,
+         .mark_filtering_set = mark_filtering_set,
+         .table = t,

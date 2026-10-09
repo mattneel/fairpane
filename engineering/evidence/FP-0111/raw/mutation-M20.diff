@@ -1,0 +1,13 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..67f8555 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -667,7 +667,7 @@ pub fn parseLayout(t: Reader, kind: Kind) TableStatus(Layout) {
+         .script_list = lists[0],
+         .feature_list = lists[1],
+         .lookup_list = lists[2],
+-        .feature_variations = variations,
++        .feature_variations = 0,
+         .script_count = scripts,
+         .feature_count = features,
+         .lookup_count = lookups,

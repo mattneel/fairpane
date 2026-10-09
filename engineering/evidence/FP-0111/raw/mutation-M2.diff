@@ -1,0 +1,12 @@
+diff --git a/src/font/layout_common.zig b/src/font/layout_common.zig
+index 2ae8181..63d8079 100644
+--- a/src/font/layout_common.zig
++++ b/src/font/layout_common.zig
+@@ -29,6 +29,7 @@ pub const Coverage = struct {
+         var low: u32 = 0;
+         var high: u32 = self.count;
+         if (self.format == 1) {
++            high -|= 1;
+             while (low < high) {
+                 const middle = low + (high - low) / 2;
+                 const g = self.table.u16At(self.offset + 4 + 2 * @as(u64, middle)) orelse return null;

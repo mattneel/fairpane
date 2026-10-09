@@ -2,10 +2,10 @@
 
 ## Scope
 
-These tests cover task FP-0013, Unicode 18.0.0 properties and allocation-free OpenType parsing, and task FP-0119, TrueType outline decoding.
+These tests cover task FP-0013, Unicode 18.0.0 properties and allocation-free OpenType parsing, task FP-0111, the OpenType layout common tables and GDEF, and task FP-0119, TrueType outline decoding.
 `build.zig` roots a test artifact at `root.zig`, which imports the library module as `fairpane`.
 `zig build test` runs them.
-Each test is named `FP-0013 case N: ...` or `FP-0119 case N: ...` after the case list in `engineering/evidence/FP-0013/CONTRACT.md` or `engineering/evidence/FP-0119/CONTRACT.md`.
+Each test is named `FP-0013 case N: ...`, `FP-0111 case N: ...`, or `FP-0119 case N: ...` after the case list in `engineering/evidence/FP-0013/CONTRACT.md`, `engineering/evidence/FP-0111/CONTRACT.md`, or `engineering/evidence/FP-0119/CONTRACT.md`.
 No test here shapes, segments, rasterizes, or selects a fallback font; `specs/capabilities/text-fonts.json` names the tasks that own that work.
 
 ## Font fixtures
@@ -28,11 +28,13 @@ The subset is an OFL Modified Version: it keeps the 20 distinct code points of t
 
 Each font has a `<stem>.expect.json` file beside it, such as `NotoSans-Regular.expect.json`.
 `tools/fonts/font_expectations.py` writes it, reading the font only through fontTools 4.66.1.
-The file records the table directory, the raw fields of `head`, `hhea`, `maxp`, `OS/2`, and `post`, every `name` record,
+The file has format version 2.
+It records the table directory, the raw fields of `head`, `hhea`, `maxp`, `OS/2`, and `post`, every `name` record,
 the `cmap` subtables and selection, the glyph of every seed code point, the metrics and glyph headers of every mapped glyph,
-the `GDEF`, `GSUB`, and `GPOS` versions and tags, and the CFF Name INDEX, CharStrings count, and CID keying.
-Case 13 compares every field with Fairpane's parser.
-Case 12 compares the font's SHA-256, the generator's script SHA-256 with the committed `tools/fonts/font_expectations.py`,
+the `GDEF`, `GSUB`, and `GPOS` layout dumps that `tools/README.md` describes, and the CFF Name INDEX, CharStrings count, and CID keying.
+FP-0013 case 13 compares every field except the layout dumps with Fairpane's parser, and it compares the layout versions, tags, and lookup counts.
+FP-0111 case 25 compares the rest of each layout dump.
+FP-0013 case 12 compares the font's SHA-256, the generator's script SHA-256 with the committed `tools/fonts/font_expectations.py`,
 and the generator's fontTools version with `engineering/dependencies.json`.
 The `tests/text` run step therefore runs in the build root and lists both files as inputs.
 Nobody edits an expectation file by hand.
@@ -94,3 +96,29 @@ Never edit an expectation file, a seed, or an upstream byte to pass a case.
 If a case 14 invariant fails, stop and report the font, the glyph ID, and both values.
 If any fixture glyph returns `UnsupportedPhantomPoint`, stop and report it.
 If an F_GLYF expectation contradicts the OpenType `glyf` chapter, stop and report it instead of changing it.
+
+## Layout fixtures
+
+`layout_test.zig` holds FP-0111 cases 1 to 24, and `layout_builder.zig` writes their fixtures from the contract's byte strings.
+Blob cases call `parseCoverage`, `parseClassDef`, and `parseDevice` on bytes from `chapter2` Examples 5 to 9, the `gdef` examples, and edge values.
+The `chapter2` script examples E1, E2, and E34 and the `gdef` tables F_GDEF, F_GDEF4, and F_GDEF2 are fixed byte strings.
+The builder writes G, a GSUB table with three scripts, seven features, and thirteen lookups of every kind that the contract names,
+G11, which is G as version 1.1 with a FeatureVariations table, P, a GPOS table with nine lookups, T_MFS, and H(N), whose LangSys and Feature list index 0 N times.
+It returns the position of every field that a case edits, so each malformed variant changes exactly one field.
+Each case puts its table into `B_TT` and parses the font under `.reject`.
+Case 17 reads `layout.work`, a selection counter that exists only in test builds.
+Case 21 truncates and changes every byte of G, P, and F_GDEF, and case 22 changes the bytes after the handles were taken.
+Case 23 selects and walks on a thread with a 256 KiB stack.
+
+`layout_fixture_test.zig` holds FP-0111 case 25.
+It compares every script, LangSys, feature, lookup, subtable, primary coverage, GDEF class, mark glyph set, and ligature caret of each fixture with its expectation file.
+For each LangSys, it also requests that LangSys's distinct feature tags and compares every mask with the masks that the dumped lists give.
+
+## FP-0111 stop rules
+
+If a font digest differs from `specs/snapshots/opentype-fixtures.json` before a fontTools run, stop and report both values.
+If case 25 finds a difference, stop and report the font, the table, the JSON path, and both values, which the case prints.
+Never edit a fixture, an expectation file, or `tools/fonts/font_expectations.py` to pass a case.
+If a fixture lookup or subtable is rejected or unsupported, or a fixture LangSys names more than 63 distinct tags, stop and report it.
+If `font_expectations.py` exits with status 1, or `font-expectations --check` differs after a write run, stop and report it.
+If an expectation contradicts the cited OpenType text, stop and report it instead of changing it.

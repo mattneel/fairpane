@@ -1,0 +1,16 @@
+diff --git a/src/font/layout.zig b/src/font/layout.zig
+index fba6b93..1370ef7 100644
+--- a/src/font/layout.zig
++++ b/src/font/layout.zig
+@@ -526,10 +526,7 @@ fn openLookup(t: Reader, kind: Kind, at: u64) LookupStatus {
+     const flag = header.int(u16, 2);
+     const count = header.int(u16, 4);
+     if (!t.fits(at + 6, 2 * @as(u64, count))) return .{ .rejected = .count_out_of_bounds };
+-    var mark_filtering_set: ?u16 = null;
+-    if (flag & use_mark_filtering_set != 0) {
+-        mark_filtering_set = t.u16At(at + 6 + 2 * @as(u64, count)) orelse return .{ .rejected = .too_short };
+-    }
++    const mark_filtering_set: ?u16 = null;
+     var k: u64 = 0;
+     while (k < count) : (k += 1) {
+         const offset = t.u16At(at + 6 + 2 * k) orelse return .{ .rejected = .count_out_of_bounds };

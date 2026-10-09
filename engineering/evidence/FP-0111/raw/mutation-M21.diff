@@ -1,0 +1,16 @@
+diff --git a/src/font/gdef.zig b/src/font/gdef.zig
+index 8d9ca05..8dc36a4 100644
+--- a/src/font/gdef.zig
++++ b/src/font/gdef.zig
+@@ -162,10 +162,9 @@ pub const LigGlyph = struct {
+             2 => .{ .valid = .{ .point = t.u16At(at + 2) orelse return .{ .rejected = .too_short } } },
+             3 => {
+                 const value = t.fixed(6, at) orelse return .{ .rejected = .too_short };
+-                const device = value.int(u16, 4);
+                 return .{ .valid = .{ .coordinate_device = .{
+                     .coordinate = value.int(i16, 2),
+-                    .device = if (device == 0) null else common.parseDevice(t, at + device),
++                    .device = null,
+                 } } };
+             },
+             else => .{ .unsupported_format = format },

@@ -50,7 +50,7 @@
       "status": "remaining",
       "owner_task": "FP-0015",
       "summary": "GSUB and GPOS lookups, Arabic joining, and Indic and Universal Shaping Engine reordering.",
-      "engine_behavior": "No API. GSUB and GPOS expose only their script tags, feature tags, and lookup counts; no lookup runs."
+      "engine_behavior": "No lookup is applied. fairpane.font.layout parses ScriptList, FeatureList, LookupList, Lookup headers, Coverage, ClassDef, and the GDEF classes, mark glyph sets, and ligature carets, and selects lookups by script, language, and feature tags. FeatureVariations, Device, and VariationIndex data, and unknown lookup types and formats, are reported as unsupported."
     },
     {
       "id": "font-fallback",
