@@ -46,6 +46,27 @@ Commit `7bbe196` implements contract revision 1, and policy commit `29f2135` add
 - `gates/2026-10-09T02-41-12-231Z-repo-check-cde06900.json`
 - `gates/2026-10-09T02-41-12-409Z-controller-test-574028d3.json`
 
+## Revision 2
+
+`reviews/review-2-reject.json` found that `gateStepProblems` checked only `shell:` and `if:`.
+A workflow or job `defaults.run.shell`, an `env` such as `NODE_OPTIONS`, a `working-directory`, a `container`, or an extra action could still let a gate step exit 0 without running.
+`reviews/security-review-2-accept.json` reported the same gap and further minor and note findings.
+A step output could reach a shell through `run:`, unreviewed triggers were accepted, the `pages.yml` problem text did not name its grants, and an upload step without `if:` reported nothing.
+Review 2 also noted a block scalar form that the checker accepted and libyaml rejects.
+
+The `fairpane-core` worker `FP0033Revision2` implemented contract revision 2 on base `acd7a5a` in `tools/workflow-check.mjs`, `tools/workflow-check.test.mjs`, and `tools/README.md`.
+`gateWorkflowProblems` replaces `gateStepProblems` with allowlists.
+Neither workflow file changed.
+`gates.yml` still has no problem, and the `pages.yml` list now reads `Line 49: Job deploy grants a permission other than contents: read (pages: write, id-token: write).`
+The Gates test now also asserts each job's full step sequence, including the `uses:` actions.
+
+| Check | Evidence |
+| --- | --- |
+| Red baseline | `raw/revision-2-tests-before.log` records `HEAD` `acd7a5a` and the old checker blob `ef953b17`. It records the `node -e` command that stages the old checker, the new tests, and both workflows under `out/fp0033-rev2-before`, and that appends the stub `export { gateStepProblems as gateWorkflowProblems };`. It records the staged blob IDs and the run, which passes 13 of 19 cases and fails 6. Cases 12 through 16 fail on the new checks. Case 1 and case 15 fail at their reviewed-list assertion, because the old `pages.yml` problem did not name its grants. |
+| 12-16 | `raw/revision-2-tests-after.log` records `git hash-object` of both workflows and the changed checker files. `node tools/workflow-check.test.mjs` passes 19 of 19, and `node tools/fairpane.mjs test` passes 148 of 148, both with exit status 0. |
+
+The integrator still records `git show --stat` of the revision 2 commit, `git hash-object` of each workflow file at that commit, the gate receipts, `actionlint`, and the GitHub run.
+
 ## Limits
 
 Workflow receipts are unsigned local integrity records, as their artifact names state.

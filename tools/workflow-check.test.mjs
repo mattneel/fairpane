@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { WorkflowParseError, checkWorkflow, gateStepProblems, parseWorkflow } from './workflow-check.mjs';
+import { WorkflowParseError, checkWorkflow, gateWorkflowProblems, parseWorkflow } from './workflow-check.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readWorkflow = name => fs.readFileSync(path.join(root, '.github/workflows', name), 'utf8');
@@ -65,7 +65,7 @@ const CHARACTER = /Character U\+[0-9A-F]{4} is not accepted/;
 /** The reviewed problems of each workflow file. A new workflow file needs its own reviewed entry. */
 const REVIEWED = {
   'gates.yml': [],
-  'pages.yml': ['Line 49: Job deploy grants a permission other than contents: read.'],
+  'pages.yml': ['Line 49: Job deploy grants a permission other than contents: read (pages: write, id-token: write).'],
 };
 
 export const workflowCases = [
@@ -78,7 +78,7 @@ export const workflowCases = [
   ['FP-0033: The Gates workflow runs the contract gates in order on pinned runner images', () => {
     const workflow = parseWorkflow(readWorkflow('gates.yml'));
     assert.equal(workflow.entries.get('name').value.value, 'Gates');
-    assert.deepEqual(gateStepProblems(workflow), []);
+    assert.deepEqual(gateWorkflowProblems(workflow), []);
     const concurrency = workflow.entries.get('concurrency').value.entries;
     assert.equal(concurrency.get('group').value.value,
       "gates-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.run_id }}");
@@ -96,8 +96,9 @@ export const workflowCases = [
     assert.deepEqual([...jobs.keys()], Object.keys(expected));
     for (const [job, [runner, gates]] of Object.entries(expected)) {
       assert.equal(jobs.get(job).value.entries.get('runs-on').value.value, runner);
-      const runs = steps(workflow, job).map(s => field(s, 'run')).filter(Boolean);
-      assert.deepEqual(runs, ['node tools/fairpane.mjs install-zig', ...gates.map(g => `node tools/fairpane.mjs run ${g}`)]);
+      const sequence = steps(workflow, job).map(s => [field(s, 'uses')?.split('@')[0] ?? null, field(s, 'run') ?? null]);
+      assert.deepEqual(sequence, [['actions/checkout', null], ['actions/setup-node', null], [null, 'node tools/fairpane.mjs install-zig'],
+        ...gates.map(g => [null, `node tools/fairpane.mjs run ${g}`]), ['actions/upload-artifact', null]]);
       const upload = steps(workflow, job).at(-1);
       assert.match(field(upload, 'uses'), /^actions\/upload-artifact@/);
       assert.equal(field(upload, 'if'), '${{ always() }}');
@@ -166,7 +167,7 @@ export const workflowCases = [
   }],
   ['FP-0033 9: A gate step that can be skipped or rerouted fails', () => {
     const run = '        run: node tools/fairpane.mjs run repo-check\n';
-    const gates = text => gateStepProblems(parseWorkflow(text));
+    const gates = text => gateWorkflowProblems(parseWorkflow(text));
     assert.deepEqual(gates(BASE), []);
     assert.match(gates(variant(run, `${run}        if: always()\n`)).join('\n'), /Only an upload-artifact step may set if:/);
     assert.match(gates(variant(run, `${run}        shell: bash\n`)).join('\n'), /sets shell:/);
@@ -174,6 +175,78 @@ export const workflowCases = [
     const upload = condition => `${run}\n      - name: Upload\n        uses: actions/upload-artifact@cf430e0 # v7.0.2\n${condition}`;
     assert.deepEqual(gates(variant(run, upload('        if: ${{ always() }}\n'))), []);
     assert.match(gates(variant(run, upload('        if: ${{ success() }}\n'))).join('\n'), /Only an upload-artifact step may set if:/);
+  }],
+  ['FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition', () => {
+    const run = '        run: node tools/fairpane.mjs run repo-check\n', job = '    runs-on: ubuntu-24.04\n';
+    const gates = text => gateWorkflowProblems(parseWorkflow(text));
+    const reports = (text, pattern) => {
+      const problems = gates(text);
+      assert.ok(problems.some(p => pattern.test(p)), `Expected ${pattern} in ${JSON.stringify(problems)}`);
+    };
+    const setup = `      - name: Set up Node\n        uses: actions/setup-node@${'b'.repeat(40)} # v7.1.0\n        with:\n          node-version: 24.21.0\n\n`;
+    const upload = condition => `${run}\n      - name: Upload\n${condition}        uses: actions/upload-artifact@${'c'.repeat(40)} # v7.0.2\n` +
+      '        with:\n          name: receipts\n          path: out/evidence/\n          if-no-files-found: error\n';
+    const accepted = variant(run, upload('        if: ${{ always() }}\n')).replace('      - name: Run a gate\n', `${setup}      - name: Run a gate\n`);
+    assert.deepEqual(gates(accepted), []);
+    assert.deepEqual(checkWorkflow(accepted), []);
+    assert.deepEqual(gates(variant(run, '        run: node tools/fairpane.mjs install-zig\n')), []);
+    reports(variant('jobs:\n', "defaults:\n  run:\n    shell: 'true {0}'\n\njobs:\n"), /The Gates workflow sets defaults:/);
+    reports(variant(job, `${job}    defaults:\n      run:\n        shell: 'true {0}'\n`), /Job build sets defaults:/);
+    reports(variant('jobs:\n', 'env:\n  NODE_OPTIONS: --require=./x.js\n\njobs:\n'), /The Gates workflow sets env:/);
+    reports(variant(job, `${job}    env:\n      NODE_OPTIONS: --require=./x.js\n`), /Job build sets env:/);
+    reports(variant(run, `${run}        env:\n          NODE_OPTIONS: --require=./x.js\n`), /A run step of job build sets env:/);
+    reports(variant(run, `${run}        working-directory: elsewhere\n`), /A run step of job build sets working-directory:/);
+    reports(variant(job, `${job}    container: node:24\n`), /Job build sets container:/);
+    reports(variant('      - name: Run a gate\n', `      - name: Write the environment\n        uses: actions/github-script@${'a'.repeat(40)} # v8.0.0\n\n      - name: Run a gate\n`),
+      /Job build uses actions\/github-script, which is not an accepted action/);
+    reports(variant('          persist-credentials: false\n', '          persist-credentials: false\n          ref: refs/heads/other\n'),
+      /The actions\/checkout step of job build sets the input ref\./);
+    reports(variant('          persist-credentials: false\n', '          persist-credentials: false\n        env:\n          NODE_OPTIONS: --require=./x.js\n'),
+      /The actions\/checkout step of job build sets env:/);
+    reports(accepted.replace('          node-version: 24.21.0\n', '          node-version: 24.21.0\n          cache: npm\n'),
+      /The actions\/setup-node step of job build sets the input cache\./);
+    for (const command of ['node tools/fairpane.mjs run repo-check || true', 'echo skipped', 'node tools/fairpane.mjs run repo-check --evidence-dir out/evidence/x']) {
+      reports(variant(run, `        run: ${command}\n`), new RegExp(`Job build runs ${JSON.stringify(command).replace(/[|.]/g, '\\$&')}, which is not`));
+    }
+    reports(variant(run, upload('')), /An upload-artifact step of job build must set if: \$\{\{ always\(\) \}\}/);
+  }],
+  ['FP-0033 13: A run: value with a ${{ }} expression fails in every workflow', () => {
+    const run = '        run: node tools/fairpane.mjs run repo-check\n';
+    const sink = /A run: value contains a \$\{\{ \}\} expression/;
+    fails(variant(run, '        run: echo "${{ steps.x.outputs.y }}"\n'), sink);
+    fails(variant(run, '        run: |\n          echo ${{ github.run_id }}\n'), sink);
+    assert.deepEqual(checkWorkflow(variant(run, run + '        env:\n          VALUE: ${{ steps.x.outputs.y }}\n')), []);
+  }],
+  ['FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails', () => {
+    const unaccepted = name => new RegExp(`The workflow uses ${name}, which is not an accepted trigger`);
+    fails(variant('  pull_request:\n', '  issue_comment:\n'), unaccepted('issue_comment'));
+    fails(variant('  pull_request:\n    branches: [master]\n', "  schedule:\n    - cron: '0 0 * * *'\n"), unaccepted('schedule'));
+    const on = 'on:\n  push:\n    branches: [master]\n  pull_request:\n    branches: [master]\n';
+    fails(variant(on, 'on: [push, issue_comment]\n'), unaccepted('issue_comment'));
+    fails(variant(on, 'on: schedule\n'), unaccepted('schedule'));
+    assert.deepEqual(checkWorkflow(variant('\npermissions:\n', '  workflow_dispatch:\n\npermissions:\n')), []);
+  }],
+  ['FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list', () => {
+    const pages = readWorkflow('pages.yml').replaceAll('\r\n', '\n');
+    const grants = '    permissions:\n      pages: write\n      id-token: write\n';
+    assert.ok(pages.includes(grants), 'pages.yml lacks the reviewed deploy grants.');
+    assert.deepEqual(checkWorkflow(pages), REVIEWED['pages.yml']);
+    const widened = [['    permissions: write-all\n', 'write-all'], [`${grants}      contents: write\n`, 'pages: write, id-token: write, contents: write']];
+    for (const [text, granted] of widened) {
+      const problems = checkWorkflow(pages.replace(grants, text));
+      assert.notDeepEqual(problems, REVIEWED['pages.yml']);
+      assert.deepEqual(problems, [`Line 49: Job deploy grants a permission other than contents: read (${granted}).`]);
+    }
+    fails(variant('permissions:\n  contents: read\n', 'permissions:\n  contents: read\n  actions: write\n'),
+      /^Line 9: The workflow grants a permission other than contents: read \(contents: read, actions: write\)\.$/);
+  }],
+  ['FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse', () => {
+    const run = '        run: node tools/fairpane.mjs run repo-check\n';
+    unparseable(variant(run, '        run: |\n            \n          echo hi\n'),
+      /^Line 23: A leading blank line of a block scalar has more spaces than its first content line\.$/);
+    for (const blank of ['          ', '   ', '']) {
+      assert.equal(field(steps(parseWorkflow(variant(run, `        run: |\n${blank}\n          echo hi\n`)), 'build')[1], 'run'), '\necho hi');
+    }
   }],
   ['FP-0033: The parser reads the accepted subset and its block scalars exactly', () => {
     const text = variant('        run: node tools/fairpane.mjs run repo-check\n',

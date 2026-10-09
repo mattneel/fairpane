@@ -1,0 +1,73 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD","HEAD:tools/workflow-check.mjs"]
+acd7a5a2dc4ba0915de7d330e57b51e6251e0077
+ef953b1759d5d194d95354f9fd7fda5fb8108ae4
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD","HEAD:tools/workflow-check.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t89dccb307\\m","started_at":"2026-10-09T04:25:48.203Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--short"]
+ M tools/workflow-check.test.mjs
+?? engineering/evidence/FP-0033/raw/revision-2-tests-before.log
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t89dccb307\\m","started_at":"2026-10-09T04:25:48.279Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs = require(\"node:fs\"); const d = \"out/fp0033-rev2-before\"; fs.rmSync(d, { recursive: true, force: true }); fs.mkdirSync(d + \"/tools\", { recursive: true }); fs.cpSync(\".github/workflows\", d + \"/.github/workflows\", { recursive: true }); fs.copyFileSync(\"tools/workflow-check.mjs\", d + \"/tools/workflow-check.mjs\"); fs.copyFileSync(\"tools/workflow-check.test.mjs\", d + \"/tools/workflow-check.test.mjs\"); const stub = \"\\n// Baseline stub: the revision 2 tests import gateWorkflowProblems, so the old gateStepProblems answers under that name.\\nexport { gateStepProblems as gateWorkflowProblems };\\n\"; fs.appendFileSync(d + \"/tools/workflow-check.mjs\", stub); console.log(\"Appended stub:\" + stub);"]
+Appended stub:
+// Baseline stub: the revision 2 tests import gateWorkflowProblems, so the old gateStepProblems answers under that name.
+export { gateStepProblems as gateWorkflowProblems };
+
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs = require(\"node:fs\"); const d = \"out/fp0033-rev2-before\"; fs.rmSync(d, { recursive: true, force: true }); fs.mkdirSync(d + \"/tools\", { recursive: true }); fs.cpSync(\".github/workflows\", d + \"/.github/workflows\", { recursive: true }); fs.copyFileSync(\"tools/workflow-check.mjs\", d + \"/tools/workflow-check.mjs\"); fs.copyFileSync(\"tools/workflow-check.test.mjs\", d + \"/tools/workflow-check.test.mjs\"); const stub = \"\\n// Baseline stub: the revision 2 tests import gateWorkflowProblems, so the old gateStepProblems answers under that name.\\nexport { gateStepProblems as gateWorkflowProblems };\\n\"; fs.appendFileSync(d + \"/tools/workflow-check.mjs\", stub); console.log(\"Appended stub:\" + stub);"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t89dccb307\\m","started_at":"2026-10-09T04:25:52.471Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/workflow-check.mjs","tools/workflow-check.test.mjs","out/fp0033-rev2-before/tools/workflow-check.mjs","out/fp0033-rev2-before/tools/workflow-check.test.mjs",".github/workflows/gates.yml",".github/workflows/pages.yml","out/fp0033-rev2-before/.github/workflows/gates.yml","out/fp0033-rev2-before/.github/workflows/pages.yml"]
+ef953b1759d5d194d95354f9fd7fda5fb8108ae4
+dc421bf2e37486f4a4b58d716307db9a334d52b2
+7ea847b05d6da6c80ac41f2512099e3723ace4b5
+dc421bf2e37486f4a4b58d716307db9a334d52b2
+ccbd330eb01756973b71fc9464cec7a2043d0a00
+a70741af57639e29f6646c5d0308959f39991843
+ccbd330eb01756973b71fc9464cec7a2043d0a00
+a70741af57639e29f6646c5d0308959f39991843
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/workflow-check.mjs","tools/workflow-check.test.mjs","out/fp0033-rev2-before/tools/workflow-check.mjs","out/fp0033-rev2-before/tools/workflow-check.test.mjs",".github/workflows/gates.yml",".github/workflows/pages.yml","out/fp0033-rev2-before/.github/workflows/gates.yml","out/fp0033-rev2-before/.github/workflows/pages.yml"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t89dccb307\\m","started_at":"2026-10-09T04:25:55.587Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0033-rev2-before/tools/workflow-check.test.mjs"]
+TAP version 13
+not ok 1 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+  ---
+  message: "pages.yml\n+ actual - expected\n\n  [\n+   'Line 49: Job deploy grants a permission other than contents: read.'\n-   'Line 49: Job deploy grants a permission other than contents: read (pages: write, id-token: write).'\n  ]\n"
+  ...
+ok 2 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+ok 3 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+ok 4 - FP-0033 3: A workflow permission other than contents: read fails
+ok 5 - FP-0033 3: A job permission other than contents: read fails
+ok 6 - FP-0033 4: continue-on-error on a step or a job fails
+ok 7 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+ok 8 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+ok 9 - FP-0033 4: A workflow_run trigger fails
+ok 10 - FP-0033 8: An expression outside the allowlist fails
+ok 11 - FP-0033 9: A gate step that can be skipped or rerouted fails
+not ok 12 - FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+  ---
+  message: "Expected /The Gates workflow sets defaults:/ in []"
+  ...
+not ok 13 - FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+  ---
+  message: "Expected /A run: value contains a \\$\\{\\{ \\}\\} expression/ in []"
+  ...
+not ok 14 - FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+  ---
+  message: "Expected /The workflow uses issue_comment, which is not an accepted trigger/ in []"
+  ...
+not ok 15 - FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n+   'Line 49: Job deploy grants a permission other than contents: read.'\n-   'Line 49: Job deploy grants a permission other than contents: read (pages: write, id-token: write).'\n  ]\n"
+  ...
+not ok 16 - FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+  ---
+  message: "Expected a parse error, got success"
+  ...
+ok 17 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+ok 18 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+ok 19 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+1..19
+# tests 19
+# pass 13
+# fail 6
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0033-rev2-before/tools/workflow-check.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t89dccb307\\m","started_at":"2026-10-09T04:25:55.656Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":46}

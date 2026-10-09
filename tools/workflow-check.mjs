@@ -7,7 +7,8 @@
  * plain and quoted single-line scalars, single-line flow sequences of scalars, `|` and `>` block scalars, and comments.
  * Rejected: every other character, including tabs and the NEL, LS, and PS line breaks that YAML parsers honor,
  * anchors, aliases, tags, flow mappings, complex keys, quoted keys, document markers, directives,
- * multi-line plain or quoted scalars, block scalars as sequence items, and duplicate keys.
+ * multi-line plain or quoted scalars, block scalars as sequence items, duplicate keys,
+ * and a block scalar whose leading blank line has more spaces than its first content line, which libyaml also rejects.
  */
 
 export class WorkflowParseError extends Error {
@@ -140,15 +141,18 @@ function tokenize(text) {
     tokens.push(token);
     if (!token.block) continue;
     // A block scalar owns the following blank lines and every line indented beyond its key.
-    let end = i + 1, contentIndent = null;
+    // Like libyaml, it rejects a leading blank line with more spaces than its first content line.
+    let end = i + 1, contentIndent = null, blankIndent = 0, blankLine = 0;
     const body = [];
     while (end < lines.length) {
       const l = lines[end], lead = /^ */.exec(l)[0].length;
       if (l.trim() !== '') {
         if (lead <= column) break;
-        if (contentIndent === null) contentIndent = lead;
-        else if (lead < contentIndent) throw new WorkflowParseError(end + 1, 'A block scalar line is indented less than its first line.');
-      }
+        if (contentIndent === null) {
+          if (blankIndent > lead) throw new WorkflowParseError(blankLine, 'A leading blank line of a block scalar has more spaces than its first content line.');
+          contentIndent = lead;
+        } else if (lead < contentIndent) throw new WorkflowParseError(end + 1, 'A block scalar line is indented less than its first line.');
+      } else if (contentIndent === null && lead > blankIndent) { blankIndent = lead; blankLine = end + 1; }
       body.push(l); end++;
     }
     while (body.length && body.at(-1).trim() === '') { body.pop(); end--; }
@@ -259,6 +263,12 @@ function visit(n, fn) {
 }
 const isReadOnly = entry => entry.value.kind === 'map' && entry.value.entries.size === 1 &&
   entry.value.entries.get('contents')?.value.kind === 'scalar' && entry.value.entries.get('contents').value.value === 'read';
+/** A scalar as written when it is a single word, and quoted otherwise, so no scalar reads like a list of grants. */
+const word = n => n.kind !== 'scalar' ? `(${n.kind === 'null' ? 'nothing' : n.kind === 'seq' ? 'a sequence' : 'a mapping'})` :
+  /^[A-Za-z0-9_-]+$/.test(n.value) ? n.value : JSON.stringify(n.value);
+/** The exact grants of a permissions value in source order, so a reviewed problem list binds the grants themselves. */
+const grants = n => n.kind === 'map' ? [...n.entries.values()].map(e => `${e.key}: ${word(e.value)}`).join(', ') : word(n);
+const ACCEPTED_TRIGGERS = new Set(['push', 'pull_request', 'workflow_dispatch']);
 
 /** Policy problems in a parsed workflow. An empty list means every check passed. */
 export function workflowProblems(root) {
@@ -268,22 +278,23 @@ export function workflowProblems(root) {
   if (!on) add(root.line, 'The workflow declares no trigger.');
   else {
     const v = on.value;
-    const triggers = v.kind === 'scalar' ? [[v.value, v.line]] : v.kind === 'seq' ? v.items.map(i => [i.value, i.line]) :
+    const triggers = v.kind === 'scalar' ? [[v.value, v.line]] : v.kind === 'seq' ? v.items.map(i => [i.kind === 'scalar' ? i.value : null, i.line]) :
       v.kind === 'map' ? [...v.entries.values()].map(e => [e.key, e.line]) : [];
     if (triggers.length === 0) add(on.line, 'The workflow declares no trigger.');
     for (const [name, line] of triggers) {
-      if (name === 'pull_request_target' || name === 'workflow_run') add(line, `The workflow uses ${name}.`);
+      if (name === null) add(line, 'A trigger is not a scalar.');
+      else if (!ACCEPTED_TRIGGERS.has(name)) add(line, `The workflow uses ${name}, which is not an accepted trigger.`);
     }
   }
   const permissions = root.entries.get('permissions');
   if (!permissions) add(root.line, 'The workflow does not declare permissions: contents: read.');
-  else if (!isReadOnly(permissions)) add(permissions.line, 'The workflow grants a permission other than contents: read.');
+  else if (!isReadOnly(permissions)) add(permissions.line, `The workflow grants a permission other than contents: read (${grants(permissions.value)}).`);
   const jobs = root.entries.get('jobs');
   if (!jobs || jobs.value.kind !== 'map' || jobs.value.entries.size === 0) add(jobs?.line ?? root.line, 'The workflow has no jobs mapping.');
   else for (const [id, job] of jobs.value.entries) {
     if (job.value.kind !== 'map') { add(job.line, `Job ${id} is not a mapping.`); continue; }
     const p = job.value.entries.get('permissions');
-    if (p && !isReadOnly(p)) add(p.line, `Job ${id} grants a permission other than contents: read.`);
+    if (p && !isReadOnly(p)) add(p.line, `Job ${id} grants a permission other than contents: read (${grants(p.value)}).`);
   }
   visit(root, n => {
     if (n.kind === 'scalar') for (const body of expressionBodies(n.value)) for (const p of expressionProblems(body)) add(n.line, p);
@@ -292,6 +303,9 @@ export function workflowProblems(root) {
       if (e.key === 'continue-on-error') add(e.line, 'continue-on-error is not accepted.');
       if (e.key === 'secrets') add(e.line, 'A secrets mapping is not accepted.');
     }
+    // A run: value reaches a shell, so no expression may expand inside it. Values pass through env: instead.
+    const run = n.entries.get('run');
+    if (run?.value.kind === 'scalar' && run.value.value.includes('${{')) add(run.line, 'A run: value contains a ${{ }} expression. Pass the value through env: instead.');
     // An if: value is an expression even without ${{ }}.
     const condition = n.entries.get('if');
     if (condition?.value.kind === 'scalar' && !condition.value.value.includes('${{')) {
@@ -310,29 +324,76 @@ export function workflowProblems(root) {
   return problems;
 }
 
+const GATE_WORKFLOW_KEYS = ['name', 'on', 'permissions', 'concurrency', 'jobs'];
+const GATE_JOB_KEYS = ['name', 'runs-on', 'timeout-minutes', 'steps'];
+const GATE_RUN_KEYS = ['name', 'run'];
+const GATE_COMMAND = /^node tools\/fairpane\.mjs (?:install-zig|run [a-z0-9][a-z0-9_-]*)$/;
+/** The only actions that the Gates workflow may use, with the only inputs that each may receive. */
+const GATE_ACTIONS = new Map([
+  ['actions/checkout', ['persist-credentials']],
+  ['actions/setup-node', ['node-version']],
+  ['actions/upload-artifact', ['name', 'path', 'if-no-files-found']],
+]);
+const UPLOAD_CONDITION = '${{ always() }}';
+const CONDITION_PROBLEM = `Only an upload-artifact step may set if:, and only to ${UPLOAD_CONDITION}.`;
+const series = items => items.length < 3 ? items.join(' and ') : `${items.slice(0, -1).join(', ')}, and ${items.at(-1)}`;
+
 /**
- * Problems that would let a gate in the Gates workflow pass without running.
- * No job sets if:, no step sets shell:, and only an actions/upload-artifact step sets if:, to exactly ${{ always() }}.
+ * Problems in the Gates workflow outside its allowlists.
+ * The workflow may set only name, on, permissions, concurrency, and jobs, and a job only name, runs-on, timeout-minutes, and steps.
+ * A run step may set only name and run, and it runs `node tools/fairpane.mjs install-zig` or `node tools/fairpane.mjs run <gate>`.
+ * An action step may set only name, uses, and with, and it uses an accepted action with only that action's accepted inputs.
+ * An actions/upload-artifact step must also set if: to exactly ${{ always() }}, and no other step may set if:.
+ * So no default, environment, working directory, container, condition, or other action can change what a gate step runs.
+ * The step order, the runner labels, and the gate list are fixed by the gates.yml test, not by this function.
  */
-export function gateStepProblems(root) {
+export function gateWorkflowProblems(root) {
   const problems = [];
   const add = (line, message) => problems.push(`Line ${line}: ${message}`);
+  for (const e of root.entries.values()) {
+    if (!GATE_WORKFLOW_KEYS.includes(e.key)) add(e.line, `The Gates workflow sets ${e.key}:. It may set only ${series(GATE_WORKFLOW_KEYS)}.`);
+  }
   const jobs = root.entries.get('jobs');
-  if (jobs?.value.kind !== 'map') return problems;
+  if (jobs?.value.kind !== 'map') { add(jobs?.line ?? root.line, 'The Gates workflow has no jobs mapping.'); return problems; }
   for (const [id, job] of jobs.value.entries) {
-    if (job.value.kind !== 'map') continue;
-    const jobCondition = job.value.entries.get('if');
-    if (jobCondition) add(jobCondition.line, `Job ${id} sets if:.`);
+    if (job.value.kind !== 'map') { add(job.line, `Job ${id} is not a mapping.`); continue; }
+    for (const e of job.value.entries.values()) {
+      if (!GATE_JOB_KEYS.includes(e.key)) add(e.line, `Job ${id} sets ${e.key}:. A Gates job may set only ${series(GATE_JOB_KEYS)}.`);
+    }
     const steps = job.value.entries.get('steps');
     if (steps?.value.kind !== 'seq') { add(job.line, `Job ${id} has no steps sequence.`); continue; }
     for (const step of steps.value.items) {
       if (step.kind !== 'map') { add(step.line, `A step of job ${id} is not a mapping.`); continue; }
-      const shell = step.entries.get('shell'), condition = step.entries.get('if');
-      if (shell) add(shell.line, 'A gate workflow step sets shell:.');
-      if (!condition) continue;
-      const uses = step.entries.get('uses')?.value.value ?? '';
-      const upload = uses.split('@')[0].toLowerCase() === 'actions/upload-artifact';
-      if (!upload || condition.value.value !== '${{ always() }}') add(condition.line, 'Only an upload-artifact step may set if:, and only to ${{ always() }}.');
+      const uses = step.entries.get('uses'), run = step.entries.get('run');
+      if (uses) {
+        if (uses.value.kind !== 'scalar') { add(uses.line, `A step of job ${id} sets uses: to something other than a scalar.`); continue; }
+        const action = uses.value.value.split('@')[0].toLowerCase(), inputs = GATE_ACTIONS.get(action);
+        const upload = action === 'actions/upload-artifact';
+        if (!inputs) add(uses.line, `Job ${id} uses ${action}, which is not an accepted action.`);
+        const keys = upload ? ['name', 'if', 'uses', 'with'] : ['name', 'uses', 'with'];
+        for (const e of step.entries.values()) {
+          if (e.key === 'if' && !upload) add(e.line, CONDITION_PROBLEM);
+          else if (!keys.includes(e.key)) add(e.line, `The ${action} step of job ${id} sets ${e.key}:. An action step may set only ${series(keys)}.`);
+        }
+        const w = step.entries.get('with');
+        if (w && w.value.kind !== 'map') add(w.line, `The ${action} step of job ${id} sets with: to something other than a mapping.`);
+        else if (w && inputs) for (const e of w.value.entries.values()) {
+          if (!inputs.includes(e.key)) add(e.line, `The ${action} step of job ${id} sets the input ${e.key}. That action accepts only ${series(inputs)}.`);
+        }
+        if (!upload) continue;
+        const condition = step.entries.get('if');
+        if (!condition) add(uses.line, `An upload-artifact step of job ${id} must set if: ${UPLOAD_CONDITION}.`);
+        else if (condition.value.kind !== 'scalar' || condition.value.value !== UPLOAD_CONDITION) add(condition.line, CONDITION_PROBLEM);
+      } else if (run) {
+        for (const e of step.entries.values()) {
+          if (e.key === 'if') add(e.line, CONDITION_PROBLEM);
+          else if (!GATE_RUN_KEYS.includes(e.key)) add(e.line, `A run step of job ${id} sets ${e.key}:. A run step may set only ${series(GATE_RUN_KEYS)}.`);
+        }
+        const command = run.value.kind === 'scalar' ? run.value.value : null;
+        if (command === null || !GATE_COMMAND.test(command)) {
+          add(run.line, `Job ${id} runs ${command === null ? '(not a scalar)' : JSON.stringify(command)}, which is not node tools/fairpane.mjs install-zig or node tools/fairpane.mjs run <gate>.`);
+        }
+      } else add(step.line, `A step of job ${id} sets neither run nor uses.`);
     }
   }
   return problems;

@@ -146,13 +146,34 @@ A green check on a pull request therefore enforces nothing independently of that
 It accepts only printable ASCII text with LF or CRLF line ends, because YAML parsers also break lines at NEL, LS, and PS.
 It parses only block mappings, block sequences, single-line scalars, single-line flow sequences, block scalars, and comments.
 It rejects anchors, aliases, tags, flow mappings, multi-line plain scalars, duplicate keys, and every other construct with a line number.
-It reports a `uses:` reference without a full 40-hex commit SHA and a version comment.
-It reports a workflow or job permission other than `contents: read`, any `continue-on-error`, and a `pull_request_target` or `workflow_run` trigger.
-It reports a checkout without `persist-credentials: false`.
-It treats every `${{ }}` expression and every `if:` value as an expression.
-An expression may call only `always` and `format`, and it may read only `github.event_name`, `github.run_id`, `github.event.pull_request.number`, and step outputs.
-`gateStepProblems` reports a job condition, a step `shell:`, and any step condition except `${{ always() }}` on an upload step.
-`tools/workflow-check.test.mjs` checks every workflow file against its reviewed problem list, and `node tools/fairpane.mjs test` runs its cases.
+It also rejects a block scalar whose leading blank line has more spaces than its first content line, as libyaml does.
+
+`workflowProblems` checks every workflow file as follows.
+
+- A `uses:` reference needs a full 40-hex commit SHA and a version comment.
+- The only accepted triggers are `push`, `pull_request`, and `workflow_dispatch`.
+- A workflow or job permission other than `contents: read` is a problem, and the problem names the exact grants in source order.
+- Every `continue-on-error` key and every `secrets` mapping is a problem.
+- A checkout needs `persist-credentials: false`.
+- Every `${{ }}` expression and every `if:` value is an expression.
+  An expression may call only `always` and `format`, and it may read only `github.event_name`, `github.run_id`, `github.event.pull_request.number`, and step outputs.
+- A `run:` value may contain no `${{ }}` expression, so no expression reaches a shell.
+  A run step passes a value through `env:` instead.
+
+`gateWorkflowProblems` checks the Gates workflow against allowlists.
+
+- The workflow may set only `name`, `on`, `permissions`, `concurrency`, and `jobs`.
+- A job may set only `name`, `runs-on`, `timeout-minutes`, and `steps`.
+- A run step may set only `name` and `run`.
+  Its command must be `node tools/fairpane.mjs install-zig` or `node tools/fairpane.mjs run <gate>`.
+- An action step may set only `name`, `uses`, and `with`.
+  An `actions/upload-artifact` step must also set `if: ${{ always() }}`, and no other step may set `if:`.
+- The only accepted actions are `actions/checkout` with the input `persist-credentials`, `actions/setup-node` with `node-version`, and `actions/upload-artifact` with `name`, `path`, and `if-no-files-found`.
+
+No default shell, environment variable, working directory, container, or other action can therefore change what a gate step runs.
+`tools/workflow-check.test.mjs` fixes the Gates step order, runner labels, gate list, and concurrency expressions.
+It also checks every workflow file against its reviewed problem list, and `node tools/fairpane.mjs test` runs its cases.
+The `pages.yml` list names the deploy job's `pages: write` and `id-token: write` grants, so any other grant fails it.
 
 To update a pinned action, follow these steps.
 
