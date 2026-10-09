@@ -1,35 +1,40 @@
-# FP-0014 task contract draft
-
-Status: drafted by the `FP0014Contract` worker and not frozen.
-The root integrator freezes it as `CONTRACT.md` after applying the decisions that `engineering/HANDOFF.md` lists.
-No implementation may start from this draft.
+# FP-0014 task contract
 
 ## Identity
 
 Task ID: `FP-0014`, "Implement initial CSS syntax and cascade".
 Workstream: `css-layout`.
-Base: commit `ab2e2ed`.
+Base: the commit that freezes this contract.
 Prerequisites: `FP-0009` and `FP-0007`, accepted.
-The `fairpane-spec` drafter wrote this contract, and the root integrator freezes it with the decisions below.
+The `fairpane-spec` worker `FP0014Contract` drafted this contract, and the root integrator froze it with the decisions below.
 Assigned role: `fairpane-core`.
 Authority: `routine-local-engineering`.
 
-### Decisions for the integrator to confirm
+### Integrator decisions
 
 - The CSS baseline is the set of CSSWG editor's drafts at `w3c/csswg-drafts` commit `58354dac99cc8783a9b7b28957ece56bb48579eb`, which every cited CSS draft names as its revision.
   The DOM baseline is the DOM Standard at commit `b76da7af5fe35a2a368127cc9ec22449ac8fd559`, dated 5 October 2026.
 - CSS Syntax at that commit has a defect in "consume a block's contents" (section 5.5.5).
   Its `<EOF-token>` and `<}-token>` branch returns `rules` and drops a nonempty `decls`, so `a { color: red }` would have no declaration.
+  The integrator confirmed the text in `css-syntax-3/Overview.bs` at the pinned commit.
   This task appends a nonempty `decls` to `rules` before that return, as the algorithm's other branches do.
   Cases 7, 8, 9, 11, and 44 depend on this choice.
+  Reporting the defect upstream is a publication that needs owner authorization, so this task does not report it.
 - The laboratory keeps reporting the `style` stage as `unsupported`.
   The laboratory has no `tree` stage, so it cannot build a DOM to style, and a style path that no case can reach would be untested dead code.
+  Task `FP-0068` owns the laboratory style wiring.
 - Each frozen value grammar accepts a subset of the property's standard grammar.
   Every standard form outside that subset produces the diagnostic `unsupported_value`, and the declaration is dropped as a user agent without the feature drops it.
+  That includes the `display` values that need flex, grid, or ruby containment, and the CSS Nesting rules, which are dropped with diagnostics.
 - No WPT test runs in this task, for the reasons in "WPT applicability".
-- The user-agent constants are a `medium` font size of 16px, a `larger` and `smaller` ratio of 1.2, the light system-color palette below, and specificity components that saturate at 65535.
-- Values 5 is an exploration-phase draft.
-  This task still implements its arbitrary-substitution algorithm, including the spread syntax and `{}`-wrapped free-form arguments, because CSS Variables 1 defines `var()` replacement in its terms.
+- The user-agent constants are a `medium` font size of 16px, a `larger` and `smaller` ratio of 1.2, the light system-color palette below, and specificity components that saturate at 65535, as Selectors section 15 permits.
+- CSS Variables 1 (work status "Testing") defines `var()` as an arbitrary substitution function with the argument grammar of Values 5, so this task implements that algorithm, `{}`-wrapped free-form arguments, and `var()` names that substitution produces.
+  Values 5 is an exploration-phase draft, and only Values 5 defines the spread syntax, so this task does not implement the spread syntax.
+  A property whose value uses the spread syntax in an arbitrary substitution function becomes invalid at computed-value time with the reason `unsupported_value`.
+  Task `FP-0071` owns the spread syntax.
+- The container relative length units `cqw`, `cqh`, `cqi`, `cqb`, `cqmin`, and `cqmax` of CSS Conditional Rules Level 5 produce `unsupported_value`, like the other standard units outside the frozen set.
+- The 148 named colors may be transcribed by hand.
+  The integrator checks every row against the named-color table of the pinned Color 4 source and records the result.
 
 ## Sources
 
@@ -54,6 +59,8 @@ Authority: `routine-local-engineering`.
   Section 3.1.
 - CSS Display Level 4, editor's draft of 5 June 2026: <https://drafts.csswg.org/css-display-4/>.
   Sections 2, 2.3, 2.7, and 2.8.
+- CSS Conditional Rules Level 5, working draft source at the pinned commit: <https://github.com/w3c/csswg-drafts/blob/58354dac99cc8783a9b7b28957ece56bb48579eb/css-conditional-5/Overview.bs>.
+  Section "Container Relative Lengths" (`#container-lengths`).
 - DOM Standard, Living Standard of 5 October 2026: <https://dom.spec.whatwg.org/>.
   Section 1.2 ("Ordered sets"), section 4.5 (document type and mode defaults), and section 4.9 (attribute list, "get an attribute by namespace and local name", "set an attribute value", "remove an attribute by namespace and local name", the ID attribute change steps, and the classes of `classList`).
 - Infra Standard, "ASCII whitespace" and "ASCII case-insensitive": <https://infra.spec.whatwg.org/>.
@@ -337,6 +344,7 @@ The `<length>` units are `px`; `cm` as `v * 96 / 2.54`; `mm` as `v * 96 / 25.4`;
 Each expression is evaluated in `f64` from left to right.
 A unitless `0` is a length of 0px.
 The units `ex`, `rex`, `cap`, `rcap`, `ch`, `rch`, `ic`, `ric`, `lh`, and `rlh`, and every viewport unit of Values 4 6.1.2 (`vw`, `vh`, `vi`, `vb`, `vmin`, `vmax`, and their `s`, `l`, and `d` variants), produce `unsupported_value`.
+The container relative length units `cqw`, `cqh`, `cqi`, `cqb`, `cqmin`, and `cqmax` (Conditional 5, "Container Relative Lengths") also produce `unsupported_value`.
 Any other unit is invalid.
 Any function other than `var()`, `rgb()`, and `rgba()` in a standard property value produces `unsupported_value`, because Values 4 math functions and the other excluded functions are standard forms.
 
@@ -376,6 +384,8 @@ Such a property computes to the guaranteed-invalid value if it is a custom prope
 A value that is one CSS-wide keyword after substitution acts as that keyword, including `revert` and `revert-rule`.
 One `var()` expansion is limited to 65536 component values, where a function or simple block counts as one plus its contents.
 A longer expansion gives the guaranteed-invalid value ("Safely Handling Overly-Long Substitution").
+The spread syntax is three adjacent `<delim-token>`s with the value `.` immediately followed by an arbitrary substitution function (Values 5, "Argument Grammars and Spread Syntax").
+A property whose value uses the spread syntax inside an arbitrary substitution function becomes invalid at computed-value time with the reason `unsupported_value`, so it computes to the guaranteed-invalid value if it is a custom property and to its `unset` value otherwise.
 
 ### Style resolution
 
@@ -413,20 +423,21 @@ Cases 3, 8, 9, 10, and 42 cover the behavior that those files test.
 
 `src/css/css.zig` lists these obligations in its module documentation, and the evidence README repeats them.
 
-| Obligation | Current engine behavior |
-| --- | --- |
-| Stylesheet byte decoding and `@charset` sniffing | No API; the entry points take decoded strings |
-| HTML documents, quirks mode, and HTML case rules for selectors | Every store document is an XML document in no-quirks mode |
-| Pseudo-classes, pseudo-elements, `:is()`, `:not()`, `:where()`, `:has()`, nesting, and `@namespace` | `unsupported_selector`, `nested_rule_ignored`, `nested_declarations_ignored`, or `ignored_at_rule` |
-| Every at-rule | `ignored_at_rule` |
-| Every property outside the registry, including shorthands and logical properties | `unknown_property` |
-| Excluded `color`, `display`, `font-size`, and unit forms | `unsupported_value` |
-| Math functions | `unsupported_value` |
-| Cascade layers, encapsulation contexts, style attributes, presentational hints, and animation and transition origins | No input |
-| A user-agent stylesheet for HTML | None |
-| CSSOM, serialization, and `getComputedStyle` | No API |
-| Incremental invalidation | `diff` reports effects, and resolution always recomputes every element |
-| Laboratory style wiring | `style` reports `unsupported` |
+| Obligation | Current engine behavior | Owner task |
+| --- | --- | --- |
+| Stylesheet byte decoding and `@charset` sniffing | No API; the entry points take decoded strings | `FP-0069` |
+| HTML documents, quirks mode, and HTML case rules for selectors | Every store document is an XML document in no-quirks mode | `FP-0070` |
+| Pseudo-classes, pseudo-elements, `:is()`, `:not()`, `:where()`, `:has()`, nesting, and `@namespace` | `unsupported_selector`, `nested_rule_ignored`, `nested_declarations_ignored`, or `ignored_at_rule` | `FP-0070` |
+| Every at-rule | `ignored_at_rule` | `FP-0069` |
+| Every property outside the registry, including shorthands and logical properties | `unknown_property` | `FP-0071` |
+| Excluded `color`, `display`, `font-size`, and unit forms | `unsupported_value` | `FP-0071` |
+| Math functions | `unsupported_value` | `FP-0071` |
+| The Values 5 spread syntax | Invalid at computed-value time with `unsupported_value` | `FP-0071` |
+| Cascade layers, encapsulation contexts, style attributes, presentational hints, and animation and transition origins | No input | `FP-0072` |
+| A user-agent stylesheet for HTML | None | `FP-0072` |
+| CSSOM, serialization, and `getComputedStyle` | No API | `FP-0073` |
+| Incremental invalidation | `diff` reports effects, and resolution always recomputes every element | `FP-0074` |
+| Laboratory style wiring | `style` reports `unsupported` | `FP-0068` |
 
 ### Stop rules
 
@@ -648,7 +659,7 @@ Every case uses `std.testing.allocator`, so a leak fails the case.
     `rgb(1, 2)`, `rgb(1 2)`, `rgb(1, 2, none)`, `rgb(10%, 20, 30)`, `rgb(1, 2, 3,)`, `rgb(1 2 3 4)`, `rgb(1 2 3 /)`, and `rgb(1px 2 3)` report `invalid_value`.
     `hsl(0 0% 0%)`, `rgb(calc(1) 2 3)`, `lab(50% 0 0)`, `color-mix(in srgb, red, blue)`, and `rgb(from red r g b)` report `unsupported_value`.
 32. Under a root with no declarations and a parent with `font-size: 20px`, a child computes `2em` to 40, `50%` to 10, `larger` to `20.0 * 1.2`, `smaller` to `20.0 / 1.2`, `1rem` to 16, `xx-small` to `16.0 * 3.0 / 5.0`, `x-small` to 12, `small` to `16.0 * 8.0 / 9.0`, `medium` to 16, `large` to `16.0 * 6.0 / 5.0`, `x-large` to 24, `xx-large` to 32, `xxx-large` to 48, `12pt` to `12.0 * 96.0 / 72.0`, `1in` to 96, `2.54cm` to `2.54 * 96.0 / 2.54`, `10mm` to `10.0 * 96.0 / 25.4`, `40Q` to `40.0 * 96.0 / 101.6`, `1pc` to `96.0 / 6.0`, `0` to 0, and `0.5PX` to 0.5.
-    `-1px`, `5`, `-10%`, `1foo`, and `auto` report `invalid_value`, and `math`, `1ex`, `1vw`, `1dvmin`, and `calc(1px)` report `unsupported_value`; each of these children computes to 20.
+    `-1px`, `5`, `-10%`, `1foo`, and `auto` report `invalid_value`, and `math`, `1ex`, `1vw`, `1dvmin`, `1cqw`, and `calc(1px)` report `unsupported_value`; each of these children computes to 20.
     On the root element, `2em` and `2rem` compute to 32, and `50%` computes to 8.
 33. Under a root with `font-size: 10px`, an element with `font-size: 20px` computes `margin-top: 10px` to 10px, `margin-right: 5%` to 5%, `margin-bottom: auto` to `auto`, and `margin-left: -2em` to -40px.
     `margin-top: 1rem` computes to 10px, and `margin-top: 0` computes to 0px.
@@ -707,8 +718,8 @@ Every case uses `std.testing.allocator`, so a leak fails the case.
 | `margin-top: var(var(--myvar))` | 10px |
 | `margin-right: var(--missing, 3px)` | 3px |
 | `font-size: var(--zz, var(--f, 30px))` | 30 |
-| `margin-bottom: var(...var(--args))` | 5px |
-| `margin-bottom: var(...var(--args2))` | 9px |
+| `margin-bottom: var(...var(--args))` | 0px, with `unsupported_value` |
+| `--s: var(...var(--args))` | The guaranteed-invalid value, with `unsupported_value` |
 | `margin-left: var(--n)px` | 0px, with `grammar_mismatch` |
 | `margin-left: var(--missing,)` | 0px, with `grammar_mismatch` |
 | `margin-left: var(var(--args))` | 0px, with `guaranteed_invalid` |
@@ -758,6 +769,7 @@ Every case uses `std.testing.allocator`, so a leak fails the case.
 ## Evidence
 
 Record each command with `node tools/fairpane.mjs record` under `engineering/evidence/FP-0014/raw/`.
+Run every Zig command with `--env ZIG_GLOBAL_CACHE_DIR=C:\src\fairpane\.zig-cache\global`, so the record shows the cache override.
 
 1. Record `tests-before.log` with `zig build test --summary all --cache-dir out/fp0014-cache-before` at the base.
 2. Record an uncached `tests-after.log` with `zig build test --summary all --cache-dir out/fp0014-cache-after`.
@@ -767,8 +779,8 @@ Record each command with `node tools/fairpane.mjs record` under `engineering/evi
 The mutation control swaps the precedence of important user declarations and important author declarations in `cascade.zig`.
 Store its exact diff in `mutation-cascade-origin.diff` beside its log.
 The control must fail case 35.
-The integrator records `HEAD`, the staged diff, and file hashes.
-The integrator then runs `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` with `--evidence-dir engineering/evidence/FP-0014/gates`.
+The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` with `--evidence-dir engineering/evidence/FP-0014/gates`.
+The integrator also compares every row of `src/css/named_colors.zon` with the named-color table of `css-color-4/Overview.bs` at the pinned commit and records the comparison.
 
 ## Authority
 
@@ -787,16 +799,3 @@ Required reviewer: `fairpane-review`.
 - No HTML document type, quirks mode, or user-agent stylesheet exists in this task.
 - The laboratory, the C ABI, `include`, and `api` stay unchanged.
 - No acceptance threshold, gate, corpus pin, or applicability record changes in this task.
-
-## Worker open questions
-
-- CSS Syntax at csswg-drafts 58354dac has a defect in section 5.5.5, "consume a block's contents". Its <EOF-token>/<}-token> branch returns `rules` without appending a nonempty `decls`. Read literally, `a { color: red }` would get no declaration; the current main branch has the same text. The draft appends `decls` before returning, and cases 7, 8, 9, 11, and 44 depend on that. Do you confirm this resolution? Reporting it upstream to w3c/csswg-drafts would be a publication and needs owner authorization.
-- The draft leaves `src/lab.zig` unchanged, so the `style` stage keeps reporting `unsupported`. There are two alternatives. (a) Report `not-reached` once a wiring path exists. (b) Add a lab case format with an explicit DOM fixture and stylesheets; this would conflict with FP-0054, which is active in `lab.zig`. Which plan task should own wiring `css.resolve` into the lab? The FP-0010 acceptance criteria do not mention it.
-- Several remaining obligations have no owner plan task. These are stylesheet byte decoding and @charset; HTML documents, quirks mode, and HTML case rules; pseudo-classes, nesting, and @namespace; all at-rules; other properties and shorthands; excluded color, display, font-size, and unit forms; math functions; layers, style attributes, and presentational hints; an HTML UA stylesheet; CSSOM and serialization; and incremental invalidation. FP-0013 used a `specs/capabilities` record for this, but FP-0014 cannot write `specs/`. Should the integrator assign owners and add that record?
-- Please confirm the user-agent constants the draft chooses. These are `medium` = 16px, a `larger`/`smaller` ratio of 1.2, the 19-entry light system-color palette in the contract, and u16 specificity components that saturate at 65535.
-- Values 5 is an exploration-phase draft. The draft adopts its whole substitution algorithm, including the `...` spread syntax and `{}`-wrapped free-form arguments, because CSS Variables 1 defines `var()` in its terms. Case 40 tests the spread rows. Should the spread syntax be deferred for web compatibility instead?
-- The 148 named colors are transcribed by hand into `src/css/named_colors.zon` from Color 4 section 6.1 at 58354dac. The draft does not use a reproducible generator, which `docs/ARCHITECTURE.md` asks for imported datasets. A generator would need a pinned csswg-drafts snapshot, and adding one is a protected `specs/corpora.json` change. Is hand transcription with review acceptable?
-- FP-0014 cannot write `specs/`. Should the integrator add `specs/sources.json` entries for the cited drafts and their revisions?
-- Units from modules outside Values 4, such as the container units `cqw` through `cqmax`, are classified as `invalid_value` rather than `unsupported_value`. Should the unsupported-unit list be extended?
-- The base `ab2e2ed` predates the integration of FP-0013 and the start of FP-0054. FP-0014 shares only `src/root.zig` with FP-0013 and touches no lab file. Should FP-0013 be integrated first?
-- Should `display` values that need flex, grid, or ruby containment report `unsupported_value`, and should CSS Nesting nested rules and nested declarations rules be dropped with diagnostics? Browsers that support those features behave differently in both cases.
