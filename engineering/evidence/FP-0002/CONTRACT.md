@@ -156,4 +156,13 @@ Case 7 adds mistyped and calendar-invalid fixtures.
 Case 13 verifies a fixture candidate repository from the verifier's own location and checks the advisory report.
 Case 14 adds a replace ref, an inherited `GIT_DIR`, an abbreviated ID, and a ref name.
 Case 16 reports the outcome of every noncanonical fixture in one assertion.
-The integrator's update of `docs/QUALIFICATION.md` in commit `e2eaace` lies outside the task's writable paths, and this revision records that exception.
+The integrator's updates of `docs/QUALIFICATION.md` in commits `e2eaace` and `9e9a0bf` lie outside the task's writable paths, and this revision records both exceptions.
+
+Revision 3 follows the rejecting review `engineering/evidence/FP-0002/reviews/review-2-reject.json`.
+The `--repository` path must be the top-level directory of a Git work tree, and any other path is a tool error.
+The trust-policy guard covers the candidate repository and its Git common directory, which a linked work tree keeps elsewhere.
+An unreadable repository and an unreadable tree are tool errors, so `unknown-candidate` names only a readable repository without that commit object.
+An advisory verification reports `verified-advisory` and exits with status 3.
+Case 13 adds a linked work tree, a subdirectory path, and the advisory exit status.
+Case 14 adds an annotated tag object, a subdirectory, a directory outside any repository, and an empty `PATH`.
+Evidence binds to a fresh work tree of the commit, so untracked files cannot enter the source digest.

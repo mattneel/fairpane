@@ -30,8 +30,9 @@ Operating-system permissions on a separate runner account supply the actual boun
 ### Candidate identity
 
 A candidate is an immutable Git commit, named by its full 40-hex commit ID.
-A ref or an abbreviated ID is a mutable pointer, so the verifier rejects it.
+A ref, a tag object, or an abbreviated ID is a mutable or indirect pointer, so the verifier rejects it.
 Its identity is the full commit ID and the commit's tree ID, read from the object database of an explicit candidate repository.
+The `--repository` path must be the top-level directory of a Git work tree, because Git searches parent directories from any other path.
 The working tree never contributes to the identity.
 Git runs without replace objects and without inherited `GIT_*` variables, and the verifier finds `git` through `PATH` only.
 A replace ref or an inherited `GIT_DIR` therefore cannot change the reported tree.
@@ -42,7 +43,8 @@ This repository uses SHA-1 object IDs, so a SHA-256 object format or content dig
 The forged-receipt argument applies to the verifier code too.
 A workspace writer can edit the verifier inside the candidate checkout and make it report success.
 Release verification therefore runs a verifier copy that the candidate workspace cannot modify, against the candidate repository named by `--repository`.
-A verifier that runs from inside the candidate repository reports `inside-candidate`, and its result is advisory only.
+A verifier that runs from inside the candidate repository or its Git directory reports `verified-advisory` with exit status 3.
+Its result is advisory only, and automation that reads only the exit status cannot mistake it for an authoritative result.
 
 ### Signed result records
 
@@ -68,10 +70,10 @@ Controller test case 16 demonstrates the substitution, and the recorded mutation
 | `changed-policy` | The payload names another acceptance-policy digest. |
 | `zero-denominator` | `discovered` or `selected` is zero. |
 | `inconsistent-counts` | A count is not a nonnegative safe integer, `selected` exceeds `discovered`, or the outcomes do not sum to `selected`. |
-| `unprotected-policy` | The trust policy lies inside the repository. |
+| `unprotected-policy` | The trust policy lies inside the candidate repository or its Git directory. |
 | `unknown-candidate` | The candidate is not a full commit ID of a commit object in the candidate repository. |
 
-A Git spawn failure, signal, or timeout is a tool error with exit status 1, not a rejection code.
+An unreadable candidate repository, an unreadable tree, a Git spawn failure, a signal, or a timeout is a tool error with exit status 1, not a rejection code.
 Signature-encoding failures report `malformed` before any signature check, because they are format failures.
 
 The verifier imports nothing from the local receipt code, and `tools/attest.test.mjs` runs its tests standalone.

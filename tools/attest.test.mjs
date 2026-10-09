@@ -10,7 +10,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { AttestationError, candidateIdentity, decodePublicKey, signResult, verifyBytes, verifyResult } from './attest.mjs';
+import { AttestationError, candidateIdentity, candidateRepository, decodePublicKey, signResult, verifyBytes, verifyResult } from './attest.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SPKI_ED25519_PREFIX = '302a300506032b6570032100';
@@ -154,6 +154,17 @@ export const attestationCases = [
     const inside = verify(candidate.dir, insidePolicy, candidate.first);
     assert.equal(inside.status, 1, inside.stderr);
     assert.equal(JSON.parse(inside.stdout).code, 'unprotected-policy');
+    const linked = path.join(dir, 'linked'), gitDirectoryPolicy = path.join(candidate.dir, '.git', 'trust-policy.json');
+    runGit(candidate.dir, ['worktree', 'add', '-q', '--detach', linked, candidate.first]);
+    fs.writeFileSync(gitDirectoryPolicy, JSON.stringify(trustPolicy()));
+    const shared = verify(linked, gitDirectoryPolicy, candidate.first);
+    assert.equal(shared.status, 1, shared.stderr);
+    assert.equal(JSON.parse(shared.stdout).code, 'unprotected-policy');
+    fs.mkdirSync(path.join(candidate.dir, 'sub'));
+    const subdirectory = verify(path.join(candidate.dir, 'sub'), outsidePolicy, candidate.first);
+    assert.equal(subdirectory.status, 1);
+    assert.equal(subdirectory.stdout, '');
+    assert.match(subdirectory.stderr, /top-level directory/);
     const outside = verify(candidate.dir, outsidePolicy, candidate.first);
     assert.equal(outside.status, 0, outside.stdout + outside.stderr);
     const verified = JSON.parse(outside.stdout);
@@ -163,7 +174,8 @@ export const attestationCases = [
     const own = runGit(root, ['rev-parse', 'HEAD']), ownTree = runGit(root, ['rev-parse', 'HEAD^{tree}']);
     fs.writeFileSync(envelopeFile, signResult(record({ candidate: { commit: own, tree: ownTree } }), runner.privateKey, 'runner-1'));
     const advisory = verify(root, outsidePolicy, own);
-    assert.equal(advisory.status, 0, advisory.stdout + advisory.stderr);
+    assert.equal(advisory.status, 3, advisory.stdout + advisory.stderr);
+    assert.equal(JSON.parse(advisory.stdout).result, 'verified-advisory');
     assert.equal(JSON.parse(advisory.stdout).verifier, 'inside-candidate');
   }],
   ['14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names', () => {
@@ -180,6 +192,15 @@ export const attestationCases = [
     try { assert.deepEqual(candidateIdentity(candidate.dir, candidate.first), expected); }
     finally { if (inherited === undefined) delete process.env.GIT_DIR; else process.env.GIT_DIR = inherited; }
     for (const name of ['f'.repeat(40), candidate.first.slice(0, 12), 'HEAD', '-h', '']) rejects(() => candidateIdentity(candidate.dir, name), 'unknown-candidate');
+    runGit(candidate.dir, ['tag', '-a', 'fixture-tag', '-m', 'fixture tag', candidate.first]);
+    rejects(() => candidateIdentity(candidate.dir, runGit(candidate.dir, ['rev-parse', 'fixture-tag'])), 'unknown-candidate');
+    fs.mkdirSync(path.join(candidate.dir, 'nested'));
+    assert.match(codeOf(() => candidateRepository(path.join(candidate.dir, 'nested'))), /^error: .*top-level directory/);
+    assert.match(codeOf(() => candidateRepository(temp())), /^error: The candidate repository cannot be read/);
+    const searchPath = process.env.PATH;
+    process.env.PATH = '';
+    try { assert.match(codeOf(() => candidateIdentity(candidate.dir, candidate.first)), /^error: No git executable exists on PATH/); }
+    finally { process.env.PATH = searchPath; }
   }],
   ['16: A trusted signature over a noncanonical payload fails as malformed', () => {
     const canonical = JSON.stringify(record());

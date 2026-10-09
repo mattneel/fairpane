@@ -79,12 +79,14 @@ export function isInside(target, directory) {
   return !(path.isAbsolute(relative) || relative === '..' || relative.startsWith(`..${path.sep}`));
 }
 /**
- * Load a trust policy that lies outside the candidate workspace.
- * A workspace writer can edit any file inside the workspace, so such a file cannot be protected input.
+ * Load a trust policy that lies outside every protected location of the candidate.
+ * A workspace writer can edit any file inside those locations, so such a file cannot be protected input.
  * This location check is a guard against an obvious mistake, not a security boundary.
  */
-export function loadTrustPolicy(policyPath, workspaceRoot) {
-  if (isInside(policyPath, workspaceRoot)) fail('unprotected-policy', 'The trust policy must come from outside the candidate workspace.');
+export function loadTrustPolicy(policyPath, protectedLocations) {
+  for (const location of [protectedLocations].flat()) {
+    if (isInside(policyPath, location)) fail('unprotected-policy', 'The trust policy must come from outside the candidate repository and its Git directory.');
+  }
   return parseTrustPolicy(parseJson(fs.readFileSync(fs.realpathSync.native(policyPath), 'utf8'), 'The trust policy'));
 }
 /** Read an envelope file as strict UTF-8 text, so ill-formed bytes cannot pass as replacement characters. */
@@ -114,15 +116,30 @@ function readGit(repository, args) {
   return r;
 }
 /**
+ * Resolve the candidate repository that Git actually uses.
+ * The path must be the top-level directory of a work tree, because Git searches parent directories from any other path.
+ * An unreadable repository is a tool error, not a rejection.
+ */
+export function candidateRepository(repositoryPath) {
+  const top = readGit(repositoryPath, ['rev-parse', '--show-toplevel']);
+  if (top.status !== 0) throw new Error(`The candidate repository cannot be read: ${top.stderr.trim()}`);
+  const root = fs.realpathSync.native(top.stdout.trim());
+  if (root !== fs.realpathSync.native(repositoryPath)) throw new Error(`The --repository path must be the top-level directory of a Git work tree, ${root}.`);
+  const common = readGit(root, ['rev-parse', '--path-format=absolute', '--git-common-dir']);
+  if (common.status !== 0) throw new Error(`The candidate Git directory cannot be read: ${common.stderr.trim()}`);
+  return { root, gitDirectory: fs.realpathSync.native(common.stdout.trim()) };
+}
+/**
  * Resolve an immutable candidate identity from the Git object database, never from the working tree.
  * The candidate must be a full commit ID, because a ref or an abbreviated ID is a mutable pointer.
+ * The repository must already be readable, so a missing commit object is a rejection and a missing tree is a tool error.
  */
 export function candidateIdentity(repository, commit) {
   if (!matches(HEX40, commit)) fail('unknown-candidate', 'The candidate must be a full 40-hex commit ID.');
   const resolved = readGit(repository, ['rev-parse', '--verify', '--quiet', `${commit}^{commit}`]);
   if (resolved.status !== 0 || resolved.stdout.trim() !== commit) fail('unknown-candidate', `No commit object ${commit} exists in the candidate repository.`);
   const tree = readGit(repository, ['rev-parse', '--verify', '--quiet', `${commit}^{tree}`]);
-  if (tree.status !== 0 || !matches(HEX40, tree.stdout.trim())) fail('unknown-candidate', `Commit ${commit} has no readable tree.`);
+  if (tree.status !== 0 || !matches(HEX40, tree.stdout.trim())) throw new Error(`Commit ${commit} exists, but its tree cannot be read.`);
   return { commit, tree: tree.stdout.trim() };
 }
 function checkCounts(counts) {

@@ -95,11 +95,13 @@ It accepts only an Ed25519 signature from a key in the trust policy over the exa
 It requires a canonical payload, the expected commit and tree, the trust policy's acceptance-policy digest, and consistent nonzero counts.
 It reads the candidate identity from Git objects, never from the working tree.
 Its Git calls ignore replace refs and inherited `GIT_*` variables, and they find `git` through `PATH` only.
-The candidate must be a full 40-hex commit ID, because a ref or an abbreviated ID is a mutable pointer.
-A Git failure or timeout is a tool error, distinct from a rejection.
-A trust policy inside the candidate repository fails as `unprotected-policy`, because a workspace writer can edit it.
+The `--repository` path must be the top-level directory of a Git work tree, because Git searches parent directories from any other path.
+The candidate must be a full 40-hex commit ID of a commit object, because a ref, a tag, or an abbreviated ID is a mutable pointer.
+An unreadable repository, an unreadable tree, a Git spawn failure, a signal, or a timeout is a tool error, distinct from a rejection.
+A protected runner whose account does not own the candidate checkout lists that path in `safe.directory` in its own Git configuration.
+A trust policy inside the candidate repository or its Git directory fails as `unprotected-policy`, because a workspace writer can edit it.
 That location check is a guard, not a security boundary; operating-system permissions on a separate runner supply the boundary.
-A verifier that runs from inside the candidate repository reports `inside-candidate`, and its result is advisory only.
+A verifier that runs from inside the candidate reports `verified-advisory` with exit status 3, and its result is advisory only.
 `node tools/attest.test.mjs` runs the verifier's own tests without the rest of the controller.
 
 A verified result authenticates one record and is not release qualification.

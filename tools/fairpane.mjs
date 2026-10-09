@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { readJson, checkRepository, readyTasks, qualificationProblems, fingerprints,
   validateReceipt, runGate, recordCommand, installZig, compilerPath, checkCompiler, safePath } from './lib.mjs';
 import { corpusCommand } from './corpus.mjs';
-import { AttestationError, candidateIdentity, isInside, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
+import { AttestationError, candidateIdentity, candidateRepository, isInside, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command = 'help', ...args] = process.argv.slice(2);
@@ -120,14 +120,17 @@ try {
     }
     if (!options.repository || !options.policy || !options.candidate || files.length !== 1) throw new Error(usage);
     try {
-      const repository = path.resolve(options.repository);
-      const trust = loadTrustPolicy(path.resolve(options.policy), repository);
-      const candidate = candidateIdentity(repository, options.candidate);
-      const advisory = isInside(root, repository);
-      output({ ...verifyResult(readEnvelope(path.resolve(files[0])), trust, candidate), candidate,
+      const repository = candidateRepository(path.resolve(options.repository));
+      const trust = loadTrustPolicy(path.resolve(options.policy), [repository.root, repository.gitDirectory]);
+      const candidate = candidateIdentity(repository.root, options.candidate);
+      const advisory = isInside(root, repository.root) || isInside(root, repository.gitDirectory);
+      const verified = verifyResult(readEnvelope(path.resolve(files[0])), trust, candidate);
+      output({ ...verified, result: advisory ? 'verified-advisory' : 'verified', candidate,
         verifier: advisory ? 'inside-candidate' : 'outside-candidate',
-        note: advisory ? 'The verifier runs from inside the candidate workspace, so this result is advisory only.' :
+        note: advisory ? 'The verifier runs from inside the candidate repository, so this result is advisory only.' :
           'A verified result authenticates one record. It is not release qualification.' });
+      // An advisory result exits with status 3, so automation that reads only the status cannot mistake it for authority.
+      if (advisory) process.exitCode = 3;
     } catch (e) {
       if (!(e instanceof AttestationError)) throw e;
       output({ result: 'rejected', code: e.code, message: e.message });
