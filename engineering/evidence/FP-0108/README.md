@@ -181,6 +181,20 @@ The assignment's rule for a frozen expectation that contradicts its source appli
 - `corpus-fetch unicode` found every `published_url` equal to its member.
 - No FP-0108 test takes more than 30 s in the Debug profile.
 
-## Integrator steps
+## Integration
 
-The contract leaves these steps to the integrator: `raw/integration-binding.log`, the `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` gates with `--evidence-dir engineering/evidence/FP-0108/gates`, and an uncached `raw/integration-tests.log`.
+Commit `6cf88af` applies the worker's `out/fp0108.patch`, blob `8aa9608ddbc2f81827c762a08f5462bb0ad9d878`, on `3e7128c`, and all 53 files apply cleanly.
+That head contains `FP-0107`, whose controller runner runs ordinary cases on four worker threads; no FP-0108 controller case changes the working directory, the environment, or a module-level function.
+Commit `7f2a7e7` adds contract amendment 1, which limits M7's case 11 scope to the lines that depend on U+0903.
+
+`raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache directory `out/fp0108-integration`: `Build Summary: 100/100 steps succeeded; 334/334 tests passed`.
+`raw/integration-binding.log` records `HEAD` `7f2a7e7` and a status that includes ignored files before and after these gates:
+
+| Gate | Receipt | Status | Duration |
+| --- | --- | --- | --- |
+| `repo-check` | `gates/2026-10-09T18-18-47-194Z-repo-check-cf41715a.json` | pass | 209 ms |
+| `controller-test` | `gates/2026-10-09T18-18-47-671Z-controller-test-207ecf4b.json` | pass, 244 of 244 | 42,404 ms |
+| `zig-fmt` | `gates/2026-10-09T18-19-30-365Z-zig-fmt-52dd8f80.json` | pass | 69 ms |
+| `zig-test` | `gates/2026-10-09T18-19-30-729Z-zig-test-906674f1.json` | pass | 43,446 ms |
+
+Bun 1.4.2 passes 244 of 244 cases in `raw/bun-selftest.log`.
