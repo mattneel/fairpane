@@ -1,0 +1,12 @@
+diff --git a/out/fp0064-tokenizer.fixed.zig b/src/html/tokenizer.zig
+index b148d4a..5e40285 100644
+--- a/out/fp0064-tokenizer.fixed.zig
++++ b/src/html/tokenizer.zig
+@@ -441,6 +441,7 @@ pub const Tokenizer = struct {
+ 
+     /// Stops borrowing the chunk and keeps its undecided units.
+     fn release(t: *Tokenizer) Allocator.Error!void {
++        t.temp.clearRetainingCapacity();
+         if (!t.borrowed) return;
+         const rest = t.chunk[t.chunk_index..];
+         if (rest.len != 0) {

@@ -1,8 +1,7 @@
 //! The 84 tokenizer states of HTML Standard §13.2.5.1 to §13.2.5.84, at whatwg/html commit
-//! `efc54f7b70858d9fcf06d1a5871ae215f448c029`, and the branches of each implemented state.
+//! `efc54f7b70858d9fcf06d1a5871ae215f448c029`, and the branches of each state.
 //!
-//! The tokenizer implements 54 states: exactly those that the machine reaches from its initial data state
-//! without any action from tree construction. The other 30 states belong to task `FP-0064`.
+//! The tokenizer implements all 84 states, with every branch of each section.
 
 const std = @import("std");
 
@@ -196,28 +195,55 @@ pub fn title(state: State) []const u8 {
     return titles[@backingInt(state)];
 }
 
-/// Whether the tokenizer implements `state`: sections 1, 6 to 8, 32 to 68, and 72 to 84.
-pub fn implemented(state: State) bool {
-    return switch (section(state)) {
-        1, 6...8, 32...68, 72...84 => true,
-        else => false,
-    };
-}
-
-/// Returns the task that owns an unimplemented state, or null for an implemented state.
-pub fn owner(state: State) ?[]const u8 {
-    return if (implemented(state)) null else "FP-0064";
-}
-
-/// Returns the branches of an implemented state, in the order of its section's entries.
+/// Returns the branches of `state`, in the order of its section's entries.
 /// "whitespace" means U+0009, U+000A, U+000C, or U+0020.
-/// An unimplemented state has no branches.
+/// Every state has at least one branch.
 pub fn branches(state: State) []const []const u8 {
+    const appropriate_end_tag_name: []const []const u8 = &.{
+        "whitespace with an appropriate end tag",
+        "/ with an appropriate end tag",
+        "> with an appropriate end tag",
+        "ASCII upper alpha",
+        "ASCII lower alpha",
+        "whitespace, /, or > otherwise",
+        "else",
+    };
+    const double_escape_boundary: []const []const u8 = &.{
+        "whitespace, /, or > with \"script\"",
+        "whitespace, /, or > otherwise",
+        "ASCII upper alpha",
+        "ASCII lower alpha",
+        "else",
+    };
     return switch (state) {
-        .data => &.{ "&", "<", "NULL", "EOF", "else" },
+        .data, .rcdata => &.{ "&", "<", "NULL", "EOF", "else" },
+        .rawtext, .script_data => &.{ "<", "NULL", "EOF", "else" },
+        .plaintext => &.{ "NULL", "EOF", "else" },
         .tag_open => &.{ "!", "/", "ASCII alpha", "?", "EOF", "else" },
         .end_tag_open => &.{ "ASCII alpha", ">", "EOF", "else" },
         .tag_name => &.{ "whitespace", "/", ">", "ASCII upper alpha", "NULL", "EOF", "else" },
+        .rcdata_less_than_sign, .rawtext_less_than_sign => &.{ "/", "else" },
+        .rcdata_end_tag_open,
+        .rawtext_end_tag_open,
+        .script_data_end_tag_open,
+        .script_data_escaped_end_tag_open,
+        => &.{ "ASCII alpha", "else" },
+        .rcdata_end_tag_name,
+        .rawtext_end_tag_name,
+        .script_data_end_tag_name,
+        .script_data_escaped_end_tag_name,
+        => appropriate_end_tag_name,
+        .script_data_less_than_sign => &.{ "/", "!", "else" },
+        .script_data_escape_start, .script_data_escape_start_dash => &.{ "-", "else" },
+        .script_data_escaped,
+        .script_data_escaped_dash,
+        .script_data_double_escaped,
+        .script_data_double_escaped_dash,
+        => &.{ "-", "<", "NULL", "EOF", "else" },
+        .script_data_escaped_dash_dash, .script_data_double_escaped_dash_dash => &.{ "-", "<", ">", "NULL", "EOF", "else" },
+        .script_data_escaped_less_than_sign => &.{ "/", "ASCII alpha", "else" },
+        .script_data_double_escape_start, .script_data_double_escape_end => double_escape_boundary,
+        .script_data_double_escaped_less_than_sign => &.{ "/", "else" },
         .before_attribute_name => &.{ "whitespace", "/ or > or EOF", "=", "else" },
         .attribute_name => &.{ "whitespace or / or > or EOF", "=", "ASCII upper alpha", "NULL", "\" or ' or <", "else" },
         .after_attribute_name => &.{ "whitespace", "/", "=", ">", "EOF", "else" },
@@ -256,6 +282,9 @@ pub fn branches(state: State) []const []const u8 {
         .after_doctype_public_identifier, .between_doctype_public_and_system_identifiers => &.{ "whitespace", ">", "\"", "'", "EOF", "else" },
         .after_doctype_system_identifier => &.{ "whitespace", ">", "EOF", "else" },
         .bogus_doctype => &.{ ">", "NULL", "EOF", "else" },
+        .cdata_section => &.{ "]", "EOF", "else" },
+        .cdata_section_bracket => &.{ "]", "else" },
+        .cdata_section_end => &.{ "]", ">", "else" },
         .processing_instruction_open => &.{ "ASCII alpha or _", "EOF", "else" },
         .processing_instruction_target => &.{
             "terminator with a disallowed target",
@@ -288,7 +317,6 @@ pub fn branches(state: State) []const []const u8 {
             "control or 0x0D not in the table",
             "no error",
         },
-        else => &.{},
     };
 }
 
@@ -305,7 +333,7 @@ const branch_offsets = offsets: {
     break :offsets result;
 };
 
-/// The number of branches of all implemented states.
+/// The number of branches of all states.
 pub const branch_count: usize = branch_offsets[titles.len];
 
 /// Returns the flat index of the branch named `name` of `state`, or a compile error for an unknown name.

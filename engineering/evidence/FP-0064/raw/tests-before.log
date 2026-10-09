@@ -1,0 +1,501 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+dfa6563cff2a74d154681de99f42dce28a822f52
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:07.766Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--short"]
+ M src/html/partition_test.zig
+ M src/html/tokenizer_test.zig
+?? engineering/evidence/FP-0064/raw/tests-before.log
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:07.835Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","add","--detach","out/fp0064-before-tests","HEAD"]
+Preparing worktree (detached HEAD dfa6563)
+HEAD is now at dfa6563 FP-0064: freeze the tokenizer states contract
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","add","--detach","out/fp0064-before-tests","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:07.911Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":310}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","src/html/tokenizer_test.zig","src/html/partition_test.zig","out/fp0064-before-tests/src/html/"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["src/html/tokenizer_test.zig","src/html/partition_test.zig","out/fp0064-before-tests/src/html/"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:08.275Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/fp0064-before-tests","status","--short"]
+ M src/html/partition_test.zig
+ M src/html/tokenizer_test.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/fp0064-before-tests","status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:08.346Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":73}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/html/tokenizer_test.zig","src/html/partition_test.zig","out/fp0064-before-tests/src/html/tokenizer_test.zig","out/fp0064-before-tests/src/html/partition_test.zig","out/fp0064-before-tests/src/html/tokenizer.zig","out/fp0064-before-tests/src/html/states.zig","out/fp0064-before-tests/src/html/errors.zig","out/fp0064-before-tests/src/html/root.zig","out/fp0064-before-tests/src/html/dump.zig","out/fp0064-before-tests/src/lab.zig","out/fp0064-before-tests/build.zig"]
+90978341eafc0e544ced9b187f287921e20b369b
+669dc6b972de98f4bc73b613a3f9538495915860
+90978341eafc0e544ced9b187f287921e20b369b
+669dc6b972de98f4bc73b613a3f9538495915860
+7ee21c872da0c52629570bfbb08c565a21a431de
+69e690d04e7c1d84822709de30ea56accdefd012
+140d7259482fdbd3e463272b112c22b4d6fe58b9
+c5785c44803064c63cf297d9cd0a6d7863d0e87e
+5393040c2923a42f905759db1df64ee5098d6e55
+358420db6e02ee4f2a040051bb27154764fe6453
+efe5659b843e5700b316c6cf09ffed407f4dbdcb
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/html/tokenizer_test.zig","src/html/partition_test.zig","out/fp0064-before-tests/src/html/tokenizer_test.zig","out/fp0064-before-tests/src/html/partition_test.zig","out/fp0064-before-tests/src/html/tokenizer.zig","out/fp0064-before-tests/src/html/states.zig","out/fp0064-before-tests/src/html/errors.zig","out/fp0064-before-tests/src/html/root.zig","out/fp0064-before-tests/src/html/dump.zig","out/fp0064-before-tests/src/lab.zig","out/fp0064-before-tests/build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:08.468Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0064-cache-before"]
+test
++- run test
+   +- compile test debug native 3 errors
+src\html\tokenizer_test.zig:18:31: error: root source file struct 'html.tokenizer' has no member named 'ContentState'
+const ContentState = tokenizer.ContentState;
+                     ~~~~~~~~~^~~~~~~~~~~~~
+src\html\tokenizer.zig:1:1: note: struct declared here
+//! The HTML tokenizer of HTML Standard §13.2.5, at whatwg/html commit `efc54f7b70858d9fcf06d1a5871ae215f448c029`.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    html.tokenizer_test.test.FP-0064 case 14: interface edges of switchTo__struct_3927: src\html\tokenizer_test.zig:1163:41
+    test.FP-0064 case 14: interface edges of switchTo: src\html\tokenizer_test.zig:1164:21
+    3 reference(s) hidden; use '-freference-trace=5' to see all references
+src\html\tokenizer_test.zig:533:57: error: root source file struct 'html.tokenizer' has no member named 'SwitchError'
+pub fn drive(t: *Tokenizer, s: tokenizer.Step) tokenizer.SwitchError!void {
+                                               ~~~~~~~~~^~~~~~~~~~~~
+src\html\tokenizer.zig:1:1: note: struct declared here
+//! The HTML tokenizer of HTML Standard §13.2.5, at whatwg/html commit `efc54f7b70858d9fcf06d1a5871ae215f448c029`.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src\html\tokenizer_test.zig:1358:45: error: no field or member function named 'switchTo' in 'html.tokenizer.Tokenizer'
+    testing.expectError(error.OutOfMemory, t.switchTo(.rcdata)) catch |e| return e;
+                                           ~^~~~~~~~~
+src\html\tokenizer.zig:97:23: note: struct declared here
+pub const Tokenizer = struct {
+                      ^~~~~~
+src\html\tokenizer_test.zig:1358:45: note: method invocation only supports up to one level of implicit pointer dereferencing
+src\html\tokenizer_test.zig:1358:45: note: use '.*' to dereference pointer
+error: 3 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0064-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 62/65 steps succeeded (1 failed); 45/45 tests passed
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 3 errors
++- run test 45 pass (45 total) 293ms MaxRSS:16M
+|  +- compile test debug native success 3s MaxRSS:420M
++- FP-0007 case 13: case 2 passes with exit status 0 success 44ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:357M
++- FP-0007 case 13: case 3 fails with exit status 1 success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 48ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 51ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 41ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 49ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 70ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 16ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 20ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:344M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 38ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 39ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 48ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 47ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 47ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 47ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 48ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 47ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 46ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 47ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 8ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 46ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 48ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 46ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 45ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 43ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 437ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 443ms
++- FP-0011 case 4: allocation_invokes_call.zig success 463ms
++- FP-0011 case 4: leaf_allocates.zig success 391ms
++- FP-0011 case 4: mutation_throws.zig success 396ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 400ms
++- FP-0011 case 4: leaf_positive.zig success 459ms
++- FP-0011 case 5: catalog_callback_alone.zig success 395ms
++- FP-0011 case 5: catalog_exception_alone.zig success 421ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 366ms
++- FP-0011 case 5: kernel_wider_context.zig success 390ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 369ms
++- FP-0011 case 8: layout_undescribed_field.zig success 413ms
++- FP-0011 case 8: layout_plain_reference.zig success 394ms
++- FP-0011 case 8: layout_missing_field.zig success 386ms
++- FP-0011 case 20: abi_reference_value.zig success 402ms
++- FP-0011 case 20: abi_nan_box_value.zig success 380ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 420ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 389ms
++- FP-0011 case 35: leaf_widens_context.zig success 367ms
++- FP-0011 case 36: binding_missing_kernel.zig success 398ms
++- FP-0011 case 36: binding_stray_kernel.zig success 424ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x31c921fe test --summary all --cache-dir out/fp0064-cache-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0064-cache-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m\\out\\fp0064-before-tests","started_at":"2026-10-09T12:43:13.432Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":6565,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","add","--detach","out/fp0064-before-behavior","HEAD"]
+Preparing worktree (detached HEAD dfa6563)
+HEAD is now at dfa6563 FP-0064: freeze the tokenizer states contract
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","add","--detach","out/fp0064-before-behavior","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:27.836Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":444}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","out/fp0064-staging/run2-addition.zig","out/fp0064-before-behavior/src/html/tokenizer_test.zig"]
+8eb8f90712ce8023354475a4040115f6fa789bc5
+9553e35ab8343b76201b2bebe2331b0b5066c7e8
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","out/fp0064-staging/run2-addition.zig","out/fp0064-before-behavior/src/html/tokenizer_test.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:28.345Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","require('fs').appendFileSync(process.argv[1], require('fs').readFileSync(process.argv[2]))","out/fp0064-before-behavior/src/html/tokenizer_test.zig","out/fp0064-staging/run2-addition.zig"]
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","require('fs').appendFileSync(process.argv[1], require('fs').readFileSync(process.argv[2]))","out/fp0064-before-behavior/src/html/tokenizer_test.zig","out/fp0064-staging/run2-addition.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:28.420Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/fp0064-before-behavior","status","--short"]
+ M src/html/tokenizer_test.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/fp0064-before-behavior","status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:28.517Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":73}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/fp0064-before-behavior","diff"]
+diff --git a/src/html/tokenizer_test.zig b/src/html/tokenizer_test.zig
+index 9553e35..e066d21 100644
+--- a/src/html/tokenizer_test.zig
++++ b/src/html/tokenizer_test.zig
+@@ -884,3 +884,52 @@ test "FP-0008 case 17: each induced allocation failure returns OutOfMemory, ever
+     try testing.checkAllAllocationFailures(no_remap.allocator(), tokenizeUnderAllocationFailure, .{});
+     try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
+ }
++
++// FP-0064 tests-before run 2: the CDATA cases through the base helper `tokenizeChunksForeign`.
++
++const fp0064_cdata_cases = [_]Case{
++    .{ .id = "K1", .input = "<![CDATA[x", .expected = "C\"x\" !eof-in-cdata@1:11 EOF" },
++    .{ .id = "CD1", .input = "<![CDATA[a]b]]c]]]>d", .expected = "C\"a]b]]c]d\" EOF" },
++    .{ .id = "CD2", .input = "<![CDATA[\\0\\u0001]", .expected = "C\"\\u0000\" !control-character-in-input-stream@1:11 C\"\\u0001]\" !eof-in-cdata@1:13 EOF" },
++    .{ .id = "CD3", .input = "<![CDATA[]]", .expected = "C\"]]\" !eof-in-cdata@1:12 EOF" },
++    .{ .id = "CD4", .input = "<![CDATA[]]>", .expected = "EOF" },
++    .{ .id = "CD5", .input = "<![CDATA[<a>&amp;</a>]]><b>", .expected = "C\"<a>&amp;</a>\" S\"b\"[] EOF" },
++    .{ .id = "CD6", .input = "<!--a--><![CDATA[", .expected = "M\"a\" !eof-in-cdata@1:18 EOF" },
++    .{ .id = "Q9", .input = "<![CDATA[a]]]>", .expected = "C\"a]\" EOF" },
++    .{ .id = "Q10", .input = "<![CDATA[]\\0]", .expected = "C\"]\\u0000]\" !eof-in-cdata@1:13 EOF" },
++    .{ .id = "Q11", .input = "<![CDATA[\\uD83D\\uDE00]]>", .expected = "C\"\\uD83D\\uDE00\" EOF" },
++    .{ .id = "Q12", .input = "<![CDATA[x]]>", .expected = "C\"x\" EOF" },
++};
++
++test "FP-0064 tests-before run 2: K1, CD1 to CD6, and Q9 to Q12 as one chunk with a foreign adjusted current node" {
++    const gpa = testing.allocator;
++    var first_error: ?anyerror = null;
++    for (fp0064_cdata_cases) |case| {
++        const input = try decodeInput(gpa, case.input);
++        defer gpa.free(input);
++        const expected = try expectedDump(gpa, case.expected);
++        defer gpa.free(expected);
++        const observed = tokenizeChunksForeign(gpa, input, &.{}, dump.plain, true) catch |err| {
++            std.debug.print("FP-0064 case {s}: {s}\n", .{ case.id, @errorName(err) });
++            if (first_error == null) first_error = err;
++            continue;
++        };
++        defer gpa.free(observed);
++        if (!std.mem.eql(u8, expected, observed)) {
++            std.debug.print("FP-0064 case {s}:\nexpected:\n{s}observed:\n{s}", .{ case.id, expected, observed });
++            if (first_error == null) first_error = error.TestExpectedEqual;
++        }
++    }
++    if (first_error) |err| return err;
++}
++
++test "FP-0064 tests-before run 2: case 15 with the flag true, whole and split at offset 6" {
++    const gpa = testing.allocator;
++    const input = asciiUnits("<![CDATA[x]]>");
++    const cdata_dump = "[\"Character\",\"x\",[9,10]]\n[\"EOF\",[13,13]]\n";
++    for ([_][]const usize{ &.{}, &.{6} }) |boundaries| {
++        const observed = try tokenizeChunksForeign(gpa, &input, boundaries, dump.full, true);
++        defer gpa.free(observed);
++        try testing.expectEqualStrings(cdata_dump, observed);
++    }
++}
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/fp0064-before-behavior","diff"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:28.659Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":88}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","out/fp0064-before-behavior/src/html/tokenizer_test.zig","out/fp0064-before-behavior/src/html/partition_test.zig","out/fp0064-before-behavior/src/html/tokenizer.zig","out/fp0064-before-behavior/src/html/states.zig","out/fp0064-before-behavior/src/html/errors.zig","out/fp0064-before-behavior/src/html/root.zig","out/fp0064-before-behavior/src/html/dump.zig","out/fp0064-before-behavior/src/lab.zig","out/fp0064-before-behavior/build.zig"]
+e066d2189c20b66cad95e9334e57fc867555c5be
+d7625f87e24c8ddcb4c737c4356e67e7a4017026
+7ee21c872da0c52629570bfbb08c565a21a431de
+69e690d04e7c1d84822709de30ea56accdefd012
+140d7259482fdbd3e463272b112c22b4d6fe58b9
+c5785c44803064c63cf297d9cd0a6d7863d0e87e
+5393040c2923a42f905759db1df64ee5098d6e55
+358420db6e02ee4f2a040051bb27154764fe6453
+efe5659b843e5700b316c6cf09ffed407f4dbdcb
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","out/fp0064-before-behavior/src/html/tokenizer_test.zig","out/fp0064-before-behavior/src/html/partition_test.zig","out/fp0064-before-behavior/src/html/tokenizer.zig","out/fp0064-before-behavior/src/html/states.zig","out/fp0064-before-behavior/src/html/errors.zig","out/fp0064-before-behavior/src/html/root.zig","out/fp0064-before-behavior/src/html/dump.zig","out/fp0064-before-behavior/src/lab.zig","out/fp0064-before-behavior/build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T12:43:28.802Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0064-cache-before-behavior"]
+test
++- run test 227 pass, 2 fail (229 total)
+error: 'html.tokenizer_test.test.FP-0064 tests-before run 2: K1, CD1 to CD6, and Q9 to Q12 as one chunk with a foreign adjusted current node' failed:
+       FP-0064 case K1: UnimplementedState
+       FP-0064 case CD1: UnimplementedState
+       FP-0064 case CD2: UnimplementedState
+       FP-0064 case CD3: UnimplementedState
+       FP-0064 case CD4: UnimplementedState
+       FP-0064 case CD5: UnimplementedState
+       FP-0064 case CD6: UnimplementedState
+       FP-0064 case Q9: UnimplementedState
+       FP-0064 case Q10: UnimplementedState
+       FP-0064 case Q11: UnimplementedState
+       FP-0064 case Q12: UnimplementedState
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:727:46: 0x7ff794822c15 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:728:70: 0x7ff79481db0d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481fe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:728:70: 0x7ff79481db0d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481fe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481fe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:727:46: 0x7ff79481dab5 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\handles.zig:730:69: 0x7ff79481db82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\html\tokenizer_test.zig:923:28: 0x7ff7948ff7e1 in test.FP-0064 tests-before run 2: K1, CD1 to CD6, and Q9 to Q12 as one chunk with a foreign adjusted current node (test_zcu.obj)
+           if (first_error) |err| return err;
+                                  ^
+error: 'html.tokenizer_test.test.FP-0064 tests-before run 2: case 15 with the flag true, whole and split at offset 6' failed:
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\html\tokenizer.zig:1905:17: 0x7ff794874fb6 in markupDeclarationOpen (test_zcu.obj)
+                       return error.UnimplementedState;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\html\tokenizer.zig:635:41: 0x7ff794862d17 in step (test_zcu.obj)
+                   .markup_declaration_open => return t.markupDeclarationOpen(),
+                                               ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\html\tokenizer.zig:234:18: 0x7ff794862968 in run (test_zcu.obj)
+                   if (!try t.step()) {
+                        ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\html\tokenizer.zig:226:9: 0x7ff7948628cc in fail (test_zcu.obj)
+               return err;
+               ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\html\tokenizer.zig:210:33: 0x7ff7948615eb in next (test_zcu.obj)
+                   t.run() catch |err| return t.fail(err);
+                                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\html\tokenizer_test.zig:397:24: 0x7ff7948f109b in tokenizeChunksForeign (test_zcu.obj)
+                   const s = (try t.next()) orelse return error.TestUnexpectedResult;
+                              ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\out\fp0064-before-behavior\src\html\tokenizer_test.zig:931:26: 0x7ff7948ff225 in test.FP-0064 tests-before run 2: case 15 with the flag true, whole and split at offset 6 (test_zcu.obj)
+               const observed = try tokenizeChunksForeign(gpa, &input, boundaries, dump.full, true);
+                                ^
+failed command: cd . && ".\\out\\fp0064-cache-before-behavior\\o\\6dd1bbc3a7823ec0a452afb3ff9883e1\\test.exe" "--cache-dir=.\\out\\fp0064-cache-before-behavior" --seed=0x398e1c18 --listen=-
+
+Build Summary: 63/65 steps succeeded (1 failed); 272/274 tests passed (2 failed)
+test transitive failure
++- run test 227 pass, 2 fail (229 total)
+|  +- compile test debug native success 9s MaxRSS:845M
++- run test 45 pass (45 total) 305ms MaxRSS:16M
+|  +- compile test debug native success 4s MaxRSS:418M
++- FP-0007 case 13: case 2 passes with exit status 0 success 40ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 3s MaxRSS:358M
++- FP-0007 case 13: case 3 fails with exit status 1 success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 50ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 41ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 78ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 11ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 15ms
+|  +- compile exe fairpane-lab-check debug native success 3s MaxRSS:344M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 51ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 36ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 42ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 42ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 50ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 45ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 50ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 49ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 43ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 50ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 42ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 50ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 6ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 42ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 47ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 49ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 48ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 45ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 414ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 466ms
++- FP-0011 case 4: allocation_invokes_call.zig success 398ms
++- FP-0011 case 4: leaf_allocates.zig success 379ms
++- FP-0011 case 4: mutation_throws.zig success 396ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 386ms
++- FP-0011 case 4: leaf_positive.zig success 481ms
++- FP-0011 case 5: catalog_callback_alone.zig success 405ms
++- FP-0011 case 5: catalog_exception_alone.zig success 388ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 365ms
++- FP-0011 case 5: kernel_wider_context.zig success 410ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 365ms
++- FP-0011 case 8: layout_undescribed_field.zig success 398ms
++- FP-0011 case 8: layout_plain_reference.zig success 376ms
++- FP-0011 case 8: layout_missing_field.zig success 405ms
++- FP-0011 case 20: abi_reference_value.zig success 365ms
++- FP-0011 case 20: abi_nan_box_value.zig success 365ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 338ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 387ms
++- FP-0011 case 35: leaf_widens_context.zig success 345ms
++- FP-0011 case 36: binding_missing_kernel.zig success 393ms
++- FP-0011 case 36: binding_stray_kernel.zig success 350ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x398e1c18 test --summary all --cache-dir out/fp0064-cache-before-behavior
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0064-cache-before-behavior"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m\\out\\fp0064-before-behavior","started_at":"2026-10-09T12:43:32.237Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":190194,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

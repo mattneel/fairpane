@@ -1,0 +1,991 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","src/html/tokenizer.zig","out/fp0064-tokenizer.fixed.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["src/html/tokenizer.zig","out/fp0064-tokenizer.fixed.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T13:00:25.180Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":14}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/html/tokenizer.zig","out/fp0064-tokenizer.fixed.zig"]
+b148d4ad2f7fbe109aeeab002d8cd90620cc05e7
+b148d4ad2f7fbe109aeeab002d8cd90620cc05e7
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/html/tokenizer.zig","out/fp0064-tokenizer.fixed.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T13:00:25.251Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","out/fp0064-tokenizer.fixed.zig","src/html/tokenizer.zig"]
+diff --git a/out/fp0064-tokenizer.fixed.zig b/src/html/tokenizer.zig
+index b148d4a..5e40285 100644
+--- a/out/fp0064-tokenizer.fixed.zig
++++ b/src/html/tokenizer.zig
+@@ -441,6 +441,7 @@ pub const Tokenizer = struct {
+ 
+     /// Stops borrowing the chunk and keeps its undecided units.
+     fn release(t: *Tokenizer) Allocator.Error!void {
++        t.temp.clearRetainingCapacity();
+         if (!t.borrowed) return;
+         const rest = t.chunk[t.chunk_index..];
+         if (rest.len != 0) {
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","out/fp0064-tokenizer.fixed.zig","src/html/tokenizer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T13:00:30.719Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0064/raw/mutation-temp-release.diff","out/fp0064-tokenizer.fixed.zig","src/html/tokenizer.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0064/raw/mutation-temp-release.diff","out/fp0064-tokenizer.fixed.zig","src/html/tokenizer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T13:00:30.801Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/html/tokenizer.zig"]
+5e4028501e95f364c88c83b5d8d8de8439b78b74
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/html/tokenizer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T13:00:30.870Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0064-cache-mutation"]
+test
++- run test 226 pass, 15 fail (241 total)
+error: 'html.tokenizer_test.test.FP-0008 case 4: each error catalog input produces exactly its expected sequence, whole and one code unit per chunk' failed:
+       FP-0008 case A4, one code unit per chunk:
+       expected:
+       ["error","absence-of-digits-in-numeric-character-reference",1,3,2]
+       ["Character","&#z"]
+       ["EOF"]
+       observed:
+       ["error","absence-of-digits-in-numeric-character-reference",1,3,2]
+       ["Character","z"]
+       ["EOF"]
+       FP-0008 case A9, one code unit per chunk:
+       expected:
+       ["error","disallowed-processing-instruction-target",1,6,5]
+       ["Comment","?XmL?"]
+       ["EOF"]
+       observed:
+       ["PI","",""]
+       ["EOF"]
+       FP-0008 case A23, one code unit per chunk:
+       expected:
+       ["error","invalid-processing-instruction-target",1,4,3]
+       ["Comment","?a$"]
+       ["EOF"]
+       observed:
+       ["error","invalid-processing-instruction-target",1,4,3]
+       ["Comment","?$"]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:727:46: 0x7ff7754c2c15 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:728:70: 0x7ff7754bdb0d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bfe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:728:70: 0x7ff7754bdb0d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bfe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bfe02 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:727:46: 0x7ff7754bdab5 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\handles.zig:730:69: 0x7ff7754bdb82 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:618:17: 0x7ff7755baf9e in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:741:5: 0x7ff7755bcff3 in test.FP-0008 case 4: each error catalog input produces exactly its expected sequence, whole and one code unit per chunk (test_zcu.obj)
+           try checkTable("FP-0008", &catalog);
+           ^
+error: 'html.tokenizer_test.test.FP-0008 case 8: processing instructions, whole and one code unit per chunk' failed:
+       FP-0008 case PI1, one code unit per chunk:
+       expected:
+       ["PI","a",""]
+       ["EOF"]
+       observed:
+       ["PI","",""]
+       ["EOF"]
+       FP-0008 case PI2, one code unit per chunk:
+       expected:
+       ["PI","_x-1","b c"]
+       ["EOF"]
+       observed:
+       ["PI","","b c"]
+       ["EOF"]
+       FP-0008 case PI3, one code unit per chunk:
+       expected:
+       ["PI","a","?b"]
+       ["EOF"]
+       observed:
+       ["PI","","?b"]
+       ["EOF"]
+       FP-0008 case PI7, one code unit per chunk:
+       expected:
+       ["PI","a","b"]
+       ["EOF"]
+       observed:
+       ["PI","","b"]
+       ["EOF"]
+       FP-0008 case PI8, one code unit per chunk:
+       expected:
+       ["error","disallowed-processing-instruction-target",1,6,5]
+       ["Comment","?xml x?"]
+       ["EOF"]
+       observed:
+       ["PI","","x"]
+       ["EOF"]
+       FP-0008 case PI9, one code unit per chunk:
+       expected:
+       ["error","disallowed-processing-instruction-target",1,17,16]
+       ["Comment","?Xml-Stylesheet"]
+       ["EOF"]
+       observed:
+       ["PI","",""]
+       ["EOF"]
+       FP-0008 case PI10, one code unit per chunk:
+       expected:
+       ["PI","xmlx",""]
+       ["EOF"]
+       observed:
+       ["PI","",""]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:618:17: 0x7ff7755baf9e in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:757:5: 0x7ff7755bce33 in test.FP-0008 case 8: processing instructions, whole and one code unit per chunk (test_zcu.obj)
+           try checkTable("FP-0008", &instructions);
+           ^
+error: 'html.tokenizer_test.test.FP-0008 case 9: character references, whole and one code unit per chunk' failed:
+       FP-0008 case R4, one code unit per chunk:
+       expected:
+       ["error","absence-of-digits-in-numeric-character-reference",1,4,3]
+       ["Character","&#xg;"]
+       ["error","missing-semicolon-after-character-reference",1,11,10]
+       ["Character","A "]
+       ["error","missing-semicolon-after-character-reference",1,16,15]
+       ["Character","Ax&"]
+       ["EOF"]
+       observed:
+       ["error","absence-of-digits-in-numeric-character-reference",1,4,3]
+       ["Character","g;"]
+       ["error","missing-semicolon-after-character-reference",1,11,10]
+       ["Character","A "]
+       ["error","missing-semicolon-after-character-reference",1,16,15]
+       ["Character","Ax&"]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:618:17: 0x7ff7755baf9e in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:762:5: 0x7ff7755bcdc6 in test.FP-0008 case 9: character references, whole and one code unit per chunk (test_zcu.obj)
+           try checkTable("FP-0008", &references);
+           ^
+error: 'html.tokenizer_test.test.FP-0064 case 4: RCDATA, whole and one code unit per chunk' failed:
+       FP-0064 case RC10, one code unit per chunk:
+       expected:
+       ["StartTag","title",[],false]
+       ["Character","</b>x"]
+       ["EndTag","title",[],false]
+       ["EOF"]
+       observed:
+       ["StartTag","title",[],false]
+       ["Character","</>x"]
+       ["EndTag","title",[],false]
+       ["EOF"]
+       FP-0064 case RC11, one code unit per chunk:
+       expected:
+       ["StartTag","textarea",[],false]
+       ["Character","</t a></t/b>"]
+       ["EOF"]
+       observed:
+       ["StartTag","textarea",[],false]
+       ["Character","</ a><//b>"]
+       ["EOF"]
+       FP-0064 case RC12, one code unit per chunk:
+       expected:
+       ["StartTag","title",[],false]
+       ["Character","</TiTx>"]
+       ["EOF"]
+       observed:
+       ["StartTag","title",[],false]
+       ["Character","</>"]
+       ["EOF"]
+       FP-0064 case RC13, whole:
+       expected:
+       ["StartTag","title",[],false]
+       ["Character","</tit"]
+       ["EOF"]
+       observed:
+       ["StartTag","title",[],false]
+       ["Character","</"]
+       ["EOF"]
+       FP-0064 case RC14, one code unit per chunk:
+       expected:
+       ["StartTag","title",[],false]
+       ["Character","</tit1e>"]
+       ["EOF"]
+       observed:
+       ["StartTag","title",[],false]
+       ["Character","</1e>"]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:618:17: 0x7ff7755baf9e in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:795:5: 0x7ff7755bc153 in test.FP-0064 case 4: RCDATA, whole and one code unit per chunk (test_zcu.obj)
+           try checkTable("FP-0064", &rcdata_walks);
+           ^
+error: 'html.tokenizer_test.test.FP-0064 case 5: RAWTEXT, whole and one code unit per chunk' failed:
+       FP-0064 case RW3, one code unit per chunk:
+       expected:
+       ["StartTag","iframe",[],false]
+       ["Character","</ifram>"]
+       ["EndTag","iframe",[],false]
+       ["EOF"]
+       observed:
+       ["StartTag","iframe",[],false]
+       ["Character","</>"]
+       ["EndTag","iframe",[],false]
+       ["EOF"]
+       FP-0064 case RW4, one code unit per chunk:
+       expected:
+       ["StartTag","noframes",[],false]
+       ["Character","a</n-"]
+       ["EOF"]
+       observed:
+       ["StartTag","noframes",[],false]
+       ["Character","a</-"]
+       ["EOF"]
+       FP-0064 case RW7, one code unit per chunk:
+       expected:
+       ["StartTag","noembed",[],false]
+       ["Character","</no/>"]
+       ["EOF"]
+       observed:
+       ["StartTag","noembed",[],false]
+       ["Character","<//>"]
+       ["EOF"]
+       FP-0064 case RW8, whole:
+       expected:
+       ["StartTag","xmp",[],false]
+       ["Character","</X"]
+       ["EOF"]
+       observed:
+       ["StartTag","xmp",[],false]
+       ["Character","</"]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:618:17: 0x7ff7755baf9e in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:799:5: 0x7ff7755bc0e3 in test.FP-0064 case 5: RAWTEXT, whole and one code unit per chunk (test_zcu.obj)
+           try checkTable("FP-0064", &rawtext_walks);
+           ^
+error: 'html.tokenizer_test.test.FP-0064 case 6: script data and its escape states, whole and one code unit per chunk' failed:
+       FP-0064 case SD3, one code unit per chunk:
+       expected:
+       ["StartTag","script",[],false]
+       ["Character","</scrip>"]
+       ["error","end-tag-with-attributes",1,27,26]
+       ["EndTag","script",[["x",""]],false]
+       ["EOF"]
+       observed:
+       ["StartTag","script",[],false]
+       ["Character","</>"]
+       ["error","end-tag-with-attributes",1,27,26]
+       ["EndTag","script",[["x",""]],false]
+       ["EOF"]
+       FP-0064 case SD4, one code unit per chunk:
+       expected:
+       ["StartTag","script",[],false]
+       ["Character","</s1"]
+       ["EOF"]
+       observed:
+       ["StartTag","script",[],false]
+       ["Character","</1"]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:618:17: 0x7ff7755baf9e in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:803:5: 0x7ff7755bc073 in test.FP-0064 case 6: script data and its escape states, whole and one code unit per chunk (test_zcu.obj)
+           try checkTable("FP-0064", &script_walks);
+           ^
+error: 'html.tokenizer_test.test.FP-0064 case 7: the script data escaped states, whole and one code unit per chunk' failed:
+       FP-0064 case SE4, one code unit per chunk:
+       expected:
+       ["StartTag","script",[],false]
+       ["Character","<!--<a-<1--</b>"]
+       ["EndTag","script",[],false]
+       ["EOF"]
+       observed:
+       ["StartTag","script",[],false]
+       ["Character","<!--<a-<1--</>"]
+       ["EndTag","script",[],false]
+       ["EOF"]
+       FP-0064 case SE5, one code unit per chunk:
+       expected:
+       ["StartTag","script",[],false]
+       ["Character","<!--</1</Scr1"]
+       ["error","eof-in-script-html-comment-like-text",1,22,21]
+       ["EOF"]
+       observed:
+       ["StartTag","script",[],false]
+       ["Character","<!--</1</1"]
+       ["error","eof-in-script-html-comment-like-text",1,22,21]
+       ["EOF"]
+       FP-0064 case SE10, whole:
+       expected:
+       ["StartTag","script",[],false]
+       ["Character","<!--</sc"]
+       ["error","eof-in-script-html-comment-like-text",1,17,16]
+       ["EOF"]
+       observed:
+       ["StartTag","script",[],false]
+       ["Character","<!--</"]
+       ["error","eof-in-script-html-comment-like-text",1,17,16]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:618:17: 0x7ff7755baf9e in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:807:5: 0x7ff7755bc003 in test.FP-0064 case 7: the script data escaped states, whole and one code unit per chunk (test_zcu.obj)
+           try checkTable("FP-0064", &escaped_walks);
+           ^
+error: 'html.tokenizer_test.test.FP-0064 case 8: the script data double escape states, whole and one code unit per chunk' failed:
+       FP-0064 case DE1, one code unit per chunk:
+       expected:
+       ["StartTag","script",[],false]
+       ["Character","<!--<script>a-b--c<d</e</script>-->"]
+       ["EOF"]
+       observed:
+       ["StartTag","script",[],false]
+       ["Character","<!--<script>a-b--c<d</"]
+       ["EndTag","script",[],false]
+       ["Character","-->"]
+       ["EOF"]
+       FP-0064 case DE7, one code unit per chunk:
+       expected:
+       ["StartTag","script",[],false]
+       ["Character","<!--<script></SCRIPTS>"]
+       ["error","eof-in-script-html-comment-like-text",1,31,30]
+       ["EOF"]
+       observed:
+       ["StartTag","script",[],false]
+       ["Character","<!--<script></>"]
+       ["error","eof-in-script-html-comment-like-text",1,31,30]
+       ["EOF"]
+       FP-0064 case DE8, one code unit per chunk:
+       expected:
+       ["StartTag","script",[],false]
+       ["Character","<!--<script/x</script\u0009x-->"]
+       ["EOF"]
+       observed:
+       ["StartTag","script",[],false]
+       ["Character","<!--<script/x"]
+       ["error","end-tag-with-attributes",1,34,33]
+       ["EndTag","script",[["x--",""]],false]
+       ["EOF"]
+       FP-0064 case DE11, one code unit per chunk:
+       expected:
+       ["StartTag","script",[],false]
+       ["Character","<!--<script></scr"]
+       ["error","eof-in-script-html-comment-like-text",1,26,25]
+       ["EOF"]
+       observed:
+       ["StartTag","script",[],false]
+       ["Character","<!--<script></"]
+       ["error","eof-in-script-html-comment-like-text",1,26,25]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:618:17: 0x7ff7755baf9e in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:811:5: 0x7ff7755bbf93 in test.FP-0064 case 8: the script data double escape states, whole and one code unit per chunk (test_zcu.obj)
+           try checkTable("FP-0064", &double_escaped_walks);
+           ^
+error: 'html.tokenizer_test.test.FP-0064 case 10: the last start tag name, whole and one code unit per chunk' failed:
+       FP-0064 case L1, one code unit per chunk:
+       expected:
+       ["StartTag","title",[],false]
+       ["Character","x"]
+       ["EndTag","title",[],false]
+       ["StartTag","b",[],false]
+       ["StartTag","textarea",[],false]
+       ["Character","</title>"]
+       ["EndTag","textarea",[],false]
+       ["EOF"]
+       observed:
+       ["StartTag","title",[],false]
+       ["Character","x"]
+       ["EndTag","title",[],false]
+       ["StartTag","b",[],false]
+       ["StartTag","textarea",[],false]
+       ["Character","</>"]
+       ["EndTag","textarea",[],false]
+       ["EOF"]
+       FP-0064 case L2, one code unit per chunk:
+       expected:
+       ["Character","</title>a"]
+       ["EOF"]
+       observed:
+       ["Character","</>a"]
+       ["EOF"]
+       FP-0064 case L3, one code unit per chunk:
+       expected:
+       ["Character","</xmp>"]
+       ["EOF"]
+       observed:
+       ["Character","</>"]
+       ["EOF"]
+       FP-0064 case L6, one code unit per chunk:
+       expected:
+       ["StartTag","script",[],false]
+       ["EndTag","script",[],false]
+       ["StartTag","style",[],false]
+       ["Character","</script>"]
+       ["EndTag","style",[],false]
+       ["EOF"]
+       observed:
+       ["StartTag","script",[],false]
+       ["EndTag","script",[],false]
+       ["StartTag","style",[],false]
+       ["Character","</>"]
+       ["EndTag","style",[],false]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:618:17: 0x7ff7755baf9e in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:819:5: 0x7ff7755bbeb3 in test.FP-0064 case 10: the last start tag name, whole and one code unit per chunk (test_zcu.obj)
+           try checkTable("FP-0064", &last_start_tag_walks);
+           ^
+error: 'html.tokenizer_test.test.FP-0008 case 11 and FP-0064 case 11: the error catalogs, the state walks, and the CDATA case execute every branch of every state' failed:
+       FP-0008 case A4, one code unit per chunk:
+       expected:
+       ["error","absence-of-digits-in-numeric-character-reference",1,3,2]
+       ["Character","&#z"]
+       ["EOF"]
+       observed:
+       ["error","absence-of-digits-in-numeric-character-reference",1,3,2]
+       ["Character","z"]
+       ["EOF"]
+       FP-0008 case A9, one code unit per chunk:
+       expected:
+       ["error","disallowed-processing-instruction-target",1,6,5]
+       ["Comment","?XmL?"]
+       ["EOF"]
+       observed:
+       ["PI","",""]
+       ["EOF"]
+       FP-0008 case A23, one code unit per chunk:
+       expected:
+       ["error","invalid-processing-instruction-target",1,4,3]
+       ["Comment","?a$"]
+       ["EOF"]
+       observed:
+       ["error","invalid-processing-instruction-target",1,4,3]
+       ["Comment","?$"]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:618:17: 0x7ff7755baf9e in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:844:26: 0x7ff7755bb07b in test.FP-0008 case 11 and FP-0064 case 11: the error catalogs, the state walks, and the CDATA case execute every branch of every state (test_zcu.obj)
+           for (tables) |table| try checkTable("FP-0008", table);
+                                ^
+error: 'html.tokenizer_test.test.FP-0064 case 12: each input produces exactly its dump with spans and errors' failed:
+       ====== expected this output: =========
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","</scrip",[8,15]]
+       ["EOF",[15,15]]
+       ␃
+       
+       ======== instead found this: =========
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","</",[8,15]]
+       ["EOF",[15,15]]
+       ␃
+       
+       ======================================
+       First difference occurs on line 2:
+       expected:
+       ["Character","</scrip",[8,15]]
+                       ^ ('\x73')
+       found:
+       ["Character","</",[8,15]]
+                       ^ ('\x22')
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:696:9: 0x7ff7753397db in expectEqualStrings (test_zcu.obj)
+               return error.TestExpectedEqual;
+               ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:869:5: 0x7ff7755b8db2 in expectFullDump (test_zcu.obj)
+           try testing.expectEqualStrings(expected, observed);
+           ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\tokenizer_test.zig:1012:9: 0x7ff7755b977c in test.FP-0064 case 12: each input produces exactly its dump with spans and errors (test_zcu.obj)
+               try expectFullDump(case.input, case.dump, case.setup);
+               ^
+error: 'html.partition_test.test.FP-0008 case 13: set P compares every composition of each input into nonempty chunks with the whole input' failed:
+       FP-0008 case 13 partition mismatch on input P10: "<?xml x?><?a?b>"
+       partition: [0,3) [3,15)
+       reference dump:
+       ["error","disallowed-processing-instruction-target",1,6,5]
+       ["Comment","?xml x?",[0,9]]
+       ["PI","a","?b",[9,15]]
+       ["EOF",[15,15]]
+       partition dump:
+       ["PI","ml","x",[0,9]]
+       ["PI","a","?b",[9,15]]
+       ["EOF",[15,15]]
+       1-minimal input: "<?xml "
+       FP-0008 case 13 partition mismatch on input P14: "&;&#;&#x;&a;"
+       partition: [0,4) [4,12)
+       reference dump:
+       ["Character","&;",[0,2]]
+       ["error","absence-of-digits-in-numeric-character-reference",1,5,4]
+       ["Character","&#;",[2,5]]
+       ["error","absence-of-digits-in-numeric-character-reference",1,9,8]
+       ["Character","&#x;&a",[5,11]]
+       ["error","unknown-named-character-reference",1,12,11]
+       ["Character",";",[11,12]]
+       ["EOF",[12,12]]
+       partition dump:
+       ["Character","&;",[0,2]]
+       ["error","absence-of-digits-in-numeric-character-reference",1,5,4]
+       ["Character",";",[4,5]]
+       ["error","absence-of-digits-in-numeric-character-reference",1,9,8]
+       ["Character","&#x;&a",[5,11]]
+       ["error","unknown-named-character-reference",1,12,11]
+       ["Character",";",[11,12]]
+       ["EOF",[12,12]]
+       1-minimal input: "&#&"
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:584:14: 0x7ff775313c8f in expect (test_zcu.obj)
+           if (!ok) return error.TestUnexpectedResult;
+                    ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\partition_test.zig:239:5: 0x7ff7755a945f in test.FP-0008 case 13: set P compares every composition of each input into nonempty chunks with the whole input (test_zcu.obj)
+           try testing.expect(!failed);
+           ^
+error: 'html.partition_test.test.FP-0008 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input' failed:
+       FP-0008 case 13 partition mismatch on input S1: "ab<c d=\"e\">&amp;f<!--g--><?h i?>&#x41\u000D\u000A<!DOCTYPE j>"
+       partition: [0,28) [28,51)
+       reference dump:
+       ["Character","ab",[0,2]]
+       ["StartTag","c",[["d","e",[5,6],[8,9]]],false,[2,11]]
+       ["Character","&f",[11,17]]
+       ["Comment","g",[17,25]]
+       ["PI","h","i",[25,32]]
+       ["error","missing-semicolon-after-character-reference",1,38,37]
+       ["Character","A\u000A",[32,39]]
+       ["DOCTYPE","j",null,null,false,[39,51]]
+       ["EOF",[51,51]]
+       partition dump:
+       ["Character","ab",[0,2]]
+       ["StartTag","c",[["d","e",[5,6],[8,9]]],false,[2,11]]
+       ["Character","&f",[11,17]]
+       ["Comment","g",[17,25]]
+       ["PI","","i",[25,32]]
+       ["error","missing-semicolon-after-character-reference",1,38,37]
+       ["Character","A\u000A",[32,39]]
+       ["DOCTYPE","j",null,null,false,[39,51]]
+       ["EOF",[51,51]]
+       1-minimal input: "<?h#"
+       FP-0008 case 13 partition mismatch on input B4: "<!--a--><!--b--!><!----><?pi d?><x y='z'/>"
+       partition: [0,27) [27,42)
+       reference dump:
+       ["Comment","a",[0,8]]
+       ["error","incorrectly-closed-comment",1,17,16]
+       ["Comment","b",[8,17]]
+       ["Comment","",[17,24]]
+       ["PI","pi","d",[24,32]]
+       ["StartTag","x",[["y","z",[35,36],[38,39]]],true,[32,42]]
+       ["EOF",[42,42]]
+       partition dump:
+       ["Comment","a",[0,8]]
+       ["error","incorrectly-closed-comment",1,17,16]
+       ["Comment","b",[8,17]]
+       ["Comment","",[17,24]]
+       ["PI","i","d",[24,32]]
+       ["StartTag","x",[["y","z",[35,36],[38,39]]],true,[32,42]]
+       ["EOF",[42,42]]
+       1-minimal input: "<?p>"
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:584:14: 0x7ff775313c8f in expect (test_zcu.obj)
+           if (!ok) return error.TestUnexpectedResult;
+                    ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\partition_test.zig:253:5: 0x7ff7755a9269 in test.FP-0008 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input (test_zcu.obj)
+           try testing.expect(!failed);
+           ^
+error: 'html.partition_test.test.FP-0064 case 13: set P compares every composition of each input into nonempty chunks with the whole input' failed:
+       FP-0064 case 13 partition mismatch on input Q2: "<xmp></xmpa>"
+       partition: [0,8) [8,12)
+       reference dump:
+       ["StartTag","xmp",[],false,[0,5]]
+       ["Character","</xmpa>",[5,12]]
+       ["EOF",[12,12]]
+       partition dump:
+       ["StartTag","xmp",[],false,[0,5]]
+       ["Character","</mpa>",[5,12]]
+       ["EOF",[12,12]]
+       1-minimal input: "<xmp></a>"
+       FP-0064 case 13 partition mismatch on input Q4: "&lt</a>\u000D\u000A"
+       partition: [0,6) [6,9)
+       reference dump:
+       ["error","missing-semicolon-after-character-reference",1,3,2]
+       ["Character","<</a>\u000A",[0,9]]
+       ["EOF",[9,9]]
+       partition dump:
+       ["error","missing-semicolon-after-character-reference",1,3,2]
+       ["Character","<</>\u000A",[0,9]]
+       ["EOF",[9,9]]
+       1-minimal input: "</a\u000A"
+       FP-0064 case 13 partition mismatch on input Q8: "<!--</script>"
+       partition: [0,7) [7,13)
+       reference dump:
+       ["Character","<!--</script>",[0,13]]
+       ["error","eof-in-script-html-comment-like-text",1,14,13]
+       ["EOF",[13,13]]
+       partition dump:
+       ["Character","<!--</cript>",[0,13]]
+       ["error","eof-in-script-html-comment-like-text",1,14,13]
+       ["EOF",[13,13]]
+       1-minimal input: "</t>"
+       FP-0064 case 13 partition mismatch on input Q16: "<!--<script></s"
+       partition: [0,6) [6,15)
+       reference dump:
+       ["Character","<!--<script></s",[0,15]]
+       ["error","eof-in-script-html-comment-like-text",1,16,15]
+       ["EOF",[15,15]]
+       partition dump:
+       ["Character","<!--<script></",[0,15]]
+       ["error","eof-in-script-html-comment-like-text",1,16,15]
+       ["EOF",[15,15]]
+       1-minimal input: "<!--<script></s"
+       FP-0064 case 13 partition mismatch on input SP1: "<title></b\u0000"
+       partition: [0,10) [10,11)
+       reference dump:
+       ["StartTag","title",[],false,[0,7]]
+       ["Character","</b",[7,10]]
+       ["error","unexpected-null-character",1,11,10]
+       ["Character","\uFFFD",[10,11]]
+       ["EOF",[11,11]]
+       partition dump:
+       ["StartTag","title",[],false,[0,7]]
+       ["Character","</",[7,10]]
+       ["error","unexpected-null-character",1,11,10]
+       ["Character","\uFFFD",[10,11]]
+       ["EOF",[11,11]]
+       1-minimal input: "<title></b\u0000"
+       FP-0064 case 13, input SP5:
+       expected:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","</scrip",[8,15]]
+       ["EOF",[15,15]]
+       observed:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","</",[8,15]]
+       ["EOF",[15,15]]
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:584:14: 0x7ff775313c8f in expect (test_zcu.obj)
+           if (!ok) return error.TestUnexpectedResult;
+                    ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\partition_test.zig:290:5: 0x7ff7755a8db7 in test.FP-0064 case 13: set P compares every composition of each input into nonempty chunks with the whole input (test_zcu.obj)
+           try testing.expect(!failed);
+           ^
+error: 'html.partition_test.test.FP-0064 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input' failed:
+       FP-0064 case 13 partition mismatch on input RC11: "<textarea></t a></t/b>"
+       partition: [0,13) [13,22)
+       reference dump:
+       ["StartTag","textarea",[],false,[0,10]]
+       ["Character","</t a></t/b>",[10,22]]
+       ["EOF",[22,22]]
+       partition dump:
+       ["StartTag","textarea",[],false,[0,10]]
+       ["Character","</ a></t/b>",[10,22]]
+       ["EOF",[22,22]]
+       1-minimal input: "<textarea></b>"
+       FP-0064 case 13 partition mismatch on input RW3: "<iframe></ifram></iframe\u0009>"
+       partition: [0,11) [11,26)
+       reference dump:
+       ["StartTag","iframe",[],false,[0,8]]
+       ["Character","</ifram>",[8,16]]
+       ["EndTag","iframe",[],false,[16,26]]
+       ["EOF",[26,26]]
+       partition dump:
+       ["StartTag","iframe",[],false,[0,8]]
+       ["Character","</fram>",[8,16]]
+       ["EndTag","iframe",[],false,[16,26]]
+       ["EOF",[26,26]]
+       1-minimal input: "<iframe></e>"
+       FP-0064 case 13 partition mismatch on input SD3: "<script></scrip></script x>"
+       partition: [0,11) [11,27)
+       reference dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","</scrip>",[8,16]]
+       ["error","end-tag-with-attributes",1,27,26]
+       ["EndTag","script",[["x","",[25,26],null]],false,[16,27]]
+       ["EOF",[27,27]]
+       partition dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","</crip>",[8,16]]
+       ["error","end-tag-with-attributes",1,27,26]
+       ["EndTag","script",[["x","",[25,26],null]],false,[16,27]]
+       ["EOF",[27,27]]
+       1-minimal input: "<script></x>"
+       FP-0064 case 13 partition mismatch on input SE4: "<script><!--<a-<1--</b></script>"
+       partition: [0,22) [22,32)
+       reference dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","<!--<a-<1--</b>",[8,23]]
+       ["EndTag","script",[],false,[23,32]]
+       ["EOF",[32,32]]
+       partition dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","<!--<a-<1--</>",[8,23]]
+       ["EndTag","script",[],false,[23,32]]
+       ["EOF",[32,32]]
+       1-minimal input: "<script></b<"
+       FP-0064 case 13 partition mismatch on input SE5: "<script><!--</1</Scr1"
+       partition: [0,18) [18,21)
+       reference dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","<!--</1</Scr1",[8,21]]
+       ["error","eof-in-script-html-comment-like-text",1,22,21]
+       ["EOF",[21,21]]
+       partition dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","<!--</1</cr1",[8,21]]
+       ["error","eof-in-script-html-comment-like-text",1,22,21]
+       ["EOF",[21,21]]
+       1-minimal input: "<script></r1"
+       FP-0064 case 13 partition mismatch on input DE1: "<script><!--<script>a-b--c<d</e</script>-->"
+       partition: [0,14) [14,43)
+       reference dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","<!--<script>a-b--c<d</e</script>-->",[8,43]]
+       ["EOF",[43,43]]
+       partition dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","<!--<script>a-b--c<d</e",[8,31]]
+       ["EndTag","script",[],false,[31,40]]
+       ["Character","-->",[40,43]]
+       ["EOF",[43,43]]
+       1-minimal input: "<script></e<"
+       FP-0064 case 13 partition mismatch on input DE7: "<script><!--<script></SCRIPTS>"
+       partition: [0,14) [14,23) [23,30)
+       reference dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","<!--<script></SCRIPTS>",[8,30]]
+       ["error","eof-in-script-html-comment-like-text",1,31,30]
+       ["EOF",[30,30]]
+       partition dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","<!--<script></CRIPTS>",[8,30]]
+       ["error","eof-in-script-html-comment-like-text",1,31,30]
+       ["EOF",[30,30]]
+       1-minimal input: "<script></S>"
+       FP-0064 case 13 partition mismatch on input DE8: "<script><!--<script/x</script\u0009x-->"
+       partition: [0,14) [14,34)
+       reference dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","<!--<script/x</script\u0009x-->",[8,34]]
+       ["EOF",[34,34]]
+       partition dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["Character","<!--<script/x",[8,21]]
+       ["error","end-tag-with-attributes",1,34,33]
+       ["EndTag","script",[["x--","",[30,33],null]],false,[21,34]]
+       ["EOF",[34,34]]
+       1-minimal input: "<script><!--<script/</c"
+       FP-0064 case 13 partition mismatch on input L1: "<title>x</title><b><textarea></title></textarea>"
+       partition: [0,32) [32,48)
+       reference dump:
+       ["StartTag","title",[],false,[0,7]]
+       ["Character","x",[7,8]]
+       ["EndTag","title",[],false,[8,16]]
+       ["StartTag","b",[],false,[16,19]]
+       ["StartTag","textarea",[],false,[19,29]]
+       ["Character","</title>",[29,37]]
+       ["EndTag","textarea",[],false,[37,48]]
+       ["EOF",[48,48]]
+       partition dump:
+       ["StartTag","title",[],false,[0,7]]
+       ["Character","x",[7,8]]
+       ["EndTag","title",[],false,[8,16]]
+       ["StartTag","b",[],false,[16,19]]
+       ["StartTag","textarea",[],false,[19,29]]
+       ["Character","</itle>",[29,37]]
+       ["EndTag","textarea",[],false,[37,48]]
+       ["EOF",[48,48]]
+       1-minimal input: "<textarea></a>"
+       FP-0064 case 13 partition mismatch on input L6: "<script></script><style></script></style>"
+       partition: [0,27) [27,41)
+       reference dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["EndTag","script",[],false,[8,17]]
+       ["StartTag","style",[],false,[17,24]]
+       ["Character","</script>",[24,33]]
+       ["EndTag","style",[],false,[33,41]]
+       ["EOF",[41,41]]
+       partition dump:
+       ["StartTag","script",[],false,[0,8]]
+       ["EndTag","script",[],false,[8,17]]
+       ["StartTag","style",[],false,[17,24]]
+       ["Character","</cript>",[24,33]]
+       ["EndTag","style",[],false,[33,41]]
+       ["EOF",[41,41]]
+       1-minimal input: "<style></e>"
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:584:14: 0x7ff775313c8f in expect (test_zcu.obj)
+           if (!ok) return error.TestUnexpectedResult;
+                    ^
+       C:\Users\requi\.omp\wt\t14e7c73ce\m\src\html\partition_test.zig:325:5: 0x7ff7755a68b4 in test.FP-0064 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input (test_zcu.obj)
+           try testing.expect(!failed);
+           ^
+failed command: cd . && ".\\out\\fp0064-cache-mutation\\o\\88e715f6a092bcf6087af297ecef53a8\\test.exe" "--cache-dir=.\\out\\fp0064-cache-mutation" --seed=0x4e486d7b --listen=-
+
+Build Summary: 63/65 steps succeeded (1 failed); 271/286 tests passed (15 failed)
+test transitive failure
++- run test 226 pass, 15 fail (241 total)
+|  +- compile test debug native success 9s MaxRSS:862M
++- run test 45 pass (45 total) 303ms MaxRSS:16M
+|  +- compile test debug native success 3s MaxRSS:414M
++- FP-0007 case 13: case 2 passes with exit status 0 success 39ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 3s MaxRSS:359M
++- FP-0007 case 13: case 3 fails with exit status 1 success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 48ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 77ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 9ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 12ms
+|  +- compile exe fairpane-lab-check debug native success 3s MaxRSS:344M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 50ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 33ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 35ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 45ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 48ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 41ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 49ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 49ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 41ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 46ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 48ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 42ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 47ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 7ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 42ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 46ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 45ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 47ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 44ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 398ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 425ms
++- FP-0011 case 4: allocation_invokes_call.zig success 445ms
++- FP-0011 case 4: leaf_allocates.zig success 363ms
++- FP-0011 case 4: mutation_throws.zig success 364ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 400ms
++- FP-0011 case 4: leaf_positive.zig success 415ms
++- FP-0011 case 5: catalog_callback_alone.zig success 387ms
++- FP-0011 case 5: catalog_exception_alone.zig success 370ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 390ms
++- FP-0011 case 5: kernel_wider_context.zig success 379ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 387ms
++- FP-0011 case 8: layout_undescribed_field.zig success 389ms
++- FP-0011 case 8: layout_plain_reference.zig success 386ms
++- FP-0011 case 8: layout_missing_field.zig success 382ms
++- FP-0011 case 20: abi_reference_value.zig success 377ms
++- FP-0011 case 20: abi_nan_box_value.zig success 361ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 363ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 406ms
++- FP-0011 case 35: leaf_widens_context.zig success 406ms
++- FP-0011 case 36: binding_missing_kernel.zig success 361ms
++- FP-0011 case 36: binding_stray_kernel.zig success 359ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x4e486d7b test --summary all --cache-dir out/fp0064-cache-mutation
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0064-cache-mutation"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T13:00:34.575Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":183113,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","out/fp0064-tokenizer.fixed.zig","src/html/tokenizer.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["out/fp0064-tokenizer.fixed.zig","src/html/tokenizer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T13:03:55.243Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":13}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--exit-code","out/fp0064-tokenizer.fixed.zig","src/html/tokenizer.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--exit-code","out/fp0064-tokenizer.fixed.zig","src/html/tokenizer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T13:03:55.318Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/html/tokenizer.zig"]
+b148d4ad2f7fbe109aeeab002d8cd90620cc05e7
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/html/tokenizer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t14e7c73ce\\m","started_at":"2026-10-09T13:03:55.396Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}

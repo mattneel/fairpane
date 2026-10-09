@@ -13,6 +13,8 @@ pub const dump = @import("dump.zig");
 
 pub const Tokenizer = tokenizer.Tokenizer;
 pub const Error = tokenizer.Error;
+pub const ContentState = tokenizer.ContentState;
+pub const SwitchError = tokenizer.SwitchError;
 pub const Step = tokenizer.Step;
 pub const Token = tokenizer.Token;
 pub const Kind = tokenizer.Kind;

@@ -85,12 +85,9 @@ pub fn fromName(text: []const u8) ?ErrorCode {
     return null;
 }
 
-/// Whether the tokenizer of task FP-0008 raises `code`.
-/// It never raises `eof-in-cdata` and `eof-in-script-html-comment-like-text`, which belong to unimplemented states of task FP-0064,
-/// or `non-void-html-element-start-tag-with-trailing-solidus`, which tree construction raises in task FP-0010.
+/// Whether the tokenizer raises `code`. It raises 51 of the 52 codes.
+/// It never raises `non-void-html-element-start-tag-with-trailing-solidus`, which tree construction raises in task FP-0010
+/// when it does not acknowledge a start tag's self-closing flag.
 pub fn raisedByTokenizer(code: ErrorCode) bool {
-    return switch (code) {
-        .eof_in_cdata, .eof_in_script_html_comment_like_text, .non_void_html_element_start_tag_with_trailing_solidus => false,
-        else => true,
-    };
+    return code != .non_void_html_element_start_tag_with_trailing_solidus;
 }

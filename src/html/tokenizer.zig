@@ -5,8 +5,8 @@
 //! and every other surrogate unit is its own code point. It normalizes newlines as Infra "normalize newlines" defines,
 //! and it reports the preprocessing errors of §13.2.3.5 when it first consumes each code point.
 //!
-//! It implements the 54 states that the machine reaches from its initial data state without any action from tree construction.
-//! `states.zig` records the other 30 states, which belong to task FP-0064.
+//! It implements all 84 states of §13.2.5.1 to §13.2.5.84. Tree construction switches the tokenizer to the RCDATA, RAWTEXT,
+//! script data, and PLAINTEXT states through `switchTo`, before the first call of `next` or right after a start tag token.
 //!
 //! A chunk boundary never changes the result. The tokenizer holds a CR or a leading surrogate at the end of the available input
 //! until the next unit or `finish`, and its lookahead states keep their progress across calls of `next`.
@@ -25,7 +25,13 @@ pub const CodeUnitIndex = web_string.CodeUnitIndex;
 pub const State = states.State;
 pub const ErrorCode = errors.ErrorCode;
 
-pub const Error = error{ OutOfMemory, UnimplementedState, ChunkPending, InputFinished };
+/// A state that tree construction switches the tokenizer to (§13.2.6.2, §13.2.6.4.4, §13.2.6.4.7, and §13.4).
+pub const ContentState = enum { rcdata, rawtext, script_data, plaintext };
+
+pub const Error = error{ OutOfMemory, ChunkPending, InputFinished };
+
+/// The errors of `switchTo`. `OutOfMemory` is the tokenizer's sticky failure; `SwitchNotAllowed` changes nothing.
+pub const SwitchError = error{ OutOfMemory, SwitchNotAllowed };
 
 pub const Step = union(enum) { token: Token, parse_error: ParseError, need_input };
 
@@ -60,7 +66,7 @@ pub const Position = struct { offset: CodeUnitIndex, line: usize, column: usize 
 
 pub const Span = struct { start: Position, end: Position };
 
-/// Test builds count each executed branch of each implemented state, in the flat order of `states.branchIndex`.
+/// Test builds count each executed branch of each state, in the flat order of `states.branchIndex`.
 pub var coverage: if (builtin.is_test) [states.branch_count]u64 else void = if (builtin.is_test) @splat(0) else {};
 
 inline fn hit(comptime state: State, comptime branch: []const u8) void {
@@ -97,6 +103,7 @@ const Peek = union(enum) { unit: u16, end, more };
 pub const Tokenizer = struct {
     /// Whether there is an adjusted current node that is not an element in the HTML namespace (§13.2.4.2).
     /// Tree construction sets it before `next`. It defaults to false.
+    /// The markup declaration open state reads it when the available input decides its `[CDATA[` branch.
     adjusted_current_node_is_foreign: bool = false,
 
     gpa: Allocator,
@@ -118,8 +125,10 @@ pub const Tokenizer = struct {
     // Machine.
     state: State = .data,
     return_state: State = .data,
-    failure: ?Error = null,
-    unimplemented: ?State = null,
+    /// Whether an allocation failed. The tokenizer then returns `error.OutOfMemory` from every method except `deinit`.
+    failed: bool = false,
+    /// Whether `switchTo` may switch: before the first call of `next`, and after `next` returned a start tag token.
+    switch_allowed: bool = true,
     eof_queued: bool = false,
     queue: [queue_capacity]Queued = undefined,
     queue_head: usize = 0,
@@ -131,8 +140,15 @@ pub const Tokenizer = struct {
     run_start: Position = undefined,
     run_end: Position = undefined,
 
-    /// The `<` that starts the current tag, comment, DOCTYPE, or processing instruction.
+    /// The `<` that starts the current tag, comment, DOCTYPE, or processing instruction, or a possible end tag in a text state.
     markup_start: Position = undefined,
+
+    /// The tag name of the last start tag token that the tokenizer emitted. It is empty before the first one,
+    /// because a tag name is never empty. It has its own storage, because later tags reuse `tag_buffer`.
+    last_start_tag: std.ArrayList(u16) = .empty,
+
+    /// The first of the `]` characters that the CDATA section bracket and end states hold.
+    bracket_start: Position = undefined,
 
     // The current tag token. `tag_buffer` holds its name and then each attribute's name and value.
     tag_buffer: std.ArrayList(u16) = .empty,
@@ -180,13 +196,14 @@ pub const Tokenizer = struct {
         t.doctype_buffer.deinit(gpa);
         t.instruction.deinit(gpa);
         t.temp.deinit(gpa);
+        t.last_start_tag.deinit(gpa);
         t.* = undefined;
     }
 
     /// Borrows `chunk` until `next` returns `need_input`, or until `deinit`. An empty chunk is valid.
     /// Neither `error.InputFinished` nor `error.ChunkPending` changes any state.
     pub fn feed(t: *Tokenizer, chunk: []const u16) Error!void {
-        if (t.failure) |err| return err;
+        if (t.failed) return error.OutOfMemory;
         if (t.finished) return error.InputFinished;
         if (t.borrowed) return error.ChunkPending;
         t.chunk = chunk;
@@ -196,15 +213,16 @@ pub const Tokenizer = struct {
 
     /// Marks the end of the input after any borrowed chunk. A second call does nothing.
     pub fn finish(t: *Tokenizer) Error!void {
-        if (t.failure) |err| return err;
+        if (t.failed) return error.OutOfMemory;
         t.finished = true;
     }
 
     /// Returns one step. It returns `need_input` only before `finish`, when no further step is possible without more input,
     /// and null after the end-of-file token. A token's views stay valid until the next call of any method.
-    /// After `error.OutOfMemory` or `error.UnimplementedState`, every later call except `deinit` returns the same error.
+    /// After `error.OutOfMemory`, every later call except `deinit` returns it again.
     pub fn next(t: *Tokenizer) Error!?Step {
-        if (t.failure) |err| return err;
+        if (t.failed) return error.OutOfMemory;
+        t.switch_allowed = false;
         if (t.queue_len == 0) {
             if (t.eof_queued) return null;
             t.run() catch |err| return t.fail(err);
@@ -213,22 +231,37 @@ pub const Tokenizer = struct {
                 return .need_input;
             }
         }
-        return t.pop();
+        const s = t.pop();
+        // A start tag token is the last step of its action, so the tokenizer has queued no later step and consumed
+        // no later character. A switch therefore applies to the next input character.
+        t.switch_allowed = s == .token and s.token.kind == .start_tag;
+        return s;
     }
 
-    /// Returns the state that the machine would have entered when `next` returned `error.UnimplementedState`, or null.
-    pub fn unimplementedState(t: *const Tokenizer) ?State {
-        return t.unimplemented;
+    /// Switches the tokenizer to `state`, as tree construction does (§13.2.6.2, §13.2.6.4.4, §13.2.6.4.7, and §13.4).
+    /// It succeeds before the first call of `next`, even after `feed` and `finish`, and after `next` returned a start tag
+    /// token, until the next call of `next`. In that window, the last call decides. At any other time it returns
+    /// `error.SwitchNotAllowed` and changes nothing. It allocates nothing.
+    pub fn switchTo(t: *Tokenizer, state: ContentState) SwitchError!void {
+        if (t.failed) return error.OutOfMemory;
+        if (!t.switch_allowed) return error.SwitchNotAllowed;
+        std.debug.assert(t.queue_len == 0 and !t.reconsume);
+        t.state = switch (state) {
+            .rcdata => .rcdata,
+            .rawtext => .rawtext,
+            .script_data => .script_data,
+            .plaintext => .plaintext,
+        };
     }
 
-    fn fail(t: *Tokenizer, err: Error) Error {
-        t.failure = err;
+    fn fail(t: *Tokenizer, err: Allocator.Error) Allocator.Error {
+        t.failed = true;
         return err;
     }
 
     // Steps.
 
-    fn run(t: *Tokenizer) (Allocator.Error || error{UnimplementedState})!void {
+    fn run(t: *Tokenizer) Allocator.Error!void {
         t.compactText();
         while (t.queue_len == 0) {
             if (!try t.step()) {
@@ -401,7 +434,7 @@ pub const Tokenizer = struct {
         return code_point;
     }
 
-    /// Consumes `count` characters that a lookahead found to be ASCII letters, which preprocessing never reports.
+    /// Consumes `count` characters that a lookahead matched. Each is an ASCII letter, an ASCII digit, `-`, `[`, or `;`, which preprocessing never reports.
     fn consumeMatched(t: *Tokenizer, count: usize) void {
         for (0..count) |_| _ = t.consume().?;
     }
@@ -503,12 +536,17 @@ pub const Tokenizer = struct {
     }
 
     /// Emits the current tag token, which ends after the current input character.
+    /// A start tag's name becomes the last start tag name, which decides whether a later end tag token is appropriate.
     fn emitTag(t: *Tokenizer) Allocator.Error!void {
         t.finishAttribute();
         const buffer = t.tag_buffer.items;
         if (t.tag_is_end) {
             if (t.attributes.items.len != 0) t.raise(.end_tag_with_attributes);
             if (t.self_closing) t.raise(.end_tag_with_trailing_solidus);
+        } else {
+            // The record allocates only when it grows.
+            t.last_start_tag.clearRetainingCapacity();
+            try t.last_start_tag.appendSlice(t.gpa, buffer[0..t.tag_name_end]);
         }
         t.attribute_views.clearRetainingCapacity();
         try t.attribute_views.ensureTotalCapacity(t.gpa, t.attributes.items.len);
@@ -630,7 +668,7 @@ pub const Tokenizer = struct {
     // The state machine.
 
     /// Runs one action of the current state. Returns false, with no effect, when the action needs more input.
-    fn step(t: *Tokenizer) (Allocator.Error || error{UnimplementedState})!bool {
+    fn step(t: *Tokenizer) Allocator.Error!bool {
         switch (t.state) {
             .markup_declaration_open => return t.markupDeclarationOpen(),
             .named_character_reference => return t.namedCharacterReference(),
@@ -665,6 +703,81 @@ pub const Tokenizer = struct {
                 },
                 else => {
                     hit(.data, "else");
+                    try t.emitCurrent();
+                },
+            },
+            .rcdata => switch (c) {
+                '&' => {
+                    hit(.rcdata, "&");
+                    t.startReference(.rcdata);
+                },
+                '<' => {
+                    hit(.rcdata, "<");
+                    t.markup_start = t.current.position;
+                    t.state = .rcdata_less_than_sign;
+                },
+                0 => {
+                    hit(.rcdata, "NULL");
+                    try t.emitReplacement();
+                },
+                eof => {
+                    hit(.rcdata, "EOF");
+                    t.emitEof();
+                },
+                else => {
+                    hit(.rcdata, "else");
+                    try t.emitCurrent();
+                },
+            },
+            .rawtext => switch (c) {
+                '<' => {
+                    hit(.rawtext, "<");
+                    t.markup_start = t.current.position;
+                    t.state = .rawtext_less_than_sign;
+                },
+                0 => {
+                    hit(.rawtext, "NULL");
+                    try t.emitReplacement();
+                },
+                eof => {
+                    hit(.rawtext, "EOF");
+                    t.emitEof();
+                },
+                else => {
+                    hit(.rawtext, "else");
+                    try t.emitCurrent();
+                },
+            },
+            .script_data => switch (c) {
+                '<' => {
+                    hit(.script_data, "<");
+                    t.markup_start = t.current.position;
+                    t.state = .script_data_less_than_sign;
+                },
+                0 => {
+                    hit(.script_data, "NULL");
+                    try t.emitReplacement();
+                },
+                eof => {
+                    hit(.script_data, "EOF");
+                    t.emitEof();
+                },
+                else => {
+                    hit(.script_data, "else");
+                    try t.emitCurrent();
+                },
+            },
+            .plaintext => switch (c) {
+                0 => {
+                    hit(.plaintext, "NULL");
+                    try t.emitReplacement();
+                },
+                eof => {
+                    hit(.plaintext, "EOF");
+                    t.emitEof();
+                },
+                else => {
+                    hit(.plaintext, "else");
                     try t.emitCurrent();
                 },
             },
@@ -758,6 +871,263 @@ pub const Tokenizer = struct {
                     try t.appendTagName(c);
                 },
             },
+            .rcdata_less_than_sign => try t.textLessThanSign(.rcdata_less_than_sign, .rcdata, .rcdata_end_tag_open, c),
+            .rcdata_end_tag_open => try t.textEndTagOpen(.rcdata_end_tag_open, .rcdata, .rcdata_end_tag_name, c),
+            .rcdata_end_tag_name => try t.textEndTagName(.rcdata_end_tag_name, .rcdata, c),
+            .rawtext_less_than_sign => try t.textLessThanSign(.rawtext_less_than_sign, .rawtext, .rawtext_end_tag_open, c),
+            .rawtext_end_tag_open => try t.textEndTagOpen(.rawtext_end_tag_open, .rawtext, .rawtext_end_tag_name, c),
+            .rawtext_end_tag_name => try t.textEndTagName(.rawtext_end_tag_name, .rawtext, c),
+            .script_data_less_than_sign => switch (c) {
+                '/' => {
+                    hit(.script_data_less_than_sign, "/");
+                    t.temp.clearRetainingCapacity();
+                    t.state = .script_data_end_tag_open;
+                },
+                '!' => {
+                    hit(.script_data_less_than_sign, "!");
+                    t.state = .script_data_escape_start;
+                    try t.emitSource('<', t.markup_start);
+                    try t.emitCurrent();
+                },
+                else => {
+                    hit(.script_data_less_than_sign, "else");
+                    try t.emitSource('<', t.markup_start);
+                    t.reconsumeIn(.script_data);
+                },
+            },
+            .script_data_end_tag_open => try t.textEndTagOpen(.script_data_end_tag_open, .script_data, .script_data_end_tag_name, c),
+            .script_data_end_tag_name => try t.textEndTagName(.script_data_end_tag_name, .script_data, c),
+            .script_data_escape_start => switch (c) {
+                '-' => {
+                    hit(.script_data_escape_start, "-");
+                    t.state = .script_data_escape_start_dash;
+                    try t.emitCurrent();
+                },
+                else => {
+                    hit(.script_data_escape_start, "else");
+                    t.reconsumeIn(.script_data);
+                },
+            },
+            .script_data_escape_start_dash => switch (c) {
+                '-' => {
+                    hit(.script_data_escape_start_dash, "-");
+                    t.state = .script_data_escaped_dash_dash;
+                    try t.emitCurrent();
+                },
+                else => {
+                    hit(.script_data_escape_start_dash, "else");
+                    t.reconsumeIn(.script_data);
+                },
+            },
+            .script_data_escaped => switch (c) {
+                '-' => {
+                    hit(.script_data_escaped, "-");
+                    t.state = .script_data_escaped_dash;
+                    try t.emitCurrent();
+                },
+                '<' => {
+                    hit(.script_data_escaped, "<");
+                    t.markup_start = t.current.position;
+                    t.state = .script_data_escaped_less_than_sign;
+                },
+                0 => {
+                    hit(.script_data_escaped, "NULL");
+                    try t.emitReplacement();
+                },
+                eof => {
+                    hit(.script_data_escaped, "EOF");
+                    t.eofInScriptComment();
+                },
+                else => {
+                    hit(.script_data_escaped, "else");
+                    try t.emitCurrent();
+                },
+            },
+            .script_data_escaped_dash => switch (c) {
+                '-' => {
+                    hit(.script_data_escaped_dash, "-");
+                    t.state = .script_data_escaped_dash_dash;
+                    try t.emitCurrent();
+                },
+                '<' => {
+                    hit(.script_data_escaped_dash, "<");
+                    t.markup_start = t.current.position;
+                    t.state = .script_data_escaped_less_than_sign;
+                },
+                0 => {
+                    hit(.script_data_escaped_dash, "NULL");
+                    t.state = .script_data_escaped;
+                    try t.emitReplacement();
+                },
+                eof => {
+                    hit(.script_data_escaped_dash, "EOF");
+                    t.eofInScriptComment();
+                },
+                else => {
+                    hit(.script_data_escaped_dash, "else");
+                    t.state = .script_data_escaped;
+                    try t.emitCurrent();
+                },
+            },
+            .script_data_escaped_dash_dash => switch (c) {
+                '-' => {
+                    hit(.script_data_escaped_dash_dash, "-");
+                    try t.emitCurrent();
+                },
+                '<' => {
+                    hit(.script_data_escaped_dash_dash, "<");
+                    t.markup_start = t.current.position;
+                    t.state = .script_data_escaped_less_than_sign;
+                },
+                '>' => {
+                    hit(.script_data_escaped_dash_dash, ">");
+                    t.state = .script_data;
+                    try t.emitCurrent();
+                },
+                0 => {
+                    hit(.script_data_escaped_dash_dash, "NULL");
+                    t.state = .script_data_escaped;
+                    try t.emitReplacement();
+                },
+                eof => {
+                    hit(.script_data_escaped_dash_dash, "EOF");
+                    t.eofInScriptComment();
+                },
+                else => {
+                    hit(.script_data_escaped_dash_dash, "else");
+                    t.state = .script_data_escaped;
+                    try t.emitCurrent();
+                },
+            },
+            .script_data_escaped_less_than_sign => switch (c) {
+                '/' => {
+                    hit(.script_data_escaped_less_than_sign, "/");
+                    t.temp.clearRetainingCapacity();
+                    t.state = .script_data_escaped_end_tag_open;
+                },
+                'A'...'Z', 'a'...'z' => {
+                    hit(.script_data_escaped_less_than_sign, "ASCII alpha");
+                    t.temp.clearRetainingCapacity();
+                    try t.emitSource('<', t.markup_start);
+                    t.reconsumeIn(.script_data_double_escape_start);
+                },
+                else => {
+                    hit(.script_data_escaped_less_than_sign, "else");
+                    try t.emitSource('<', t.markup_start);
+                    t.reconsumeIn(.script_data_escaped);
+                },
+            },
+            .script_data_escaped_end_tag_open => try t.textEndTagOpen(
+                .script_data_escaped_end_tag_open,
+                .script_data_escaped,
+                .script_data_escaped_end_tag_name,
+                c,
+            ),
+            .script_data_escaped_end_tag_name => try t.textEndTagName(.script_data_escaped_end_tag_name, .script_data_escaped, c),
+            .script_data_double_escape_start => try t.doubleEscapeBoundary(
+                .script_data_double_escape_start,
+                .script_data_double_escaped,
+                .script_data_escaped,
+                c,
+            ),
+            .script_data_double_escaped => switch (c) {
+                '-' => {
+                    hit(.script_data_double_escaped, "-");
+                    t.state = .script_data_double_escaped_dash;
+                    try t.emitCurrent();
+                },
+                '<' => {
+                    hit(.script_data_double_escaped, "<");
+                    t.state = .script_data_double_escaped_less_than_sign;
+                    try t.emitCurrent();
+                },
+                0 => {
+                    hit(.script_data_double_escaped, "NULL");
+                    try t.emitReplacement();
+                },
+                eof => {
+                    hit(.script_data_double_escaped, "EOF");
+                    t.eofInScriptComment();
+                },
+                else => {
+                    hit(.script_data_double_escaped, "else");
+                    try t.emitCurrent();
+                },
+            },
+            .script_data_double_escaped_dash => switch (c) {
+                '-' => {
+                    hit(.script_data_double_escaped_dash, "-");
+                    t.state = .script_data_double_escaped_dash_dash;
+                    try t.emitCurrent();
+                },
+                '<' => {
+                    hit(.script_data_double_escaped_dash, "<");
+                    t.state = .script_data_double_escaped_less_than_sign;
+                    try t.emitCurrent();
+                },
+                0 => {
+                    hit(.script_data_double_escaped_dash, "NULL");
+                    t.state = .script_data_double_escaped;
+                    try t.emitReplacement();
+                },
+                eof => {
+                    hit(.script_data_double_escaped_dash, "EOF");
+                    t.eofInScriptComment();
+                },
+                else => {
+                    hit(.script_data_double_escaped_dash, "else");
+                    t.state = .script_data_double_escaped;
+                    try t.emitCurrent();
+                },
+            },
+            .script_data_double_escaped_dash_dash => switch (c) {
+                '-' => {
+                    hit(.script_data_double_escaped_dash_dash, "-");
+                    try t.emitCurrent();
+                },
+                '<' => {
+                    hit(.script_data_double_escaped_dash_dash, "<");
+                    t.state = .script_data_double_escaped_less_than_sign;
+                    try t.emitCurrent();
+                },
+                '>' => {
+                    hit(.script_data_double_escaped_dash_dash, ">");
+                    t.state = .script_data;
+                    try t.emitCurrent();
+                },
+                0 => {
+                    hit(.script_data_double_escaped_dash_dash, "NULL");
+                    t.state = .script_data_double_escaped;
+                    try t.emitReplacement();
+                },
+                eof => {
+                    hit(.script_data_double_escaped_dash_dash, "EOF");
+                    t.eofInScriptComment();
+                },
+                else => {
+                    hit(.script_data_double_escaped_dash_dash, "else");
+                    t.state = .script_data_double_escaped;
+                    try t.emitCurrent();
+                },
+            },
+            .script_data_double_escaped_less_than_sign => switch (c) {
+                '/' => {
+                    hit(.script_data_double_escaped_less_than_sign, "/");
+                    t.temp.clearRetainingCapacity();
+                    t.state = .script_data_double_escape_end;
+                    try t.emitCurrent();
+                },
+                else => {
+                    hit(.script_data_double_escaped_less_than_sign, "else");
+                    t.reconsumeIn(.script_data_double_escaped);
+                },
+            },
+            .script_data_double_escape_end => try t.doubleEscapeBoundary(
+                .script_data_double_escape_end,
+                .script_data_escaped,
+                .script_data_double_escaped,
+                c,
+            ),
             .before_attribute_name => switch (c) {
                 '\t', '\n', 0x0C, ' ' => hit(.before_attribute_name, "whitespace"),
                 '/', '>', eof => {
@@ -1559,6 +1929,51 @@ pub const Tokenizer = struct {
                 },
                 else => hit(.bogus_doctype, "else"),
             },
+            .cdata_section => switch (c) {
+                ']' => {
+                    hit(.cdata_section, "]");
+                    t.bracket_start = t.current.position;
+                    t.state = .cdata_section_bracket;
+                },
+                eof => {
+                    hit(.cdata_section, "EOF");
+                    t.raise(.eof_in_cdata);
+                    t.emitEof();
+                },
+                // Tree construction handles U+0000 in a CDATA section, so the state emits it unchanged.
+                else => {
+                    hit(.cdata_section, "else");
+                    try t.emitCurrent();
+                },
+            },
+            .cdata_section_bracket => switch (c) {
+                ']' => {
+                    hit(.cdata_section_bracket, "]");
+                    t.state = .cdata_section_end;
+                },
+                else => {
+                    hit(.cdata_section_bracket, "else");
+                    try t.emitSource(']', t.bracket_start);
+                    t.reconsumeIn(.cdata_section);
+                },
+            },
+            .cdata_section_end => switch (c) {
+                ']' => {
+                    // The earlier of the two held `]` characters is emitted, and the current one is now held.
+                    hit(.cdata_section_end, "]");
+                    try t.emitSource(']', t.bracket_start);
+                    t.bracket_start = after(t.bracket_start);
+                },
+                '>' => {
+                    hit(.cdata_section_end, ">");
+                    t.state = .data;
+                },
+                else => {
+                    hit(.cdata_section_end, "else");
+                    try t.appendText(&.{ ']', ']' }, t.bracket_start, after(after(t.bracket_start)));
+                    t.reconsumeIn(.cdata_section);
+                },
+            },
             .processing_instruction_open => switch (c) {
                 'A'...'Z', 'a'...'z', '_' => {
                     hit(.processing_instruction_open, "ASCII alpha or _");
@@ -1755,41 +2170,141 @@ pub const Tokenizer = struct {
                     t.reconsumeIn(.numeric_character_reference_end);
                 },
             },
-            // These states consume nothing, or no other state switches to them.
+            // These states consume nothing, so `step` runs them before it consumes a character.
             .markup_declaration_open, .named_character_reference, .numeric_character_reference_end => unreachable,
-            .rcdata,
-            .rawtext,
-            .script_data,
-            .plaintext,
-            .rcdata_less_than_sign,
-            .rcdata_end_tag_open,
-            .rcdata_end_tag_name,
-            .rawtext_less_than_sign,
-            .rawtext_end_tag_open,
-            .rawtext_end_tag_name,
-            .script_data_less_than_sign,
-            .script_data_end_tag_open,
-            .script_data_end_tag_name,
-            .script_data_escape_start,
-            .script_data_escape_start_dash,
-            .script_data_escaped,
-            .script_data_escaped_dash,
-            .script_data_escaped_dash_dash,
-            .script_data_escaped_less_than_sign,
-            .script_data_escaped_end_tag_open,
-            .script_data_escaped_end_tag_name,
-            .script_data_double_escape_start,
-            .script_data_double_escaped,
-            .script_data_double_escaped_dash,
-            .script_data_double_escaped_dash_dash,
-            .script_data_double_escaped_less_than_sign,
-            .script_data_double_escape_end,
-            .cdata_section,
-            .cdata_section_bracket,
-            .cdata_section_end,
-            => unreachable,
         }
         return true;
+    }
+
+    /// Emits a U+FFFD REPLACEMENT CHARACTER for the current U+0000, which spans that U+0000, after an
+    /// unexpected-null-character parse error.
+    fn emitReplacement(t: *Tokenizer) Allocator.Error!void {
+        t.raise(.unexpected_null_character);
+        try t.emitCharacter(replacement, t.current.position, t.cursor());
+    }
+
+    /// The EOF branch of the script data escaped and double escaped states.
+    fn eofInScriptComment(t: *Tokenizer) void {
+        t.raise(.eof_in_script_html_comment_like_text);
+        t.emitEof();
+    }
+
+    /// Whether the current end tag token is an appropriate end tag token: a start tag was emitted, and the end tag's name
+    /// so far equals the last start tag name code unit for code unit.
+    fn appropriateEndTag(t: *const Tokenizer) bool {
+        const name = t.tag_buffer.items[0..t.tag_name_end];
+        return t.last_start_tag.items.len != 0 and std.mem.eql(u16, name, t.last_start_tag.items);
+    }
+
+    /// The RCDATA and RAWTEXT less-than sign states (§13.2.5.9 and §13.2.5.12). `markup_start` is the `<`.
+    fn textLessThanSign(t: *Tokenizer, comptime state: State, comptime text: State, comptime end_tag_open: State, c: u21) Allocator.Error!void {
+        if (c == '/') {
+            hit(state, "/");
+            t.temp.clearRetainingCapacity();
+            t.state = end_tag_open;
+        } else {
+            hit(state, "else");
+            try t.emitSource('<', t.markup_start);
+            t.reconsumeIn(text);
+        }
+    }
+
+    /// The RCDATA, RAWTEXT, script data, and script data escaped end tag open states (§13.2.5.10, §13.2.5.13, §13.2.5.16,
+    /// and §13.2.5.24). `markup_start` is the `<`, and the `/` follows it.
+    fn textEndTagOpen(t: *Tokenizer, comptime state: State, comptime text: State, comptime end_tag_name: State, c: u21) Allocator.Error!void {
+        switch (c) {
+            'A'...'Z', 'a'...'z' => {
+                hit(state, "ASCII alpha");
+                t.createTag(true);
+                t.reconsumeIn(end_tag_name);
+            },
+            else => {
+                hit(state, "else");
+                try t.emitSource('<', t.markup_start);
+                try t.emitSource('/', after(t.markup_start));
+                t.reconsumeIn(text);
+            },
+        }
+    }
+
+    /// The RCDATA, RAWTEXT, script data, and script data escaped end tag name states (§13.2.5.11, §13.2.5.14, §13.2.5.17,
+    /// and §13.2.5.25). The temporary buffer holds the name's source characters.
+    fn textEndTagName(t: *Tokenizer, comptime state: State, comptime text: State, c: u21) Allocator.Error!void {
+        switch (c) {
+            '\t', '\n', 0x0C, ' ', '/', '>' => if (t.appropriateEndTag()) switch (c) {
+                '/' => {
+                    hit(state, "/ with an appropriate end tag");
+                    t.state = .self_closing_start_tag;
+                },
+                '>' => {
+                    hit(state, "> with an appropriate end tag");
+                    t.state = .data;
+                    try t.emitTag();
+                },
+                else => {
+                    hit(state, "whitespace with an appropriate end tag");
+                    t.state = .before_attribute_name;
+                },
+            } else {
+                hit(state, "whitespace, /, or > otherwise");
+                try t.abandonEndTag(text);
+            },
+            'A'...'Z' => {
+                hit(state, "ASCII upper alpha");
+                try t.appendTagName(c + 0x20);
+                try t.temp.append(t.gpa, @intCast(c));
+            },
+            'a'...'z' => {
+                hit(state, "ASCII lower alpha");
+                try t.appendTagName(c);
+                try t.temp.append(t.gpa, @intCast(c));
+            },
+            else => {
+                hit(state, "else");
+                try t.abandonEndTag(text);
+            },
+        }
+    }
+
+    /// The "anything else" branch of an end tag name state. It emits `<`, `/`, and the temporary buffer, each of which spans
+    /// its source character, so together they span from the `<` to the current input character. It reconsumes in `text`.
+    fn abandonEndTag(t: *Tokenizer, comptime text: State) Allocator.Error!void {
+        const name_start = after(after(t.markup_start));
+        try t.appendText(&.{ '<', '/' }, t.markup_start, name_start);
+        try t.appendText(t.temp.items, name_start, t.current.position);
+        t.reconsumeIn(text);
+    }
+
+    /// The script data double escape start and end states (§13.2.5.26 and §13.2.5.31). Each switches to `with_script` when
+    /// the temporary buffer is "script" and to `otherwise` when it is not, and reconsumes "anything else" in `otherwise`.
+    fn doubleEscapeBoundary(t: *Tokenizer, comptime state: State, comptime with_script: State, comptime otherwise: State, c: u21) Allocator.Error!void {
+        switch (c) {
+            '\t', '\n', 0x0C, ' ', '/', '>' => {
+                const script = [_]u16{ 's', 'c', 'r', 'i', 'p', 't' };
+                if (std.mem.eql(u16, t.temp.items, &script)) {
+                    hit(state, "whitespace, /, or > with \"script\"");
+                    t.state = with_script;
+                } else {
+                    hit(state, "whitespace, /, or > otherwise");
+                    t.state = otherwise;
+                }
+                try t.emitCurrent();
+            },
+            'A'...'Z' => {
+                hit(state, "ASCII upper alpha");
+                try t.temp.append(t.gpa, @intCast(c + 0x20));
+                try t.emitCurrent();
+            },
+            'a'...'z' => {
+                hit(state, "ASCII lower alpha");
+                try t.temp.append(t.gpa, @intCast(c));
+                try t.emitCurrent();
+            },
+            else => {
+                hit(state, "else");
+                t.reconsumeIn(otherwise);
+            },
+        }
     }
 
     fn startDoctypeName(t: *Tokenizer, code_point: u21) Allocator.Error!void {
@@ -1860,7 +2375,7 @@ pub const Tokenizer = struct {
     }
 
     /// The markup declaration open state, which consumes nothing until the next few characters decide its branch.
-    fn markupDeclarationOpen(t: *Tokenizer) (Allocator.Error || error{UnimplementedState})!bool {
+    fn markupDeclarationOpen(t: *Tokenizer) Allocator.Error!bool {
         const Branch = enum { hyphens, doctype, cdata, other };
         const Pattern = struct { text: []const u8, branch: Branch, fold: bool };
         const branch: Branch = branch: {
@@ -1901,8 +2416,7 @@ pub const Tokenizer = struct {
             .cdata => if (t.adjusted_current_node_is_foreign) {
                 hit(.markup_declaration_open, "[CDATA[ with a foreign adjusted current node");
                 t.consumeMatched(7);
-                t.unimplemented = .cdata_section;
-                return error.UnimplementedState;
+                t.state = .cdata_section;
             } else {
                 hit(.markup_declaration_open, "[CDATA[ otherwise");
                 t.consumeMatched(7);

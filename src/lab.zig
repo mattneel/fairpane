@@ -1133,9 +1133,10 @@ fn digestOfUnits(units: []const u16) [32]u8 {
     return hasher.finalResult();
 }
 
-/// Runs the `tokenize` stage: `html.Tokenizer` on the decoded code units in one chunk.
+/// Runs the `tokenize` stage: `html.Tokenizer` on the decoded code units in one chunk, from the data state.
 /// It records the number of lines and the SHA-256 of the token dump, and every parse error in step order.
-/// The laboratory never sets `adjusted_current_node_is_foreign`, so any tokenizer error is a harness error.
+/// It makes no `switchTo` call and leaves `adjusted_current_node_is_foreign` false, because only tree construction
+/// (FP-0010) decides switches. Any tokenizer error is therefore a harness error.
 fn tokenize(gpa: Allocator, arena: Allocator, units: []const u16, execution: *Execution, failure: *Detail) Interrupt!void {
     execution.harness_stage = .tokenize;
     execution.tokenize = .failed;
