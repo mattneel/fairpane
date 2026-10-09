@@ -1,0 +1,13 @@
+{
+  "verdict": "approve",
+  "summary": "Plan review 14: I approve 2c85bd3 ('plan: apply plan review 13's findings'). Each of the three changes matches the review 13 finding it answers. The checks I could run found nothing else changed, though I could not diff the commit. Review 13's last note, on two unrouted FP-0111 security notes, is still open; it was optional.\n\nHow I checked: I read the working-tree plan.json and state.json with jq, which you said equal the commit. .git/logs/HEAD shows 2c85bd3 after c964315 ('plan: record plan review 13'). I ran nothing.\n\n- **Minor 1 (ADR collision): closed.** FP-0085 criterion 6 now reads 'Record the outcome in a new architecture decision record, and make no speed claim beyond the recorded samples.' Across all tasks, only FP-0083, FP-0128, and FP-0129 name a numbered ADR, and all three name 0012. FP-0032, FP-0048, and FP-0085 ask for a new, unnumbered ADR, so nothing claims 0012 twice.\n- **Minor 2 (::slotted() owner): closed.** FP-0072's third note now has its contract narrow css.zig row 30 to name FP-0072 for :host, :host(), and :host-context(), and FP-0026's frontier decomposition, or a later slot-assignment task, for ::slotted(). That matches criteria 5 and 6 and FP-0026's note.\n- **Note 1 (renumbering reason): applied.** FP-0083, FP-0128, and FP-0129 each end with 'Names architecture decision record 0012, not 0011, because ADR 0011 records concurrent controller tests (plan commit 4e65397).'\n\nThe evidence for 'nothing else changed' is invariant checks, not a diff, because the commit is local and unpushed [INFERENCE]:\n- plan.json still holds 136 tasks.\n- FP-0085's other five criteria and FP-0072's first two notes match their review 13 text.\n- FP-0112's notes are unchanged.",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0111/reviews/security-review-1-accept.json",
+      "line": 30,
+      "issue": "Review 13's last note is still open, because this commit does not address it. Two items have no owner:\n- the Coverage handle's u16 cast, which assumes glyph_count <= 65536 for a hand-built Coverage;\n- a coverage-guided fuzz target for parseLayout, the opening calls, and selectLookups.\nFP-0112's state notes are unchanged.",
+      "recommendation": "When convenient, add the Coverage handle item to FP-0112's state note. Route the fuzz target, together with FP-0119 security review 1's release-mode and fuzzing items, to the laboratory task that owns fuzzing, or to FP-0026's note."
+    }
+  ]
+}
