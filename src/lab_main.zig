@@ -6,10 +6,12 @@
 //! The exit status is 0 for `pass`, 1 for `fail`, 2 for `unsupported`, 3 for `harness-error`, and 4 for `timeout`.
 //! A usage error exits with status 64 and writes no result.
 
+const builtin = @import("builtin");
 const std = @import("std");
 const lab = @import("lab.zig");
 const Io = std.Io;
 const Allocator = std.mem.Allocator;
+const windows = std.os.windows;
 
 const usage =
     \\usage: fairpane-lab run <case> [--transcript <path>]
@@ -87,7 +89,7 @@ fn isOption(arg: []const u8) bool {
 fn runCommand(io: Io, gpa: Allocator, case_path: []const u8, transcript_path: ?[]const u8) u8 {
     var run = start: {
         if (transcript_path) |path| {
-            const refusal = refuseInputAsOutput(io, gpa, .{ .path = case_path, .subject = "case file" }, .{ .path = path, .subject = "transcript file" });
+            const refusal = refuseInputAsOutput(io, .{ .path = case_path, .subject = "case file" }, .{ .path = path, .subject = "transcript file" });
             if (refusal) |detail| break :start lab.Run.initHarnessError(gpa, null, detail);
         }
         const bytes = lab.readInputFile(io, gpa, case_path, lab.case_size_limit) catch |err| {
@@ -119,7 +121,7 @@ fn replayCommand(io: Io, gpa: Allocator, transcript_path: []const u8) u8 {
 
 fn minimizeCommand(io: Io, gpa: Allocator, case_path: []const u8, out_path: []const u8) u8 {
     var minimization = start: {
-        const refusal = refuseInputAsOutput(io, gpa, .{ .path = case_path, .subject = "case file" }, .{ .path = out_path, .subject = "output file" });
+        const refusal = refuseInputAsOutput(io, .{ .path = case_path, .subject = "case file" }, .{ .path = out_path, .subject = "output file" });
         if (refusal) |detail| break :start lab.Minimization.initHarnessError(gpa, null, detail);
         const bytes = lab.readInputFile(io, gpa, case_path, lab.case_size_limit) catch |err| {
             break :start lab.Minimization.initHarnessError(gpa, null, lab.fileFailure("case file", err));
@@ -141,19 +143,78 @@ fn minimizeCommand(io: Io, gpa: Allocator, case_path: []const u8, out_path: []co
 const NamedFile = struct { path: []const u8, subject: []const u8 };
 
 /// Returns the detail of a harness error when `output` names the `input` file or when that cannot be decided, and null otherwise.
-/// Equal spellings name one file. When the output file exists, the canonical real paths of both files decide,
-/// so different spellings of one file are refused. An output file that does not exist is not the input file.
-fn refuseInputAsOutput(io: Io, gpa: Allocator, input: NamedFile, output: NamedFile) ?lab.Detail {
+/// Equal spellings name one file. When the output file exists, the identities of both files decide,
+/// so a hard link, a symbolic link, or another spelling of the input file is refused.
+/// An output file that does not exist is not the input file.
+fn refuseInputAsOutput(io: Io, input: NamedFile, output: NamedFile) ?lab.Detail {
     if (std.mem.eql(u8, input.path, output.path)) return same_file;
-    const cwd = Io.Dir.cwd();
-    const output_real = cwd.realPathFileAlloc(io, output.path, gpa) catch |err| return switch (err) {
+    const output_identity = fileIdentity(io, output.path) catch |err| return switch (err) {
         error.FileNotFound => null,
         else => lab.fileFailure(output.subject, err),
     };
-    defer gpa.free(output_real);
-    const input_real = cwd.realPathFileAlloc(io, input.path, gpa) catch |err| return lab.fileFailure(input.subject, err);
-    defer gpa.free(input_real);
-    return if (std.mem.eql(u8, input_real, output_real)) same_file else null;
+    const input_identity = fileIdentity(io, input.path) catch |err| return lab.fileFailure(input.subject, err);
+    return if (std.meta.eql(input_identity, output_identity)) same_file else null;
+}
+
+/// The identity of a file: the volume or device that holds it and its file identifier on that volume or device.
+/// Two names of one file, including hard links, have one identity.
+const FileIdentity = switch (builtin.os.tag) {
+    .windows => struct { volume_serial_number: u64, file_id: [16]u8 },
+    // `stx_dev_major` and `stx_dev_minor` together are the `st_dev` that `fstat` reports.
+    .linux => struct { dev_major: u32, dev_minor: u32, ino: u64 },
+    else => struct { dev: @FieldType(std.posix.Stat, "dev"), ino: @FieldType(std.posix.Stat, "ino") },
+};
+
+/// `FILE_ID_INFORMATION`, which `NtQueryInformationFile` returns for the `FileIdInformation` class.
+/// The pinned standard library names the class but does not define the structure.
+const FILE_ID_INFORMATION = extern struct {
+    VolumeSerialNumber: windows.ULONGLONG,
+    /// `FILE_ID_128`.
+    FileId: [16]u8,
+};
+
+/// Opens the file at `path`, following symbolic links, and returns its identity.
+fn fileIdentity(io: Io, path: []const u8) !FileIdentity {
+    const file = try Io.Dir.cwd().openFile(io, path, .{});
+    defer file.close(io);
+    switch (builtin.os.tag) {
+        .windows => {
+            var io_status_block: windows.IO_STATUS_BLOCK = undefined;
+            var info: FILE_ID_INFORMATION = undefined;
+            return switch (windows.ntdll.NtQueryInformationFile(file.handle, &io_status_block, &info, @sizeOf(FILE_ID_INFORMATION), .Id)) {
+                .SUCCESS => .{ .volume_serial_number = info.VolumeSerialNumber, .file_id = info.FileId },
+                .ACCESS_DENIED => error.AccessDenied,
+                else => |status| windows.unexpectedStatus(status),
+            };
+        },
+        // The pinned standard library binds no `fstat` on Linux, so `statx` on the open descriptor reports the same fields.
+        .linux => {
+            const linux = std.os.linux;
+            while (true) {
+                var statx = std.mem.zeroes(linux.Statx);
+                switch (linux.errno(linux.statx(file.handle, "", linux.AT.EMPTY_PATH, .{ .INO = true }, &statx))) {
+                    .SUCCESS => {
+                        if (!statx.mask.INO) return error.Unexpected;
+                        return .{ .dev_major = statx.dev_major, .dev_minor = statx.dev_minor, .ino = statx.ino };
+                    },
+                    .INTR => continue,
+                    .ACCES => return error.AccessDenied,
+                    .NOMEM => return error.SystemResources,
+                    else => |err| return std.posix.unexpectedErrno(err),
+                }
+            }
+        },
+        else => while (true) {
+            var stat: std.posix.Stat = undefined;
+            switch (std.posix.errno(std.posix.system.fstat(file.handle, &stat))) {
+                .SUCCESS => return .{ .dev = stat.dev, .ino = stat.ino },
+                .INTR => continue,
+                .ACCES => return error.AccessDenied,
+                .NOMEM => return error.SystemResources,
+                else => |err| return std.posix.unexpectedErrno(err),
+            }
+        },
+    }
 }
 
 fn writeBytes(bytes: []const u8, writer: *Io.Writer) Io.Writer.Error!void {

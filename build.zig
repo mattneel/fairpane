@@ -176,7 +176,8 @@ pub fn build(b: *std.Build) void {
     }
 }
 
-/// Adds FP-0007 contract cases 13 and 14 and FP-0054 contract case 5, which run the installed `fairpane-lab` executable.
+/// Adds FP-0007 contract cases 13 and 14 and FP-0054 contract case 5 and revision 1 cases 1 to 5,
+/// which run the installed `fairpane-lab` executable.
 fn addLabCases(
     b: *std.Build,
     test_step: *std.Build.Step,
@@ -268,6 +269,121 @@ fn addLabCases(
     unchanged.expectExitCode(0);
     unchanged.step.dependOn(&guard.step);
     test_step.dependOn(&unchanged.step);
+
+    addRevision1Cases(b, test_step, install, lab, check);
+}
+
+/// Adds FP-0054 revision 1 cases 1 to 5.
+/// Each case works in a directory that `check fresh` creates for the run,
+/// so a guard regression cannot corrupt a cached copy that a later run reuses.
+/// Every step that reads or writes that directory has side effects, so each run repeats it.
+fn addRevision1Cases(
+    b: *std.Build,
+    test_step: *std.Build.Step,
+    install: *std.Build.Step,
+    lab: std.Build.LazyPath,
+    check: *std.Build.Step.Compile,
+) void {
+    const fixture = b.path("tests/lab/case-03-body-mismatch.json");
+    const harness_error = "\"result\": \"harness-error\"";
+
+    const guards = [_]struct { case: u8, name: []const u8, layout: []const u8, args: []const []const u8 }{
+        .{ .case = 1, .name = "minimize refuses an --out path that is a hard link to the input file", .layout = "link", .args = &.{ "minimize", "case.json", "--out", "link.json" } },
+        .{ .case = 2, .name = "run refuses a --transcript path that is a hard link to the input file", .layout = "link", .args = &.{ "run", "case.json", "--transcript", "link.json" } },
+        .{ .case = 3, .name = "minimize refuses an --out path that names the input file in other letter case", .layout = "case", .args = &.{ "minimize", "case.json", "--out", "CASE.JSON" } },
+    };
+    for (guards) |guard_case| {
+        // Only Windows hosts add case 3, because other file systems may hold `case.json` and `CASE.JSON` as two files.
+        if (guard_case.case == 3 and b.graph.host.result.os.tag != .windows) continue;
+        const dir = freshDirectory(b, check, guard_case.case, guard_case.layout, fixture);
+        const guard = revisionLabRun(b, install, lab, dir, b.fmt("FP-0054 revision 1 case {d}: {s}", .{ guard_case.case, guard_case.name }));
+        guard.addArgs(guard_case.args);
+        guard.expectExitCode(3);
+        guard.expectStdOutMatch(harness_error);
+        guard.expectStdOutMatch("\"detail\": \"command line: the output path names the input file\"");
+        test_step.dependOn(&guard.step);
+
+        const unchanged = revisionCheck(b, check, dir, b.fmt("FP-0054 revision 1 case {d}: the refused command leaves the input unchanged", .{guard_case.case}));
+        unchanged.addArg("same");
+        unchanged.addFileArg(fixture);
+        unchanged.addArg("case.json");
+        unchanged.step.dependOn(&guard.step);
+        test_step.dependOn(&unchanged.step);
+    }
+
+    const copies = freshDirectory(b, check, 4, "copy", fixture);
+    const distinct = revisionLabRun(b, install, lab, copies, "FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file");
+    distinct.addArgs(&.{ "minimize", "case.json", "--out", "other.json" });
+    distinct.expectExitCode(0);
+    distinct.expectStdOutMatch("\"result\": \"pass\"");
+    test_step.dependOn(&distinct.step);
+
+    const derived = revisionCheck(b, check, copies, "FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest");
+    derived.addArgs(&.{ "derived", "case.json", "other.json" });
+    derived.step.dependOn(&distinct.step);
+    test_step.dependOn(&derived.step);
+
+    const oversized = freshDirectory(b, check, 5, "oversized", null);
+    const case_detail = "\"detail\": \"case file: exceeds the size limit\"";
+    const run_case = revisionLabRun(b, install, lab, oversized, "FP-0054 revision 1 case 5: run reports a case file one byte above the size limit");
+    run_case.addArgs(&.{ "run", "case.json" });
+    run_case.expectExitCode(3);
+    run_case.expectStdOutMatch(harness_error);
+    run_case.expectStdOutMatch(case_detail);
+
+    const minimize_case = revisionLabRun(b, install, lab, oversized, "FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit");
+    minimize_case.addArgs(&.{ "minimize", "case.json", "--out", "minimized.json" });
+    minimize_case.expectExitCode(3);
+    minimize_case.expectStdOutMatch(harness_error);
+    minimize_case.expectStdOutMatch(case_detail);
+
+    const absent = revisionCheck(b, check, oversized, "FP-0054 revision 1 case 5: the failed minimization creates no output file");
+    absent.addArgs(&.{ "absent", "minimized.json" });
+    absent.step.dependOn(&minimize_case.step);
+
+    const replay_transcript = revisionLabRun(b, install, lab, oversized, "FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit");
+    replay_transcript.addArgs(&.{ "replay", "transcript.json" });
+    replay_transcript.expectExitCode(3);
+    replay_transcript.expectStdOutMatch(harness_error);
+    replay_transcript.expectStdOutMatch("\"detail\": \"transcript file: exceeds the size limit\"");
+
+    const removal = revisionCheck(b, check, oversized, "FP-0054 revision 1 case 5: remove the oversized files");
+    removal.addArgs(&.{ "remove", "case.json", "transcript.json" });
+    removal.step.dependOn(&run_case.step);
+    removal.step.dependOn(&absent.step);
+    removal.step.dependOn(&replay_transcript.step);
+    test_step.dependOn(&removal.step);
+}
+
+/// Returns a directory that `check fresh` replaces on every run with the files of `layout`.
+fn freshDirectory(b: *std.Build, check: *std.Build.Step.Compile, case: u8, layout: []const u8, fixture: ?std.Build.LazyPath) std.Build.LazyPath {
+    const run = b.addRunArtifact(check);
+    run.setName(b.fmt("FP-0054 revision 1 case {d}: create a fresh directory", .{case}));
+    run.has_side_effects = true;
+    run.addArg("fresh");
+    const dir = run.addOutputDirectoryArg2(b.fmt("fp0054-r1-case-{d}", .{case}), .{});
+    run.addArg(layout);
+    if (fixture) |path| run.addFileArg(path);
+    run.expectExitCode(0);
+    return dir;
+}
+
+/// Runs the installed laboratory executable in `dir` on every run.
+fn revisionLabRun(b: *std.Build, install: *std.Build.Step, lab: std.Build.LazyPath, dir: std.Build.LazyPath, name: []const u8) *std.Build.Step.Run {
+    const run = labRun(b, install, lab, name);
+    run.setCwd(dir);
+    run.has_side_effects = true;
+    return run;
+}
+
+/// Runs the check executable in `dir` on every run, expecting exit status 0.
+fn revisionCheck(b: *std.Build, check: *std.Build.Step.Compile, dir: std.Build.LazyPath, name: []const u8) *std.Build.Step.Run {
+    const run = b.addRunArtifact(check);
+    run.setName(name);
+    run.setCwd(dir);
+    run.has_side_effects = true;
+    run.expectExitCode(0);
+    return run;
 }
 
 /// Runs the installed laboratory executable after the `lab` installation step.

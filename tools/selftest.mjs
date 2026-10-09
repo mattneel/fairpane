@@ -587,6 +587,16 @@ test('FP-0054 case 6: a capture-directory removal error with a non-transient cod
   });
   assert.equal(fs.readdirSync(tmp).length, 1, 'The failed capture directory survives, as its record states.');
 });
+test('FP-0054 revision 1 case 6: a capture-directory removal error without a code gets one attempt', async () => {
+  const dir = temp(), logPath = path.join(dir, 'uncoded.log');
+  const removal = failingRemoval([{ message: 'forced removal failure without a code' }]);
+  const tmp = await withPrivateTemp(async () => {
+    const r = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath, fileSystem: removal.fileSystem });
+    assert.equal(r.error, 'Capture directory removal failed: forced removal failure without a code'); assert.equal(removal.times.length, 1);
+    assert.equal(lastResult(logPath).error, r.error);
+  });
+  assert.equal(fs.readdirSync(tmp).length, 1, 'The failed capture directory survives, as its record states.');
+});
 test('FP-0054 case 6: lastResult asserts that a RESULT line exists before it parses one', () => {
   const logPath = path.join(temp(), 'no-result.log');
   fs.writeFileSync(logPath, '\nCOMMAND ["absent"]\noutput without a result\n');
