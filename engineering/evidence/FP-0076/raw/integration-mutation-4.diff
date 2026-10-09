@@ -1,0 +1,13 @@
+diff --git a/src/lab_main.zig b/src/lab_main.zig
+index ce2657d..a6b1a07 100644
+--- a/src/lab_main.zig
++++ b/src/lab_main.zig
+@@ -150,7 +150,7 @@ fn refuseInputAsOutput(input: NamedFile, output: NamedFile) ?lab.Detail {
+     if (std.mem.eql(u8, input.path, output.path)) return same_file;
+     const output_identity = fileIdentity(output.path) catch |err| return switch (err) {
+         error.FileNotFound => null,
+-        else => lab.fileFailure(output.subject, err),
++        else => lab.fileFailure(input.subject, err),
+     };
+     const input_identity = fileIdentity(input.path) catch |err| return lab.fileFailure(input.subject, err);
+     return if (std.meta.eql(input_identity, output_identity)) same_file else null;

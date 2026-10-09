@@ -95,6 +95,7 @@ The base laboratory's `openFile` maps `STATUS_OBJECT_NAME_INVALID` to `BadPathNa
 Both baselines record case 4 as passing.
 Cases 1, 2, and 3 fail before the change on their hosts.
 Case 4 still tests the failure path that the change rewrote: an unidentifiable output is a harness error that names `output file`, and it writes nothing.
+Contract amendment 1 (`3bea7a6`) exempts case 4 from the red baseline and requires it to fail under a control that reports an unidentified output path with the input's subject; see "Integration".
 
 ## Resolved ambiguities
 
@@ -113,3 +114,21 @@ Case 4 still tests the failure path that the change rewrote: an unidentifiable o
   The mutation controls show the same removal with the real laboratory.
 - `RESULT` lines record each command's working directory and resolved executable, and the controller suite prints temporary paths under the user profile, as earlier evidence does.
   No recorded command lists a home directory or a user profile.
+
+## Integration
+
+The integrator applied the worker's patch on `3bea7a6` with `git apply --3way`.
+It applied without conflicts, merged with the FP-0066 and FP-0082 changes to `build.zig`, and changed no contract text.
+The implementation is commit `d56bc5f`.
+
+- `raw/integration-binding.log` records `HEAD` `d56bc5f` and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
+- `gates/2026-10-09T15-42-32-017Z-repo-check-2d0c24b7.json`, `gates/2026-10-09T15-42-32-440Z-controller-test-6d02f1a6.json`, `gates/2026-10-09T15-43-27-009Z-zig-fmt-1e374c06.json`, and `gates/2026-10-09T15-43-27-307Z-zig-test-db8aab34.json` pass.
+- `raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0076-integration`: 100 of 100 build steps and 321 of 321 tests pass.
+- `raw/bun-selftest.log` records Bun and `tools/selftest.mjs` with 224 of 224 tests.
+- `raw/integration-tests-linux.log` clones the repository at `d56bc5f` in WSL Ubuntu with no status lines and runs the suite as uid 1000 with the fresh cache `out/fp0076-integration-linux`: 102 of 102 build steps and 321 of 321 tests pass.
+- `raw/integration-mutation-4.log` and `raw/integration-mutation-4.diff` run amendment 1's control.
+  The control changes the guard's detail for an unidentified output path from the output's subject to the input's subject.
+  `src/lab_main.zig` hashes to `ce2657d` before, `a6b1a07` during, and `ce2657d` after; the WSL clone records the same hashes.
+  On Windows, 97 of 100 steps succeed: `FP-0076 case 4: minimize reports the output path out|.json, which cannot be identified` fails with the detail `case file: BadPathName`, and its dependent "the directory gains no file" step does not run.
+  On WSL Ubuntu, 99 of 102 steps succeed, and the same case fails for `case.json/out.json` with `case file: NotDir`.
+  No other step fails on either host.
