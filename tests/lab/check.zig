@@ -13,6 +13,7 @@
 //! `check entries [<name>...]` confirms that the current directory holds exactly the named entries.
 //! `check fifo <laboratory>` runs FP-0076 contract case 1 in the current directory, which holds `case.json`.
 //! `check oversized <laboratory>` runs FP-0054 revision 1 case 5 in the current directory, which must be empty.
+//! `check delete-pending <laboratory> <directory>` runs FP-0106 contract case 5 on Windows in `directory`, which holds `case.json`.
 
 const builtin = @import("builtin");
 const std = @import("std");
@@ -38,6 +39,8 @@ pub fn main(init: std.process.Init) !u8 {
     // A FIFO exists only on POSIX systems, so Windows builds omit the command.
     if (builtin.os.tag != .windows and args.len == 3 and std.mem.eql(u8, args[1], "fifo")) return checkFifo(io, gpa, args[2]);
     if (args.len == 3 and std.mem.eql(u8, args[1], "oversized")) return checkOversized(io, gpa, args[2]);
+    // A pending deletion is a Windows state, so other builds omit the command.
+    if (builtin.os.tag == .windows and args.len == 4 and std.mem.eql(u8, args[1], "delete-pending")) return checkDeletePending(io, gpa, args[2], args[3]);
     return usage();
 }
 
@@ -46,7 +49,7 @@ fn usage() u8 {
         \\usage: check minimal <case> | check empty <directory> | check same <expected> <actual>
         \\       check fresh <directory> case|link|copy|symlink|unreadable <fixture> | check fresh <directory> empty
         \\       check readable <path> | check derived <case> <minimized> | check entries [<name>...]
-        \\       check fifo <laboratory> | check oversized <laboratory>
+        \\       check fifo <laboratory> | check oversized <laboratory> | check delete-pending <laboratory> <directory>
         \\
     , .{});
     return 2;
@@ -525,3 +528,101 @@ fn exists(io: Io, path: []const u8) !bool {
     };
     return true;
 }
+
+/// FP-0106 contract case 5: `minimize` with an `--out` file that is pending deletion reports `output file: FileBusy`
+/// after the identification open's 13 waits, which total 4095 ms.
+/// The helper creates `out.json` in `directory` with 2 bytes, opens it with `DELETE` and `SYNCHRONIZE` access and every share mode,
+/// and sets `FileDispositionInfo` with `DeleteFile` true. That class has no POSIX-semantics flag, so the name stays until the handle closes.
+/// It confirms that an `NtCreateFile` of `out.json` with `FILE_READ_ATTRIBUTES` access returns `STATUS_DELETE_PENDING`,
+/// runs the laboratory in `directory` while it holds the handle, and closes the handle before it returns.
+fn checkDeletePending(io: Io, gpa: std.mem.Allocator, laboratory: []const u8, directory: []const u8) !u8 {
+    var dir = try Io.Dir.cwd().openDir(io, directory, .{});
+    defer dir.close(io);
+    try dir.writeFile(io, .{ .sub_path = "out.json", .data = "{}" });
+
+    var handle: windows.HANDLE = undefined;
+    const delete_access: windows.ACCESS_MASK = .{ .STANDARD = .{ .RIGHTS = .{ .DELETE = true }, .SYNCHRONIZE = true } };
+    switch (openOutJson(dir, &handle, delete_access, .{ .IO = .SYNCHRONOUS_NONALERT, .NON_DIRECTORY_FILE = true })) {
+        .SUCCESS => {},
+        else => |status| {
+            std.debug.print("NtCreateFile of out.json with DELETE access returned {s}\n", .{statusName(status)});
+            return 1;
+        },
+    }
+    // Windows removes the name when this last handle closes, after the laboratory has exited.
+    defer windows.CloseHandle(handle);
+    var disposition: FILE_DISPOSITION_INFO = .{ .DeleteFile = .TRUE };
+    if (!SetFileInformationByHandle(handle, file_disposition_info, &disposition, @sizeOf(FILE_DISPOSITION_INFO)).toBool()) {
+        return win32Failure("SetFileInformationByHandle", @backingInt(windows.GetLastError()));
+    }
+
+    // The case tests nothing unless the laboratory's own open of out.json returns STATUS_DELETE_PENDING.
+    var probe: windows.HANDLE = undefined;
+    const attributes_access: windows.ACCESS_MASK = .{ .STANDARD = .{ .SYNCHRONIZE = true }, .SPECIFIC = .{ .FILE = .{ .READ_ATTRIBUTES = true } } };
+    const status = openOutJson(dir, &probe, attributes_access, .{ .IO = .SYNCHRONOUS_NONALERT });
+    if (status != .DELETE_PENDING) {
+        if (status == .SUCCESS) windows.CloseHandle(probe);
+        std.debug.print("out.json is not pending deletion: {s}\n", .{statusName(status)});
+        return 1;
+    }
+
+    const started: Io.Clock.Timestamp = .now(io, .awake);
+    const result = try std.process.run(gpa, io, .{
+        .argv = &.{ laboratory, "minimize", "case.json", "--out", "out.json" },
+        .cwd = .{ .path = directory },
+    });
+    const elapsed_ms = started.untilNow(io).raw.toMilliseconds();
+    defer gpa.free(result.stdout);
+    defer gpa.free(result.stderr);
+
+    var failed = false;
+    if (!exitedWith(result.term, 3)) {
+        std.debug.print("the laboratory {f}; expected exit status 3\n", .{result.term});
+        failed = true;
+    }
+    if (std.mem.indexOf(u8, result.stdout, "\"result\": \"harness-error\"") == null) {
+        std.debug.print("the result is not \"harness-error\"\n", .{});
+        failed = true;
+    }
+    if (std.mem.indexOf(u8, result.stdout, "\"detail\": \"output file: FileBusy\"") == null) {
+        std.debug.print("the detail is not \"output file: FileBusy\"\n", .{});
+        failed = true;
+    }
+    if (elapsed_ms < 4000) {
+        std.debug.print("the laboratory ran for {d} ms, less than 4000 ms\n", .{elapsed_ms});
+        failed = true;
+    }
+    if (failed) {
+        std.debug.print("stdout: {s}\nstderr: {s}\n", .{ result.stdout, result.stderr });
+        return 1;
+    }
+    var stdout_buffer: [128]u8 = undefined;
+    var stdout = Io.File.stdout().writerStreaming(io, &stdout_buffer);
+    try stdout.interface.print("the laboratory reported output file: FileBusy after {d} ms\n", .{elapsed_ms});
+    try stdout.interface.flush();
+    return 0;
+}
+
+/// Opens `out.json` in `dir` with `access`, every share mode, and `options`.
+fn openOutJson(dir: Io.Dir, handle: *windows.HANDLE, access: windows.ACCESS_MASK, options: windows.FILE.MODE) windows.NTSTATUS {
+    var object_name: windows.UNICODE_STRING = .init(std.unicode.utf8ToUtf16LeStringLiteral("out.json"));
+    const attributes: windows.OBJECT.ATTRIBUTES = .{ .RootDirectory = dir.handle, .ObjectName = &object_name };
+    var io_status_block: windows.IO_STATUS_BLOCK = undefined;
+    return windows.ntdll.NtCreateFile(handle, access, &attributes, &io_status_block, null, .{ .NORMAL = true }, .VALID_FLAGS, .OPEN, options, null, 0);
+}
+
+fn statusName(status: windows.NTSTATUS) []const u8 {
+    return std.enums.tagName(windows.NTSTATUS, status) orelse "an unnamed status";
+}
+
+/// `FILE_DISPOSITION_INFO`, the buffer of the `FileDispositionInfo` class.
+const FILE_DISPOSITION_INFO = extern struct { DeleteFile: windows.BOOLEAN };
+/// `FileDispositionInfo` of `FILE_INFO_BY_HANDLE_CLASS`.
+const file_disposition_info: c_int = 4;
+
+extern "kernel32" fn SetFileInformationByHandle(
+    hFile: windows.HANDLE,
+    FileInformationClass: c_int,
+    lpFileInformation: *anyopaque,
+    dwBufferSize: windows.DWORD,
+) callconv(.winapi) windows.BOOL;

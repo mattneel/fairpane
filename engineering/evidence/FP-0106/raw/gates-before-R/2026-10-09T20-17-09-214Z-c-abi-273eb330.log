@@ -1,0 +1,20 @@
+Fairpane local gate: c-abi
+Trust: unsigned-local-integrity-only
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\out\\c-abi-build"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\out\\c-abi-build"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r","started_at":"2026-10-09T20:17:09.268Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":90487,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\tools\\fairpane.mjs","abi-exports","out/c-abi-build/lib/fairpane.lib"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "library": "out/c-abi-build/lib/fairpane.lib",
+  "exports": 15
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\tools\\fairpane.mjs","abi-exports","out/c-abi-build/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r","started_at":"2026-10-09T20:18:39.756Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":72,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\out\\c-abi-smoke.exe"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\out\\c-abi-smoke.exe"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r","started_at":"2026-10-09T20:18:39.828Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16869,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\out\\c-abi-smoke.exe"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\out\\c-abi-smoke.exe","arguments":[],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r","started_at":"2026-10-09T20:18:56.698Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":214,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r\\.zig-cache\\global"}}

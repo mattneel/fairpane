@@ -1,0 +1,34 @@
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-after\\o\\b089465582f2f7e26817d0caede0ee1c\\fairpane-lab-check.exe","fresh","out/fp0106/case-5","case","tests/lab/case-03-body-mismatch.json"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-after\\o\\b089465582f2f7e26817d0caede0ee1c\\fairpane-lab-check.exe","arguments":["fresh","out/fp0106/case-5","case","tests/lab/case-03-body-mismatch.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:29:34.515Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":12}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-after\\o\\b089465582f2f7e26817d0caede0ee1c\\fairpane-lab-check.exe","delete-pending","zig-out/bin/fairpane-lab.exe","out/fp0106/case-5"]
+error: FileNotFound
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\Io\Threaded.zig:1438:9: 0x7ff61af21be8 in fail__func_365 (fairpane-lab-check_zcu.obj)
+        return err;
+        ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\Io\Threaded.zig:5540:35: 0x7ff61af73194 in dirOpenDirWindows (fairpane-lab-check_zcu.obj)
+        .OBJECT_PATH_NOT_FOUND => return syscall.fail(error.FileNotFound),
+                                  ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\Io\Threaded.zig:16550:16: 0x7ff61af61c21 in windowsCreateProcessPathExt (fairpane-lab-check_zcu.obj)
+            => return error.FileNotFound,
+               ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\Io\Threaded.zig:16227:16: 0x7ff61af6bacf in processSpawnWindows (fairpane-lab-check_zcu.obj)
+            }) return original_err;
+               ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\process.zig:463:5: 0x7ff61afd1136 in spawn (fairpane-lab-check_zcu.obj)
+    return io.vtable.processSpawn(io.userdata, options);
+    ^
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\process.zig:508:17: 0x7ff61afcd5a1 in run (fairpane-lab-check_zcu.obj)
+    var child = try spawn(io, .{
+                ^
+C:\Users\requi\.omp\wt\tf07027fe0\m\tests\lab\check.zig:570:20: 0x7ff61afc0889 in checkDeletePending (fairpane-lab-check_zcu.obj)
+    const result = try std.process.run(gpa, io, .{
+                   ^
+C:\Users\requi\.omp\wt\tf07027fe0\m\tests\lab\check.zig:43:102: 0x7ff61afc1f7e in main (fairpane-lab-check_zcu.obj)
+    if (builtin.os.tag == .windows and args.len == 4 and std.mem.eql(u8, args[1], "delete-pending")) return checkDeletePending(io, gpa, args[2], args[3]);
+                                                                                                     ^
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-after\\o\\b089465582f2f7e26817d0caede0ee1c\\fairpane-lab-check.exe","arguments":["delete-pending","zig-out/bin/fairpane-lab.exe","out/fp0106/case-5"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:29:34.584Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["../../../out/fp0106-after/o/b089465582f2f7e26817d0caede0ee1c/fairpane-lab-check.exe","entries","case.json"]
+RESULT {"executable":"../../../out/fp0106-after/o/b089465582f2f7e26817d0caede0ee1c/fairpane-lab-check.exe","arguments":["entries","case.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106\\case-5","started_at":"2026-10-09T20:29:34.673Z","exit_code":null,"signal":null,"timed_out":false,"error":"The executable is absent: ../../../out/fp0106-after/o/b089465582f2f7e26817d0caede0ee1c/fairpane-lab-check.exe","duration_ms":0}

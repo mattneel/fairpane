@@ -375,7 +375,7 @@ fn libraryArchive(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std
 
 /// Adds the `library-test` step, which `zig build test` runs: FP-0066 contract cases 1, 2, 4, and 5,
 /// which check the library that `zig build` installs, and the tests of their check tool.
-/// Case 3, `abi-exports` on the ReleaseSafe library, runs through the controller.
+/// Case 3, `abi-exports` on the ReleaseSafe library, runs in the `c-abi` gate.
 fn addLibraryCases(b: *std.Build, test_step: *std.Build.Step, target: std.Build.ResolvedTarget) void {
     const step = b.step("library-test", "Run the FP-0066 cases on the libraries that zig build installs");
     test_step.dependOn(step);
@@ -440,7 +440,7 @@ fn libraryCheck(b: *std.Build, step: *std.Build.Step, check: *std.Build.Step.Com
 }
 
 /// Adds FP-0007 contract cases 13 and 14, FP-0054 contract case 5 and revision 1 cases 1 to 5, FP-0008 contract case 26,
-/// FP-0123 contract case 15 Lab-7, and FP-0076 contract cases 1 to 7, which run the installed `fairpane-lab` executable.
+/// FP-0123 contract case 15 Lab-7, FP-0076 contract cases 1 to 7, and FP-0106 contract case 5, which run the installed `fairpane-lab` executable.
 fn addLabCases(
     b: *std.Build,
     test_step: *std.Build.Step,
@@ -537,6 +537,7 @@ fn addLabCases(
 
     addRevision1Cases(b, test_step, install, lab, check);
     addFp0076Cases(b, test_step, install, lab, check);
+    addFp0106Cases(b, test_step, install, lab, check);
 }
 
 const harness_error = "\"result\": \"harness-error\"";
@@ -712,6 +713,33 @@ fn addFp0076Cases(
         entries.step.dependOn(&failing.step);
         test_step.dependOn(&entries.step);
     }
+}
+
+/// Adds FP-0106 contract case 5, which only Windows hosts add, because a pending deletion that keeps its name is a Windows state.
+fn addFp0106Cases(
+    b: *std.Build,
+    test_step: *std.Build.Step,
+    install: *std.Build.Step,
+    lab: std.Build.LazyPath,
+    check: *std.Build.Step.Compile,
+) void {
+    if (b.graph.host.result.os.tag != .windows) return;
+    const dir = freshDirectory(b, check, "FP-0106 case 5", "fp0106-case-5", "case", b.path("tests/lab/case-03-body-mismatch.json"));
+    // The helper takes the directory as an argument and runs the laboratory there, so it needs no working directory of its own.
+    const pending = b.addRunArtifact(check);
+    pending.setName("FP-0106 case 5: minimize reports output file: FileBusy for an --out file that stays pending deletion through every retry");
+    pending.has_side_effects = true;
+    pending.addArg("delete-pending");
+    pending.addFileArg2(lab, .{ .make_absolute = true });
+    pending.addDirectoryArg2(dir, .{ .make_absolute = true });
+    pending.step.dependOn(install);
+    pending.expectExitCode(0);
+    test_step.dependOn(&pending.step);
+
+    const entries = freshCheck(b, check, dir, "FP-0106 case 5: after the helper closes its handle, the directory holds only case.json");
+    entries.addArgs(&.{ "entries", "case.json" });
+    entries.step.dependOn(&pending.step);
+    test_step.dependOn(&entries.step);
 }
 
 /// Returns a directory that `check fresh` replaces on every run with the files of `layout`.

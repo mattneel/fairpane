@@ -1,0 +1,21 @@
+diff --git a/src/c_api.zig b/out/fp0106/mutation/c_api-R.zig
+index 0f0c3cb..72642bd 100644
+--- a/src/c_api.zig
++++ b/out/fp0106/mutation/c_api-R.zig
+@@ -172,10 +172,15 @@ fn eventToC(event: ?native.Event) abi.Event {
+     return result;
+ }
+ 
+-export fn fp_abi_revision() callconv(.c) u32 {
++fn fp_abi_revision() callconv(.c) u32 {
+     return abi_revision;
+ }
+ 
++// FP-0106 mutation R: only a Debug build exports `fp_abi_revision`.
++comptime {
++    if (builtin.mode == .debug) @export(&fp_abi_revision, .{ .name = "fp_abi_revision" });
++}
++
+ export fn fp_query_capabilities(out: ?*abi.Capabilities, out_size: usize) callconv(.c) u32 {
+     return finish("fp_query_capabilities", queryCapabilities(out, out_size));
+ }

@@ -239,7 +239,7 @@ Generation reads only arrays for ordered collections, so the output never depend
 `node tools/abi.test.mjs` runs those cases without the rest of the controller.
 
 `abi-exports` reads the archive symbol table of a static library in the GNU, System V, COFF, or BSD layout.
-The `c-abi` gate runs it on the library that it builds, before it compiles the C smoke test.
+The `c-abi` gate runs it on the Debug library that it builds, before it compiles the C smoke test, and after the smoke test on a ReleaseSafe library that it builds into a new `out/c-abi-release`.
 
 ## Produce release records
 
@@ -288,7 +288,7 @@ It builds a ReleaseSafe library from each of two copies of `src` in different di
 `tools/zig/library_check.zig` then compares the two ReleaseSafe libraries byte for byte, searches one for the paths of its build directory and of the compiler installation, and lists its members.
 It also confirms that the Debug library's object names the absolute path of `src`.
 The search ignores ASCII letter case and treats `/` and `\` as the same byte.
-FP-0066 case 3 is `node tools/fairpane.mjs abi-exports` on the installed ReleaseSafe library.
+FP-0066 case 3, `node tools/fairpane.mjs abi-exports` on the installed ReleaseSafe library, runs in the `c-abi` gate.
 
 ## Generate the Unicode property tables
 

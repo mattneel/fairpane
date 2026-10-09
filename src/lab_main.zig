@@ -89,7 +89,7 @@ fn isOption(arg: []const u8) bool {
 fn runCommand(io: Io, gpa: Allocator, case_path: []const u8, transcript_path: ?[]const u8) u8 {
     var run = start: {
         if (transcript_path) |path| {
-            const refusal = refuseInputAsOutput(.{ .path = case_path, .subject = "case file" }, .{ .path = path, .subject = "transcript file" });
+            const refusal = refuseInputAsOutput(io, .{ .path = case_path, .subject = "case file" }, .{ .path = path, .subject = "transcript file" });
             if (refusal) |detail| break :start lab.Run.initHarnessError(gpa, null, detail);
         }
         const bytes = lab.readInputFile(io, gpa, case_path, lab.case_size_limit) catch |err| {
@@ -121,7 +121,7 @@ fn replayCommand(io: Io, gpa: Allocator, transcript_path: []const u8) u8 {
 
 fn minimizeCommand(io: Io, gpa: Allocator, case_path: []const u8, out_path: []const u8) u8 {
     var minimization = start: {
-        const refusal = refuseInputAsOutput(.{ .path = case_path, .subject = "case file" }, .{ .path = out_path, .subject = "output file" });
+        const refusal = refuseInputAsOutput(io, .{ .path = case_path, .subject = "case file" }, .{ .path = out_path, .subject = "output file" });
         if (refusal) |detail| break :start lab.Minimization.initHarnessError(gpa, null, detail);
         const bytes = lab.readInputFile(io, gpa, case_path, lab.case_size_limit) catch |err| {
             break :start lab.Minimization.initHarnessError(gpa, null, lab.fileFailure("case file", err));
@@ -146,13 +146,13 @@ const NamedFile = struct { path: []const u8, subject: []const u8 };
 /// Equal spellings name one file. When the output file exists, the identities of both files decide,
 /// so a hard link, a symbolic link, or another spelling of the input file is refused.
 /// An output file that does not exist is not the input file.
-fn refuseInputAsOutput(input: NamedFile, output: NamedFile) ?lab.Detail {
+fn refuseInputAsOutput(io: Io, input: NamedFile, output: NamedFile) ?lab.Detail {
     if (std.mem.eql(u8, input.path, output.path)) return same_file;
-    const output_identity = fileIdentity(output.path) catch |err| return switch (err) {
+    const output_identity = fileIdentity(io, output.path) catch |err| return switch (err) {
         error.FileNotFound => null,
         else => lab.fileFailure(output.subject, err),
     };
-    const input_identity = fileIdentity(input.path) catch |err| return lab.fileFailure(input.subject, err);
+    const input_identity = fileIdentity(io, input.path) catch |err| return lab.fileFailure(input.subject, err);
     return if (std.meta.eql(input_identity, output_identity)) same_file else null;
 }
 
@@ -175,7 +175,9 @@ const FILE_ID_INFORMATION = extern struct {
 
 /// Returns the identity of the file at `path`, relative to the current directory, following symbolic links.
 /// It never opens the file for reading, so a FIFO does not block and a file without read permission still has an identity.
-fn fileIdentity(path: []const u8) !FileIdentity {
+/// On Windows, `lab.windowsIdentityStep` maps each status of the open as the pinned standard library's open does,
+/// so a cancelation request is honored and a sharing violation or a pending deletion is retried with backoff.
+fn fileIdentity(io: Io, path: []const u8) !FileIdentity {
     switch (builtin.os.tag) {
         .windows => {
             // The handle's only data access is `FILE_READ_ATTRIBUTES`, which a read-data denial does not remove.
@@ -189,27 +191,33 @@ fn fileIdentity(path: []const u8) !FileIdentity {
             };
             var handle: windows.HANDLE = undefined;
             var io_status_block: windows.IO_STATUS_BLOCK = undefined;
-            switch (windows.ntdll.NtCreateFile(
-                &handle,
-                .{ .STANDARD = .{ .SYNCHRONIZE = true }, .SPECIFIC = .{ .FILE = .{ .READ_ATTRIBUTES = true } } },
-                &attributes,
-                &io_status_block,
-                null,
-                .{ .NORMAL = true },
-                .VALID_FLAGS,
-                .OPEN,
-                .{ .IO = .SYNCHRONOUS_NONALERT },
-                null,
-                0,
-            )) {
-                .SUCCESS => {},
-                .OBJECT_NAME_INVALID => return error.BadPathName,
-                .OBJECT_NAME_NOT_FOUND, .OBJECT_PATH_NOT_FOUND => return error.FileNotFound,
-                .BAD_NETWORK_PATH, .BAD_NETWORK_NAME => return error.NetworkNotFound,
-                .NO_MEDIA_IN_DEVICE => return error.NoDevice,
-                .ACCESS_DENIED => return error.AccessDenied,
-                .NOT_A_DIRECTORY => return error.NotDir,
-                else => |status| return windows.unexpectedStatus(status),
+            var attempt: u5 = 0;
+            while (true) {
+                const status = windows.ntdll.NtCreateFile(
+                    &handle,
+                    .{ .STANDARD = .{ .SYNCHRONIZE = true }, .SPECIFIC = .{ .FILE = .{ .READ_ATTRIBUTES = true } } },
+                    &attributes,
+                    &io_status_block,
+                    null,
+                    .{ .NORMAL = true },
+                    .VALID_FLAGS,
+                    .OPEN,
+                    .{ .IO = .SYNCHRONOUS_NONALERT },
+                    null,
+                    0,
+                );
+                switch (lab.windowsIdentityStep(status)) {
+                    .opened => break,
+                    .retry => try io.checkCancel(),
+                    .retry_after_backoff => {
+                        const ms = lab.windowsIdentityBackoffMs(attempt) orelse return error.FileBusy;
+                        try io.sleep(.fromMilliseconds(ms), .awake);
+                        attempt += 1;
+                    },
+                    .fail => |err| return err,
+                    .bug => return windows.statusBug(status),
+                    .unexpected => return windows.unexpectedStatus(status),
+                }
             }
             defer windows.CloseHandle(handle);
             var info: FILE_ID_INFORMATION = undefined;

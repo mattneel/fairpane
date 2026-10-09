@@ -1,0 +1,43 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","add","--detach","out/fp0106-base-r","b8313e6"]
+Preparing worktree (detached HEAD b8313e6)
+Updating files:  74% (1635/2201)Updating files:  75% (1651/2201)Updating files:  76% (1673/2201)Updating files:  77% (1695/2201)Updating files:  78% (1717/2201)Updating files:  79% (1739/2201)Updating files:  80% (1761/2201)Updating files:  81% (1783/2201)Updating files:  82% (1805/2201)Updating files:  83% (1827/2201)Updating files:  84% (1849/2201)Updating files:  85% (1871/2201)Updating files:  86% (1893/2201)Updating files:  87% (1915/2201)Updating files:  88% (1937/2201)Updating files:  89% (1959/2201)Updating files:  90% (1981/2201)Updating files:  91% (2003/2201)Updating files:  92% (2025/2201)Updating files:  93% (2047/2201)Updating files:  94% (2069/2201)Updating files:  95% (2091/2201)Updating files:  96% (2113/2201)Updating files:  97% (2135/2201)Updating files:  98% (2157/2201)Updating files:  99% (2179/2201)Updating files: 100% (2201/2201)Updating files: 100% (2201/2201), done.
+HEAD is now at b8313e6 FP-0131: freeze the FP-0052 review follow-up contract
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","add","--detach","out/fp0106-base-r","b8313e6"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:16:54.666Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1651}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","require('fs').copyFileSync('out/fp0106/mutation/c_api-R.zig','out/fp0106-base-r/src/c_api.zig')"]
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","require('fs').copyFileSync('out/fp0106/mutation/c_api-R.zig','out/fp0106-base-r/src/c_api.zig')"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:16:56.485Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":179}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/fp0106-base-r","rev-parse","HEAD"]
+b8313e622326ba6ba8438455d947a487c8ac3add
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/fp0106-base-r","rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:16:56.786Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":63}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/fp0106-base-r","status","--short"]
+ M src/c_api.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/fp0106-base-r","status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:16:56.971Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":127}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/fp0106-base-r","hash-object","src/c_api.zig","tools/lib.mjs"]
+72642bd0681b6b798ab1da639180098040628f74
+7a2bd74a9c1e7477d769d5ed82d4dea26c3d04cd
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/fp0106-base-r","hash-object","src/c_api.zig","tools/lib.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:16:57.290Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":125}
+
+COMMAND ["C:\\Windows\\system32\\cmd.exe","/d","/c","mklink","/J","out\\fp0106-base-r\\.tools","C:\\src\\fairpane\\.tools"]
+Junction created for out\fp0106-base-r\.tools <<===>> C:\src\fairpane\.tools
+RESULT {"executable":"C:\\Windows\\system32\\cmd.exe","arguments":["/d","/c","mklink","/J","out\\fp0106-base-r\\.tools","C:\\src\\fairpane\\.tools"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:16:57.527Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","c-abi","--evidence-dir","out/evidence/fp0106-before"]
+Execute gate c-abi.
+{
+  "gate": "c-abi",
+  "status": "pass",
+  "receipt": "out/evidence/fp0106-before/2026-10-09T20-17-09-214Z-c-abi-273eb330.json",
+  "error": null
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","c-abi","--evidence-dir","out/evidence/fp0106-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\fp0106-base-r","started_at":"2026-10-09T20:17:08.802Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":108397}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');const d='engineering/evidence/FP-0106/raw/gates-before-R';fs.mkdirSync(d,{recursive:true});for(const f of fs.readdirSync('out/fp0106-base-r/out/evidence/fp0106-before'))fs.copyFileSync('out/fp0106-base-r/out/evidence/fp0106-before/'+f,d+'/'+f)"]
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');const d='engineering/evidence/FP-0106/raw/gates-before-R';fs.mkdirSync(d,{recursive:true});for(const f of fs.readdirSync('out/fp0106-base-r/out/evidence/fp0106-before'))fs.copyFileSync('out/fp0106-base-r/out/evidence/fp0106-before/'+f,d+'/'+f)"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:19:04.698Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":61}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/fp0106-base-r","status","--short"]
+ M src/c_api.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/fp0106-base-r","status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:19:04.864Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":48}

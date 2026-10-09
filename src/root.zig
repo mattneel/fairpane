@@ -28,6 +28,7 @@ test {
     _ = html;
     // The laboratory drives the engine but is not part of the library's API.
     _ = @import("lab.zig");
+    _ = @import("lab_identity_test.zig");
     _ = handles;
     _ = @import("memory_budget.zig");
     _ = js;

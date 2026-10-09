@@ -1,0 +1,13 @@
+diff --git a/src/lab.zig b/out/fp0106/mutation/lab-M4.zig
+index e37e93e..225277d 100644
+--- a/src/lab.zig
++++ b/out/fp0106/mutation/lab-M4.zig
+@@ -176,7 +176,7 @@ pub fn windowsIdentityStep(status: std.os.windows.NTSTATUS) WindowsIdentityStep
+         .OBJECT_NAME_COLLISION => .{ .fail = error.PathAlreadyExists },
+         .FILE_IS_A_DIRECTORY => .{ .fail = error.IsDir },
+         .NOT_A_DIRECTORY => .{ .fail = error.NotDir },
+-        .VIRUS_INFECTED, .VIRUS_DELETED => .{ .fail = error.AntivirusInterference },
++        .VIRUS_INFECTED => .{ .fail = error.AntivirusInterference },
+         else => .unexpected,
+     };
+ }

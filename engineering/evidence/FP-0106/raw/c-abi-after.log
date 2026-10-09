@@ -1,0 +1,41 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+b8313e622326ba6ba8438455d947a487c8ac3add
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:19:14.945Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--short"]
+ M build.zig
+ M src/lab.zig
+ M src/lab_main.zig
+ M src/root.zig
+ M tests/lab/README.md
+ M tests/lab/check.zig
+ M tools/README.md
+ M tools/lib.mjs
+ M tools/zig/library_check.zig
+?? engineering/evidence/FP-0106/raw/
+?? engineering/evidence/ci/dispatch-57df855/
+?? src/lab_identity_test.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:19:15.081Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":80}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/c_api.zig","tools/lib.mjs"]
+0f0c3cb89ec13a57d945ac994cf19bf7a8c05a9b
+0c1ff897e2aeaec836259dd9dc6136a49743509b
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/c_api.zig","tools/lib.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:19:15.269Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":45}
+
+COMMAND ["C:\\Windows\\system32\\cmd.exe","/d","/c","mklink","/J",".tools","C:\\src\\fairpane\\.tools"]
+Junction created for .tools <<===>> C:\src\fairpane\.tools
+RESULT {"executable":"C:\\Windows\\system32\\cmd.exe","arguments":["/d","/c","mklink","/J",".tools","C:\\src\\fairpane\\.tools"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:19:15.531Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","run","c-abi","--evidence-dir","out/evidence/fp0106-after"]
+Execute gate c-abi.
+{
+  "gate": "c-abi",
+  "status": "pass",
+  "receipt": "out/evidence/fp0106-after/2026-10-09T20-19-18-491Z-c-abi-c7d92f07.json",
+  "error": null
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","run","c-abi","--evidence-dir","out/evidence/fp0106-after"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:19:18.219Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":102953}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');const s='out/evidence/fp0106-after',d='engineering/evidence/FP-0106/raw/gates-after';fs.mkdirSync(d,{recursive:true});for(const f of fs.readdirSync(s))fs.copyFileSync(s+'/'+f,d+'/'+f)"]
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');const s='out/evidence/fp0106-after',d='engineering/evidence/FP-0106/raw/gates-after';fs.mkdirSync(d,{recursive:true});for(const f of fs.readdirSync(s))fs.copyFileSync(s+'/'+f,d+'/'+f)"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:21:08.314Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":43}

@@ -1,0 +1,36 @@
+Fairpane local gate: c-abi
+Trust: unsigned-local-integrity-only
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\c-abi-build"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\c-abi-build"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:21:19.511Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":2205,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\tools\\fairpane.mjs","abi-exports","out/c-abi-build/lib/fairpane.lib"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "library": "out/c-abi-build/lib/fairpane.lib",
+  "exports": 15
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\tools\\fairpane.mjs","abi-exports","out/c-abi-build/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:21:21.716Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":78,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\c-abi-smoke.exe"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\c-abi-smoke.exe"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:21:21.794Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":144,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\c-abi-smoke.exe"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\c-abi-smoke.exe","arguments":[],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:21:21.939Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":48,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","-Doptimize=ReleaseSafe","--prefix","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\c-abi-release"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","-Doptimize=ReleaseSafe","--prefix","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\out\\c-abi-release"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:21:21.988Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":4055,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\tools\\fairpane.mjs","abi-exports","out/c-abi-release/lib/fairpane.lib"]
+{
+  "result": "fail",
+  "schema": "api/fairpane.schema.json",
+  "library": "out/c-abi-release/lib/fairpane.lib",
+  "unexpected": [],
+  "missing": [
+    "fp_abi_revision"
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\tools\\fairpane.mjs","abi-exports","out/c-abi-release/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m","started_at":"2026-10-09T20:21:26.043Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":93,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\.zig-cache\\global"}}
+GATE ERROR Gate command failed: ["C:\\nvm4w\\nodejs\\node.exe","C:\\Users\\requi\\.omp\\wt\\tf07027fe0\\m\\tools\\fairpane.mjs","abi-exports","out/c-abi-release/lib/fairpane.lib"]

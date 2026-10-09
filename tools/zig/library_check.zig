@@ -42,7 +42,7 @@ pub fn main(init: std.process.Init) !u8 {
                 try needles.append(arena, try std.fs.path.resolveAlloc(arena, &.{ cwd, value }));
             } else return usage();
         }
-        return reportAbsent(arena, args[2], bytes, needles.items);
+        return reportAbsent(args[2], bytes, needles.items);
     }
     if (std.mem.eql(u8, command, "names") and args.len == 4) {
         const bytes = try readLibrary(init.io, arena, args[2]);
@@ -53,7 +53,7 @@ pub fn main(init: std.process.Init) !u8 {
         }
         const cwd = try std.process.currentPathAlloc(init.io, arena);
         const directory = try std.fs.path.resolveAlloc(arena, &.{ cwd, args[3] });
-        if (try find(arena, archive.members[0].data, directory) == null) {
+        if (try find(archive.members[0].data, directory) == null) {
             std.debug.print("the object {s} of {s} does not name {s}\n", .{ archive.members[0].name, args[2], directory });
             return 1;
         }
@@ -107,13 +107,16 @@ fn malformed(path: []const u8, err: ParseError) u8 {
     return 1;
 }
 
-fn reportAbsent(gpa: std.mem.Allocator, path: []const u8, bytes: []const u8, needles: []const []const u8) !u8 {
+/// Reports each needle that `bytes`, the library at `path`, contains. An empty needle is a usage error.
+fn reportAbsent(path: []const u8, bytes: []const u8, needles: []const []const u8) u8 {
     var found = false;
     for (needles) |needle| {
-        if (try find(gpa, bytes, needle)) |offset| {
-            std.debug.print("{s} contains {s} at byte {d}\n", .{ path, needle, offset });
-            found = true;
-        }
+        const offset = find(bytes, needle) catch |err| {
+            std.debug.print("cannot search {s} for an empty needle: {t}\n", .{ path, err });
+            return 2;
+        } orelse continue;
+        std.debug.print("{s} contains {s} at byte {d}\n", .{ path, needle, offset });
+        found = true;
     }
     return if (found) 1 else 0;
 }
@@ -124,15 +127,24 @@ fn fold(byte: u8) u8 {
 }
 
 /// The offset of the first occurrence of `needle` in `haystack`, comparing folded bytes.
-fn find(gpa: std.mem.Allocator, haystack: []const u8, needle: []const u8) !?usize {
+/// It folds each byte as it reads it and stores no folded copy of either slice.
+/// Horspool's rule moves the window by the shift of its last folded byte: the distance from that byte's last
+/// occurrence in the needle, other than at its last position, to the needle's end, or the needle's length.
+fn find(haystack: []const u8, needle: []const u8) error{EmptyNeedle}!?usize {
     if (needle.len == 0) return error.EmptyNeedle;
-    const folded_needle = try gpa.alloc(u8, needle.len);
-    defer gpa.free(folded_needle);
-    for (folded_needle, needle) |*out, byte| out.* = fold(byte);
-    const folded = try gpa.alloc(u8, haystack.len);
-    defer gpa.free(folded);
-    for (folded, haystack) |*out, byte| out.* = fold(byte);
-    return std.mem.find(u8, folded, folded_needle);
+    if (needle.len > haystack.len) return null;
+    const last = needle.len - 1;
+    var shift: [256]usize = @splat(needle.len);
+    for (needle[0..last], 0..) |byte, index| shift[fold(byte)] = last - index;
+    var start: usize = 0;
+    while (start <= haystack.len - needle.len) {
+        const window = haystack[start..][0..needle.len];
+        for (window, needle) |actual, expected| {
+            if (fold(actual) != fold(expected)) break;
+        } else return start;
+        start += shift[fold(window[last])];
+    }
+    return null;
 }
 
 const ParseError = error{
@@ -319,10 +331,65 @@ test "FP-0066: malformed archives fail to parse" {
     try testing.expectError(error.MalformedName, parse(gpa, try testArchive(gpa, &.{.{ "#1/9", "0", "data" }})));
 }
 
-test "FP-0066: a search ignores letter case and the path separator" {
+test "FP-0066 (amended by FP-0106 case 4): a search ignores letter case and the path separator" {
     const library = "debug info: C:\\Src\\Fairpane\\SRC\\root.zig";
-    try testing.expectEqual(@as(?usize, 12), try find(testing.allocator, library, "c:/src/fairpane/src"));
-    try testing.expectEqual(@as(?usize, 12), try find(testing.allocator, library, "C:\\src\\FAIRPANE"));
-    try testing.expectEqual(@as(?usize, null), try find(testing.allocator, library, "c:/src/fairpane/lib"));
-    try testing.expectError(error.EmptyNeedle, find(testing.allocator, library, ""));
+    // Every search runs, so a failure names each search that it breaks.
+    const searches = [_]struct { []const u8, []const u8, ?usize }{
+        .{ library, "c:/src/fairpane/src", 12 },
+        .{ library, "C:\\src\\FAIRPANE", 12 },
+        .{ library, "c:/src/fairpane/lib", null },
+        .{ library, "ROOT.ZIG", 32 },
+        .{ "abcabd", "abd", 3 },
+        .{ "aaab", "aab", 1 },
+        .{ "ab", "b", 1 },
+        .{ "xyz", "xyzw", null },
+        .{ "Q", "q", 0 },
+        .{ "a\\b/C", "A/B\\c", 0 },
+    };
+    var failed = false;
+    for (searches) |search| {
+        const haystack, const needle, const expected = search;
+        const actual = try find(haystack, needle);
+        if (!std.meta.eql(actual, expected)) {
+            std.debug.print("find(\"{s}\", \"{s}\") is {?d}, not {?d}\n", .{ haystack, needle, actual, expected });
+            failed = true;
+        }
+    }
+    try testing.expectError(error.EmptyNeedle, find(library, ""));
+    try testing.expect(!failed);
+}
+
+/// The source of the function whose declaration starts with `start`: from its first occurrence to the next line that is exactly `}`.
+fn functionSource(source: []const u8, start: []const u8) ?[]const u8 {
+    const begin = std.mem.find(u8, source, start) orelse return null;
+    var lines = std.mem.splitScalar(u8, source[begin..], '\n');
+    while (lines.next()) |line| {
+        if (std.mem.eql(u8, std.mem.trimEnd(u8, line, "\r"), "}")) {
+            const end = lines.index orelse source.len - begin;
+            return source[begin..][0..end];
+        }
+    }
+    return null;
+}
+
+test "FP-0106 case 3: find and reportAbsent take no allocator and neither allocates nor copies" {
+    const takes_allocator = comptime blk: {
+        for ([_]std.lang.Type.Fn{ @typeInfo(@TypeOf(find)).@"fn", @typeInfo(@TypeOf(reportAbsent)).@"fn" }) |info| {
+            for (info.param_types) |param_type| {
+                if (param_type) |t| if (t == std.mem.Allocator) break :blk true;
+            }
+        }
+        break :blk false;
+    };
+    try testing.expect(!takes_allocator);
+    const source = @embedFile("library_check.zig");
+    for ([_][]const u8{ "fn find(", "fn reportAbsent(" }) |start| {
+        const body = functionSource(source, start) orelse return error.FunctionMissing;
+        for ([_][]const u8{ "alloc", "Allocator", "heap", "dupe" }) |word| {
+            if (std.mem.find(u8, body, word)) |offset| {
+                std.debug.print("the source of {s}...) contains {s} at byte {d}\n", .{ start, word, offset });
+                return error.SearchAllocates;
+            }
+        }
+    }
 }

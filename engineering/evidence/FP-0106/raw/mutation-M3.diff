@@ -1,0 +1,13 @@
+diff --git a/src/lab.zig b/out/fp0106/mutation/lab-M3.zig
+index e37e93e..9067fa0 100644
+--- a/src/lab.zig
++++ b/out/fp0106/mutation/lab-M3.zig
+@@ -183,7 +183,7 @@ pub fn windowsIdentityStep(status: std.os.windows.NTSTATUS) WindowsIdentityStep
+ 
+ /// The number of waits before an open that keeps returning `SHARING_VIOLATION` or `DELETE_PENDING` fails,
+ /// the pinned `max_windows_kernel_bug_retries` (`Io/Threaded.zig:1571`).
+-const windows_identity_backoffs = 13;
++const windows_identity_backoffs = 12;
+ 
+ /// The wait in milliseconds before backoff `attempt`, or null when the open fails with `FileBusy`.
+ /// The waits double from 0 ms and 1 ms, as the pinned `(1 << attempt) >> 1`, and sum to 4095 ms.

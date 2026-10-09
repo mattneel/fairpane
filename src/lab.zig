@@ -138,6 +138,60 @@ pub fn fileFailure(subject: []const u8, err: anyerror) Detail {
     } };
 }
 
+// The Windows identification open.
+
+/// The errors that the identification open of `lab_main.zig` returns for a status,
+/// each as the pinned standard library's `dirOpenFileWtf16` returns it (`Io/Threaded.zig:5167-5224`).
+pub const WindowsIdentityError = error{ BadPathName, FileNotFound, NetworkNotFound, NoDevice, AccessDenied, PipeBusy, PathAlreadyExists, IsDir, NotDir, AntivirusInterference };
+
+/// What the identification open does after its `NtCreateFile` call returns a status.
+pub const WindowsIdentityStep = union(enum) {
+    /// The handle is open.
+    opened,
+    /// Check for a pending cancelation, then open again.
+    retry,
+    /// Wait `windowsIdentityBackoffMs(attempt)` and open again, or fail with `FileBusy` when it is null.
+    retry_after_backoff,
+    /// Fail with the error.
+    fail: WindowsIdentityError,
+    /// The status shows a programming error, which `windows.statusBug` reports.
+    bug,
+    /// Any other status, which `windows.unexpectedStatus` reports.
+    unexpected,
+};
+
+/// Maps a status of the identification open as each arm of the pinned `dirOpenFileWtf16` switch does.
+pub fn windowsIdentityStep(status: std.os.windows.NTSTATUS) WindowsIdentityStep {
+    return switch (status) {
+        .SUCCESS => .opened,
+        .OBJECT_NAME_INVALID => .{ .fail = error.BadPathName },
+        .OBJECT_NAME_NOT_FOUND, .OBJECT_PATH_NOT_FOUND => .{ .fail = error.FileNotFound },
+        .BAD_NETWORK_PATH, .BAD_NETWORK_NAME => .{ .fail = error.NetworkNotFound },
+        .NO_MEDIA_IN_DEVICE, .PIPE_NOT_AVAILABLE => .{ .fail = error.NoDevice },
+        .INVALID_PARAMETER, .OBJECT_PATH_SYNTAX_BAD, .INVALID_HANDLE => .bug,
+        .CANCELLED => .retry,
+        .SHARING_VIOLATION, .DELETE_PENDING => .retry_after_backoff,
+        .ACCESS_DENIED, .USER_MAPPED_FILE => .{ .fail = error.AccessDenied },
+        .PIPE_BUSY => .{ .fail = error.PipeBusy },
+        .OBJECT_NAME_COLLISION => .{ .fail = error.PathAlreadyExists },
+        .FILE_IS_A_DIRECTORY => .{ .fail = error.IsDir },
+        .NOT_A_DIRECTORY => .{ .fail = error.NotDir },
+        .VIRUS_INFECTED, .VIRUS_DELETED => .{ .fail = error.AntivirusInterference },
+        else => .unexpected,
+    };
+}
+
+/// The number of waits before an open that keeps returning `SHARING_VIOLATION` or `DELETE_PENDING` fails,
+/// the pinned `max_windows_kernel_bug_retries` (`Io/Threaded.zig:1571`).
+const windows_identity_backoffs = 13;
+
+/// The wait in milliseconds before backoff `attempt`, or null when the open fails with `FileBusy`.
+/// The waits double from 0 ms and 1 ms, as the pinned `(1 << attempt) >> 1`, and sum to 4095 ms.
+pub fn windowsIdentityBackoffMs(attempt: u5) ?u32 {
+    if (attempt >= windows_identity_backoffs) return null;
+    return (@as(u32, 1) << attempt) >> 1;
+}
+
 // Cases.
 
 pub const Corpus = struct {

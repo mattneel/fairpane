@@ -1,0 +1,13 @@
+diff --git a/tools/zig/library_check.zig b/out/fp0106/mutation/library_check-M5.zig
+index ce6da85..4f6fb1e 100644
+--- a/tools/zig/library_check.zig
++++ b/out/fp0106/mutation/library_check-M5.zig
+@@ -140,7 +140,7 @@ fn find(haystack: []const u8, needle: []const u8) error{EmptyNeedle}!?usize {
+     while (start <= haystack.len - needle.len) {
+         const window = haystack[start..][0..needle.len];
+         for (window, needle) |actual, expected| {
+-            if (fold(actual) != fold(expected)) break;
++            if (actual != fold(expected)) break;
+         } else return start;
+         start += shift[fold(window[last])];
+     }

@@ -1,0 +1,23 @@
+diff --git a/src/lab.zig b/out/fp0106/mutation/lab-M2.zig
+index e37e93e..d213e61 100644
+--- a/src/lab.zig
++++ b/out/fp0106/mutation/lab-M2.zig
+@@ -142,7 +142,7 @@ pub fn fileFailure(subject: []const u8, err: anyerror) Detail {
+ 
+ /// The errors that the identification open of `lab_main.zig` returns for a status,
+ /// each as the pinned standard library's `dirOpenFileWtf16` returns it (`Io/Threaded.zig:5167-5224`).
+-pub const WindowsIdentityError = error{ BadPathName, FileNotFound, NetworkNotFound, NoDevice, AccessDenied, PipeBusy, PathAlreadyExists, IsDir, NotDir, AntivirusInterference };
++pub const WindowsIdentityError = error{ BadPathName, FileNotFound, NetworkNotFound, NoDevice, AccessDenied, PipeBusy, PathAlreadyExists, IsDir, NotDir, AntivirusInterference, FileBusy };
+ 
+ /// What the identification open does after its `NtCreateFile` call returns a status.
+ pub const WindowsIdentityStep = union(enum) {
+@@ -170,7 +170,8 @@ pub fn windowsIdentityStep(status: std.os.windows.NTSTATUS) WindowsIdentityStep
+         .NO_MEDIA_IN_DEVICE, .PIPE_NOT_AVAILABLE => .{ .fail = error.NoDevice },
+         .INVALID_PARAMETER, .OBJECT_PATH_SYNTAX_BAD, .INVALID_HANDLE => .bug,
+         .CANCELLED => .retry,
+-        .SHARING_VIOLATION, .DELETE_PENDING => .retry_after_backoff,
++        .SHARING_VIOLATION => .retry_after_backoff,
++        .DELETE_PENDING => .{ .fail = error.FileBusy },
+         .ACCESS_DENIED, .USER_MAPPED_FILE => .{ .fail = error.AccessDenied },
+         .PIPE_BUSY => .{ .fail = error.PipeBusy },
+         .OBJECT_NAME_COLLISION => .{ .fail = error.PathAlreadyExists },
