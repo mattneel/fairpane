@@ -1,0 +1,63 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.EXE","-e","\nconst { execFileSync } = require(\"child_process\");\nconst gh = process.argv[1];\nconst runs = JSON.parse(execFileSync(gh, [\"run\",\"list\",\"--workflow\",\"Gates\",\"--limit\",\"60\",\"--json\",\"databaseId,headSha,status,conclusion,createdAt,attempt\"], { encoding: \"utf8\" }));\nfor (const run of runs) {\n  if (run.status !== \"completed\") { console.log(`${run.databaseId} ${run.headSha.slice(0,7)} ${run.createdAt} ${run.status}`); continue; }\n  const view = JSON.parse(execFileSync(gh, [\"run\",\"view\",String(run.databaseId),\"--json\",\"jobs,attempt\"], { encoding: \"utf8\" }));\n  for (const job of view.jobs) for (const st of job.steps) {\n    if (st.name !== \"Run gate zig-test\" || !st.startedAt || !st.completedAt) continue;\n    const s = Math.round((Date.parse(st.completedAt) - Date.parse(st.startedAt)) / 1000);\n    console.log(`${run.databaseId} attempt ${view.attempt} ${run.headSha.slice(0,7)} created ${run.createdAt} ${job.name} zig-test ${st.conclusion} ${s}s`);\n  }\n}\n","C:\\Program Files\\GitHub CLI\\gh.exe"]
+37937560262 0baa8d5 2026-10-09T13:32:22Z in_progress
+37937485293 45acde8 2026-10-09T13:31:45Z in_progress
+37937090342 e03293f 2026-10-09T13:28:30Z in_progress
+37936849509 f38fe6c 2026-10-09T13:26:26Z in_progress
+37936811513 efc3dd3 2026-10-09T13:26:07Z in_progress
+37936609533 152ed53 2026-10-09T13:24:27Z in_progress
+37936496693 e6d215c 2026-10-09T13:23:30Z in_progress
+37936361001 a3e5cf9 2026-10-09T13:22:21Z in_progress
+37936302812 attempt 1 b7369a3 created 2026-10-09T13:21:51Z Windows gates zig-test success 245s
+37936151538 e659254 2026-10-09T13:20:33Z in_progress
+37935141435 attempt 1 ed95bc5 created 2026-10-09T13:11:57Z Windows gates zig-test success 552s
+37935108213 d526219 2026-10-09T13:11:40Z in_progress
+37935097274 attempt 1 49f2a81 created 2026-10-09T13:11:34Z Windows gates zig-test success 530s
+37935038508 attempt 1 cb8427d created 2026-10-09T13:11:03Z Windows gates zig-test success 590s
+37934396058 attempt 1 493143b created 2026-10-09T13:05:29Z Windows gates zig-test success 559s
+37934334536 attempt 1 04342e2 created 2026-10-09T13:04:58Z Windows gates zig-test success 276s
+37934223362 attempt 1 789ad50 created 2026-10-09T13:03:59Z Windows gates zig-test success 565s
+37934034077 4531b33 2026-10-09T13:02:18Z in_progress
+37933043253 attempt 1 ba759f7 created 2026-10-09T12:53:36Z Windows gates zig-test success 283s
+37932243183 attempt 1 1409e8b created 2026-10-09T12:46:25Z Windows gates zig-test success 396s
+37931577806 attempt 1 d250e30 created 2026-10-09T12:40:23Z Windows gates zig-test success 558s
+37931504508 attempt 1 d17abb0 created 2026-10-09T12:39:45Z Windows gates zig-test success 456s
+37931192952 attempt 1 9cc81ea created 2026-10-09T12:36:52Z Windows gates zig-test failure 601s
+37930649863 attempt 1 dfa6563 created 2026-10-09T12:31:56Z Windows gates zig-test success 254s
+37930138030 attempt 1 f90350b created 2026-10-09T12:27:23Z Windows gates zig-test success 257s
+37929878226 attempt 1 9eba04f created 2026-10-09T12:25:02Z Windows gates zig-test success 251s
+37929836003 attempt 1 42c5e07 created 2026-10-09T12:24:39Z Windows gates zig-test success 295s
+37929137713 attempt 1 405bd23 created 2026-10-09T12:18:12Z Windows gates zig-test success 347s
+37929005855 attempt 1 3640a79 created 2026-10-09T12:16:57Z Windows gates zig-test success 438s
+37928701190 attempt 1 297f1d3 created 2026-10-09T12:14:07Z Windows gates zig-test success 569s
+37928571465 attempt 1 5134610 created 2026-10-09T12:12:54Z Windows gates zig-test success 526s
+37928265753 attempt 1 b0e8e33 created 2026-10-09T12:10:07Z Windows gates zig-test success 298s
+37928199103 attempt 1 82ba854 created 2026-10-09T12:09:28Z Windows gates zig-test success 438s
+37928003602 attempt 1 837fcdd created 2026-10-09T12:07:35Z Windows gates zig-test success 547s
+37927297050 attempt 1 8d945fe created 2026-10-09T12:00:52Z Windows gates zig-test success 320s
+37927263722 attempt 1 ece0fde created 2026-10-09T12:00:35Z Windows gates zig-test success 516s
+37926957860 attempt 1 977442c created 2026-10-09T11:57:39Z Windows gates zig-test success 513s
+37926644057 attempt 2 a1b2d1c created 2026-10-09T11:54:39Z Windows gates zig-test success 566s
+37926245764 attempt 1 639ec81 created 2026-10-09T11:50:50Z Windows gates zig-test success 573s
+37922870938 attempt 1 1b9b1f9 created 2026-10-09T11:18:03Z Windows gates zig-test success 119s
+37922717792 attempt 1 f0f9a23 created 2026-10-09T11:16:32Z Windows gates zig-test success 115s
+37922592998 attempt 1 79de0e6 created 2026-10-09T11:15:18Z Windows gates zig-test success 155s
+37922184936 attempt 1 1323095 created 2026-10-09T11:11:18Z Windows gates zig-test success 137s
+37921378862 attempt 1 76ed5bd created 2026-10-09T11:03:23Z Windows gates zig-test success 143s
+37921160655 attempt 1 00f85bc created 2026-10-09T11:01:15Z Windows gates zig-test success 142s
+37920536721 attempt 1 43edcec created 2026-10-09T10:55:11Z Windows gates zig-test success 106s
+37920400730 attempt 1 bcbe5a4 created 2026-10-09T10:53:52Z Windows gates zig-test success 106s
+37919843004 attempt 1 909104a created 2026-10-09T10:48:23Z Windows gates zig-test success 85s
+37919622672 attempt 1 24b8a35 created 2026-10-09T10:46:12Z Windows gates zig-test success 122s
+37919150376 attempt 1 8dd827b created 2026-10-09T10:41:33Z Windows gates zig-test success 104s
+37919122842 attempt 1 189502e created 2026-10-09T10:41:17Z Windows gates zig-test success 136s
+37917899118 attempt 1 6e142bb created 2026-10-09T10:29:19Z Windows gates zig-test success 140s
+37917871333 attempt 1 ba28c19 created 2026-10-09T10:29:03Z Windows gates zig-test success 137s
+37916552594 attempt 1 c283c70 created 2026-10-09T10:16:12Z Windows gates zig-test success 104s
+37916454663 attempt 1 069b60e created 2026-10-09T10:15:16Z Windows gates zig-test success 87s
+37916319615 attempt 1 aeebdf1 created 2026-10-09T10:13:57Z Windows gates zig-test success 108s
+37915524561 attempt 1 1158696 created 2026-10-09T10:06:22Z Windows gates zig-test success 138s
+37914893436 attempt 1 bdcc84c created 2026-10-09T10:00:25Z Windows gates zig-test success 134s
+37914142363 attempt 1 d55b300 created 2026-10-09T09:53:16Z Windows gates zig-test success 112s
+37913535101 attempt 1 3531b1a created 2026-10-09T09:47:31Z Windows gates zig-test success 137s
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.EXE","arguments":["-e","\nconst { execFileSync } = require(\"child_process\");\nconst gh = process.argv[1];\nconst runs = JSON.parse(execFileSync(gh, [\"run\",\"list\",\"--workflow\",\"Gates\",\"--limit\",\"60\",\"--json\",\"databaseId,headSha,status,conclusion,createdAt,attempt\"], { encoding: \"utf8\" }));\nfor (const run of runs) {\n  if (run.status !== \"completed\") { console.log(`${run.databaseId} ${run.headSha.slice(0,7)} ${run.createdAt} ${run.status}`); continue; }\n  const view = JSON.parse(execFileSync(gh, [\"run\",\"view\",String(run.databaseId),\"--json\",\"jobs,attempt\"], { encoding: \"utf8\" }));\n  for (const job of view.jobs) for (const st of job.steps) {\n    if (st.name !== \"Run gate zig-test\" || !st.startedAt || !st.completedAt) continue;\n    const s = Math.round((Date.parse(st.completedAt) - Date.parse(st.startedAt)) / 1000);\n    console.log(`${run.databaseId} attempt ${view.attempt} ${run.headSha.slice(0,7)} created ${run.createdAt} ${job.name} zig-test ${st.conclusion} ${s}s`);\n  }\n}\n","C:\\Program Files\\GitHub CLI\\gh.exe"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T13:33:25.318Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":50379}
