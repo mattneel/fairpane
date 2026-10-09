@@ -1,0 +1,47 @@
+Fairpane local gate: zig-test
+Trust: unsigned-local-integrity-only
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test"]
+test
++- FP-0082 case 16: a missing path exits with status 3 w
+fairpane-js-parse: tests/js/parse/missing.js: FileNotFound
+failed command: cd . && ".\\zig-out\\bin\\fairpane-js-parse.exe" file tests/js/parse/missing.js
+
+test
++- FP-0082 case 16: invalid-utf8.js exits with status 3 w
+fairpane-js-parse: .\tests\js\parse\invalid-utf8.js: InvalidUtf8
+failed command: ".\\zig-out\\bin\\fairpane-js-parse.exe" file ".\\tests\\js\\parse\\invalid-utf8.js"
+
+test
++- FP-0082 case 17: the census of the sound fixture exits with status 0 failure
+fairpane-js-parse: census: cannot create .\.zig-cache\o\402c102b2af32213a6433349ce921e77\census-sound/census.jsonl: PathAlreadyExists
+error: ========= expected to find in stdout: =========
+       {"format":"fairpane-js-parse-census","version":1,"commit":"0000000000000000000000000000000000000000"}
+       
+       ========= but stdout does not contain it: =====
+       
+failed command: ".\\zig-out\\bin\\fairpane-js-parse.exe" census ".\\tests\\js\\census\\sound" ".\\.zig-cache\\o\\402c102b2af32213a6433349ce921e77\\census-sound/census.jsonl"
+
+test
++- FP-0082 case 17: the census refuses an existing output file and exits with status 3 w
+fairpane-js-parse: census: cannot create .\.zig-cache\o\0c925f44918d6f5adba948a0455992d0\existing.jsonl: PathAlreadyExists
+failed command: ".\\zig-out\\bin\\fairpane-js-parse.exe" census ".\\tests\\js\\census\\sound" ".\\.zig-cache\\o\\0c925f44918d6f5adba948a0455992d0\\existing.jsonl"
+
+test
++- FP-0082 case 17: the census of the unsound fixture exits with status 1 failure
+fairpane-js-parse: census: cannot create .\.zig-cache\o\448efb2083a2ec0b2030573d17d9d3d1\census-unsound/census.jsonl: PathAlreadyExists
+error: ========= expected to find in stdout: =========
+       "false_accept":2,"false_syntax_error":1,"metadata_error":1,
+       ========= but stdout does not contain it: =====
+       
+failed command: ".\\zig-out\\bin\\fairpane-js-parse.exe" census ".\\tests\\js\\census\\unsound" ".\\.zig-cache\\o\\448efb2083a2ec0b2030573d17d9d3d1\\census-unsound/census.jsonl"
+
+Build Summary: 97/100 steps succeeded (2 failed); 45/45 tests passed
+test transitive failure
++- FP-0082 case 17: the census of the sound fixture exits with status 0 failure
++- FP-0082 case 17: the census of the unsound fixture exits with status 1 failure
+
+error: the following build command exited with code 1:
+.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=.zig-cache\global --seed=0x5d662bb2 test
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T18:02:06.572Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":1191,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+GATE ERROR Gate command failed: ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test"]

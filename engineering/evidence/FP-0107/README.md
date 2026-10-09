@@ -187,6 +187,28 @@ Neither run supports a claim in this README.
 7. `node tools/selftest.mjs`, `exit_code` 1: 238 of 240 pass, and FP-0107 cases 1 and 2 fail with "Cannot find module ...\tools\test-runner.mjs".
 8. `git reset -q -- tools/selftest.mjs` and `git diff --cached --stat`, `exit_code` 0 each, which leave the index at `HEAD`.
 
+## Integration
+
+Commit `13168dc` applies the worker's `out/fp0107.patch`, blob `322cee895ab048d6d6f7edc22de7484116b79be1`, on `194739e`, and all 27 files apply cleanly.
+No file under `src`, `tests`, or `build.zig` changes.
+
+`raw/integration-binding.log` records `HEAD` `13168dc` and a status that includes ignored files before and after these gates:
+
+| Gate | Receipt | Status | Duration |
+| --- | --- | --- | --- |
+| `repo-check` | `gates/2026-10-09T18-01-12-691Z-repo-check-17a98035.json` | pass | 840 ms |
+| `controller-test` | `gates/2026-10-09T18-01-14-088Z-controller-test-7a9ee339.json` | pass, 240 of 240 | 51,743 ms |
+| `zig-fmt` | `gates/2026-10-09T18-02-06-104Z-zig-fmt-954b51cf.json` | pass | 74 ms |
+| `zig-test` | `gates/2026-10-09T18-02-06-479Z-zig-test-9b503199.json` | fail | 1,191 ms |
+
+The failed `zig-test` run failed only the two FP-0082 case 17 census steps, with `PathAlreadyExists` for a `census.jsonl` that a run at 17:23 UTC had left in the local cache.
+`engineering/evidence/FP-0082/raw/census-rerun-5-lost-manifest.log` and `census-rerun-6.log` reproduce that failure on purpose, and FP-0082 revision 2 amendment 1 owns the fix.
+The integrator then removed the two stale output directories with an unrecorded `rm -rf`.
+`raw/integration-binding-zig-test-2.log` records `HEAD` `13168dc` and the status before and after a second `zig-test` run, `gates/2026-10-09T18-11-24-103Z-zig-test-4c9ac18a.json`, which passes.
+Bun 1.4.2 passes 240 of 240 cases in `raw/bun-selftest-integration.log` and `raw/bun-selftest-zig-test-2.log`.
+The local `controller-test` total is 51,573 ms, against 37,968 ms in `raw/profile-after.log`.
+[INFERENCE] Workers' builds were running on the host at the same time; the dispatched runs decide criterion 3.
+
 ## Open items
 
 - The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs `repo-check` and `controller-test`.

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "repo-check",
+  "gate_sha256": "83889f6c10672d867afaf998faeda5b700c86ef1730d7dbff34c22e2062cc69e",
+  "status": "pass",
+  "started_at": "2026-10-09T18:01:12.693Z",
+  "finished_at": "2026-10-09T18:01:13.770Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "os_release": "10.0.26200",
+    "runtime": "v26.7.0",
+    "bun_version": null,
+    "zig_version": null
+  },
+  "source_before": {
+    "sha256": "d0f780400711bf1e633b9fe370697e9624029755d0c105cac80006466d719789",
+    "file_count": 315
+  },
+  "source_after": {
+    "sha256": "d0f780400711bf1e633b9fe370697e9624029755d0c105cac80006466d719789",
+    "file_count": 315
+  },
+  "policy_before": {
+    "sha256": "f8e3214684ae5e4a2a4b742f2e859258516adcd01aeffabd1913fe08556b2ee5",
+    "file_count": 24
+  },
+  "policy_after": {
+    "sha256": "f8e3214684ae5e4a2a4b742f2e859258516adcd01aeffabd1913fe08556b2ee5",
+    "file_count": 24
+  },
+  "commands": [
+    {
+      "executable": "C:\\nvm4w\\nodejs\\node.exe",
+      "arguments": [
+        "C:\\src\\fairpane\\tools\\fairpane.mjs",
+        "check"
+      ],
+      "cwd": "C:\\src\\fairpane",
+      "started_at": "2026-10-09T18:01:12.693Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 840
+    }
+  ],
+  "error": null,
+  "outputs": [
+    {
+      "path": "engineering/evidence/FP-0107/gates/2026-10-09T18-01-12-691Z-repo-check-17a98035.log",
+      "size": 914,
+      "sha256": "e9f753a63d215fbceb8eacfbf7492f757d381565c8a578d755eb0c4f4ccfb9af"
+    }
+  ]
+}
