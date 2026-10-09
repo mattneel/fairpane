@@ -1,0 +1,74 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+77158595185cdf213c663c9817200200df0b88c2
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:23:47.609Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/js/parser.zig","src/js/parse_census.zig","src/js/parse_main.zig","tools/corpus.mjs"]
+ca6260768d30f722c1f02e5b29bde1bfbf4443de
+597d885f178bacfcbeaf7fadde7666577e552e03
+b05fffaf1d70b49b3df99cfe61a9a27c487eb555
+c5a41a612e74f2f02835ef024c439cb2f05566fa
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/js/parser.zig","src/js/parse_census.zig","src/js/parse_main.zig","tools/corpus.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:23:47.734Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29}
+
+COMMAND ["--env","ZIG_GLOBAL_CACHE_DIR=C:\\src\\fairpane\\.zig-cache\\global","C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","js-tools","-Doptimize=ReleaseSafe","--summary","all"]
+RESULT {"executable":"--env","arguments":["ZIG_GLOBAL_CACHE_DIR=C:\\src\\fairpane\\.zig-cache\\global","C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","js-tools","-Doptimize=ReleaseSafe","--summary","all"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:23:47.843Z","exit_code":null,"signal":null,"timed_out":false,"error":"The executable is not on PATH: --env","duration_ms":0}
+
+COMMAND ["--env","FAIRPANE_CORPORA_DIR=C:\\src\\fairpane\\.tools\\corpora","node","tools/fairpane.mjs","corpus-extract","test262","out/fp0082-test262-r2"]
+RESULT {"executable":"--env","arguments":["FAIRPANE_CORPORA_DIR=C:\\src\\fairpane\\.tools\\corpora","node","tools/fairpane.mjs","corpus-extract","test262","out/fp0082-test262-r2"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:23:47.918Z","exit_code":null,"signal":null,"timed_out":false,"error":"The executable is not on PATH: --env","duration_ms":0}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","zig-out/bin/fairpane-js-parse.exe","out/fp0082-test262-r2/EXTRACT.json"]
+fatal: could not open 'out/fp0082-test262-r2/EXTRACT.json' for reading: No such file or directory
+3fc399c2fff68e012a53f11945e508ff09733ed1
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","zig-out/bin/fairpane-js-parse.exe","out/fp0082-test262-r2/EXTRACT.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:23:47.993Z","exit_code":128,"signal":null,"timed_out":false,"error":null,"duration_ms":35}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m\\zig-out\\bin\\fairpane-js-parse.exe","census","out/fp0082-test262-r2","out/fp0082-census-r2.jsonl"]
+fairpane-js-parse: census: FileNotFound
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m\\zig-out\\bin\\fairpane-js-parse.exe","arguments":["census","out/fp0082-test262-r2","out/fp0082-census-r2.jsonl"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:23:48.095Z","exit_code":3,"signal":null,"timed_out":false,"error":null,"duration_ms":12}
+
+COMMAND ["C:\\Windows\\system32\\cmd.exe","/d","/c","certutil","-hashfile","out\\fp0082-census-r2.jsonl","SHA256"]
+CertUtil: -hashfile command FAILED: 0x80070002 (WIN32: 2 ERROR_FILE_NOT_FOUND)
+CertUtil: The system cannot find the file specified.
+RESULT {"executable":"C:\\Windows\\system32\\cmd.exe","arguments":["/d","/c","certutil","-hashfile","out\\fp0082-census-r2.jsonl","SHA256"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:23:48.177Z","exit_code":2147942402,"signal":null,"timed_out":false,"error":null,"duration_ms":192}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+77158595185cdf213c663c9817200200df0b88c2
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:23:55.170Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","js-tools","-Doptimize=ReleaseSafe","--summary","all"]
+Build Summary: 4/4 steps succeeded
+js-tools success
++- install fairpane-js-parse success
+   +- compile exe fairpane-js-parse safe native success 12s MaxRSS:382M
+      +- WriteFile src success
+
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","js-tools","-Doptimize=ReleaseSafe","--summary","all"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:23:55.246Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16104,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-extract","test262","out/fp0082-test262-r2"]
+{
+  "result": "pass",
+  "out": "C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m\\out\\fp0082-test262-r2",
+  "schema_version": 1,
+  "corpus": "test262",
+  "commit": "2e0a56762801e275a9fdf96dc49d90ba0cddcf63",
+  "tree": "6a4268a9354a545d41c3b62efebc478ed8c521f4",
+  "files": 53975,
+  "entries_sha256": "95f65b6c7dc3617d92648f5b9fc65b2d1e6236f1eed0763a1038f8235943a1f1",
+  "note": "Extraction checked the tree and inventory against the snapshot record and wrote Git blobs whose content hashes to their tree object IDs. No corpus code ran."
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-extract","test262","out/fp0082-test262-r2"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:24:11.406Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22727,"environment_overrides":{"FAIRPANE_CORPORA_DIR":"C:\\src\\fairpane\\.tools\\corpora"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","zig-out/bin/fairpane-js-parse.exe","out/fp0082-test262-r2/EXTRACT.json"]
+ea582cc0807e9963b47ebcbbfb897ac60f240f00
+7ae22ae38f6bd3e4479545b8b3e0d7f24ae72f79
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","zig-out/bin/fairpane-js-parse.exe","out/fp0082-test262-r2/EXTRACT.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:24:34.192Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":49}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m\\zig-out\\bin\\fairpane-js-parse.exe","census","out/fp0082-test262-r2","out/fp0082-census-r2.jsonl"]
+{"format":"fairpane-js-parse-census","version":1,"commit":"2e0a56762801e275a9fdf96dc49d90ba0cddcf63"}
+{"summary":{"discovered":53616,"module":843,"proposal_files":2450,"runs":102151,"agree_valid":28777,"agree_error":1949,"unsupported":71421,"limit":0,"proposal_mismatch":4,"false_accept":0,"false_syntax_error":0,"metadata_error":0,"input_error":0},"unsupported_by_code":{"arguments_object":1165,"array_literal":11226,"arrow_function":2547,"async_function":4436,"bigint_literal":748,"block_function_declaration":333,"class":14850,"coalesce":66,"default_parameter":129,"destructuring_assignment":210,"destructuring_binding":1226,"for_in":757,"for_of":318,"generator":3811,"import":822,"lexical_declaration":20544,"logical_assignment":130,"method_definition":4030,"new_target":62,"non_ascii_identifier":178,"object_spread":126,"optional_chain":19,"regular_expression":2731,"rest_parameter":41,"spread":78,"super":16,"template":480,"using_declaration":100,"with":242}}
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m\\zig-out\\bin\\fairpane-js-parse.exe","arguments":["census","out/fp0082-test262-r2","out/fp0082-census-r2.jsonl"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:24:34.409Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":5216}
+
+COMMAND ["C:\\Windows\\system32\\cmd.exe","/d","/c","certutil","-hashfile","out\\fp0082-census-r2.jsonl","SHA256"]
+SHA256 hash of out\fp0082-census-r2.jsonl:
+0e5277cd3bad6676e588dd11e196231c95069088f45aa5e993eb947a962148c7
+CertUtil: -hashfile command completed successfully.
+RESULT {"executable":"C:\\Windows\\system32\\cmd.exe","arguments":["/d","/c","certutil","-hashfile","out\\fp0082-census-r2.jsonl","SHA256"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:24:39.683Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":202}

@@ -668,8 +668,9 @@ function blobId(bytes) {
 /**
  * Write every blob of the pinned tree whose path starts with "test/" or "harness/", and "features.txt", to `outDir`,
  * which must lie under `<root>/out/` and be absent or empty. Before anything is written, the commit's tree and the
- * inventory must equal the snapshot record, and every written path must pass `relativePathProblem` and resolve inside
- * `outDir`. Each written file must hash to its tree object ID.
+ * inventory must equal the snapshot record, every written path must pass `relativePathProblem` and resolve inside
+ * `outDir`, and no two written paths, or directories of them, may differ only in letter case, as the Rust archive
+ * reader also requires. Each written file must hash to its tree object ID.
  * `EXTRACT.json` records the commit, the tree, the file count, and the SHA-256 of the sorted lines `<oid> <path>\n`.
  */
 export async function extractCorpus(root, id, outDir, { corporaDir = corporaRoot(root), allowFileUpstream = false } = {}) {
@@ -699,6 +700,17 @@ export async function extractCorpus(root, id, outDir, { corporaDir = corporaRoot
     return file;
   });
   invariant(entries.some(e => e.path.equals(EXTRACT_FEATURES)), 'The pinned tree has no features.txt.');
+  // Windows compares names without regard to letter case, so two such paths would be written to one file or directory.
+  const spellings = new Map();
+  for (const e of entries) {
+    let prefix = '';
+    for (const part of e.path.toString('utf8').split('/')) {
+      prefix = prefix === '' ? part : `${prefix}/${part}`;
+      const key = prefix.toLowerCase(), other = spellings.get(key);
+      if (other === undefined) spellings.set(key, prefix);
+      else invariant(other === prefix, `${prefix} differs from ${other} only in letter case.`);
+    }
+  }
   fs.mkdirSync(target, { recursive: true });
   let index = 0, chunks = [];
   await streamBlobs(gitDir, entries.map(e => e.oid), {

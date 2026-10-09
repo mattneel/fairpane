@@ -1,0 +1,21 @@
+diff --git a/src/js/parser.zig b/src/js/parser.zig
+index ca62607..2d21d97 100644
+--- a/src/js/parser.zig
++++ b/src/js/parser.zig
+@@ -1364,15 +1364,11 @@ const Parser = struct {
+         resetSet(&p.function_names, p.gpa, declarations.len);
+         try p.function_names.ensureTotalCapacity(p.gpa, @intCast(declarations.len));
+         p.initialized.clearRetainingCapacity();
+-        var index = declarations.len;
+-        while (index > 0) {
+-            index -= 1;
+-            const function = declarations[index];
++        for (declarations) |function| {
+             const entry = p.function_names.getOrPutAssumeCapacity(function.name.?);
+             if (!entry.found_existing) try p.initialized.append(p.gpa, function);
+         }
+         p.noteCapacity(.function_names, declarations.len);
+-        std.mem.reverse(*const ast.Function, p.initialized.items);
+         p.declarations.shrinkRetainingCapacity(body.functions_base);
+         return p.arena.dupe(*const ast.Function, p.initialized.items);
+     }

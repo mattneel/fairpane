@@ -1,0 +1,12 @@
+diff --git a/tools/corpus.mjs b/tools/corpus.mjs
+index c5a41a6..b3007ed 100644
+--- a/tools/corpus.mjs
++++ b/tools/corpus.mjs
+@@ -708,7 +708,6 @@ export async function extractCorpus(root, id, outDir, { corporaDir = corporaRoot
+       prefix = prefix === '' ? part : `${prefix}/${part}`;
+       const key = prefix.toLowerCase(), other = spellings.get(key);
+       if (other === undefined) spellings.set(key, prefix);
+-      else invariant(other === prefix, `${prefix} differs from ${other} only in letter case.`);
+     }
+   }
+   fs.mkdirSync(target, { recursive: true });

@@ -1,0 +1,49 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+77158595185cdf213c663c9817200200df0b88c2
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:18:01.573Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":43}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","archive","--format=tar","--output=out/fp0082-base-r2.tar","7715859","src"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["archive","--format=tar","--output=out/fp0082-base-r2.tar","7715859","src"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:18:01.746Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":100}
+
+COMMAND ["C:\\Windows\\system32\\cmd.exe","/d","/c","mkdir","out\\fp0082-base-r2"]
+RESULT {"executable":"C:\\Windows\\system32\\cmd.exe","arguments":["/d","/c","mkdir","out\\fp0082-base-r2"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:18:01.916Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\Windows\\system32\\tar.exe","-xf","out/fp0082-base-r2.tar","-C","out/fp0082-base-r2"]
+RESULT {"executable":"C:\\Windows\\system32\\tar.exe","arguments":["-xf","out/fp0082-base-r2.tar","-C","out/fp0082-base-r2"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:18:02.008Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":43}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","engineering/evidence/FP-0082/raw/probe-allocations-r2.mjs","engineering/evidence/FP-0082/raw/probe-allocations-r2.zig.txt"]
+782f41dd049312aa2fb675cc5b66c53767fce305
+a04d15f003308018262b11be1f342968bfe1079c
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","engineering/evidence/FP-0082/raw/probe-allocations-r2.mjs","engineering/evidence/FP-0082/raw/probe-allocations-r2.zig.txt"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:18:02.131Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0082/raw/probe-allocations-r2.mjs","out/fp0082-base-r2"]
+Appended 1293 bytes to out\fp0082-base-r2\src\js\parser.zig.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0082/raw/probe-allocations-r2.mjs","out/fp0082-base-r2"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m","started_at":"2026-10-09T18:18:02.224Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","src/root.zig","--test-filter","FP-0082 revision 2 probe","--cache-dir","../fp0082-base-r2-cache"]
+1/6 root.test_0...OK
+2/6 css.css.test_0...OK
+3/6 font.opentype.test_0...OK
+4/6 html.root.test_0...OK
+5/6 js.runtime.test_0...OK
+6/6 js.parser.test.FP-0082 revision 2 probe: allocations of the case 13 source...round 0: 29 allocations, 10 resizes
+round 1: 30 allocations, 9 resizes
+round 2: 31 allocations, 8 resizes
+round 3: 30 allocations, 12 resizes
+round 4: 30 allocations, 8 resizes
+round 5: 31 allocations, 3 resizes
+round 6: 31 allocations, 7 resizes
+round 7: 31 allocations, 7 resizes
+round 8: 31 allocations, 7 resizes
+round 9: 31 allocations, 7 resizes
+round 10: 31 allocations, 7 resizes
+round 11: 31 allocations, 7 resizes
+FAIL (TestAllocationsDiffer)
+C:\Users\requi\.omp\wt\ta289bd6b1\m\out\fp0082-base-r2\src\js\parser.zig:3231:18: 0x7ff6fd63358d in test.FP-0082 revision 2 probe: allocations of the case 13 source (test_zcu.obj)
+    if (differs) return error.TestAllocationsDiffer;
+                 ^
+5 passed; 0 skipped; 1 failed.
+error: the following test command failed with exit code 1:
+C:\Users\requi\.omp\wt\ta289bd6b1\m\out\fp0082-base-r2-cache\o\de07744689b34c6ead59ac67fa7a7ea8\test.exe --seed=0xe69f85e3
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","src/root.zig","--test-filter","FP-0082 revision 2 probe","--cache-dir","../fp0082-base-r2-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta289bd6b1\\m\\out\\fp0082-base-r2","started_at":"2026-10-09T18:18:02.328Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3102,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

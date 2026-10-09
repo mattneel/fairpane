@@ -1197,6 +1197,26 @@ test('FP-0082 case 18: the shared path rule gives each reason, and null for ordi
     assert.equal(lib.relativePathProblem(bad), reason, JSON.stringify(bad));
   for (const good of ['test/a/b.js', 'harness/assert.js']) assert.equal(lib.relativePathProblem(good), null, good);
 });
+// FP-0082 revision 2, case 2: for each adjacent pair of rules, a path with both defects gives the earlier rule's reason.
+// An empty component and a "." or ".." component cannot share one component, so that row puts the empty one first.
+test('FP-0082 case 18: the shared path rule gives the earlier reason for a path with the defects of two adjacent rules', () => {
+  for (const [bad, reason] of [['test\\a\u0001b.js', 'a control character'], ['test\\a:b.js', 'a backslash'], ['test/a:b//c.js', 'a colon'],
+    ['test//../a.js', 'an empty path component'], ['test/../a.js', 'a ".." path component'],
+    ['test/CON./a.js', 'a path component that ends in "." or a space']])
+    assert.equal(lib.relativePathProblem(bad), reason, JSON.stringify(bad));
+});
+// Windows compares names without regard to letter case, so two such tree paths, or two such directories, would be written to one place.
+for (const [paths, message] of [
+  [['test/language/A.js'], 'test/language/a.js differs from test/language/A.js only in letter case.'],
+  [['test/Language/b.js'], 'test/language differs from test/Language only in letter case.'],
+]) {
+  test(`FP-0082 case 18: corpus-extract refuses ${paths[0]} beside test/language/a.js before it creates the output directory`, async () => {
+    const f = await corpusFixture('test262', [...T262_EXTRACT_FILES, ...paths.map(p => ({ path: p, text: 'case;\n' }))]);
+    const out = path.join(f.dir, 'out', 'letter-case');
+    await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', out, { corporaDir: f.corporaDir }), { message });
+    assert.equal(fs.existsSync(out), false, 'The output directory exists.');
+  });
+}
 const HOSTILE_EXTRACT_PATHS = [
   ['test/..\\..\\..\\x.js', 'a backslash', '../../x.js'],
   ['test/a:b.js', 'a colon', 'test/a'],

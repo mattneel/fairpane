@@ -1,0 +1,20 @@
+diff --git a/src/js/parser.zig b/src/js/parser.zig
+index ca62607..4af545b 100644
+--- a/src/js/parser.zig
++++ b/src/js/parser.zig
+@@ -1337,10 +1337,14 @@ const Parser = struct {
+     /// parameters whatever earlier checks left.
+     fn duplicateParameter(p: *Parser, params: []const Name, offsets: []const u32) Allocator.Error!?u32 {
+         defer p.noteCapacity(.params_seen, params.len);
+-        resetSet(&p.params_seen, p.gpa, params.len);
+         try p.params_seen.ensureTotalCapacity(p.gpa, @intCast(params.len));
++        var inserted: usize = 0;
++        defer for (params[0..inserted]) |param| {
++            _ = p.params_seen.remove(param);
++        };
+         for (params, offsets) |param, offset| {
+             if (p.params_seen.getOrPutAssumeCapacity(param).found_existing) return offset;
++            inserted += 1;
+         }
+         return null;
+     }

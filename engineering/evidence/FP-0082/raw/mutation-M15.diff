@@ -1,0 +1,13 @@
+diff --git a/src/js/parser.zig b/src/js/parser.zig
+index ca62607..ca8d992 100644
+--- a/src/js/parser.zig
++++ b/src/js/parser.zig
+@@ -1361,7 +1361,7 @@ const Parser = struct {
+     /// `body` in reverse order, keeping the last declaration of each name, listed in source order.
+     fn functionsToInitialize(p: *Parser, body: *const Scope) Error![]const *const ast.Function {
+         const declarations = p.declarations.items[body.functions_base..];
+-        resetSet(&p.function_names, p.gpa, declarations.len);
++        p.function_names.clearRetainingCapacity();
+         try p.function_names.ensureTotalCapacity(p.gpa, @intCast(declarations.len));
+         p.initialized.clearRetainingCapacity();
+         var index = declarations.len;

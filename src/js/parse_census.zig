@@ -65,19 +65,27 @@ pub fn classify(expect_error: bool, proposal: bool, outcome: @FieldType(parser.P
     return class;
 }
 
-/// Runs the census of `root` and writes the per-file records to `out_path`, which must not exist.
+/// How the census opens its records file.
+pub const Output = enum {
+    /// The file must not exist.
+    create,
+    /// An existing file is truncated before the first record is written, so it holds this run's records only.
+    replace,
+};
+
+/// Runs the census of `root` and writes the per-file records to `out_path`, opened as `output` says.
 /// Returns the exit status: 0 for a sound census, 1 for a census with violations, and 3 for unusable inputs.
-pub fn run(io: Io, gpa: Allocator, root: []const u8, out_path: []const u8, stdout: *Io.Writer, stderr: *Io.Writer) u8 {
+pub fn run(io: Io, gpa: Allocator, root: []const u8, out_path: []const u8, output: Output, stdout: *Io.Writer, stderr: *Io.Writer) u8 {
     var arena_state: std.heap.ArenaAllocator = .init(gpa);
     defer arena_state.deinit();
     const arena = arena_state.allocator();
-    return runWithArena(io, gpa, arena, root, out_path, stdout, stderr) catch |err| {
+    return runWithArena(io, gpa, arena, root, out_path, output, stdout, stderr) catch |err| {
         stderr.print("fairpane-js-parse: census: {s}\n", .{@errorName(err)}) catch {};
         return input_status;
     };
 }
 
-fn runWithArena(io: Io, gpa: Allocator, arena: Allocator, root: []const u8, out_path: []const u8, stdout: *Io.Writer, stderr: *Io.Writer) !u8 {
+fn runWithArena(io: Io, gpa: Allocator, arena: Allocator, root: []const u8, out_path: []const u8, output: Output, stdout: *Io.Writer, stderr: *Io.Writer) !u8 {
     var root_dir = try Io.Dir.cwd().openDir(io, root, .{});
     defer root_dir.close(io);
     const commit = commitOf(io, arena, root_dir) catch |err| {
@@ -89,7 +97,7 @@ fn runWithArena(io: Io, gpa: Allocator, arena: Allocator, root: []const u8, out_
         return input_status;
     };
     const paths = try discover(io, arena, root_dir);
-    const out_file = Io.Dir.cwd().createFile(io, out_path, .{ .exclusive = true }) catch |err| {
+    const out_file = Io.Dir.cwd().createFile(io, out_path, .{ .exclusive = output == .create }) catch |err| {
         try stderr.print("fairpane-js-parse: census: cannot create {s}: {s}\n", .{ out_path, @errorName(err) });
         return input_status;
     };

@@ -289,8 +289,11 @@ fn addParseCases(b: *std.Build, test_step: *std.Build.Step, install: *std.Build.
     usage.expectStdErrMatch("usage: fairpane-js-parse");
     test_step.dependOn(&usage.step);
 
+    // The build runner reuses a step's output directory for the same inputs and never empties it, so a run that
+    // wrote census.jsonl without finalizing the step's manifest leaves the file behind. These two steps therefore
+    // pass --replace; their assertions read only this run's exit status and standard output.
     const sound = labRun(b, install, parse, "FP-0082 case 17: the census of the sound fixture exits with status 0");
-    sound.addArg("census");
+    sound.addArgs(&.{ "census", "--replace" });
     sound.addDirectoryArg(b.path("tests/js/census/sound"));
     _ = sound.addOutputDirectoryArg2("census-sound", .{ .suffix = "/census.jsonl" });
     for (census_fixtures) |name| sound.addFileInput(b.path(b.fmt("tests/js/census/{s}", .{name})));
@@ -300,7 +303,7 @@ fn addParseCases(b: *std.Build, test_step: *std.Build.Step, install: *std.Build.
     test_step.dependOn(&sound.step);
 
     const unsound = labRun(b, install, parse, "FP-0082 case 17: the census of the unsound fixture exits with status 1");
-    unsound.addArg("census");
+    unsound.addArgs(&.{ "census", "--replace" });
     unsound.addDirectoryArg(b.path("tests/js/census/unsound"));
     _ = unsound.addOutputDirectoryArg2("census-unsound", .{ .suffix = "/census.jsonl" });
     for (census_fixtures) |name| unsound.addFileInput(b.path(b.fmt("tests/js/census/{s}", .{name})));

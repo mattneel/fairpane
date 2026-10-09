@@ -1,7 +1,7 @@
 # FP-0082 evidence
 
 This directory holds the worker evidence for `FP-0082`, "Parse a bounded script grammar with sound syntax-error accounting".
-The frozen contract is `CONTRACT.md` with amendment 1 (`7ffafd3`) and amendment 2 (`41aaa7e`), and revision 1 below.
+The frozen contract is `CONTRACT.md` with amendment 1 (`7ffafd3`) and amendment 2 (`41aaa7e`), and revisions 1 and 2 below.
 The worker `FP0082Parser` produced this evidence in an isolated worktree, and the integrator commits it.
 
 ## Binding
@@ -141,7 +141,7 @@ M7 alters a blob as the contract describes: the test overwrites a loose object f
   Every command exited as its final log does, and the census output had the same SHA-256.
   The worker abandoned them after replacing the module comment of `src/js/parser.zig`, which still described recursion, and removing an unused `Locals` variant.
   The final logs ran at the changed blob that `raw/tests-after.log` records.
-  `raw/mutation.log` ran its controls at blob `a6246a6`; every diff still applies to the final files (`git apply --check`).
+  `raw/mutation.log` ran its controls at blob `a6246a6`; every diff still applies to the final files (`git apply --check`). [Revision 2 annotation: this check was not recorded at `5d41509`; see "Revision 1 mutation controls", where `raw/mutation-r1.log` records it at the revised files and M7 no longer applies.]
 
 ## Resolved ambiguities
 
@@ -311,6 +311,7 @@ Review 1 found that `raw/mutation.log` had no recorded `git apply --check`, so t
 - [INFERENCE] The resolved-path check cannot fire while the path rule holds, because a path that passes the rule has no `..` component, no `\`, and no `:`; M9 shows that it stops the backslash escape when the rule is weakened.
 - The hashed parameter set is emptied by removing the names that a check inserted, so a later check never pays for the capacity that an earlier, larger function left.
   [INFERENCE] Each removal compares about one name, and case 4's bound counts those comparisons too.
+  [Revision 2 annotation: review 2 showed this note wrong; removal leaves tombstones, so later lookups can probe up to the larger capacity. See "Revision 2".]
 - The census file's SHA-256 equals the one in `raw/census.log`, so the E96 change altered no census run.
 
 ### Revision 1 integration
@@ -324,3 +325,127 @@ The integrator applied the worker's own patch `out/fp0082-r1.patch` (blob `aa77e
 - `raw/integration-protected-diff-r1.log` first records the diff of the protected paths and `specs` from `a3e5cf9` to `9a68167`, as the revision asks.
   It is not empty, because the range holds other tasks' commits: P1 `9fb8d8f`, P2 `2e07f89`, and FP-0052's `775d988`, as the log's `git log` lists.
   The same log shows that neither FP-0082 commit, `5d41509` or `9a68167`, changes a protected path or `specs`, and that `specs/applicability/test262.json` is unchanged across the range.
+
+## Revision 2
+
+The worker `FP0082Revision2` produced this revision in an isolated worktree at `HEAD` `7715859`, the commit that froze revision 2.
+Revision 2 amendment 1, which the integrator committed as `c28afb0` during the work, added case 3; the worktree stayed at `7715859`, so `CONTRACT.md` in the patch is the `7715859` text, and the amendment's text is read from `c28afb0`.
+Every log below records `HEAD` `7715859`.
+
+### Revision 2 changes
+
+| File | Change |
+| --- | --- |
+| `src/js/parser.zig` | `resetSet` empties a reused set for a coming check of `n` names: it releases a set whose capacity exceeds four times `@max(n, 8)` and clears any other in place, and no set is emptied with `remove`. `duplicateParameter` and `functionsToInitialize` call it with their own count and then reserve that count. The VarDeclaredNames sets are now `Parser.seen`, one set per body nesting level indexed like `scopes`, keyed by the name alone; `enterBody` adds a level's set, `declareVar` uses the current level's set, and `finishNames` empties it with `resetSet(…, 0)` when the body completes, so a nested body never touches an enclosing body's names and the next body at that level starts with a capacity of at most 32. `Scope.id`, `Parser.scope_count`, and `NameKey` are removed. The test-only `Parser.setCapacity` reads a set's capacity, and `Parser.noteCapacity` appends it with the checked count to `Parser.capacity_log` when a test sets that log. `Limiter` refuses every resize and remap (see "Case 13 and the limiter"). The `writeOutcome` doc comment states the write stack's bound: `parse.height` frames, at most `max_depth * @sizeOf(ast.WriteFrame)` bytes, outside `max_memory_bytes`. Revision 2 case 1 and the allocation test are new. |
+| `src/js/parse_census.zig` | `run` takes an `Output` mode: `.create` refuses an existing `<out.jsonl>` as before, and `.replace` truncates it before the first record. |
+| `src/js/parse_main.zig` | `census --replace <root> <out.jsonl>` selects `.replace`; `census <root> <out.jsonl>` keeps `.create`. The usage line names `[--replace]`. |
+| `build.zig` | The sound and unsound census steps of case 17 pass `--replace`; the refusal step does not. |
+| `tools/corpus.mjs` | Before it creates the output directory, `extractCorpus` checks every written path and each of its directory prefixes, in sorted path order, against the spellings seen so far, compared with `toLowerCase` as `readArchive` in `tools/rust.mjs` does, and fails with `<path> differs from <other path> only in letter case.` |
+| `tools/selftest.mjs` | Case 2: the adjacent-rule unit test and two letter-case extraction tests, one for two file paths and one for two directories. |
+| `tools/README.md` | `corpus-extract` names the letter-case check. |
+
+### Revision 2 logs
+
+| Log | Commands | RESULT exit codes |
+| --- | --- | --- |
+| `raw/tests-before-r2.log` | `git rev-parse HEAD`, `git add src/js/parser.zig tools/selftest.mjs`, `git ls-files -s`, a mistyped `zig build test`, `zig build test --summary all --cache-dir out/fp0082-before-r2`, `node --version`, `node tools/fairpane.mjs test` | 0, 0, 0, none (see "Revision 2 attempts"), 1, 0, 1 |
+| `raw/census-rerun-before-r2.log` | `git rev-parse HEAD`, `git ls-files -s` and `git hash-object` of the census sources, `zig build test --summary all --cache-dir out/fp0082-rerun-before-r2`, `node raw/delete-census-manifests-r2.mjs`, the same `zig build test` again | 0, 0, 0, 0, 0, 1 |
+| `raw/census-rerun-after-r2.log` | `git rev-parse HEAD`, `git hash-object`, `zig build test --summary all --cache-dir out/fp0082-rerun-after-r2`, `node raw/delete-census-manifests-r2.mjs`, the same `zig build test` again | 0, 0, 0, 0, 0 |
+| `raw/probe-allocations-r2.log` | `git rev-parse HEAD`, `git archive` of `src` at `7715859`, `mkdir`, `tar -xf`, `git hash-object` of the probe files, `node raw/probe-allocations-r2.mjs`, `zig test` of the probe in that copy | 0, 0, 0, 0, 0, 0, 1 |
+| `raw/tests-after-r2.log` | `cmd /d /c ver`, `git rev-parse HEAD`, `git diff --stat`, `git ls-files -s`, removal of `out/fp0082-after-r2`, `zig build test --summary all --cache-dir out/fp0082-after-r2` | 0 for every command |
+| `raw/fmt-r2.log` | A misordered `record` call, then `zig fmt --check build.zig src tests` | none (see "Revision 2 attempts"), 0 |
+| `raw/controller-tests-after-r2.log` | `node --version`, `node tools/fairpane.mjs test` | 0, 0 |
+| `raw/mutation-r2.log` | `git apply --check` of M1 to M12 and M7-r1, then M6-r2, M11-r2, M14, M15, M17, and M16 | See "Revision 2 mutation controls" |
+| `raw/census-r2.log` | A first sequence with misordered `record` calls, then `git rev-parse HEAD`, `zig build js-tools -Doptimize=ReleaseSafe --summary all`, `corpus-extract test262 out/fp0082-test262-r2` with `FAIRPANE_CORPORA_DIR`, `git hash-object` of the tool and `EXTRACT.json`, the census, and `certutil -hashfile` | 0, 0, none, none, 128, 3, 2147942402 (see "Revision 2 attempts"); then 0, 0, 0, 0, 0, 0 |
+
+### Revision 2 red baseline
+
+`raw/tests-before-r2.log` stages `src/js/parser.zig` (blob `fc1816fd8af369bbdd6dfe70b95f288b61c78246`) and `tools/selftest.mjs` (blob `93b72f1f0e6273df0550a78fe038e87500a4e028`) at the base.
+The staged parser holds case 1 and the test-only accessor on the base's sets, so case 1 can compile and measure the base.
+
+- `zig build test` fails only case 1, with `TestCapacityExceedsBound`: `repeat false: record 2, params_seen with 0 names has capacity 16384`; 322 of 323 tests pass, and 98 of 100 steps succeed.
+- The controller suite fails 2 of 241 tests, the two letter-case tests: the file pair fails while writing with `EEXIST`, and the directory pair is extracted without a rejection (`Missing expected rejection.`).
+  The adjacent-rule unit test passes at the base, as the revision states, because the base already applies the rules in the frozen order.
+- After the red run, the worker corrected case 1's expected check counts, which the red run never reached: the script's own Use Strict Directive also runs the duplicate-parameter check, on an empty list, so the `params_seen` count is one more than the first draft expected.
+  The final `tools/selftest.mjs` blob equals the staged one.
+
+### Case 1 design
+
+- `params_seen` and `function_names` are parser-wide and reused; each check calls `resetSet` with its own count `n` first, so the reset costs at most `4 * @max(n, 8)` slots, and the inserts go into a table without tombstones.
+  After the check, the capacity is at most `@max(retained, capacityForSize(n))`, which is at most `4 * @max(n, 8)`.
+- VarDeclaredNames sets are per nesting level, so an enclosing body's entries stay in its own set while nested bodies run.
+  A completed body's set is emptied with `resetSet(…, 0)`, which releases it when its capacity exceeds 32, so a later body at that level pays at most 32 slots to clear.
+- Case 1 reads every check through `Parser.capacity_log`: 22,002 `params_seen` checks, and 22,002 `seen` and 22,002 `function_names` checks (one per finished function and one for the script) for the valid script, and 21,997, 21,995, and 21,995 when the repeated parameter stops the parse; every capacity is within `4 * @max(n, 8)`.
+- Hash flooding with crafted names stays out of scope, as the integrator decided; `FP-0026` owns it.
+
+### Case 13 and the limiter
+
+After the set change, case 13 failed with `NondeterministicMemoryUsage` in the worker's unrecorded development runs.
+`std.testing.checkAllAllocationFailures` needs every parse of its source to make the same number of allocations, but the parse's arena and lists grow a block in place when the test allocator can resize it, and the pinned test allocator, `std.heap.SafeAllocator`, can do so only when nothing was placed after the block.
+The number of allocations therefore depends on where earlier tests left the allocator, not on the parser.
+`raw/probe-allocations-r2.log` shows this at the base: a copy of the base `src` with the probe of `raw/probe-allocations-r2.zig.txt` parses the case 13 source twelve times, each after a block of another size, and makes 29, 30, 31, 30, 30, 31, 31, 31, 31, 31, 31, and 31 allocations.
+The base passes case 13 only because its runs happen to see the same placement.
+`Limiter` now refuses every resize and remap, so a caller that needs another size allocates a new block and frees the old one.
+The allocation sequence, and with it the outstanding bytes that `max_memory_bytes` bounds, then depend only on the source and the options.
+The new test "FP-0082 revision 2: the case 13 source makes the same allocations whatever the state of the test allocator" repeats the probe on the revised parser and requires zero resizes and one allocation count; M17 restores the pass-through and fails both it and case 13.
+[INFERENCE] A refused resize copies a growing list once per growth step, which keeps the total copying linear in the final size, because the lists grow geometrically.
+The fresh census in `raw/census-r2.log` gives the same file hash as `raw/census.log`, so no census record changed.
+
+### Case 3 (revision 2 amendment 1)
+
+The two census steps of case 17 now pass `census --replace`, and the census truncates an existing `<out.jsonl>` only when that option is given.
+The mechanism cannot hide a census failure, for these reasons.
+
+- The steps' assertions read only the census's exit status and standard output, which the census computes from the files that it parses in that run; nothing reads `census.jsonl`, old or new.
+- The census opens the file with truncation before it writes the first record, so a replaced file holds only that run's records.
+- `--replace` changes only how the output file is opened; discovery, parsing, classification, the summary, and the exit status are the same code for both modes.
+- The unsound step still requires exit status 1 and its violation counts, so a census failure stays visible through `--replace`.
+- The refusal step keeps the old command line and still requires exit status 3 for an existing output file, so the refusal row of case 17 stays as frozen.
+
+`raw/census-rerun-before-r2.log` runs before the change: the first `zig build test` in the fresh cache `out/fp0082-rerun-before-r2` passes 100 of 100 steps and 324 of 324 tests, `raw/delete-census-manifests-r2.mjs` removes the two census steps' manifests from `<cache>/h/` and keeps both `census.jsonl` outputs, and the second run fails both census steps with `PathAlreadyExists` and `Build Summary: 97/100 steps succeeded (2 failed)`.
+`raw/census-rerun-after-r2.log` repeats the sequence after the change in `out/fp0082-rerun-after-r2`: both runs pass 100 of 100 steps, and in the second run both census steps execute (`success 25ms` and `success 28ms`) instead of being cached, while the refusal step is cached.
+The deletion script selects a manifest whose bytes contain `tests\js\census\sound\EXTRACT.json` and not `existing.jsonl`, as the integrator's `raw/census-rerun-5-lost-manifest.log` did, and it fails unless exactly two manifests match.
+
+### Revision 2 results
+
+- `raw/tests-after-r2.log`: 100 of 100 build steps succeed, and 324 of 324 tests pass, 273 of them in the library test binary; revision 1's integration had 322, and revision 2 adds case 1 and the allocation test. Case 10 measures 21,104 bytes for 1,022 terms and 20,976 bytes for 1,021 parentheses.
+- `raw/fmt-r2.log`: the format check exits with status 0.
+- `raw/controller-tests-after-r2.log`: 241 of 241 controller tests pass, including the three new case 2 tests.
+- `raw/census-r2.log`: the fresh extraction writes 53,975 files at `2e0a56762801e275a9fdf96dc49d90ba0cddcf63` with tree `6a4268a9354a545d41c3b62efebc478ed8c521f4` and `entries_sha256` `95f65b6c7dc3617d92648f5b9fc65b2d1e6236f1eed0763a1038f8235943a1f1`.
+  The census summary equals the counts in "Integration": 53,616 discovered, 843 module, 2,450 proposal files, 102,151 runs, 28,777 `agree_valid`, 1,949 `agree_error`, 71,421 `unsupported`, 4 `proposal_mismatch`, and 0 `limit`, `false_accept`, `false_syntax_error`, `metadata_error`, and `input_error`.
+  The census file's SHA-256 is `0e5277cd3bad6676e588dd11e196231c95069088f45aa5e993eb947a962148c7`, the same as in `raw/census.log` and `raw/census-r1.log`.
+
+### Revision 2 mutation controls
+
+`raw/mutation-r2.log` first records `HEAD`, the blob IDs of the revised files, and `git apply --check` of every earlier diff.
+M1 to M5, M7-r1, M8, M9, M10, and M12 apply.
+M6 (`patch failed: src/js/parser.zig:1282`), M7 (`tools/corpus.mjs:703`, as in revision 1), and M11 (`src/js/parser.zig:1301`) do not, because revision 2 changed `functionsToInitialize` and `duplicateParameter`.
+No `mutation-M13.diff` exists in the repository; revisions 1 and 2 define no control M13, so none was checked.
+`raw/mutation-M6-r2.diff` (blob `d62364a69d26ba38f73b3d56ab613d1f70f77137`) and `raw/mutation-M11-r2.diff` (blob `4529dbeea528d6c5d90b5c6050bbf47d70c34620`) make the same mutations on the revised file and are rerun.
+Each control records `HEAD`, the file's blob ID before, after applying, and after reversing, and its run.
+Every reversal restored the revised blob ID (`ca6260768d30f722c1f02e5b29bde1bfbf4443de` for `src/js/parser.zig`, `c5a41a612e74f2f02835ef024c439cb2f05566fa` for `tools/corpus.mjs`), and no control crashed.
+
+| Control | Mutation | Named case | Observed |
+| --- | --- | --- | --- |
+| M6-r2 | functions-to-initialize iterates forward. | T8 | Case 2 fails on T8. |
+| M11-r2 | Every pair is compared again. | Revision 1 case 4 | `TestTooManyComparisons`: 49,995,000 comparisons for the first source. |
+| M14 (`mutation-M14.diff`, blob `a26ec849`) | `params_seen` is emptied with `remove` again. | Case 1 | `TestCapacityExceedsBound`: record 2, `params_seen` with 0 names has capacity 16,384. |
+| M15 (`mutation-M15.diff`, blob `5c315ee2`) | `function_names` is cleared in place and keeps its largest capacity. | Case 1 | `TestCapacityExceedsBound`: record 30,007, `function_names` with 0 names has capacity 16,384. |
+| M16 (`mutation-M16.diff`, blob `89f1349d`) | Extraction skips the letter-case check. | Case 2, collision rows | Both letter-case tests fail (`EEXIST` and `Missing expected rejection.`); 239 of 241 pass. |
+| M17 (`mutation-M17.diff`, blob `ee8f3086`), added by the worker | `Limiter` passes resizes and remaps to its child again. | Case 13 and the allocation test | Case 13 fails with `NondeterministicMemoryUsage`, and the allocation test finds 6 resizes. |
+
+### Revision 2 attempts
+
+Three logs hold failed commands that ran nothing useful; they are kept as recorded, because no log is deleted or overwritten.
+
+- `raw/tests-before-r2.log`: the fourth command passed the compiler path and the `ZIG_GLOBAL_CACHE_DIR` value without their backslashes, because the shell removed them, as in revision 1. No process ran, and RESULT has no exit code. The next command is the intended run.
+- `raw/fmt-r2.log`: the first `record` call put `--env` after the log path, so the record tool took `--env` as the executable and ran nothing. The second command is the intended check.
+- `raw/census-r2.log`: the first sequence put `--env` after the log path for the build and the extraction, so neither ran, and the hash, census, and `certutil` commands after them failed because the extraction was absent. The log then records `HEAD` again and the complete sequence; only that second sequence is evidence.
+
+The worker's development compilations and test runs, including the runs that found the case 13 failure and the probe runs before `raw/probe-allocations-r2.log`, were not recorded.
+
+### Revision 2 notes
+
+- The letter-case check compares `toLowerCase` keys, as the Rust archive reader does. [INFERENCE] NTFS compares names through its own upper-case table, so a pair such as final and medial sigma may still collide on disk without a rejection; the pinned Test262 paths are ASCII. `FP-0099` owns the shared path rule.
+- The adjacent-rule rows cannot put an empty component and a `.` or `..` component in one component, so that row places the empty component first, and it shows the component order.
+- [INFERENCE] `resetSet` uses the capacity that the pinned `std.HashMapUnmanaged` reports; `capacityForSize(n)` is at most `2.5n + 2`, which is why a set sized for `n` stays within `4 * @max(n, 8)`.

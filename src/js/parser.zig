@@ -199,7 +199,9 @@ pub const WriteError = std.Io.Writer.Error || Allocator.Error;
 
 /// Writes the outcome as one line without a terminator. A script is written with a heap stack of
 /// one frame per tree level, so a tree of any depth uses a constant amount of native stack; the
-/// stack comes from the allocator that `parseScript` received and is freed before returning.
+/// stack comes from the allocator that `parseScript` received and is freed before returning. The
+/// stack has `parse.height` frames, which `parseScript` bounds by `Options.max_depth`, so it takes at
+/// most `max_depth * @sizeOf(ast.WriteFrame)` bytes, which `max_memory_bytes` does not count.
 pub fn writeOutcome(parse: *const Parse, writer: *std.Io.Writer) WriteError!void {
     switch (parse.outcome) {
         .script => |tree| {
@@ -264,7 +266,11 @@ pub fn parseScript(gpa: Allocator, source: []const u16, options: Options) error{
     return parse;
 }
 
-/// Passes allocations through to `child` while the outstanding bytes stay within `limit`.
+/// Passes allocations through to `child` while the outstanding bytes stay within `limit`. It never
+/// resizes or remaps a block, so a caller that needs another size allocates a new block and frees
+/// the old one. Whether `child` can resize a block in place depends on its state, such as the blocks
+/// that it placed after it, so refusing keeps the sequence of allocations, and with it the outstanding
+/// bytes that `limit` bounds, a function of the source and the options alone.
 const Limiter = struct {
     child: Allocator,
     limit: usize,
@@ -276,7 +282,7 @@ const Limiter = struct {
         return .{ .ptr = limiter, .vtable = &vtable };
     }
 
-    const vtable: Allocator.VTable = .{ .alloc = alloc, .resize = resize, .remap = remap, .free = free };
+    const vtable: Allocator.VTable = .{ .alloc = alloc, .resize = Allocator.noResize, .remap = Allocator.noRemap, .free = free };
 
     fn fits(limiter: *const Limiter, bytes: usize) bool {
         return bytes <= limiter.limit - limiter.used;
@@ -291,22 +297,6 @@ const Limiter = struct {
         const memory = limiter.child.rawAlloc(len, alignment, return_address) orelse return null;
         limiter.used += len;
         return memory;
-    }
-
-    fn resize(context: *anyopaque, memory: []u8, alignment: std.mem.Alignment, new_len: usize, return_address: usize) bool {
-        const limiter: *Limiter = @ptrCast(@alignCast(context));
-        if (new_len > memory.len and !limiter.fits(new_len - memory.len)) return false;
-        if (!limiter.child.rawResize(memory, alignment, new_len, return_address)) return false;
-        limiter.used = limiter.used - memory.len + new_len;
-        return true;
-    }
-
-    fn remap(context: *anyopaque, memory: []u8, alignment: std.mem.Alignment, new_len: usize, return_address: usize) ?[*]u8 {
-        const limiter: *Limiter = @ptrCast(@alignCast(context));
-        if (new_len > memory.len and !limiter.fits(new_len - memory.len)) return null;
-        const result = limiter.child.rawRemap(memory, alignment, new_len, return_address) orelse return null;
-        limiter.used = limiter.used - memory.len + new_len;
-        return result;
     }
 
     fn free(context: *anyopaque, memory: []u8, alignment: std.mem.Alignment, return_address: usize) void {
@@ -345,7 +335,6 @@ const Flags = struct {
 /// The state of a Script or a function body, with the function name and parameters that a Use
 /// Strict Directive checks retroactively.
 const Scope = struct {
-    id: u32,
     strict: bool,
     /// The body is a FunctionBody, not a Script.
     function: bool,
@@ -367,20 +356,17 @@ const Scope = struct {
 
 const Label = struct { name: Name, loop: bool };
 
-const NameKey = struct { scope: u32, name: Name };
-
+/// A set of the names of one body, such as its VarDeclaredNames or its declared function names.
 const NameContext = struct {
-    pub fn hash(_: NameContext, key: NameKey) u64 {
-        var hasher = std.hash.Wyhash.init(key.scope);
-        hasher.update(std.mem.sliceAsBytes(key.name));
-        return hasher.final();
+    pub fn hash(_: NameContext, name: Name) u64 {
+        return std.hash.Wyhash.hash(0, std.mem.sliceAsBytes(name));
     }
-    pub fn eql(_: NameContext, a: NameKey, b: NameKey) bool {
-        return a.scope == b.scope and std.mem.eql(u16, a.name, b.name);
+    pub fn eql(_: NameContext, a: Name, b: Name) bool {
+        return std.mem.eql(u16, a, b);
     }
 };
 
-const NameSet = std.HashMapUnmanaged(NameKey, void, NameContext, std.hash_map.default_max_load_percentage);
+const NameSet = std.HashMapUnmanaged(Name, void, NameContext, std.hash_map.default_max_load_percentage);
 
 /// The parameter names of one function, for the duplicate-parameter check.
 const ParamContext = struct {
@@ -394,6 +380,14 @@ const ParamContext = struct {
 };
 
 const ParamSet = std.HashMapUnmanaged(Name, void, ParamContext, std.hash_map.default_max_load_percentage);
+
+/// Empties a set that the parser reuses, for a coming check of `count` names, so that the check's
+/// work is proportional to `count` whatever earlier checks left. A set whose capacity exceeds four
+/// times `@max(count, 8)` is released; any other is cleared in place, which costs at most that
+/// capacity. No set is emptied with `remove`, because its tombstones would lengthen every later probe.
+fn resetSet(set: anytype, gpa: Allocator, count: usize) void {
+    if (set.capacity() > 4 * @max(count, 8)) set.clearAndFree(gpa) else set.clearRetainingCapacity();
+}
 
 const FunctionKind = enum { declaration, expression };
 
@@ -538,7 +532,6 @@ const Parser = struct {
     /// The first cover-grammar error of an ObjectLiteral that may still be reinterpreted as a pattern.
     pending: ?Diagnostic = null,
     function_count: u32 = 0,
-    scope_count: u32 = 0,
     /// The index in `labels` of the first label of the label chain that directly labels the statement being parsed.
     label_chain: ?usize = null,
     /// The grammar procedures in progress, innermost last. They hold the nesting state, so the
@@ -562,16 +555,52 @@ const Parser = struct {
     params: std.ArrayList(Name) = .empty,
     param_offsets: std.ArrayList(u32) = .empty,
     var_names: std.ArrayList(Name) = .empty,
-    seen: NameSet = .empty,
+    /// The VarDeclaredNames set of each body in progress, indexed like `scopes`, which `declareVar`
+    /// keeps unique. A nested body has its own set, so it never touches an enclosing body's names;
+    /// `finishNames` empties a body's set with `resetSet`, and the next body at that level reuses it.
+    seen: std.ArrayList(NameSet) = .empty,
     declarations: std.ArrayList(*const ast.Function) = .empty,
     labels: std.ArrayList(Label) = .empty,
+    /// The declared function names of the body that `functionsToInitialize` lists; see `resetSet`.
     function_names: NameSet = .empty,
     initialized: std.ArrayList(*const ast.Function) = .empty,
+    /// The parameter names that `duplicateParameter` checks; see `resetSet`.
     params_seen: ParamSet = .empty,
 
     /// The name comparisons of the duplicate-parameter check on this thread. Only test builds
     /// compile it, because only `ParamContext.eql` under `builtin.is_test` refers to it.
     threadlocal var duplicate_comparisons: u64 = 0;
+
+    /// The sets that the parser fills per function or per body.
+    const SetKind = enum { params_seen, seen, function_names };
+    /// One check of a set: the names of the function or body that it checked, and the set's capacity afterward.
+    const CapacityRecord = struct { set: SetKind, count: usize, capacity: usize };
+    const CapacityLog = struct {
+        gpa: Allocator,
+        records: std.ArrayList(CapacityRecord) = .empty,
+        /// Appending a record failed.
+        failed: bool = false,
+    };
+    /// Test builds only: when set, each check of a set appends the capacity that `setCapacity` reads.
+    threadlocal var capacity_log: ?*CapacityLog = null;
+
+    /// Test builds only: the capacity of `set` while the current body is being checked.
+    fn setCapacity(p: *const Parser, set: SetKind) usize {
+        return switch (set) {
+            .params_seen => p.params_seen.capacity(),
+            .seen => p.seen.items[p.scopes.items.len - 1].capacity(),
+            .function_names => p.function_names.capacity(),
+        };
+    }
+
+    /// Test builds only: records the capacity of `set` after a check of `count` names of the current body.
+    fn noteCapacity(p: *const Parser, set: SetKind, count: usize) void {
+        if (builtin.is_test) {
+            if (capacity_log) |log| log.records.append(log.gpa, .{ .set = set, .count = count, .capacity = p.setCapacity(set) }) catch {
+                log.failed = true;
+            };
+        }
+    }
 
     fn deinit(p: *Parser) void {
         p.scratch.deinit(p.gpa);
@@ -585,6 +614,7 @@ const Parser = struct {
         p.params.deinit(p.gpa);
         p.param_offsets.deinit(p.gpa);
         p.var_names.deinit(p.gpa);
+        for (p.seen.items) |*set| set.deinit(p.gpa);
         p.seen.deinit(p.gpa);
         p.declarations.deinit(p.gpa);
         p.labels.deinit(p.gpa);
@@ -595,6 +625,12 @@ const Parser = struct {
 
     fn scope(p: *Parser) *Scope {
         return &p.scopes.items[p.scopes.items.len - 1];
+    }
+
+    /// Pushes the state of a body that the parser enters, with an empty VarDeclaredNames set.
+    fn enterBody(p: *Parser, body: Scope) Allocator.Error!void {
+        try p.scopes.append(p.gpa, body);
+        if (p.seen.items.len < p.scopes.items.len) try p.seen.append(p.gpa, .empty);
     }
 
     // Diagnostics.
@@ -1180,7 +1216,7 @@ const Parser = struct {
 
     /// Adds `name` to the VarDeclaredNames of the current body.
     fn declareVar(p: *Parser, name: Name) Error!void {
-        const entry = try p.seen.getOrPut(p.gpa, .{ .scope = p.scope().id, .name = name });
+        const entry = try p.seen.items[p.scopes.items.len - 1].getOrPut(p.gpa, name);
         if (!entry.found_existing) try p.var_names.append(p.gpa, name);
     }
 
@@ -1216,8 +1252,7 @@ const Parser = struct {
     // Bodies.
 
     fn parseProgram(p: *Parser) Error!*const ast.Script {
-        try p.scopes.append(p.gpa, .{ .id = 0, .strict = false, .function = false, .label_base = 0, .names_base = 0, .functions_base = 0 });
-        p.scope_count = 1;
+        try p.enterBody(.{ .strict = false, .function = false, .label_base = 0, .names_base = 0, .functions_base = 0 });
         p.tok = try p.lexer.next();
         try p.checkCurrent();
         p.depth = 2;
@@ -1298,26 +1333,26 @@ const Parser = struct {
     }
 
     /// The offset of the first parameter that repeats an earlier name. Each parameter takes one
-    /// lookup in a hashed set, so the check is linear in the number of parameters; the set is
-    /// emptied by removing its names, so a later check does not pay for an earlier one's capacity.
+    /// lookup in a hashed set that `resetSet` empties first, so the check is linear in the number of
+    /// parameters whatever earlier checks left.
     fn duplicateParameter(p: *Parser, params: []const Name, offsets: []const u32) Allocator.Error!?u32 {
+        defer p.noteCapacity(.params_seen, params.len);
+        resetSet(&p.params_seen, p.gpa, params.len);
         try p.params_seen.ensureTotalCapacity(p.gpa, @intCast(params.len));
-        var inserted: usize = 0;
-        defer for (params[0..inserted]) |param| {
-            _ = p.params_seen.remove(param);
-        };
         for (params, offsets) |param, offset| {
             if (p.params_seen.getOrPutAssumeCapacity(param).found_existing) return offset;
-            inserted += 1;
         }
         return null;
     }
 
-    /// Copies the VarDeclaredNames of `body` to the tree and forgets them.
+    /// Copies the VarDeclaredNames of `body`, the current body, to the tree, and empties its set for
+    /// the next body at its level: `resetSet` with no names releases a set whose capacity exceeds 32,
+    /// so the next body never pays for this one's capacity.
     fn finishNames(p: *Parser, body: *const Scope) Error![]const Name {
         const names = p.var_names.items[body.names_base..];
         const copy = try p.arena.dupe(Name, names);
-        for (names) |name| _ = p.seen.remove(.{ .scope = body.id, .name = name });
+        p.noteCapacity(.seen, names.len);
+        resetSet(&p.seen.items[p.scopes.items.len - 1], p.gpa, 0);
         p.var_names.shrinkRetainingCapacity(body.names_base);
         return copy;
     }
@@ -1326,15 +1361,17 @@ const Parser = struct {
     /// `body` in reverse order, keeping the last declaration of each name, listed in source order.
     fn functionsToInitialize(p: *Parser, body: *const Scope) Error![]const *const ast.Function {
         const declarations = p.declarations.items[body.functions_base..];
-        p.function_names.clearRetainingCapacity();
+        resetSet(&p.function_names, p.gpa, declarations.len);
+        try p.function_names.ensureTotalCapacity(p.gpa, @intCast(declarations.len));
         p.initialized.clearRetainingCapacity();
         var index = declarations.len;
         while (index > 0) {
             index -= 1;
             const function = declarations[index];
-            const entry = try p.function_names.getOrPut(p.gpa, .{ .scope = 0, .name = function.name.? });
+            const entry = p.function_names.getOrPutAssumeCapacity(function.name.?);
             if (!entry.found_existing) try p.initialized.append(p.gpa, function);
         }
+        p.noteCapacity(.function_names, declarations.len);
         std.mem.reverse(*const ast.Function, p.initialized.items);
         p.declarations.shrinkRetainingCapacity(body.functions_base);
         return p.arena.dupe(*const ast.Function, p.initialized.items);
@@ -1752,8 +1789,7 @@ const Parser = struct {
             try p.declareVar(name.?);
         }
         const enclosing = p.scope();
-        try p.scopes.append(p.gpa, .{
-            .id = p.scope_count,
+        try p.enterBody(.{
             .strict = enclosing.strict,
             .function = true,
             .name = name,
@@ -1762,7 +1798,6 @@ const Parser = struct {
             .names_base = p.var_names.items.len,
             .functions_base = p.declarations.items.len,
         });
-        p.scope_count += 1;
         try p.parseParams();
         if (p.tok.tag != .l_brace) return p.unexpected();
         try p.advance();
@@ -3207,4 +3242,78 @@ test "FP-0082 revision 1 case 4: the duplicate-parameter check of 10,000 strict 
             return error.TestTooManyComparisons;
         }
     };
+}
+
+test "FP-0082 revision 2 case 1: after a large body, each per-function and per-body set stays within four times its own count" {
+    const gpa = testing.allocator;
+    for ([_]bool{ false, true }) |repeat| {
+        // One function with 10,000 parameters, 10,000 `var` names, and 10,000 function declarations, then 2,000
+        // functions with five of each.
+        var text: std.Io.Writer.Allocating = .init(gpa);
+        defer text.deinit();
+        const w = &text.writer;
+        try w.writeAll("\"use strict\"; function big(");
+        for (0..10_000) |index| try w.print("{s}p{d}", .{ if (index == 0) "" else ", ", index });
+        try w.writeAll(") {");
+        for (0..10_000) |index| try w.print(" var v{d};", .{index});
+        for (0..10_000) |index| try w.print(" function f{d}() {{}}", .{index});
+        try w.writeAll(" }");
+        var repeat_offset: usize = 0;
+        for (0..2_000) |index| {
+            try w.print(" function s{d}(a0, a1, a2, a3, a4", .{index});
+            if (repeat and index == 1_999) {
+                repeat_offset = text.written().len + ", ".len;
+                try w.writeAll(", a0");
+            }
+            try w.writeAll(") { var v0; var v1; var v2; var v3; var v4; function g0() {} function g1() {} function g2() {} function g3() {} function g4() {} }");
+        }
+        var source = try web_string.WebString.fromUtf8(gpa, text.written());
+        defer source.deinit(gpa);
+        var log: Parser.CapacityLog = .{ .gpa = gpa };
+        defer log.records.deinit(gpa);
+        Parser.capacity_log = &log;
+        defer Parser.capacity_log = null;
+        var parse = try parseScript(gpa, source.units, .{});
+        defer parse.deinit();
+        const expected_tag: std.meta.Tag(@FieldType(Parse, "outcome")) = if (repeat) .diagnostic else .script;
+        try testing.expectEqual(expected_tag, std.meta.activeTag(parse.outcome));
+        if (repeat) try testing.expectEqual(Diagnostic{ .syntax_error = .{ .code = .duplicate_parameter, .offset = @intCast(repeat_offset) } }, parse.outcome.diagnostic);
+        try testing.expect(!log.failed);
+        var checks: std.EnumArray(Parser.SetKind, usize) = .initFill(0);
+        for (log.records.items, 0..) |record, index| {
+            checks.getPtr(record.set).* += 1;
+            if (record.capacity > 4 * @max(record.count, 8)) {
+                std.debug.print("repeat {}: record {d}, {s} with {d} names has capacity {d}\n", .{ repeat, index, @tagName(record.set), record.count, record.capacity });
+                return error.TestCapacityExceedsBound;
+            }
+        }
+        // The script's Use Strict Directive checks its empty parameter list, and every function is strict, so each
+        // one checks its parameters; each finished function body, and the finished script, checks its names and
+        // its function declarations. The repeated parameter stops the parse at the last small function's
+        // parameter check, so `functions` counts the finished functions.
+        const functions: usize = if (repeat) 1 + 10_000 + 1_999 * 6 else 1 + 10_000 + 2_000 * 6;
+        try testing.expectEqual(if (repeat) functions + 2 else functions + 1, checks.get(.params_seen));
+        try testing.expectEqual(if (repeat) functions else functions + 1, checks.get(.seen));
+        try testing.expectEqual(if (repeat) functions else functions + 1, checks.get(.function_names));
+    }
+}
+
+// Case 13 needs each parse of its source to make the same allocations. The parser never resizes in
+// place, so a block that the test allocator places differently cannot change the parse's allocations.
+test "FP-0082 revision 2: the case 13 source makes the same allocations whatever the state of the test allocator" {
+    const gpa = testing.allocator;
+    const text = try std.mem.join(gpa, "\n", &.{ caseNamed("T9").source, caseNamed("T11").source, caseNamed("T18").source, caseNamed("T21").source, caseNamed("T33").source });
+    defer gpa.free(text);
+    var source = try web_string.WebString.fromUtf8(gpa, text);
+    defer source.deinit(gpa);
+    var first: ?usize = null;
+    for (0..12) |round| {
+        // A block of another size before each parse moves the test allocator's next placement.
+        const pad = try gpa.alloc(u8, 1 + round * 37);
+        defer gpa.free(pad);
+        var counting: std.testing.FailingAllocator = .init(gpa, .{});
+        try parseAndWrite(counting.allocator(), source.units);
+        try testing.expectEqual(@as(usize, 0), counting.resize_index);
+        if (first) |count| try testing.expectEqual(count, counting.alloc_index) else first = counting.alloc_index;
+    }
 }

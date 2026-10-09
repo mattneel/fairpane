@@ -1,0 +1,36 @@
+diff --git a/src/js/parser.zig b/src/js/parser.zig
+index ca62607..5985779 100644
+--- a/src/js/parser.zig
++++ b/src/js/parser.zig
+@@ -282,7 +282,7 @@ const Limiter = struct {
+         return .{ .ptr = limiter, .vtable = &vtable };
+     }
+ 
+-    const vtable: Allocator.VTable = .{ .alloc = alloc, .resize = Allocator.noResize, .remap = Allocator.noRemap, .free = free };
++    const vtable: Allocator.VTable = .{ .alloc = alloc, .resize = resize, .remap = remap, .free = free };
+ 
+     fn fits(limiter: *const Limiter, bytes: usize) bool {
+         return bytes <= limiter.limit - limiter.used;
+@@ -299,6 +299,22 @@ const Limiter = struct {
+         return memory;
+     }
+ 
++    fn resize(context: *anyopaque, memory: []u8, alignment: std.mem.Alignment, new_len: usize, return_address: usize) bool {
++        const limiter: *Limiter = @ptrCast(@alignCast(context));
++        if (new_len > memory.len and !limiter.fits(new_len - memory.len)) return false;
++        if (!limiter.child.rawResize(memory, alignment, new_len, return_address)) return false;
++        limiter.used = limiter.used - memory.len + new_len;
++        return true;
++    }
++
++    fn remap(context: *anyopaque, memory: []u8, alignment: std.mem.Alignment, new_len: usize, return_address: usize) ?[*]u8 {
++        const limiter: *Limiter = @ptrCast(@alignCast(context));
++        if (new_len > memory.len and !limiter.fits(new_len - memory.len)) return null;
++        const result = limiter.child.rawRemap(memory, alignment, new_len, return_address) orelse return null;
++        limiter.used = limiter.used - memory.len + new_len;
++        return result;
++    }
++
+     fn free(context: *anyopaque, memory: []u8, alignment: std.mem.Alignment, return_address: usize) void {
+         const limiter: *Limiter = @ptrCast(@alignCast(context));
+         limiter.child.rawFree(memory, alignment, return_address);

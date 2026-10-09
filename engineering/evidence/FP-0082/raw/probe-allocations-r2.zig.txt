@@ -1,0 +1,22 @@
+
+// FP-0082 revision 2 probe, appended to a copy of `src/js/parser.zig` at the base by
+// `probe-allocations-r2.mjs`. It parses the case 13 source twelve times, each after a block of another
+// size, and prints the allocation and resize counts that the parse makes through a counting allocator.
+test "FP-0082 revision 2 probe: allocations of the case 13 source" {
+    const gpa = testing.allocator;
+    const text = try std.mem.join(gpa, "\n", &.{ caseNamed("T9").source, caseNamed("T11").source, caseNamed("T18").source, caseNamed("T21").source, caseNamed("T33").source });
+    defer gpa.free(text);
+    var source = try web_string.WebString.fromUtf8(gpa, text);
+    defer source.deinit(gpa);
+    var first: ?usize = null;
+    var differs = false;
+    for (0..12) |round| {
+        const pad = try gpa.alloc(u8, 1 + round * 37);
+        defer gpa.free(pad);
+        var counting: std.testing.FailingAllocator = .init(gpa, .{});
+        try parseAndWrite(counting.allocator(), source.units);
+        std.debug.print("round {d}: {d} allocations, {d} resizes\n", .{ round, counting.alloc_index, counting.resize_index });
+        if (first) |count| differs = differs or count != counting.alloc_index else first = counting.alloc_index;
+    }
+    if (differs) return error.TestAllocationsDiffer;
+}

@@ -2,7 +2,9 @@
 //!
 //! `file <path>` writes the outcome line and exits with status 0 for a script, 1 for a syntax error,
 //! 2 for an unsupported outcome, 3 for an input or usage error, and 4 for a limit.
-//! `census <root> <out.jsonl>` runs the census of an extracted Test262 tree.
+//! `census <root> <out.jsonl>` runs the census of an extracted Test262 tree and refuses an existing
+//! `<out.jsonl>`. `census --replace <root> <out.jsonl>` truncates an existing `<out.jsonl>` instead;
+//! the `zig build test` census steps use it, because the build runner reuses their output directory.
 
 const std = @import("std");
 const Io = std.Io;
@@ -11,7 +13,7 @@ const parser = @import("parser.zig");
 const census = @import("parse_census.zig");
 const web_string = @import("../web_string.zig");
 
-const usage = "usage: fairpane-js-parse file <path>\n       fairpane-js-parse census <root> <out.jsonl>\n";
+const usage = "usage: fairpane-js-parse file <path>\n       fairpane-js-parse census [--replace] <root> <out.jsonl>\n";
 const input_status: u8 = 3;
 
 pub fn main(init: std.process.Init) u8 {
@@ -28,7 +30,9 @@ pub fn main(init: std.process.Init) u8 {
     const status = if (args.len == 3 and std.mem.eql(u8, args[1], "file"))
         parseFile(io, init.gpa, args[2], &stdout.interface, &stderr.interface)
     else if (args.len == 4 and std.mem.eql(u8, args[1], "census"))
-        census.run(io, init.gpa, args[2], args[3], &stdout.interface, &stderr.interface)
+        census.run(io, init.gpa, args[2], args[3], .create, &stdout.interface, &stderr.interface)
+    else if (args.len == 5 and std.mem.eql(u8, args[1], "census") and std.mem.eql(u8, args[2], "--replace"))
+        census.run(io, init.gpa, args[3], args[4], .replace, &stdout.interface, &stderr.interface)
     else blk: {
         stderr.interface.writeAll(usage) catch {};
         break :blk input_status;
