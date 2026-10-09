@@ -140,6 +140,11 @@ Commit `63e14ca` applies the worker's `out/fp0106.patch`, blob `cdeb5c30f9df80ef
 | Uncached `zig build test --summary all` | `raw/integration-tests.log`, with the fresh cache directory `out/fp0106-integration` | exit 0; `Build Summary: 104/104 steps succeeded; 397/397 tests passed` |
 | Bun 1.4.2 | `raw/bun-selftest.log` | 253 of 253 |
 
-## Open items
+## First CI run
 
-After the push, the integrator records `gh run view` of the first `Gates` run that contains the change and the Windows `c-abi` receipt and log under `engineering/evidence/FP-0106/ci/`, and reports the duration of the ReleaseSafe `zig build` command here.
+Push run 37990258390 of `a7219f9` is the first `Gates` run that contains `63e14ca`, and it concluded `success` in both jobs.
+`ci/run-37990258390.log` records `gh run view` of that run and `gh run download` of its receipts into `ci/run-37990258390/`.
+The Windows `c-abi` receipt, `ci/run-37990258390/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T21-01-11-455Z-c-abi-6e5b0546.json`, passes.
+Its ReleaseSafe `zig build` took 4,132 ms, and its second `abi-exports` run exits 0.
+The step took 84 s from 21:01:11 to 21:02:35 UTC, within the 72 to 147 s of the sixteen earlier Windows `c-abi` steps in `../ci/runs-2026-10-09-extension-2.log`.
+Most of the step is the C smoke compile, which took 79,321 ms in this receipt and which FP-0106 did not change.
