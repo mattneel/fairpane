@@ -1,0 +1,84 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","reproduce-check","c0cbf85c65a51892318c7f4076d3a9b3e8842907"]
+{
+  "result": "different",
+  "commit": "c0cbf85c65a51892318c7f4076d3a9b3e8842907",
+  "tree": "c7ed6f8d5fcdd684722dae828fef69ea5de2979a",
+  "source_tar_sha256": "cf304d8cd797413c79caaf40f53b9788d6f44a91e7eef7bcbb9db5914b445a81",
+  "build_type_command": [
+    "zig",
+    "build",
+    "-Doptimize=ReleaseSafe",
+    "--prefix",
+    "zig-out"
+  ],
+  "work_trees": [
+    "C:\\src\\fairpane\\out\\reproduce\\c0cbf85c65a5-moahBm\\a",
+    "C:\\src\\fairpane\\out\\reproduce\\c0cbf85c65a5-moahBm\\b"
+  ],
+  "builds": [
+    {
+      "work_tree": "C:\\src\\fairpane\\out\\reproduce\\c0cbf85c65a5-moahBm\\a",
+      "executable": "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "-Doptimize=ReleaseSafe",
+        "--prefix",
+        "C:\\src\\fairpane\\out\\reproduce\\c0cbf85c65a5-moahBm\\a\\zig-out"
+      ],
+      "environment": {
+        "ZIG_LOCAL_CACHE_DIR": "C:\\src\\fairpane\\out\\reproduce\\c0cbf85c65a5-moahBm\\a\\.zig-cache",
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\src\\fairpane\\out\\reproduce\\c0cbf85c65a5-moahBm\\a\\.zig-global-cache"
+      },
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 59943,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "work_tree": "C:\\src\\fairpane\\out\\reproduce\\c0cbf85c65a5-moahBm\\b",
+      "executable": "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "-Doptimize=ReleaseSafe",
+        "--prefix",
+        "C:\\src\\fairpane\\out\\reproduce\\c0cbf85c65a5-moahBm\\b\\zig-out"
+      ],
+      "environment": {
+        "ZIG_LOCAL_CACHE_DIR": "C:\\src\\fairpane\\out\\reproduce\\c0cbf85c65a5-moahBm\\b\\.zig-cache",
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\src\\fairpane\\out\\reproduce\\c0cbf85c65a5-moahBm\\b\\.zig-global-cache"
+      },
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 63429,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "files": [
+    {
+      "path": "include/fairpane.h",
+      "a": "845b602f10c46a62bc29897a649200bcef8e57a477cff23bb91bc170d216b410",
+      "b": "845b602f10c46a62bc29897a649200bcef8e57a477cff23bb91bc170d216b410"
+    },
+    {
+      "path": "lib/fairpane.lib",
+      "a": "07d5ef383ca12a5e4aa0c64cd386da03c9e0d0743c2f8005a6457f4761b805e2",
+      "b": "646a87ade7417bb1b7052dba3a00c5ef95be8f7c2bff8507c6d69d962e712c81"
+    }
+  ],
+  "differing": [
+    "lib/fairpane.lib"
+  ],
+  "error": null,
+  "removal": {
+    "removed": true,
+    "errors": []
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","reproduce-check","c0cbf85c65a51892318c7f4076d3a9b3e8842907"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T10:25:59.922Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":124502}
