@@ -81,5 +81,16 @@ The isolated `fairpane-bindings` worker `FP0021Revision` wrote it.
 The C and Zig foreign-unwind scenarios only establish that the boundary has no unwinding channel.
 They do not qualify unwinding safety, and each later wrapper must inject a real panic or exception.
 
-The integrator runs `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, `zig-build`, and `c-abi` on the revision commit.
-`docs/ABI_AND_WRAPPERS.md` is outside this task's paths, so the integrator corrects its stale reference separately.
+The integrator applied the patch, resolved one import conflict in `tools/fairpane.mjs` by keeping both sides' imports, and committed it as `574c224`.
+Commit `e1ecd79` corrected the stale reference in `docs/ABI_AND_WRAPPERS.md`.
+`raw/revision-1-binding.log` records `HEAD` `574c224` and an empty status that includes ignored files for every source root.
+
+- `gates/2026-10-09T04-44-10-442Z-repo-check-ae235260.json`
+- `gates/2026-10-09T04-44-10-649Z-controller-test-5a19c3c6.json`, with 155 of 155 controller tests.
+- `gates/2026-10-09T04-44-33-509Z-zig-fmt-39628c56.json`
+- `gates/2026-10-09T04-44-33-683Z-zig-test-5b166113.json`
+- `gates/2026-10-09T04-44-37-901Z-zig-build-37ed25d6.json`, which answers review 1's missing `zig-build` receipt.
+- `gates/2026-10-09T04-44-39-526Z-c-abi-e553f902.json`, which now also runs `abi-exports`.
+
+`raw/revision-1-integration-zig-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0021-r1-integration-cache`: 17 of 17 build steps and 101 of 101 tests.
+`raw/revision-1-integration-bun.log` records Bun with 155 of 155 controller tests.

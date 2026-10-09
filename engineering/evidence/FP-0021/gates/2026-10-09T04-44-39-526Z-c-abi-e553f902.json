@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "c-abi",
+  "gate_sha256": "e768491e01cf324d0d163fba767c72f1cd9dbbb6659ca81541e62bb01e5e6184",
+  "status": "pass",
+  "started_at": "2026-10-09T04:44:39.529Z",
+  "finished_at": "2026-10-09T04:44:40.164Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "os_release": "10.0.26200",
+    "runtime": "v26.7.0",
+    "bun_version": null,
+    "zig_version": "0.18.0-dev.120+9fe22a29b"
+  },
+  "source_before": {
+    "sha256": "3dc7c2026ccbe72fc31ea5ae7c0fbb4f2a7daf62ce256dbafe3dfcc937e104c7",
+    "file_count": 129
+  },
+  "source_after": {
+    "sha256": "3dc7c2026ccbe72fc31ea5ae7c0fbb4f2a7daf62ce256dbafe3dfcc937e104c7",
+    "file_count": 129
+  },
+  "policy_before": {
+    "sha256": "b142ba18629ac87351de6da7273563614be02a8042e940750babcac427ecd5b3",
+    "file_count": 17
+  },
+  "policy_after": {
+    "sha256": "b142ba18629ac87351de6da7273563614be02a8042e940750babcac427ecd5b3",
+    "file_count": 17
+  },
+  "commands": [
+    {
+      "executable": "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "--prefix",
+        "C:\\src\\fairpane\\out\\c-abi-build"
+      ],
+      "cwd": "C:\\src\\fairpane",
+      "started_at": "2026-10-09T04:44:39.549Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 91,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\src\\fairpane\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\nvm4w\\nodejs\\node.exe",
+      "arguments": [
+        "C:\\src\\fairpane\\tools\\fairpane.mjs",
+        "abi-exports",
+        "out/c-abi-build/lib/fairpane.lib"
+      ],
+      "cwd": "C:\\src\\fairpane",
+      "started_at": "2026-10-09T04:44:39.640Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 45,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\src\\fairpane\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "cc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "tests/c/abi_smoke.c",
+        "-Iinclude",
+        "C:\\src\\fairpane\\out\\c-abi-build\\lib\\fairpane.lib",
+        "-o",
+        "C:\\src\\fairpane\\out\\c-abi-smoke.exe"
+      ],
+      "cwd": "C:\\src\\fairpane",
+      "started_at": "2026-10-09T04:44:39.685Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 406,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\src\\fairpane\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\src\\fairpane\\out\\c-abi-smoke.exe",
+      "arguments": [],
+      "cwd": "C:\\src\\fairpane",
+      "started_at": "2026-10-09T04:44:40.091Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 36,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\src\\fairpane\\.zig-cache\\global"
+      }
+    }
+  ],
+  "error": null,
+  "outputs": [
+    {
+      "path": "engineering/evidence/FP-0021/gates/2026-10-09T04-44-39-526Z-c-abi-e553f902.log",
+      "size": 2445,
+      "sha256": "8c1bd51e3965606392058b975b2fbefb2e08dd0e86d78543838e7463bb7f7cca"
+    }
+  ]
+}

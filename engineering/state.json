@@ -252,23 +252,24 @@
       "notes": []
     },
     "FP-0021": {
-      "status": "active",
+      "status": "implemented",
       "owner": "fairpane-bindings workers FP0021Schema and FP0021Revision, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0021/README.md",
-        "engineering/evidence/FP-0021/gates/2026-10-09T02-46-05-308Z-repo-check-1114babe.json",
-        "engineering/evidence/FP-0021/gates/2026-10-09T02-46-05-488Z-controller-test-54b193bf.json",
-        "engineering/evidence/FP-0021/gates/2026-10-09T02-46-26-215Z-zig-fmt-77677748.json",
-        "engineering/evidence/FP-0021/gates/2026-10-09T02-46-26-362Z-zig-test-3f72cd3e.json",
-        "engineering/evidence/FP-0021/gates/2026-10-09T02-46-29-740Z-c-abi-ce4fe73c.json",
-        "engineering/evidence/FP-0021/raw/integration-zig-tests.log",
-        "engineering/evidence/FP-0021/raw/mutation-stale.log"
+        "engineering/evidence/FP-0021/gates/2026-10-09T04-44-10-442Z-repo-check-ae235260.json",
+        "engineering/evidence/FP-0021/gates/2026-10-09T04-44-10-649Z-controller-test-5a19c3c6.json",
+        "engineering/evidence/FP-0021/gates/2026-10-09T04-44-33-509Z-zig-fmt-39628c56.json",
+        "engineering/evidence/FP-0021/gates/2026-10-09T04-44-33-683Z-zig-test-5b166113.json",
+        "engineering/evidence/FP-0021/gates/2026-10-09T04-44-37-901Z-zig-build-37ed25d6.json",
+        "engineering/evidence/FP-0021/gates/2026-10-09T04-44-39-526Z-c-abi-e553f902.json",
+        "engineering/evidence/FP-0021/raw/revision-1-integration-zig-tests.log",
+        "engineering/evidence/FP-0021/raw/revision-1-mutation-thread.log"
       ],
       "review": "engineering/evidence/FP-0021/reviews/review-1-reject.json",
       "notes": [
-        "The frozen contract is engineering/evidence/FP-0021/CONTRACT.md, based on commit 24c0c64.",
-        "Commit 13372de implements it with 138 of 138 controller tests and 89 of 89 Zig tests.",
-        "fairpane-review rejected 13372de because engine_destroy's consumption was lost from the ownership data. Contract revision 1 is active in worker FP0021Revision."
+        "The frozen contract is engineering/evidence/FP-0021/CONTRACT.md, based on commit 24c0c64, with revision 1.",
+        "fairpane-review rejected 13372de because engine_destroy's consumption was lost from the ownership data.",
+        "Commit 574c224 implements revision 1 with 155 of 155 controller tests and 101 of 101 Zig tests. Awaiting fairpane-review."
       ]
     },
     "FP-0022": {

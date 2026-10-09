@@ -1,0 +1,143 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "98fa147",
+    "586b854"
+  ],
+  "summary": "I accept revision 2. I read the files in the working tree and the recorded logs. I did not run git or any other command. The commit identities come from the evidence logs. raw/revision-2-binding.log records HEAD 98fa147, and its `git show --stat` lists only tools/README.md, tools/workflow-check.mjs, tools/workflow-check.test.mjs, and FP-0033 evidence files. No .github path is in that list. The workflow blob IDs (gates.yml ccbd330, pages.yml a70741a) match HEAD. raw/github-run-37884244035.log records a push run on headSha 586b854 with conclusion success for both jobs.\n\nAll three minor findings and both checker notes from my revision 1 review are resolved:\n- **Step outputs in shells:** a `run:` value that contains `${{` is now a problem in every workflow (workflow-check.mjs:319-321).\n- **Gate-step gaps:** gateWorkflowProblems replaces the denylist with key, action, input, and command allowlists (:346-420). The defaults, env, working-directory, container, and inserted-action bypasses are each reported. The gates.yml test now compares the full step sequence, including action names.\n- **pages.yml exception:** the permission problem text now names the exact grants (:280-283, :304, :310). Widening the deploy job to write-all, or adding contents: write, no longer matches the reviewed list.\n- **Trigger allowlist:** only push, pull_request, and workflow_dispatch are accepted (:284, :299).\n- **Upload steps without if::** such a step is now a problem (:405).\n- **New parser rule:** a block scalar whose leading blank line has more spaces than its first content line is rejected. That only adds a rejection, so the parser fails closed.\n\nThe red baseline is genuine. With the new tests staged against the old checker, 6 of 19 cases fail (raw/revision-2-tests-before.log, exit 1). After the change, 19 of 19 checker cases and 148 of 148 controller tests pass, each with exit 0.\n\nI found no new bypass and no weakened guarantee. Every check from revision 1 is still present or replaced by a stricter allowlist:\n- A job-level if: or a step shell: is still rejected.\n- The trigger denylist became an allowlist.\n- The upload condition is now required, not just constrained.\n\nFour residual notes remain, and none is a blocker or major:\n1. `with:` inputs can still carry step outputs into a composite action or a script action in workflows other than Gates.\n2. The Gates test pins action names, not the full SHAs, the upload path or if-no-files-found, or the trigger filters.\n3. The pages.yml deploy job's steps are still not bound.\n4. The claim that the workflows are 'byte-identical' to the linted files relies on two different hash kinds.\n\nEach note needs a reviewed merge to master before it matters. On a pull request, the pull request controls the checker anyway, as tools/README.md:141-142 states. All of these remain local integrity checks: under docs/SECURITY.md:80-81 they provide no independent enforcement.",
+  "criteria": [
+    {
+      "criterion": "Rev 2: the Gates workflow is checked against key allowlists at workflow, job, run-step, and action-step level",
+      "met": true,
+      "evidence": "workflow-check.mjs:346-348 define the workflow, job, and run-step key lists. :373-375 report workflow keys and :381-383 report job keys. :393-396 allow only name, uses, and with on an action step, plus if on an upload step. :407-411 allow only name and run on a run step. A step that sets both uses and run takes the uses branch, so its run key is reported at :396. Job-level permissions, if, env, defaults, container, services, strategy, needs, and uses (reusable workflows) all fall outside GATE_JOB_KEYS. A step has no allowed id key, so no Gates step can produce a steps.*.outputs value."
+    },
+    {
+      "criterion": "Rev 2: run commands are limited to install-zig or run <gate>, and only checkout, setup-node, and upload-artifact are accepted, each with fixed inputs",
+      "met": true,
+      "evidence": "GATE_COMMAND at :349 is anchored at both ends. JavaScript `$` without the m flag does not match before a trailing newline. The gate class excludes spaces and newlines, so `|| true`, `--evidence-dir`, and multi-line block commands fail (test.mjs:215-219). The block scalar parser joins folded (>) lines with \\n, not a space, so a folded scalar still contains the newline that fails the regex. GATE_ACTIONS at :351-355 allows checkout ref, repository, and path inputs nowhere, and allows setup-node cache and mirror nowhere. The checkout ref and setup-node cache fixtures are tested at test.mjs:210-214. The test at :99-101 fixes the exact ordered step list for each job, and :92-98 fix the runner labels."
+    },
+    {
+      "criterion": "Check 12: defaults, env, working-directory, container, an extra action, a checkout ref, another command, and an upload without if: are each reported",
+      "met": true,
+      "evidence": "test.mjs:188-222 covers each listed fixture. Defaults are covered at workflow and job level, and env at workflow, job, run-step, and action-step level. raw/revision-2-tests-before.log shows case 12 failing against the old gateStepProblems ('Expected /The Gates workflow sets defaults:/ in []'). raw/revision-2-tests-after.log shows it passing."
+    },
+    {
+      "criterion": "Check 13: ${{ steps.x.outputs.y }} inside run: is a problem in every workflow",
+      "met": true,
+      "evidence": "workflow-check.mjs:319-321 runs inside visit() for every mapping, so it applies to every workflow file, not only Gates. Double-quoted escapes are limited to \\\\ \\\" \\/ \\n \\t \\r \\0 (:23, :45-47), so no escape can produce `{`. Folded scalars insert a separator, so `${{` cannot be built across lines. test.mjs:223-229 cover plain and block run values, and the env: form remains accepted. pages.yml uses `${RUNNER_TEMP}` and similar, not `${{`, so it adds no false problem."
+    },
+    {
+      "criterion": "Check 14: triggers other than push, pull_request, and workflow_dispatch are problems",
+      "met": true,
+      "evidence": "ACCEPTED_TRIGGERS at :284 is applied at :292-300 to the scalar, sequence, and mapping forms. A non-scalar sequence item and an empty on: are also problems. The match is case-sensitive, so case variants are rejected. test.mjs:230-238 cover issue_comment and schedule in mapping, flow-sequence, and scalar form, and pull_request_target and workflow_run remain covered."
+    },
+    {
+      "criterion": "Check 15: the pages.yml reviewed list binds the exact grants",
+      "met": true,
+      "evidence": "grants() at :283 renders the entries in source order. word() at :280-281 writes single-word scalars as written and JSON-quotes anything else, and keys cannot contain spaces or commas (KEY at :22). So two different grant sets produce the same text only for nested mapping values, which GitHub rejects anyway. The line number is part of the text, so moving the grants or adding them to another job changes the list. test.mjs:68 and :239-252 assert that write-all and an added contents: write each produce a different text."
+    },
+    {
+      "criterion": "Check 16 and parser safety: the libyaml blank-line form is rejected, and no accept-side difference is added",
+      "met": true,
+      "evidence": "workflow-check.mjs:146-160 track the widest leading blank line before content and throw when it is wider than the first content line (:152). This only adds a rejection. When the blank lines are no wider than the content indent, the content indent equals libyaml's detected indent, so the interpretation does not change. test.mjs:253-261 cover the review 2 fixture and three accepted blank-line widths."
+    },
+    {
+      "criterion": "No earlier guarantee is weakened",
+      "met": true,
+      "evidence": "Each revision 1 rule still holds or is stricter:\n- Job-level if: is rejected by GATE_JOB_KEYS.\n- Step shell: is rejected by both step key lists.\n- if: is allowed only on upload-artifact and only as `${{ always() }}`, and it is now required.\n- The pull_request_target and workflow_run denial is subsumed by the allowlist.\n- continue-on-error, secrets, pinning, persist-credentials, and the expression allowlist are unchanged (:312-344).\n- raw/revision-2-binding.log shows that 98fa147 changes no .github file, and the gates.yml and pages.yml blob IDs equal HEAD."
+    },
+    {
+      "criterion": "Evidence binds to the revision, and the integrated run succeeds",
+      "met": true,
+      "evidence": "raw/revision-2-binding.log records:\n- HEAD 98fa147.\n- An empty porcelain status with --ignored for every source root, including .github.\n- `git show --stat` of 7bbe196, 29f2135, and 98fa147.\n- Blob IDs equal to `HEAD:`.\n\nraw/github-run-37884244035.log records gh exit 0, headSha 586b854, and event push. Both 'Linux gates' and 'Windows gates' succeed, and a search for any conclusion other than success found none. The controller-test receipt (gates/...-controller-test-5ea3d49a.json) shows status pass and trust unsigned-local-integrity-only."
+    },
+    {
+      "criterion": "Local integrity checks are not presented as independent enforcement",
+      "met": true,
+      "evidence": "tools/README.md:139-143 and FP-0033/README.md under Limits still say that receipts are unsigned local integrity records and that a pull request runs its own workflow, checker, and controller. The artifact names in gates.yml end in '-unsigned-local-integrity-records-not-attestations'. This matches docs/SECURITY.md:80-81."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "minor: step outputs are on the expression allowlist, and nothing stops run: from interpolating them (workflow-check.mjs:215 in revision 1)",
+      "resolved": true,
+      "evidence": "workflow-check.mjs:319-321 reject any `${{` in a run: value in every workflow. test.mjs:223-229 cover it, and red-baseline case 13 fails before the change. Residual: `with:` inputs can still carry step outputs into a composite action or actions/github-script outside Gates. See the new note."
+    },
+    {
+      "finding": "minor: gateStepProblems missed defaults.run.shell, env (NODE_OPTIONS), working-directory, container, and an inserted uses: step",
+      "resolved": true,
+      "evidence": "gateWorkflowProblems (:370-420) uses key, action, input, and command allowlists, and each listed vector has a fixture in test.mjs:188-222. The gates.yml test now compares the full ordered [action, run] sequence (test.mjs:99-101), so an inserted step fails even with an accepted action. Only accepted actions can write $GITHUB_ENV or $GITHUB_PATH, and they receive only fixed inputs. Residual: the action SHAs are not pinned by the test. See the new note."
+    },
+    {
+      "finding": "minor: the pages.yml exception matched only the message text, so write-all kept check 6 green",
+      "resolved": true,
+      "evidence": "The permission problems now include the exact grants (:283, :304, :310). The reviewed text is 'Line 49: Job deploy grants a permission other than contents: read (pages: write, id-token: write).' (test.mjs:68). Line 49 is the deploy job's permissions: line in pages.yml. test.mjs:239-252 show that write-all and an added contents: write change the text. The second half of my recommendation was not adopted: the deploy job's steps are still not bound. See the new note."
+    },
+    {
+      "finding": "note: triggers are a two-name denylist; issue_comment, pull_request_review, issues, and similar triggers were accepted",
+      "resolved": true,
+      "evidence": "ACCEPTED_TRIGGERS = {push, pull_request, workflow_dispatch} (:284) applies to every workflow (:299). test.mjs:230-238 cover it. gates.yml and pages.yml use only accepted triggers, and both still check clean against their reviewed lists."
+    },
+    {
+      "finding": "note: an upload-artifact step without if: reported nothing",
+      "resolved": true,
+      "evidence": "workflow-check.mjs:405 reports a missing if: on any actions/upload-artifact step, and :406 requires the exact `${{ always() }}`. The fixture with no if: is at test.mjs:221."
+    },
+    {
+      "finding": "note: git could not confirm the separate policy commit, the writable-path scope, or the identity of the linted files",
+      "resolved": true,
+      "evidence": "raw/revision-2-binding.log `git show --stat` shows that 29f2135 'policy: bind gate receipts to the workflow files' changes only engineering/policy.json (3 lines). 7bbe196 changes only engineering/evidence/FP-0033 and tools files. hash-object of both workflows equals `rev-parse HEAD:`. Residual: no log computes both the SHA-256 and the git blob ID of the same file. See the new note."
+    },
+    {
+      "finding": "note: runner image labels are mutable, and receipts lack ImageVersion",
+      "resolved": true,
+      "evidence": "Still documented under Limits in FP-0033/README.md ('Receipts do not record the runner image version...')."
+    },
+    {
+      "finding": "note: the setup-node runtime is not checked against a project-held digest",
+      "resolved": false,
+      "evidence": "Unchanged. The 98fa147 stat touches no workflow or lib file. I still accept this as the pinned action's trust boundary."
+    },
+    {
+      "finding": "note: Get-Zig.ps1 has no streaming size cap",
+      "resolved": false,
+      "evidence": "Unchanged, and not in the 98fa147 stat. Only disk exhaustion is possible, before the archive check rejects the file."
+    },
+    {
+      "finding": "note: tar -tf checks names only, not entry types",
+      "resolved": false,
+      "evidence": "Unchanged, and not in the 98fa147 stat. The check runs after the SHA-256 match against the protected lock, so it is defense in depth only."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "note",
+      "path": "tools/README.md",
+      "line": 161,
+      "issue": "The README says 'A run: value may contain no ${{ }} expression, so no expression reaches a shell.' That holds only for a workflow's own run: values. Outside the Gates workflow, the expression allowlist still lets steps.<id>.outputs.<name> reach a `with:` input, and any pinned action is accepted there. A composite action that interpolates `${{ inputs.x }}` into its own run:, or actions/github-script `script:`, turns a data-dependent step output into shell or JavaScript injection, and the checker reports nothing. Neither current workflow does this. Gates allows no step id and only three JavaScript actions with fixed inputs. pages.yml passes only constants to with: and uses the deploy-pages output only in environment.url.",
+      "recommendation": "Reword the README line to 'no expression reaches a workflow run: value'. Alternatively, reject steps.*.outputs.* inside with: except for reviewed action/input pairs."
+    },
+    {
+      "severity": "note",
+      "path": "tools/workflow-check.test.mjs",
+      "line": 99,
+      "issue": "The Gates step-sequence assertion strips everything after '@', and gateWorkflowProblems accepts any 40-hex SHA under the three accepted action names (workflow-check.mjs:388-392). Repinning actions/checkout to another commit therefore passes, including a fork-network commit that GitHub resolves under the parent repository's name. The test also leaves three values unpinned:\n- the upload `path` and `if-no-files-found` inputs. `if-no-files-found: ignore` with a wrong path gives a green job with no receipts.\n- the trigger filters beyond `branches`, such as paths-ignore and types, which can suppress a run.\n\nNone of these makes a gate step pass without running, and each needs a reviewed merge to master.",
+      "recommendation": "In the gates.yml test, assert the exact uses references, the full SHA, and the version comment. Also assert that path is out/evidence/ and if-no-files-found is error, and that push and pull_request carry only the branches filter."
+    },
+    {
+      "severity": "note",
+      "path": "tools/workflow-check.test.mjs",
+      "line": 68,
+      "issue": "The pages.yml reviewed list now binds the deploy job's grants. Nothing binds what that job runs. A reviewed change could add a run: step, or a job-level uses: reusable workflow, that uses the id-token: write OIDC token or the pages: write grant, and the reviewed problem list would still match exactly. pages.yml triggers only on push to master and workflow_dispatch, so a fork pull request cannot exercise it before merge.",
+      "recommendation": "Assert that the deploy job's keys are exactly needs, runs-on, permissions, environment, and steps. Assert that its steps are the single pinned actions/deploy-pages step with id deployment."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0033/README.md",
+      "line": 68,
+      "issue": "The README says 'The workflow files are byte-identical to the files that raw/revision-1-actionlint.log linted'. That log records SHA-256 values (27c988f8…, 8230ec4d…), while raw/revision-2-binding.log records git blob IDs (ccbd330…, a70741a…). No log computes both for one file. For gates.yml, the chain holds through blob ccbd330 recorded at the original integration (review-1-reject.json:117). For pages.yml, it depends on intervening commits whose stats are not recorded. The integrated run is on 586b854, and no log records `git diff --stat 98fa147 586b854`, so its claim to change only evidence files is not shown.",
+      "recommendation": "For the next workflow-touching revision, record certutil SHA-256 and git hash-object of each workflow file in the same log. Also record `git diff --stat` between the implementation commit and the run's head commit."
+    }
+  ],
+  "commands_run": []
+}
