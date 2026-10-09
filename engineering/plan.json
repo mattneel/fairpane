@@ -3465,9 +3465,52 @@
         "Run the workflow checks in repo-check, or record why only controller-test runs them.",
         "Strip trailing spaces before the reserved device name comparison in the archive reader, and check each component name of an archive's components file with the archive path rules.",
         "Start doctor's probes of bun, git, omp, and zig so that no probe runs a program from the repository directory, and test it with a marker program in the working directory.",
-        "State in api/README.md that the engine memory limit bounds the bytes the engine requests, not the resident memory of the process, and that it is a local integrity bound, not containment, as the FP-0081 reviews note."
+        "State in api/README.md that the engine memory limit bounds the bytes the engine requests, not the resident memory of the process, and that it is a local integrity bound, not containment, as the FP-0081 reviews note.",
+        "Add a mutation control that removes the Linux job's gate order check from the workflow checker, and show that it fails a checker case, as FP-0067 review 1 notes."
       ],
       "read": ["engineering/evidence/FP-0067/reviews/review-1-reject.json", "engineering/evidence/FP-0079/reviews/security-review-2-accept.json", "engineering/evidence/FP-0081/reviews/security-review-1-accept.json"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0106",
+      "title": "Close the FP-0066 and FP-0076 review findings",
+      "workstream": "laboratory",
+      "depends_on": ["FP-0066", "FP-0076"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Check the exported symbols of the ReleaseSafe library in a gate or in reproduce-check, so that an export missing only from release builds fails a check.",
+        "Search the library for each needle in tools/zig/library_check.zig without copying or case-folding the whole library once for each needle.",
+        "Map each Windows status that the attributes-only identification open can return as the replaced open in the pinned standard library did, including DELETE_PENDING, PIPE_BUSY, PIPE_NOT_AVAILABLE, VIRUS_INFECTED, VIRUS_DELETED, and CANCELLED, and test an output file that is pending deletion on Windows.",
+        "Keep every FP-0066 and FP-0076 case passing."
+      ],
+      "read": ["engineering/evidence/FP-0066/reviews/review-1-accept.json", "engineering/evidence/FP-0076/reviews/review-1-accept.json", "engineering/evidence/FP-0066/CONTRACT.md", "engineering/evidence/FP-0076/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0107",
+      "title": "Keep the controller-test gate within its timeout on Windows",
+      "workstream": "laboratory",
+      "depends_on": [],
+      "role": "fairpane-core",
+      "allowed_paths": ["tools", "tests", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Make the controller suite report each test's duration, and record the controller-test gate's per-test durations on the Windows and Linux CI jobs over at least ten runs.",
+        "Name the tests that dominate the Windows duration and the cause of each from those records.",
+        "Keep the gate's slowest recorded Windows duration at most two thirds of its timeout by reducing test time, or through a separate reviewed change to the timeout, without removing, skipping, excluding, or weakening any test.",
+        "Rerun the gate on the Windows CI runner at least ten times after the change and report each duration."
+      ],
+      "read": ["engineering/evidence/FP-0098/ci/README.md", "engineering/evidence/ci/runs-2026-10-09.log", "engineering/evidence/ci/run-37952850522-attempt-1/README.md", "engineering/gates.json", "tools/selftest.mjs"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
