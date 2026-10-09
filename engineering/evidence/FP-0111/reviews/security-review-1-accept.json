@@ -1,0 +1,48 @@
+{
+  "verdict": "accept",
+  "summary": "I found no exploitable out-of-bounds read, panic, overflow, unbounded loop, recursion, or allocation in the FP-0111 parsers. I reviewed `layout.zig`, `layout_common.zig`, `gdef.zig`, the `Defect` additions in `tables.zig`, and the `opentype.zig` entry points, reading the working tree at the reviewed head. Every read goes through `Reader`, which checks u64 offsets, and the multi-field records are copied with `fixed`. Each count is checked with `fits` before any loop over it. Every sum is u64, or u32 with operands bounded by u16, so no sum can wrap into an in-bounds read. The narrowing casts depend only on invariants the parser establishes: the Coverage index is below glyph_count, which is at most 65536; the iterator glyph is at most the range end; the request position is at most 62; and the flag high byte fits in u8. Each `unreachable` depends only on an index checked against a captured count, or on a status variant that the opener never produces. None depends on font bytes. `selectLookups` reads each feature and lookup index once and checks it against the captured `feature_count` or `lookup_count` where it is used. The `MasksTooShort` precheck then keeps every `masks[i]` write in bounds. Mutation M12 shows that this check is what contains the write: without it, cases 21 and 22 panic with an index out of bounds. Selection never opens lookups, extensions, or subtables, so extension chains, offset cycles, and shared subtables cannot add to its work. Extensions are followed exactly one level. Validation that selection does not count is at most `max_work` + 65,535 Feature entries plus the Script and LangSys arrays, which matches contract step 9. No function recurses or allocates. Case 23 runs the walk, H(100), and H(30000) on a thread with a 256 KiB stack, and case 24 checks over the type system that no public function takes an allocator. Unsupported data is reported as unsupported: lookup types, extension formats, subtable formats, Coverage and ClassDef versions, Device and VariationIndex tables, caret formats, and FeatureVariations, which sets the flag. The `font-expectations` path is not injectable. `spawnSync` runs with an argument array and no shell. The fonts come from the fixed `EXPECTATION_FONTS` list and are copied into a fresh staging directory through `safePath`. Python runs with PYTHON* variables removed and `PYTHONSAFEPATH=1`. The script writes only beside its staged input, and any fontTools warning makes it exit with status 1. The logs record real commands and exit statuses: tests-before exited 1, tests-after exited 0, the integration build exited 0 with 422 of 422 tests passing, and all four gate receipts passed with exit 0. These are local integrity records, not independent enforcement. The remaining items are notes and do not block acceptance.",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "src/font/layout.zig",
+      "line": 582,
+      "issue": "Only selection has a counted work limit. Each opening call (`lookup`, `subtable`, `coverage`, `parseClassDef`, the GDEF methods) is linear in its own structure. But a hostile table can point many LookupList entries at one Lookup, many subtable offsets at one subtable, and many subtables at one large Coverage. A consumer that walks every lookup, subtable, and coverage can then do work that grows roughly cubically with table size. Nothing in the engine walks this way today; only the tests do.",
+      "recommendation": "Before FP-0112 or FP-0113 applies any lookup, require them to open each Coverage and ClassDef once per run, as the FP-0112 obligation already says. Alternatively, have them charge validation against a per-run budget, and add a hostile shared-structure regression case."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/layout.zig",
+      "line": 614,
+      "issue": "`checkList` treats a NULL ScriptList, FeatureList, or LookupList header offset as an empty list, which is the FP-0013 behavior and is unchanged here. As a result, `selectLookups` returns `valid` with `script = null` and no masks for a header that `chapter2` does not allow to be NULL. This case is missing from the FP-0111 strictness table, so FP-0058 will not review it.",
+      "recommendation": "Add NULL header list offsets to the strictness choices that FP-0058 compares with web-font practice, or report them as `null_offset` in a later amendment."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/layout.zig",
+      "line": 511,
+      "issue": "`Lookup.subtable` follows an extension offset again but trusts the extension format and type that it found at open time. This is memory-safe, because every later read is checked, and README item 5 documents it. But if the bytes change after the open, the call can return a `valid` subtable typed by stale header data.",
+      "recommendation": "Keep the behavior documented. If a future consumer relies on the effective type for anything beyond reads, check the extension header's format and type again in `subtable`."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/layout_common.zig",
+      "line": 50,
+      "issue": "The `@intCast` to u16 in `Coverage.index`, and the same cast in the iterator, rely on `glyph_count <= 65536`. `parseCoverage` guarantees that bound, but Zig struct fields are always public. A caller that builds or edits a `Coverage` by hand with a larger `glyph_count` could trigger a safety panic, or undefined behavior in ReleaseFast. Font bytes cannot reach this.",
+      "recommendation": "Consider marking the handle fields as internal by convention or documentation. Alternatively, have `index` compare against `@min(glyph_count, 65536)`."
+    },
+    {
+      "severity": "note",
+      "path": "tools/fonts/font_expectations.py",
+      "line": 381,
+      "issue": "The script itself does not check the font digest before fontTools reads a fixture. Only evidence step 0 (`digests-before.log`) compared the digests by hand. The pre-read check remains `FP-0078` criterion 1. Apart from that, the invocation is safe: there is no shell, the argument vector is fixed, the input is a staged copy obtained through `safePath`, and `relative_to(FONT_ROOT)` keeps the path lexically under the font root.",
+      "recommendation": "Land the FP-0078 pre-read digest check before anyone extends the dump again."
+    },
+    {
+      "severity": "note",
+      "path": "tests/text/layout_test.zig",
+      "line": 1205,
+      "issue": "The evidence for hostile-input containment is local, deterministic, and Debug-only. It consists of the case 21 truncations and three single-byte substitutions for G, P, and F_GDEF, plus the case 22 after-parse `FF` writes. No fuzzer and no ReleaseSafe run covers other inputs. My source review found no unchecked path, but the tests do not establish containment independently.",
+      "recommendation": "Add a coverage-guided fuzz target for `parseLayout`, the opening calls, and `selectLookups` once the qualification runner exists."
+    }
+  ]
+}
