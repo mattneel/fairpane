@@ -1,0 +1,76 @@
+{
+  "verdict": "accept",
+  "summary": "FP-0079 at 04342e2 passes the hostile-input review. I found no blocker or major issue.\n\nDownload (lib.mjs:210-224): it fetches with redirect:'error' and a 10-minute signal. It stops the stream before writing once the byte count would exceed the locked size. It writes into a fresh 'wx' .partial file, requires the exact size and SHA-256 before renaming, and unlinks the partial file in `finally`. A reused archive passes the same size and SHA-256 check. installRust extracts nothing until every component has been verified, so no parse runs on unverified bytes.\n\nTar reader (rust.mjs:140-237): it checks every header checksum, accepts only the GNU or POSIX ustar/00 magic, and accepts only entry types 0, NUL, 5 and L. A GNU long name and a POSIX prefix+name both reach the same acceptedArchivePath check and the archiveRoot check before any filesystem call (lines 158-166), so neither trick bypasses the path rules. Absolute paths, drive letters, backslashes, NUL, and empty, '.' or '..' components are rejected. Paths that are equal ignoring case are rejected. Every file opens with 'wx' into a fresh mkdir'd destination, and symlinks and hardlinks are refused, so the reader cannot overwrite a file or write through a link. Truncation, a dangling L entry, and a missing end-of-archive marker all fail. Each path is joined only from components that pass these rules, and the first component equals the lock-fixed archive_root, so no write leaves the destination.\n\nComponent installation (rust.mjs:258-305): manifest.in paths get the same rules, an unlisted file fails, two components installing one path fail (compared ignoring case, using a shared set that is updated after each component), copies use COPYFILE_EXCL, and no top-level archive file is installed. The toolchain and download paths come from safePath (no symlinks), and staging happens in a mkdtemp directory under .tools/rust/<version> that is renamed into place. installRust therefore writes only under .tools.\n\nExecutable resolution: verifyToolchain (rust.mjs:351-363) spawns the staged or installed bin/<tool>[.exe] by absolute path, both because safePath resolves its result and because the CLI root is absolute. The evidence logs show the absolute .tools path on Windows and an explicit relative path after a fixed cd on Linux. CARGO_HOME is set to <root>/.tools/cargo-home, but that is configuration, not confinement.\n\nTrust model: I checked that every lock value matches the committed signed manifest. All 9 component url and hash values sit under the correct [pkg.<package>.target.<host>] tables, date is 2026-10-01, and git_commit_hash is b940084d7…. The .sha256 file names ce6dddc8…. The GnuPG log shows GOODSIG and a VALIDSIG whose signing and primary fingerprints are both 108F66205EAEB0AAA8DD5E1C85AB96E6FA1BE5FE (key created 2013-09-26, no expiry). I did not recompute file hashes. The manifest digest rests on raw/rust-lock-verify.log, and the claim that the two key copies are byte-identical rests on the README.\n\nWhat an attacker who controls static.rust-lang.org or the network at install time can do:\n- deny service (HTTP errors, stalls up to 10 minutes, truncated or oversized bodies, all rejected);\n- briefly use up to the locked size in disk space per archive.\n\nWhat that attacker cannot do: substitute bytes without a SHA-256 second preimage, redirect the download, get unverified bytes parsed, or write outside .tools.\n\nThe same attacker at lock-creation time could not pass the signature check without the Rust signing key, because the fingerprint was frozen in the contract (9cc81ea) before the fetch. A compromised Rust signing key or Rust build infrastructure is out of scope.\n\nAll of this is local integrity checking. The installer re-checks only the digests in the lock. `check` validates only the lock's shape. Nothing in code re-runs GnuPG or rust-lock-verify. Independent enforcement of the lock values depends on P1 protecting toolchains/rust.lock.json, on review, and on the owner's branch protections, none of which this commit establishes.\n\nThe lock values are approved as committed.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/rust.mjs",
+      "line": 98,
+      "issue": "acceptedArchivePath rejects only NUL. It does not reject ':', other control characters, Windows reserved device names (CON, NUL, COM1, AUX…), or components ending in '.' or a space, even though safePath (lib.mjs:45) already rejects [\\x00-\\x1f:]. On NTFS, an entry such as '<root>/rustc/bin/rustc.exe:payload' creates an alternate data stream. filesBelow/readdir does not list streams, so the 'unlisted file' check misses it, and [INFERENCE] CopyFileW carries the stream into the installed toolchain. A reserved name may open a device instead of a file [INFERENCE: depends on Windows build and Node's \\\\?\\ prefixing]. 'wx' and COPYFILE_EXCL still prevent any overwrite or directory escape, and only archive bytes that match the locked SHA-256 can reach this code.",
+      "recommendation": "Reuse the safePath convention in acceptedArchivePath: reject [\\x00-\\x1f:]. Also reject Windows reserved base names and components ending in '.' or ' '. Add rejection tests for these cases."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/rust.test.mjs",
+      "line": 330,
+      "issue": "Case 5 tests path rules only through the 100-byte name field. It has no hostile GNU long-name case (an L payload with '../', a leading '/', 'C:', an embedded NUL, or a name outside the root), no POSIX prefix traversal (for example prefix '<root>/..' or a prefix producing an empty component), no case-insensitive file/directory collision, no trailing or chained L entry, and no lone zero block. By reading the code, I found that the long name and the prefix both reach acceptedArchivePath and the root check (lines 158-166) and that a dangling L entry fails 'ends early'. No test guards against a regression, though, and mutation control M3 covers only the checksum.",
+      "recommendation": "Add rejection fixtures for long-name and prefix traversal, NUL inside a long name, an L entry at end of archive, and a file/directory case collision. Each should assert the exact frozen message."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/fairpane.mjs",
+      "line": 99,
+      "issue": "doctor's path_rustc spawns a bare 'rustc' ([INFERENCE] on Windows, libuv searches the current directory before PATH). Controller test case 9 (rust.test.mjs:464) runs doctor with cwd at the repository root. There, a rustup proxy reads rust-toolchain.toml and selects 1.99.0, and [INFERENCE] it may auto-install that toolchain and rustfmt over the network into the global rustup home during the controller-test gate. The README admits this only as an [INFERENCE] note, and raw/global-state.log brackets only the install, not the test runs. This contradicts docs/TOOLCHAIN.md:45 ('never a Rust toolchain from PATH') and the contract's 'No repository command runs rustup or a Rust executable from PATH'. The frozen contract itself mandates path_rustc, so the implementation followed contradictory clauses. Gates do not use the result.",
+      "recommendation": "Amend the contract in a follow-up. Either drop path_rustc from the test, or spawn it with RUSTUP_AUTO_INSTALL=0 and a cwd outside the repository. Reword TOOLCHAIN.md:45 to name doctor's diagnostic probe as the one PATH lookup."
+    },
+    {
+      "severity": "note",
+      "path": "tools/rust.mjs",
+      "line": 152,
+      "issue": "The payload of a GNU 'L' entry is buffered with no length limit; size can be up to 8 GiB of octal. Total decompressed output is also unbounded. Only bytes that match the locked digest reach this code, so this is defense in depth only.",
+      "recommendation": "Cap long-name payloads (for example at 4096 bytes) and fail with a fixed message."
+    },
+    {
+      "severity": "note",
+      "path": "tools/lib.mjs",
+      "line": 210,
+      "issue": "Download behavior is correct: there is no Content-Length pre-check, but the in-stream bound (bytes <= size before each write) keeps the partial file at or below the locked size. The thrown invariant cancels the body iterator, and the partial file is unlinked in finally. A killed process leaves a UUID-named .partial file that is never reused. The 10-minute total timeout means a 161 MB archive needs at least about 270 KB/s, which is an operational concern, not a security one.",
+      "recommendation": "None required. Optionally reject a Content-Length above the locked size early, and sweep stale *.partial files."
+    },
+    {
+      "severity": "note",
+      "path": "tools/rust.mjs",
+      "line": 381,
+      "issue": "Local integrity only. An existing dest is accepted after just a version check. A reused archive is hashed and then reopened for extraction (time-of-check to time-of-use). Anyone who can write to .tools can defeat both. This matches install-zig and docs/TOOLCHAIN.md:22-23 and is outside the network-attacker model.",
+      "recommendation": "Keep the documented boundary. A trusted runner should reinstall from verified artifacts."
+    },
+    {
+      "severity": "note",
+      "path": "tools/rust.mjs",
+      "line": 354,
+      "issue": "Version checks run by absolute path but inherit process.env and the caller's cwd. CARGO_HOME is a setting, not confinement: the trusted binaries could write anywhere. [INFERENCE] cargo -V loads no config, and Windows resolves any DLL missing from bin through the normal search order.",
+      "recommendation": "Optionally pass cwd: dir to the spawn so version checks do not depend on the caller's directory."
+    },
+    {
+      "severity": "note",
+      "path": "tools/lib.mjs",
+      "line": 310,
+      "issue": "checkRepository runs only validateRustLock (shape: URLs, roots, hex formats, fingerprint constant). It does not re-run rust-lock-verify against the committed manifest or re-check the signature. If an edit changes a digest but keeps the lock's shape, check still passes. Provenance enforcement depends on P1, review, and owner branch protection.",
+      "recommendation": "Land P1 as planned. Consider having repo-check run rustLockProblems against the committed raw/provenance manifest, while labeling that as a local integrity check, not independent enforcement."
+    },
+    {
+      "severity": "note",
+      "path": "tools/rust.mjs",
+      "line": 43,
+      "issue": "parseChannelManifest reads a TOML subset. Multi-line or escaped strings could make it read a different structure than a real TOML parser would. It is a reviewer aid applied to bytes that the signature check covers, and its tables have null prototypes, so a '__proto__' key cannot pollute an object prototype.",
+      "recommendation": "None required. Keep it out of the installation path."
+    },
+    {
+      "severity": "note",
+      "path": "toolchains/rust.lock.json",
+      "line": null,
+      "issue": "Lock approval. The values equal the contract's frozen object (test case 1 also asserts this). Each component URL and sha256 matches the hash under the correct [pkg.<pkg>.target.<host>] table of raw/provenance/channel-rust-1.99.0.toml: Windows rustc at 27808-27809, cargo at 192-193, rust-std at 27503-27504, rust-mingw at 26764-26765 and rustfmt at 28744-28745; Linux rustc at 27843-27844, cargo at 227-228, rust-std at 27545-27546 and rustfmt at 28779-28780. The manifest date and rustc git_commit_hash match. gpg-verify.log shows VALIDSIG with primary fingerprint 108F66205EAEB0AAA8DD5E1C85AB96E6FA1BE5FE and no BADSIG, ERRSIG, EXPKEYSIG or REVKEYSIG. I did not recompute the SHA-256 of the committed manifest or key files; those claims rest on raw/rust-lock-verify.log, the .sha256 file, and the README.",
+      "recommendation": "The main agent may recompute the manifest SHA-256 (expected ce6dddc886364f8d786514771212cebe9b731ba82d6b859951c6b0ccc516b6a2) and confirm the two key files are identical before P1."
+    }
+  ]
+}

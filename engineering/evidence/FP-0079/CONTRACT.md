@@ -574,3 +574,52 @@ Required gates: `repo-check` and `controller-test`.
 - The worker installs no Node, GnuPG, MinGW, or Visual Studio; the integrator's user-local WSL Node is the only Node on Linux.
 - `install-zig` keeps its behavior and messages, and `scripts/Get-Zig.ps1` stays unchanged.
 - No support claim is made for the Rust wrapper.
+
+## Revision 1
+
+Base: the commit that freezes this revision.
+Source findings: `reviews/review-1-reject.json` and `reviews/security-review-1-accept.json`.
+Every section above stays in force except where this revision replaces it.
+Writable paths stay as above.
+
+### Integrator decisions
+
+- Review 1 rejected `04342e2` for one major finding: `doctor` started `rustc` from `PATH` with the repository as its working directory, and case 9 runs `doctor` in every controller test.
+  On a host with rustup, that `rustc` is the rustup proxy, which reads `rust-toolchain.toml` and may install 1.99.0 and `rustfmt` into the global rustup home.
+  No `PATH` probe is safe against a proxy that reads the toolchain file, and the probe only reports a toolchain that no gate uses, so `doctor` drops it.
+- The lock values stay unchanged; both reviews approved them.
+- The component order rule at line 138 is corrected to the frozen lock's order: `rustc`, `cargo`, `rust-std`, then `rust-mingw` for a `-windows-gnu` host, then `rustfmt-preview`.
+  The implementation already follows the lock.
+- The security review's archive findings are folded in, because this revision changes the same reader.
+
+### Behavior
+
+- `doctor` has no `path_rustc` field, and it starts no `rustc`, `cargo`, `rustdoc`, `rustfmt`, or `rustup` from `PATH` or the working directory.
+- The archive path rules also reject a path with a code unit from U+0000 to U+001F, a `:` in any component, a component that ends in `.` or a space, and a component whose name before its first `.` is a reserved Windows device name, compared without regard to case.
+  The reserved names are those that Microsoft's "Naming Files, Paths, and Namespaces" lists; the worker records the list and its URL.
+  The message stays `The archive path is not accepted: <name>`.
+- A GNU `L` entry whose payload is longer than 4096 bytes fails with `The archive long name is longer than 4096 bytes.` before the reader buffers it.
+- `checkRust` starts each version check with its working directory set to the toolchain's `bin` directory.
+
+### Exact test cases
+
+1. Case 9: the JSON output of `doctor` has a boolean `rust.available` and no `path_rustc` key.
+   With a directory first on `PATH` that holds a program named `rustc` (`rustc.exe` on Windows) that writes a marker file when it starts, `doctor` run from the repository root leaves no marker.
+   The same program, started directly by the test, writes the marker, so the case shows that the program works.
+2. Case 5 gains a rejection fixture with its exact message for each of these: a GNU long name with a `..` component, a leading `/`, a drive letter, an embedded NUL, and a path outside the root; a POSIX prefix of `<root>/..`; a prefix that makes an empty component; a file and a directory whose paths differ only in case; an `L` entry at the end of the archive; an `L` payload of 4097 bytes; a component with `:`; a component with U+0001; the components `CON`, `nul.txt`, and `COM1`; a component that ends in `.`; and a component that ends in a space.
+3. Mutation controls: control M5 makes `doctor` start `rustc` from `PATH` again and must fail case 9; control M6 removes the `:` rule and must fail case 5.
+
+Cases 1 and 2 must fail on `04342e2` before the change, except the parts of case 2 that the old rules already reject; the README names those parts.
+
+### Revision 1 evidence
+
+Record each command with `node tools/fairpane.mjs record` under `engineering/evidence/FP-0079/raw/`, with the suffix `-r1`, and keep each failed attempt as its own log.
+
+1. `tests-before-r1.log` on the base, with `HEAD`, the staging command, and the blob ID of every staged file.
+2. `global-state-r1.log` before and after `node tools/fairpane.mjs test`: the listing of `%USERPROFILE%\.rustup\toolchains`, each toolchain's `lib\rustlib\components` file, the SHA-256 of `%USERPROFILE%\.rustup\settings.toml`, and the listing of `%USERPROFILE%\.cargo\bin`; both outputs must be equal.
+3. `claims-r1.log`: the SHA-256 of both key files, a probe of whether the worktree's `.tools\cargo-home` exists, and the Windows version, for the README claims that review 1 found without a log; or the README drops those claims.
+4. `mutation-r1.log` and its diffs for M5 and M6, `controller-tests-after-r1.log`, and `check-after-r1.log`.
+5. The README gains a `## Revision 1` section.
+   It states that the first implementation's worktree was based on `9cc81ea` and that the integrator committed it as `04342e2` on top of `789ad50`.
+
+After both reviews accept this revision, the integrator records `node tools/fairpane.mjs rust-lock-verify engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml` on the committed tree, lands policy change P1, and runs the gates on the P1 head with the binding records that the Evidence section describes.

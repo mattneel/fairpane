@@ -1,0 +1,62 @@
+{
+  "verdict": "reject",
+  "summary": "I read the frozen contract, all 12 changed files, all 22 raw logs and 4 diffs, and the 5 provenance files. I ran nothing; every point below comes from reading files.\n\n(2) The lock is correct. `toolchains/rust.lock.json` matches the frozen object field by field, including `checked_date` 2026-10-09. All 9 component sha256 values equal the `hash` of the same package and target in `raw/provenance/channel-rust-1.99.0.toml`, and their URLs match too. The line numbers are rustc win 27809 and linux 27844; cargo 193 and 228; rust-std 27504 and 27546; rust-mingw 26765; rustfmt-preview 28745 and 28780. Each target table appears once. The manifest has `date = \"2026-10-01\"` and `[pkg.rustc] version = \"1.99.0 (b940084d7 2026-09-28)\"` with commit b940084d….\n\nThe manifest's SHA-256 is `ce6dddc8…b6a2`. The `.sha256` file, the lock, and the `rust-lock-verify.log` output (exit 0, no problems) all give that value. The sizes were confirmed by download, because install-rust checks size and SHA-256 and passed on both hosts. On these values alone, I would approve the lock for P1.\n\n(1) All 10 cases are implemented as the contract describes (`tools/rust.test.mjs`), and every behavior and message is in `tools/lib.mjs`, `tools/rust.mjs`, and `tools/fairpane.mjs`. The cases are registered in `tools/selftest.mjs` at lines 27, 233, and 1126, and the async cases are awaited at 1112.\n\n(3) Every required evidence step has a log with its exit status:\n- The before-run exits 1 with ERR_MODULE_NOT_FOUND.\n- GnuPG 2.4.9 reports GOODSIG 85AB96E6FA1BE5FE, and the VALIDSIG line's first and last fields are 108F66205EAEB0AAA8DD5E1C85AB96E6FA1BE5FE. No BADSIG, ERRSIG, EXPKEYSIG, or REVKEYSIG appears. The static and keybase keys show the same first `fpr`.\n- Install on Windows (5 archives) and Linux (4 archives) reports downloaded true, then false.\n- The frozen version lines appear on both hosts.\n- Both smoke runs exit 0 with the frozen output and the panic text on stderr.\n- The two global-state outputs are identical.\n- M1 to M4 each fail as the contract requires, with restored-file digests recorded.\n- The after-run passes 202 of 202 tests, and check passes.\n\n(4) install-zig keeps its behavior and messages. `fetchLockedArchive(..., { name: 'compiler', title: 'Compiler' })` produces the same strings as the old inline loop, which I read in `out/fp0027-r2-release/tools/lib.mjs:504-551`. That file is a release snapshot at the same line range the contract cites, used here as a proxy for the base. The default `verifyArchive` name is 'compiler', so the existing selftest callers are unchanged.\n\n(5) I found no Rust-related edits in the protected files. A full diff check needs git, which I could not run.\n\nThe verdict is reject because of one major finding: the PATH `rustc` probe in `doctor`, which case 9 runs during every controller test, now goes through the rustup proxy with the repository's `rust-toolchain.toml`. The contract requires each of these three parts, so fixing this needs an integrator amendment. The lock does not change.",
+  "findings": [
+    {
+      "severity": "major",
+      "path": "tools/fairpane.mjs",
+      "line": 99,
+      "issue": "`path_rustc` runs `versionOf('rustc', ['-V'])` from PATH. `versionOf` sets no cwd, so it inherits the repository root, because case 9 (`tools/rust.test.mjs:464`) starts `doctor` with `cwd: root`. On any host with rustup, PATH `rustc` is the rustup proxy. The proxy reads the new `rust-toolchain.toml` (channel 1.99.0, rustfmt component) and resolves `1.99.0-<host triple>`.\n\n[INFERENCE] rustup ≥1.28.1 auto-installs a missing toolchain or component by default. Minimal reproduction: on a host with rustup and no 1.99.0 toolchain for its triple, run `node tools/fairpane.mjs test` or `doctor` in the repo root. rustup downloads into ~/.rustup until the 15 s timeout kills it, which can leave a partial install. The GitHub windows-2025 and ubuntu-24.04 images ship rustup [INFERENCE], so the `controller-test` gate in `.github/workflows/gates.yml` would do this on every run.\n\nThis contradicts several statements:\n- 'The cases need no network access and no installed Rust toolchain.'\n- The integrator decision 'No repository command runs rustup or a Rust executable from PATH.'\n- The non-goal 'existing global rustup toolchains stay untouched'.\n- The contract's 'This task neither uses nor changes' the global 1.99.0-msvc toolchain.\n- docs/TOOLCHAIN.md:43, 'never a Rust toolchain from `PATH`'.\n\nThe evidence does not show that the task's own test runs left global state unchanged:\n- README:146 admits that global-state.log brackets only the installation.\n- The baseline (12:49:41) was taken after both development test runs (12:49:17 and 12:49:33).\n- The listing captures toolchain names only, not components.\n- [INFERENCE] The first development run took 6170 ms and the second 782 ms, although the first stopped early in case 7. That suggests a one-time side effect, such as rustup adding rustfmt.\n\nThe implementation follows the frozen contract; the conflict is inside the contract.",
+      "recommendation": "Before P1, the integrator amends the contract so that the PATH probe cannot invoke rustup's toolchain resolution. Two options:\n- Run the probe with `RUSTUP_AUTO_INSTALL=0` and a cwd outside the repository.\n- Have case 9 run `doctor` with a PATH that contains no `rustc`.\n\nThen record a global-state bracket around `node tools/fairpane.mjs test` that also lists the components of each rustup toolchain. Neither option changes the lock."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0079/README.md",
+      "line": 7,
+      "issue": "README says the work tree's HEAD was 9cc81ea. Commit 04342e2's parent is 789ad50 (.git/logs/HEAD), with six commits in between (d17abb0, d250e30, 1409e8b, ba759f7, 4531b33, 789ad50). Every log ran on the pre-rebase tree. For example, check-after.log reports 81 tasks, but the plan at HEAD lists at least 86 (FP-0082 to FP-0085 and FP-0098 were added).\n\nThe 28 blob IDs in linux-copy.log tie the changed tool files to the tested content. All 9 that I spot-checked exist as loose objects. [INFERENCE] They are the blobs in 04342e2's tree; I could not verify that without git. The same binding gap was a minor finding in FP-0014 review 1.",
+      "recommendation": "State the rebase in the README. Let the P1-head `repo-check` and `controller-test` gates and `integration-binding.log` serve as the binding evidence. Optionally, record `git ls-tree 04342e2` for the 28 paths."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0079/README.md",
+      "line": 54,
+      "issue": "Some README claims have no log:\n- line 54: the two key files are byte-identical with SHA-256 e54b09a4…, and no log hashes or compares them;\n- line 125: the Windows `.tools\\cargo-home` did not exist after the after-runs;\n- line 8: the Windows OS version 10.0.26200.\n\nThe key tails match on visual inspection, and both fingerprint listings match.",
+      "recommendation": "Record the key-file SHA-256 comparison, a cargo-home existence probe, and an OS version probe with `record`, or remove the claims."
+    },
+    {
+      "severity": "note",
+      "path": "tools/lib.mjs",
+      "line": 149,
+      "issue": "The contract's validation rule (CONTRACT.md:138) puts `rust-mingw` after `rustfmt-preview`, while the frozen lock puts it before. The implementation follows the lock, so case 1 can pass, and the README discloses the choice. The resulting message lists 'rustc, cargo, rust-std, rust-mingw, rustfmt-preview'.",
+      "recommendation": "Correct CONTRACT.md:138 or the FP-0029 contract wording when the integrator next touches it. No code change is needed."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0079/README.md",
+      "line": 122,
+      "issue": "Every Windows Rust command used the work tree's `.tools\\cargo-home`, not the contract's `C:\\src\\fairpane\\.tools\\cargo-home`. The README discloses this, and the logs' `environment_overrides` confirm it. It is the same directory that `checkRust` sets.",
+      "recommendation": "Accept as disclosed."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0079/raw/controller-tests-before.log",
+      "line": null,
+      "issue": "The before-run fails at module resolution, so no case runs. That meets 'must fail, because tools/rust.mjs … do not exist' literally, but it does not show cases 1 and 3 failing individually.",
+      "recommendation": "None required."
+    },
+    {
+      "severity": "note",
+      "path": "tools/rust.mjs",
+      "line": 151,
+      "issue": "From a security review of the archive reader:\n- It does not reject Windows-special path forms: `:` after the first component (NTFS alternate streams), reserved device names such as `CON` or `NUL`, and trailing dots or spaces.\n- It does not limit the size of a GNU `L` long-name entry, which it buffers in memory.\n\nThe risk is low, because every archive is checked against a reviewed SHA-256 before extraction, and the colliding forms fail closed through the 'wx' open.",
+      "recommendation": "Consider rejecting these path forms and limiting `L` entries, for example to 4096 bytes, in a follow-up hardening task."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml",
+      "line": null,
+      "issue": "`.gitattributes` applies `* text=auto eol=lf`. rust-lock-verify hashed the working-tree file before the commit. The checked-out provenance files contain no CR bytes, so [INFERENCE] the committed bytes equal the verified bytes, but no case re-hashes the committed manifest.",
+      "recommendation": "Have the integrator run `node tools/fairpane.mjs rust-lock-verify engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml` on the P1 head. Optionally, mark `raw/provenance/*` as `binary` in a protected-policy change."
+    }
+  ]
+}

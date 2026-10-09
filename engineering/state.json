@@ -919,10 +919,10 @@
     },
     "FP-0079": {
       "status": "active",
-      "owner": "fairpane-bindings worker FP0079Rust, integrated by root-integrator",
-      "evidence": ["engineering/evidence/FP-0079/CONTRACT.md"],
+      "owner": "fairpane-bindings workers FP0079Rust and FP0079R1, integrated by root-integrator",
+      "evidence": ["engineering/evidence/FP-0079/CONTRACT.md", "engineering/evidence/FP-0079/README.md"],
       "review": null,
-      "notes": ["Split from FP-0029 by fairpane-bindings worker FP0029Contract-2, because the lock must land in a reviewed change before the wrapper and policy.json cannot name a root that does not exist yet."]
+      "notes": ["Split from FP-0029 by fairpane-bindings worker FP0029Contract-2, because the lock must land in a reviewed change before the wrapper and policy.json cannot name a root that does not exist yet.", "Worker FP0079Rust implemented it in 04342e2. fairpane-security accepted it in reviews/security-review-1-accept.json, and fairpane-review rejected it in reviews/review-1-reject.json because doctor started rustc from PATH at the repository root, where a rustup proxy may install the pinned toolchain during controller tests. Both reviews approved the lock values. Contract revision 1 removes that probe and hardens the archive path rules."]
     },
     "FP-0080": {
       "status": "planned",
