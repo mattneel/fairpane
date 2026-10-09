@@ -562,7 +562,7 @@ E92 for (a; b⏎) c ⇒ syntax-error unexpected_token @10
 E93 if (a)⏎else b ⇒ syntax-error unexpected_token @7
 E94 a⏎++ ⇒ syntax-error unexpected_end @4
 E95 function () {} ⇒ syntax-error unexpected_token @9
-E96 () ⇒ syntax-error unexpected_token @1
+E96 () ⇒ syntax-error unexpected_token @1 (superseded by revision 1, case 1: unexpected_end @2)
 E97 function f(,) {} ⇒ syntax-error unexpected_token @11
 E98 try {} ⇒ syntax-error unexpected_end @6
 E99 switch (a) { default: default: } ⇒ syntax-error unexpected_token @22
@@ -971,3 +971,9 @@ The integrator records `git diff --stat a3e5cf9 <revision commit> -- AGENTS.md d
    Case 3 therefore replaces the `test/` subtree, and its assertions stay as frozen.
    The worker records that probe as `raw/probe-subtree-r1.log`, and the README states both behaviors.
    M10 must still fail case 3.
+2. Spec review 2 corrects the basis of the E96 rows; their behavior and every frozen row stay as they are.
+   The context-free grammar accepts `( )` and `( Expression , )` as a PrimaryExpression through CoverParenthesizedExpressionAndArrowParameterList (13.2).
+   The rejection is the 13.2.9.1 early error, which requires the cover to cover a ParenthesizedExpression, and 5.1.4 step 4 makes a failed reparse an early Syntax Error.
+   `unexpected_token` and `unexpected_end` therefore also report such a cover, at the first token after `)` that is not `=>`, or at the end of the input.
+   The two code comments that call it a grammar failure, at the E96 rows and `arrowParametersOnly` in `src/js/parser.zig`, are corrected by `FP-0090` when it implements arrow functions.
+   The emitted code table of case 1 stays frozen and is not authoritative for citations; this contract's code table is.

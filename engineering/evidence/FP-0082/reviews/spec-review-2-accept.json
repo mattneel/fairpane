@@ -1,0 +1,41 @@
+{
+  "verdict": "accept",
+  "summary": "I accept Revision 1, with no blocker or major finding. This was a read-only review: I read the Revision 1 section of `CONTRACT.md`, the revised `parser.zig` and `lexer.zig`, and `README.md`, and checked them against the live ECMA-262 draft. I ran no build or test.\n\nThe four new rows are correct. ECMA-262 rejects all four sources, and every offset matches the source text:\n- E96 `()` gives `unexpected_end @2`, the source length.\n- E96a `() + 1` gives `unexpected_token @3`, at `+`.\n- E96b `(a,)` gives `unexpected_end @4`.\n- E96c `(a,) + 1` gives `unexpected_token @5`.\n\nU18 `() => 1` still gives `unsupported arrow_function @3`.\n\n`arrowParametersOnly` (`parser.zig` 2109–2113) advances past the `)` of `( )` or `( Expression , )`. It returns `unsupported arrow_function` at `=>` and otherwise calls `unexpected()`, so the behavior matches the revision. The other changes do not alter outcomes:\n- `keywordOf` still matches exactly the same 36 ReservedWords, now through length and first-letter buckets.\n- `scanNumber` rewrites only LegacyOctalIntegerLiterals and literals with separators.\n- `duplicateParameter` uses a hashed set and still returns the offset of the first repeated name.\n\nNo other frozen row changed. Cases 2, 6, and 7 in `CONTRACT.md` are identical to my review 1 reading, and so are the `t_cases`, `e_cases`, and `u_cases` tables in `parser.zig`, apart from E96 and the added E96a–E96c. The README reports the census file's SHA-256 unchanged.\n\nAll the corrected citations are right in the draft:\n- PropName is 8.6.5, and PropertyNameList is 13.2.5.4.\n- 14.5 excludes `function` from an ExpressionStatement through its lookahead.\n- B.3.3 applies only to non-strict code.\n- 14.7.5.1 and 14.11.1 each contain the IsLabelledFunction rule.\n- The 12.10.1 rule 1, third-condition comment is correct.\n- The new wording for line 20 and the lexer module comment is accurate.\n- The U14 wording (`async` offset) and the E47/E53 wording (`invalid_assignment_target`) match the frozen rows.\n\nThe `enum = 1` decision agrees with the frozen rows E93 and E100 and with ECMA-262 validity.\n\nOne correction to my own review 1: the rationale I gave for E96 was imprecise. The behavior is right, but the reason is an early error, not a grammar failure; see the first finding.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0082/CONTRACT.md",
+      "line": null,
+      "issue": "Revision 1 states that \"the full grammar continues `( )` and `( Expression , )` only with `=>`\". The code comments in `src/js/parser.zig` (the E96 comment near line 2590 and the `arrowParametersOnly` doc comment near line 2107) say the same thing, and so did my spec review 1. This is not quite what the specification says. The context-free grammar accepts both forms as PrimaryExpression : CoverParenthesizedExpressionAndArrowParameterList (13.2), so `() + 1` and `()` followed by automatic semicolon insertion at the end of input both parse. The rejection comes from the 13.2.9.1 early error, which requires the cover to cover a ParenthesizedExpression; under 5.1.4 step 4, a failed reparse is an early Syntax Error. Validity is unaffected, and reporting at the first token after `)` that is not `=>`, or at the end of the input, is a defensible contract convention. Read literally, however, the contract's `unexpected_token` and `unexpected_end` definitions describe grammar failures, so they do not cover this early error.",
+      "recommendation": "Keep the behavior and every frozen row. In a later integrator decision, cite 13.2.9.1 and 5.1.4 as the basis. Also state that `unexpected_token` and `unexpected_end` report a CoverParenthesizedExpressionAndArrowParameterList that fails 13.2.9.1, at the first token after `)` that is not `=>` or at the end of the input. Update the two code comments to match."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/parser.zig",
+      "line": 157,
+      "issue": "The emitted code table still gives `function_declaration_position` the sections `14.6.1,14.7.2.1,14.7.3.1,14.7.4.1,14.13.1`, and the frozen case 1 literal (line 2776) agrees. The 14.5 and B.3.3 citations that Revision 1 adds exist only in the contract text. This is consistent with \"behavior is unchanged\", but the machine-readable table and the corrected contract now disagree.",
+      "recommendation": "Either state in the contract that the case 1 table stays frozen and is not authoritative for citations, or update the table and case 1 together in a later revision."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0082/CONTRACT.md",
+      "line": 565,
+      "issue": "The case 6 block still shows `E96 () ⇒ syntax-error unexpected_token @1`. Only the Revision 1 section overrides it, so a reader of the case table sees the superseded expectation.",
+      "recommendation": "Annotate row E96 in place with a pointer to Revision 1 case 1."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0082/raw/oracle-v8.mjs",
+      "line": 90,
+      "issue": "The V8 oracle lists E96 but not E96a, E96b, or E96c. Original evidence item 5 says the oracle lists every source of cases 2, 6, and 7, and Revision 1 does not require a rerun. All three sources are errors in ECMA-262, so no disagreement is expected [INFERENCE: not run].",
+      "recommendation": "Add the three rows and record an `oracle-v8-r1.log` when the evidence is next refreshed."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/parser.zig",
+      "line": 2111,
+      "issue": "`arrowParametersOnly` returns `unsupported arrow_function` at `=>` even when a line terminator precedes it, as in `()⏎=> 1`. ECMA-262 rejects that source: ArrowFunction has [no LineTerminator here] before `=>`, so 12.10.1 rule 3 inserts a semicolon and the `=>` is a syntax error. Because an `unsupported` outcome asserts nothing about validity, this does not break soundness, and it matches the contract's `arrow_function` trigger.",
+      "recommendation": "No change is required for FP-0082. FP-0090 should report this case as a syntax error when it implements arrow functions."
+    }
+  ]
+}
