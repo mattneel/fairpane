@@ -59,6 +59,9 @@ node tools/fairpane.mjs next
   An acceptance-policy change would need separate independent approval.
 - Local receipts are unsigned.
   Task `FP-0002` owns the protected attestation boundary.
+- Two owner questions remain open.
+  The first asks whether compatibility with existing browser extensions enters the release profile; `FP-0040` waits on it.
+  The second asks the owner to confirm the required `extensions` family, which the record derives from the SDK memo.
 
 ## Owner decisions
 

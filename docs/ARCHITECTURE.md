@@ -19,7 +19,7 @@ A callback that secretly delegates shaping or rendering to another engine violat
 | Zig engine | First-party code and the pinned Zig toolchain. | Web semantics and document execution. |
 | `fairpane-sys` | First-party bindings and Rust toolchain facilities. | Exact declarations of the public C ABI. |
 | `fairpane` | First-party wrapper code, `fairpane-sys`, and the Rust standard library. | Safe, idiomatic Rust ownership and operations. |
-| Rust browser application | Qualified third-party dependencies are welcome. | The shell's user interface and application services. |
+| Rust browser application | Qualified third-party dependencies are welcome. | It provides the shell's user interface and application services. |
 | Optional language hosts | Each host carries its own runtime dependencies, but never a third-party JavaScript or WebAssembly engine. | Each host runs extension code for one language. |
 
 Dependencies belong to the application that needs them and never migrate into the reusable contract.

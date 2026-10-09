@@ -921,7 +921,8 @@
         "src",
         "tests",
         "build.zig",
-        "engineering/decisions"
+        "engineering/decisions",
+        "engineering/dependencies.json"
       ],
       "protected_paths": [
         "AGENTS.md",
@@ -956,7 +957,8 @@
         "Derive each requester's identity from its authenticated connection, never from a field inside a request.",
         "Restart the chrome renderer after it fails, while the OS window frame keeps its title and close control.",
         "Recover a page window after its renderer fails.",
-        "Record the renderer-failure recovery result for the application behavior evidence area of ADR 0004."
+        "Record the renderer-failure recovery result for the application behavior evidence area of ADR 0004.",
+        "Finalize the GPUI selection in engineering/dependencies.json when this task completes the last outstanding GPUI evidence area."
       ],
       "read": [
         "docs/SECURITY.md",
@@ -1460,6 +1462,7 @@
         "Demonstrate IME composition in the engine-rendered address bar and in an engine-owned page field, hosted in GPUI.",
         "Demonstrate focus and actions that cross the chrome and page boundary correctly.",
         "Record whether GPUI qualifies for the text input and accessibility evidence areas of ADR 0004.",
+        "Finalize the GPUI selection in engineering/dependencies.json when this task completes the last outstanding GPUI evidence area.",
         "Add each new capability through a reviewed ABI schema change with C and Rust lifecycle tests.",
         "Record every unimplemented editing, IME, and accessibility behavior for later tasks."
       ],
@@ -1567,7 +1570,7 @@
         "Record the exact GPUI and GPUI Kit versions and snapshot of that pairing.",
         "Prove that the resolved dependency graph contains no GPUI Kit WebView or JavaScript-extension package and no other web or script engine.",
         "Leave the text input and accessibility evidence areas to FP-0030.",
-        "Keep the GPUI selection provisional until FP-0030 qualifies those areas.",
+        "Keep the GPUI selection provisional until FP-0030 and FP-0020 qualify their evidence areas.",
         "Record the result for each evidence area in an architecture decision record."
       ],
       "read": [
@@ -1840,7 +1843,8 @@
       "acceptance": [
         "Map every operation in the extension contract into idiomatic Rust functions and types in the distributed Rust SDK.",
         "Keep the extension API in the Rust SDK distinct from the engine embedding API.",
-        "Represent each asynchronous operation as a request handle with completion and cancellation.",
+        "Represent each asynchronous operation as a request handle or as a Future that needs no particular executor, with completion and cancellation.",
+        "Record why the chosen representation avoids an async runtime requirement in the Rust SDK.",
         "Invoke each completion on the extension worker's owner thread.",
         "Expose lossless web strings through a dedicated type with explicit conversions to Rust strings.",
         "Never replace a value that a Rust string cannot represent.",
@@ -2063,6 +2067,8 @@
         "Build a useful TypeScript reference extension that passes the FP-0039 shared behavioral scenarios.",
         "Build a document frontend through the TypeScript SDK, without a hidden JavaScript application underneath it.",
         "Build a custom graphics frontend through the TypeScript SDK with explicit input and accessibility contracts.",
+        "Record which runtime executes each TypeScript frontend demonstration.",
+        "Ship the Node-API transport and the Fairpane-runtime extension transport in the same distributed TypeScript SDK artifact.",
         "Pass the TypeScript integration's isolation and lifecycle tests.",
         "Build an independent example against the distributed TypeScript SDK.",
         "Keep TypeScript language support optional."
@@ -2295,7 +2301,8 @@
       "workstream": "guest-compute",
       "depends_on": [
         "FP-0020",
-        "FP-0035"
+        "FP-0035",
+        "FP-0048"
       ],
       "role": "fairpane-core",
       "allowed_paths": [
@@ -2329,6 +2336,7 @@
       ],
       "acceptance": [
         "Define the validated GPU service protocol for GPU requests, with explicit validation of every request.",
+        "Route the FP-0048 GPU paint requests from renderer processes through the validated service.",
         "Route rendered surfaces to the compositor and the shell through the versioned surface interface.",
         "Report WebGPU as unsupported through the service until a WebGPU task implements it.",
         "Specify how the engine composes a visible WebGPU canvas texture into the page, for that WebGPU task.",
@@ -2358,6 +2366,9 @@
         "ports",
         "tests",
         "build.zig",
+        "api",
+        "include",
+        "bindings",
         "engineering/decisions",
         "engineering/dependencies.json"
       ],
@@ -2383,6 +2394,7 @@
       "acceptance": [
         "Record the platform graphics interface that the first adapter uses in an architecture decision record.",
         "Declare that interface in the platform adapter inventory of engineering/dependencies.json.",
+        "Add the GPU-resident surface kinds through a reviewed ABI schema change with C and Rust lifecycle tests.",
         "Paint the immutable paint scene into GPU-resident surfaces through the versioned surface interface.",
         "Compare GPU output against the scalar software raster within tolerances declared before the run.",
         "Keep the scalar software raster as the reference path.",

@@ -27,8 +27,8 @@ A second extension language tests whether Fairpane is genuinely extensible, rath
 JavaScript extension code runs on Fairpane's own JavaScript runtime, through public runtime facilities.
 TypeScript extensions run on that same runtime through the TypeScript SDK's extension transport.
 Extension code runs in separate execution contexts, never in a page's existing context.
-A compiled language runs its extensions as compiled extension workers.
-An interpreted language supplies a runtime host.
+A compiled language can run its extensions as compiled extension workers.
+An interpreted language can run on Fairpane's own JavaScript runtime or supply a runtime host.
 No language host ships a third-party JavaScript or WebAssembly engine, a renderer, or a WebView.
 
 Every adapter calls the same broker.
@@ -106,7 +106,7 @@ Each officially supported language receives three connected deliverables.
 
 Rust gets the browser shell as its flagship consumer.
 Every other language gets a maintained browser integration and useful extensions that exercise its SDK.
-ADR 0006 names the officially supported SDKs: Rust, C, TypeScript, and Elixir.
+ADR 0006 names the planned officially supported SDKs: Rust, C, TypeScript, and Elixir.
 No deliverable receives a private API, and a missing capability becomes a public-contract issue.
 The first-party integration builds against the same SDK artifact that external developers receive.
 Each SDK also exposes the frontend platform, so a frontend in that language needs no hidden JavaScript application.
