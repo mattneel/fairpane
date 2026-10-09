@@ -2801,7 +2801,8 @@
         "Decode WOFF 1.0 with checked table lengths and zlib streams.",
         "Implement a first-party Brotli decoder that passes the RFC 7932 test vectors.",
         "Decode WOFF2, including the glyf and loca transforms, with checked sizes.",
-        "Reject malformed or oversized inputs within declared memory bounds."
+        "Reject malformed or oversized inputs within declared memory bounds.",
+        "Compare the sfnt parser's strictness with web-font practice, including table tags outside printable ASCII and known tables that overlap the table directory, as the FP-0013 security review notes."
       ],
       "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md"],
       "contract_state": "bootstrap-seed",
@@ -2990,6 +2991,174 @@
         "Record the base identity of every red baseline run in the evidence logs."
       ],
       "read": ["engineering/evidence/FP-0033/reviews/review-4-accept.json", "engineering/evidence/FP-0051/reviews/review-3-accept.json"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0068",
+      "title": "Run tree construction and style resolution in the laboratory",
+      "workstream": "laboratory",
+      "depends_on": ["FP-0010", "FP-0014"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Complete the laboratory tree stage with the HTML tree constructor and report its result.",
+        "Complete the style stage by resolving the case's stylesheets against the constructed document.",
+        "Express expectations about computed values and style diagnostics in the case format.",
+        "Keep every FP-0007 and FP-0054 case passing, with stage statuses that match the implemented stages."
+      ],
+      "read": ["engineering/evidence/FP-0007/CONTRACT.md", "engineering/evidence/FP-0014/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0069",
+      "title": "Decode stylesheets and implement the CSS at-rules",
+      "workstream": "css-layout",
+      "depends_on": ["FP-0014", "FP-0065"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Decode stylesheet bytes with the CSS Syntax encoding determination, including @charset.",
+        "Implement @import, @media, @supports, @namespace, @font-face, @keyframes, @page, @property, @container, @scope, @starting-style, and every other standard at-rule, or decompose them into owner tasks.",
+        "Report every at-rule that remains unimplemented as unsupported, never as an accepted no-op.",
+        "Run the applicable WPT css-syntax and at-rule tests when the laboratory can load them."
+      ],
+      "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0070",
+      "title": "Implement the remaining selectors, nesting, and HTML selector rules",
+      "workstream": "css-layout",
+      "depends_on": ["FP-0010", "FP-0014"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Implement the Selectors 4 pseudo-classes and pseudo-elements, including :is(), :not(), :where(), and :has().",
+        "Implement CSS Nesting, nested declarations rules, and @namespace prefixes.",
+        "Apply the HTML case rules and quirks-mode matching for HTML documents.",
+        "Bound the matching cost of :has() and report the bound."
+      ],
+      "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0071",
+      "title": "Expand the CSS property registry and value grammars",
+      "workstream": "css-layout",
+      "depends_on": ["FP-0014"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Register every standard property, including shorthands and logical properties, with initial values, inheritance, computed representations, and invalidation effects.",
+        "Implement the color, display, font-size, and unit forms that FP-0014 reports as unsupported, and the math functions.",
+        "Implement the Values 5 spread syntax once its specification is stable enough to test, or record why it stays unsupported.",
+        "Generate the registry and keyword data from pinned specification sources where they exist."
+      ],
+      "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0072",
+      "title": "Complete the cascade inputs and the HTML user-agent stylesheet",
+      "workstream": "css-layout",
+      "depends_on": ["FP-0010", "FP-0014"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Implement cascade layers, encapsulation contexts, and the animation and transition origins.",
+        "Apply style attributes and HTML presentational hints at their cascade positions.",
+        "Ship the HTML Standard's user-agent stylesheet as a reviewed source with its provenance.",
+        "Keep selectors, cascade, and computed values separate."
+      ],
+      "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0073",
+      "title": "Implement the CSSOM, serialization, and getComputedStyle",
+      "workstream": "css-layout",
+      "depends_on": ["FP-0014", "FP-0019"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Expose stylesheets, rules, and declarations through the CSSOM interfaces with their Web IDL bindings.",
+        "Serialize selectors, values, and rules as CSSOM specifies.",
+        "Implement getComputedStyle with resolved values.",
+        "Run the applicable WPT cssom tests."
+      ],
+      "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0074",
+      "title": "Implement incremental style invalidation",
+      "workstream": "css-layout",
+      "depends_on": ["FP-0014", "FP-0016"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Restyle only the elements that a DOM, attribute, or stylesheet change can affect.",
+        "Compare every incremental result with a full resolution of the same state.",
+        "Use the registry's invalidation effects to limit layout and paint work.",
+        "Measure the saving without claiming it before the measurement."
+      ],
+      "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0075",
+      "title": "Ship third-party notices with every binary distribution",
+      "workstream": "laboratory",
+      "depends_on": ["FP-0027"],
+      "role": "fairpane-core",
+      "allowed_paths": ["tools", "docs", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "List every third-party notice that compiled or packaged data requires, including the Unicode License v3 of the imported UCD files.",
+        "Generate a notices file from that list for each release artifact set.",
+        "Make the release records fail when a required notice is missing from the artifact set.",
+        "Keep test-only fixtures, such as the OFL fonts, out of binary distributions or include their notices."
+      ],
+      "read": ["engineering/decisions/0009-release-and-stewardship.md", "LICENSE-DECISION.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
