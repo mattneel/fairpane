@@ -819,3 +819,76 @@ Required reviewer: `fairpane-review`.
 - No C ABI declaration, header, or schema changes.
 - No Unicode data import exists beyond the 17 `Zs` code points named above.
 - No speed claim results from this task.
+
+## Revision 1
+
+Base: the commit that freezes this revision, whose parent is `005ef1e`.
+Source finding: `engineering/evidence/FP-0011/reviews/review-1-reject.json`.
+Every section above stays in force except where this revision replaces it.
+Writable paths add `engineering/evidence/FP-0011`.
+
+### Corrected observed fact
+
+The statement that `@typeInfo` gives no way to enumerate declarations is wrong.
+The locked compiler's `std.builtin.Type.Struct` has `decl_names`, which the binding check already uses.
+A probe with the locked compiler records whether `decl_names` lists declarations without `pub`, and the decision record states the result.
+
+### Enforced effect boundary
+
+No `Context` value gives its holder a `*Heap`, a `*Runtime`, or a wider context.
+
+- The context keeps its heap in a form that only the runtime file converts back to a heap pointer, and that conversion is not `pub`.
+- The kernels live in a file other than the one that performs the conversion.
+- Allocation, property mutation, throwing, collection, and calls reach the heap only through context methods whose required effects the context type must contain at compile time.
+- A root context comes only from the runtime that owns the heap, through a function that takes that runtime, and never from a heap pointer or a context.
+
+The decision record states that this boundary stops accidental reach and does not stop code that deliberately converts integers or pointers with `@ptrFromInt` or `@ptrCast`.
+
+### StringToNumber digit scale
+
+`stringToNumber` returns RoundMVResult of the exact mathematical value of every StrDecimalLiteral, whatever its length, digit scale, or exponent.
+Scale and exponent arithmetic saturates and never overflows.
+The ExponentPart saturates only at a magnitude that exceeds the literal's length by enough that the result is zero or infinity whatever its digits.
+The comment on the longest `Number::toString` result names 25 code units, as in `"-0.0000012345678901234567"`.
+
+### Revision 1 test cases
+
+34. Compile-fail fixture `leaf_reaches_heap.zig`: a function that holds a `*Context(.{})` tries to allocate a string through the context's stored heap.
+    The fixture expects a diagnostic substring that names the refused field, declaration, or type, recorded from the locked compiler.
+35. Compile-fail fixture `leaf_widens_context.zig`: a function that holds a `*Context(.{})` tries to obtain a root context from what the context exposes.
+    The fixture expects a recorded diagnostic substring in the same way.
+36. Compile-fail fixtures for the binding check: a catalog entry without a kernel fails with `operation <name> has no kernel`, and a kernel without an entry fails with `kernel <name> belongs to no operation`, each naming the stub.
+37. The fixture `leaf_calls_behavior.zig` also expects a diagnostic substring that names the `Context` parameter type, recorded from the locked compiler.
+38. Number vectors, checked against Node v26.7.0 by the integrator on 2026-10-09:
+
+    | Input | Result bits |
+    | --- | --- |
+    | `"0."`, then 1,000,001 `"0"`, then `"1e1000005"` | `0x408F400000000000` (1000) |
+    | `"1"`, then 1,000,000 `"0"`, then `"e-1000001"` | `0x3FB999999999999A` (0.1) |
+    | `"0."`, then 1,000,001 `"0"`, then `"1e1000000"` | `0x3F847AE147AE147B` (0.01) |
+    | `"0."`, then 1,000,001 `"0"`, then `"1e"` and 25 `"9"` | `0x7FF0000000000000` (+Infinity) |
+    | `"1"`, then 1,000,000 `"0"`, then `"e-"` and 25 `"9"` | `0x0000000000000000` (+0) |
+
+Cases 34, 35, and 38 must fail before the fix, except the third vector, which the current code already returns.
+Case 36 tests behavior that already holds, so `raw/mutation-r1.log` shows that it fails when the binding check skips each direction.
+
+### Revision 1 evidence
+
+The worker records these files under `engineering/evidence/FP-0011/raw/`.
+
+1. `probe-r1.log`: the `decl_names` probe and the diagnostic text of each new or changed fixture.
+2. `tests-before-r1.log`: `zig build test --summary all` on the revision base with the new tests and the old implementation.
+3. `tests-after-r1.log`: `zig build test --summary all` with a fresh cache directory, exit status 0.
+4. `fmt-r1.log`: `zig fmt --check src build.zig tests`, exit status 0.
+5. `mutation-left-root-r1.log` and `.diff`: the left-root mutation control redone on the revised kernels.
+   The log records the commands that apply and reverse the mutation and the file hashes before and after.
+6. `mutation-r1.log`: the binding-check controls of case 36, recorded the same way.
+
+The worker updates the decision record for the boundary, the probe, and the number fix.
+The worker's measurement runs, if any, are not evidence.
+
+The integrator records `HEAD` and a status that includes ignored files for every source root before the gates.
+The integrator then reruns `doctor`, `measure-build`, and the six measurement runs at the integration commit on an otherwise idle machine, with no worker building.
+The integrator also records the active power scheme and that the measurement processes keep the default processor affinity.
+Decision record sections 3 through 6 then cite those runs and apply the pre-registered rules again.
+Section 5 states any shift of sample level within a run that decides a separability outcome.

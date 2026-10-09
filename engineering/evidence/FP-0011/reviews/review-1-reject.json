@@ -1,0 +1,163 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "84b7b14d8e2372521da65f73d68267785bfac0cb",
+    "ba3a352bbc5123599d3183fd7e4306540636bea5"
+  ],
+  "summary": "I rejected FP-0011 because of two major findings. I reviewed it statically by reading the local tree, the locked Zig std and langref, the GitHub mirror at 84b7b14 (commit file list, raw runtime.zig, heap.zig and number.zig), and ECMA-262 §7.1.4.1. I built and ran nothing.\n\nWhat holds up:\n- The 23 catalog entries have effect flags that match ECMA-262 as upper bounds.\n- The kernels follow ToPrimitive, OrdinaryToPrimitive, ToNumber, ToNumeric, ToString, ToPropertyKey, OrdinaryGet, ValidateAndApplyPropertyDescriptor and ApplyStringOrNumericBinaryOperator step for step.\n- The generated tracer and finalizer are built entirely from the layout tables. Case 9 compares them with the hand-written tracer over 64 seeded heaps.\n- Case 11 (collection before every allocation plus quarantine) and the left-root mutation control show that a rooting error is detected.\n- The frozen number vectors and the StrWhiteSpaceChar set are correct.\n- No value representation can reach the C ABI.\n- The decision record (ADR 0008) applies the pre-registered rules literally and makes no speed claim.\n- 84b7b14 changes no protected path and no Rust shell code.\n- The gate receipts and the uncached 132/132 test run are bound to a clean HEAD at 84b7b14. The blob of `src/js/runtime.zig` in 84b7b14 (b7126cd) matches the original side of the mutation diff.\n\nThe two majors:\n1. The effect boundary can be bypassed. Every Context exposes the public field `heap: *Heap`, the Heap methods are `pub`, and `Runtime.rootContext` is public. A leaf `{}` context can therefore allocate, collect, throw, mutate, or build `Context(.all)` and invoke `call` with no diagnostic. The ADR's statement that Context is 'the only way to reach the heap' is not enforced.\n2. StringToNumber caps the exponent at 1,000,000 while the leading-zero/digit scale is unbounded. Valid long literals therefore convert to wrong Numbers. For example, `\"0.\"+\"0\"×1000001+\"1e1000005\"` gives 0.01 instead of 1000.\n\nOn the binding check (`bindKernels`): the contract's 'observed fact' that `@typeInfo` has no `decls` field is literally true but led to the wrong conclusion. The locked std has `Struct.decl_names` (lib/std/lang.zig:760). The signature checks are sound, because they use exact type equality on the memoized `*Context(effects)`, operand types and return type. The reverse check (each kernel belongs to an entry) depends on `decl_names`. If `decl_names` lists only public declarations, as `decls` did in earlier Zig, that check misses non-pub declarations. This is my inference; it is not documented. It cannot weaken effects, because `invoke` dispatches by catalog name. The check proves kernel signatures, not kernel bodies, which is why finding 1 matters.",
+  "criteria": [
+    {
+      "criterion": "Plan: Define operation effects with callback, allocation, exception, and mutation boundaries.",
+      "met": false,
+      "evidence": "The effects are defined and validated (operations.zig:11-23, 197-218, 233-245; cases 1-6; fixtures pass in integration-tests.log). The leaf boundary is not sound, though. A `{}` context can reach `heap` and `rootContext` (runtime.zig:158-167; heap.zig:321, 453, 470, 538), and ADR 0008:22 claims Context is the only way to reach the heap."
+    },
+    {
+      "criterion": "Plan: Define explicit heap-reference metadata and trace generation experiments.",
+      "met": true,
+      "evidence": "heap_catalog.zig:46-129 defines the descriptors and layouts. checkLayout (lines 210-266) recurses through struct, union, optional, pointer, slice and array. trace and finalize (lines 325-388) dispatch only on `layout(kind)`. Cases 7-10 and 12-16 exist, and the case 8 fixtures pass."
+    },
+    {
+      "criterion": "Plan: Compare compact-value candidates without exposing their layout through the C ABI.",
+      "met": true,
+      "evidence": "All three Value types use auto layout, and value.zig:55-62 enforces this. The case 20 fixtures fail with all four ABI diagnostics (integration-tests.log). The textual scan at value.zig:134-163 passes. c_api.zig, engine.zig and abi_generated.zig do not import js. rawBits raises a compile error outside tests."
+    },
+    {
+      "criterion": "Plan: Preserve numerical edge cases and arbitrary string code units in tests.",
+      "met": false,
+      "evidence": "Cases 18, 19 and 21-24 cover signed zero, NaN payloads (including 0xFFF9…/0xFFFA… patterns that look like nan_box tags), subnormals, the 2^53 boundaries, 768-digit decimal rounding and all 65,536 code units, and they pass. StringToNumber still returns wrong values for valid literals whose digit scale exceeds about 1e6 (number.zig:248, 259). The contract claims the result is 'the correctly rounded value of the whole literal'."
+    },
+    {
+      "criterion": "Plan: Record measured design choices rather than claims of free speed.",
+      "met": true,
+      "evidence": "The measurement logs contain the raw samples, the build, the load readings and the summary script. ADR 0008 §§4-7 reports min/median/max, applies the pre-registered rules literally, and limits its claims. The minor caveats below concern confounding and disclosure, not overclaiming."
+    },
+    {
+      "criterion": "Each catalog entry's effect flags match ECMA-262.",
+      "met": true,
+      "evidence": "These entries have no user-code path and no throw, so they are leaf: Number::add, Number::sameValue, SameValue, IsCallable, StringToNumber, OrdinaryGetOwnProperty (returns a spec record) and OrdinaryGetPrototypeOf. OrdinaryPreventExtensions only mutates the object. Number::toString, BigInt::add, BigInt::toString and string-concatenation only allocate. OrdinaryDefineOwnProperty calls ValidateAndApplyPropertyDescriptor without user code, so allocation plus mutation is right. Call, GetMethod, OrdinaryGet (getter), OrdinaryToPrimitive, ToPrimitive, ToNumeric, ToNumber, ToString, ToPropertyKey and ApplyStringOrNumericBinaryOperator can all run user code and are 'all'. The case 1 frozen table matches the contract."
+    },
+    {
+      "criterion": "A leaf context cannot reach callback or allocation operations.",
+      "met": false,
+      "evidence": "Only `invoke`, `require`-guarded methods and the Behavior parameter type are checked. The public field `Context.heap` (runtime.zig:167) and the public `Runtime.rootContext` (runtime.zig:158) bypass all of them. The cited lines were confirmed at 84b7b14 on the mirror."
+    },
+    {
+      "criterion": "The generated tracer is derived from layout metadata and equals the manual tracer.",
+      "met": true,
+      "evidence": "`trace` (heap_catalog.zig:325-346) derives every visit from `layout(kind)` and the descriptors. The manual tracer is at heap.zig:592-620. Case 9 (heap.zig:873-929) compares sorted per-cell visit lists for seeds 1-64 under all three representations, with at least 200 cells of each kind, then checks that both tracers free the same cells."
+    },
+    {
+      "criterion": "The collector never frees a reachable cell under the stress and quarantine modes.",
+      "met": true,
+      "evidence": "Marking covers every root (heap.zig:525-561), and dead cells are counted, not traced. Case 11 (runtime.zig:1725-1742) reruns every scenario with collection before each allocation plus quarantine and requires dead_resolutions == 0 and collections >= cells_allocated. The verifier checks that every traced reference is live. mutation-left-root.log shows the test catches a removed root (AD19, dead_resolutions 4, 119/120). Integration run: 132/132."
+    },
+    {
+      "criterion": "Numerical vectors: signed zero, NaN payloads, subnormals, 2^53 boundaries, Number::toString shortest round trip.",
+      "met": true,
+      "evidence": "number_vectors.zig holds the frozen vectors. I checked a sample by hand: 2^53+1 → 2^53, 0x20000000000003 → 0x4340000000000002, 1e21 → '1e+21', 5e-7 is exponential, 2^1023 text. Case 22 checks 100,000 PRNG patterns for round trip and that neither (k-1)-digit neighbour round-trips. Ryū in the locked std (fmt/float.zig:361-495) accepts boundaries for even mantissas, matching step 5 with Note 2."
+    },
+    {
+      "criterion": "StringToNumber grammar and whitespace set.",
+      "met": false,
+      "evidence": "The whitespace set (number.zig:116-122) matches ECMA-262 WhiteSpace ∪ LineTerminator, with exactly 17 Zs code points. The grammar handling is correct: signs only on decimals, NonDecimalIntegerLiteral uses 𝔽 with ties-to-even, and Infinity, `.5`, `5.`, `1_000` and the 0x/0o/0b forms behave correctly. The exponent saturation at number.zig:248 combined with the clamp of scale+exponent at :259 is wrong for |scale| > about 1e6."
+    },
+    {
+      "criterion": "No value representation reaches the C ABI.",
+      "met": true,
+      "evidence": "The case 20 compile fixtures fail with 'parameter of type', 'return type', 'not allowed in function with calling convention' and 'extern structs cannot contain fields of type' (integration-tests.log). I found no js import in src/c_api.zig, src/engine.zig or src/abi_generated.zig. 84b7b14 touches nothing under include or api."
+    },
+    {
+      "criterion": "The measurement method records raw samples and environment without overclaiming.",
+      "met": true,
+      "evidence": "Each sample line records ns, cell, byte, peak and collection counts and a checksum. Each header records zig_version, target, cpu_model, optimize, logical_cpus, executable_bytes, clock and allocator. measure-load.log records CPU name and load. Run order and timestamps match the contract. The ADR discloses the other agent sessions and the wide spread. The caveats are listed as minor findings."
+    },
+    {
+      "criterion": "The evidence binds to 84b7b14.",
+      "met": true,
+      "evidence": "integration-binding.log shows HEAD 84b7b14 with an empty status, ignored files included, at 05:07:24. The gates ran 05:07:25-05:08:01 with matching before and after source digests, and integration-tests.log ran at 05:08:03. The worker logs (tests-after, mutation, measure) ran in an uncommitted worktree. Only runtime.zig is bound, by blob b7126cd; the other src/js files have no recorded digest (minor)."
+    },
+    {
+      "criterion": "bindKernels binding check is sound, given the contract's claim that `decls` is absent.",
+      "met": true,
+      "evidence": "The locked std exposes `Struct.decl_names` (lib/std/lang.zig:760), and the langref says type info 'has declarations'. bindKernels (runtime.zig:419-470) checks the first parameter type `*Context(entry.effects)`, the operand types in order and the exact return type, all by type equality, and checks each entry with @hasDecl. Fixtures cover the wider-context and undeclared-throw cases. The reverse check over decl_names may miss non-pub declarations; this is my inference and it is harmless, because invoke dispatches by catalog name. The contract's 'observed fact' is wrong and was not amended; README.md:43 records it."
+    },
+    {
+      "criterion": "Contract cases 1-33 have tests that ran.",
+      "met": true,
+      "evidence": "Each case has a named test or a build fixture: operations.zig (1-3), build.zig compile fixtures (4, 5, 8, 20), runtime.zig (6, 11, 18, 19, 24-32), heap_catalog.zig (7), heap.zig (9, 10, 12-16), value.zig (17, 20), number.zig (21-23) and measure.zig (33). tests-after.log shows 120/120 with an uncached build. integration-tests.log shows 35/35 steps and 132/132 tests on 84b7b14, including all 18 FP-0011 fixture steps. tests-before.log shows the required failing baseline."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "src/js/runtime.zig",
+      "line": 167,
+      "issue": "The effect discipline can be bypassed at compile time. `Context(effects)` stores `heap: *Heap` as a public field, and Zig has no private fields. The Heap primitives are `pub` (heap.zig:321 allocateString, 453 appendProperty, 470 throwValue, 538 collect), and `Runtime.rootContext(heap)` (runtime.zig:158) returns `Context(.all)` from any heap pointer. A leaf kernel or any `*Context(.{})` can therefore allocate, collect, mutate, throw, or widen itself and invoke `call`/user code with no diagnostic. This breaks the assigned property 'a leaf context cannot reach callback or allocation operations' and makes ADR 0008:22 unsupported. Current kernels do not do this (no `ctx.heap` or `rootContext` in runtime.zig:487-795), so this is an enforcement defect, not a present behavior bug. Repro (inferred, not compiled): tests/compile_fail/leaf_escape.zig with `const Rt = @import(\"fairpane\").js.Runtime(.reference); fn probe(ctx: *Rt.Context(.{})) void { _ = ctx.heap.allocateString(&.{}) catch {}; var all = Rt.rootContext(ctx.heap); _ = all.invoke(.call, .{ Rt.undefined_value, Rt.undefined_value, @as([]const Rt.Value, &.{}) }) catch {}; } comptime { _ = &probe; }` should compile with exit status 0.",
+      "recommendation": "Make the heap unreachable from a narrowed context. Move the kernels into their own file, store the heap in Context behind a file-private accessor or opaque handle, and make the mutating Heap methods non-pub or reachable only through Context. Give rootContext to hosts only, or require a host capability token. Add a compile-fail fixture for direct heap access and for widening through rootContext."
+    },
+    {
+      "severity": "major",
+      "path": "src/js/number.zig",
+      "line": 248,
+      "issue": "StringToNumber saturates the ExponentPart at 1,000,000. Line 259 then clamps `scale + exponent`, but `scale` grows with the literal's leading fractional zeros or integer digits and has no bound. The comment's premise that 'any exponent beyond this bound already gives zero or infinity' is false once |scale| > 1e6. ECMA-262 §7.1.4.1.2 requires RoundMVResult of the exact MV. Repro: `stringToNumber` of the code units of \"0.\" ++ 1,000,001×'0' ++ \"1e1000005\" returns 0.01 (0x3F847AE147AE147B); the MV is 10^3, so the expected result is 0x408F400000000000. A second repro: \"1\" ++ 1,000,000×'0' ++ \"e-1000001\" returns 1, expected 0.1. This contradicts the contract's claim that the parseFloat input is 'the correctly rounded value of the whole literal'.",
+      "recommendation": "Saturate the exponent at a bound larger than any reachable |scale|, for example text.len + 4000 or maxInt(i64)/4, and use saturating i64 arithmetic before the ±2000 clamp. Add vectors for both repros to number_vectors.zig."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0011/README.md",
+      "line": 28,
+      "issue": "The worker logs (tests-after, fmt, mutation, measure-build, measure-*) ran in the uncommitted worktree C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m before 84b7b14 existed (commit at 05:07:19; measurement at 05:03). They record no source digest. Only src/js/runtime.zig can be tied to 84b7b14, through the mutation diff's original blob b7126cd matching the committed blob. The contract requires the measurement runs 'at the final implementation commit'.",
+      "recommendation": "Record a digest of src/js (or `git stash create`/tree hash) beside each worker log, or rerun the measurement at 84b7b14 and bind it with integration-binding.log."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0008-javascript-values-and-heap.md",
+      "line": 202,
+      "issue": "nan_box's 'not separably slower' verdict on mark-generated rests on a mid-run regime shift. In nan_box run 2, samples 1-8 are 13.1-15.7 ms, then samples 9-11 drop to 3.7, 2.76 and 2.65 ms (measure-nan_box-run2.log:65-75). mark-manual then runs wholly in the fast regime (2.5-3.4 ms). Run 1 is cleanly slower (10.1-13.3 ms against reference 5.3-6.7 ms), and the medians are about 1.8-2.2× reference in both runs. Workloads always run in a fixed order, with mark-generated before mark-manual, and core affinity is not recorded on a dual-CCD 9955HX3D. The tracer and representation comparisons are therefore confounded by time-ordered drift. The ADR applies the rule correctly but does not disclose that the outcome depends on these samples.",
+      "recommendation": "State in §5/§7 that the mark-generated verdict depends on three run-2 samples and that the medians favor reference. For FP-0012, interleave workloads and tracers within a process and record affinity and power plan."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0011/raw/mutation-left-root.log",
+      "line": null,
+      "issue": "The log records the hash before, the backup copy, the failing test and the hash after. It does not record the commands that applied and reverted the mutation, so the restored state is shown only by the hash match.",
+      "recommendation": "Record the patch application and reversal commands in the same log."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0011/CONTRACT.md",
+      "line": 33,
+      "issue": "The frozen 'observed fact' that @typeInfo has no `decls`, 'so no check can enumerate declarations', is wrong for the locked compiler. lib/std/lang.zig:760 has `Struct.decl_names`. The implementation and README.md:43 deviate from the contract premise (for the better), but the contract was not amended.",
+      "recommendation": "Amend the contract's observed facts, or record the deviation in the task record."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/runtime.zig",
+      "line": 423,
+      "issue": "The kernel→entry direction of bindKernels enumerates `decl_names`. If it lists only public declarations, as `decls` did historically (my inference; undocumented in the locked langref), a non-pub stray kernel goes unreported. No fixture covers 'operation <name> has no kernel' or 'kernel <x> belongs to no operation'.",
+      "recommendation": "Add fixtures for both messages. Optionally assert in a test that every declaration of Kernels is pub."
+    },
+    {
+      "severity": "note",
+      "path": "build.zig",
+      "line": 50,
+      "issue": "The leaf_calls_behavior fixture expects only the generic text 'expected type', which any unrelated type error would also satisfy. The contract froze this text.",
+      "recommendation": "Also match the parameter type name, for example 'Context(.{', in a later contract revision."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/heap.zig",
+      "line": 449,
+      "issue": "`noteWrite` counts heap_mutation only for cells allocated before the outermost invoke. A nested non-mutating operation that writes a cell created earlier in the same outer invoke would not be counted in case 6. This matches the contract, but it weakens the runtime corroboration.",
+      "recommendation": "Track the boundary per invocation depth if the counter is meant to corroborate nested effects."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/number.zig",
+      "line": 44,
+      "issue": "The comment says the longest toString result is 24 code units. Step 8 with n = -5 and k = 17 produces 25, for example \"-0.0000012345678901234567\". The buffer size of 25 is correct.",
+      "recommendation": "Correct the comment."
+    }
+  ],
+  "commands_run": []
+}
