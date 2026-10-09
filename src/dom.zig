@@ -614,6 +614,8 @@ pub const Store = struct {
 /// It records each child's next sibling before it yields the child.
 /// Removing or moving the yielded child therefore neither skips nor repeats another original child,
 /// and a child inserted before the recorded next sibling is not visited.
+/// A move that places the yielded child after the recorded sibling in the same parent visits it again.
+/// A move of the recorded sibling to an earlier position visits the children between again.
 /// Iteration ends early if the recorded sibling no longer is a child of the parent.
 pub const ChildIterator = struct {
     store: *Store,
