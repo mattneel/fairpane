@@ -8,6 +8,7 @@ import { readJson, checkRepository, readyTasks, qualificationProblems, fingerpri
   validateReceipt, runGate, recordCommand, installZig, compilerPath, checkCompiler, safePath } from './lib.mjs';
 import { corpusCommand } from './corpus.mjs';
 import { AttestationError, candidateIdentity, candidateRepository, isInside, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
+import { abiCheck, abiGenerate } from './abi.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command = 'help', ...args] = process.argv.slice(2);
@@ -43,6 +44,10 @@ function help() {
                               input and a full commit ID in a candidate
                               repository. Paths resolve from the current
                               directory.
+  abi-generate                Validate the ABI schema and failure scenarios, then
+                              write include/fairpane.h and src/abi_generated.zig.
+  abi-check                   Regenerate the ABI files in memory and exit with
+                              status 1 when a committed file differs.
   release-check               Check release prerequisites and fail closed.
   help                        Print these commands.
 
@@ -79,7 +84,10 @@ try {
       'Complete or resume an authorized task. Freeze exact tests before implementation.' :
       'Resolve blockers or decompose the next workstream. An empty frontier does not mean completion.' });
   } else if (command === 'fingerprint') output(fingerprints(root));
-  else if (command === 'install-zig') output(await installZig(root));
+  else if (command === 'abi-generate') output(abiGenerate(root));
+  else if (command === 'abi-check') {
+    const r = abiCheck(root); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
+  } else if (command === 'install-zig') output(await installZig(root));
   else if (command === 'run') {
     const rest = [...args], at = rest.indexOf('--evidence-dir');
     const evidenceDir = at === -1 ? undefined : rest.splice(at, 2)[1];

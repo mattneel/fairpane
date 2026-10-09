@@ -29,6 +29,8 @@ It does not publish code, change approval settings, or choose an account identit
 | `corpus-applicability <id>` | Counts discovered tests in a local snapshot without network access or corpus code. |
 | `corpus-verify <id>` | Recomputes a local snapshot and compares its records and `specs/corpora.json` pins. |
 | `attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>` | Verifies a signed result against protected trust input and a full commit ID in a candidate repository. |
+| `abi-generate` | Validates the ABI schema and failure scenarios, then writes `include/fairpane.h` and `src/abi_generated.zig`. |
+| `abi-check` | Regenerates the ABI files in memory and exits with status 1 when a committed file differs. |
 | `release-check` | Reports unmet obligations and returns a nonzero status. |
 
 Each command uses this repository, independent of the caller's current directory.
@@ -158,6 +160,22 @@ To update a pinned action, follow these steps.
 4. Replace the SHA and the version comment in every workflow that uses the action.
 5. Run `actionlint` at a pinned release with a verified digest.
 6. Run `node tools/fairpane.mjs test`.
+
+## Generate the ABI declarations
+
+`tools/abi.mjs` reads `api/fairpane.schema.json` and generates `include/fairpane.h` and `src/abi_generated.zig`.
+It validates the schema and `api/failure-scenarios.json` before it writes or compares any file.
+Generation reads only arrays for ordered collections, so the output never depends on object key order.
+`api/README.md` describes the schema, the value kinds, and the failure scenarios.
+
+1. Edit `api/fairpane.schema.json`.
+2. Run `node tools/fairpane.mjs abi-generate`.
+3. Run `node tools/fairpane.mjs abi-check`.
+4. Read the reported files and lines on exit status 1.
+
+`abi-check` compares the committed files byte for byte and names each stale file with its first differing line.
+`tools/abi.test.mjs` holds the FP-0021 cases, and `node tools/fairpane.mjs test` runs them.
+`node tools/abi.test.mjs` runs those cases without the rest of the controller.
 
 ## Extend the controller
 

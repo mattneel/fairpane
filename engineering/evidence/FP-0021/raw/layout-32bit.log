@@ -1,0 +1,20 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-target","x86-linux","src/abi_generated.zig","-femit-bin=out/scratch/abi-x86-linux.o"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-target","x86-linux","src/abi_generated.zig","-femit-bin=out/scratch/abi-x86-linux.o"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t0abe21ea3\\m","started_at":"2026-10-09T02:38:35.182Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":65,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-target","arm-linux-musleabihf","src/abi_generated.zig","-femit-bin=out/scratch/abi-arm-linux-musleabihf.o"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-target","arm-linux-musleabihf","src/abi_generated.zig","-femit-bin=out/scratch/abi-arm-linux-musleabihf.o"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t0abe21ea3\\m","started_at":"2026-10-09T02:38:35.319Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":70,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');const t=fs.readFileSync('src/abi_generated.zig','utf8');const m=t.replace('layout(24, 16)','layout(24, 20)');if(m===t)process.exit(2);fs.writeFileSync('out/scratch/abi_mutant.zig',m);console.log('Wrote out/scratch/abi_mutant.zig with the 32-bit DocumentInfo size changed from 16 to 20.')"]
+Wrote out/scratch/abi_mutant.zig with the 32-bit DocumentInfo size changed from 16 to 20.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');const t=fs.readFileSync('src/abi_generated.zig','utf8');const m=t.replace('layout(24, 16)','layout(24, 20)');if(m===t)process.exit(2);fs.writeFileSync('out/scratch/abi_mutant.zig',m);console.log('Wrote out/scratch/abi_mutant.zig with the 32-bit DocumentInfo size changed from 16 to 20.')"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t0abe21ea3\\m","started_at":"2026-10-09T02:38:35.456Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-obj","-target","x86-linux","out/scratch/abi_mutant.zig","-femit-bin=out/scratch/abi-mutant.o"]
+out\scratch\abi_mutant.zig:220:50: error: DocumentInfo differs from the size that the schema implies.
+    if (@sizeOf(DocumentInfo) != layout(24, 20)) @compileError("DocumentInfo differs from the size that the schema implies.");
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+    comptime: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:20:9
+    2 reference(s) hidden; use '-freference-trace=4' to see all references
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-obj","-target","x86-linux","out/scratch/abi_mutant.zig","-femit-bin=out/scratch/abi-mutant.o"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t0abe21ea3\\m","started_at":"2026-10-09T02:38:35.549Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":43,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

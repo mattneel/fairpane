@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "abi_schema": "api/fairpane.schema.json",
+  "description": "Foreign-runtime failure scenarios that every wrapper runs against the actual engine before it qualifies. Each call names a C function, its arguments in prose, and the exact status it returns.",
+  "scenarios": [
+    {
+      "id": "unknown-identifier",
+      "situation": "identifier",
+      "description": "Zero, an identifier that was never issued, and an identifier from the other family are unknown.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_document_get", "arguments": "a live engine, document zero, and writable output", "status": "unknown_id" },
+        { "function": "fp_document_destroy", "arguments": "a live engine and the largest 64-bit document identifier", "status": "unknown_id" },
+        { "function": "fp_document_load", "arguments": "a live engine, document zero, a one-byte URL, and writable output", "status": "unknown_id" },
+        { "function": "fp_request_respond", "arguments": "a live engine and a response for request zero", "status": "unknown_id" },
+        { "function": "fp_request_reject", "arguments": "a live engine, the largest 64-bit request identifier, and the unsupported_version reason", "status": "unknown_id" },
+        { "function": "fp_request_cancel", "arguments": "a live engine and a live document's identifier used as a request", "status": "unknown_id" },
+        { "function": "fp_document_get", "arguments": "a live engine, a live request's identifier used as a document, and writable output", "status": "unknown_id" }
+      ],
+      "effects": [
+        "No output byte changes.",
+        "The engine queues no event and no input.",
+        "The live document stays loading, and its request still accepts a response."
+      ]
+    },
+    {
+      "id": "foreign-identifier",
+      "situation": "identifier",
+      "description": "A document or request identifier from one engine is unknown in another engine.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_document_get", "arguments": "engine B and a document of engine A", "status": "unknown_id" },
+        { "function": "fp_document_destroy", "arguments": "engine B and a document of engine A", "status": "unknown_id" },
+        { "function": "fp_document_load", "arguments": "engine B, a document of engine A, a URL, and writable output", "status": "unknown_id" },
+        { "function": "fp_request_respond", "arguments": "engine B and a response for a request of engine A", "status": "unknown_id" },
+        { "function": "fp_request_reject", "arguments": "engine B and a request of engine A", "status": "unknown_id" },
+        { "function": "fp_request_cancel", "arguments": "engine B and a request of engine A", "status": "unknown_id" },
+        { "function": "fp_request_respond", "arguments": "engine A and a response for its own request", "status": "ok" }
+      ],
+      "effects": [
+        "Neither engine changes, and no output byte changes.",
+        "Engine A's document stays loading, and its request still accepts a response."
+      ]
+    },
+    {
+      "id": "retired-identifier",
+      "situation": "identifier",
+      "description": "A destroyed document, a request that a step ended, and a request that a reload ended are unknown.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_document_destroy", "arguments": "a loading document", "status": "ok" },
+        { "function": "fp_document_get", "arguments": "the destroyed document", "status": "unknown_id" },
+        { "function": "fp_request_respond", "arguments": "a response for the destroyed document's request", "status": "unknown_id" },
+        { "function": "fp_document_load", "arguments": "a loading document, which cancels its earlier request", "status": "ok" },
+        { "function": "fp_request_cancel", "arguments": "the request that the reload cancelled", "status": "unknown_id" },
+        { "function": "fp_engine_step", "arguments": "a budget that applies a queued response", "status": "ok" },
+        { "function": "fp_request_reject", "arguments": "the request whose response the step applied", "status": "unknown_id" }
+      ],
+      "effects": [
+        "Identifiers are never reused, so a retired identifier stays unknown.",
+        "No output byte changes."
+      ]
+    },
+    {
+      "id": "wrong-thread",
+      "situation": "thread",
+      "description": "Every owner-thread function called from a thread that did not create the engine is refused before any other argument check.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_document_create", "arguments": "the engine from another thread", "status": "wrong_thread" },
+        { "function": "fp_document_destroy", "arguments": "the engine and a live document from another thread", "status": "wrong_thread" },
+        { "function": "fp_document_get", "arguments": "the engine and a live document from another thread", "status": "wrong_thread" },
+        { "function": "fp_document_load", "arguments": "the engine and a live document from another thread", "status": "wrong_thread" },
+        { "function": "fp_request_respond", "arguments": "the engine and a response for a live request from another thread", "status": "wrong_thread" },
+        { "function": "fp_request_reject", "arguments": "the engine and a live request from another thread", "status": "wrong_thread" },
+        { "function": "fp_request_cancel", "arguments": "the engine and a live request from another thread", "status": "wrong_thread" },
+        { "function": "fp_engine_step", "arguments": "the engine from another thread", "status": "wrong_thread" },
+        { "function": "fp_engine_next_event", "arguments": "the engine from another thread", "status": "wrong_thread" },
+        { "function": "fp_engine_destroy", "arguments": "the engine from another thread", "status": "wrong_thread" },
+        { "function": "fp_query_capabilities", "arguments": "writable output from another thread", "status": "ok" }
+      ],
+      "effects": [
+        "No engine, document, request, queued input, or event changes.",
+        "No output byte changes.",
+        "fp_query_capabilities follows the any-thread rule and succeeds, and fp_abi_revision returns the revision from any thread."
+      ]
+    },
+    {
+      "id": "cancel-before-answer-queued",
+      "situation": "cancellation",
+      "description": "A host cancellation of a request without a queued answer queues input, and a step fails the document.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_request_cancel", "arguments": "a live request without a queued answer", "status": "ok" },
+        { "function": "fp_engine_step", "arguments": "a budget of eight", "status": "ok" },
+        { "function": "fp_request_cancel", "arguments": "the same request again", "status": "unknown_id" }
+      ],
+      "effects": [
+        "The document stays loading until the step applies the cancellation.",
+        "The step applies one input and fails the document.",
+        "The step announces request_cancelled and then document_state_changed to failed with no rejection reason."
+      ]
+    },
+    {
+      "id": "cancel-after-answer-queued",
+      "situation": "cancellation",
+      "description": "A queued answer blocks a host cancellation, and an engine cancellation by reload discards the queued answer.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_request_respond", "arguments": "a response for a live request", "status": "ok" },
+        { "function": "fp_request_cancel", "arguments": "the answered request", "status": "invalid_state" },
+        { "function": "fp_request_reject", "arguments": "the answered request", "status": "invalid_state" },
+        { "function": "fp_request_respond", "arguments": "a second response for the answered request", "status": "invalid_state" },
+        { "function": "fp_document_load", "arguments": "the same document, which cancels the answered request", "status": "ok" },
+        { "function": "fp_engine_step", "arguments": "a budget of eight", "status": "ok" },
+        { "function": "fp_request_respond", "arguments": "a response for the cancelled request", "status": "unknown_id" }
+      ],
+      "effects": [
+        "The reload announces request_cancelled for the first request and request_issued for the second request.",
+        "The step applies nothing, and the document stays loading.",
+        "A response for the second request later loads the document with exactly that body."
+      ]
+    },
+    {
+      "id": "document-teardown-outstanding",
+      "situation": "teardown",
+      "description": "Destroying a document with an outstanding request, a queued answer, and undrained events cancels the request and keeps other documents.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_request_respond", "arguments": "a response for the doomed document's request", "status": "ok" },
+        { "function": "fp_document_destroy", "arguments": "the doomed document", "status": "ok" },
+        { "function": "fp_engine_next_event", "arguments": "repeated until the kind is none", "status": "ok" },
+        { "function": "fp_engine_step", "arguments": "a budget of eight", "status": "ok" },
+        { "function": "fp_request_respond", "arguments": "a response for the other document's request", "status": "ok" }
+      ],
+      "effects": [
+        "The undrained issuance event of the ended request has a null URL and a zero length.",
+        "The destruction announces request_cancelled after the earlier events.",
+        "The step applies nothing because the queued answer was discarded.",
+        "The destroyed document and its request are unknown, and the other document stays loading."
+      ]
+    },
+    {
+      "id": "engine-teardown-outstanding",
+      "situation": "teardown",
+      "description": "Destroying an engine with outstanding requests, queued answers, loaded bodies, and undrained events releases everything.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_engine_step", "arguments": "a zero budget, which reports queued input and ready events", "status": "ok" },
+        { "function": "fp_engine_destroy", "arguments": "the engine", "status": "ok" }
+      ],
+      "effects": [
+        "The destruction succeeds without draining events or applying input.",
+        "A runtime with an allocation tracker observes no leaked engine storage."
+      ]
+    },
+    {
+      "id": "allocation-failure",
+      "situation": "allocation_failure",
+      "description": "Each operation that allocates returns out_of_memory at each of its allocations and changes nothing.",
+      "expressible_in_c": false,
+      "reason": "The C ABI takes no allocator, so a C caller cannot induce an allocation failure inside the engine.",
+      "calls": [
+        { "function": "fp_engine_create", "arguments": "options with an allocator whose next allocation fails", "status": "out_of_memory" },
+        { "function": "fp_document_create", "arguments": "an engine whose next allocation fails", "status": "out_of_memory" },
+        { "function": "fp_document_load", "arguments": "an engine whose first, then second, then later allocation fails", "status": "out_of_memory" },
+        { "function": "fp_request_respond", "arguments": "an engine whose input queue must grow", "status": "out_of_memory" },
+        { "function": "fp_request_reject", "arguments": "an engine whose full input queue must grow", "status": "out_of_memory" },
+        { "function": "fp_request_cancel", "arguments": "an engine whose full input queue must grow", "status": "out_of_memory" },
+        { "function": "fp_engine_step", "arguments": "an engine whose full event queue must grow", "status": "out_of_memory" },
+        { "function": "fp_document_destroy", "arguments": "a loading document in an engine whose full event queue must grow", "status": "out_of_memory" }
+      ],
+      "effects": [
+        "No engine handle, identifier, or output byte is written.",
+        "The documents, requests, queued inputs, and events stay unchanged.",
+        "The same call succeeds once allocation succeeds, and destroying the engine frees every allocated byte."
+      ]
+    },
+    {
+      "id": "null-required-pointer",
+      "situation": "invalid_argument",
+      "description": "A null engine, a null required input, or a null required output returns invalid_argument.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_query_capabilities", "arguments": "null output", "status": "invalid_argument" },
+        { "function": "fp_engine_create", "arguments": "null options", "status": "invalid_argument" },
+        { "function": "fp_engine_create", "arguments": "null output", "status": "invalid_argument" },
+        { "function": "fp_engine_destroy", "arguments": "a null engine", "status": "invalid_argument" },
+        { "function": "fp_document_create", "arguments": "a null engine, then a null output", "status": "invalid_argument" },
+        { "function": "fp_document_destroy", "arguments": "a null engine", "status": "invalid_argument" },
+        { "function": "fp_document_get", "arguments": "a null engine, then a null output", "status": "invalid_argument" },
+        { "function": "fp_document_load", "arguments": "a null engine, then a null URL with a zero length, then a null output", "status": "invalid_argument" },
+        { "function": "fp_request_respond", "arguments": "a null engine, then a null response, then a null body with a nonzero length", "status": "invalid_argument" },
+        { "function": "fp_request_reject", "arguments": "a null engine", "status": "invalid_argument" },
+        { "function": "fp_request_cancel", "arguments": "a null engine", "status": "invalid_argument" },
+        { "function": "fp_engine_step", "arguments": "a null engine, then a null output", "status": "invalid_argument" },
+        { "function": "fp_engine_next_event", "arguments": "a null engine, then a null output", "status": "invalid_argument" }
+      ],
+      "effects": [
+        "No output byte changes.",
+        "No queued input is applied, and no event is removed.",
+        "The live request still accepts a response."
+      ]
+    },
+    {
+      "id": "short-structure",
+      "situation": "invalid_argument",
+      "description": "An input structure whose struct_size is below the declared size, or an output size below the declared size, returns invalid_argument.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_engine_create", "arguments": "options whose struct_size is one byte short", "status": "invalid_argument" },
+        { "function": "fp_query_capabilities", "arguments": "an output size one byte short, then zero", "status": "invalid_argument" },
+        { "function": "fp_request_respond", "arguments": "a response whose struct_size is one byte short", "status": "invalid_argument" },
+        { "function": "fp_document_get", "arguments": "an output size one byte short", "status": "invalid_argument" },
+        { "function": "fp_engine_step", "arguments": "an output size one byte short", "status": "invalid_argument" },
+        { "function": "fp_engine_next_event", "arguments": "an output size one byte short, then zero", "status": "invalid_argument" }
+      ],
+      "effects": [
+        "No output byte changes.",
+        "The short step applies no queued input, and the short event call removes no event.",
+        "The request still accepts a complete response."
+      ]
+    },
+    {
+      "id": "response-body-bound",
+      "situation": "bounds",
+      "description": "A response body beyond max_response_body_bytes returns limit_exceeded, and a body at the bound succeeds.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_engine_create", "arguments": "a body bound of sixteen bytes", "status": "ok" },
+        { "function": "fp_request_respond", "arguments": "a seventeen-byte body", "status": "limit_exceeded" },
+        { "function": "fp_request_respond", "arguments": "a sixteen-byte body", "status": "ok" },
+        { "function": "fp_engine_step", "arguments": "a budget of eight", "status": "ok" }
+      ],
+      "effects": [
+        "The oversized response queues nothing, and the request stays live.",
+        "The document loads with exactly the sixteen-byte body."
+      ]
+    },
+    {
+      "id": "load-bound",
+      "situation": "bounds",
+      "description": "A load beyond max_outstanding_requests returns limit_exceeded, and a reload of a loading document stays within the bound.",
+      "expressible_in_c": true,
+      "calls": [
+        { "function": "fp_engine_create", "arguments": "a bound of two outstanding requests", "status": "ok" },
+        { "function": "fp_document_load", "arguments": "a third document while two requests are outstanding", "status": "limit_exceeded" },
+        { "function": "fp_document_load", "arguments": "a document that is already loading", "status": "ok" },
+        { "function": "fp_engine_step", "arguments": "a budget that applies one response", "status": "ok" },
+        { "function": "fp_document_load", "arguments": "the third document", "status": "ok" }
+      ],
+      "effects": [
+        "The refused load writes no output, queues no event, and leaves the third document empty.",
+        "The third document loads after a request ends."
+      ]
+    },
+    {
+      "id": "foreign-unwind",
+      "situation": "foreign_unwind",
+      "description": "A foreign exception or panic in host code never unwinds across the C ABI, and the engine stays usable afterward.",
+      "expressible_in_c": false,
+      "reason": "C has no exceptions or unwinding, and the engine never calls host code, so a C caller has no failure to propagate.",
+      "calls": [
+        { "function": "fp_engine_next_event", "arguments": "the engine, after which host code fails", "status": "ok" },
+        { "function": "fp_request_respond", "arguments": "a response for the live request after the host failure", "status": "ok" },
+        { "function": "fp_engine_step", "arguments": "a budget of eight", "status": "ok" },
+        { "function": "fp_engine_destroy", "arguments": "the engine", "status": "ok" }
+      ],
+      "effects": [
+        "Every C function returns a plain status, so no exception, panic, or error union crosses the boundary.",
+        "A wrapper catches a host exception or panic before it reaches a C frame.",
+        "The engine keeps its state through the host failure, loads the document, and frees every allocated byte on destruction."
+      ]
+    }
+  ]
+}

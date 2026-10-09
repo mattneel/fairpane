@@ -1,0 +1,129 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","test"]
+node:internal/modules/esm/resolve:272
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\requi\.omp\wt\t0abe21ea3\m\tools\abi.mjs' imported from C:\Users\requi\.omp\wt\t0abe21ea3\m\tools\abi.test.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:272:11)
+    at moduleResolve (node:internal/modules/esm/resolve:879:10)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:708:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:728:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:766:56)
+    at #resolve (node:internal/modules/esm/loader:690:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:610:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:277:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:389:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/requi/.omp/wt/t0abe21ea3/m/tools/abi.mjs'
+}
+
+Node.js v26.7.0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","test"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t0abe21ea3\\m","started_at":"2026-10-09T02:26:19.966Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":91}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/zig-cache-fp0021-before"]
+test
++- run test
+   +- compile test debug native 1 errors
+src\abi_generated.zig:1:1: error: unable to load "abi_generated.zig": FileNotFound
+src\abi_scenarios.zig:8:21: note: file imported here
+const abi = @import("abi_generated.zig");
+                    ^~~~~~~~~~~~~~~~~~~
+error: 1 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\zig-cache-fp0021-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+test transitive failure
++- run test transitive failure
+   +- compile test debug native 1 errors
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xd6378f19 test --summary all --cache-dir out/zig-cache-fp0021-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/zig-cache-fp0021-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t0abe21ea3\\m","started_at":"2026-10-09T02:26:20.101Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3179,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","out/c-abi-build"]
+install
++- install fairpane
+   +- compile lib fairpane debug native 1 errors
+src\abi_generated.zig:1:1: error: unable to load "abi_generated.zig": FileNotFound
+src\abi_scenarios.zig:8:21: note: file imported here
+const abi = @import("abi_generated.zig");
+                    ^~~~~~~~~~~~~~~~~~~
+error: 1 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-lib -Odebug "-Mroot=src\\root.zig" --cache-dir .zig-cache --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane -static --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 1/4 steps succeeded (1 failed)
+install transitive failure
++- install fairpane transitive failure
+   +- compile lib fairpane debug native 1 errors
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xdc79da05 --prefix out/c-abi-build
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","out/c-abi-build"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t0abe21ea3\\m","started_at":"2026-10-09T02:26:23.323Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3284,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","out/c-abi-build/lib/fairpane.lib","-o","out/c-abi-smoke.exe"]
+error: out/c-abi-build/lib/fairpane.lib: file not found
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","out/c-abi-build/lib/fairpane.lib","-o","out/c-abi-smoke.exe"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t0abe21ea3\\m","started_at":"2026-10-09T02:26:26.658Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":20,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","-c","tests/c/abi_smoke.c","-Iinclude","-o","out/c-abi-smoke-before.o"]
+tests/c/abi_smoke.c:165:8: error: unknown type name 'fp_document_id'
+  165 | static fp_document_id create_document(fp_engine *engine) {
+      |        ^
+tests/c/abi_smoke.c:166:5: error: use of undeclared identifier 'fp_document_id'
+  166 |     fp_document_id document = 0;
+      |     ^~~~~~~~~~~~~~
+tests/c/abi_smoke.c:167:40: error: use of undeclared identifier 'document'
+  167 |     assert(fp_document_create(engine, &document) == FP_STATUS_OK);
+      |                                        ^~~~~~~~
+tests/c/abi_smoke.c:168:12: error: use of undeclared identifier 'document'
+  168 |     return document;
+      |            ^~~~~~~~
+tests/c/abi_smoke.c:171:8: error: unknown type name 'fp_request_id'
+  171 | static fp_request_id load(fp_engine *engine, fp_document_id document, const char *url) {
+      |        ^
+tests/c/abi_smoke.c:171:46: error: unknown type name 'fp_document_id'
+  171 | static fp_request_id load(fp_engine *engine, fp_document_id document, const char *url) {
+      |                                              ^
+tests/c/abi_smoke.c:172:5: error: use of undeclared identifier 'fp_request_id'
+  172 |     fp_request_id request = 0;
+      |     ^~~~~~~~~~~~~
+tests/c/abi_smoke.c:173:83: error: use of undeclared identifier 'request'
+  173 |     assert(fp_document_load(engine, document, (const uint8_t *)url, strlen(url), &request) == FP_STATUS_OK);
+      |                                                                                   ^~~~~~~
+tests/c/abi_smoke.c:174:12: error: use of undeclared identifier 'request'
+  174 |     return request;
+      |            ^~~~~~~
+tests/c/abi_smoke.c:177:29: error: unknown type name 'fp_request_id'
+  177 | static fp_response response(fp_request_id request, const char *body) {
+      |                             ^
+tests/c/abi_smoke.c:182:40: error: unknown type name 'fp_request_id'
+  182 | static void respond(fp_engine *engine, fp_request_id request, const char *body) {
+      |                                        ^
+tests/c/abi_smoke.c:187:58: error: unknown type name 'fp_document_id'
+  187 | static fp_document_info document_info(fp_engine *engine, fp_document_id document) {
+      |                                                          ^
+tests/c/abi_smoke.c:193:51: error: unknown type name 'fp_document_id'
+  193 | static uint32_t document_state(fp_engine *engine, fp_document_id document) {
+      |                                                   ^
+tests/c/abi_smoke.c:215:64: error: unknown type name 'fp_document_id'
+  215 | static fp_event expect_event(fp_engine *engine, uint32_t kind, fp_document_id document, fp_request_id request) {
+      |                                                                ^
+tests/c/abi_smoke.c:215:89: error: unknown type name 'fp_request_id'
+  215 | static fp_event expect_event(fp_engine *engine, uint32_t kind, fp_document_id document, fp_request_id request) {
+      |                                                                                         ^
+tests/c/abi_smoke.c:237:56: error: unknown type name 'fp_document_id'
+  237 | static void expect_unknown_document(fp_engine *engine, fp_document_id document) {
+      |                                                        ^
+tests/c/abi_smoke.c:243:5: error: use of undeclared identifier 'fp_request_id'
+  243 |     fp_request_id request = 0x5E0;
+      |     ^~~~~~~~~~~~~
+tests/c/abi_smoke.c:244:73: error: use of undeclared identifier 'request'
+  244 |     assert(fp_document_load(engine, document, (const uint8_t *)"u", 1, &request) == FP_STATUS_UNKNOWN_ID);
+      |                                                                         ^~~~~~~
+tests/c/abi_smoke.c:245:12: error: use of undeclared identifier 'request'
+  245 |     assert(request == 0x5E0);
+      |            ^~~~~~~
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+20 errors generated.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","-c","tests/c/abi_smoke.c","-Iinclude","-o","out/c-abi-smoke-before.o"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t0abe21ea3\\m","started_at":"2026-10-09T02:26:37.128Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":257,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

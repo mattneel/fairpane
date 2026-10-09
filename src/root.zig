@@ -11,6 +11,7 @@ comptime {
 }
 
 test {
+    _ = @import("abi_scenarios.zig");
     _ = c_api;
     _ = dom;
     _ = engine;

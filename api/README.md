@@ -1,9 +1,11 @@
 # Experimental embedding surface
 
-`bootstrap.json` is the machine-readable contract for the candidate surface.
-`include/fairpane.h` is its C declaration.
-`src/c_api.zig` is its candidate implementation.
+`fairpane.schema.json` is the single machine-readable description of the public C ABI.
+`include/fairpane.h` is its generated C declaration.
+`src/abi_generated.zig` is its generated Zig declaration.
+`src/c_api.zig` is its candidate implementation, and it imports the generated Zig declarations.
 `src/engine.zig` is the native Zig API behind it.
+`failure-scenarios.json` defines the failure scenarios that every wrapper runs before it qualifies.
 
 ABI revision zero is experimental.
 The capability mask is zero because no browser feature is implemented.
@@ -11,8 +13,109 @@ No native API can validate arbitrary pointer provenance from a hostile in-proces
 
 The browser shell reaches the engine only through this surface and the first-party Rust wrapper.
 The surface must therefore carry every capability that the browser needs.
-A future schema generator replaces duplicated declarations after its own qualification.
-This bootstrap does not claim that the header is generated.
+Generated declarations do not qualify a wrapper by themselves.
+A wrapper qualifies only after it runs the failure scenarios against the actual engine in its own runtime.
+
+## Schema
+
+The schema is language-neutral data.
+It contains no C or Zig syntax.
+It describes every constant, status, enumeration, handle, identifier family, structure, function, parameter, and event of the ABI.
+Names are lowercase snake case, and the generator derives each language's names from them and from the `fp` prefix.
+Collections are arrays, so declaration order never depends on object key order.
+
+Every value has one of these kinds.
+
+| Kind | Meaning | C declaration | Zig declaration |
+| --- | --- | --- | --- |
+| `integer` | A fixed-width integer with explicit signedness and an explicit inclusive range. | `uint32_t`, `int32_t`, and so on | `u32`, `i32`, and so on |
+| `enumeration` | A closed set of named integer values with an underlying integer kind. | `FP_*` macros and the underlying integer | An `enum` type, and the underlying integer in structures and parameters |
+| `handle` | An opaque engine pointer whose layout no binding may inspect. | `fp_engine *` | `?*Engine` |
+| `identifier` | An opaque nonzero 64-bit identifier for a named family. | `fp_document_id` | `DocumentId`, a nonexhaustive `enum(u64)` |
+| `bytes` | A range of bytes with a pointer and a length. | `const uint8_t *` and `size_t` | `?[*]const u8` and `usize` |
+| `text` | A range of UTF-8 bytes that holds Unicode scalar values only. | `const char *` and `size_t` | `?[*]const c_char` and `usize` |
+| `web_string` | A range of UTF-16 code units that may hold unpaired surrogates. | `const uint16_t *` and `size_t` | `?[*]const u16` and `usize` |
+| `structure` | A versioned record whose first field is `struct_size`. | `fp_*` structure | `extern struct` |
+| `optional` | A value that may be absent, distinct from an explicit null value of a nullable kind. | `FP_OPTIONAL(type)` | `Optional(T)` |
+
+A range field or parameter named `x` has a generated length named `x_len`.
+Its unit is bytes for `bytes` and `text`, and UTF-16 code units for `web_string`.
+An output structure parameter named `x` has a generated size argument named `x_size`.
+
+An optional value encodes absence as zero, so its value kind must never be zero.
+That value kind is an identifier, an enumeration without a zero member, or an integer whose range excludes zero.
+`FP_OPTIONAL(type)` expands to `type`, so an optional field keeps the layout and name of its value.
+The Zig `Optional(T)` type is a nonexhaustive enumeration with an `absent` member, an `of` function, and a `get` function.
+Zig structures and parameters carry raw integers for enumerations, because a C caller can pass any value.
+An optional enumeration carries `Optional(T)` of the enumeration type, because that wrapper accepts every raw value.
+
+Each pointer-bearing parameter and field states its direction, its nullability, its ownership, and its lifetime.
+A parameter is pointer-bearing when its direction is `out` or its kind is a handle, a range, or a structure.
+A field is pointer-bearing when its kind is a handle or a range.
+An output parameter that receives a pointer states the facts of that pointer in `receives`.
+
+| Fact | Values |
+| --- | --- |
+| Direction | `in` or `out`. |
+| Nullability | `non_null`, `null_when_empty`, or `nullable`. An input range that is `null_when_empty` may be null only when its length is zero. An output range that is `null_when_empty` is null exactly when its length is zero. |
+| Ownership | `borrowed`, `owned_by_engine`, or `transferred_to_caller`. |
+| Lifetime | A lifetime that the schema defines: `call`, `request_end`, `next_load_or_destroy`, or `engine_destroy`. Each lifetime lists the functions that end it. |
+
+Each function states its thread rule and every status it can return.
+The thread rules are `any`, `becomes_owner`, and `owner`.
+Each event lists the event structure fields that it carries and whether each one is always present or optional.
+
+The schema implies a C layout with natural alignment for every member.
+A pointer and a target-sized length follow each other for a range.
+The generated Zig file checks at compile time that every structure has the implied size and field offsets on 32-bit and 64-bit targets.
+`src/c_api.zig` checks at compile time that each exported function has its generated function type.
+It also checks that the native enumerations match the schema enumerations.
+
+## Generator and staleness check
+
+`tools/abi.mjs` validates the schema and then generates `include/fairpane.h` and `src/abi_generated.zig`.
+It uses no package dependencies.
+The same schema always produces byte-identical files, regardless of object key order.
+Each generated file starts with a comment that names the schema and states that the file is generated.
+
+The validator rejects an unknown kind, a pointer without ownership or lifetime, an inverted integer range, and a duplicate name.
+It also rejects a structure without `struct_size` as its first field and a generated C or Zig name that collides with another.
+It rejects an optional value that can be zero and a function status that the status enumeration lacks.
+
+To change the ABI, follow these steps.
+
+1. Edit `api/fairpane.schema.json`.
+2. Run `node tools/fairpane.mjs abi-generate`.
+3. Update `src/c_api.zig` until `zig build test` compiles its export checks.
+4. Update `api/failure-scenarios.json` and the C and Zig scenario tests when a status or an effect changes.
+5. Run `node tools/fairpane.mjs abi-check`.
+
+`abi-check` regenerates the files in memory and compares them with the committed files byte for byte.
+It exits with status 1 and names each file that differs, with the first differing line.
+Never edit a generated file by hand.
+
+## Failure scenarios
+
+`failure-scenarios.json` defines the foreign-runtime failure scenarios that every wrapper must run before it qualifies.
+Each scenario has an identifier, a situation, a description, the C calls that produce it, and the exact expected statuses and effects.
+Each call names a C function and its arguments in prose, and the status must be one that the schema lists for that function.
+The validator requires at least one scenario for each of these situations.
+
+- An unknown, foreign, or retired identifier.
+- A call from a thread other than the engine's owner.
+- Cancellation of a request before and after its answer is queued.
+- Engine and document teardown with outstanding requests, queued answers, and undrained events.
+- Allocation failure during each operation that allocates.
+- A null required pointer and a structure shorter than its `struct_size` requires.
+- A response body and a load beyond their bounds.
+- A foreign exception or panic in host code, which must never unwind across the C ABI.
+
+A scenario that C cannot express states the reason.
+C has no allocator argument in this ABI and no exceptions, so the allocation and unwinding scenarios run in Zig and in later wrappers only.
+`tests/c/abi_smoke.c` runs every scenario that C can express, and it names each identifier with a `Scenario <id>:` comment.
+`src/abi_scenarios.zig` runs every scenario through the generated declarations against the exported C symbols of the actual engine.
+Its test names start with `Scenario <id>:`.
+The controller tests check that both sources name exactly the scenarios that they must run.
 
 ## Conventions
 
