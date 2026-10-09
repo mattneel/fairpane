@@ -96,6 +96,7 @@ Never edit an expectation file, a seed, or an upstream byte to pass a case.
 If a case 14 invariant fails, stop and report the font, the glyph ID, and both values.
 If any fixture glyph returns `UnsupportedPhantomPoint`, stop and report it.
 If an F_GLYF expectation contradicts the OpenType `glyf` chapter, stop and report it instead of changing it.
+If the `tests/text` run step grows by more than 10 seconds over its base on the development host, stop and report both durations.
 
 ## Layout fixtures
 
