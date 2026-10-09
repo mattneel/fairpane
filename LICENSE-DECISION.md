@@ -40,4 +40,9 @@ On 2026-10-09, the owner also approved the Encoding Standard's index files, `htt
 They enter the repository on the same terms as the named character reference table: WHATWG's license text, its attribution, and a recorded digest beside them.
 `engineering/evidence/FP-0065/owner-answers.log` records the question and the answer.
 
+On 2026-10-09, the owner also approved the Standard Encoding table and the Expert and ExpertSubset charsets of Adobe Technical Note #5176, "The Compact Font Format Specification", which CFF `endchar` seac needs.
+They enter the repository as data with their source, retrieval date, and a recorded digest beside them.
+On the same day, the owner chose two shaping oracles: first-party expectations derived from the fonts' own tables and the script specifications, and files of Unicode's text-rendering-tests repository where each file's license is recorded and permits redistribution.
+`engineering/evidence/text/owner-answers-1.log` records the questions and the answers.
+
 See `docs/SOURCES.md` for [S20].

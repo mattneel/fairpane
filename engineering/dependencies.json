@@ -128,7 +128,8 @@
         "installation": "Installed under .tools/python from the verified wheel with --no-index --no-deps.",
         "uses": [
           "Subsetting a font fixture during an import, with the recorded argument vector and input and output digests.",
-          "Writing font expectation files that the first-party parser's tests compare against."
+          "Writing font expectation files that the first-party parser's tests compare against.",
+          "Writing dumps of GSUB, GPOS, and GDEF subtable data as expectation files that the first-party layout tests compare against, as the owner approved on 2026-10-09 in engineering/evidence/text/owner-answers-1.log; it never writes shaping output."
         ],
         "boundary": "An import-time tool only. No build, gate, test, or runtime path runs it, and no engine or wrapper code depends on it."
       }
