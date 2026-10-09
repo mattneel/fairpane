@@ -253,8 +253,8 @@
       ]
     },
     "FP-0014": {
-      "status": "active",
-      "owner": "fairpane-core worker FP0014R1, integrated by root-integrator",
+      "status": "accepted",
+      "owner": "fairpane-core workers FP0014Css and FP0014R1, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0014/README.md",
         "engineering/evidence/FP-0014/gates/2026-10-09T11-43-15-320Z-repo-check-c749976d.json",
@@ -271,16 +271,19 @@
         "engineering/evidence/FP-0014/gates/2026-10-09T12-54-28-189Z-zig-test-531423e0.json",
         "engineering/evidence/FP-0014/raw/integration-binding-r1.log",
         "engineering/evidence/FP-0014/raw/integration-tests-r1.log",
-        "engineering/evidence/FP-0014/raw/bun-selftest-r1.log"
+        "engineering/evidence/FP-0014/raw/bun-selftest-r1.log",
+        "engineering/evidence/FP-0014/raw/integration-binding-r1-digests.log",
+        "engineering/evidence/FP-0014/ci/README.md"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0014/reviews/review-2-accept.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0014/CONTRACT.md, drafted by worker FP0014Contract and frozen by the root integrator with the decisions it lists.",
         "Tasks FP-0068 to FP-0074 own the obligations that the contract leaves unsupported.",
         "Integrator amendments 1 (43edcec) and 2 (1323095) corrected the case 39 expected dump and replaced the two ZON tables with data-only Zig files.",
         "Commit ef8ad1c implements it with 192 of 192 controller tests and 272 of 272 Zig tests, and the 148 named colors match the pinned Color 4 table.",
         "fairpane-review rejected ef8ad1c and 639ec81 in reviews/review-1-reject.json because StyleMap.textStyle returns the parent's whole style instead of defaulting. Contract revision 1 also covers ignored at-rule diagnostics, the other Values 5 substitution functions, display and selector classification, bounded selector matching, and the module structure.",
-        "Worker FP0014R1 implemented revision 1. Its files landed in 1409e8b, whose message names only the FP-0012 plan split because git apply --3way had staged them; the README's 'Integration of revision 1' section records that. The binding at ba759f7 passes all four gates, 278 of 278 Zig tests uncached, and 192 of 192 controller tests under Bun 1.4.2."
+        "Worker FP0014R1 implemented revision 1. Its files landed in 1409e8b, whose message names only the FP-0012 plan split because git apply --3way had staged them; the README's 'Integration of revision 1' section records that. The binding at ba759f7 passes all four gates, 278 of 278 Zig tests uncached, and 192 of 192 controller tests under Bun 1.4.2.",
+        "fairpane-review accepted revision 1 in reviews/review-2-accept.json with four minor findings and two notes. The README records each; contract amendment 3 states the matcher's restart rule, and FP-0070 carries the restart-path cases, the sibling-combinator bound, and the import cycle. Gates runs of 1409e8b and ba759f7 passed; ci/README.md records the earlier timeout of run 37931192952."
       ]
     },
     "FP-0015": {
