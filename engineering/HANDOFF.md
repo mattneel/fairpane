@@ -47,7 +47,7 @@ ADR 0007 makes the frontend language independent of the renderer and reserves th
 4. Dispatch `FP-0107` once the `FP-0052` and `FP-0098` revisions land; one set of ten dispatched runs, at most two at a time, serves `FP-0098` and `FP-0107`.
 5. After `FP-0098` is accepted, extend the CI ledger to the acceptance head and accept `FP-0064`, `FP-0066`, `FP-0067`, `FP-0076`, `FP-0079`, and `FP-0081` in `plan:` acceptance commits.
 6. Ask the owner the open questions: the TN5176 tables for `FP-0120`, and the shaping reference fixtures and the fontTools boundary for `FP-0111` to `FP-0115`.
-7. Remove stale worker worktrees under the OMP worktree directory, as `docs/GIT_OPERATIONS.md` requires.
+7. Keep `git worktree list` limited to the main checkout; the OMP harness keeps its isolated worker directories outside the repository, so they are not repository worktrees.
 
 ```text
 node tools/fairpane.mjs check
