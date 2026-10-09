@@ -90,3 +90,20 @@ The evidence files that the patch adds later lie outside both path lists, so the
 - The revision-format check and the "Pinned commit" log line moved under the lock with the pin selection, so a fetch now logs the pin after `git ls-remote`.
 - The base check of `tests-before.log` ran in this working tree with the four other changed files restored to `b8313e6` and only `tools/selftest.mjs` staged; `git status --short` in that log shows the state.
 - The untracked `engineering/evidence/ci/dispatch-57df855/` directory was present in the working tree before this task and is not part of the patch.
+
+## Integration
+
+Commit `9b47a37` integrates the worker's patch, and the push of `5859de7` carried it to `origin`.
+The integrator recorded the binding after that push, in a temporary detached worktree of `9b47a37` without `.tools`, and removed the worktree afterward.
+`raw/integration-binding.log` records `HEAD` `9b47a3707910a0791ad784da260f81a954faee30` and a status of the whole worktree, ignored files included, before and after both gates.
+The only entries are this log and the new receipts.
+
+| Run | Record | Result |
+| --- | --- | --- |
+| `repo-check` | `gates/2026-10-09T20-52-57-087Z-repo-check-8029ca73.json` | pass, 208 ms |
+| `controller-test` | `gates/2026-10-09T20-52-57-543Z-controller-test-7dbe35f0.json` | pass, 253 of 253, 52,044 ms |
+| `corpus-verify test262` at `9b47a37` | `raw/corpus-verify-test262.log` | exit 0, no missing denominator |
+| `corpus-verify wpt` at `9b47a37` | `raw/corpus-verify-wpt.log` | exit 0, no missing denominator |
+
+Both `corpus-verify` runs set `FAIRPANE_CORPORA_DIR` to the local snapshots through the record tool's `--env` option.
+The receipts and logs were copied from the worktree into this tree unchanged.
