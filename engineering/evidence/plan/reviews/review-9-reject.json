@@ -1,0 +1,58 @@
+{
+  "verdict": "reject",
+  "summary": "Plan review 9: I reject overall because of one major finding in cf67a28. FP-0072's new criterion 5 requires matching ::slotted(), but ::slotted() matches only elements assigned to a slot. The same commit records slots and slot assignment as owned by no shadow-DOM task, routing them only to FP-0026's frontier note, so FP-0072 cannot meet criterion 5. I approve 9982925 and b9217fe.\n\nHow I checked: I read the three diffs on GitHub, the pre-freeze checks in out/drafts/FP-0127-check.json and out/drafts/FP-0111-check.json, and the FP-0082 contract's revision 2 decision. I queried plan.json and state.json with jq. I ran nothing; that `node tools/fairpane.mjs check` passes is [INFERENCE].\n\n**9982925** is mechanical. Its plan.json hunks only add toolchains/rust.lock.json and rust-toolchain.toml to protected lists, and it records review 8. A jq query shows that every task missing any policy.json protected path is accepted (29 tasks, matching state.json's accepted list), and no task allows a path it protects.\n\n**b9217fe** follows the FP-0111 check.\n- FP-0058 gains the layout-strictness criterion, word for word as the check's fix, and an FP-0111 dependency.\n- FP-0059 gains the FeatureVariations and GDEF item-variation-store criterion, word for word as the check's fix, and dependencies on FP-0111 and FP-0113.\n- FP-0111, FP-0112, and FP-0113 may write specs/capabilities/text-fonts.json, which exists.\n- 34 open tasks gain engineering/evidence. Only 12 accepted tasks still lack it.\n- No criterion is weakened, and no cycle forms: FP-0113 → FP-0112 → FP-0111 → FP-0013, and none of these depends on FP-0058 or FP-0059.\n\n**cf67a28** routes the FP-0127 check's selector finding correctly for :host, :host(), and :host-context(). It records the hash-flooding routing that FP-0082 revision 2 decided, and adds FP-0103's declarative-shadow-root dump note. But it creates the ::slotted() gap above. It also leaves the shadow-root DOM bindings that the FP-0127 draft gives to FP-0019 without a dependency on FP-0127 or a frontier entry.\n\nTwo more obligations have no owner. They predate these commits, and b9217fe leaves them unrouted: Device tables and contour-point anchors, which FP-0111 and FP-0113 report as not applied.",
+  "commits": [
+    {
+      "commit": "cf67a28",
+      "verdict": "reject",
+      "notes": "**FP-0072 criterion 5 (plan.json:3243).** 'Match :host, :host(), :host-context(), and ::slotted() within the encapsulation contexts of criterion 1, as the pinned CSS Scoping specification states.'\n- It follows the FP-0127 check's major finding (FP-0127-check.json:19-21). :host and ::slotted are CSS Scoping 1 features, outside FP-0070's 'Selectors 4' criterion. FP-0072 is the only CSS task that depends on FP-0127.\n- :host, :host(), and :host-context() need only shadow roots and host-including ancestors, which FP-0127 criteria 1 and 2 provide.\n- ::slotted() is different (major finding). It matches elements assigned to a slot, and the same commit records 'slots, slot assignment, and the flat tree' as owned by no shadow-DOM task in FP-0026's note.\n\n**FP-0026's note.** It gains:\n- hash-flooding resistance of the engine's internal hash maps, which matches FP-0082 CONTRACT.md:996-997 and README:379 (revision 2's decision);\n- custom element registries, ::part(), slots, slot assignment, and the flat tree.\n\nThe FP-0127 check also gives the DOM bindings row (attachShadow(), the shadowRoot getter, closed-mode hiding, retargeting, composed paths) to FP-0019. FP-0019 still depends only on FP-0009, FP-0012, FP-0018, and FP-0100, and the check's suggested fix adds FP-0127 to it or routes the row to FP-0026. Neither was done (minor).\n\n**FP-0103's note.** Declarative shadow roots are dumped under criteria 5 and 7, because the HTML Standard sets a declarative shadow root as the template's contents. That needs no plan change, and FP-0103 depends on FP-0127."
+    },
+    {
+      "commit": "9982925",
+      "verdict": "approve",
+      "notes": "Every removed line in the plan.json hunk is \"specs/corpora.json\" or \"toolchains/rust.lock.json\" regaining a trailing comma. Every added line is one of \"specs/corpora.json\", \"toolchains/rust.lock.json\", or \"rust-toolchain.toml\". No criterion, dependency, writable path, gate, or reviewer changes.\n\njq over plan.json at HEAD:\n- The tasks missing any of the nine policy.json protected paths are exactly the 29 accepted tasks. The commit keeps their historical entries, as its message says.\n- No task lists a protected path in allowed_paths.\n\nThis closes plan review 8's minor. The commit also records review 8 as engineering/evidence/plan/reviews/review-8-approve.json."
+    },
+    {
+      "commit": "b9217fe",
+      "verdict": "approve",
+      "notes": "The commit applies three FP-0111 check findings word for word:\n- **FP-0058 criterion 7.** 'Compare the OpenType layout strictness choices that the FP-0111 contract lists with web-font practice, and record each kept or changed choice' (check major, FP-0111-check.json:13-15), with \"FP-0111\" added to depends_on (2924).\n- **FP-0059 criterion 8.** 'Evaluate GSUB and GPOS FeatureVariations condition sets for the selected instance, and apply the GDEF item variation store through VariationIndex tables in GDEF and GPOS, replacing the FP-0111 and FP-0113 unsupported reports' (check minor, :25-27), with \"FP-0111\" and \"FP-0113\" added (2948).\n- **specs/capabilities/text-fonts.json.** FP-0111, FP-0112, and FP-0113 may write it, as the FP-0108 rule requires and the check's answer 2 recommends (:20-21, :134).\n\nThe evidence-path additions to 34 open tasks only widen writable paths to an allowed evidence root, so they weaken nothing.\n\nNo cycle forms: FP-0113 → FP-0112 → FP-0111 → FP-0013, and FP-0056's chain does not reach FP-0058 or FP-0059. Both new criteria are testable.\n\nNotes:\n- The read lists of FP-0058 and FP-0059 do not name the FP-0111 or FP-0113 contracts.\n- Device tables and contour-point anchors stay unowned (see findings)."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 3243,
+      "issue": "FP-0072 criterion 5 requires matching ::slotted(). In CSS Scoping, ::slotted(<compound>) matches elements that are assigned to a slot, so it needs the DOM Standard's slot assignment: 'find slottables', 'assign slottables', and the assigned slot. FP-0127 criterion 1 provides only the shadow root's slot-assignment mode field, not the algorithm. The same commit's FP-0026 note records 'slots, slot assignment, and the flat tree, which no shadow-DOM task owns'. So readyTasks releases FP-0072 with a criterion that no task in its dependency closure, or anywhere in the plan, can make testable. ::slotted() could only ever match nothing.",
+      "recommendation": "Choose one of two fixes:\n- Create a slot-assignment task now that depends on FP-0127 and implements slots, slottables, assign slottables, and the flat tree. Make FP-0072 depend on it, and remove 'slots, slot assignment, and the flat tree' from FP-0026's note.\n- Narrow FP-0072 criterion 5 to ':host, :host(), and :host-context()', and add a criterion that reports ::slotted() as unsupported with the owner that FP-0026's decomposition names. Criterion 5 is new in this commit, so narrowing it weakens no accepted obligation."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/state.json",
+      "line": 384,
+      "issue": "The FP-0127 pre-freeze check notes (out/drafts/FP-0127-check.json:85-87) that the draft gives FP-0019 the row 'attachShadow(), the shadowRoot getter, closed-mode hiding, retargeting, …'. FP-0019 does not depend on FP-0127 and cannot own them. The check's fix was to add FP-0127 to FP-0019's depends_on, or to route the row to FP-0026. cf67a28 does neither: FP-0019's depends_on is [FP-0009, FP-0012, FP-0018, FP-0100], and FP-0026's new note omits these bindings.",
+      "recommendation": "Before FP-0127's contract freezes, either add \"FP-0127\" to FP-0019's depends_on, which creates no cycle because FP-0127 depends only on FP-0009, or add the shadow-root bindings, retargeting, and composed paths to FP-0026's note."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3926,
+      "issue": "FP-0111 criterion 4 (3880) reports Device data as unsupported, and FP-0113 criterion 5 (3926) reports 'Device, VariationIndex, and contour-point anchor data that is not applied'. b9217fe gives VariationIndex to FP-0059 criterion 8. Non-variation Device tables, the per-ppem adjustments, and contour-point anchors (AnchorFormat 2) still have no owner task. FP-0114 criterion 5 requires every unapplied feature to be reported 'with an owner task'.",
+      "recommendation": "Name an owner in a plan commit. FP-0057, which owns glyph hinting and depends on FP-0056 and FP-0061, fits both: Device tables apply at device sizes, and contour-point anchors need hinted outline points. Add a criterion there, or route both to FP-0026's note."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/state.json",
+      "line": 384,
+      "issue": "FP-0082 revision 2 routed hash-flooding resistance of the parser's fixed-seed sets, and of the engine's other internal hash maps, to FP-0026's frontier decomposition. FP-0026 depends on FP-0019, FP-0020, and FP-0021, so this hostile-input hardening has no near-term task. Meanwhile the parser accepts attacker-supplied scripts.",
+      "recommendation": "Consider a concrete security-workstream task for keyed or seeded internal hashing, depending on FP-0082, rather than leaving it in the frontier note."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3245,
+      "issue": "The read lists do not name the contracts that the new criteria depend on:\n- FP-0072 reads only FP-0014/CONTRACT.md, although criterion 5 depends on FP-0127.\n- FP-0058 and FP-0059 do not read the FP-0111 or FP-0113 contracts that their new criteria cite.\n\nFP-0127's contract is not committed yet.",
+      "recommendation": "When those contracts are frozen, add engineering/evidence/FP-0127/CONTRACT.md to FP-0072's read list, FP-0111/CONTRACT.md to FP-0058's and FP-0059's, and FP-0113/CONTRACT.md to FP-0059's."
+    }
+  ]
+}
