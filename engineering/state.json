@@ -177,8 +177,8 @@
       ]
     },
     "FP-0011": {
-      "status": "implemented",
-      "owner": "fairpane-js worker FP0011Js, integrated by root-integrator",
+      "status": "active",
+      "owner": "fairpane-js worker FP0011R1, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0011/README.md",
         "engineering/evidence/FP-0011/gates/2026-10-09T05-07-25-099Z-repo-check-407bab9b.json",
@@ -193,7 +193,8 @@
       "review": null,
       "notes": [
         "The frozen contract is engineering/evidence/FP-0011/CONTRACT.md, drafted by worker FP0011Contract and frozen on commit 8af0f20.",
-        "Commit 84b7b14 implements it with 132 of 132 Zig tests in the integrated tree. Awaiting fairpane-review."
+        "Commit 84b7b14 implements it with 132 of 132 Zig tests in the integrated tree.",
+        "fairpane-review rejected 84b7b14 and ba3a352 in reviews/review-1-reject.json: a leaf context reaches the heap, and StringToNumber rounds long literals wrongly. Contract revision 1 is frozen in f95fab6."
       ]
     },
     "FP-0012": {
@@ -204,7 +205,7 @@
       "notes": []
     },
     "FP-0013": {
-      "status": "implemented",
+      "status": "active",
       "owner": "fairpane-text worker FP0013Text, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0013/README.md",
@@ -220,7 +221,8 @@
       "notes": [
         "The frozen contract is engineering/evidence/FP-0013/CONTRACT.md, drafted by worker FP0013Contract and frozen on commit 28e2195.",
         "The owner approved Unicode data and OFL fonts in the repository; engineering/evidence/FP-0013/owner-answers.log records it.",
-        "Commit b1fdb8c implements it with 180 of 180 controller tests and 177 of 177 Zig tests. Awaiting fairpane-review and fairpane-security; the unicode and opentype-fixtures pins wait for acceptance."
+        "Commit b1fdb8c implements it with 180 of 180 controller tests and 177 of 177 Zig tests; the unicode and opentype-fixtures pins wait for acceptance.",
+        "fairpane-security rejected b1fdb8c and c5f7f2b in reviews/security-review-1-reject.json because cmap validation work is not linear in the input length; fairpane-review is pending."
       ]
     },
     "FP-0014": {
@@ -330,8 +332,8 @@
       "notes": []
     },
     "FP-0027": {
-      "status": "implemented",
-      "owner": "fairpane-core worker FP0027Releases, integrated by root-integrator",
+      "status": "active",
+      "owner": "root-integrator",
       "evidence": [
         "engineering/evidence/FP-0027/README.md",
         "engineering/evidence/FP-0027/gates/2026-10-09T09-33-31-406Z-repo-check-fea293bf.json",
@@ -343,7 +345,8 @@
       "review": null,
       "notes": [
         "The frozen contract is engineering/evidence/FP-0027/CONTRACT.md, based on commit 97aa319.",
-        "Commit 493edb6 implements it with 167 of 167 controller tests. The real reproduce-check reports different, which FP-0066 addresses. Awaiting fairpane-review."
+        "Commit 493edb6 implements it with 167 of 167 controller tests. The worker's real reproduce-check of ba3a352 reports different, which FP-0066 addresses.",
+        "fairpane-review rejected 493edb6 and 2b766fa in reviews/review-1-reject.json because the real release records ran on ba3a352. Contract revision 1, frozen in 3531b1a, is implemented in ea3433a."
       ]
     },
     "FP-0028": {
@@ -640,8 +643,8 @@
       ]
     },
     "FP-0054": {
-      "status": "implemented",
-      "owner": "fairpane-core worker FP0054Followups, integrated by root-integrator",
+      "status": "active",
+      "owner": "fairpane-core worker FP0054R1, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0054/README.md",
         "engineering/evidence/FP-0054/gates/2026-10-09T09-30-14-403Z-repo-check-36895c39.json",
@@ -655,7 +658,8 @@
       "notes": [
         "Created from the minor findings and notes in the FP-0007 and FP-0053 review-1 records.",
         "The frozen contract is engineering/evidence/FP-0054/CONTRACT.md, based on commit ab2e2ed.",
-        "Commit 0dda99b implements it with 158 of 158 controller tests and 136 of 136 Zig tests. Awaiting fairpane-review."
+        "Commit 0dda99b implements it with 158 of 158 controller tests and 136 of 136 Zig tests.",
+        "fairpane-review rejected 0dda99b and 6f515b3 in reviews/review-1-reject.json because the output guard compares path strings, not file identities. Contract revision 1 is frozen in 005ef1e."
       ]
     },
     "FP-0055": {
