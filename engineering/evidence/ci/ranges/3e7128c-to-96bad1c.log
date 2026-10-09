@@ -1,0 +1,398 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","log","--format=%H %s","3e7128c..96bad1c"]
+96bad1c47d46185670f0991a18e708d4c7910832 FP-0107: record the revision 1 binding at d4de685
+d4de685d3cf53176b95d96bd120f6466028ea059 FP-0107: name the Windows search path PATH in each worker environment
+f585679d89f3b539be2304136f9973f090c6e099 FP-0107: amend revision 1 to give workers canonical names
+9dfb13e759ee571589fdb125219b69f231667094 FP-0107: freeze revision 1 for the worker environment on Windows
+b68eebfa75b9e7d7c84ae47056d7194111f4d523 FP-0123: add Encoding Standard labels and streaming UTF decoders
+3400a3878bde04267c55f904c0d0e7ef1bb7e0b7 FP-0082: record the revision 2 binding at f397d8d
+f397d8d304d889af032b93d5423c27879b048b97 FP-0082: record revision 2 amendment 2 for deterministic allocations
+84ffa53ced9cfa7bb651657b4b8ccaab311cd009 FP-0082: bound per-body name sets and replace stale census output
+246e6de7349bfb05a9a38a2b86858c5d030c1261 FP-0119: record the integration binding at 077ad63
+077ad63aca31dd8efc91617f2bbdd08b54055338 FP-0119: decode TrueType glyf outlines into a bounded path model
+f76662a317f112ed4ad88b9516f7c29c43cbe741 engineering: mark FP-0100 active
+bd11c2b561c78ecd0964c02b83c728caf3bf6f76 FP-0100: freeze the tree construction contract
+d945fa7b159eabeaa870d09e94256867f25241f6 plan: split FP-0080 into FP-0132, FP-0133, and FP-0134
+1d6508e3e9786138c2ef17f301b9cf47ca9cefca FP-0108: record the integration binding at 7f2a7e7
+7f2a7e7c20d3652d9968f4f382abb6f640b9fa6d FP-0108: limit M7 to the lines that depend on U+0903
+6cf88af1957810c432974adc2052b9fbd8a5ef6a FP-0108: segment grapheme clusters with UAX #29 data
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["log","--format=%H %s","3e7128c..96bad1c"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:34:45.662Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":224}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","3e7128c","96bad1c","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"]
+ build.zig | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","3e7128c","96bad1c","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:34:46.039Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":48}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","show","--name-status","--format=%H %s","9dfb13e"]
+9dfb13e759ee571589fdb125219b69f231667094 FP-0107: freeze revision 1 for the worker environment on Windows
+
+M	engineering/evidence/FP-0107/CONTRACT.md
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["show","--name-status","--format=%H %s","9dfb13e"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:34:46.186Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","show","--name-status","--format=%H %s","f585679"]
+f585679d89f3b539be2304136f9973f090c6e099 FP-0107: amend revision 1 to give workers canonical names
+
+M	engineering/evidence/FP-0107/CONTRACT.md
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["show","--name-status","--format=%H %s","f585679"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:34:46.295Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","show","--name-status","--format=%H %s","d4de685"]
+d4de685d3cf53176b95d96bd120f6466028ea059 FP-0107: name the Windows search path PATH in each worker environment
+
+M	engineering/evidence/FP-0107/README.md
+A	engineering/evidence/FP-0107/raw/bun-r1-repro-after.log
+A	engineering/evidence/FP-0107/raw/bun-selftest-r1-attempt-1.log
+A	engineering/evidence/FP-0107/raw/bun-selftest-r1-attempt-2.log
+A	engineering/evidence/FP-0107/raw/bun-selftest-r1.log
+A	engineering/evidence/FP-0107/raw/mutation-r1-M3.diff
+A	engineering/evidence/FP-0107/raw/mutation-r1.log
+A	engineering/evidence/FP-0107/raw/r1-repro-after-attempt-1.log
+A	engineering/evidence/FP-0107/raw/r1-repro-after-attempt-2.log
+A	engineering/evidence/FP-0107/raw/r1-repro-after.log
+A	engineering/evidence/FP-0107/raw/r1-repro-before.log
+A	engineering/evidence/FP-0107/raw/r1-share-env-probe.log
+A	engineering/evidence/FP-0107/raw/r1-share-env-probe.mjs
+A	engineering/evidence/FP-0107/raw/tests-after-r1-attempt-1.log
+A	engineering/evidence/FP-0107/raw/tests-after-r1-attempt-2.log
+A	engineering/evidence/FP-0107/raw/tests-after-r1-repeat-1-attempt-2.log
+A	engineering/evidence/FP-0107/raw/tests-after-r1-repeat-1.log
+A	engineering/evidence/FP-0107/raw/tests-after-r1-repeat-2-attempt-2.log
+A	engineering/evidence/FP-0107/raw/tests-after-r1-repeat-2.log
+A	engineering/evidence/FP-0107/raw/tests-after-r1-repeat-3-attempt-2.log
+A	engineering/evidence/FP-0107/raw/tests-after-r1-repeat-3.log
+A	engineering/evidence/FP-0107/raw/tests-after-r1.log
+A	engineering/evidence/FP-0107/raw/tests-before-r1.log
+M	tools/README.md
+M	tools/selftest.mjs
+M	tools/test-runner.mjs
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["show","--name-status","--format=%H %s","d4de685"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:34:46.411Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","3e7128c","96bad1c","--","tools/selftest.mjs","tools/test-runner.mjs","tools/*.test.mjs"]
+ tools/fileset.test.mjs | 36 +++++++++++++++++++++--
+ tools/selftest.mjs     | 45 ++++++++++++++++++++++++++++
+ tools/test-runner.mjs  | 21 ++++++++++++-
+ tools/ucd.test.mjs     | 80 ++++++++++++++++++++++++++++++++++++++++++++++----
+ 4 files changed, 172 insertions(+), 10 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","3e7128c","96bad1c","--","tools/selftest.mjs","tools/test-runner.mjs","tools/*.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:49:20.046Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":59}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","grep","-n","-F","gate.kind === 'controller-test'","96bad1c","--","tools/lib.mjs"]
+96bad1c:tools/lib.mjs:742:    else if (gate.kind === 'controller-test') await run(process.execPath, [path.join(root, 'tools/selftest.mjs')]);
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["grep","-n","-F","gate.kind === 'controller-test'","96bad1c","--","tools/lib.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:51:28.917Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","grep","-n","-F","build.zig","96bad1c","--","tools/selftest.mjs","tools/test-runner.mjs","tools/*.test.mjs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["grep","-n","-F","build.zig","96bad1c","--","tools/selftest.mjs","tools/test-runner.mjs","tools/*.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:51:29.003Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":29}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","3e7128c:tools/test-runner.mjs","9dfb13e:tools/test-runner.mjs"]
+0bde36422f21261ca2ebe2f254617b6045f40669
+0bde36422f21261ca2ebe2f254617b6045f40669
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","3e7128c:tools/test-runner.mjs","9dfb13e:tools/test-runner.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:55:17.218Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","3e7128c","9dfb13e","--","tools/test-runner.mjs","tools/selftest.mjs"]
+ tools/selftest.mjs | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","3e7128c","9dfb13e","--","tools/test-runner.mjs","tools/selftest.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:55:17.307Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","log","-p","--format=%H","3e7128c..96bad1c","--","build.zig"]
+b68eebfa75b9e7d7c84ae47056d7194111f4d523
+
+diff --git a/build.zig b/build.zig
+index 23234b0..b6aaeb3 100644
+--- a/build.zig
++++ b/build.zig
+@@ -36,6 +36,12 @@ const lab_fixtures = [_][]const u8{
+     "fp0008-decode-pass.json",
+     "fp0008-decode-wrong-encoding.json",
+     "fp0008-tokenize-replacement.json",
++    "fp0123-decode-utf16le.json",
++    "fp0123-tokenize-utf16be.json",
++    "fp0123-tokenize-utf16le-errors.json",
++    "fp0123-decode-name-shift-jis.json",
++    "fp0123-decode-bom-only.json",
++    "fp0123-decode-name-lowercase.json",
+ };
+ 
+ /// A compile-failure fixture of FP-0011 and the exit status and standard-error texts that it must produce.
+@@ -434,7 +440,7 @@ fn libraryCheck(b: *std.Build, step: *std.Build.Step, check: *std.Build.Step.Com
+ }
+ 
+ /// Adds FP-0007 contract cases 13 and 14, FP-0054 contract case 5 and revision 1 cases 1 to 5, FP-0008 contract case 26,
+-/// and FP-0076 contract cases 1 to 7, which run the installed `fairpane-lab` executable.
++/// FP-0123 contract case 15 Lab-7, and FP-0076 contract cases 1 to 7, which run the installed `fairpane-lab` executable.
+ fn addLabCases(
+     b: *std.Build,
+     test_step: *std.Build.Step,
+@@ -452,6 +458,7 @@ fn addLabCases(
+         .{ .name = "FP-0008 case 26: case 18 passes with exit status 0", .args = &.{"run"}, .fixture = "fp0008-tokenize-pass.json", .status = 0 },
+         .{ .name = "FP-0008 case 26: the token_count variant of case 19 fails with exit status 1", .args = &.{"run"}, .fixture = "fp0008-tokenize-token-count.json", .status = 1 },
+         .{ .name = "FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2", .args = &.{"run"}, .fixture = "fp0008-tokenize-no-bom.json", .status = 2 },
++        .{ .name = "FP-0123 case 15 Lab-7: the UTF-16BE tokenize case of Lab-3 passes with exit status 0", .args = &.{"run"}, .fixture = "fp0123-tokenize-utf16be.json", .status = 0 },
+     };
+     const results = [_][]const u8{ "pass", "fail", "unsupported", "harness-error", "timeout" };
+     for (exits) |case| {
+84ffa53ced9cfa7bb651657b4b8ccaab311cd009
+
+diff --git a/build.zig b/build.zig
+index 332da69..23234b0 100644
+--- a/build.zig
++++ b/build.zig
+@@ -289,8 +289,11 @@ fn addParseCases(b: *std.Build, test_step: *std.Build.Step, install: *std.Build.
+     usage.expectStdErrMatch("usage: fairpane-js-parse");
+     test_step.dependOn(&usage.step);
+ 
++    // The build runner reuses a step's output directory for the same inputs and never empties it, so a run that
++    // wrote census.jsonl without finalizing the step's manifest leaves the file behind. These two steps therefore
++    // pass --replace; their assertions read only this run's exit status and standard output.
+     const sound = labRun(b, install, parse, "FP-0082 case 17: the census of the sound fixture exits with status 0");
+-    sound.addArg("census");
++    sound.addArgs(&.{ "census", "--replace" });
+     sound.addDirectoryArg(b.path("tests/js/census/sound"));
+     _ = sound.addOutputDirectoryArg2("census-sound", .{ .suffix = "/census.jsonl" });
+     for (census_fixtures) |name| sound.addFileInput(b.path(b.fmt("tests/js/census/{s}", .{name})));
+@@ -300,7 +303,7 @@ fn addParseCases(b: *std.Build, test_step: *std.Build.Step, install: *std.Build.
+     test_step.dependOn(&sound.step);
+ 
+     const unsound = labRun(b, install, parse, "FP-0082 case 17: the census of the unsound fixture exits with status 1");
+-    unsound.addArg("census");
++    unsound.addArgs(&.{ "census", "--replace" });
+     unsound.addDirectoryArg(b.path("tests/js/census/unsound"));
+     _ = unsound.addOutputDirectoryArg2("census-unsound", .{ .suffix = "/census.jsonl" });
+     for (census_fixtures) |name| unsound.addFileInput(b.path(b.fmt("tests/js/census/{s}", .{name})));
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["log","-p","--format=%H","3e7128c..96bad1c","--","build.zig"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:55:17.385Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","log","--format=%H","--stat","3e7128c..96bad1c","--","tools/selftest.mjs","tools/test-runner.mjs","tools/*.test.mjs"]
+d4de685d3cf53176b95d96bd120f6466028ea059
+
+ tools/selftest.mjs    | 25 +++++++++++++++++++++++++
+ tools/test-runner.mjs | 21 ++++++++++++++++++++-
+ 2 files changed, 45 insertions(+), 1 deletion(-)
+84ffa53ced9cfa7bb651657b4b8ccaab311cd009
+
+ tools/selftest.mjs | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+6cf88af1957810c432974adc2052b9fbd8a5ef6a
+
+ tools/fileset.test.mjs | 36 +++++++++++++++++++++--
+ tools/ucd.test.mjs     | 80 ++++++++++++++++++++++++++++++++++++++++++++++----
+ 2 files changed, 107 insertions(+), 9 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["log","--format=%H","--stat","3e7128c..96bad1c","--","tools/selftest.mjs","tools/test-runner.mjs","tools/*.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:55:17.461Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":28}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","-U0","3e7128c","96bad1c","--","tools/selftest.mjs","tools/test-runner.mjs","tools/*.test.mjs"]
+diff --git a/tools/fileset.test.mjs b/tools/fileset.test.mjs
+index 04cc975..1967517 100644
+--- a/tools/fileset.test.mjs
++++ b/tools/fileset.test.mjs
+@@ -3 +3 @@
+- * File-set corpus, record, and capability tests for FP-0013 cases 41 through 49, revision 1 cases 53 through 55, and the file-set part of FP-0052 case 6.
++ * File-set corpus, record, and capability tests for FP-0013 cases 41 through 49, revision 1 cases 53 through 55, the file-set part of FP-0052 case 6, and FP-0108 cases 5 and 6.
+@@ -395 +395 @@ export const fileSetCases = [
+-  ['FP-0013 case 49: the committed capability record validates with exactly the frozen obligations and existing owner tasks', () => {
++  ['FP-0013 case 49 (amended by FP-0108 case 6): the committed capability record validates with exactly the frozen obligations and existing owner tasks', () => {
+@@ -402 +402 @@ export const fileSetCases = [
+-      ['grapheme-segmentation', 'remaining', 'FP-0015'], ['line-breaking', 'remaining', 'FP-0015'], ['shaping', 'remaining', 'FP-0015'],
++      ['grapheme-segmentation', 'implemented', 'FP-0108'], ['line-breaking', 'remaining', 'FP-0015'], ['shaping', 'remaining', 'FP-0015'],
+@@ -423,0 +424,30 @@ export const fileSetCases = [
++  ['FP-0108 case 5: the committed unicode records select 12 of 71 members, keep the source digests, and list the four FP-0108 members', () => {
++    const a = readJson(path.join(root, 'specs/applicability/unicode.json'));
++    assert.equal(a.discovered, 71);
++    assert.equal(a.selected, 12);
++    assert.equal(a.unclassified, 59);
++    assert.deepEqual(a.excluded, []);
++    assert.deepEqual(a.breakdown.counts, { '.': 45, auxiliary: 11, emoji: 3, extracted: 12 });
++    const record = readJson(path.join(root, 'specs/snapshots/unicode.json'));
++    const zip = record.sources.find(s => s.id === 'ucd-zip'), license = record.sources.find(s => s.id === 'unicode-license');
++    assert.equal(zip.size, 5657953);
++    assert.equal(zip.sha256, '7b3e555514060b92290d154f53655c5eb0fa62b16eb04c03434ff72d1a66a0d8');
++    assert.deepEqual(zip.inventory, { entry_count: 71, total_bytes: 39580113, sha256: '37761bcf3660066413756e978f9d5ec7c7be3c187738f5d95785203c8dd8b2f4' });
++    assert.equal(license.size, 1995);
++    assert.equal(license.sha256, 'e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96');
++    assert.equal(record.selected.filter(e => e.source === 'ucd-zip').length, 12);
++    for (const member of ['auxiliary/GraphemeBreakProperty.txt', 'DerivedCoreProperties.txt', 'emoji/emoji-data.txt', 'auxiliary/GraphemeBreakTest.txt']) {
++      const e = record.selected.find(x => x.member === member);
++      assert.ok(e, member);
++      assert.equal(e.source, 'ucd-zip', member);
++      assert.equal(e.path, `src/unicode/ucd/${member}`, member);
++      assert.equal(e.role, 'data', member);
++      assert.equal(e.published_url, `https://www.unicode.org/Public/18.0.0/ucd/${member}`, member);
++    }
++    const policy = readJson(path.join(root, 'specs/corpora.json')).corpora.find(c => c.id === 'unicode');
++    assert.deepEqual(policy, {
++      id: 'unicode', upstream: 'https://www.unicode.org/Public/', purpose: 'Unicode properties and conformance data', revision: '18.0.0',
++      license_record: 'specs/snapshots/unicode.json', inventory_sha256: '2511e5384857e35883ec38bd8c0d225d1ea7591f6ee6ba6347c572f6b47a59d7',
++      local_path: '<corpora-root>/unicode/sources', status: 'pinned',
++    });
++  }],
+diff --git a/tools/selftest.mjs b/tools/selftest.mjs
+index 5a12bf8..dae4022 100644
+--- a/tools/selftest.mjs
++++ b/tools/selftest.mjs
+@@ -1199,0 +1200,20 @@ test('FP-0082 case 18: the shared path rule gives each reason, and null for ordi
++// FP-0082 revision 2, case 2: for each adjacent pair of rules, a path with both defects gives the earlier rule's reason.
++// An empty component and a "." or ".." component cannot share one component, so that row puts the empty one first.
++test('FP-0082 case 18: the shared path rule gives the earlier reason for a path with the defects of two adjacent rules', () => {
++  for (const [bad, reason] of [['test\\a\u0001b.js', 'a control character'], ['test\\a:b.js', 'a backslash'], ['test/a:b//c.js', 'a colon'],
++    ['test//../a.js', 'an empty path component'], ['test/../a.js', 'a ".." path component'],
++    ['test/CON./a.js', 'a path component that ends in "." or a space']])
++    assert.equal(lib.relativePathProblem(bad), reason, JSON.stringify(bad));
++});
++// Windows compares names without regard to letter case, so two such tree paths, or two such directories, would be written to one place.
++for (const [paths, message] of [
++  [['test/language/A.js'], 'test/language/a.js differs from test/language/A.js only in letter case.'],
++  [['test/Language/b.js'], 'test/language differs from test/Language only in letter case.'],
++]) {
++  test(`FP-0082 case 18: corpus-extract refuses ${paths[0]} beside test/language/a.js before it creates the output directory`, async () => {
++    const f = await corpusFixture('test262', [...T262_EXTRACT_FILES, ...paths.map(p => ({ path: p, text: 'case;\n' }))]);
++    const out = path.join(f.dir, 'out', 'letter-case');
++    await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', out, { corporaDir: f.corporaDir }), { message });
++    assert.equal(fs.existsSync(out), false, 'The output directory exists.');
++  });
++}
+@@ -1540,0 +1561,25 @@ test('FP-0107 case 2: the runner runs no case that declares a process-wide chang
++test('FP-0107 revision 1 case 3: a case on a worker thread reads process.env as the main thread does when the search path is named Path', () => {
++  const dir = temp();
++  const runner = pathToFileURL(path.join(root, 'tools', 'test-runner.mjs')).href;
++  put(dir, 'env-probe.mjs', [
++    "import { isMainThread } from 'node:worker_threads';",
++    `import { casePool, serveCases } from ${JSON.stringify(runner)};`,
++    "const cases = [{ name: 'report PATH', fn: () => { throw new Error(JSON.stringify(process.env.PATH ?? null)); } }];",
++    'if (isMainThread) {',
++    '  const pool = casePool(import.meta.url, 1);',
++    "  let seen = 'no report';",
++    "  try { await pool.run(0, 'report PATH'); } catch (e) { seen = e.message; }",
++    '  await pool.close();',
++    '  console.log(JSON.stringify({ main: process.env.PATH ?? null, worker: JSON.parse(seen) }));',
++    '} else serveCases(cases, () => []);',
++    ''].join('\n'));
++  const env = { ...process.env };
++  const key = Object.keys(env).find(k => k.toUpperCase() === 'PATH');
++  if (key !== undefined) { const value = env[key]; delete env[key]; env.Path = value; }
++  const r = spawnSync(process.execPath, [path.join(dir, 'env-probe.mjs')], { env, encoding: 'utf8' });
++  assert.equal(r.status, 0, r.stderr);
++  const seen = JSON.parse(r.stdout.trim().split('\n').at(-1));
++  const describe = value => value === null ? 'nothing' : `a value of ${value.length} characters`;
++  assert.ok(seen.worker === seen.main, `The worker read ${describe(seen.worker)} as PATH, and the main thread read ${describe(seen.main)}.`);
++  if (process.platform === 'win32') assert.ok(seen.main !== null, 'The main thread must read Path as PATH on Windows.');
++});
+diff --git a/tools/test-runner.mjs b/tools/test-runner.mjs
+index 0bde364..02fc991 100644
+--- a/tools/test-runner.mjs
++++ b/tools/test-runner.mjs
+@@ -89,0 +90,18 @@ export async function runCases(cases, { write = line => console.log(line), concu
++/** The spellings under which the tools read Windows environment variables that a host may name in another letter case. */
++const WINDOWS_ENVIRONMENT_NAMES = ['PATH', 'SystemRoot'];
++
++/**
++ * Return the environment for a worker thread: a copy of `env`. A worker's copy matches names with regard to case, while
++ * the main thread's `process.env` on Windows does not, and a Windows host may name the search path `Path`. On Windows,
++ * the copy therefore names each variable of `WINDOWS_ENVIRONMENT_NAMES` with the spelling that the tools read.
++ */
++function workerEnvironment(env = process.env, platform = process.platform) {
++  const copy = { ...env };
++  if (platform !== 'win32') return copy;
++  for (const name of WINDOWS_ENVIRONMENT_NAMES) {
++    const found = Object.keys(copy).find(key => key !== name && key.toUpperCase() === name.toUpperCase());
++    if (found !== undefined && !(name in copy)) { copy[name] = copy[found]; delete copy[found]; }
++  }
++  return copy;
++}
++
+@@ -92,0 +111 @@ export async function runCases(cases, { write = line => console.log(line), concu
++ * Each worker gets a copy of this thread's environment from `workerEnvironment`.
+@@ -103 +122 @@ export function casePool(moduleUrl, size = DEFAULT_CONCURRENCY) {
+-    const state = { worker: new Worker(new URL(moduleUrl)), pending: null, stopped: false, closing: false };
++    const state = { worker: new Worker(new URL(moduleUrl), { env: workerEnvironment() }), pending: null, stopped: false, closing: false };
+diff --git a/tools/ucd.test.mjs b/tools/ucd.test.mjs
+index 2ba9a28..1bdbd34 100644
+--- a/tools/ucd.test.mjs
++++ b/tools/ucd.test.mjs
+@@ -3 +3 @@
+- * Unicode property generator tests for FP-0013 cases 1 through 4.
++ * Unicode property generator tests for FP-0013 cases 1 through 4 and FP-0108 cases 1 through 4.
+@@ -5 +5 @@
+- * The Zig part of case 3, the exhaustive comparison of `lookup` with an independent parser, runs in `zig build test`.
++ * The Zig part of FP-0013 case 3 and FP-0108 case 7, the exhaustive comparisons of `lookup` with an independent parser, run in `zig build test`.
+@@ -13,0 +14,2 @@ import { GENERATED_PATH, UCD_FILES, UCD_LICENSE, UcdError, parseAliases, parsePr
++// FP-0108 generator functions are read through the namespace, so a missing export fails only the case that calls it.
++import * as ucd from './ucd.mjs';
+@@ -54,0 +57,21 @@ const FIXTURE_DATA = [
++const FIXTURE_INCB_ALIASES = [
++  'InCB; Consonant ; Consonant',
++  'InCB; Extend ; Extend',
++  'InCB; Linker ; Linker',
++  'InCB; None ; None',
++  '',
++].join('\n');
++const FIXTURE_INCB = [
++  '# @missing: 0000..10FFFF; InCB; None',
++  '0041          ; Alphabetic # x',
++  '0915..0939    ; InCB; Consonant # Lo',
++  '094D          ; InCB; Linker',
++  '0300..0301    ; InCB; Extend',
++  '',
++].join('\n');
++const FIXTURE_EXTPICT = [
++  '0041..0043    ; Extended_Pictographic# a',
++  '0044          ; Emoji                # b',
++  '00A9          ; Extended_Pictographic',
++  '',
++].join('\n');
+@@ -87 +110 @@ export const ucdCases = [
+-  ['FP-0013 case 3: ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input', () => {
++  ['FP-0013 case 3 (amended by FP-0108 case 1): ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input', () => {
+@@ -91 +114,13 @@ export const ucdCases = [
+-    assert.equal(UCD_FILES.length, 8);
++    assert.deepEqual(UCD_FILES, [
++      'src/unicode/ucd/Scripts.txt',
++      'src/unicode/ucd/ScriptExtensions.txt',
++      'src/unicode/ucd/PropertyValueAliases.txt',
++      'src/unicode/ucd/extracted/DerivedBidiClass.txt',
++      'src/unicode/ucd/extracted/DerivedJoiningType.txt',
++      'src/unicode/ucd/extracted/DerivedGeneralCategory.txt',
++      'src/unicode/ucd/IndicSyllabicCategory.txt',
++      'src/unicode/ucd/IndicPositionalCategory.txt',
++      'src/unicode/ucd/auxiliary/GraphemeBreakProperty.txt',
++      'src/unicode/ucd/DerivedCoreProperties.txt',
++      'src/unicode/ucd/emoji/emoji-data.txt',
++    ]);
+@@ -93,2 +128,8 @@ export const ucdCases = [
+-      const first = fs.readFileSync(path.join(root, file), 'utf8').split('\n')[0];
+-      assert.equal(first, `# ${path.posix.basename(file, '.txt')}-18.0.0.txt`, file);
++      const lines = fs.readFileSync(path.join(root, file), 'utf8').split('\n');
++      if (file === 'src/unicode/ucd/emoji/emoji-data.txt') {
++        // emoji-data.txt names no version on line 1; its version is on line 8.
++        assert.equal(lines[0], '# emoji-data.txt', file);
++        assert.equal(lines[7], '# Version: 18.0.0', file);
++      } else {
++        assert.equal(lines[0], `# ${path.posix.basename(file, '.txt')}-18.0.0.txt`, file);
++      }
+@@ -128,0 +170,27 @@ export const ucdCases = [
++  ['FP-0108 case 2: parseFieldProperty reads only the InCB lines of a multi-property file and applies the @missing default', () => {
++    const aliases = parseAliases(FIXTURE_INCB_ALIASES, 'Fixture-aliases.txt').get('InCB');
++    const parsed = ucd.parseFieldProperty(FIXTURE_INCB, { file: 'Fixture.txt', aliases, property: 'InCB' });
++    const probes = [[0x0041, 'None'], [0x0914, 'None'], [0x0915, 'Consonant'], [0x0939, 'Consonant'], [0x093A, 'None'],
++      [0x094D, 'Linker'], [0x0300, 'Extend'], [0x0301, 'Extend'], [0x10FFFF, 'None']];
++    for (const [cp, value] of probes) assert.equal(parsed.valueAt(cp), value, `U+${cp.toString(16).toUpperCase()}`);
++  }],
++  ['FP-0108 case 3: parseBinaryProperty sets only the lines whose single field is the property, and every other code point is false', () => {
++    const parsed = ucd.parseBinaryProperty(FIXTURE_EXTPICT, { file: 'Fixture.txt', property: 'Extended_Pictographic' });
++    const probes = [[0x0040, false], [0x0041, true], [0x0043, true], [0x0044, false], [0x00A9, true], [0x10FFFF, false]];
++    for (const [cp, value] of probes) assert.equal(parsed.valueAt(cp), value, `U+${cp.toString(16).toUpperCase()}`);
++  }],
++  ['FP-0108 case 4: a missing InCB value, an unknown value, an extra value, and a binary line with a value each fail with a distinct message naming the line', () => {
++    const aliases = parseAliases(FIXTURE_INCB_ALIASES, 'Fixture-aliases.txt').get('InCB');
++    // The unchanged fixture parses, so each failure below comes from its one changed line.
++    assert.equal(ucd.parseFieldProperty(FIXTURE_INCB, { file: 'Fixture.txt', aliases, property: 'InCB' }).valueAt(0x094D), 'Linker');
++    const field = line => () => ucd.parseFieldProperty(`# header\n\n${line}\n`, { file: 'Fixture.txt', aliases, property: 'InCB' });
++    const binary = line => () => ucd.parseBinaryProperty(`# header\n\n${line}\n`, { file: 'Fixture.txt', property: 'Extended_Pictographic' });
++    const messages = [
++      rejects(field('0915 ; InCB'), /^Fixture\.txt line 3: /),
++      rejects(field('0915 ; InCB; Nope'), /^Fixture\.txt line 3: unknown value "Nope"/),
++      rejects(field('0915 ; InCB; Linker; Extra'), /^Fixture\.txt line 3: /),
++      rejects(binary('0041 ; Extended_Pictographic; Y'), /^Fixture\.txt line 3: /),
++    ];
++    assert.equal(new Set(messages).size, messages.length, JSON.stringify(messages));
++    rejects(() => ucd.parseFieldProperty('# @missing: 0000..10FFFF; InCB\n', { file: 'Fixture.txt', aliases, property: 'InCB' }), /^Fixture\.txt line 1: /);
++  }],
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","-U0","3e7128c","96bad1c","--","tools/selftest.mjs","tools/test-runner.mjs","tools/*.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:55:17.538Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","grep","-n","-F","build.zig","96bad1c","--","tools"]
+96bad1c:tools/README.md:284:`build.zig` installs the static library under the library rules of ADR 0009.
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["grep","-n","-F","build.zig","96bad1c","--","tools"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:55:17.618Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29}

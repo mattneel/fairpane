@@ -1,0 +1,40 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","96bad1c","0cf7c95","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","96bad1c","0cf7c95","--","engineering/gates.json",".github/workflows","toolchains","tools/lib.mjs","build.zig"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:34:46.522Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","show","--name-status","--format=%H %s","0f187af"]
+0f187af0d10116a3d126151211a68d17af9e6ff6 FP-0107: record review 1 and freeze revision 2
+
+M	engineering/evidence/FP-0107/CONTRACT.md
+A	engineering/evidence/FP-0107/reviews/review-1-reject.json
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["show","--name-status","--format=%H %s","0f187af"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:34:46.626Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","show","--name-status","--format=%H %s","0cf7c95"]
+0cf7c9592f96358690d2888ea5e3b9c78c110ae0 FP-0107: declare the five TMP cases and pass module declarations
+
+M	engineering/decisions/0011-concurrent-controller-tests.md
+M	engineering/evidence/FP-0107/README.md
+A	engineering/evidence/FP-0107/raw/bun-r2-repro-after.log
+A	engineering/evidence/FP-0107/raw/bun-selftest-r2.log
+A	engineering/evidence/FP-0107/raw/mutation-r2-M3.diff
+A	engineering/evidence/FP-0107/raw/mutation-r2.log
+A	engineering/evidence/FP-0107/raw/r2-repro-after.log
+A	engineering/evidence/FP-0107/raw/tests-after-r2.log
+A	engineering/evidence/ci/runs-3e7128c.log
+M	tools/abi.test.mjs
+M	tools/fileset.test.mjs
+M	tools/rust.test.mjs
+M	tools/selftest.mjs
+M	tools/ucd.test.mjs
+M	tools/workflow-check.test.mjs
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["show","--name-status","--format=%H %s","0cf7c95"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:34:46.732Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","96bad1c","0cf7c95","--","tools/selftest.mjs","tools/test-runner.mjs","tools/*.test.mjs"]
+ tools/abi.test.mjs            |  2 +-
+ tools/fileset.test.mjs        |  2 +-
+ tools/rust.test.mjs           |  2 +-
+ tools/selftest.mjs            | 10 +++++-----
+ tools/ucd.test.mjs            |  2 +-
+ tools/workflow-check.test.mjs |  2 +-
+ 6 files changed, 10 insertions(+), 10 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","96bad1c","0cf7c95","--","tools/selftest.mjs","tools/test-runner.mjs","tools/*.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:49:20.279Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}

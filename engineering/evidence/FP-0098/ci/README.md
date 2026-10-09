@@ -40,6 +40,7 @@ That gate is outside this task's criteria, which cover `zig-test`; plan commit `
 
 Review 2 (`../reviews/review-2-reject.json`) asks for a new series on a head that contains revision 1 (`0276268`), with the build summary's phase durations.
 The integrator started ten runs with `gh workflow run Gates --ref master` while `master` was at `57df855cb9b99b0e557f4e4e4462963248219300`, at most two at a time.
+`ancestry-57df855.log` records `git merge-base --is-ancestor 0276268879438531745c63ab497e80c0a1e69aa5 57df855` with exit status 0, so the series head contains revision 1, as review 3 asked.
 `../../ci/dispatch-57df855/dispatch-01.log` to `dispatch-10.log` record each `gh workflow run` with its exit status.
 `../../ci/runs-57df855.log` records `gh run view` of every `Gates` run created from 18:40 UTC to 20:18:17 UTC, each with `headBranch`, `event`, `headSha`, `attempt`, its conclusion, and each gate step's duration in seconds: the push runs 37978329724 of `96bad1c` and 37980317371 of `57df855`, and the ten dispatched runs.
 All twelve concluded `success` on both jobs, and none has a second attempt.
@@ -74,4 +75,4 @@ The phase times are copied verbatim from the build summary in each `zig-test` re
 - Item 7: `../raw/integration-binding-r1.log` records `HEAD` `0276268` and a status that includes ignored files for every source root, before and after `repo-check` (`../gates/2026-10-09T20-28-29-695Z-repo-check-6cd567d7.json`, pass) and `controller-test` (`../gates/2026-10-09T20-28-30-159Z-controller-test-b81afd46.json`, pass, 238 of 238).
   The integrator recorded it after the fact, in a temporary detached worktree of `0276268` that it removed afterward.
   `../raw/integration-binding-r1-attempt-1.log` and its receipts record the first attempt, whose `controller-test` failed only FP-0079 case 9, because the integrator had linked the worktree's `.tools` to the main checkout's and the Rust check rejects a symbolic link; attempt 2 used no `.tools`.
-- Item 8: `../../ci/README.md` "Extension through `9df8680`" records the run ledger.
+- Item 8: `../../ci/README.md` records the run ledger in "Extension through `5859de7`" and in each later extension through the head before the acceptance commit.

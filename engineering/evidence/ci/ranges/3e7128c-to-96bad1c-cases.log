@@ -1,0 +1,23 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.EXE","-e","\nconst fs = require('fs');\nconst names = file => fs.readFileSync(file, 'utf8').split('\\n').map(l => /^(?:not )?ok \\d+ - (.*)$/.exec(l)).filter(Boolean).map(m => m[1]);\nconst summary = file => fs.readFileSync(file, 'utf8').split('\\n').filter(l => /^# (tests|pass|fail|skip|todo) /.test(l));\nconst [failed, replacing] = process.argv.slice(1);\nconst a = names(failed), b = names(replacing), bs = new Set(b), as = new Set(a);\nconsole.log(JSON.stringify({ failed, cases: a.length, distinct: as.size, summary: summary(failed) }));\nconsole.log(JSON.stringify({ replacing, cases: b.length, distinct: bs.size, summary: summary(replacing) }));\nconsole.log(JSON.stringify({ missing_from_replacing: a.filter(n => !bs.has(n)), added_in_replacing: b.filter(n => !as.has(n)) }, null, 1));\n","engineering/evidence/ci/run-37971989978-attempt-1/2026-10-09T18-17-15-324Z-controller-test-032e4509.log","engineering/evidence/ci/run-37978329724/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-12-49-455Z-controller-test-11cc7f33.log"]
+{"failed":"engineering/evidence/ci/run-37971989978-attempt-1/2026-10-09T18-17-15-324Z-controller-test-032e4509.log","cases":240,"distinct":240,"summary":["# tests 240","# pass 197","# fail 43"]}
+{"replacing":"engineering/evidence/ci/run-37978329724/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-12-49-455Z-controller-test-11cc7f33.log","cases":248,"distinct":248,"summary":["# tests 248","# pass 248","# fail 0"]}
+{
+ "missing_from_replacing": [
+  "FP-0013 case 3: ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input",
+  "FP-0013 case 49: the committed capability record validates with exactly the frozen obligations and existing owner tasks"
+ ],
+ "added_in_replacing": [
+  "FP-0013 case 3 (amended by FP-0108 case 1): ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input",
+  "FP-0108 case 2: parseFieldProperty reads only the InCB lines of a multi-property file and applies the @missing default",
+  "FP-0108 case 3: parseBinaryProperty sets only the lines whose single field is the property, and every other code point is false",
+  "FP-0108 case 4: a missing InCB value, an unknown value, an extra value, and a binary line with a value each fail with a distinct message naming the line",
+  "FP-0013 case 49 (amended by FP-0108 case 6): the committed capability record validates with exactly the frozen obligations and existing owner tasks",
+  "FP-0108 case 5: the committed unicode records select 12 of 71 members, keep the source digests, and list the four FP-0108 members",
+  "FP-0082 case 18: the shared path rule gives the earlier reason for a path with the defects of two adjacent rules",
+  "FP-0082 case 18: corpus-extract refuses test/language/A.js beside test/language/a.js before it creates the output directory",
+  "FP-0082 case 18: corpus-extract refuses test/Language/b.js beside test/language/a.js before it creates the output directory",
+  "FP-0107 revision 1 case 3: a case on a worker thread reads process.env as the main thread does when the search path is named Path"
+ ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.EXE","arguments":["-e","\nconst fs = require('fs');\nconst names = file => fs.readFileSync(file, 'utf8').split('\\n').map(l => /^(?:not )?ok \\d+ - (.*)$/.exec(l)).filter(Boolean).map(m => m[1]);\nconst summary = file => fs.readFileSync(file, 'utf8').split('\\n').filter(l => /^# (tests|pass|fail|skip|todo) /.test(l));\nconst [failed, replacing] = process.argv.slice(1);\nconst a = names(failed), b = names(replacing), bs = new Set(b), as = new Set(a);\nconsole.log(JSON.stringify({ failed, cases: a.length, distinct: as.size, summary: summary(failed) }));\nconsole.log(JSON.stringify({ replacing, cases: b.length, distinct: bs.size, summary: summary(replacing) }));\nconsole.log(JSON.stringify({ missing_from_replacing: a.filter(n => !bs.has(n)), added_in_replacing: b.filter(n => !as.has(n)) }, null, 1));\n","engineering/evidence/ci/run-37971989978-attempt-1/2026-10-09T18-17-15-324Z-controller-test-032e4509.log","engineering/evidence/ci/run-37978329724/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T19-12-49-455Z-controller-test-11cc7f33.log"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T20:50:06.334Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":48}

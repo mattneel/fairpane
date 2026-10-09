@@ -1,0 +1,42 @@
+{
+  "verdict": "approve",
+  "scope": "Fixing commits d4de685 (FP-0107 revision 1) and 0cf7c95 (revision 2), and the uncommitted ledger section \"### The eleven runs of `3e7128c`\" in engineering/evidence/ci/README.md (lines 438-465), which records the failed runs 37971989978 and 37972006869 to 37974347550 and their replacement by push run 37978329724 of 96bad1c.",
+  "summary": "I approve the two fixing commits. They fix the recorded cause, and they remove, skip, exclude, or weaken no test, gate, timeout, or threshold. The ledger section is mostly supported by its evidence, but three statements go beyond what it cites; the three minor findings below cover them.\n\n**The commits fix the recorded cause.**\n- Both failed Windows receipts report 43 failures of 240 cases. Every failure message names the missing `git`, and a search for any other message in either receipt finds none.\n- Before d4de685, the runner started each worker with `new Worker(new URL(moduleUrl))` and no env option (the `-` line of raw/mutation-r2-M3.diff), so each worker read a case-sensitive copy of process.env.\n- d4de685 adds `workerEnvironment` (tools/test-runner.mjs:98-107) and passes its result to each worker (tools/test-runner.mjs:121). On Windows, that copy names the search path `PATH` and the system root `SystemRoot`.\n- With the search path named `Path`, raw/r1-repro-before.log fails 45 of 247 cases, all naming the missing `git`. raw/r1-repro-after.log and raw/r2-repro-after.log exit 0 with 248 of 248.\n- Revision 1 case 3 fails before the fix in raw/tests-before-r1.log. It is the only case that M3 kills in raw/mutation-r1.log and raw/mutation-r2.log.\n- In the replacing Windows receipt, run-37978329724/windows-gate-receipts-…/2026-10-09T19-12-49-455Z-controller-test-11cc7f33.log, 248 of 248 cases pass, including 'ok 248 - FP-0107 revision 1 case 3' on the hosted runner with Node v24.21.0.\n- That receipt's source digest, a295086e…, equals the local r1 binding receipt at d4de685.\n\n**Nothing is weakened.**\n- `git show --name-status` of each commit lists only tools/README.md, tools/selftest.mjs, tools/test-runner.mjs, five case modules, an ADR, and evidence files.\n- Across 3e7128c..96bad1c, tools/selftest.mjs has 45 insertions and no deletions, so no existing selftest line changed. The single deletion in test-runner.mjs is the Worker line, which gains the env option.\n- 0cf7c95 changes 10 lines each way. Five add declarations to closing lines (tools/selftest.mjs:584, 655, 686, 696, 706), and five widen the module maps to pass a declaration through. A declaration only makes a case run alone.\n- engineering/gates.json, .github/workflows, toolchains, and tools/lib.mjs are unchanged in both ranges. build.zig changes only through other tasks' commits. Both the failed and the replacing receipts carry gate_sha256 43baf0f8….\n- ranges/3e7128c-to-96bad1c-cases.log shows that the replacing run keeps every case of the failed run. FP-0013 cases 3 and 49 run under their amended names.\n\n**Ledger statements I confirmed.** The 16 commits in the range; the Windows controller-test failures after 31 to 47 s, with later steps skipped and Linux passing (runs-3e7128c.log); 43 of 240 failures in each downloaded receipt; build.zig as the only file changed among the rule's five paths (13 insertions, 3 deletions); the gate command at tools/lib.mjs:742; the empty five-path diff and the 10-line suite change for revision 2; 248 of 248 in the replacing run; and Windows step times of 49 to 104 s across the eleven 57df855 runs (runs-57df855.log).\n\nOutside the scope of this fix review, the 104 s step in run 37981495878 exceeds FP-0107 criterion 3's 80 s bound.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/ci/README.md",
+      "line": 445,
+      "issue": "The rule asks for evidence that the cause fails the step on the failed head's sources. The reproduction ran on the base of revision 1 (9dfb13e), not on 3e7128c, and raw/r1-repro-before.log records no HEAD or blob ID. The base is identified only by raw/tests-before-r1.log, recorded three minutes later, which shows HEAD 9dfb13e and tools/test-runner.mjs 0bde3642. Nothing recorded shows that 3e7128c has the same runner, although the range stat implies it.",
+      "recommendation": "Record `git rev-parse 3e7128c:tools/test-runner.mjs 9dfb13e:tools/test-runner.mjs` and `git diff --stat 3e7128c 9dfb13e -- tools/test-runner.mjs tools/selftest.mjs`, and cite raw/tests-before-r1.log for the base. Alternatively, rerun the reproduction on a checkout of 3e7128c."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/ci/README.md",
+      "line": 451,
+      "issue": "The cited log, ranges/3e7128c-to-96bad1c.log, does not support the attribution of the build.zig changes. It contains only the aggregate `git diff --stat` (build.zig, 13 insertions and 3 deletions) and no per-commit history of build.zig. Nothing in it shows that 84ffa53 adds `--replace` or that b68eebf adds six laboratory fixtures. The conclusion still holds: the controller-test gate runs `node tools/selftest.mjs`, and the failures were Git resolution on worker threads, which no build.zig change can affect.",
+      "recommendation": "Add `git log -p --format=%H 3e7128c..96bad1c -- build.zig` to the range log."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/ci/README.md",
+      "line": 454,
+      "issue": "Lines 454-456 name the three commits that change the suite and describe all 10 deleted lines: one Worker construction, three file comments, and six FP-0108 amendments. The cited range log has only the aggregate `--stat` of four files (172 insertions and 10 deletions), so neither the commit attribution nor the content of the deleted lines is recorded. ranges/3e7128c-to-96bad1c-cases.log supports the two renamed case names. The M3 diffs support the Worker line, and the current files agree with the amendment text, but no record shows that the deleted lines did not weaken the assertions of FP-0013 cases 3 and 49.",
+      "recommendation": "Add `git log --format=%H --stat 3e7128c..96bad1c -- tools/selftest.mjs tools/test-runner.mjs tools/*.test.mjs` and `git diff -U0 3e7128c 96bad1c -- tools/selftest.mjs tools/test-runner.mjs tools/*.test.mjs` to the range log, or limit the ledger's text to what the stat and the case comparison show."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/ci/README.md",
+      "line": 453,
+      "issue": "The `git grep build.zig` at 96bad1c covers the suite's test files but not the tools modules they import, such as tools/lib.mjs, tools/corpus.mjs, and tools/release.mjs. [INFERENCE] None of them reads build.zig: a search of tools at the current head finds build.zig only in tools/README.md.",
+      "recommendation": "Widen the recorded grep to `git grep -n -F build.zig 96bad1c -- tools`."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/ci/README.md",
+      "line": 461,
+      "issue": "The ledger cites ../FP-0107/reviews/fix-review-approve.json as a record that predates every acceptance relying on it, but that file does not exist yet, and the ledger section is uncommitted.",
+      "recommendation": "Store this verdict as engineering/evidence/FP-0107/reviews/fix-review-approve.json. Commit it together with the ledger section and the recorded range additions before any acceptance relies on the replacement."
+    }
+  ]
+}

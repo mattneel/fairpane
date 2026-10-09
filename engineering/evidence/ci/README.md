@@ -419,3 +419,67 @@ The nine replacements at `29a9f8e` therefore cover their failures for every task
 
 Every other run of every window concluded `success`.
 `FP-0098` and `FP-0082` are not in this table: `FP-0098` still needs its revision's ten dispatched runs, and `FP-0082` waits for revision 2.
+
+## Extension through `5859de7`
+
+The integrator extended this ledger on 2026-10-09 after the push run of `5859de7` concluded.
+`5859de7` is the latest pushed head, so it is the pre-acceptance head of every acceptance commit that the next push carries.
+
+### Runs after the previous extension
+
+[runs-2026-10-09-extension-2.log](runs-2026-10-09-extension-2.log) records `gh run view` of every `Gates` run created from 17:40 to 20:44:08 UTC, with each attempt and each gate step's duration.
+It holds 27 runs, one attempt each, and all completed: the push runs of `588b5bc`, `07aa602`, `3e7128c`, `96bad1c`, `57df855`, `9df8680`, and `5859de7`, the ten dispatched runs of `3e7128c`, and the ten dispatched runs of `57df855`.
+Every run concluded `success` except the eleven runs of `3e7128c`.
+[runs-3e7128c.log](runs-3e7128c.log) and [runs-57df855.log](runs-57df855.log) record the same runs of those two series.
+[pushes-through-5859de7.log](pushes-through-5859de7.log) lists the commits that each of the seven pushes carried.
+The seven ranges hold 62 commits, as many as `0276268..5859de7` holds, so these seven heads are the only pushed heads after `0276268`.
+For example, `ecdd343` reached `origin` in the push of `5859de7`.
+
+### The eleven runs of `3e7128c`
+
+- Failed attempts: push run 37971989978 and dispatched runs 37972006869 to 37974347550, attempt 1 each.
+- Failed gate and step: in every one, `Run gate controller-test` failed in the Windows job after 31 to 47 seconds, every later Windows gate step was skipped, and the Linux job passed.
+  The Windows receipts in [run-37971989978-attempt-1/](run-37971989978-attempt-1/) and [run-37972006869-attempt-1/](run-37972006869-attempt-1/) each report 43 failures of 240 cases, and each failure names the missing `git`.
+- Cause: the concurrent runner of `FP-0107` (`13168dc`) gave each worker thread a case-sensitive copy of `process.env`, so a case on a worker found no search path when the environment named it `Path`.
+  [INFERENCE] The hosted Windows runner names the search path `Path`.
+  With that name, [../FP-0107/raw/r1-repro-before.log](../FP-0107/raw/r1-repro-before.log) fails 45 of 247 cases locally on the base of revision 1, and each failure names the missing `git`.
+  [../FP-0107/raw/tests-before-r1.log](../FP-0107/raw/tests-before-r1.log) identifies that base as `9dfb13e`.
+  The range log records that `3e7128c` and `9dfb13e` have the same runner blob, `0bde3642`, and that `tools/selftest.mjs` only gains 20 lines between them.
+  The cause is deterministic, so one passing run of a fixed head suffices.
+- Fix: FP-0107 revision 1, `d4de685`, names the search path `PATH` and the system root `SystemRoot` in each worker's copy, and adds revision 1 case 3, which reads `process.env` on a worker when the search path is named `Path`.
+  Revision 2, `0cf7c95`, declares five cases that change `TMPDIR`, `TMP`, and `TEMP`, and passes each case module's declarations through.
+- Range: [ranges/3e7128c-to-96bad1c.log](ranges/3e7128c-to-96bad1c.log) lists the 16 commits from the failed head to the replacing head `96bad1c`, the files of `9dfb13e`, `f585679`, and `d4de685`, and the rule's two `git diff --stat` commands.
+  The commands that the fix review asked for follow them.
+  - The diff of `engineering/gates.json`, `.github/workflows`, `toolchains`, `tools/lib.mjs`, and `build.zig` changes only `build.zig`, with 13 insertions and 3 deletions.
+    The log's `git log -p` of `build.zig` shows that `84ffa53` (FP-0082 revision 2) passes `--replace` to the two census steps and that `b68eebf` (FP-0123) adds six laboratory fixtures and their cases.
+    Neither change can make the replacing run's `controller-test` step pass.
+    At `96bad1c`, the gate runs `node tools/selftest.mjs` (`tools/lib.mjs:742`), and the log's `git grep` commands find `build.zig` in no file under `tools` except `tools/README.md`.
+  - The diff of the controller suite's sources, `tools/selftest.mjs`, `tools/test-runner.mjs`, and `tools/*.test.mjs`, changes four files in `d4de685`, `84ffa53`, and `6cf88af`, with 172 insertions and 10 deletions.
+    The log's `git log --stat` and `git diff -U0` of those files record the attribution and every deleted line.
+    One deleted line is the worker construction that `d4de685` replaces, and three are file comments.
+    The other six are FP-0108's frozen amendments of FP-0013 cases 3 and 49: each name gains "(amended by FP-0108 case N)", the count of eight UCD files becomes an exact list of eleven, the version header check gains `emoji-data.txt`'s version on line 8, and grapheme segmentation moves from remaining to implemented by `FP-0108`.
+  - [ranges/3e7128c-to-96bad1c-cases.log](ranges/3e7128c-to-96bad1c-cases.log) compares the case names of the failed Windows receipt with the replacing run's Windows receipt in [run-37978329724/](run-37978329724/).
+    The replacing run passes all 248 of its cases.
+    The only names of the failed run's 240 cases that it lacks are FP-0013 cases 3 and 49, which it runs under their amended names.
+  - [ranges/96bad1c-to-0cf7c95.log](ranges/96bad1c-to-0cf7c95.log) records that the diff of the five paths is empty for revision 2, and that revision 2 changes six files of the suite by ten lines each way.
+- Review record: the `fairpane-review` fix review of `d4de685` and `0cf7c95`, [../FP-0107/reviews/fix-review-approve.json](../FP-0107/reviews/fix-review-approve.json), approves both commits and predates every acceptance that relies on it.
+  Its three minor findings asked for the range log's later commands, which this section now cites.
+  FP-0107 review 2, [../FP-0107/reviews/review-2-accept.json](../FP-0107/reviews/review-2-accept.json), also accepts revisions 1 and 2 apart from criterion 3, the CI time bound.
+- Disposition: the passing push run 37978329724 of `96bad1c`, which contains `d4de685`, replaces the reruns of `3e7128c`.
+  The eleven passing runs of `57df855`, which contains `0cf7c95`, confirm the fix.
+  The time bound of FP-0107 criterion 3 is a separate matter of that task: the Windows `controller-test` step of `57df855` took 49 to 104 seconds, within the gate's 120-second timeout.
+
+### Windows through `5859de7`
+
+| Task | Implementation, first pushed head | Failed attempts in its window | Disposition |
+| --- | --- | --- | --- |
+| `FP-0082` | `5d41509`, `5d41509` | `a2dd9ed` attempt 1; `66d71bd`; the eleven runs of `3e7128c` | Same-head attempt 2; replacement at `f5be48f`; replacement at `96bad1c` |
+| `FP-0098` | `9d5638b`, `9d5638b` | The same as `FP-0082` | The same |
+| `FP-0108` | `6cf88af`, `96bad1c` | None | — |
+| `FP-0119` | `077ad63`, `96bad1c` | None | — |
+| `FP-0123` | `b68eebf`, `96bad1c` | None | — |
+| `FP-0100` | `f17b396`, `9df8680` | None | — |
+| `FP-0131` | `9b47a37`, `5859de7` | None | — |
+
+Every other run of every window concluded `success`.
+`FP-0106` has no pushed head yet, so its window begins with the next push.
