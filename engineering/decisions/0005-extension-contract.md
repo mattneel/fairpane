@@ -1,6 +1,6 @@
 # ADR 0005: One extension contract with equal language clients
 
-Status: decided by the owner; this record awaits an accepting independent review.
+Status: the quoted rule and the recorded answers are owner decisions; the engineering decisions this record labels await an accepting independent review.
 Owner: the project owner.
 Date: 2026-10-09.
 Related tasks: `FP-0006`, `FP-0019`, `FP-0020`, `FP-0021`, `FP-0036`, `FP-0037`, `FP-0038`, `FP-0039`, `FP-0040`.
@@ -15,14 +15,13 @@ Its clients are JavaScript on Fairpane's own runtime and every officially suppor
 Every client receives equal capabilities through an idiomatic language interface, and none receives private privileges.
 
 The owner's first extension memo named Rhai and JavaScript as the first two clients.
-The owner then clarified that Rhai stood for writing the frontend in a second language.
-The frontend and shell are now Rust, so Fairpane needs no Rhai extensions.
-In the owner's words, "We can just polyglot the whole way down."
+The owner later answered the confirmation question in full: "No when I said Rhai I meant being able to write the frontend in Rhai. But we changed it to Rust so no need for Rhai extensions. We can just polyglot the whole way down."
+Fairpane therefore needs no Rhai extensions.
 ADR 0006 makes every language SDK power its own first-party extension, and ADR 0007 lets every language drive a frontend.
 
 The Rust shell tests whether the engine is genuinely embeddable.
 A second extension language tests whether Fairpane is genuinely extensible, rather than merely programmable in JavaScript.
-Rust supplies that second language first, through a compiled extension worker on the Rust SDK.
+As an engineering decision, Rust supplies that second language first, because its SDK exists before any other through `FP-0029`.
 
 ## Components
 
@@ -37,7 +36,8 @@ Rust supplies that second language first, through a compiled extension worker on
 The JavaScript adapter runs extension code on Fairpane's own JavaScript runtime through public runtime facilities.
 JavaScript and TypeScript extension code runs in separate execution contexts, never in a page's existing context.
 TypeScript extensions run on that same runtime, as the owner decided.
-A compiled language runs its extensions as compiled extension workers, and an interpreted language supplies a runtime host.
+A compiled language can run its extensions as compiled extension workers.
+An interpreted language can run on Fairpane's own JavaScript runtime or supply a runtime host.
 No language host ships a third-party JavaScript or WebAssembly engine, a renderer, or a WebView.
 Every adapter calls the same broker, and no adapter implements its own permission policy.
 Shell-only operations stay in Rust, so a command-palette entry needs no trip through Zig.
@@ -133,8 +133,9 @@ The baseline still needs these properties before its public interfaces stabilize
 
 ## Release scope
 
-The owner's SDK memo makes a first-party extension in every supported language a product obligation.
-The qualification profile therefore requires the `extensions` capability family.
+The owner selected no release-scope option, and the confirmation answer began with "No."
+As an engineering decision derived from the SDK memo, which makes a first-party extension in every supported language a product obligation, the qualification profile requires the `extensions` capability family.
+The owner's confirmation of that family remains an open question beside the one that blocks `FP-0040`.
 
 The extension memo also proposed compatibility with existing browser extensions as a separate qualification target.
 An earlier record read the owner's reply "YES." as approval of a required `webextensions-compat` family.
@@ -145,5 +146,6 @@ The family is therefore absent from the qualification profile until the owner de
 ## Sources and evidence
 
 - `engineering/evidence/extensions/owner-memo-2026-10-09.md` holds the owner's extension memo verbatim.
-- `engineering/evidence/extensions/release-scope-question.log` holds the first release-scope question and the owner's reply.
+- `engineering/evidence/extensions/release-scope-question.log` holds the first release-scope question and the first characters of the owner's reply.
+- `engineering/evidence/extensions/owner-sdk-memo-extraction.log` and `engineering/evidence/extensions/owner-sdk-memo-2026-10-09.md` hold that reply in full.
 - `engineering/evidence/extensions/owner-answers-2.log` holds the confirmation question and the owner's clarification.

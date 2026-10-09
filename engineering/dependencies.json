@@ -53,12 +53,12 @@
         "crate": "gpui",
         "role": "GPUI is the lead interface framework. It hosts windows, input, IME delivery, AccessKit accessibility, frame presentation, and the engine-rendered chrome. GPUI Kit's installation guide names gpui-pre as the crates.io package that publishes its paired GPUI snapshot.",
         "source": "https://gpui-kit.com/docs/installation",
-        "status": "candidate pending FP-0032 and FP-0030"
+        "status": "candidate pending FP-0032, FP-0030, and FP-0020"
       },
       {
         "crate": "gpui-kit",
         "role": "The shell uses only selected GPUI Kit behavior facilities, paired with their specified GPUI snapshot. GPUI Kit documented version 0.7.1 on October 9, 2026.",
-        "status": "candidate pending FP-0032 and FP-0030"
+        "status": "candidate pending FP-0032, FP-0030, and FP-0020"
       },
       {
         "crate": "tokio",
@@ -77,7 +77,8 @@
       },
       {
         "crate": "cargo-deny",
-        "role": "Cargo-deny is a development check for licenses, advisories, and approved dependency sources. The tool for the ban and duplicate checks stays unassigned until FP-0017 selects one.",
+        "role": "Cargo-deny is a development check for licenses, advisories, and approved dependency sources. Its bans check also denies specific crates and detects multiple versions of the same crate, which covers the ban and duplicate checks.",
+        "source": "https://embarkstudios.github.io/cargo-deny/checks/bans/index.html",
         "status": "candidate development tool"
       },
       {

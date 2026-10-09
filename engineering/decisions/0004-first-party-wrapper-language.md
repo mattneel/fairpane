@@ -35,7 +35,7 @@ GPUI hosts that engine-rendered chrome and the page documents in the shell's win
 | Zig engine | First-party code and the pinned Zig toolchain. | Web semantics and document execution. |
 | `fairpane-sys` | First-party bindings and Rust toolchain facilities. | Exact declarations of the public C ABI. |
 | `fairpane` | First-party wrapper code, `fairpane-sys`, and the Rust standard library. | Safe, idiomatic Rust ownership and operations. |
-| Rust browser application | Qualified third-party dependencies are welcome. | The shell's user interface and application services. |
+| Rust browser application | Qualified third-party dependencies are welcome. | It provides the shell's user interface and application services. |
 
 The crate names describe the structure, not reserved package names.
 Dependencies belong to the application that needs them.

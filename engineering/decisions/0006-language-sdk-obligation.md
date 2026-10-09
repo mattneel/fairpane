@@ -1,6 +1,6 @@
 # ADR 0006: Every language SDK powers a first-party integration
 
-Status: decided by the owner; this record awaits an accepting independent review.
+Status: the quoted rule and the recorded answers are owner decisions; the engineering decisions this record labels await an accepting independent review.
 Owner: the project owner.
 Date: 2026-10-09.
 Related tasks: `FP-0022`, `FP-0029`, `FP-0037`, `FP-0039`, `FP-0041`, `FP-0042`, `FP-0049`.
@@ -20,14 +20,16 @@ The browser becomes the place where the entire SDK family proves itself.
 ## Officially supported SDKs
 
 A language SDK becomes officially supported only through its own support package and qualification.
-The current set has four planned members.
+As an engineering decision, the planned set has four members.
 
-| SDK | Flagship integration | Reference extension |
+| SDK | Maintained integration | Reference extension |
 | --- | --- | --- |
-| Rust | The browser shell, `FP-0017`. | The Rust workspace extension, `FP-0037` and `FP-0039`. |
-| C | The C-only consumer, `FP-0034`. | The C support package, `FP-0049`. |
-| TypeScript | The TypeScript support package, `FP-0041`. | The TypeScript workspace extension, `FP-0041`. |
-| Elixir | The Elixir support package, `FP-0042`. | The Elixir workspace extension, `FP-0042`. |
+| Rust | The browser shell, `FP-0017`, with the Rust extension worker in `FP-0037`. | The Rust workspace extension, `FP-0039`. |
+| C | The C language-support extension, `FP-0049`. | The C workspace extension, `FP-0049`. |
+| TypeScript | The TypeScript language-support extension, `FP-0041`. | The TypeScript workspace extension, `FP-0041`. |
+| Elixir | The Elixir language-support extension, `FP-0042`. | The Elixir workspace extension, `FP-0042`. |
+
+The C-only consumer in `FP-0034` remains the native ABI harness, not C's integration.
 
 The direct Zig API sits over internal interfaces, so it is not a public SDK.
 The other languages in `docs/ABI_AND_WRAPPERS.md` join the set only with a support package.
@@ -44,8 +46,8 @@ The language-support extension supplies the bridge.
 The reference extension proves that another developer can cross it.
 Neither deliverable receives a private API.
 A missing capability becomes a public-contract issue, not an internal shortcut.
-For a compiled language, the integration launches a compiled extension worker.
-For an interpreted language, it supplies a runtime host.
+For a compiled language, the integration can launch a compiled extension worker.
+For an interpreted language, the integration can run on Fairpane's own JavaScript runtime or supply a runtime host.
 No host ships a third-party JavaScript or WebAssembly engine, a renderer, or a WebView.
 TypeScript extensions therefore run on Fairpane's own JavaScript runtime through the TypeScript SDK's extension transport, as the owner decided.
 The execution model can differ, while the capabilities and permission rules stay equivalent.

@@ -1,0 +1,228 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "799dcba",
+    "ec425ea",
+    "2069b4d",
+    "0c975c9"
+  ],
+  "summary": "I accept the revised decision record. I found no blocker or major defect. All four major findings in review-1-reject.json are resolved. (1) The record no longer claims that the owner chose an option. The ask question, its options, and the owner's reply are preserved in release-scope-question.log and owner-answers-2.log. webextensions-compat is removed and FP-0040 is blocked. (2) AGENTS.md:27, dependencies.json optional_language_hosts, ADR 0005/0006, and FP-0041 now forbid a third-party JavaScript or WebAssembly engine, renderer, or WebView in any language host. TypeScript extensions run on Fairpane's runtime, as the owner chose in owner-answers-2.log. (3) Renderer-failure recovery moved from FP-0017 and FP-0032 to FP-0020 (plan.json:957-959), and ADR 0004:110-112 now splits the evidence three ways. (4) FP-0048 now supplies GPU-resident engine surfaces before FP-0045. FP-0046 is limited to the service boundary and reports WebGPU as unsupported, and its paths now include apps and ports. Rhai remains only in history: ADR 0005:17-19, HANDOFF.md:74, state.json:348 and :367, and evidence. All protected-path changes and the REQUIRED_CAPABILITIES change are confined to 2069b4d. 0c975c9 touches no protected path. The 2069b4d and 0c975c9 check receipts show the same policy fingerprint, 366776e0.... Relative to 09e52d0, the capability list only adds 'extensions', and the AGENTS.md and CHARTER.md changes are additive or stricter. Removing webextensions-compat restores the 09e52d0 state and reverses an addition that review 1 found unauthorized, so I do not count it as a weakening. Several minor problems remain. The ADR status lines say 'decided by the owner', but the records do not show the owner deciding the Rust second extension language, the four-SDK set, or FP-0048/FP-0049. The required 'extensions' family is an inference from the SDK memo, and the record leaves out that the owner's confirmation answer opened with 'No' and selected no option. FP-0048 cannot write the ABI that its criterion needs. No task sends GPU paint requests through the owner-mandated GPU service. GPUI finalization ignores FP-0020. The cargo-deny note names a task that cannot write the file. I ran no shell commands. I fetched https://github.com/mattneel/fairpane/commit/2069b4d.diff and https://github.com/mattneel/fairpane/commit/0c975c9.diff, plus raw 09e52d0 copies of tools/lib.mjs, AGENTS.md, and docs/CHARTER.md, with the read tool. I read the current working-tree files and the receipts in engineering/evidence/decisions-2026-10-09/ but did not re-run them.",
+  "criteria": [
+    {
+      "criterion": "1. Resolution of every finding in review-1-reject.json",
+      "met": true,
+      "evidence": "All 19 findings are resolved except one note: 2069b4d again references FP-0048 and FP-0049 before 0c975c9 creates them. See prior_findings."
+    },
+    {
+      "criterion": "2. Fidelity of ADRs 0004-0007, EXTENSIONS.md, and FRONTENDS.md to the memos and answers, including the Rhai withdrawal, the authority for 'extensions', and the webextensions-compat removal",
+      "met": true,
+      "evidence": "The Rhai withdrawal is recorded accurately. ADR 0005:17-20 and HANDOFF.md:74 cite owner-answers-2.log:4 and quote 'We can just polyglot the whole way down.' The TypeScript-host choice is cited correctly at ADR 0005:40, ADR 0006:50, and EXTENSIONS.md:28; its option text in owner-answers-2.log:3 matches. The webextensions-compat removal is explained, and FP-0040 is blocked (ADR 0005:139-143, EXTENSIONS.md:148-149, QUALIFICATION.md:27, state.json FP-0040 'blocked'). The memo's 'Unlimited development resources' wording is restored at ADR 0005:113. The gpui-pre claim now has an evidence log (wrapper-language/gpui-kit-installation.log), and the log matches. No text still says the owner chose an option or approved a family. Minor problems remain. The status lines on ADRs 0005-0007 attribute derived engineering choices to the owner. ADR 0005:18 paraphrases 'the frontend in Rhai' as 'a second language'. ADR 0005:136-137 derives the required 'extensions' family from the SDK memo without recording that the confirmation answer began with 'No' and chose no option. ADR 0006:47-48 hardens the memo's 'can launch'/'can supply'. Each is listed under findings."
+    },
+    {
+      "criterion": "3. Policy: protected changes confined to policy commits, with no protection weakened relative to 09e52d0 except the webextensions-compat reversal",
+      "met": true,
+      "evidence": "2069b4d touches AGENTS.md, docs/CHARTER.md, engineering/qualification.json, tools/lib.mjs, ADRs 0004-0007, dependencies.json, workstreams.json, and evidence. 0c975c9 touches only .omp/agents, README, non-charter docs, ADR 0001, HANDOFF, plan.json, state.json, and evidence. The policy fingerprint is 366776e0... (17 files) in both 2069b4d-check.log and 0c975c9-check.log, so 0c975c9 changed no policy root. Both commits were checked out with 'git worktree add --detach' (2069b4d-materialize.log, 0c975c9-materialize.log), and each check and selftest exited 0 with 102/102 tests. 09e52d0 lists 19 REQUIRED_CAPABILITIES; the current list has 20, adding only 'extensions' (tools/lib.mjs:13). AGENTS.md:24-36 is a superset of the 09e52d0 rules. It adds parse and style to the crate ban and adds the new engine ban at :27. CHARTER.md:20 renames the dependency exception to 'browser application', and :31-39 is additive. dependencies.json removes the Rhai acceptable use and the Rhai candidate, which narrows the exception. Removing the webextensions-compat family is acceptable. It was added in 799dcba on an owner selection that the evidence shows never happened, and that commit was rejected. It never existed at 09e52d0. The removal sits in the policy commit with an ADR rationale and a blocked FP-0040, so it restores the baseline rather than weakening a protection."
+    },
+    {
+      "criterion": "4. Plan integrity: no cycle, each task completable in dependency order with its allowed paths, no weakened criterion, no vacuous criterion",
+      "met": true,
+      "evidence": "I traced every depends_on edge for FP-0001 to FP-0049 and found no cycle. FP-0017 no longer requires renderer recovery, and FP-0020:957-959 now carries it with engineering/decisions in its paths. FP-0030 can write engineering/decisions and dependencies.json. FP-0032:1567-1568 restores 'Use the newest qualified, compatible GPUI and GPUI Kit pairing' as its own criterion. FP-0035 is unchanged. FP-0036 splits its compound criterion. FP-0037 is retargeted to a Rust worker with split prohibitions. FP-0039 is retargeted to JavaScript and Rust parity. FP-0040 is blocked and adds the content-script criterion. FP-0041 and FP-0042 add custom graphics frontends and an FP-0044 dependency. FP-0043 adds FP-0030. FP-0045 depends on FP-0048. FP-0046 is rescoped and its paths include apps and ports. FP-0048 and FP-0049 are new. FP-0041 replaced 'Keep the TypeScript host optional and its runtime dependencies inside that host' with 'Keep TypeScript language support optional' plus a stricter no-engine criterion. TypeScript now has no host, so this is not a weakening. Minor gaps remain. FP-0048 cannot extend the ABI for GPU surfaces. FP-0046's separation criteria have no GPU-request producer among its prerequisites. GPUI finalization after FP-0020 has no task that can write dependencies.json. dependencies.json:80 assigns a selection to FP-0017, which cannot write that file."
+    },
+    {
+      "criterion": "5. Consistency and prose across AGENTS.md, docs, README, AGENT_LAUNCH, .omp/agents, book, engineering JSON, and HANDOFF, including remaining Rhai references",
+      "met": true,
+      "evidence": "No Rhai reference remains outside evidence and state history. The only matches are ADR 0005:17-19, HANDOFF.md:74, and state.json:348 and :367, all historical, plus evidence files. The term 'browser application' is now used consistently: CHARTER.md:20, ADR 0001:21, ADR 0004:38, ARCHITECTURE.md:22-27, README.md:75, SECURITY.md:24-29, and TOOLCHAIN.md:49-51. SECURITY.md:29 lists all five dependency checks. fairpane-platform.md:14 now matches the ADR 0004:71-74 definition of a narrow platform adapter. The table fragments are fixed (FRONTENDS.md:17-18 and :31-33, ADR 0007:44-46, ARCHITECTURE.md:23). PRODUCT.md:73, README.md:43, ROADMAP.md:15 and :19, QUALIFICATION.md:27, workstreams.json:91, and qualification.json 'extensions' agree with ADR 0005. The book includes EXTENSIONS.md and FRONTENDS.md. Remaining minor issues: GPUI status is inconsistent across ADR 0004:112, plan.json:1570, and dependencies.json:56 and :61. EXTENSIONS.md:109 calls the planned SDKs 'officially supported'. A few prose items are listed as notes."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "major ADR 0005:134 — the 'YES to the recommended option' owner authority for extensions and webextensions-compat is unsupported.",
+      "resolved": true,
+      "evidence": "release-scope-question.log:3-4 preserves the question, its four options, and the 'User provided custom input' reply. owner-answers-2.log:3-4 preserves the confirmation question and the answer. ADR 0005:139-143 retracts the earlier reading. qualification.json and tools/lib.mjs drop webextensions-compat, and FP-0040 is blocked (state.json, plan.json:2010). HANDOFF.md:74-76 and state.json:376-377 no longer claim approval, and a search for 'approved' finds no remaining claim. A residual derivation issue for 'extensions' is reported as a new minor finding."
+    },
+    {
+      "finding": "major dependencies.json:103 — optional language hosts could ship a third-party JavaScript engine, against .omp/RULES.md:5.",
+      "resolved": true,
+      "evidence": "AGENTS.md:27 says 'Never ship a third-party JavaScript or WebAssembly engine, renderer, or WebView in any language host.' The same ban is in the dependencies.json optional_language_hosts policy, ADR 0005:42, ADR 0006:49, EXTENSIONS.md:32, SECURITY.md:46, and ARCHITECTURE.md:23. FP-0041:2059-2060 runs TypeScript extensions on Fairpane's runtime through FP-0038 and ships no third-party engine. owner-answers-2.log:4 supports this: 'typescript-host: Fairpane's own JS runtime'."
+    },
+    {
+      "finding": "major plan.json:795 — FP-0017 and FP-0032 require renderer-failure recovery before FP-0020 introduces renderer processes.",
+      "resolved": true,
+      "evidence": "The 0c975c9 diff removes 'Restart the chrome when its renderer fails' from FP-0017 and 'Recover a window after a renderer failure' from FP-0032. FP-0020:957-959 now requires chrome restart, page-window recovery, and recording the ADR 0004 evidence, and its paths include engineering/decisions. ADR 0004:110-112 assigns that evidence to FP-0020."
+    },
+    {
+      "finding": "major plan.json:2311 — FP-0045 and FP-0046 lack a GPU paint or WebGPU prerequisite, and FP-0046 cannot write the shell or the ports.",
+      "resolved": true,
+      "evidence": "New FP-0048 (plan.json:2348-2395) paints into GPU-resident surfaces against the scalar reference, and FP-0045 now depends on it. FP-0046:2331-2334 reports WebGPU as unsupported and only specifies composition for a later WebGPU task. Its allowed paths now include apps and ports. Residual gaps are reported as new minor findings: FP-0048's ABI paths and the GPU-service routing."
+    },
+    {
+      "finding": "minor ADR 0004:127 — cargo-deny lost 'licenses', and no tool covers the ban and duplicate checks.",
+      "resolved": true,
+      "evidence": "ADR 0004:133 and dependencies.json:80 now say 'licenses, advisories, and approved dependency sources', and the ban and duplicate tool is marked unassigned, as review 1 allowed. The assignment to FP-0017 is a new minor finding."
+    },
+    {
+      "finding": "minor dependencies.json:55 — the unsourced gpui-pre claim.",
+      "resolved": true,
+      "evidence": "dependencies.json:54-55 cites https://gpui-kit.com/docs/installation. wrapper-language/gpui-kit-installation.log shows HTTP 200 and the passage 'gpui-pre is the crates.io package name used to publish a snapshot of GPUI from a recorded Zed commit'."
+    },
+    {
+      "finding": "minor plan.json:1457 — FP-0030 cannot write engineering/decisions or dependencies.json.",
+      "resolved": true,
+      "evidence": "FP-0030's allowed paths now include engineering/decisions and engineering/dependencies.json. The new FP-0020 share of GPUI finalization is reported separately."
+    },
+    {
+      "finding": "minor plan.json:2049 — FP-0041 and FP-0042 lack custom graphics frontends and FP-0044, and FP-0043 lacks FP-0030.",
+      "resolved": true,
+      "evidence": "FP-0041 and FP-0042 depend on FP-0044 and require document and custom graphics frontends (plan.json:2064-2065, and the matching FP-0042 criteria). FP-0043 depends on FP-0030."
+    },
+    {
+      "finding": "minor ADR 0006:94 — the set of officially supported SDKs is undefined, and Rust and C have no reference extension.",
+      "resolved": true,
+      "evidence": "ADR 0006:20-33 lists Rust, C, TypeScript, and Elixir. FP-0037 and FP-0039 give Rust its reference extension. New FP-0049 (plan.json:2400-2445) delivers the C support package. The labeling problems are reported as a new minor finding."
+    },
+    {
+      "finding": "minor plan.json:1562 — FP-0032's 'Use the newest qualified, compatible pairing' was weakened.",
+      "resolved": true,
+      "evidence": "plan.json:1567-1568 now has 'Use the newest qualified, compatible GPUI and GPUI Kit pairing.' and 'Record the exact GPUI and GPUI Kit versions and snapshot of that pairing.' as separate criteria."
+    },
+    {
+      "finding": "minor ADR 0005:99 — 'Unlimited development resources' was reworded, and 'can ship' became 'ships'.",
+      "resolved": true,
+      "evidence": "ADR 0005:113 and EXTENSIONS.md:95 restore the memo's sentence. The Rhai 'ships' sentence was removed with Rhai. A similar can-to-must change in ADR 0006:47-48 is a new minor finding."
+    },
+    {
+      "finding": "minor plan.json:2001 — FP-0040 does not reconcile content-script page access with containment.",
+      "resolved": true,
+      "evidence": "plan.json:2013 says 'Record how content-script page access maps onto the permission-checked document interface, with a security decision for any exception.'"
+    },
+    {
+      "finding": "minor SECURITY.md:28 — 'browser shell' and 'browser application' were both used, and the ban and duplicate checks were missing.",
+      "resolved": true,
+      "evidence": "CHARTER.md:20 was renamed in policy commit 2069b4d. ADR 0001:21, ARCHITECTURE.md:22, README.md:75, SECURITY.md:24-29, and TOOLCHAIN.md:49-51 were renamed in 0c975c9. SECURITY.md:29 lists license, advisory, source, ban, and duplicate checks."
+    },
+    {
+      "finding": "minor plan.json:1840 — compound prohibitions at :1840 and :1895, and a three-part criterion at :1779.",
+      "resolved": true,
+      "evidence": "The 0c975c9 diff splits FP-0036's criterion into three (now around :1784-1786). FP-0037's prohibitions are now :1849-1850 and FP-0038's are now :1904-1905, one instruction each."
+    },
+    {
+      "finding": "minor FRONTENDS.md:17 — table cells were sentence fragments.",
+      "resolved": true,
+      "evidence": "FRONTENDS.md:17-18 and :31-33, ADR 0007:44-46, and ARCHITECTURE.md:23 are now complete sentences. The rewritten ARCHITECTURE.md:22 cell is a new fragment, reported as a note."
+    },
+    {
+      "finding": "note ADR 0005:3 — ADRs were marked 'accepted' before review.",
+      "resolved": true,
+      "evidence": "ADR 0004 now says 'accepted by the owner; this revision awaits an accepting independent review'. ADRs 0005-0007 say 'decided by the owner; this record awaits an accepting independent review'. The scope of the 'decided by the owner' claim is a new minor finding."
+    },
+    {
+      "finding": "note .omp/agents/fairpane-platform.md:14 — 'ordinary' shell code was undefined.",
+      "resolved": true,
+      "evidence": "ADR 0004:71-74 defines a narrow platform adapter as a shell module that a recorded decision names. fairpane-platform.md:14 now matches that definition."
+    },
+    {
+      "finding": "note ADR 0007:89 — task references landed before the tasks existed.",
+      "resolved": false,
+      "evidence": "The pattern repeats. 2069b4d adds FP-0049 to ADR 0006:6, :28, and :113, and FP-0048 to ADR 0007:6 and :94, but 2069b4d-check.log reports 47 tasks. Those tasks first appear in 0c975c9, which reports 49. Neither the record nor the commit accepts this intermediate gap explicitly."
+    },
+    {
+      "finding": "note ec425ea-check.log:2 — receipts did not record how each verification tree was materialized.",
+      "resolved": true,
+      "evidence": "2069b4d-materialize.log and 0c975c9-materialize.log record 'git worktree add --detach out/verify-<id> <id>', the HEAD line with the commit subject, and the later worktree removal. Each exited 0."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0005-extension-contract.md",
+      "line": 3,
+      "issue": "The status lines of ADRs 0005, 0006, and 0007 say 'decided by the owner'. Each record now also contains choices that no owner record shows. ADR 0005:26 makes Rust the first second extension language. ADR 0006:22-30 fixes a four-SDK set and assigns C to FP-0034 and FP-0049. ADR 0007:94 adds FP-0048. owner-answers-2.log:4 says only 'polyglot the whole way down' and chooses the TypeScript host. ADR 0005:18 also paraphrases 'I meant being able to write the frontend in Rhai' as 'Rhai stood for writing the frontend in a second language'. To reproduce, compare ADR 0005:17-26 and ADR 0006:20-33 with owner-answers-2.log:4 and the two memos.",
+      "recommendation": "Split each ADR into an owner-decision part and an engineering-decision part, or label the derived choices as engineering decisions with their rationale. Quote the owner's full answer at ADR 0005:18 instead of paraphrasing it."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0005-extension-contract.md",
+      "line": 136,
+      "issue": "'The qualification profile therefore requires the extensions capability family' is an inference from the SDK memo, not an owner selection. The confirmation question asked the owner to confirm how extensions enter the profile, and the recommended option was the committed two-family state. The answer opened with 'No' and selected no option (owner-answers-2.log:3-4). QUALIFICATION.md:7 says 'The owner or an explicitly delegated body approves scope changes.' The inference is reasonable and strengthens the profile. The SDK memo makes extension scenarios part of each language's qualification, and qualification.json 'embedding-wrappers' already requires reference extensions. The record still omits the 'No' and the lack of a selection.",
+      "recommendation": "State in ADR 0005's 'Release scope' section that the owner selected no release-scope option and that the required 'extensions' family is derived from the SDK memo. Add an owner confirmation of the 'extensions' family to the same open question that blocks FP-0040 in HANDOFF.md."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 2386,
+      "issue": "FP-0048 must 'Paint the immutable paint scene into GPU-resident surfaces through the versioned surface interface'. FP-0035 exports frames 'starting with a CPU-memory surface' and requires each new capability to arrive 'through a reviewed ABI schema change with C and Rust lifecycle tests'. FP-0048's allowed paths (src, ports, tests, build.zig, engineering/decisions, engineering/dependencies.json) exclude api, include, and bindings. [INFERENCE] A GPU-resident surface kind is a new ABI capability, so FP-0048 cannot export GPU surfaces through the interface. FP-0045 can write the ABI, but it depends on FP-0048.",
+      "recommendation": "Add api, include, and bindings to FP-0048's allowed paths, together with the ABI schema-change criterion. Alternatively, require FP-0035 to define the GPU-resident surface kinds."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 2335,
+      "issue": "The owner's frontend rule says 'GPU requests go to a validated GPU service' (frontends/owner-memo-2026-10-09.md:31; FRONTENDS.md:27; ARCHITECTURE.md:91). After the rescoping, FP-0046 only defines the protocol and reports WebGPU as unsupported. FP-0048, the only producer of GPU work, neither depends on FP-0046 nor routes through it. No task therefore sends real GPU requests through the service. 'Keep compute-only GPU work out of the shell's presentation path' (:2335) and 'Keep GPU acceleration for ordinary pages and WebGPU support as separate deliverables' (:2336) have no subject among FP-0046's prerequisites, so they pass vacuously.",
+      "recommendation": "Make FP-0046 depend on FP-0048 and require it to route FP-0048's GPU paint requests from renderer processes through the validated service. Alternatively, add a task that does this after FP-0020 and FP-0048, so the separation criteria have a real subject."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/dependencies.json",
+      "line": 56,
+      "issue": "ADR 0004:112 says 'The GPUI selection stays provisional until all three tasks pass', meaning FP-0032, FP-0030, and FP-0020. dependencies.json:56 and :61 still say 'candidate pending FP-0032 and FP-0030', and FP-0032 (plan.json:1570) says 'until FP-0030 qualifies those areas'. FP-0020 cannot write engineering/dependencies.json. FP-0020 and FP-0030 are independent, so if FP-0020 finishes last, no task can finalize the GPUI status.",
+      "recommendation": "Change both dependency statuses to 'pending FP-0032, FP-0030, and FP-0020'. Name FP-0020 in FP-0032's provisional criterion. Give the finalization to a task that depends on all three and can write dependencies.json, or add dependencies.json to FP-0020's paths."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/dependencies.json",
+      "line": 80,
+      "issue": "'The tool for the ban and duplicate checks stays unassigned until FP-0017 selects one' assigns the decision to FP-0017. FP-0017's allowed paths (apps, bindings, ports, tests, build.zig) exclude both engineering/dependencies.json and engineering/decisions, and no FP-0017 criterion asks it to select a tool. The candidate already covers both checks. cargo-deny's documentation says 'The bans check is used to deny (or allow) specific crates, as well as detect and handle multiple versions of the same crate' (https://embarkstudios.github.io/cargo-deny/checks/bans/index.html).",
+      "recommendation": "Cite the cargo-deny bans check for the ban and duplicate checks. Alternatively, assign the selection to FP-0029 or FP-0032, which can write dependencies.json and precede FP-0017."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0006-language-sdk-obligation.md",
+      "line": 28,
+      "issue": "The C row mislabels its deliverables. The 'Flagship integration' is the C-only CI consumer (FP-0034), which is a test harness, not the 'maintained browser integration' the memo requires for non-Rust languages. The C language-support extension, which is the actual integration, is in FP-0049, but the table lists FP-0049 only as the 'Reference extension'. Line 23 calls the set 'planned', and line 22 says an SDK becomes supported only after qualification. However, EXTENSIONS.md:109 says ADR 0006 'names the officially supported SDKs'.",
+      "recommendation": "List FP-0049's language-support extension as C's integration and FP-0049's reference extension as its reference extension. Keep FP-0034 as the native-ABI harness. Change EXTENSIONS.md:109 to 'the planned officially supported SDKs'."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0006-language-sdk-obligation.md",
+      "line": 48,
+      "issue": "ADR 0006:47-48, ADR 0005:41, and EXTENSIONS.md:30-31 turn the memo's 'can launch a compiled extension worker' and 'can supply a runtime host' into requirements. TypeScript, an interpreted language, now supplies no runtime host and runs on Fairpane's runtime (ADR 0006:50), which contradicts the absolute 'For an interpreted language, it supplies a runtime host'. Review 1 flagged the same can-to-must drift for Rhai.",
+      "recommendation": "Restore 'can', or say that an interpreted language either runs on Fairpane's own JavaScript runtime or supplies a runtime host."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 1843,
+      "issue": "FP-0037 represents each Rust asynchronous operation as 'a request handle with completion and cancellation'. ADR 0005:69-70 maps each operation into the language's idiom and gives request handles to 'a language without a native asynchronous model'. Rust has a native async model (Future and async/await). No record explains why the Rust adapter uses handles, for example to avoid requiring an async runtime.",
+      "recommendation": "Record the rationale in FP-0037, or allow a Future-based interface that requires no particular executor."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 2064,
+      "issue": "The owner's TypeScript-host decision covers extensions. The records do not say where a TypeScript document or custom graphics frontend runs (FP-0041:2064-2065). FP-0022's TypeScript SDK is a Node-API native adapter (ABI_AND_WRAPPERS.md:68), and the extension transport for Fairpane's runtime is new in FP-0041. [INFERENCE] A frontend demonstration on the developer's Node would not ship an engine, but the records leave this open.",
+      "recommendation": "State in FP-0041 or FRONTENDS.md which runtime executes the TypeScript frontend demonstrations, and that the TypeScript SDK artifact provides both transports."
+    },
+    {
+      "severity": "note",
+      "path": "docs/CHARTER.md",
+      "line": 34,
+      "issue": "'Its clients are JavaScript on Fairpane's own runtime and every officially supported language SDK.' follows 'Every extension language receives equal capabilities...', so 'Its' reads as referring to the extension language rather than the extension contract. Separately, the rewritten ARCHITECTURE.md:22 and ADR 0004:38 cell 'The shell's user interface and application services.' is a sentence fragment.",
+      "recommendation": "In a later policy commit, change 'Its clients' to 'The extension contract's clients'. Rewrite the table cell as a complete sentence."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/decisions/0005-extension-contract.md",
+      "line": 148,
+      "issue": "The sources list says release-scope-question.log 'holds ... the owner's reply'. That log stores only the reply's first 60 characters (result_prefix, release-scope-question.log:4). The full reply is in owner-sdk-memo-extraction.log, which ADR 0005 does not cite.",
+      "recommendation": "Cite owner-sdk-memo-extraction.log as the full text of the reply."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0003/reviews/spec-review-2-reject.json",
+      "line": null,
+      "issue": "The decision docs commit 0c975c9 also adds the unrelated FP-0003 review records review-2-accept.json and spec-review-2-reject.json. This mixes task evidence into a decision-record commit.",
+      "recommendation": "Commit task review evidence separately from decision-record changes."
+    }
+  ],
+  "commands_run": []
+}

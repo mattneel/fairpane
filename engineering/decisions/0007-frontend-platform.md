@@ -1,6 +1,6 @@
 # ADR 0007: One renderer for frontends in every language
 
-Status: decided by the owner; this record awaits an accepting independent review.
+Status: the quoted statements are owner decisions; the task assignments in Consequences are engineering decisions that await an accepting independent review.
 Owner: the project owner.
 Date: 2026-10-09.
 Related tasks: `FP-0035`, `FP-0041`, `FP-0042`, `FP-0043`, `FP-0044`, `FP-0045`, `FP-0046`, `FP-0048`.

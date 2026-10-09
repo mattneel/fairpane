@@ -1,0 +1,5 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","\nfetch('https://embarkstudios.github.io/cargo-deny/checks/bans/index.html').then(r=>r.text().then(t=>{const p=t.replace(/<[^>]+>/g,' ').replace(/\\s+/g,' '); console.log('HTTP', r.status); const i=p.indexOf('The bans check'); console.log(i>=0? p.slice(i,i+200):'NOT FOUND');}))"]
+HTTP 200
+The bans check is used to deny (or allow) specific crates, as well as detect and handle multiple versions of the same crate. cargo deny check bans Use Case - Denying specific crates Sometimes, certain
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","\nfetch('https://embarkstudios.github.io/cargo-deny/checks/bans/index.html').then(r=>r.text().then(t=>{const p=t.replace(/<[^>]+>/g,' ').replace(/\\s+/g,' '); console.log('HTTP', r.status); const i=p.indexOf('The bans check'); console.log(i>=0? p.slice(i,i+200):'NOT FOUND');}))"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:01:32.786Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":190}
