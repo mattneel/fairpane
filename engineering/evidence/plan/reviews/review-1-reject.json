@@ -1,0 +1,108 @@
+{
+  "verdict": "reject",
+  "summary": "I reviewed the engineering/plan.json and engineering/state.json hunks of all six commits. I could not run `git show` because only read, grep, and glob tools were available, so I read each commit's diff from GitHub (`github.com/mattneel/fairpane/commit/<sha>.diff`) and compared it with the HEAD tree (master = 1409e8b).\n\nThe overall verdict is reject because of one major finding in 1409e8b. Six obligation tasks have a criterion that requires the FP-0084 Test262 runner, but none of them has FP-0084 in its dependency path, so `readyTasks` can release them before that runner exists. Adding FP-0084 to the depends_on of FP-0086, FP-0087, FP-0089, FP-0091, FP-0093, and FP-0094 fixes it with no cycle. The other five commits are approved.\n\n1. **No deleted or weakened criteria.** No commit deletes, weakens, or makes conditional any existing criterion without a named task now carrying it.\n   - FP-0052 criterion 4 is a strict superset of the old text.\n   - FP-0077 criterion 4 is the only replacement, and its obligation is now FP-0010 criterion 5.\n2. **Splits keep the parents word for word.**\n   - FP-0029 still has all 20 criteria, unchanged. FP-0079 carries criterion 1 verbatim. FP-0080 carries criteria 2–5, 17, 18, 19, and 20 verbatim, plus a narrowed form of 14. FP-0029 depends on FP-0079, FP-0080, and FP-0081.\n   - FP-0012 still has all 7 criteria, unchanged. FP-0083 carries 1, 3, and 7; FP-0084 carries 2; FP-0085 carries 5 and 6, all verbatim. FP-0012 keeps criterion 4 itself and depends on FP-0082 through FP-0085.\n3. **The upstream move is verified.** The GitHub API returns html5lib-tests commit 224991ec10db04f056a89eed8b0bd8695fd2950e, 'Tree construction tests have moved to WPT'. It deletes tree-construction/*.dat and adds a README pointing to wpt/html/syntax/parsing. The pinned WPT revision b60c4b349d9d (specs/corpora.json:9) contains the .dat files under html/syntax/parsing/resources/: tests1–26, adoption01/02, webkit01/02, template, and others. The new FP-0010 criterion therefore names a test set that exists at the pin.\n4. **Graph check (static only).** Every dependency names an existing task, the graph is acyclic, every gate and workstream ID exists, and FP-0079 through FP-0097 all have state.json entries (state.json:909-945). I did not run `node tools/fairpane.mjs check`; that it passes is [INFERENCE] from reading validatePlan (tools/lib.mjs:134-169).\n5. **Added criteria are concrete and testable.**\n   - FP-0012 criteria 6 and 7 match ADR 0008 §8 and the review 2 recommendations.\n   - Correction to the brief: a1b2d1c added only criterion 6, without the affinity-mask clause. Criterion 7 and the affinity-mask clause came from b0e8e33. As this independent approval of FP-0012 criteria 6 and 7, I approve their HEAD text (plan.json:563-564), now also carried by FP-0085:3404 and FP-0083:3361.\n\nThe main agent should run `node tools/fairpane.mjs check` on HEAD, and again after adding the missing dependencies.",
+  "commits": [
+    {
+      "commit": "a1b2d1c",
+      "verdict": "approve",
+      "notes": "Adds FP-0012 criterion 6 in its original form ('…recording the logical processor of each sample.') and adds ADR 0008 to FP-0012's read list. It only adds a requirement, and it matches ADR 0008 §8 as it stands in the same commit (reference representation plus the generated tracer, interleaved comparisons, per-sample processor). The state.json hunk only moves FP-0011 to implemented. Criterion 7 and the affinity-mask clause are not in this commit; b0e8e33 added them. Their HEAD text is approved here as content (see findings). This is the independent approval that FP-0011 review 2 requested at plan.json:558."
+    },
+    {
+      "commit": "42c5e07",
+      "verdict": "approve",
+      "notes": "Old FP-0052 criterion 4: 'Resolve taskkill.exe from the Windows system directory instead of the search path.' The new text keeps that and adds every other Windows system program that the tools start by bare name, naming powershell.exe. A grep of tools/ finds exactly the bare-name Windows programs the contract lists: taskkill.exe at corpus.mjs:63 and lib.mjs:393, and powershell.exe at lib.mjs:511. `tar` at lib.mjs:536/543 runs only off Windows, and `git` is not a system program. FP-0078 now depends on FP-0052, which depends only on FP-0003, so there is no cycle. state.json is not touched."
+    },
+    {
+      "commit": "dfa6563",
+      "verdict": "approve",
+      "notes": "Adds FP-0010 criterion 5. Replaces FP-0077 criterion 4 ('Run the tree-construction tests once FP-0010 lands, or name the task that runs them.') with a record that names FP-0010. The old criterion already allowed naming the task that runs the tests, so the obligation moves intact to FP-0010:465. The upstream move is verified through the GitHub API, and the WPT pin contains the .dat files. FP-0077 now depends on FP-0008, FP-0052, and FP-0064, with no cycle. The state hunk only activates FP-0064. Minor: FP-0010's writable paths may not cover reading the corpus (see findings)."
+    },
+    {
+      "commit": "9cc81ea",
+      "verdict": "approve",
+      "notes": "Only FP-0029's depends_on changes; its 20 criteria are untouched, as the diff shows and as I counted at HEAD (plan.json:1400-1419). FP-0079 criterion 1 is FP-0029 criterion 1 verbatim. FP-0080 carries FP-0029 criteria 2, 3, 4, 5, 17, 18, 19, and 20 verbatim, plus a narrowed form of 14 that FP-0029 still holds in full. The new criteria (FP-0079 2-6, FP-0080 10-13, FP-0081 1-4) are concrete and testable. State entries exist for FP-0079, FP-0080, and FP-0081. FP-0080 does not list FP-0021, but FP-0021 is accepted (state.json:320), so this is a note."
+    },
+    {
+      "commit": "d250e30",
+      "verdict": "approve",
+      "notes": "FP-0075 gains a dependency on FP-0066 and the writable path build.zig. Its acceptance criteria are unchanged. FP-0066 depends only on FP-0027, so there is no cycle. The commit touches only plan.json, as a separate plan change should."
+    },
+    {
+      "commit": "1409e8b",
+      "verdict": "reject",
+      "notes": "The split itself is correct. FP-0012 keeps its 7 criteria unchanged, gains dependencies on FP-0082 through FP-0085, and adds a closing rule to its expansion_rule. The parts carry the criteria word for word, as their state notes say. The FP-0086 to FP-0097 code names match the FP-0082 draft contract's code table (CONTRACT.md:211-240). Every new task has a state entry, and the graph is acyclic.\n\nOne major finding: FP-0086, FP-0087, FP-0089, FP-0091, FP-0093, and FP-0094 each require 'run the affected Test262 directories through the FP-0084 runner', but none of them depends on FP-0084, directly or transitively. FP-0088, FP-0090, FP-0096, and FP-0097 inherit the same gap through FP-0086 or FP-0087. Minor findings: read paths name contracts that are not in the tree, and FP-0014 revision 1 source is bundled into this plan commit."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 3414,
+      "issue": "Six obligation tasks have a criterion that requires the FP-0084 runner but no dependency path to FP-0084:\n- FP-0086 (3414), FP-0087 (3415), FP-0089 (3417), and FP-0091 (3419) depend only on FP-0083.\n- FP-0093 (3421) depends on FP-0083 and FP-0055.\n- FP-0094 (3422) depends only on FP-0083.\n\nTheir last criterion requires 'run the affected Test262 directories through the FP-0084 runner'. FP-0088, FP-0090, FP-0096, and FP-0097 inherit the gap through FP-0086 or FP-0087.\n\nreadyTasks (tools/lib.mjs:170-171) checks only depends_on, and AGENTS.md:45 says to select a task whose prerequisites are accepted. Reproduction: set FP-0083 to accepted and FP-0084 to planned. readyTasks then returns FP-0084, FP-0086, FP-0087, FP-0089, FP-0091, and FP-0094 together, plus FP-0093 once FP-0055 is accepted. Each of those obligation tasks is released with a criterion it cannot meet, or a worker is pushed to build a second runner. Only FP-0092 (3420) lists FP-0084.",
+      "recommendation": "Add \"FP-0084\" to depends_on of FP-0086, FP-0087, FP-0089, FP-0091, FP-0093, and FP-0094. FP-0088, FP-0090, FP-0096, and FP-0097 then inherit it. FP-0084 depends only on FP-0083 and FP-0003, so this adds no cycle, and FP-0085, which needs both FP-0084 and FP-0087, stays consistent. Land it as a separate plan commit and re-run `node tools/fairpane.mjs check`."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 564,
+      "issue": "The brief says a1b2d1c adds FP-0012 criteria 6 and 7. In fact a1b2d1c added criterion 6 without the clause 'and the affinity mask of each measurement process'. The clause and criterion 7 (host_context) came from b0e8e33 ('plan: route review findings and run the Zig gates on Linux'), which is outside this review. b0e8e33 also changed other acceptance criteria that no one has approved independently:\n- FP-0067: a new Linux-gates criterion (3007) and a new .github writable path.\n- FP-0070: two new criteria (3071-3072). 'Reject a selector whose ancestor compounds cannot match in constant time' is ambiguous: reject at parse time, or fast-reject while matching?\n- FP-0071: criterion 3 is rewritten as a superset, and a new criterion is added (3092-3093).",
+      "recommendation": "Treat this review as the independent approval of the HEAD text of FP-0012 criteria 6 and 7, at plan.json:563-564, carried verbatim at 3404 and 3361. Get a separate approval for b0e8e33's FP-0067, FP-0070, and FP-0071 hunks, and clarify the wording at 3071."
+    },
+    {
+      "severity": "minor",
+      "path": "AGENTS.md",
+      "line": 62,
+      "issue": "'Keep acceptance-policy changes separate and require independent approval.' Four of the six commits bundle plan criteria with other work, the pattern FP-0011 review 2 flagged:\n- 42c5e07 (FP-0052 contract freeze), dfa6563 (FP-0064 contract freeze), and 9cc81ea (FP-0079 contract, HANDOFF, and an FP-0066 contract amendment) each change plan criteria alongside that work.\n- 1409e8b, subject 'plan:', also lands FP-0014 revision 1 source: src/css/*.zig, src/dom.zig, and 16 FP-0014 evidence files. That makes 1409e8b FP-0014's integration commit under a plan subject.\n\nOnly d250e30 is a plain plan commit. This review supplies the approval after the fact. The content is sound except for the major finding above.",
+      "recommendation": "Land future plan.json and state.json acceptance changes in their own plan: commits before or after the contract freeze, and keep source out of plan commits (docs/GIT_OPERATIONS.md). Record in FP-0014's state notes that its revision 1 source landed in 1409e8b."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 569,
+      "issue": "Read paths name contracts that are not in the tree at HEAD (1409e8b):\n- FP-0012 (569), FP-0083 (3364), FP-0084 (3387), and FP-0086 through FP-0097 read engineering/evidence/FP-0082/CONTRACT.md.\n- FP-0084 (3387) and FP-0085 (3410) read engineering/evidence/FP-0083/CONTRACT.md.\n\nThe 1409e8b file list does not add FP-0082/CONTRACT.md, and FP-0083/CONTRACT.md does not exist. A draft FP-0082/CONTRACT.md exists in the working tree; its line 17 says it is frozen only after this plan review. checkRepository does not validate read paths, so check stays green. The reviewed obligation-task criteria (for example, 'unsupported codes of the FP-0082 parser') rely on that uncommitted code table.",
+      "recommendation": "Freeze and commit FP-0082/CONTRACT.md with its code table, as drafted at CONTRACT.md:211-240, before dispatching any part. Drop FP-0083/CONTRACT.md from read lists until it exists, or freeze it before FP-0084 and FP-0085 are dispatched."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 465,
+      "issue": "FP-0010 criterion 5 requires running the .dat files of the pinned WPT corpus, which is held outside the repository and fetched by the controller. FP-0010's allowed_paths are only src, tests, and build.zig (plan.json:438-442). FP-0077, the comparable html5lib importer, allows tools and specs. The criterion is concrete, the files exist at pin b60c4b349d9d under html/syntax/parsing/resources/, and the move is verified. But the task may not be able to add the verified extraction or harness it needs inside its writable paths.",
+      "recommendation": "When freezing FP-0010's contract, confirm that the harness can read the snapshot through the existing controller extraction from src, tests, or build.zig. Otherwise add \"tools\" through a separate reviewed plan change. Also freeze the denominator: the count of #data entries per .dat file, including #script-on, #script-off, and fragment cases."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3414,
+      "issue": "The obligation tasks FP-0086 to FP-0091 and FP-0093 to FP-0097 allow only src, tests, build.zig, and engineering/evidence. Their criteria require running Test262 directories through the FP-0084 runner. FP-0084 criterion 2 records the selection in specs/applicability/test262.json, and FP-0084 allows tools and specs. Widening the selection to the newly supported directories may need writes under specs/ or tools/.",
+      "recommendation": "Decide in FP-0084's contract whether later tasks widen the selection. If they do, add \"specs\" and, if needed, \"tools\" to the obligation tasks' allowed_paths in the same plan commit that fixes the dependencies."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3274,
+      "issue": "FP-0080 criterion 1 ('Generate fairpane-sys from the FP-0021 metadata') depends on FP-0021, but depends_on lists only FP-0079. FP-0021 is accepted (state.json:320-321), so the graph still releases FP-0080 correctly.",
+      "recommendation": "Optionally add \"FP-0021\" to FP-0080's depends_on so the graph shows the input."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/state.json",
+      "line": 920,
+      "issue": "FP-0080's state note says it takes FP-0029 criteria 2 to 5, 17, 18, and 20 word for word, 'and parts of 14 and 19'. FP-0080 criterion 9 (plan.json:3289) is FP-0029 criterion 19 (plan.json:1418) word for word, not a part.",
+      "recommendation": "Correct the note to list 19 as carried word for word and only 14 as narrowed."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 1372,
+      "issue": "FP-0029's allowed_paths still include toolchains/rust.lock.json and rust-toolchain.toml (1372-1373). FP-0079 criterion 6 protects both, and FP-0080 already lists the lock as protected. After FP-0079's policy change P1, FP-0029's plan entry will name protected files as writable.",
+      "recommendation": "Remove both paths from FP-0029's allowed_paths, and add toolchains/rust.lock.json to its protected_paths, in the plan change that accompanies P1."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 572,
+      "issue": "FP-0012 criterion 4 ('Preserve all remaining language obligations in the task graph') is not carried by any part. FP-0012 keeps it, and its expansion_rule postpones the built-in library obligation tasks until the slice closes. This is a valid deferral because FP-0012 cannot be accepted without meeting it. ADR 0008 §8 still names FP-0012 as the task that repeats the comparisons; FP-0085 now does that.",
+      "recommendation": "At FP-0012's closing contract, list the built-in library tasks: Map, Set, JSON, Proxy, Reflect, typed arrays, Intl, Date, and the rest. Note in ADR 0008 §8, or in FP-0085's contract, that FP-0085 carries the measurement obligation."
+    }
+  ]
+}
