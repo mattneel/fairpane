@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "c-abi",
+  "gate_sha256": "e768491e01cf324d0d163fba767c72f1cd9dbbb6659ca81541e62bb01e5e6184",
+  "status": "fail",
+  "started_at": "2026-10-09T13:38:35.218Z",
+  "finished_at": "2026-10-09T13:39:31.348Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "os_release": "10.0.26200",
+    "runtime": "v26.7.0",
+    "bun_version": null,
+    "zig_version": "0.18.0-dev.120+9fe22a29b"
+  },
+  "source_before": {
+    "sha256": "e71ce3d11a22fad0dbb97c921fbeded526b2e3e124738f95e3e06eaaf15ab3b3",
+    "file_count": 285
+  },
+  "source_after": {
+    "sha256": "e71ce3d11a22fad0dbb97c921fbeded526b2e3e124738f95e3e06eaaf15ab3b3",
+    "file_count": 285
+  },
+  "policy_before": {
+    "sha256": "7f54414c3c601aa711ad9de04dfe9c3d4b4fd3999cc01dd1f1ea7de2d3ea17ee",
+    "file_count": 23
+  },
+  "policy_after": {
+    "sha256": "7f54414c3c601aa711ad9de04dfe9c3d4b4fd3999cc01dd1f1ea7de2d3ea17ee",
+    "file_count": 23
+  },
+  "commands": [
+    {
+      "executable": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "--prefix",
+        "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before\\out\\c-abi-build"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before",
+      "started_at": "2026-10-09T13:38:35.237Z",
+      "exit_code": 1,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 56001,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before\\.zig-cache\\global"
+      }
+    }
+  ],
+  "error": "Gate command failed: [\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\t9e67fc394\\\\m\\\\out\\\\fp0081-before\\\\.tools\\\\zig\\\\0.18.0-dev.120+9fe22a29b\\\\x86_64-windows\\\\zig.exe\",\"build\",\"--prefix\",\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\t9e67fc394\\\\m\\\\out\\\\fp0081-before\\\\out\\\\c-abi-build\"]",
+  "outputs": [
+    {
+      "path": "out/evidence/fp0081-before/2026-10-09T13-38-35-216Z-c-abi-75e0c22e.log",
+      "size": 3442,
+      "sha256": "d209965694aefff76688321fdac0e36d9dd32bb29afa004154c9587a780ac211"
+    }
+  ]
+}

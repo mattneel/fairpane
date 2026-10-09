@@ -1,0 +1,83 @@
+Fairpane local gate: c-abi
+Trust: unsigned-local-integrity-only
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-build"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-build"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c","started_at":"2026-10-09T13:39:53.182Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":56707,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\tools\\fairpane.mjs","abi-exports","out/c-abi-build/lib/fairpane.lib"]
+{
+  "result": "pass",
+  "schema": "api/fairpane.schema.json",
+  "library": "out/c-abi-build/lib/fairpane.lib",
+  "exports": 13
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\tools\\fairpane.mjs","abi-exports","out/c-abi-build/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c","started_at":"2026-10-09T13:40:49.890Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":63,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-smoke.exe"]
+tests/c/abi_smoke.c:50:70: error: excess elements in struct initializer [-Werror,-Wexcess-initializers]
+   50 |     fp_engine_options options = {sizeof(fp_engine_options), 4, 1024, UINT64_MAX};
+      |                                                                      ^~~~~~~~~~
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\libc\include\any-windows-any/stdint.h:89:20: note: expanded from macro 'UINT64_MAX'
+   89 | #define UINT64_MAX 0xffffffffffffffffULL /* 18446744073709551615ULL */
+      |                    ^~~~~~~~~~~~~~~~~~~~~
+tests/c/abi_smoke.c:148:112: error: excess elements in struct initializer [-Werror,-Wexcess-initializers]
+  148 |     fp_engine_options options = {sizeof(fp_engine_options), max_outstanding_requests, max_response_body_bytes, UINT64_MAX};
+      |                                                                                                                ^~~~~~~~~~
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\libc\include\any-windows-any/stdint.h:89:20: note: expanded from macro 'UINT64_MAX'
+   89 | #define UINT64_MAX 0xffffffffffffffffULL /* 18446744073709551615ULL */
+      |                    ^~~~~~~~~~~~~~~~~~~~~
+tests/c/abi_smoke.c:323:8: error: unknown type name 'fp_engine_memory'
+  323 | static fp_engine_memory engine_memory(fp_engine *engine) {
+      |        ^
+tests/c/abi_smoke.c:324:5: error: use of undeclared identifier 'fp_engine_memory'
+  324 |     fp_engine_memory memory;
+      |     ^~~~~~~~~~~~~~~~
+tests/c/abi_smoke.c:325:12: error: call to undeclared function 'fp_engine_get_memory'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+  325 |     assert(fp_engine_get_memory(engine, &memory, sizeof(memory)) == FP_STATUS_OK);
+      |            ^
+tests/c/abi_smoke.c:325:42: error: use of undeclared identifier 'memory'
+  325 |     assert(fp_engine_get_memory(engine, &memory, sizeof(memory)) == FP_STATUS_OK);
+      |                                          ^~~~~~
+tests/c/abi_smoke.c:325:57: error: use of undeclared identifier 'memory'
+  325 |     assert(fp_engine_get_memory(engine, &memory, sizeof(memory)) == FP_STATUS_OK);
+      |                                                         ^~~~~~
+tests/c/abi_smoke.c:326:12: error: use of undeclared identifier 'memory'
+  326 |     assert(memory.struct_size == sizeof(memory) && memory.reserved == 0);
+      |            ^~~~~~
+tests/c/abi_smoke.c:326:41: error: use of undeclared identifier 'memory'
+  326 |     assert(memory.struct_size == sizeof(memory) && memory.reserved == 0);
+      |                                         ^~~~~~
+tests/c/abi_smoke.c:326:52: error: use of undeclared identifier 'memory'
+  326 |     assert(memory.struct_size == sizeof(memory) && memory.reserved == 0);
+      |                                                    ^~~~~~
+tests/c/abi_smoke.c:327:12: error: use of undeclared identifier 'memory'
+  327 |     return memory;
+      |            ^~~~~~
+tests/c/abi_smoke.c:331:12: error: call to undeclared function 'fp_engine_set_memory_limit'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+  331 |     assert(fp_engine_set_memory_limit(engine, limit) == FP_STATUS_OK);
+      |            ^
+tests/c/abi_smoke.c:342:5: error: use of undeclared identifier 'fp_engine_memory'
+  342 |     fp_engine_memory memory;
+      |     ^~~~~~~~~~~~~~~~
+tests/c/abi_smoke.c:343:13: error: use of undeclared identifier 'memory'
+  343 |     memset(&memory, 0xA5, sizeof(memory));
+      |             ^~~~~~
+tests/c/abi_smoke.c:343:34: error: use of undeclared identifier 'memory'
+  343 |     memset(&memory, 0xA5, sizeof(memory));
+      |                                  ^~~~~~
+tests/c/abi_smoke.c:344:12: error: call to undeclared function 'fp_engine_get_memory'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+  344 |     assert(fp_engine_get_memory(engine, &memory, sizeof(memory) - 1) == FP_STATUS_INVALID_ARGUMENT);
+      |            ^
+tests/c/abi_smoke.c:344:42: error: use of undeclared identifier 'memory'
+  344 |     assert(fp_engine_get_memory(engine, &memory, sizeof(memory) - 1) == FP_STATUS_INVALID_ARGUMENT);
+      |                                          ^~~~~~
+tests/c/abi_smoke.c:344:57: error: use of undeclared identifier 'memory'
+  344 |     assert(fp_engine_get_memory(engine, &memory, sizeof(memory) - 1) == FP_STATUS_INVALID_ARGUMENT);
+      |                                                         ^~~~~~
+tests/c/abi_smoke.c:345:42: error: use of undeclared identifier 'memory'
+  345 |     assert(fp_engine_get_memory(engine, &memory, 0) == FP_STATUS_INVALID_ARGUMENT);
+      |                                          ^~~~~~
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+20 errors generated.
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-smoke.exe"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c","started_at":"2026-10-09T13:40:49.953Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":435,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.zig-cache\\global"}}
+GATE ERROR Gate command failed: ["C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-smoke.exe"]

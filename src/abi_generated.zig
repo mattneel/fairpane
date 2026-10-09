@@ -121,6 +121,19 @@ pub const EngineOptions = extern struct {
     max_outstanding_requests: u32,
     /// The maximum size of one response body in bytes.
     max_response_body_bytes: u64,
+    /// The most bytes that the engine's allocations may hold at once. 18446744073709551615 permits every allocation that the process allocator grants.
+    max_allocated_bytes: u64,
+};
+
+/// Output of `functions.fp_engine_get_memory`.
+pub const EngineMemory = extern struct {
+    struct_size: u32,
+    /// Always zero.
+    reserved: u32,
+    /// The bytes that the engine's live allocations hold.
+    allocated_bytes: u64,
+    /// The current limit.
+    max_allocated_bytes: u64,
 };
 
 /// Output of `functions.fp_document_get`.
@@ -194,7 +207,7 @@ pub const functions = struct {
     /// Statuses: `Status.ok`, `Status.invalid_argument`.
     /// out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
     pub const fp_query_capabilities = fn (out: ?*Capabilities, out_size: usize) callconv(.c) u32;
-    /// Creates an engine on the calling thread and stores it in the output.
+    /// Creates an engine on the calling thread and stores it in the output. Every allocation of the engine, including the engine itself, counts against the allocation limit of the options.
     /// Thread: The calling thread becomes the owner of the engine that the call creates. The host must destroy the engine before that thread exits.
     /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.limit_exceeded`, `Status.out_of_memory`.
     /// options: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
@@ -206,6 +219,18 @@ pub const functions = struct {
     /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`.
     /// engine: input, non-null, consumed on success. A call that returns `Status.ok` ends the handle, and a call that returns any other status leaves the handle with the caller. Ends when `functions.fp_engine_destroy` destroys the engine.
     pub const fp_engine_destroy = fn (engine: ?*Engine) callconv(.c) u32;
+    /// Initializes the declared engine memory structure with the bytes that the engine's live allocations hold and the current limit. The call allocates nothing.
+    /// Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns `Status.wrong_thread`.
+    /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`.
+    /// engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+    /// out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+    pub const fp_engine_get_memory = fn (engine: ?*Engine, out: ?*EngineMemory, out_size: usize) callconv(.c) u32;
+    /// Replaces the most bytes that the engine's allocations may hold at once. A limit below the bytes that the live allocations hold is accepted. An allocation that the limit refuses fails like any other allocation, so its call returns `Status.out_of_memory` and changes nothing. The call allocates nothing.
+    /// Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns `Status.wrong_thread`.
+    /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`.
+    /// engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+    /// max_allocated_bytes: input. The new limit. 18446744073709551615 permits every allocation that the process allocator grants.
+    pub const fp_engine_set_memory_limit = fn (engine: ?*Engine, max_allocated_bytes: u64) callconv(.c) u32;
     /// Creates an empty document and stores its identifier in the output.
     /// Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns `Status.wrong_thread`.
     /// Statuses: `Status.ok`, `Status.invalid_argument`, `Status.wrong_thread`, `Status.limit_exceeded`, `Status.out_of_memory`.
@@ -268,6 +293,8 @@ pub const statuses = struct {
     pub const fp_query_capabilities: []const Status = &.{ .ok, .invalid_argument };
     pub const fp_engine_create: []const Status = &.{ .ok, .invalid_argument, .limit_exceeded, .out_of_memory };
     pub const fp_engine_destroy: []const Status = &.{ .ok, .invalid_argument, .wrong_thread };
+    pub const fp_engine_get_memory: []const Status = &.{ .ok, .invalid_argument, .wrong_thread };
+    pub const fp_engine_set_memory_limit: []const Status = &.{ .ok, .invalid_argument, .wrong_thread };
     pub const fp_document_create: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .limit_exceeded, .out_of_memory };
     pub const fp_document_destroy: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .unknown_id };
     pub const fp_document_get: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .unknown_id };
@@ -291,10 +318,16 @@ comptime {
     if (@offsetOf(Capabilities, "struct_size") != 0) @compileError("Capabilities.struct_size differs from the offset that the schema implies.");
     if (@offsetOf(Capabilities, "abi_revision") != 4) @compileError("Capabilities.abi_revision differs from the offset that the schema implies.");
     if (@offsetOf(Capabilities, "feature_bits") != 8) @compileError("Capabilities.feature_bits differs from the offset that the schema implies.");
-    if (@sizeOf(EngineOptions) != 16) @compileError("EngineOptions differs from the size that the schema implies.");
+    if (@sizeOf(EngineOptions) != 24) @compileError("EngineOptions differs from the size that the schema implies.");
     if (@offsetOf(EngineOptions, "struct_size") != 0) @compileError("EngineOptions.struct_size differs from the offset that the schema implies.");
     if (@offsetOf(EngineOptions, "max_outstanding_requests") != 4) @compileError("EngineOptions.max_outstanding_requests differs from the offset that the schema implies.");
     if (@offsetOf(EngineOptions, "max_response_body_bytes") != 8) @compileError("EngineOptions.max_response_body_bytes differs from the offset that the schema implies.");
+    if (@offsetOf(EngineOptions, "max_allocated_bytes") != 16) @compileError("EngineOptions.max_allocated_bytes differs from the offset that the schema implies.");
+    if (@sizeOf(EngineMemory) != 24) @compileError("EngineMemory differs from the size that the schema implies.");
+    if (@offsetOf(EngineMemory, "struct_size") != 0) @compileError("EngineMemory.struct_size differs from the offset that the schema implies.");
+    if (@offsetOf(EngineMemory, "reserved") != 4) @compileError("EngineMemory.reserved differs from the offset that the schema implies.");
+    if (@offsetOf(EngineMemory, "allocated_bytes") != 8) @compileError("EngineMemory.allocated_bytes differs from the offset that the schema implies.");
+    if (@offsetOf(EngineMemory, "max_allocated_bytes") != 16) @compileError("EngineMemory.max_allocated_bytes differs from the offset that the schema implies.");
     if (@sizeOf(DocumentInfo) != layout(24, 16)) @compileError("DocumentInfo differs from the size that the schema implies.");
     if (@offsetOf(DocumentInfo, "struct_size") != 0) @compileError("DocumentInfo.struct_size differs from the offset that the schema implies.");
     if (@offsetOf(DocumentInfo, "state") != 4) @compileError("DocumentInfo.state differs from the offset that the schema implies.");

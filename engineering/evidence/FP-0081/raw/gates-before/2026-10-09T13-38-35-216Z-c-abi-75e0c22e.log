@@ -1,0 +1,37 @@
+Fairpane local gate: c-abi
+Trust: unsigned-local-integrity-only
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before\\out\\c-abi-build"]
+install
++- install fairpane
+   +- compile lib fairpane debug native 6 errors
+src\c_api.zig:563:33: error: use of undeclared identifier 'fp_engine_get_memory'
+    try testing.expectEqual(ok, fp_engine_get_memory(engine, &result, @sizeOf(abi.EngineMemory)));
+                                ^~~~~~~~~~~~~~~~~~~~
+src\c_api.zig:610:33: error: use of undeclared identifier 'fp_engine_set_memory_limit'
+    try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, allocated - 1));
+                                ^~~~~~~~~~~~~~~~~~~~~~~~~~
+src\c_api.zig:646:33: error: use of undeclared identifier 'fp_engine_set_memory_limit'
+    try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, unlimited));
+                                ^~~~~~~~~~~~~~~~~~~~~~~~~~
+src\c_api.zig:721:13: error: use of undeclared identifier 'fp_engine_get_memory'
+            fp_engine_get_memory(calls.engine, &calls.memory, @sizeOf(abi.EngineMemory)),
+            ^~~~~~~~~~~~~~~~~~~~
+src\c_api.zig:737:9: error: use of undeclared identifier 'fp_engine_get_memory'
+        fp_engine_get_memory(engine, &memory, @sizeOf(abi.EngineMemory) - 1),
+        ^~~~~~~~~~~~~~~~~~~~
+src\memory_budget.zig:17:17: error: use of undeclared identifier 'MemoryBudget'
+    var budget: MemoryBudget = .init(recording.allocator(), 64);
+                ^~~~~~~~~~~~
+error: 6 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-lib -Odebug "-Mroot=src\\root.zig" --cache-dir .zig-cache --global-cache-dir ".zig-cache\\global" --build-root . --name fairpane -static --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 1/4 steps succeeded (1 failed)
+install transitive failure
++- install fairpane transitive failure
+   +- compile lib fairpane debug native 6 errors
+
+error: the following build command exited with code 1:
+.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=.zig-cache\global --seed=0x56232621 --prefix C:\Users\requi\.omp\wt\t9e67fc394\m\out\fp0081-before\out\c-abi-build
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before\\out\\c-abi-build"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before","started_at":"2026-10-09T13:38:35.237Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":56001,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before\\.zig-cache\\global"}}
+GATE ERROR Gate command failed: ["C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before\\out\\c-abi-build"]

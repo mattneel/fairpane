@@ -1,0 +1,14 @@
+diff --git a/out/fp0081-mutation/memory_budget.fixed.zig b/src/memory_budget.zig
+index 550a844..0484410 100644
+--- a/out/fp0081-mutation/memory_budget.fixed.zig
++++ b/src/memory_budget.zig
+@@ -64,7 +64,8 @@ pub const MemoryBudget = struct {
+         const budget: *MemoryBudget = @ptrCast(@alignCast(context));
+         if (!budget.admitsChange(memory.len, new_len)) return false;
+         if (!budget.backing.rawResize(memory, alignment, new_len, return_address)) return false;
+-        budget.record(memory.len, new_len);
++        // MUTATION CONTROL 1: a resize counts no growth.
++        if (new_len < memory.len) budget.record(memory.len, new_len);
+         return true;
+     }
+ 

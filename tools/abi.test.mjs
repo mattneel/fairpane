@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ABI schema, generator, and failure-scenario tests for FP-0021 and FP-0050.
+ * ABI schema, generator, and failure-scenario tests for FP-0021, FP-0050, and FP-0081.
  * Run standalone with `node tools/abi.test.mjs`, or through `node tools/fairpane.mjs test`.
  * Cases 6, 7, 8, 12, and 13 also run in Zig and C through the `zig-test` and `c-abi` gates.
  * Their controller parts check that those sources cover the schema and every scenario.
@@ -200,6 +200,8 @@ export const abiCases = [
       { name: 'payload', type: { kind: 'bytes' }, ...range },
       { name: 'label', type: { kind: 'text' }, ...range },
       { name: 'title', type: { kind: 'web_string' }, ...range },
+      // A second handle makes the pointer-sized members even in number, so the fixture needs no padding at either pointer width (FP-0081 amendment 2).
+      { name: 'parent', type: { kind: 'handle', handle: 'engine' }, ...pointer },
       { name: 'request', type: { kind: 'optional', absent: 'zero', value: { kind: 'identifier', family: 'request' } } },
     ] });
     validateSchema(fixture);
@@ -239,7 +241,8 @@ export const abiCases = [
     }
     // The C smoke test asserts these layouts against the generated header with static assertions.
     const at = (name, field) => structureLayout(s, name, 8).offsets.find(o => o.name === field).offset;
-    assert.deepEqual(['capabilities', 'engine_options', 'step_outcome'].map(name => structureLayout(s, name, 8).size), [16, 16, 32]);
+    // FP-0081 adds max_allocated_bytes, so engine_options grows from 16 to 24 bytes.
+    assert.deepEqual(['capabilities', 'engine_options', 'step_outcome'].map(name => structureLayout(s, name, 8).size), [16, 24, 32]);
     assert.deepEqual([at('response', 'body'), at('document_info', 'body'), at('event', 'reject_reason'), at('event', 'url')], [16, 8, 36, 40]);
   }],
   ['FP-0021 case 7: The C smoke test runs every C-expressible failure scenario and names each identifier it covers', () => {
@@ -491,6 +494,67 @@ export const abiCases = [
       assert.equal(count(layout, `_Static_assert(sizeof(fp_${structure.name}) == `), 1, `fp_${structure.name} size assertion`);
       assert.equal(count(zig, `if (@sizeOf(${zigTypeName(structure.name)}) != `), 1, `${zigTypeName(structure.name)} size check`);
     }
+  }],
+  ['FP-0081 case 8: the generated header, the generated Zig declarations, and the layout model agree on engine_options and engine_memory at both pointer widths, and the C smoke test must name allocation-failure', () => {
+    const s = schema(), generated = generate(s);
+    const header = generated['include/fairpane.h'], zig = generated['src/abi_generated.zig'], layout = generated['tests/c/abi_layout.h'];
+    for (const file of GENERATED_FILES) assert.equal(readText(file), generated[file], `${file} differs from the generator output.`);
+    // Each member: its name, C type, Zig type, and offset, which is the same at both pointer widths.
+    const expected = {
+      engine_options: [['struct_size', 'uint32_t', 'u32', 0], ['max_outstanding_requests', 'uint32_t', 'u32', 4],
+        ['max_response_body_bytes', 'uint64_t', 'u64', 8], ['max_allocated_bytes', 'uint64_t', 'u64', 16]],
+      engine_memory: [['struct_size', 'uint32_t', 'u32', 0], ['reserved', 'uint32_t', 'u32', 4],
+        ['allocated_bytes', 'uint64_t', 'u64', 8], ['max_allocated_bytes', 'uint64_t', 'u64', 16]],
+    };
+    for (const [name, members] of Object.entries(expected)) {
+      const zigName = zigTypeName(name), c = cFields(header, `fp_${name}`), z = zigFields(zig, zigName);
+      assert.deepEqual([...c.keys()], members.map(([member]) => member), `fp_${name} members`);
+      assert.deepEqual([...z.keys()], members.map(([member]) => member), `${zigName} fields`);
+      for (const pointerBytes of [8, 4]) {
+        const model = structureLayout(s, name, pointerBytes);
+        assert.equal(model.size, 24, `${name} size with ${pointerBytes}-byte pointers`);
+        assert.deepEqual(model.offsets, members.map(([member, , , offset]) => ({ name: member, offset })), `${name} offsets with ${pointerBytes}-byte pointers`);
+      }
+      assert.ok(layout.includes(`_Static_assert(sizeof(fp_${name}) == 24, `), `fp_${name} size assertion`);
+      assert.ok(zig.includes(`if (@sizeOf(${zigName}) != 24) @compileError(`), `${zigName} size check`);
+      for (const [member, cType, zigType, offset] of members) {
+        assert.equal(c.get(member), cType, `fp_${name}.${member} C type`);
+        assert.equal(z.get(member), zigType, `${zigName}.${member} Zig type`);
+        assert.ok(layout.includes(`_Static_assert(offsetof(fp_${name}, ${member}) == ${offset}, `), `fp_${name}.${member} offset assertion`);
+        assert.ok(zig.includes(`if (@offsetOf(${zigName}, "${member}") != ${offset}) @compileError(`), `${zigName}.${member} offset check`);
+      }
+    }
+
+    const scenario = scenarios().scenarios.find(item => item.id === 'allocation-failure');
+    assert.equal(scenario.expressible_in_c, true);
+    assert.equal(scenario.reason, undefined);
+    const smoke = readText('tests/c/abi_smoke.c');
+    const required = scenarios().scenarios.filter(item => item.expressible_in_c).map(item => item.id).sort();
+    assert.ok(required.includes('allocation-failure'));
+    assert.deepEqual([...scenarioMarkers(smoke)].sort(), required);
+    // The FP-0021 case 7 comparison fails for a smoke test that does not name the scenario.
+    const unnamed = smoke.replaceAll('Scenario allocation-failure:', 'Scenario unnamed:');
+    assert.notDeepEqual([...scenarioMarkers(unnamed)].sort(), required);
+    assert.ok(smoke.split('int main(void) {')[1].includes('    scenario_allocation_failure();\n'), 'main does not run allocation-failure.');
+    for (const symbol of ['fp_engine_get_memory', 'fp_engine_set_memory_limit']) assert.ok(callCount(smoke, symbol) > 0, `The C smoke test never calls ${symbol}.`);
+  }],
+  ['FP-0081 case 9: the validator rejects a structure that needs implicit padding at either pointer width, and the committed schema needs none', () => {
+    const s = schema();
+    validateSchema(s);
+    const u32Field = name => ({ name, type: u32 });
+    const u64Field = name => ({ name, type: { kind: 'integer', bits: 64, signed: false, range: [0, '18446744073709551615'] } });
+    const gap = schema();
+    gap.structures.push({ name: 'gap_fixture', description: 'A 32-bit field followed by a 64-bit field.', fields: [u32Field('struct_size'), u64Field('value')] });
+    rejects(() => validateSchema(gap), /gap_fixture\.value: the member needs implicit padding before it/);
+    const tail = schema();
+    tail.structures.push({ name: 'tail_fixture', description: 'A 64-bit field followed by a single 32-bit field.',
+      fields: [u32Field('struct_size'), u32Field('reserved'), u64Field('value'), u32Field('last')] });
+    rejects(() => validateSchema(tail), /tail_fixture\.last: the structure needs implicit padding after this member/);
+    // With a reserved field, the same members need no padding.
+    const filled = schema();
+    filled.structures.push({ name: 'filled_fixture', description: 'A structure without padding.',
+      fields: [u32Field('struct_size'), u32Field('reserved'), u64Field('value'), u32Field('last'), u32Field('spare')] });
+    validateSchema(filled);
   }],
 ].map(([name, fn]) => ({ name, fn }));
 

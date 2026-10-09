@@ -1,6 +1,7 @@
 /* The C smoke test. It runs every failure scenario of api/failure-scenarios.json that C can express.
  * Each scenario function names its identifier, and main runs every one.
- * Before the scenarios, main runs the FP-0006 lifecycle check and the FP-0050 reject, cancel, and empty-range checks.
+ * Before the scenarios, main runs the FP-0006 lifecycle check, the FP-0050 reject, cancel, and empty-range checks,
+ * and the FP-0081 memory argument checks.
  */
 #if !defined(_WIN32)
 #  define _POSIX_C_SOURCE 200809L
@@ -46,7 +47,7 @@ static int is_filled(const void *bytes, size_t size, unsigned char value) {
 static void check_document_lifecycle(void) {
     static const char url[] = "https://example.test/c-smoke";
     static const char body[] = "<p>C smoke</p>";
-    fp_engine_options options = {sizeof(fp_engine_options), 4, 1024};
+    fp_engine_options options = {sizeof(fp_engine_options), 4, 1024, UINT64_MAX};
     fp_engine *engine = NULL;
     fp_engine *untouched = (fp_engine *)&options;
 
@@ -144,7 +145,7 @@ static void check_document_lifecycle(void) {
 }
 
 static fp_engine *create_engine(uint32_t max_outstanding_requests, uint64_t max_response_body_bytes) {
-    fp_engine_options options = {sizeof(fp_engine_options), max_outstanding_requests, max_response_body_bytes};
+    fp_engine_options options = {sizeof(fp_engine_options), max_outstanding_requests, max_response_body_bytes, UINT64_MAX};
     fp_engine *engine = NULL;
     assert(fp_engine_create(&options, &engine) == FP_STATUS_OK);
     assert(engine != NULL);
@@ -318,6 +319,43 @@ static void check_empty_ranges(void) {
     destroy_engine(engine);
 }
 
+/* The allocated bytes and the limit that an engine reports. */
+static fp_engine_memory engine_memory(fp_engine *engine) {
+    fp_engine_memory memory;
+    assert(fp_engine_get_memory(engine, &memory, sizeof(memory)) == FP_STATUS_OK);
+    assert(memory.struct_size == sizeof(memory) && memory.reserved == 0);
+    return memory;
+}
+
+static void set_limit(fp_engine *engine, uint64_t limit) {
+    assert(fp_engine_set_memory_limit(engine, limit) == FP_STATUS_OK);
+}
+
+static void limit_to_allocated(fp_engine *engine) {
+    set_limit(engine, engine_memory(engine).allocated_bytes);
+}
+
+/* FP-0081 case 5: invalid memory calls return FP_STATUS_INVALID_ARGUMENT and write nothing.
+ * Scenario wrong-thread covers both functions from a foreign thread. */
+static void check_engine_memory(void) {
+    fp_engine *engine = create_engine(4, 16);
+    fp_engine_memory memory;
+    memset(&memory, 0xA5, sizeof(memory));
+    assert(fp_engine_get_memory(engine, &memory, sizeof(memory) - 1) == FP_STATUS_INVALID_ARGUMENT);
+    assert(fp_engine_get_memory(engine, &memory, 0) == FP_STATUS_INVALID_ARGUMENT);
+    assert(fp_engine_get_memory(engine, NULL, sizeof(memory)) == FP_STATUS_INVALID_ARGUMENT);
+    assert(fp_engine_get_memory(NULL, &memory, sizeof(memory)) == FP_STATUS_INVALID_ARGUMENT);
+    assert(fp_engine_set_memory_limit(NULL, 0) == FP_STATUS_INVALID_ARGUMENT);
+    assert(is_filled(&memory, sizeof(memory), 0xA5));
+
+    memory = engine_memory(engine);
+    assert(memory.allocated_bytes > 0 && memory.max_allocated_bytes == UINT64_MAX);
+    set_limit(engine, 0);
+    fp_engine_memory limited = engine_memory(engine);
+    assert(limited.allocated_bytes == memory.allocated_bytes && limited.max_allocated_bytes == 0);
+    destroy_engine(engine);
+}
+
 /* Scenario unknown-identifier: zero, never-issued, and other-family identifiers return FP_STATUS_UNKNOWN_ID. */
 static void scenario_unknown_identifier(void) {
     fp_engine *engine = create_engine(4, 16);
@@ -381,8 +419,8 @@ struct foreign_calls {
     fp_engine *engine;
     fp_document_id document;
     fp_request_id request;
-    uint32_t statuses[10];
-    uint32_t invalid_statuses[14];
+    uint32_t statuses[13];
+    uint32_t invalid_statuses[16];
     uint32_t revision;
     uint32_t capabilities_status;
     fp_document_id document_out;
@@ -390,6 +428,7 @@ struct foreign_calls {
     fp_document_info info;
     fp_step_outcome outcome;
     fp_event event;
+    fp_engine_memory memory;
 };
 
 static void run_foreign_calls(struct foreign_calls *calls) {
@@ -416,6 +455,8 @@ static void run_foreign_calls(struct foreign_calls *calls) {
     calls->invalid_statuses[11] = fp_engine_step(engine, 8, &calls->outcome, sizeof(calls->outcome) - 1);
     calls->invalid_statuses[12] = fp_engine_next_event(engine, NULL, sizeof(calls->event));
     calls->invalid_statuses[13] = fp_engine_next_event(engine, &calls->event, 0);
+    calls->invalid_statuses[14] = fp_engine_get_memory(engine, NULL, sizeof(calls->memory));
+    calls->invalid_statuses[15] = fp_engine_get_memory(engine, &calls->memory, sizeof(calls->memory) - 1);
     calls->statuses[0] = fp_document_create(engine, &calls->document_out);
     calls->statuses[1] = fp_document_destroy(engine, calls->document);
     calls->statuses[2] = fp_document_get(engine, calls->document, &calls->info, sizeof(calls->info));
@@ -425,7 +466,11 @@ static void run_foreign_calls(struct foreign_calls *calls) {
     calls->statuses[6] = fp_request_cancel(engine, calls->request);
     calls->statuses[7] = fp_engine_step(engine, 8, &calls->outcome, sizeof(calls->outcome));
     calls->statuses[8] = fp_engine_next_event(engine, &calls->event, sizeof(calls->event));
-    calls->statuses[9] = fp_engine_destroy(engine);
+    calls->statuses[9] = fp_engine_get_memory(engine, &calls->memory, sizeof(calls->memory));
+    /* Every limit is valid, so the second call passes a different valid limit instead of an invalid argument. */
+    calls->statuses[10] = fp_engine_set_memory_limit(engine, 0);
+    calls->statuses[11] = fp_engine_set_memory_limit(engine, UINT64_MAX);
+    calls->statuses[12] = fp_engine_destroy(engine);
 }
 
 #if defined(_WIN32)
@@ -459,6 +504,10 @@ static void scenario_wrong_thread(void) {
     fp_engine *engine = create_engine(4, 16);
     fp_document_id document = create_document(engine);
     fp_request_id request = load(engine, document, "https://example.test/thread");
+    /* A limit that neither foreign limit call sets shows that neither one applied. */
+    assert(fp_engine_set_memory_limit(engine, UINT64_MAX - 1) == FP_STATUS_OK);
+    fp_engine_memory before;
+    assert(fp_engine_get_memory(engine, &before, sizeof(before)) == FP_STATUS_OK);
     struct foreign_calls calls;
     memset(&calls, 0xA5, sizeof(calls));
     calls.engine = engine;
@@ -479,6 +528,10 @@ static void scenario_wrong_thread(void) {
     assert(is_filled(&calls.info, sizeof(calls.info), 0xA5));
     assert(is_filled(&calls.outcome, sizeof(calls.outcome), 0xA5));
     assert(is_filled(&calls.event, sizeof(calls.event), 0xA5));
+    assert(is_filled(&calls.memory, sizeof(calls.memory), 0xA5));
+    fp_engine_memory after;
+    assert(fp_engine_get_memory(engine, &after, sizeof(after)) == FP_STATUS_OK);
+    assert(after.allocated_bytes == before.allocated_bytes && after.max_allocated_bytes == UINT64_MAX - 1);
     expect_queues(engine, 2, 0);
     assert(document_state(engine, document) == FP_DOCUMENT_LOADING);
     respond(engine, request, "owner");
@@ -577,9 +630,201 @@ static void scenario_engine_teardown_outstanding(void) {
     assert(fp_engine_destroy(engine) == FP_STATUS_OK);
 }
 
+/* What a refused call leaves unchanged: the reported bytes, the ready events, the queued input, and each tracked document. */
+struct observation {
+    uint64_t allocated_bytes;
+    uint64_t events_ready;
+    uint32_t work_remaining;
+    size_t count;
+    fp_document_info documents[3];
+};
+
+static struct observation observe(fp_engine *engine, const fp_document_id *documents, size_t count) {
+    struct observation result;
+    memset(&result, 0, sizeof(result));
+    assert(count <= sizeof(result.documents) / sizeof(result.documents[0]));
+    result.allocated_bytes = engine_memory(engine).allocated_bytes;
+    /* A zero-budget step applies nothing and allocates nothing. */
+    fp_step_outcome outcome = step(engine, 0);
+    result.events_ready = outcome.events_ready;
+    result.work_remaining = outcome.work_remaining;
+    result.count = count;
+    for (size_t index = 0; index < count; index += 1) result.documents[index] = document_info(engine, documents[index]);
+    return result;
+}
+
+static int same_observation(const struct observation *a, const struct observation *b) {
+    if (a->allocated_bytes != b->allocated_bytes || a->events_ready != b->events_ready) return 0;
+    if (a->work_remaining != b->work_remaining || a->count != b->count) return 0;
+    for (size_t index = 0; index < a->count; index += 1) {
+        const fp_document_info *x = &a->documents[index], *y = &b->documents[index];
+        if (x->state != y->state || x->body != y->body || x->body_len != y->body_len) return 0;
+    }
+    return 1;
+}
+
+/* One attempt of a call that the limit may refuse. It returns the call's status and checks that a refused call wrote no output. */
+typedef uint32_t (*attempt_fn)(fp_engine *engine, void *context);
+
+/* Sets the limit to the allocated bytes, then one byte higher, and so on, until the attempt succeeds.
+ * Every earlier attempt must return FP_STATUS_OUT_OF_MEMORY and change nothing that the engine reports.
+ * The limit is unlimited again afterward. */
+static void until_allowed(fp_engine *engine, const fp_document_id *documents, size_t count, attempt_fn attempt, void *context) {
+    const struct observation before = observe(engine, documents, count);
+    uint64_t extra = 0;
+    for (;; extra += 1) {
+        set_limit(engine, before.allocated_bytes + extra);
+        uint32_t status = attempt(engine, context);
+        if (status == FP_STATUS_OK) break;
+        assert(status == FP_STATUS_OUT_OF_MEMORY);
+        struct observation after = observe(engine, documents, count);
+        assert(same_observation(&before, &after));
+    }
+    assert(extra > 0);
+    set_limit(engine, UINT64_MAX);
+}
+
+static uint32_t attempt_create(fp_engine *engine, void *context) {
+    fp_document_id *out = context;
+    uint32_t status = fp_document_create(engine, out);
+    if (status != FP_STATUS_OK) assert(*out == 0xD0C);
+    return status;
+}
+
+struct load_attempt {
+    fp_document_id document;
+    fp_request_id out;
+};
+
+static uint32_t attempt_load(fp_engine *engine, void *context) {
+    static const char url[] = "https://example.test/allocation";
+    struct load_attempt *attempt = context;
+    uint32_t status = fp_document_load(engine, attempt->document, (const uint8_t *)url, strlen(url), &attempt->out);
+    if (status != FP_STATUS_OK) assert(attempt->out == 0x5E0);
+    return status;
+}
+
+static uint32_t attempt_respond(fp_engine *engine, void *context) {
+    fp_response answer = response(*(const fp_request_id *)context, "allocation");
+    return fp_request_respond(engine, &answer);
+}
+
+static uint32_t attempt_reject(fp_engine *engine, void *context) {
+    return fp_request_reject(engine, *(const fp_request_id *)context, FP_REJECT_UNSUPPORTED_VERSION);
+}
+
+static uint32_t attempt_cancel(fp_engine *engine, void *context) {
+    return fp_request_cancel(engine, *(const fp_request_id *)context);
+}
+
+static uint32_t attempt_step(fp_engine *engine, void *context) {
+    (void)context;
+    fp_step_outcome outcome;
+    memset(&outcome, 0xA5, sizeof(outcome));
+    uint32_t status = fp_engine_step(engine, UINT32_MAX, &outcome, sizeof(outcome));
+    if (status != FP_STATUS_OK) assert(is_filled(&outcome, sizeof(outcome), 0xA5));
+    return status;
+}
+
+/* Rejects requests of new documents until a rejection at the limit fails, so the input queue is full.
+ * A rejection allocates only when the input queue must grow. */
+static void fill_inputs(fp_engine *engine) {
+    for (;;) {
+        fp_request_id request = load(engine, create_document(engine), "https://example.test/input");
+        limit_to_allocated(engine);
+        uint32_t status = fp_request_reject(engine, request, FP_REJECT_UNSUPPORTED_VERSION);
+        set_limit(engine, UINT64_MAX);
+        if (status == FP_STATUS_OUT_OF_MEMORY) return;
+        assert(status == FP_STATUS_OK);
+    }
+}
+
+/* Reloads the spare document with an empty URL at the limit and reports whether the reload succeeded. */
+static int reload_at_limit(fp_engine *engine, fp_document_id spare) {
+    fp_request_id request = 0;
+    limit_to_allocated(engine);
+    uint32_t status = fp_document_load(engine, spare, NULL, 0, &request);
+    set_limit(engine, UINT64_MAX);
+    assert(status == FP_STATUS_OK || status == FP_STATUS_OUT_OF_MEMORY);
+    return status == FP_STATUS_OK;
+}
+
+/* Reloads the spare document until only the event slots that the outstanding requests reserve are free.
+ * After two unlimited loads, the request table and map have a free entry, so a reload with an empty URL allocates only when
+ * the event queue must grow. A reload announces two events, so a reload at the limit fails exactly when fewer than two slots
+ * beyond that floor are free. */
+static void fill_events(fp_engine *engine, fp_document_id spare) {
+    load(engine, spare, "");
+    load(engine, spare, "");
+    while (reload_at_limit(engine, spare)) {
+    }
+    /* One slot or none beyond the floor is free, and draining an event frees one more. */
+    assert(next_event(engine).kind != FP_EVENT_NONE);
+    if (!reload_at_limit(engine, spare)) {
+        assert(next_event(engine).kind != FP_EVENT_NONE);
+        assert(reload_at_limit(engine, spare));
+    }
+}
+
+/* Scenario allocation-failure: through the memory limit alone, each allocating operation returns FP_STATUS_OUT_OF_MEMORY
+ * until the limit admits it, and changes nothing. */
+static void scenario_allocation_failure(void) {
+    fp_engine_options options = {sizeof(fp_engine_options), 1024, 64, 0};
+    fp_engine *untouched = (fp_engine *)&options;
+    assert(fp_engine_create(&options, &untouched) == FP_STATUS_OUT_OF_MEMORY);
+    assert(untouched == (fp_engine *)&options);
+    fp_engine *engine = create_engine(1024, 64);
+    fp_document_id tracked[3] = {0, 0, 0};
+
+    fp_document_id document = 0xD0C;
+    until_allowed(engine, tracked, 0, attempt_create, &document);
+    tracked[0] = document;
+    struct load_attempt loading = {document, 0x5E0};
+    until_allowed(engine, tracked, 1, attempt_load, &loading);
+    assert(document_state(engine, document) == FP_DOCUMENT_LOADING);
+    fp_request_id answered = loading.out;
+    until_allowed(engine, tracked, 1, attempt_respond, &answered);
+
+    fp_document_id rejected = create_document(engine);
+    tracked[1] = rejected;
+    fp_request_id rejected_request = load(engine, rejected, "https://example.test/rejected");
+    fill_inputs(engine);
+    until_allowed(engine, tracked, 2, attempt_reject, &rejected_request);
+
+    fp_document_id cancelled = create_document(engine);
+    tracked[2] = cancelled;
+    fp_request_id cancelled_request = load(engine, cancelled, "https://example.test/cancelled");
+    fill_inputs(engine);
+    until_allowed(engine, tracked, 3, attempt_cancel, &cancelled_request);
+
+    fp_document_id spare = create_document(engine);
+    fill_events(engine, spare);
+    until_allowed(engine, tracked, 3, attempt_step, NULL);
+    assert(document_state(engine, document) == FP_DOCUMENT_LOADED);
+    assert(document_state(engine, rejected) == FP_DOCUMENT_FAILED);
+    assert(document_state(engine, cancelled) == FP_DOCUMENT_FAILED);
+
+    fp_document_id doomed = create_document(engine);
+    fp_request_id doomed_request = load(engine, doomed, "https://example.test/doomed");
+    fill_events(engine, spare);
+    /* The load reserved the cancellation event, so the destruction succeeds with the limit at the allocated bytes. */
+    limit_to_allocated(engine);
+    assert(fp_document_destroy(engine, doomed) == FP_STATUS_OK);
+    set_limit(engine, UINT64_MAX);
+    fp_event last = next_event(engine);
+    for (;;) {
+        fp_event event = next_event(engine);
+        if (event.kind == FP_EVENT_NONE) break;
+        last = event;
+    }
+    assert(last.kind == FP_EVENT_REQUEST_CANCELLED && last.document_id == doomed && last.request_id == doomed_request);
+    expect_unknown_document(engine, doomed);
+    destroy_engine(engine);
+}
+
 /* Scenario null-required-pointer: a null required pointer returns FP_STATUS_INVALID_ARGUMENT and writes nothing. */
 static void scenario_null_required_pointer(void) {
-    fp_engine_options options = {sizeof(fp_engine_options), 4, 16};
+    fp_engine_options options = {sizeof(fp_engine_options), 4, 16, UINT64_MAX};
     fp_engine *untouched = (fp_engine *)&options;
     assert(fp_query_capabilities(NULL, sizeof(fp_capabilities)) == FP_STATUS_INVALID_ARGUMENT);
     assert(fp_engine_create(NULL, &untouched) == FP_STATUS_INVALID_ARGUMENT);
@@ -638,7 +883,7 @@ static void scenario_null_required_pointer(void) {
 
 /* Scenario short-structure: a structure or output size below the declared size returns FP_STATUS_INVALID_ARGUMENT. */
 static void scenario_short_structure(void) {
-    fp_engine_options options = {sizeof(fp_engine_options) - 1, 4, 16};
+    fp_engine_options options = {sizeof(fp_engine_options) - 1, 4, 16, UINT64_MAX};
     fp_engine *untouched = (fp_engine *)&options;
     assert(fp_engine_create(&options, &untouched) == FP_STATUS_INVALID_ARGUMENT);
     assert(untouched == (fp_engine *)&options);
@@ -723,6 +968,7 @@ int main(void) {
     check_document_lifecycle();
     check_reject_and_cancel();
     check_empty_ranges();
+    check_engine_memory();
     scenario_unknown_identifier();
     scenario_foreign_identifier();
     scenario_retired_identifier();
@@ -731,6 +977,7 @@ int main(void) {
     scenario_cancel_after_answer_queued();
     scenario_document_teardown_outstanding();
     scenario_engine_teardown_outstanding();
+    scenario_allocation_failure();
     scenario_null_required_pointer();
     scenario_short_structure();
     scenario_response_body_bound();

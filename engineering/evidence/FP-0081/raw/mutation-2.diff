@@ -1,0 +1,29 @@
+diff --git a/out/fp0081-mutation/engine.fixed.zig b/src/engine.zig
+index cb2a734..69852da 100644
+--- a/out/fp0081-mutation/engine.fixed.zig
++++ b/src/engine.zig
+@@ -279,8 +279,9 @@ pub const Engine = struct {
+         const documents_owner = handles.issueEngineOwnerId() catch return error.IdentifiersExhausted;
+         const requests_owner = handles.issueEngineOwnerId() catch return error.IdentifiersExhausted;
+         // The record holds the budget, so the budget counts the record before it moves into it.
+-        var budget: MemoryBudget = .init(backing, options.max_allocated_bytes);
+-        const engine = try budget.allocator().create(Engine);
++        const budget: MemoryBudget = .init(backing, options.max_allocated_bytes);
++        // MUTATION CONTROL 2: the engine record is uncounted.
++        const engine = try backing.create(Engine);
+         engine.* = .{
+             .budget = budget,
+             .gpa = undefined,
+@@ -317,9 +318,9 @@ pub const Engine = struct {
+         engine.documents.deinit(gpa);
+         engine.requests.deinit(gpa);
+         // The record holds the budget, so a copy of the budget releases the record.
+-        var budget = engine.budget;
+-        budget.allocator().destroy(engine);
+-        assert(budget.allocated_bytes == 0);
++        const budget = engine.budget;
++        // MUTATION CONTROL 2: the engine record is uncounted.
++        budget.backing.destroy(engine);
+     }
+ 
+     pub fn checkThread(engine: *const Engine) ThreadError!void {

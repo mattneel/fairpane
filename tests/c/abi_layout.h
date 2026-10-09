@@ -17,10 +17,17 @@ _Static_assert(offsetof(fp_capabilities, struct_size) == 0, "fp_capabilities.str
 _Static_assert(offsetof(fp_capabilities, abi_revision) == 4, "fp_capabilities.abi_revision differs from the offset that the schema implies.");
 _Static_assert(offsetof(fp_capabilities, feature_bits) == 8, "fp_capabilities.feature_bits differs from the offset that the schema implies.");
 
-_Static_assert(sizeof(fp_engine_options) == 16, "fp_engine_options differs from the size that the schema implies.");
+_Static_assert(sizeof(fp_engine_options) == 24, "fp_engine_options differs from the size that the schema implies.");
 _Static_assert(offsetof(fp_engine_options, struct_size) == 0, "fp_engine_options.struct_size differs from the offset that the schema implies.");
 _Static_assert(offsetof(fp_engine_options, max_outstanding_requests) == 4, "fp_engine_options.max_outstanding_requests differs from the offset that the schema implies.");
 _Static_assert(offsetof(fp_engine_options, max_response_body_bytes) == 8, "fp_engine_options.max_response_body_bytes differs from the offset that the schema implies.");
+_Static_assert(offsetof(fp_engine_options, max_allocated_bytes) == 16, "fp_engine_options.max_allocated_bytes differs from the offset that the schema implies.");
+
+_Static_assert(sizeof(fp_engine_memory) == 24, "fp_engine_memory differs from the size that the schema implies.");
+_Static_assert(offsetof(fp_engine_memory, struct_size) == 0, "fp_engine_memory.struct_size differs from the offset that the schema implies.");
+_Static_assert(offsetof(fp_engine_memory, reserved) == 4, "fp_engine_memory.reserved differs from the offset that the schema implies.");
+_Static_assert(offsetof(fp_engine_memory, allocated_bytes) == 8, "fp_engine_memory.allocated_bytes differs from the offset that the schema implies.");
+_Static_assert(offsetof(fp_engine_memory, max_allocated_bytes) == 16, "fp_engine_memory.max_allocated_bytes differs from the offset that the schema implies.");
 
 _Static_assert(sizeof(fp_document_info) == (sizeof(void *) == 8 ? 24 : 16), "fp_document_info differs from the size that the schema implies.");
 _Static_assert(offsetof(fp_document_info, struct_size) == 0, "fp_document_info.struct_size differs from the offset that the schema implies.");

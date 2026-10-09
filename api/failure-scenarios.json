@@ -76,6 +76,8 @@
         { "function": "fp_request_cancel", "arguments": "the engine and a live request from another thread", "status": "wrong_thread" },
         { "function": "fp_engine_step", "arguments": "the engine from another thread", "status": "wrong_thread" },
         { "function": "fp_engine_next_event", "arguments": "the engine from another thread", "status": "wrong_thread" },
+        { "function": "fp_engine_get_memory", "arguments": "the engine and writable output from another thread", "status": "wrong_thread" },
+        { "function": "fp_engine_set_memory_limit", "arguments": "the engine and a limit of zero from another thread", "status": "wrong_thread" },
         { "function": "fp_engine_destroy", "arguments": "the engine from another thread", "status": "wrong_thread" },
         { "function": "fp_document_create", "arguments": "the engine and a null output from another thread", "status": "wrong_thread" },
         { "function": "fp_document_destroy", "arguments": "the engine and document zero from another thread", "status": "wrong_thread" },
@@ -86,13 +88,16 @@
         { "function": "fp_request_cancel", "arguments": "the engine and request zero from another thread", "status": "wrong_thread" },
         { "function": "fp_engine_step", "arguments": "the engine and a null output, then an output size one byte short, from another thread", "status": "wrong_thread" },
         { "function": "fp_engine_next_event", "arguments": "the engine and a null output, then a zero output size, from another thread", "status": "wrong_thread" },
+        { "function": "fp_engine_get_memory", "arguments": "the engine and a null output, then an output size one byte short, from another thread", "status": "wrong_thread" },
+        { "function": "fp_engine_set_memory_limit", "arguments": "the engine and the largest limit from another thread", "status": "wrong_thread" },
         { "function": "fp_query_capabilities", "arguments": "writable output from another thread", "status": "ok" }
       ],
       "effects": [
-        "No engine, document, request, queued input, or event changes.",
+        "No engine, document, request, queued input, event, allocated byte count, or memory limit changes.",
         "No output byte changes.",
         "A call with an invalid argument also returns wrong_thread, so the thread check precedes every other argument check.",
         "fp_engine_destroy takes no argument other than the engine, so only its call with a valid engine applies.",
+        "fp_engine_set_memory_limit accepts every limit, so its second call passes a different valid limit instead of an invalid argument.",
         "fp_query_capabilities follows the any-thread rule and succeeds, and fp_abi_revision returns the revision from any thread."
       ]
     },
@@ -168,24 +173,24 @@
     {
       "id": "allocation-failure",
       "situation": "allocation_failure",
-      "description": "Each operation that allocates returns out_of_memory at each of its allocations and changes nothing.",
-      "expressible_in_c": false,
-      "reason": "The C ABI takes no allocator, so a C caller cannot induce an allocation failure inside the engine.",
+      "description": "Each operation that allocates returns out_of_memory when the engine's memory limit refuses its allocations and changes nothing.",
+      "expressible_in_c": true,
       "calls": [
-        { "function": "fp_engine_create", "arguments": "options with an allocator whose next allocation fails", "status": "out_of_memory" },
-        { "function": "fp_document_create", "arguments": "an engine whose next allocation fails", "status": "out_of_memory" },
-        { "function": "fp_document_load", "arguments": "an engine whose first, then second, then later allocation fails", "status": "out_of_memory" },
-        { "function": "fp_request_respond", "arguments": "an engine whose input queue must grow", "status": "out_of_memory" },
-        { "function": "fp_request_reject", "arguments": "an engine whose full input queue must grow", "status": "out_of_memory" },
-        { "function": "fp_request_cancel", "arguments": "an engine whose full input queue must grow", "status": "out_of_memory" },
-        { "function": "fp_engine_step", "arguments": "an engine whose event queue must grow to announce an applied host cancellation", "status": "out_of_memory" },
-        { "function": "fp_document_destroy", "arguments": "a loading document in an engine whose every later allocation fails", "status": "ok" }
+        { "function": "fp_engine_create", "arguments": "options with max_allocated_bytes zero", "status": "out_of_memory" },
+        { "function": "fp_document_create", "arguments": "an engine whose limit fp_engine_set_memory_limit set to the allocated bytes that fp_engine_get_memory reports", "status": "out_of_memory" },
+        { "function": "fp_document_load", "arguments": "an engine whose limit is the allocated bytes, then one byte higher, and so on, until the load succeeds", "status": "out_of_memory" },
+        { "function": "fp_request_respond", "arguments": "an engine whose limit is the allocated bytes and whose input queue must grow", "status": "out_of_memory" },
+        { "function": "fp_request_reject", "arguments": "an engine whose limit is the allocated bytes and whose full input queue must grow", "status": "out_of_memory" },
+        { "function": "fp_request_cancel", "arguments": "an engine whose limit is the allocated bytes and whose full input queue must grow", "status": "out_of_memory" },
+        { "function": "fp_engine_step", "arguments": "an engine whose limit is the allocated bytes and whose event queue must grow to announce an applied host cancellation", "status": "out_of_memory" },
+        { "function": "fp_document_destroy", "arguments": "a loading document in an engine whose limit is the allocated bytes", "status": "ok" }
       ],
       "effects": [
         "No engine handle, identifier, or output byte is written.",
-        "The documents, requests, queued inputs, and events stay unchanged.",
-        "The same call succeeds once allocation succeeds, and destroying the engine frees every allocated byte.",
-        "fp_document_destroy allocates nothing, so it succeeds and announces the cancellation while every allocation fails."
+        "The documents, requests, queued inputs, and events stay unchanged, and fp_engine_get_memory reports the same allocated bytes.",
+        "Each refused call is repeated with the limit one byte higher until it succeeds, and the engine and every handle stay usable meanwhile.",
+        "Destroying the engine frees every allocated byte.",
+        "fp_document_destroy allocates nothing, so it succeeds and announces the cancellation with the limit at the allocated bytes."
       ]
     },
     {

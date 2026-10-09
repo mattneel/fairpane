@@ -154,7 +154,18 @@
       "fields": [
         { "name": "struct_size", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
         { "name": "max_outstanding_requests", "description": "The maximum number of requests that are outstanding at once.", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
-        { "name": "max_response_body_bytes", "description": "The maximum size of one response body in bytes.", "type": { "kind": "integer", "bits": 64, "signed": false, "range": [0, "18446744073709551615"] } }
+        { "name": "max_response_body_bytes", "description": "The maximum size of one response body in bytes.", "type": { "kind": "integer", "bits": 64, "signed": false, "range": [0, "18446744073709551615"] } },
+        { "name": "max_allocated_bytes", "description": "The most bytes that the engine's allocations may hold at once. 18446744073709551615 permits every allocation that the process allocator grants.", "type": { "kind": "integer", "bits": 64, "signed": false, "range": [0, "18446744073709551615"] } }
+      ]
+    },
+    {
+      "name": "engine_memory",
+      "description": "Output of {function:engine_get_memory}.",
+      "fields": [
+        { "name": "struct_size", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
+        { "name": "reserved", "description": "Always zero.", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 0] } },
+        { "name": "allocated_bytes", "description": "The bytes that the engine's live allocations hold.", "type": { "kind": "integer", "bits": 64, "signed": false, "range": [0, "18446744073709551615"] } },
+        { "name": "max_allocated_bytes", "description": "The current limit.", "type": { "kind": "integer", "bits": 64, "signed": false, "range": [0, "18446744073709551615"] } }
       ]
     },
     {
@@ -248,7 +259,7 @@
     },
     {
       "name": "engine_create",
-      "description": "Creates an engine on the calling thread and stores it in the output.",
+      "description": "Creates an engine on the calling thread and stores it in the output. Every allocation of the engine, including the engine itself, counts against the allocation limit of the options.",
       "thread": "becomes_owner",
       "returns": "status",
       "statuses": ["ok", "invalid_argument", "limit_exceeded", "out_of_memory"],
@@ -273,6 +284,28 @@
       "statuses": ["ok", "invalid_argument", "wrong_thread"],
       "parameters": [
         { "name": "engine", "type": { "kind": "handle", "handle": "engine" }, "direction": "in", "nullability": "non_null", "ownership": "consumed_on_success", "lifetime": "engine_destroy" }
+      ]
+    },
+    {
+      "name": "engine_get_memory",
+      "description": "Initializes the declared engine memory structure with the bytes that the engine's live allocations hold and the current limit. The call allocates nothing.",
+      "thread": "owner",
+      "returns": "status",
+      "statuses": ["ok", "invalid_argument", "wrong_thread"],
+      "parameters": [
+        { "name": "engine", "type": { "kind": "handle", "handle": "engine" }, "direction": "in", "nullability": "non_null", "ownership": "borrowed", "lifetime": "call" },
+        { "name": "out", "type": { "kind": "structure", "structure": "engine_memory" }, "direction": "out", "nullability": "non_null", "ownership": "borrowed", "lifetime": "call" }
+      ]
+    },
+    {
+      "name": "engine_set_memory_limit",
+      "description": "Replaces the most bytes that the engine's allocations may hold at once. A limit below the bytes that the live allocations hold is accepted. An allocation that the limit refuses fails like any other allocation, so its call returns {status:out_of_memory} and changes nothing. The call allocates nothing.",
+      "thread": "owner",
+      "returns": "status",
+      "statuses": ["ok", "invalid_argument", "wrong_thread"],
+      "parameters": [
+        { "name": "engine", "type": { "kind": "handle", "handle": "engine" }, "direction": "in", "nullability": "non_null", "ownership": "borrowed", "lifetime": "call" },
+        { "name": "max_allocated_bytes", "description": "The new limit. 18446744073709551615 permits every allocation that the process allocator grants.", "type": { "kind": "integer", "bits": 64, "signed": false, "range": [0, "18446744073709551615"] }, "direction": "in" }
       ]
     },
     {

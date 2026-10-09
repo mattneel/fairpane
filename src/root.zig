@@ -26,6 +26,7 @@ test {
     // The laboratory drives the engine but is not part of the library's API.
     _ = @import("lab.zig");
     _ = handles;
+    _ = @import("memory_budget.zig");
     _ = js;
     _ = unicode;
     _ = @import("unicode/properties_test.zig");

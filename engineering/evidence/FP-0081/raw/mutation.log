@@ -1,0 +1,522 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","src/memory_budget.zig","out/fp0081-mutation/memory_budget.fixed.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["src/memory_budget.zig","out/fp0081-mutation/memory_budget.fixed.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:40:57.723Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":14}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","src/engine.zig","out/fp0081-mutation/engine.fixed.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["src/engine.zig","out/fp0081-mutation/engine.fixed.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:40:57.789Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":12}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/memory_budget.zig","out/fp0081-mutation/memory_budget.fixed.zig","src/engine.zig","out/fp0081-mutation/engine.fixed.zig"]
+550a84487b19acb7ab5e8f99dde74d812f438cf6
+550a84487b19acb7ab5e8f99dde74d812f438cf6
+cb2a734c1d33dc2d3b2644dfef7f69cb3a04d95c
+cb2a734c1d33dc2d3b2644dfef7f69cb3a04d95c
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/memory_budget.zig","out/fp0081-mutation/memory_budget.fixed.zig","src/engine.zig","out/fp0081-mutation/engine.fixed.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:40:57.861Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","out/fp0081-mutation/memory_budget.fixed.zig","src/memory_budget.zig"]
+diff --git a/out/fp0081-mutation/memory_budget.fixed.zig b/src/memory_budget.zig
+index 550a844..0484410 100644
+--- a/out/fp0081-mutation/memory_budget.fixed.zig
++++ b/src/memory_budget.zig
+@@ -64,7 +64,8 @@ pub const MemoryBudget = struct {
+         const budget: *MemoryBudget = @ptrCast(@alignCast(context));
+         if (!budget.admitsChange(memory.len, new_len)) return false;
+         if (!budget.backing.rawResize(memory, alignment, new_len, return_address)) return false;
+-        budget.record(memory.len, new_len);
++        // MUTATION CONTROL 1: a resize counts no growth.
++        if (new_len < memory.len) budget.record(memory.len, new_len);
+         return true;
+     }
+ 
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","out/fp0081-mutation/memory_budget.fixed.zig","src/memory_budget.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:41:05.512Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0081/raw/mutation-1.diff","out/fp0081-mutation/memory_budget.fixed.zig","src/memory_budget.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0081/raw/mutation-1.diff","out/fp0081-mutation/memory_budget.fixed.zig","src/memory_budget.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:41:05.582Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/memory_budget.zig"]
+0484410ffd8434f7118eac1526945ddd72e9c6b6
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/memory_budget.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:41:05.652Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0081-mutation-cache"]
+test
++- run test 253 pass, 1 fail (254 total)
+error: 'memory_budget.test.FP-0081 case 1: the budget admits exactly the remaining bytes, refuses one byte more, and never refuses a shrink or a free' failed:
+       expected 64, found 16
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:727:46: 0x7ff6677759f5 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:728:70: 0x7ff6677708ed in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667772be2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:728:70: 0x7ff6677708ed in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667772be2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667772be2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:727:46: 0x7ff667770895 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\handles.zig:730:69: 0x7ff667770962 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff6676415fa in expectEqualInner__func_1631 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff667766f1b in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\memory_budget.zig:123:5: 0x7ff667766f87 in test.FP-0081 case 1: the budget admits exactly the remaining bytes, refuses one byte more, and never refuses a shrink or a free (test_zcu.obj)
+           try testing.expectEqual(64, budget.allocated_bytes);
+           ^
+failed command: cd . && ".\\out\\fp0081-mutation-cache\\o\\5560a7753926a5b99b496e975cfcc5da\\test.exe" "--cache-dir=.\\out\\fp0081-mutation-cache" --seed=0x4f048d86 --listen=-
+
+Build Summary: 63/65 steps succeeded (1 failed); 298/299 tests passed (1 failed)
+test transitive failure
++- run test 253 pass, 1 fail (254 total)
+|  +- compile test debug native success 7s MaxRSS:879M
++- run test 45 pass (45 total) 286ms MaxRSS:16M
+|  +- compile test debug native success 3s MaxRSS:415M
++- FP-0007 case 13: case 2 passes with exit status 0 success 41ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:362M
++- FP-0007 case 13: case 3 fails with exit status 1 success 39ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 76ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 17ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 21ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:345M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 34ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 35ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 50ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 45ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 50ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 47ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 39ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 46ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 50ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 44ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 15ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 39ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 41ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 47ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 45ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 40ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 460ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 438ms
++- FP-0011 case 4: allocation_invokes_call.zig success 434ms
++- FP-0011 case 4: leaf_allocates.zig success 375ms
++- FP-0011 case 4: mutation_throws.zig success 395ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 395ms
++- FP-0011 case 4: leaf_positive.zig success 459ms
++- FP-0011 case 5: catalog_callback_alone.zig success 393ms
++- FP-0011 case 5: catalog_exception_alone.zig success 393ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 392ms
++- FP-0011 case 5: kernel_wider_context.zig success 383ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 397ms
++- FP-0011 case 8: layout_undescribed_field.zig success 407ms
++- FP-0011 case 8: layout_plain_reference.zig success 375ms
++- FP-0011 case 8: layout_missing_field.zig success 354ms
++- FP-0011 case 20: abi_reference_value.zig success 425ms
++- FP-0011 case 20: abi_nan_box_value.zig success 410ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 417ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 417ms
++- FP-0011 case 35: leaf_widens_context.zig success 394ms
++- FP-0011 case 36: binding_missing_kernel.zig success 421ms
++- FP-0011 case 36: binding_stray_kernel.zig success 384ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x4f048d86 test --summary all --cache-dir out/fp0081-mutation-cache
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0081-mutation-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:41:05.719Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":192396,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","out/fp0081-mutation/memory_budget.fixed.zig","src/memory_budget.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["out/fp0081-mutation/memory_budget.fixed.zig","src/memory_budget.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:44:18.187Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":14}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--exit-code","out/fp0081-mutation/memory_budget.fixed.zig","src/memory_budget.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--exit-code","out/fp0081-mutation/memory_budget.fixed.zig","src/memory_budget.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:44:18.261Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/memory_budget.zig"]
+550a84487b19acb7ab5e8f99dde74d812f438cf6
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/memory_budget.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:44:18.338Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","out/fp0081-mutation/engine.fixed.zig","src/engine.zig"]
+diff --git a/out/fp0081-mutation/engine.fixed.zig b/src/engine.zig
+index cb2a734..69852da 100644
+--- a/out/fp0081-mutation/engine.fixed.zig
++++ b/src/engine.zig
+@@ -279,8 +279,9 @@ pub const Engine = struct {
+         const documents_owner = handles.issueEngineOwnerId() catch return error.IdentifiersExhausted;
+         const requests_owner = handles.issueEngineOwnerId() catch return error.IdentifiersExhausted;
+         // The record holds the budget, so the budget counts the record before it moves into it.
+-        var budget: MemoryBudget = .init(backing, options.max_allocated_bytes);
+-        const engine = try budget.allocator().create(Engine);
++        const budget: MemoryBudget = .init(backing, options.max_allocated_bytes);
++        // MUTATION CONTROL 2: the engine record is uncounted.
++        const engine = try backing.create(Engine);
+         engine.* = .{
+             .budget = budget,
+             .gpa = undefined,
+@@ -317,9 +318,9 @@ pub const Engine = struct {
+         engine.documents.deinit(gpa);
+         engine.requests.deinit(gpa);
+         // The record holds the budget, so a copy of the budget releases the record.
+-        var budget = engine.budget;
+-        budget.allocator().destroy(engine);
+-        assert(budget.allocated_bytes == 0);
++        const budget = engine.budget;
++        // MUTATION CONTROL 2: the engine record is uncounted.
++        budget.backing.destroy(engine);
+     }
+ 
+     pub fn checkThread(engine: *const Engine) ThreadError!void {
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","out/fp0081-mutation/engine.fixed.zig","src/engine.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:44:36.699Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0081/raw/mutation-2.diff","out/fp0081-mutation/engine.fixed.zig","src/engine.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0081/raw/mutation-2.diff","out/fp0081-mutation/engine.fixed.zig","src/engine.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:44:36.773Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/engine.zig"]
+69852da821d929e103583ba08adef45a69afa39c
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/engine.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:44:36.847Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0081-mutation-cache"]
+test
++- run test 250 pass, 3 fail, 1 crash (254 total); 2 leaks
+error: 'abi_scenarios.test.Scenario allocation-failure: through the memory limit alone, each allocating operation returns FP_STATUS_OUT_OF_MEMORY until the limit admits it, and changes nothing' failed:
+       expected 6, found 0
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff6ceadc2a3 in expectEqualInner__func_1250 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff6ceeba637 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\abi_scenarios.zig:748:5: 0x7ff6ceeba693 in limitScenario (test_zcu.obj)
+           try testing.expectEqual(out_of_memory, run.createEngine(refused, &handle));
+           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\abi_scenarios.zig:812:5: 0x7ff6ceebe349 in test.Scenario allocation-failure: through the memory limit alone, each allocating operation returns FP_STATUS_OUT_OF_MEMORY until the limit admits it, and changes nothing (test_zcu.obj)
+           try limitScenario(null);
+           ^
+error: 'abi_scenarios.test.FP-0081 case 2: across the allocation-failure scenario through the limit, fp_engine_get_memory reports the bytes live in a recording allocator after every call' failed:
+       expected 6, found 0
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff6ceadc2a3 in expectEqualInner__func_1250 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff6ceeba637 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\abi_scenarios.zig:748:5: 0x7ff6ceeba693 in limitScenario (test_zcu.obj)
+           try testing.expectEqual(out_of_memory, run.createEngine(refused, &handle));
+           ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\abi_scenarios.zig:817:5: 0x7ff6ceebb80e in test.FP-0081 case 2: across the allocation-failure scenario through the limit, fp_engine_get_memory reports the bytes live in a recording allocator after every call (test_zcu.obj)
+           try limitScenario(&recording);
+           ^
+       [SafeAllocator] (err): leaked [addr: 2d20010, len: 312 (0x138) align: 8] allocated at: 
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\engine.zig:284:42: 0x7ff6cecd5b7f in create (test_zcu.obj)
+               const engine = try backing.create(Engine);
+                                                ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\c_api.zig:122:45: 0x7ff6cedd4e0b in engineCreate (test_zcu.obj)
+           const created = try native.Engine.create(gpa, .{
+                                                   ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\c_api.zig:115:51: 0x7ff6cedd42b1 in createEngine (test_zcu.obj)
+           return finish("fp_engine_create", engineCreate(gpa, options, out_engine));
+                                                         ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\abi_scenarios.zig:618:65: 0x7ff6ceebb8e4 in createEngine (test_zcu.obj)
+               if (run.recording) |recording| return c_api.createEngine(recording.allocator(), &engine_options, out);
+                                                                       ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\abi_scenarios.zig:748:60: 0x7ff6ceeba5cf in limitScenario (test_zcu.obj)
+           try testing.expectEqual(out_of_memory, run.createEngine(refused, &handle));
+                                                                  ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\abi_scenarios.zig:817:22: 0x7ff6ceebb7c3 in test.FP-0081 case 2: across the allocation-failure scenario through the limit, fp_engine_get_memory reports the bytes live in a recording allocator after every call (test_zcu.obj)
+           try limitScenario(&recording);
+                            ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff6cea6b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       (additional stack frames may have been skipped...)
+error: 'c_api.test.FP-0081 case 3: createEngine with a limit below the bytes that creation needs returns FP_STATUS_OUT_OF_MEMORY, writes no engine, and allocates nothing' failed:
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:584:14: 0x7ff6ceaa3c8f in expect (test_zcu.obj)
+           if (!ok) return error.TestUnexpectedResult;
+                    ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\c_api.zig:606:5: 0x7ff6ceea4ef4 in test.FP-0081 case 3: createEngine with a limit below the bytes that creation needs returns FP_STATUS_OUT_OF_MEMORY, writes no engine, and allocates nothing (test_zcu.obj)
+           try testing.expect(needed > 0);
+           ^
+       [SafeAllocator] (err): leaked [addr: 2dd0010, len: 312 (0x138) align: 8] allocated at: 
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\engine.zig:284:42: 0x7ff6cecd5b7f in create (test_zcu.obj)
+               const engine = try backing.create(Engine);
+                                                ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\c_api.zig:122:45: 0x7ff6cedd4e0b in engineCreate (test_zcu.obj)
+           const created = try native.Engine.create(gpa, .{
+                                                   ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\c_api.zig:115:51: 0x7ff6cedd42b1 in createEngine (test_zcu.obj)
+           return finish("fp_engine_create", engineCreate(gpa, options, out_engine));
+                                                         ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\c_api.zig:369:45: 0x7ff6cedd2d35 in createTestEngine (test_zcu.obj)
+           try testing.expectEqual(ok, createEngine(gpa, &test_options, &handle));
+                                                   ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\c_api.zig:604:39: 0x7ff6ceea4da1 in test.FP-0081 case 3: createEngine with a limit below the bytes that creation needs returns FP_STATUS_OUT_OF_MEMORY, writes no engine, and allocates nothing (test_zcu.obj)
+           const probe = try createTestEngine(probe_recording.allocator());
+                                             ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff6cea6b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff6cea6b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       (additional stack frames may have been skipped...)
+error: 'c_api.test.FP-0081 case 4: a limit below the allocated bytes is accepted, every allocating call then returns FP_STATUS_OUT_OF_MEMORY, and a higher limit lets the same calls succeed' exited with code 3 with stderr:
+       thread 42016 panic: integer overflow
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\c_api.zig:637:78: 0x7ff6cee9e614 in limitBelowAllocated (test_zcu.obj)
+           try testing.expectEqual(ok, fp_engine_set_memory_limit(engine, allocated - 1));
+                                                                                    ^
+       C:\Users\requi\.omp\wt\t9e67fc394\m\src\c_api.zig:667:44: 0x7ff6cee9f04d in test.FP-0081 case 4: a limit below the allocated bytes is accepted, every allocating call then returns FP_STATUS_OUT_OF_MEMORY, and a higher limit lets the same calls succeed (test_zcu.obj)
+           var allocated = try limitBelowAllocated(engine);
+                                                  ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff6cea6b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff6cea6b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff6cea6980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff6cea6980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       ???:?:?: 0x7ff862a1cd86 in ??? (KERNEL32.DLL)
+       ???:?:?: 0x7ff863d6caeb in ??? (ntdll.dll)
+failed command: cd . && ".\\out\\fp0081-mutation-cache\\o\\e2cb17ac7f95269002958906aa84e573\\test.exe" "--cache-dir=.\\out\\fp0081-mutation-cache" --seed=0xc3e21a3e --listen=-
+
+Build Summary: 63/65 steps succeeded (1 failed); 295/299 tests passed (3 failed, 1 crashed)
+test transitive failure
++- run test 250 pass, 3 fail, 1 crash (254 total); 2 leaks
+|  +- compile test debug native success 10s MaxRSS:868M
++- run test 45 pass (45 total) 332ms MaxRSS:16M
+|  +- compile test debug native success 4s MaxRSS:414M
++- FP-0007 case 13: case 2 passes with exit status 0 success 44ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 3s MaxRSS:362M
++- FP-0007 case 13: case 3 fails with exit status 1 success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 50ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 67ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 68ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 52ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 51ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 101ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 9ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 14ms
+|  +- compile exe fairpane-lab-check debug native success 3s MaxRSS:345M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 71ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 36ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 70ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json cached
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 36ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 50ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 53ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 68ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 51ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 54ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 67ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 53ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 56ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 67ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 58ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 69ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 9ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 59ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 48ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 69ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 47ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 44ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 717ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 617ms
++- FP-0011 case 4: allocation_invokes_call.zig success 641ms
++- FP-0011 case 4: leaf_allocates.zig success 569ms
++- FP-0011 case 4: mutation_throws.zig success 558ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 701ms
++- FP-0011 case 4: leaf_positive.zig success 744ms
++- FP-0011 case 5: catalog_callback_alone.zig success 627ms
++- FP-0011 case 5: catalog_exception_alone.zig success 697ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 651ms
++- FP-0011 case 5: kernel_wider_context.zig success 701ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 674ms
++- FP-0011 case 8: layout_undescribed_field.zig success 581ms
++- FP-0011 case 8: layout_plain_reference.zig success 690ms
++- FP-0011 case 8: layout_missing_field.zig success 587ms
++- FP-0011 case 20: abi_reference_value.zig success 557ms
++- FP-0011 case 20: abi_nan_box_value.zig success 689ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 666ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 589ms
++- FP-0011 case 35: leaf_widens_context.zig success 689ms
++- FP-0011 case 36: binding_missing_kernel.zig success 573ms
++- FP-0011 case 36: binding_stray_kernel.zig success 559ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xc3e21a3e test --summary all --cache-dir out/fp0081-mutation-cache
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0081-mutation-cache"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:44:36.917Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":192822,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","out/fp0081-mutation/engine.fixed.zig","src/engine.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["out/fp0081-mutation/engine.fixed.zig","src/engine.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:47:49.804Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--exit-code","out/fp0081-mutation/engine.fixed.zig","src/engine.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--exit-code","out/fp0081-mutation/engine.fixed.zig","src/engine.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:47:49.885Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/engine.zig"]
+cb2a734c1d33dc2d3b2644dfef7f69cb3a04d95c
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/engine.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m","started_at":"2026-10-09T13:47:49.985Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}

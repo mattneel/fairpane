@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "c-abi",
+  "gate_sha256": "e768491e01cf324d0d163fba767c72f1cd9dbbb6659ca81541e62bb01e5e6184",
+  "status": "fail",
+  "started_at": "2026-10-09T13:39:53.160Z",
+  "finished_at": "2026-10-09T13:40:50.485Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "os_release": "10.0.26200",
+    "runtime": "v26.7.0",
+    "bun_version": null,
+    "zig_version": "0.18.0-dev.120+9fe22a29b"
+  },
+  "source_before": {
+    "sha256": "088a9072b0ef7582d634b04d09bad77afe630b43f7500bd91f3ecd6c2c52dd9e",
+    "file_count": 284
+  },
+  "source_after": {
+    "sha256": "088a9072b0ef7582d634b04d09bad77afe630b43f7500bd91f3ecd6c2c52dd9e",
+    "file_count": 284
+  },
+  "policy_before": {
+    "sha256": "7f54414c3c601aa711ad9de04dfe9c3d4b4fd3999cc01dd1f1ea7de2d3ea17ee",
+    "file_count": 23
+  },
+  "policy_after": {
+    "sha256": "7f54414c3c601aa711ad9de04dfe9c3d4b4fd3999cc01dd1f1ea7de2d3ea17ee",
+    "file_count": 23
+  },
+  "commands": [
+    {
+      "executable": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "--prefix",
+        "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-build"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c",
+      "started_at": "2026-10-09T13:39:53.182Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 56707,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\nvm4w\\nodejs\\node.exe",
+      "arguments": [
+        "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\tools\\fairpane.mjs",
+        "abi-exports",
+        "out/c-abi-build/lib/fairpane.lib"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c",
+      "started_at": "2026-10-09T13:40:49.890Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 63,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "cc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "tests/c/abi_smoke.c",
+        "-Iinclude",
+        "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-build\\lib\\fairpane.lib",
+        "-o",
+        "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\out\\c-abi-smoke.exe"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c",
+      "started_at": "2026-10-09T13:40:49.953Z",
+      "exit_code": 1,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 435,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\fp0081-before-c\\.zig-cache\\global"
+      }
+    }
+  ],
+  "error": "Gate command failed: [\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\t9e67fc394\\\\m\\\\out\\\\fp0081-before-c\\\\.tools\\\\zig\\\\0.18.0-dev.120+9fe22a29b\\\\x86_64-windows\\\\zig.exe\",\"cc\",\"-std=c11\",\"-Wall\",\"-Wextra\",\"-Werror\",\"tests/c/abi_smoke.c\",\"-Iinclude\",\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\t9e67fc394\\\\m\\\\out\\\\fp0081-before-c\\\\out\\\\c-abi-build\\\\lib\\\\fairpane.lib\",\"-o\",\"C:\\\\Users\\\\requi\\\\.omp\\\\wt\\\\t9e67fc394\\\\m\\\\out\\\\fp0081-before-c\\\\out\\\\c-abi-smoke.exe\"]",
+  "outputs": [
+    {
+      "path": "out/evidence/fp0081-before-c/2026-10-09T13-39-53-158Z-c-abi-9e6e5bf6.log",
+      "size": 8303,
+      "sha256": "edc3993b498cea0700adfff7d5b106e65a41174076b02e91cc329178d9578bc5"
+    }
+  ]
+}

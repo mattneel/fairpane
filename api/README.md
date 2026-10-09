@@ -99,6 +99,10 @@ The generated comments therefore use only C names in the header and only Zig nam
 
 The schema implies a C layout with natural alignment for every member.
 A pointer and a target-sized length follow each other for a range.
+The validator rejects a structure that needs implicit padding at either pointer width.
+Each member must start at the sum of the earlier members' sizes, that sum must be a multiple of the member's size, and the structure's size must be a multiple of its largest member's size.
+A structure that would need padding gains an explicit `reserved` field instead, as `fp_engine_memory` does.
+Such a layout is the same under every C ABI of one pointer width.
 The generated Zig file checks at compile time that every structure has the implied size and field offsets on 32-bit and 64-bit targets.
 The generated `tests/c/abi_layout.h` checks the same size and member offsets with C11 `_Static_assert`, and the C smoke test includes it.
 The C compiler therefore checks the layout model against its own target ABI, including 32-bit x86 Linux, whose System V ABI aligns `uint64_t` members inside structures to four bytes.
@@ -122,6 +126,7 @@ The validator rejects an unknown kind, a pointer without ownership or lifetime, 
 It also rejects a structure without `struct_size` as its first field and a generated C or Zig name that collides with another.
 It rejects an optional value that can be zero and a function status that the status enumeration lacks.
 It rejects a byte, text, or web string range that is not `null_when_empty`.
+It rejects a structure that needs implicit padding at either pointer width, and it names the structure and the member.
 
 To change the ABI, follow these steps.
 
@@ -152,7 +157,10 @@ The validator requires at least one scenario for each of these situations.
 - A foreign exception or panic in host code, which must never unwind across the C ABI.
 
 A scenario that C cannot express states the reason.
-C has no allocator argument in this ABI and no exceptions, so the allocation and unwinding scenarios run in Zig and in later wrappers only.
+C has no exceptions, so the unwinding scenario runs in Zig and in later wrappers only.
+The engine's memory limit makes the allocation-failure scenario expressible in C.
+A C caller sets the limit to the allocated bytes that `fp_engine_get_memory` reports, so the next allocation fails, and it raises the limit one byte at a time until the call succeeds.
+`src/abi_scenarios.zig` runs that scenario twice: once through the limit, as C does, and once with an allocator that fails each allocation in turn.
 `tests/c/abi_smoke.c` runs every scenario that C can express, and it names each identifier with a `Scenario <id>:` comment.
 `src/abi_scenarios.zig` runs every scenario through the generated declarations against the exported C symbols of the actual engine.
 Its test names start with `Scenario <id>:`.
@@ -196,6 +204,7 @@ An input range may be null only when its length is zero, and an output range is 
 A null engine pointer returns `FP_STATUS_INVALID_ARGUMENT`.
 The engine checks the calling thread before it checks any other argument.
 A call that returns any status other than `FP_STATUS_OK` changes no engine, document, or request.
+It also leaves the allocated bytes that `fp_engine_get_memory` reports unchanged.
 
 ## Engines
 
@@ -214,6 +223,25 @@ The `fp_engine_options` structure is borrowed for the call only.
 Its `max_outstanding_requests` field bounds the number of outstanding requests.
 Its `max_response_body_bytes` field bounds the size of one response body.
 A body bound beyond the address space admits every body that the host can present.
+Its `max_allocated_bytes` field bounds the bytes that the engine's allocations may hold at once.
+
+Each engine counts the byte lengths that it requests from its allocator for its live allocations, including the engine itself.
+It does not count allocator overhead or alignment padding, so the count is the same on every allocator and platform.
+An allocation or a growth succeeds only when the live bytes plus the requested bytes stay within the limit and the process allocator grants it.
+A shrink and a free never fail on the limit.
+A refused allocation is an allocation failure: the call returns `FP_STATUS_OUT_OF_MEMORY` and changes nothing.
+The engine and every handle stay usable, and the same call succeeds once a higher limit admits its allocations.
+`fp_engine_create` checks each allocation against `max_allocated_bytes` before it makes it, so a limit below the size of the engine returns `FP_STATUS_OUT_OF_MEMORY`.
+A limit of 18446744073709551615, which is `UINT64_MAX`, permits every allocation that the process allocator grants.
+No limit value is a sentinel.
+The limit does not bound the host's memory, stack use, or allocations outside an engine.
+
+`fp_engine_get_memory` writes an `fp_engine_memory` structure with the engine's `allocated_bytes` and its current `max_allocated_bytes`.
+Its `reserved` field is always zero.
+`fp_engine_set_memory_limit` replaces the limit, and it accepts a limit below the allocated bytes.
+Both functions run on the owner thread, check the thread first, and allocate nothing.
+ABI revision zero makes no stability promise, so `fp_engine_options` grew without a new revision.
+A caller compiled against the older structure passes a smaller `struct_size`, and `fp_engine_create` returns `FP_STATUS_INVALID_ARGUMENT`.
 
 `fp_engine_destroy` releases the engine and everything it owns.
 That includes documents, outstanding requests, queued answers, undrained events, URLs, and bodies.

@@ -396,6 +396,7 @@ export function validateSchema(schema) {
         members.add(member);
       }
     }
+    checkNoPadding(ctx, s);
     claim(cNames, `${prefix}_${s.name}`);
     claim(zigNames, pascal(s.name));
   }
@@ -493,12 +494,17 @@ function scalarLayout(ctx, type, pointerBytes) {
     default: return pointerBytes;
   }
 }
+/** The C members of one field and the size of each, on a target with `pointerBytes`-byte pointers. A range field has a pointer and a length. */
+function membersOf(ctx, field, pointerBytes) {
+  return RANGE_KINDS.has(field.type.kind)
+    ? [[field.name, pointerBytes], [`${field.name}_len`, pointerBytes]]
+    : [[field.name, scalarLayout(ctx, field.type, pointerBytes)]];
+}
 function layoutOf(ctx, structure, pointerBytes) {
   let offset = 0, align = 1;
   const offsets = [];
   for (const field of structure.fields) {
-    const members = RANGE_KINDS.has(field.type.kind) ? [[field.name, pointerBytes], [`${field.name}_len`, pointerBytes]] : [[field.name, scalarLayout(ctx, field.type, pointerBytes)]];
-    for (const [member, size] of members) {
+    for (const [member, size] of membersOf(ctx, field, pointerBytes)) {
       offset = Math.ceil(offset / size) * size;
       offsets.push({ name: member, offset });
       offset += size;
@@ -506,6 +512,29 @@ function layoutOf(ctx, structure, pointerBytes) {
     }
   }
   return { size: Math.ceil(offset / align) * align, align, offsets };
+}
+/**
+ * Reject a structure that needs implicit padding at either pointer width.
+ * Each member must start at the sum of the earlier members' sizes, that sum must be a multiple of the member's size,
+ * and the structure's size must be a multiple of its largest member's size.
+ * Such a layout is the same under every C ABI of one pointer width, including 32-bit x86 System V, which aligns a 64-bit member to four bytes.
+ */
+function checkNoPadding(ctx, structure) {
+  for (const pointerBytes of [8, 4]) {
+    const width = `${pointerBytes * 8}-bit pointers`;
+    let sum = 0, largest = 1, last = null;
+    for (const field of structure.fields) {
+      for (const [member, size] of membersOf(ctx, field, pointerBytes)) {
+        check(sum % size === 0,
+          `${structure.name}.${member}: the member needs implicit padding before it with ${width}, because its offset ${sum} is not a multiple of its size ${size}.`);
+        sum += size;
+        largest = Math.max(largest, size);
+        last = member;
+      }
+    }
+    check(sum % largest === 0,
+      `${structure.name}.${last}: the structure needs implicit padding after this member with ${width}, because its size ${sum} is not a multiple of its largest member's size ${largest}.`);
+  }
 }
 /**
  * The C layout that the schema implies for a structure on a target with `pointerBytes`-byte pointers.

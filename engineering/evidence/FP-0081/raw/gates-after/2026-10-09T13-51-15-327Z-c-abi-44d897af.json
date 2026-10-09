@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "c-abi",
+  "gate_sha256": "e768491e01cf324d0d163fba767c72f1cd9dbbb6659ca81541e62bb01e5e6184",
+  "status": "pass",
+  "started_at": "2026-10-09T13:51:15.329Z",
+  "finished_at": "2026-10-09T13:51:15.773Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "os_release": "10.0.26200",
+    "runtime": "v26.7.0",
+    "bun_version": null,
+    "zig_version": "0.18.0-dev.120+9fe22a29b"
+  },
+  "source_before": {
+    "sha256": "7720b6a144a6d78db8a8967f0fec77fa67372024d48d7d624ba1a358dcc2d691",
+    "file_count": 285
+  },
+  "source_after": {
+    "sha256": "7720b6a144a6d78db8a8967f0fec77fa67372024d48d7d624ba1a358dcc2d691",
+    "file_count": 285
+  },
+  "policy_before": {
+    "sha256": "7f54414c3c601aa711ad9de04dfe9c3d4b4fd3999cc01dd1f1ea7de2d3ea17ee",
+    "file_count": 23
+  },
+  "policy_after": {
+    "sha256": "7f54414c3c601aa711ad9de04dfe9c3d4b4fd3999cc01dd1f1ea7de2d3ea17ee",
+    "file_count": 23
+  },
+  "commands": [
+    {
+      "executable": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "--prefix",
+        "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\c-abi-build"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m",
+      "started_at": "2026-10-09T13:51:15.351Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 128,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\nvm4w\\nodejs\\node.exe",
+      "arguments": [
+        "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\tools\\fairpane.mjs",
+        "abi-exports",
+        "out/c-abi-build/lib/fairpane.lib"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m",
+      "started_at": "2026-10-09T13:51:15.479Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 52,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "cc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "tests/c/abi_smoke.c",
+        "-Iinclude",
+        "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\c-abi-build\\lib\\fairpane.lib",
+        "-o",
+        "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\c-abi-smoke.exe"
+      ],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m",
+      "started_at": "2026-10-09T13:51:15.531Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 102,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\.zig-cache\\global"
+      }
+    },
+    {
+      "executable": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\out\\c-abi-smoke.exe",
+      "arguments": [],
+      "cwd": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m",
+      "started_at": "2026-10-09T13:51:15.633Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 45,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\Users\\requi\\.omp\\wt\\t9e67fc394\\m\\.zig-cache\\global"
+      }
+    }
+  ],
+  "error": null,
+  "outputs": [
+    {
+      "path": "engineering/evidence/FP-0081/raw/gates-after/2026-10-09T13-51-15-327Z-c-abi-44d897af.log",
+      "size": 2974,
+      "sha256": "5576a0c8ce546eaf5d9ae20f5ad0183b6ece355f98c67ac87e17218a099cc48f"
+    }
+  ]
+}

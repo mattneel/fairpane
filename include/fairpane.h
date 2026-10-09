@@ -107,7 +107,20 @@ typedef struct fp_engine_options {
     uint32_t max_outstanding_requests;
     /* The maximum size of one response body in bytes. */
     uint64_t max_response_body_bytes;
+    /* The most bytes that the engine's allocations may hold at once. 18446744073709551615 permits every allocation that the process allocator grants. */
+    uint64_t max_allocated_bytes;
 } fp_engine_options;
+
+/* Output of fp_engine_get_memory. */
+typedef struct fp_engine_memory {
+    uint32_t struct_size;
+    /* Always zero. */
+    uint32_t reserved;
+    /* The bytes that the engine's live allocations hold. */
+    uint64_t allocated_bytes;
+    /* The current limit. */
+    uint64_t max_allocated_bytes;
+} fp_engine_memory;
 
 /* Output of fp_document_get. */
 typedef struct fp_document_info {
@@ -187,7 +200,7 @@ FP_API uint32_t fp_abi_revision(void);
  */
 FP_API uint32_t fp_query_capabilities(fp_capabilities *out, size_t out_size);
 
-/* Creates an engine on the calling thread and stores it in the output.
+/* Creates an engine on the calling thread and stores it in the output. Every allocation of the engine, including the engine itself, counts against the allocation limit of the options.
  * Thread: The calling thread becomes the owner of the engine that the call creates. The host must destroy the engine before that thread exits.
  * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_LIMIT_EXCEEDED, FP_STATUS_OUT_OF_MEMORY.
  * options: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
@@ -202,6 +215,22 @@ FP_API uint32_t fp_engine_create(const fp_engine_options *options, fp_engine **o
  * engine: input, non-null, consumed on success. A call that returns FP_STATUS_OK ends the handle, and a call that returns any other status leaves the handle with the caller. Ends when fp_engine_destroy destroys the engine.
  */
 FP_API uint32_t fp_engine_destroy(fp_engine *engine);
+
+/* Initializes the declared engine memory structure with the bytes that the engine's live allocations hold and the current limit. The call allocates nothing.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ */
+FP_API uint32_t fp_engine_get_memory(fp_engine *engine, fp_engine_memory *out, size_t out_size);
+
+/* Replaces the most bytes that the engine's allocations may hold at once. A limit below the bytes that the live allocations hold is accepted. An allocation that the limit refuses fails like any other allocation, so its call returns FP_STATUS_OUT_OF_MEMORY and changes nothing. The call allocates nothing.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * max_allocated_bytes: input. The new limit. 18446744073709551615 permits every allocation that the process allocator grants.
+ */
+FP_API uint32_t fp_engine_set_memory_limit(fp_engine *engine, uint64_t max_allocated_bytes);
 
 /* Creates an empty document and stores its identifier in the output.
  * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.

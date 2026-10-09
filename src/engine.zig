@@ -10,16 +10,23 @@
 //!
 //! Each operation reserves its storage, including event capacity, before it changes any state.
 //! An allocation failure therefore leaves every engine, document, and request unchanged.
+//! An operation grows at most one container in place, as its last reservation.
+//! It reserves every other growth in new storage that it installs only after every reservation succeeded.
+//! A failed operation releases that new storage, so it also leaves the engine's allocated bytes unchanged.
 //! A load also reserves one event slot for the eventual cancellation of its request.
 //! After every operation, the event queue therefore has at least one unused slot for each outstanding request.
 //! Destroying a document uses that slot, so it never allocates.
 //! A step that applies a host cancellation announces two events but ends one request, so it can still need storage.
+//!
+//! Each engine counts the bytes of its live allocations, including its own record, and refuses an allocation beyond its limit.
+//! A refused allocation is an allocation failure.
 //!
 //! Internal generational handles stay inside this module.
 //! Callers identify documents and requests by opaque process-wide identifiers.
 
 const std = @import("std");
 const handles = @import("handles.zig");
+const MemoryBudget = @import("memory_budget.zig").MemoryBudget;
 const Allocator = std.mem.Allocator;
 const assert = std.debug.assert;
 const testing = std.testing;
@@ -65,6 +72,17 @@ pub const Options = struct {
     max_outstanding_requests: u32,
     /// The maximum size of one response body in bytes.
     max_response_body_bytes: usize,
+    /// The most bytes that the engine's allocations may hold at once, including the engine record.
+    /// `std.math.maxInt(u64)` permits every allocation that the backing allocator grants.
+    max_allocated_bytes: u64 = std.math.maxInt(u64),
+};
+
+/// The engine's allocated bytes and its limit.
+pub const Memory = struct {
+    /// The bytes that the engine's live allocations hold.
+    allocated_bytes: u64,
+    /// The current limit.
+    max_allocated_bytes: u64,
 };
 
 /// Announces that a request was issued or cancelled.
@@ -191,30 +209,81 @@ fn announcementsFor(answer: Answer) usize {
     };
 }
 
+/// Reserves room for `unused` more items of `deque` in new storage, without changing `deque`.
+/// The result is empty when `deque` already has the room.
+/// `installDeque` moves the items into the result, and `deinit` on the result instead releases it.
+fn reserveDeque(comptime T: type, gpa: Allocator, deque: *const std.Deque(T), unused: usize) Allocator.Error!std.Deque(T) {
+    const needed = std.math.add(usize, deque.len, unused) catch return error.OutOfMemory;
+    if (deque.buffer.len >= needed) return .empty;
+    return .initCapacity(gpa, std.ArrayList(T).growCapacity(needed));
+}
+
+/// Moves the items of `deque` into the storage that `reserveDeque` returned. It never allocates.
+fn installDeque(comptime T: type, gpa: Allocator, deque: *std.Deque(T), reserved: std.Deque(T)) void {
+    if (reserved.buffer.len == 0) return;
+    var grown = reserved;
+    var items = deque.iterator();
+    while (items.next()) |item| grown.pushBackAssumeCapacity(item);
+    deque.deinit(gpa);
+    deque.* = grown;
+}
+
+/// Reserves room for `unused` more entries of `map` in a new map, without changing `map`.
+/// The result is empty when `map` already has the room.
+/// `installMap` moves the entries into the result, and `deinit` on the result instead releases it.
+fn reserveMap(gpa: Allocator, map: anytype, unused: u32) Allocator.Error!@TypeOf(map.*) {
+    // A map grows only when `unused` exceeds its `available` count, as its own `ensureUnusedCapacity` decides.
+    if (map.available >= unused) return .empty;
+    var reserved: @TypeOf(map.*) = .empty;
+    try reserved.ensureTotalCapacity(gpa, std.math.add(u32, map.count(), unused) catch return error.OutOfMemory);
+    return reserved;
+}
+
+/// Moves the entries of `map` into the map that `reserveMap` returned. It never allocates.
+fn installMap(gpa: Allocator, map: anytype, reserved: @TypeOf(map.*)) void {
+    if (reserved.capacity() == 0) return;
+    var grown = reserved;
+    var entries = map.iterator();
+    while (entries.next()) |entry| grown.putAssumeCapacityNoClobber(entry.key_ptr.*, entry.value_ptr.*);
+    map.deinit(gpa);
+    map.* = grown;
+}
+
 /// A single-thread engine.
 /// The thread that creates an engine owns it, and every call from another thread returns `error.WrongThread`.
 /// The host must destroy an engine before the thread that created it exits, because the system can reuse the identifier of an exited thread.
 pub const Engine = struct {
+    /// Counts every allocation of the engine against its limit.
+    /// It holds the current limit, which `setMemoryLimit` replaces, so `options.max_allocated_bytes` is only the initial limit.
+    budget: MemoryBudget,
+    /// The allocator of `budget`.
     gpa: Allocator,
     options: Options,
     thread: std.Thread.Id,
     owner: handles.OwnerId,
     documents: DocumentTable,
     requests: RequestTable,
-    document_ids: std.AutoHashMapUnmanaged(DocumentId, DocumentTable.Handle),
-    request_ids: std.AutoHashMapUnmanaged(RequestId, RequestTable.Handle),
+    document_ids: DocumentIds,
+    request_ids: RequestIds,
     inputs: std.Deque(Input),
     events: std.Deque(Event),
 
+    const DocumentIds = std.AutoHashMapUnmanaged(DocumentId, DocumentTable.Handle);
+    const RequestIds = std.AutoHashMapUnmanaged(RequestId, RequestTable.Handle);
+
     /// Issues fresh owner identities for the engine and for each handle table.
-    /// `gpa` must outlive the engine.
-    pub fn create(gpa: Allocator, options: Options) CreateError!*Engine {
+    /// The engine allocates from `backing` through its budget, and the engine record counts against `options.max_allocated_bytes`.
+    /// `backing` must outlive the engine.
+    pub fn create(backing: Allocator, options: Options) CreateError!*Engine {
         const owner = handles.issueEngineOwnerId() catch return error.IdentifiersExhausted;
         const documents_owner = handles.issueEngineOwnerId() catch return error.IdentifiersExhausted;
         const requests_owner = handles.issueEngineOwnerId() catch return error.IdentifiersExhausted;
-        const engine = try gpa.create(Engine);
+        // The record holds the budget, so the budget counts the record before it moves into it.
+        var budget: MemoryBudget = .init(backing, options.max_allocated_bytes);
+        const engine = try budget.allocator().create(Engine);
         engine.* = .{
-            .gpa = gpa,
+            .budget = budget,
+            .gpa = undefined,
             .options = options,
             .thread = std.Thread.getCurrentId(),
             .owner = owner,
@@ -225,11 +294,13 @@ pub const Engine = struct {
             .inputs = .empty,
             .events = .empty,
         };
+        engine.gpa = engine.budget.allocator();
         return engine;
     }
 
     /// Releases the engine and everything it owns.
     /// That includes documents, outstanding requests, queued answers, and undrained events.
+    /// Afterward, nothing that the engine allocated remains.
     pub fn destroy(engine: *Engine) ThreadError!void {
         try engine.checkThread();
         const gpa = engine.gpa;
@@ -245,22 +316,43 @@ pub const Engine = struct {
         engine.request_ids.deinit(gpa);
         engine.documents.deinit(gpa);
         engine.requests.deinit(gpa);
-        gpa.destroy(engine);
+        // The record holds the budget, so a copy of the budget releases the record.
+        var budget = engine.budget;
+        budget.allocator().destroy(engine);
+        assert(budget.allocated_bytes == 0);
     }
 
     pub fn checkThread(engine: *const Engine) ThreadError!void {
         if (std.Thread.getCurrentId() != engine.thread) return error.WrongThread;
     }
 
+    /// Reports the engine's allocated bytes and its limit. It allocates nothing.
+    pub fn memory(engine: *const Engine) ThreadError!Memory {
+        try engine.checkThread();
+        return .{ .allocated_bytes = engine.budget.allocated_bytes, .max_allocated_bytes = engine.budget.max_allocated_bytes };
+    }
+
+    /// Replaces the limit. It allocates nothing.
+    /// A limit below the allocated bytes is valid, and it refuses every later growth until enough bytes are released.
+    pub fn setMemoryLimit(engine: *Engine, max_allocated_bytes: u64) ThreadError!void {
+        try engine.checkThread();
+        engine.budget.max_allocated_bytes = max_allocated_bytes;
+    }
+
     /// Creates an `empty` document.
     pub fn createDocument(engine: *Engine) CreateDocumentError!DocumentId {
         try engine.checkThread();
-        try engine.document_ids.ensureUnusedCapacity(engine.gpa, 1);
+        const gpa = engine.gpa;
+        var document_ids = try reserveMap(gpa, &engine.document_ids, 1);
+        errdefer document_ids.deinit(gpa);
         const id: DocumentId = @fromBackingInt(try issueIdentifier());
-        const handle = engine.documents.insert(engine.gpa, .{ .id = id, .state = .empty, .request = null, .body = no_bytes }) catch |err| return switch (err) {
+        const handle = engine.documents.insert(gpa, .{ .id = id, .state = .empty, .request = null, .body = no_bytes }) catch |err| return switch (err) {
             error.OutOfMemory => error.OutOfMemory,
             error.HandleSpaceExhausted => error.LimitExceeded,
         };
+
+        // Every reservation succeeded, so nothing below can fail.
+        installMap(gpa, &engine.document_ids, document_ids);
         engine.document_ids.putAssumeCapacityNoClobber(id, handle);
         return id;
     }
@@ -303,8 +395,10 @@ pub const Engine = struct {
         // Afterward, each outstanding request, including the one that the load issues, keeps one reserved slot.
         // A reload ends the request that it replaces, so it adds no outstanding request.
         const added: usize = @intFromBool(previous == null);
-        try engine.events.ensureUnusedCapacity(gpa, engine.requests.count() + added + 2);
-        try engine.request_ids.ensureUnusedCapacity(gpa, 1);
+        var events = try reserveDeque(Event, gpa, &engine.events, engine.requests.count() + added + 2);
+        errdefer events.deinit(gpa);
+        var request_ids = try reserveMap(gpa, &engine.request_ids, 1);
+        errdefer request_ids.deinit(gpa);
         const url_copy = try gpa.dupe(u8, url);
         errdefer gpa.free(url_copy);
         const request_id: RequestId = @fromBackingInt(try issueIdentifier());
@@ -321,6 +415,8 @@ pub const Engine = struct {
         };
 
         // Every reservation succeeded, so nothing below can fail.
+        installDeque(Event, gpa, &engine.events, events);
+        installMap(gpa, &engine.request_ids, request_ids);
         engine.request_ids.putAssumeCapacityNoClobber(request_id, request_handle);
         if (previous) |request| engine.withdrawRequest(request);
         engine.events.pushBackAssumeCapacity(.{ .request_issued = .{
@@ -356,8 +452,10 @@ pub const Engine = struct {
         const handle = try engine.unansweredRequest(request);
         if (version != (engine.requests.get(handle) catch unreachable).version) return error.UnsupportedVersion;
         if (body.len > engine.options.max_response_body_bytes) return error.LimitExceeded;
-        try engine.inputs.ensureUnusedCapacity(engine.gpa, 1);
         const body_copy = try engine.gpa.dupe(u8, body);
+        errdefer engine.gpa.free(body_copy);
+        // The queue grows in place last, so a failed growth leaves only the copy to release.
+        try engine.inputs.ensureUnusedCapacity(engine.gpa, 1);
         engine.queueAnswer(handle, .{ .response = body_copy });
     }
 
