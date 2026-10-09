@@ -1,6 +1,7 @@
 //! Experimental Fairpane bootstrap. No browser capabilities exist yet.
 
 pub const c_api = @import("c_api.zig");
+pub const css = @import("css/css.zig");
 pub const dom = @import("dom.zig");
 pub const engine = @import("engine.zig");
 pub const font = @import("font/opentype.zig");
@@ -17,6 +18,7 @@ comptime {
 test {
     _ = @import("abi_scenarios.zig");
     _ = c_api;
+    _ = css;
     _ = dom;
     _ = engine;
     _ = font;

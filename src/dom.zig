@@ -14,9 +14,19 @@
 //! Node creation copies its strings and reserves its table slot before it changes the store.
 //! An allocation failure therefore leaves the store unchanged.
 //!
-//! No shadow root, template contents, attribute, live range, node iterator, mutation observer, or custom element exists yet.
+//! Elements have attribute lists, as far as selectors need them, from section 4.9:
+//! "get an attribute by namespace and local name", "set an attribute value",
+//! "remove an attribute by namespace and local name", the ID attribute change steps, and the classes of `classList`.
+//! An attribute has a namespace, a local name, and a value; attribute namespace prefixes do not exist yet.
+//! Setting an attribute copies its strings and reserves list capacity before it changes the store,
+//! so an allocation failure leaves the store unchanged.
+//!
+//! Every document of a store is an XML document in no-quirks mode,
+//! because section 4.5 makes `xml` and `no-quirks` the defaults and the store creates no other kind.
+//!
+//! No shadow root, template contents, attribute node, live range, node iterator, mutation observer, or custom element exists yet.
 //! A host-including inclusive ancestor is therefore an inclusive ancestor.
-//! The insertion, removing, and adopting steps have no effect, and no mutation record is queued.
+//! The insertion, removing, adopting, and attribute change steps have no effect beyond those above, and no mutation record is queued.
 //!
 //! Every document is a trace root, and so is every node that the host retains.
 //! A root keeps every node of its tree alive, because script can reach any node of a tree through parent and child links.
@@ -47,6 +57,44 @@ const Element = struct {
     /// Null for an element in no namespace.
     namespace: ?WebString,
     local_name: WebString,
+    /// The attribute list in order. The store owns every string.
+    attributes: std.ArrayList(Attribute),
+};
+
+const Attribute = struct {
+    /// Null for an attribute in no namespace.
+    namespace: ?WebString,
+    local_name: WebString,
+    value: WebString,
+
+    fn deinit(attribute: *Attribute, gpa: Allocator) void {
+        if (attribute.namespace) |*namespace| namespace.deinit(gpa);
+        attribute.local_name.deinit(gpa);
+        attribute.value.deinit(gpa);
+    }
+
+    fn view(attribute: *const Attribute) AttributeView {
+        return .{
+            .namespace = if (attribute.namespace) |namespace| namespace.view() else null,
+            .local_name = attribute.local_name.view(),
+            .value = attribute.value.view(),
+        };
+    }
+
+    /// Whether the attribute has `namespace` and `local_name`, where `namespace` is already null for no namespace.
+    fn named(attribute: *const Attribute, namespace: ?View, local_name: View) bool {
+        if (!attribute.local_name.view().eql(local_name)) return false;
+        const own = attribute.namespace orelse return namespace == null;
+        const wanted = namespace orelse return false;
+        return own.view().eql(wanted);
+    }
+};
+
+/// One attribute of an element. The views stay valid until the attribute changes or the element is freed.
+pub const AttributeView = struct {
+    namespace: ?View,
+    local_name: View,
+    value: View,
 };
 
 /// The data that depends on the node type. The store owns every string.
@@ -99,6 +147,9 @@ pub const MutationError = LookupError || ValidityError;
 pub const AdoptError = LookupError || error{ NotADocument, NotSupported };
 /// `NotRetained` reports a `release` without a matching `retain`.
 pub const ReleaseError = LookupError || error{NotRetained};
+/// `NotAnElement` reports a node argument that is not an element.
+pub const AttributeError = LookupError || error{NotAnElement};
+pub const SetAttributeError = AttributeError || error{OutOfMemory};
 
 const ValidityError = error{ HierarchyRequest, NotFound };
 
@@ -129,6 +180,8 @@ fn freePayload(gpa: Allocator, payload: *Payload) void {
         .element => |*element| {
             if (element.namespace) |*namespace| namespace.deinit(gpa);
             element.local_name.deinit(gpa);
+            for (element.attributes.items) |*attribute| attribute.deinit(gpa);
+            element.attributes.deinit(gpa);
         },
         .text, .comment, .processing_instruction => |*string| string.deinit(gpa),
     }
@@ -188,7 +241,7 @@ pub const Store = struct {
         errdefer if (namespace_copy) |*copy| copy.deinit(store.gpa);
         var name_copy = try WebString.fromCodeUnits(store.gpa, local_name.units);
         errdefer name_copy.deinit(store.gpa);
-        const element: Element = .{ .namespace = namespace_copy, .local_name = name_copy };
+        const element: Element = .{ .namespace = namespace_copy, .local_name = name_copy, .attributes = .empty };
         return store.nodes.insert(store.gpa, detachedRecord(.{ .element = element }, document));
     }
 
@@ -255,6 +308,90 @@ pub const Store = struct {
 
     pub fn children(store: *Store, parent: NodeHandle) LookupError!ChildIterator {
         return .{ .store = store, .parent = parent, .pending = (try store.nodes.getPtr(parent)).first_child };
+    }
+
+    /// "Set an attribute value": sets the value of the attribute with `namespace` and `local_name`,
+    /// or appends a new attribute when the element has none. An existing attribute keeps its list position.
+    /// An empty `namespace` means no namespace. The store copies every string exactly.
+    pub fn setAttribute(store: *Store, element: NodeHandle, namespace: ?View, local_name: View, value: View) SetAttributeError!void {
+        const record = try store.elementRecord(element);
+        const wanted = nullIfEmpty(namespace);
+        var value_copy = try WebString.fromCodeUnits(store.gpa, value.units);
+        errdefer value_copy.deinit(store.gpa);
+        // Step 1: let attribute be the result of getting an attribute given namespace, localName, and element.
+        if (findAttribute(record, wanted, local_name)) |index| {
+            // Step 3: change attribute to value.
+            const existing = &record.attributes.items[index];
+            existing.value.deinit(store.gpa);
+            existing.value = value_copy;
+            return;
+        }
+        // Step 2: if attribute is null, create an attribute and append it to element.
+        var namespace_copy: ?WebString = null;
+        if (wanted) |name| namespace_copy = try WebString.fromCodeUnits(store.gpa, name.units);
+        errdefer if (namespace_copy) |*copy| copy.deinit(store.gpa);
+        var name_copy = try WebString.fromCodeUnits(store.gpa, local_name.units);
+        errdefer name_copy.deinit(store.gpa);
+        try record.attributes.ensureUnusedCapacity(store.gpa, 1);
+        record.attributes.appendAssumeCapacity(.{ .namespace = namespace_copy, .local_name = name_copy, .value = value_copy });
+    }
+
+    /// "Get an attribute by namespace and local name", returning the attribute's value.
+    /// An empty `namespace` means no namespace. The view stays valid until the attribute changes.
+    pub fn attribute(store: *Store, element: NodeHandle, namespace: ?View, local_name: View) AttributeError!?View {
+        const record = try store.elementRecord(element);
+        const index = findAttribute(record, nullIfEmpty(namespace), local_name) orelse return null;
+        return record.attributes.items[index].value.view();
+    }
+
+    /// "Remove an attribute by namespace and local name". Returns whether it removed an attribute.
+    /// An empty `namespace` means no namespace.
+    pub fn removeAttribute(store: *Store, element: NodeHandle, namespace: ?View, local_name: View) AttributeError!bool {
+        const record = try store.elementRecord(element);
+        const index = findAttribute(record, nullIfEmpty(namespace), local_name) orelse return false;
+        var removed = record.attributes.orderedRemove(index);
+        removed.deinit(store.gpa);
+        return true;
+    }
+
+    /// Iterates the attribute list in order. Any attribute change ends the iterator's validity.
+    pub fn attributes(store: *Store, element: NodeHandle) AttributeError!AttributeIterator {
+        return .{ .items = (try store.elementRecord(element)).attributes.items };
+    }
+
+    /// The element's ID under the ID attribute change steps: the value of its `id` attribute in no namespace,
+    /// or null when that attribute is absent or empty.
+    pub fn elementId(store: *Store, element: NodeHandle) AttributeError!?View {
+        const value = try store.attribute(element, null, ascii("id")) orelse return null;
+        if (value.units.len == 0) return null;
+        return value;
+    }
+
+    /// The element's classes: the ordered set parser over its `class` attribute in no namespace.
+    pub fn classes(store: *Store, element: NodeHandle) AttributeError!ClassIterator {
+        const value = try store.attribute(element, null, ascii("class")) orelse return .{ .units = &.{} };
+        return .{ .units = value.units };
+    }
+
+    fn elementRecord(store: *Store, node: NodeHandle) AttributeError!*Element {
+        return switch ((try store.nodes.getPtr(node)).payload) {
+            .element => |*element| element,
+            .document, .document_fragment, .document_type, .text, .comment, .processing_instruction => error.NotAnElement,
+        };
+    }
+
+    fn findAttribute(element: *const Element, namespace: ?View, local_name: View) ?usize {
+        for (element.attributes.items, 0..) |*candidate, index| {
+            if (candidate.named(namespace, local_name)) return index;
+        }
+        return null;
+    }
+
+    /// "Get an attribute by namespace and local name" step 1, and "validate and extract" step 1:
+    /// an empty namespace is null.
+    fn nullIfEmpty(namespace: ?View) ?View {
+        const name = namespace orelse return null;
+        return if (name.units.len == 0) null else name;
     }
 
     /// Pre-inserts `node` into `parent` before `child`, or after the last child when `child` is null.
@@ -637,6 +774,62 @@ pub const ChildIterator = struct {
         return current;
     }
 };
+
+/// Iterates one element's attribute list in order.
+pub const AttributeIterator = struct {
+    items: []const Attribute,
+    index: usize = 0,
+
+    pub fn next(iterator: *AttributeIterator) ?AttributeView {
+        if (iterator.index == iterator.items.len) return null;
+        defer iterator.index += 1;
+        return iterator.items[iterator.index].view();
+    }
+};
+
+/// The ordered set parser of the DOM Standard, section 1.2, over one attribute value.
+/// It splits on ASCII whitespace and yields each token once, at its first occurrence.
+/// Any attribute change ends the iterator's validity.
+pub const ClassIterator = struct {
+    units: []const u16,
+    index: usize = 0,
+
+    pub fn next(iterator: *ClassIterator) ?View {
+        while (nextToken(iterator.units, &iterator.index)) |token| {
+            if (!occursBefore(iterator.units, token)) return .{ .units = iterator.units[token.start..token.end] };
+        }
+        return null;
+    }
+
+    const Token = struct { start: usize, end: usize };
+
+    fn nextToken(units: []const u16, index: *usize) ?Token {
+        while (index.* < units.len and isAsciiWhitespace(units[index.*])) index.* += 1;
+        if (index.* == units.len) return null;
+        const start = index.*;
+        while (index.* < units.len and !isAsciiWhitespace(units[index.*])) index.* += 1;
+        return .{ .start = start, .end = index.* };
+    }
+
+    /// Whether an identical token starts before `token`, so the ordered set already holds it.
+    fn occursBefore(units: []const u16, token: Token) bool {
+        const wanted = units[token.start..token.end];
+        var index: usize = 0;
+        while (nextToken(units, &index)) |earlier| {
+            if (earlier.start >= token.start) return false;
+            if (std.mem.eql(u16, units[earlier.start..earlier.end], wanted)) return true;
+        }
+        return false;
+    }
+};
+
+/// Infra's ASCII whitespace: U+0009 TAB, U+000A LF, U+000C FF, U+000D CR, and U+0020 SPACE.
+fn isAsciiWhitespace(unit: u16) bool {
+    return switch (unit) {
+        0x09, 0x0A, 0x0C, 0x0D, 0x20 => true,
+        else => false,
+    };
+}
 
 /// Returns the UTF-16 code units of an ASCII literal.
 fn ascii(comptime text: []const u8) View {
@@ -1850,4 +2043,162 @@ test "FP-0009 case 12: a handle from another store returns WrongOwner, and a han
     }
     try expectChildren(s, parent, &.{child});
     try testing.expectEqual(2, theirs.nodeCount());
+}
+
+const ExpectedAttribute = struct { namespace: ?View, local_name: View, value: View };
+
+/// Checks the attribute list of `element` in order through `attributes`.
+fn expectAttributes(store: *Store, element: NodeHandle, expected: []const ExpectedAttribute) !void {
+    var iterator = try store.attributes(element);
+    for (expected) |wanted| {
+        const actual = iterator.next() orelse return error.TestExpectedAttribute;
+        if (wanted.namespace) |namespace| {
+            try testing.expect(actual.namespace.?.eql(namespace));
+        } else {
+            try testing.expectEqual(null, actual.namespace);
+        }
+        try testing.expect(actual.local_name.eql(wanted.local_name));
+        try testing.expect(actual.value.eql(wanted.value));
+    }
+    try testing.expectEqual(null, iterator.next());
+}
+
+fn expectClasses(store: *Store, element: NodeHandle, expected: []const View) !void {
+    var iterator = try store.classes(element);
+    for (expected) |wanted| try testing.expect(iterator.next().?.eql(wanted));
+    try testing.expectEqual(null, iterator.next());
+}
+
+test "FP-0014 case 18: setAttribute keeps list order, replaces in place, and honors namespaces, and removal reports its result" {
+    var store = try Store.init(testing.allocator);
+    defer store.deinit();
+    const s = &store;
+    const document = try newDocument(s);
+    const element = try newElement(s, document, "e");
+    const urn = ascii("urn:x");
+
+    try s.setAttribute(element, null, ascii("b"), ascii("1"));
+    try s.setAttribute(element, null, ascii("a"), ascii("2"));
+    try s.setAttribute(element, urn, ascii("b"), ascii("3"));
+    try expectAttributes(s, element, &.{
+        .{ .namespace = null, .local_name = ascii("b"), .value = ascii("1") },
+        .{ .namespace = null, .local_name = ascii("a"), .value = ascii("2") },
+        .{ .namespace = urn, .local_name = ascii("b"), .value = ascii("3") },
+    });
+
+    // Setting an existing attribute keeps its list position.
+    try s.setAttribute(element, null, ascii("b"), ascii("4"));
+    try expectAttributes(s, element, &.{
+        .{ .namespace = null, .local_name = ascii("b"), .value = ascii("4") },
+        .{ .namespace = null, .local_name = ascii("a"), .value = ascii("2") },
+        .{ .namespace = urn, .local_name = ascii("b"), .value = ascii("3") },
+    });
+    try testing.expect((try s.attribute(element, null, ascii("b"))).?.eql(ascii("4")));
+    try testing.expect((try s.attribute(element, ascii(""), ascii("b"))).?.eql(ascii("4")));
+    try testing.expect((try s.attribute(element, urn, ascii("b"))).?.eql(ascii("3")));
+    try testing.expectEqual(null, try s.attribute(element, null, ascii("B")));
+
+    // An empty namespace means no namespace.
+    try s.setAttribute(element, ascii(""), ascii("c"), ascii("5"));
+    try testing.expect((try s.attribute(element, null, ascii("c"))).?.eql(ascii("5")));
+
+    try testing.expect(try s.removeAttribute(element, null, ascii("a")));
+    try testing.expect(!try s.removeAttribute(element, null, ascii("a")));
+    try expectAttributes(s, element, &.{
+        .{ .namespace = null, .local_name = ascii("b"), .value = ascii("4") },
+        .{ .namespace = urn, .local_name = ascii("b"), .value = ascii("3") },
+        .{ .namespace = null, .local_name = ascii("c"), .value = ascii("5") },
+    });
+
+    // A lone surrogate round-trips.
+    const lone = [_]u16{ 'x', 0xD800 };
+    try s.setAttribute(element, null, ascii("d"), .{ .units = &lone });
+    try testing.expectEqualSlices(u16, &lone, (try s.attribute(element, null, ascii("d"))).?.units);
+    try expectInvariants(s);
+}
+
+test "FP-0014 case 19: the ID follows the ID attribute change steps, and classes follow the ordered set parser" {
+    var store = try Store.init(testing.allocator);
+    defer store.deinit();
+    const s = &store;
+    const document = try newDocument(s);
+    const element = try newElement(s, document, "e");
+
+    try testing.expectEqual(null, try s.elementId(element));
+    try s.setAttribute(element, null, ascii("id"), ascii(""));
+    try testing.expectEqual(null, try s.elementId(element));
+    try s.setAttribute(element, null, ascii("id"), ascii("x y"));
+    try testing.expect((try s.elementId(element)).?.eql(ascii("x y")));
+    const namespaced = try newElement(s, document, "n");
+    try s.setAttribute(namespaced, ascii("urn:x"), ascii("id"), ascii("z"));
+    try testing.expectEqual(null, try s.elementId(namespaced));
+
+    try expectClasses(s, element, &.{});
+    try s.setAttribute(element, null, ascii("class"), ascii(" a\tb\na  c\x0c"));
+    try expectClasses(s, element, &.{ ascii("a"), ascii("b"), ascii("c") });
+    const nbsp = [_]u16{ 'a', 0x00A0, 'b' };
+    try s.setAttribute(element, null, ascii("class"), .{ .units = &nbsp });
+    try expectClasses(s, element, &.{.{ .units = &nbsp }});
+    try s.setAttribute(namespaced, ascii("urn:x"), ascii("class"), ascii("q"));
+    try expectClasses(s, namespaced, &.{});
+}
+
+fn attributeAllocationScenario(gpa: Allocator) !void {
+    var store = try Store.init(gpa);
+    defer store.deinit();
+    const s = &store;
+    const document = try guarded(s, Store.createDocument, .{s});
+    const element = try guarded(s, Store.createElement, .{ s, document, null, ascii("e") });
+    try guarded(s, Store.setAttribute, .{ s, element, null, ascii("a"), ascii("1") });
+    try guarded(s, Store.setAttribute, .{ s, element, ascii("urn:x"), ascii("a"), ascii("2") });
+    try guarded(s, Store.setAttribute, .{ s, element, null, ascii("b"), ascii("3") });
+    // A replacement copies the new value before it changes the store.
+    try guarded(s, Store.setAttribute, .{ s, element, null, ascii("a"), ascii("4") });
+    try testing.expect(try s.removeAttribute(element, ascii("urn:x"), ascii("a")));
+    try expectAttributes(s, element, &.{
+        .{ .namespace = null, .local_name = ascii("a"), .value = ascii("4") },
+        .{ .namespace = null, .local_name = ascii("b"), .value = ascii("3") },
+    });
+}
+
+test "FP-0014 case 20: attribute operations reject bad handles, and each induced allocation failure changes nothing and leaks nothing" {
+    var store = try Store.init(testing.allocator);
+    defer store.deinit();
+    var other = try Store.init(testing.allocator);
+    defer other.deinit();
+    const s = &store;
+    const document = try newDocument(s);
+    const text = try newText(s, document, "t");
+    try expectRejected(s, error.NotAnElement, Store.setAttribute, .{ s, text, null, ascii("a"), ascii("1") });
+    try expectRejected(s, error.NotAnElement, Store.attribute, .{ s, document, null, ascii("a") });
+    try expectRejected(s, error.NotAnElement, Store.removeAttribute, .{ s, text, null, ascii("a") });
+    try expectRejected(s, error.NotAnElement, Store.attributes, .{ s, text });
+    try expectRejected(s, error.NotAnElement, Store.elementId, .{ s, text });
+    try expectRejected(s, error.NotAnElement, Store.classes, .{ s, text });
+
+    // A detached element with attributes is swept without a leak.
+    const swept = try newElement(s, document, "swept");
+    try s.setAttribute(swept, null, ascii("class"), ascii("a b"));
+    try s.setAttribute(swept, ascii("urn:x"), ascii("id"), ascii("i"));
+    try testing.expectEqual(2, try sweepChecked(s));
+    try expectRejected(s, error.StaleHandle, Store.setAttribute, .{ s, swept, null, ascii("a"), ascii("1") });
+    try expectRejected(s, error.StaleHandle, Store.attribute, .{ s, swept, null, ascii("a") });
+
+    const foreign_document = try newDocument(&other);
+    const foreign = try newElement(&other, foreign_document, "f");
+    try expectRejected(s, error.WrongOwner, Store.setAttribute, .{ s, foreign, null, ascii("a"), ascii("1") });
+    try expectRejected(s, error.WrongOwner, Store.removeAttribute, .{ s, foreign, null, ascii("a") });
+
+    // Store teardown frees the attributes of a connected element.
+    const kept = try newElement(s, document, "kept");
+    try appendChecked(s, document, kept);
+    try s.setAttribute(kept, null, ascii("a"), ascii("1"));
+
+    // Fail every remap so that each growth step is an allocation the checker can induce.
+    var no_remap: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+    var probe: testing.FailingAllocator = .init(no_remap.allocator(), .{});
+    try attributeAllocationScenario(probe.allocator());
+    try testing.expect(probe.allocations >= 10);
+    try testing.checkAllAllocationFailures(no_remap.allocator(), attributeAllocationScenario, .{});
+    try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
 }

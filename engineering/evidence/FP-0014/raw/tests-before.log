@@ -1,0 +1,1145 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0014-cache-before"]
+test
++- FP-0011 case 8: layout_missing_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe describes field ghost, which does not exist
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_missing_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_allocates.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: allocateString requires effects {allocation}; the context has effects {}
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_allocates.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_positive.zig failure
+src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+src\css\tests.zig:14:25: note: file imported here
+const cascade = @import("cascade.zig");
+                        ^~~~~~~~~~~~~
+src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+src\css\tests.zig:15:25: note: file imported here
+const compute = @import("compute.zig");
+                        ^~~~~~~~~~~~~
+src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+src\css\tests.zig:9:22: note: file imported here
+const dump = @import("dump.zig");
+                     ^~~~~~~~~~
+src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+src\css\tests.zig:913:27: note: file imported here
+    const rows = &@import("named_colors.zig").rows;
+                          ^~~~~~~~~~~~~~~~~~
+src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+src\css\tests.zig:8:24: note: file imported here
+const parser = @import("parser.zig");
+                       ^~~~~~~~~~~~
+src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+src\css\tests.zig:12:26: note: file imported here
+const registry = @import("registry.zig");
+                         ^~~~~~~~~~~~~~
+src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+src\css\tests.zig:11:27: note: file imported here
+const selectors = @import("selectors.zig");
+                          ^~~~~~~~~~~~~~~
+src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+src\css\tests.zig:16:23: note: file imported here
+const style = @import("style.zig");
+                      ^~~~~~~~~~~
+src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+src\css\tests.zig:10:28: note: file imported here
+const stylesheet = @import("stylesheet.zig");
+                           ^~~~~~~~~~~~~~~~
+src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+src\css\tests.zig:7:27: note: file imported here
+const tokenizer = @import("tokenizer.zig");
+                          ^~~~~~~~~~~~~~~
+src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+src\css\tests.zig:13:24: note: file imported here
+const values = @import("values.zig");
+                       ^~~~~~~~~~~~
+error: process exited with code 1 (expected exited with code 0)
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_positive.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_tagged_index_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_tagged_index_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_undescribed_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe does not describe field extra
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_undescribed_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_callback_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadCallback declares callback without allocation, exception, and heap_mutation
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_callback_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_nan_box_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_nan_box_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_exception_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadException declares exception without allocation
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_exception_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: mutation_throws.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: throwTypeError requires effects {allocation, exception}; the context has effects {heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/mutation_throws.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: kernel_wider_context.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::add takes a context with effects {allocation}, but the operation has effects {}
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_wider_context.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke Number::toString, which has effects {allocation}
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_number_to_string.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_calls_behavior.zig failure
+error: ========= expected to find in stderr: =========
+       expected type
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_calls_behavior.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke ToNumber, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_to_number.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::sameValue returns error.Throw, but the operation does not have the exception effect
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_undeclared_throw.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_plain_reference.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: field hidden of layout Probe holds a heap reference but is declared plain
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_plain_reference.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: allocation_invokes_call.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {allocation} cannot invoke Call, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/allocation_invokes_call.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_reference_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_reference_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_duplicate_id.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: duplicate operation id number_add
+       ========= but stderr does not contain it: =====
+       src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+       src\css\tests.zig:14:25: note: file imported here
+       const cascade = @import("cascade.zig");
+                               ^~~~~~~~~~~~~
+       src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+       src\css\tests.zig:15:25: note: file imported here
+       const compute = @import("compute.zig");
+                               ^~~~~~~~~~~~~
+       src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+       src\css\tests.zig:9:22: note: file imported here
+       const dump = @import("dump.zig");
+                            ^~~~~~~~~~
+       src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+       src\css\tests.zig:913:27: note: file imported here
+           const rows = &@import("named_colors.zig").rows;
+                                 ^~~~~~~~~~~~~~~~~~
+       src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+       src\css\tests.zig:8:24: note: file imported here
+       const parser = @import("parser.zig");
+                              ^~~~~~~~~~~~
+       src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+       src\css\tests.zig:12:26: note: file imported here
+       const registry = @import("registry.zig");
+                                ^~~~~~~~~~~~~~
+       src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+       src\css\tests.zig:11:27: note: file imported here
+       const selectors = @import("selectors.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+       src\css\tests.zig:16:23: note: file imported here
+       const style = @import("style.zig");
+                             ^~~~~~~~~~~
+       src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+       src\css\tests.zig:10:28: note: file imported here
+       const stylesheet = @import("stylesheet.zig");
+                                  ^~~~~~~~~~~~~~~~
+       src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+       src\css\tests.zig:7:27: note: file imported here
+       const tokenizer = @import("tokenizer.zig");
+                                 ^~~~~~~~~~~~~~~
+       src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+       src\css\tests.zig:13:24: note: file imported here
+       const values = @import("values.zig");
+                              ^~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_duplicate_id.zig -Mfairpane=src/root.zig
+
+test
++- run test
+   +- compile test debug native 11 errors
+src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+src\css\tests.zig:14:25: note: file imported here
+const cascade = @import("cascade.zig");
+                        ^~~~~~~~~~~~~
+src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+src\css\tests.zig:15:25: note: file imported here
+const compute = @import("compute.zig");
+                        ^~~~~~~~~~~~~
+src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+src\css\tests.zig:9:22: note: file imported here
+const dump = @import("dump.zig");
+                     ^~~~~~~~~~
+src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+src\css\tests.zig:913:27: note: file imported here
+    const rows = &@import("named_colors.zig").rows;
+                          ^~~~~~~~~~~~~~~~~~
+src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+src\css\tests.zig:8:24: note: file imported here
+const parser = @import("parser.zig");
+                       ^~~~~~~~~~~~
+src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+src\css\tests.zig:12:26: note: file imported here
+const registry = @import("registry.zig");
+                         ^~~~~~~~~~~~~~
+src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+src\css\tests.zig:11:27: note: file imported here
+const selectors = @import("selectors.zig");
+                          ^~~~~~~~~~~~~~~
+src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+src\css\tests.zig:16:23: note: file imported here
+const style = @import("style.zig");
+                      ^~~~~~~~~~~
+src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+src\css\tests.zig:10:28: note: file imported here
+const stylesheet = @import("stylesheet.zig");
+                           ^~~~~~~~~~~~~~~~
+src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+src\css\tests.zig:7:27: note: file imported here
+const tokenizer = @import("tokenizer.zig");
+                          ^~~~~~~~~~~~~~~
+src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+src\css\tests.zig:13:24: note: file imported here
+const values = @import("values.zig");
+                       ^~~~~~~~~~~~
+error: 11 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug --dep fairpane "-Mroot=tests\\text\\root.zig" -Odebug "-Mfairpane=src\\root.zig" --cache-dir "out\\fp0014-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- run test
+   +- compile test debug native 11 errors
+src\css\cascade.zig:1:1: error: unable to load "cascade.zig": FileNotFound
+src\css\tests.zig:14:25: note: file imported here
+const cascade = @import("cascade.zig");
+                        ^~~~~~~~~~~~~
+src\css\compute.zig:1:1: error: unable to load "compute.zig": FileNotFound
+src\css\tests.zig:15:25: note: file imported here
+const compute = @import("compute.zig");
+                        ^~~~~~~~~~~~~
+src\css\dump.zig:1:1: error: unable to load "dump.zig": FileNotFound
+src\css\tests.zig:9:22: note: file imported here
+const dump = @import("dump.zig");
+                     ^~~~~~~~~~
+src\css\named_colors.zig:1:1: error: unable to load "named_colors.zig": FileNotFound
+src\css\tests.zig:913:27: note: file imported here
+    const rows = &@import("named_colors.zig").rows;
+                          ^~~~~~~~~~~~~~~~~~
+src\css\parser.zig:1:1: error: unable to load "parser.zig": FileNotFound
+src\css\tests.zig:8:24: note: file imported here
+const parser = @import("parser.zig");
+                       ^~~~~~~~~~~~
+src\css\registry.zig:1:1: error: unable to load "registry.zig": FileNotFound
+src\css\tests.zig:12:26: note: file imported here
+const registry = @import("registry.zig");
+                         ^~~~~~~~~~~~~~
+src\css\selectors.zig:1:1: error: unable to load "selectors.zig": FileNotFound
+src\css\tests.zig:11:27: note: file imported here
+const selectors = @import("selectors.zig");
+                          ^~~~~~~~~~~~~~~
+src\css\style.zig:1:1: error: unable to load "style.zig": FileNotFound
+src\css\tests.zig:16:23: note: file imported here
+const style = @import("style.zig");
+                      ^~~~~~~~~~~
+src\css\stylesheet.zig:1:1: error: unable to load "stylesheet.zig": FileNotFound
+src\css\tests.zig:10:28: note: file imported here
+const stylesheet = @import("stylesheet.zig");
+                           ^~~~~~~~~~~~~~~~
+src\css\tokenizer.zig:1:1: error: unable to load "tokenizer.zig": FileNotFound
+src\css\tests.zig:7:27: note: file imported here
+const tokenizer = @import("tokenizer.zig");
+                          ^~~~~~~~~~~~~~~
+src\css\values.zig:1:1: error: unable to load "values.zig": FileNotFound
+src\css\tests.zig:13:24: note: file imported here
+const values = @import("values.zig");
+                       ^~~~~~~~~~~~
+error: 11 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0014-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 35/58 steps succeeded (20 failed)
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 11 errors
++- run test transitive failure
+|  +- compile test debug native 11 errors
++- FP-0007 case 13: case 2 passes with exit status 0 success 36ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:334M
++- FP-0007 case 13: case 3 fails with exit status 1 success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 41ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 70ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 8ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 11ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:319M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 31ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 37ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 37ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 37ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 41ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 43ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 38ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 41ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 38ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 42ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 35ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 42ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 6ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 35ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 44ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 42ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 40ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 42ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
++- FP-0011 case 4: allocation_invokes_call.zig failure
++- FP-0011 case 4: leaf_allocates.zig failure
++- FP-0011 case 4: mutation_throws.zig failure
++- FP-0011 case 4: leaf_calls_behavior.zig failure
++- FP-0011 case 4: leaf_positive.zig failure
++- FP-0011 case 5: catalog_callback_alone.zig failure
++- FP-0011 case 5: catalog_exception_alone.zig failure
++- FP-0011 case 5: catalog_duplicate_id.zig failure
++- FP-0011 case 5: kernel_wider_context.zig failure
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
++- FP-0011 case 8: layout_undescribed_field.zig failure
++- FP-0011 case 8: layout_plain_reference.zig failure
++- FP-0011 case 8: layout_missing_field.zig failure
++- FP-0011 case 20: abi_reference_value.zig failure
++- FP-0011 case 20: abi_nan_box_value.zig failure
++- FP-0011 case 20: abi_tagged_index_value.zig failure
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xdef126fd test --summary all --cache-dir out/fp0014-cache-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0014-cache-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb5fa5c781\\m\\out\\fp0014-before","started_at":"2026-10-09T11:15:41.642Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":6348,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
