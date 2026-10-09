@@ -738,7 +738,7 @@ The file hashes are recorded before and after each control.
 A crash is recorded separately from a failed assertion.
 
 - M1: the lexer treats U+2028 as white space.
-  Cases 2 (T31) and 14 must fail.
+  Case 2 (T31) must fail; amendment 2 removes case 14 from this control.
 - M2: the strict check for LegacyOctalIntegerLiteral is removed.
   E19 must fail, and a census run must report `false_accept` greater than 0.
 - M3: `=>` reports `syntax-error unexpected_token`.
@@ -860,3 +860,6 @@ Required reviewers are `fairpane-review` and `fairpane-spec`.
    - Case 9 covers T1 to T41 except T30, because a HashbangComment is allowed only at the start of a Script (12.5), and the prefix moves it away from offset 0.
      For T30, the prefixed source gives `syntax-error invalid_character @14`, which case 9 asserts as its own row.
    - Every other expectation stays as frozen.
+2. Control M1 cannot fail case 14 as frozen, as worker `FP0082Parser` reported.
+   Case 14 asserts only that each random source yields an outcome and that `writeOutcome` succeeds without a panic or a leak, and treating U+2028 as white space changes outcomes without either.
+   M1 must fail case 2 on row T31, which it does; case 14 stays a robustness property, and no requirement of the parser changes.
