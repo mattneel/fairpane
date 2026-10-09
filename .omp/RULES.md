@@ -7,3 +7,5 @@ Do not weaken the test denominator or thresholds to pass a patch.
 Do not claim that bootstrap checks establish browser completion.
 Do not claim unattended progress outside an active execution environment.
 Keep the next executable action in the repository at session boundaries.
+Keep Git and GitHub operations immaculate under `docs/GIT_OPERATIONS.md`.
+Commit each checkpoint and push it to `master` on `origin`; never use `main` or force push.

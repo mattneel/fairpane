@@ -2,7 +2,7 @@
 
 ## Public work
 
-Design discussions and implementation work belong in the open after the owner establishes the public repository and license.
+Design discussions and implementation work happen in the open at <https://github.com/mattneel/fairpane>.
 A contribution does not require allegiance to a model provider or commercial service.
 Development records preserve provenance and human accountability.
 
@@ -35,7 +35,8 @@ Release notes distinguish supported features from experimental features.
 
 ## Remaining owner decisions
 
-The license policy, public repository location, and release identities remain open.
+The owner established the public repository and authorized continuous pushes to `master`.
+The license policy and release identities remain open.
 Name availability remains provisional.
 Domain registration and trademark work are outside the agent's automatic authority.
-These decisions block publication, not local implementation.
+These decisions block a public release, not local implementation or public development.

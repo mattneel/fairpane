@@ -74,7 +74,8 @@ The first task establishes the checkout and records a baseline.
 The agent must not invent the owner's identity.
 An absent Git identity blocks the initial commit, not independent implementation work.
 The agent can work sequentially until the owner supplies an identity.
-No remote repository or automatic push is authorized by this bootstrap.
+The owner configured the public remote `origin` and authorized continuous pushes to `master`.
+`docs/GIT_OPERATIONS.md` defines the commit, push, and GitHub rules.
 
 ## Session continuation
 

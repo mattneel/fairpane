@@ -59,11 +59,19 @@ A prose claim of success is not an acceptance receipt.
 `engineering/HANDOFF.md` identifies the next executable action.
 `engineering/decisions` contains architecture decisions.
 `out/evidence` contains local receipts and logs.
+`engineering/evidence` contains reviewed, tracked evidence.
 
 The integrator alone updates shared state during concurrent work.
 The local controller does not act as a distributed scheduler or lock service.
 Task acceptance needs valid gate evidence and an independent review record.
 The first protected-runner task strengthens that boundary beyond local files.
+
+## Git operations
+
+The integrator alone commits to `master` and pushes it to `origin`.
+Workers leave their changes in isolated worktrees for review.
+Each checkpoint is committed and pushed as soon as its checks pass.
+`docs/GIT_OPERATIONS.md` defines the complete procedure and history rules.
 
 ## Stop and continuation rules
 

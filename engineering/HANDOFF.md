@@ -44,6 +44,9 @@ node tools/fairpane.mjs next
 
 ## Owner decisions
 
-The outbound license and public distribution authority remain open.
-The Git history uses the owner's configured identity and has no remote.
-These decisions do not prevent local implementation and testing.
+The owner made the repository public at <https://github.com/mattneel/fairpane> on October 8, 2026.
+The owner authorized continuous commits and pushes to `master` on `origin`.
+`docs/GIT_OPERATIONS.md` records the Git and GitHub rules.
+The owner requested public documentation as an mdBook site on GitHub Pages, deployed by GitHub Actions.
+The outbound license remains open.
+The Git history uses the owner's configured identity.

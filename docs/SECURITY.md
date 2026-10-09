@@ -44,8 +44,8 @@ The bootstrap cannot enforce independent acceptance inside that same trust bound
 
 A later qualification runner uses protected policy and immutable inputs outside implementation workspaces.
 Signed results identify the worker source, policy revision, and test corpus.
-Public branch protections require explicit repository administration.
-This archive does not pretend to configure a remote repository that does not exist.
+The public repository is <https://github.com/mattneel/fairpane>.
+Branch protections remain owner-controlled repository settings, as `docs/GIT_OPERATIONS.md` records.
 
 ## Vulnerability operations
 

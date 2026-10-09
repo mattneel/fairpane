@@ -2,8 +2,10 @@
 
 ## Current status
 
-The public contribution process begins after the owner ratifies the license and repository location.
+The project develops in public at <https://github.com/mattneel/fairpane> on the `master` branch.
+External contributions wait until the owner ratifies the outbound license.
 The following engineering rules apply to local agent work now.
+Every commit and push follows `docs/GIT_OPERATIONS.md`.
 
 ## Contribution procedure
 
