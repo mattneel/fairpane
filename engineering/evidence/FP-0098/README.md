@@ -144,7 +144,7 @@ No log was deleted or overwritten.
 | `raw/mutation.log` | Two complete controls with the same one-line mutation. The first ran on `tools/lib.mjs` blob `53236eadfbca7ca428867d48944d2ec9ce3d1f40` with `raw/mutation.diff`; the second ran on the final blob `ef00cf6d3dfae846f97f99a9b9950d2b98a8f043` with `raw/mutation-final.diff`. Each records `git hash-object` (0), the mutation (0), `git hash-object` (0), `git diff --no-index` (1, because the files differ), `node tools/selftest.mjs` (1, with cases FP-0098 1 and 2 failing and 208 cases passing), the restoration (0), and `git hash-object` (0) showing the original blob. |
 | `raw/fmt.log` | `exit_code` 0 for `zig fmt --check build.zig src tests` and for `zig fmt --check tools/zig`. |
 | `raw/controller-tests-after.log` | `exit_code` 0 for `node tools/fairpane.mjs test`, with 210 of 210 cases, including FP-0098 cases 1 to 3; then `git hash-object` (0) and `node --version` (0). |
-| `raw/linux-node-probe.log` | `exit_code` 127 for a WSL probe for Node, which WSL Ubuntu lacks, and 0 for a probe of `uname`, `curl`, and the home directory. |
+| `raw/linux-node-probe.log` | Removed by the integrator after `9d5638b`; see "Open items". The probe found no `node` on the WSL `PATH` (`exit_code` 127), which is why the Linux run below downloads its own Node. |
 | `raw/linux-controller-tests.log` | `exit_code` 0 for the download, SHA-256 check, and extraction of Node v24.21.0 for Linux x64 into `out/fp0098-linux`. Then `node tools/selftest.mjs` under WSL Ubuntu (Linux 7.2.6) exits with 1: 209 of 210 cases pass, including FP-0098 cases 1 to 3 through `/proc`. The one failure is case 13 of the attestation tests, because this working tree's Git alternates file names the Windows path `C:\src\fairpane\.git\objects`, which Linux Git cannot open; it is unrelated to this task. |
 
 ### Red baseline
@@ -167,5 +167,15 @@ No log was deleted or overwritten.
 - The integrator runs the ten dispatched `Gates` runs and records each Windows and Linux `zig-test` duration in `ci/README.md`.
   The task is accepted only if the slowest is at most 400 seconds and every run passes.
 - [INFERENCE] The jump at `ef8ad1c` from 119 to 573 seconds on Windows fits the 167-second local cost of case 46, but no CI record decides the cause of the three timed-out runs.
-- `raw/linux-node-probe.log` lists the names in the WSL user's home directory, which the probe did not need.
-  The integrator may decide whether that log belongs in the commit.
+- The worker's `raw/linux-node-probe.log` listed every name in the WSL user's home directory, which the probe did not need and which included unrelated private file and project names.
+  It landed in the public commit `9d5638b`, and the integrator removed it from the tree in the next evidence commit.
+  It stays in Git history unless the owner chooses to rewrite history, which only the owner may authorize.
+
+## Integration
+
+The integrator applied the worker's patch, without the FP-0064 files that the worker's tree had copied from the integrator's uncommitted work, and committed it alone as `9d5638b`.
+
+- `raw/integration-binding.log` records `HEAD` `9d5638b` and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
+- `gates/2026-10-09T14-06-03-411Z-repo-check-ec5516bd.json`, `gates/2026-10-09T14-06-03-775Z-controller-test-2e778742.json`, `gates/2026-10-09T14-06-49-061Z-zig-fmt-4639710b.json`, and `gates/2026-10-09T14-06-49-319Z-zig-test-ba3f7be3.json` pass.
+- `raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0098-integration`: 65 of 65 build steps and 300 of 300 tests pass in about 36 seconds.
+- `raw/bun-selftest.log` records Bun 1.4.2 and `tools/selftest.mjs` with 212 of 212 tests.
