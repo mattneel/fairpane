@@ -1,0 +1,36 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0028/controls/mutants.mjs"]
+template files: 597
+BASELINE exit 0: 143 tests, 0 failing
+KILLED resolution searches the working directory first: not ok 108 - Executable resolution never searches the process working directory
+  message: "Missing expected exception."
+KILLED record logs the unresolved name: not ok 109 - A bare executable name is logged as its resolved absolute path
+  message: "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'node'\n- 'C:\\\\nvm4w\\\\nodejs\\\\node.exe'\n"
+KILLED copy failure is swallowed: not ok 105 - A failed output copy is recorded and its capture directory is removed
+  message: "The \"string\" argument must be of type string. Received type object (null)"
+KILLED capture directory is kept: not ok 107 - A completed command leaves no capture directory
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   'fairpane-capture-6D2y5w'\n+ ]\n- []\n"
+KILLED record omits the working directory: not ok 103 - Command records carry the working directory and start time
+  message: "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-controller-AMw5cE'\n"
+KILLED every gate receives the cache override: not ok 112 - Only Zig and C ABI gates receive the repository-local compiler cache
+  message: "Expected values to be strictly equal:\n+ actual - expected\n\n+ {\n+   ZIG_GLOBAL_CACHE_DIR: 'C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-controller-7b1lo1\\\\.zig-cache\\\\global'\n+ }\n- undefined\n"
+KILLED capture-start failure skips the RESULT line and leaves the log open: not ok 113 - A capture-start failure writes a RESULT line, closes the log, and returns an error result
+  message: "Cannot read properties of undefined (reading 'slice')"
+KILLED a failed RESULT write throws: not ok 114 - A failed RESULT write returns an error result instead of throwing
+  message: "forced result write failure"
+KILLED a spawn error drops the capture error: not ok 115 - A spawn error and a capture error both remain in the result
+  message: "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'spawn C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-controller-6pizmg\\\\absent-executable ENOENT'\n- 'spawn C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-controller-6pizmg\\\\absent-executable ENOENT Output capture failed: forced capture read failure'\n"
+KILLED runGate writes its log before path validation: not ok 116 - runGate writes nothing when its evidence directory fails validation
+  message: "tools\n+ actual - expected\n\n  [\n    'engineering',\n    'engineering\\\\gates.json',\n    'engineering\\\\policy.json',\n    'input.txt',\n    'tools',\n+   'tools\\\\2026-10-09T03-00-52-621Z-fixture-08f9e20d.log',\n    'tools\\\\fairpane.mjs'\n  ]\n"
+KILLED a short log write is ignored: not ok 117 - A short write to the log produces an error result
+  message: "COMMAND: null"
+KILLED a failed capture-directory removal is silent: not ok 118 - A failed capture-directory removal appears in the command record
+  message: "Expected values to be strictly equal:\n+ actual - expected\n\n+ null\n- 'Capture directory removal failed: forced removal failure'\n"
+KILLED a busy capture directory gets no second attempt: not ok 119 - A busy capture directory is removed on a later attempt, and the last failure is recorded
+  message: "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Capture directory removal failed: forced busy removal'\n- null\n"
+KILLED the log stays open after the RESULT line: not ok 113 - A capture-start failure writes a RESULT line, closes the log, and returns an error result
+  message: "The log descriptor stayed open."
+KILLED started_at uses local time text: not ok 120 - started_at in every command record is a canonical UTC ISO 8601 timestamp
+  message: "{\"executable\":\"C:\\\\nvm4w\\\\nodejs\\\\node.exe\",\"arguments\":[\"-e\",\"\"],\"cwd\":\"C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-controller-iFrpG7\",\"started_at\":\"Thu Oct 08 2026 23:02:50 GMT-0400 (Eastern Daylight Time)\",\"exit_code\":0,\"signal\":null,\"timed_out\":false,\"error\":null,\"duration_ms\":32}"
+mutants: 15, killed: 15, survived: 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0028/controls/mutants.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:57:09.758Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":358812}

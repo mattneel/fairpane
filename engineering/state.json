@@ -570,12 +570,20 @@
       ]
     },
     "FP-0053": {
-      "status": "planned",
-      "owner": null,
-      "evidence": [],
+      "status": "implemented",
+      "owner": "root-integrator",
+      "evidence": [
+        "engineering/evidence/FP-0053/README.md",
+        "engineering/evidence/FP-0053/gates/2026-10-09T02-56-24-373Z-repo-check-5bca9917.json",
+        "engineering/evidence/FP-0053/gates/2026-10-09T02-56-24-558Z-controller-test-d8c85c29.json",
+        "engineering/evidence/FP-0053/raw/tests-before.log",
+        "engineering/evidence/FP-0053/raw/mutation-control.log"
+      ],
       "review": null,
       "notes": [
-        "Created from the minor finding and notes in engineering/evidence/FP-0031/reviews/review-1-accept.json."
+        "Created from the minor finding and notes in engineering/evidence/FP-0031/reviews/review-1-accept.json.",
+        "The frozen contract is engineering/evidence/FP-0053/CONTRACT.md, based on commit 101ba28.",
+        "Commit 8af0f20 implements it with 143 of 143 controller tests and 15 of 15 mutants killed. Awaiting fairpane-review."
       ]
     }
   }
