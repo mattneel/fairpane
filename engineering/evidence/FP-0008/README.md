@@ -184,3 +184,21 @@ The integrator's amendment 1 (commit `bcbe5a4` on `master`) resolved it without 
 4. The `derived` object of `entities.provenance.json` names the generator and the generated file `src/html/entities_table.zig`.
 5. `entities.LICENSE` already came from the frozen commit `efc54f7b70858d9fcf06d1a5871ae215f448c029`, so no refetch was needed.
    The fetch at `877d614` only wrote a comparison copy under `out/`, and both digests are recorded in `raw/entities-digest.log`.
+
+## Integration
+
+The integrator applied the patch without conflicts and committed it as `9fe40c4`.
+The integrator accepts the extra recorded network reads: the multipage index for `standard_last_updated`, `git ls-remote`, and a comparison copy of `LICENSE`.
+The recorded `standard_last_updated` is 9 October 2026, the date that the live standard showed at retrieval; the frozen text stays whatwg/html `efc54f7b`.
+
+One uninterrupted sequence ran on `9fe40c4`, with no commit or source edit during it.
+`raw/integration-binding.log` records `HEAD` `9fe40c4` and an empty status, including ignored files, for every source root before the gates, and both again after the last run.
+
+- `gates/2026-10-09T10-58-41-126Z-repo-check-8a3b6dbc.json`
+- `gates/2026-10-09T10-58-41-501Z-controller-test-f4534244.json`, with 188 of 188 controller tests.
+- `gates/2026-10-09T10-59-14-986Z-zig-fmt-bcc94310.json`
+- `gates/2026-10-09T10-59-15-244Z-zig-test-a68becf5.json`
+
+`raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0008-integration-cache` and the recorded override `ZIG_GLOBAL_CACHE_DIR`: 65 of 65 build steps and 218 of 218 tests, which include the FP-0013 revision 1 tests that landed after the worker's base.
+`raw/integration-bun.log` records Bun 1.4.2 with 188 of 188 controller tests.
+After the sequence, `raw/integration-entities-regenerate.log` records `zig build entities-generate` with exit status 0 and `git diff --exit-code` of `src/html/entities_table.zig` with exit status 0, so the committed table is reproducible.

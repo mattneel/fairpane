@@ -141,13 +141,24 @@
       ]
     },
     "FP-0008": {
-      "status": "active",
-      "owner": "fairpane-core worker FP0008Html",
-      "evidence": [],
+      "status": "implemented",
+      "owner": "fairpane-core worker FP0008Html, integrated by root-integrator",
+      "evidence": [
+        "engineering/evidence/FP-0008/README.md",
+        "engineering/evidence/FP-0008/gates/2026-10-09T10-58-41-126Z-repo-check-8a3b6dbc.json",
+        "engineering/evidence/FP-0008/gates/2026-10-09T10-58-41-501Z-controller-test-f4534244.json",
+        "engineering/evidence/FP-0008/gates/2026-10-09T10-59-14-986Z-zig-fmt-bcc94310.json",
+        "engineering/evidence/FP-0008/gates/2026-10-09T10-59-15-244Z-zig-test-a68becf5.json",
+        "engineering/evidence/FP-0008/raw/tests-before.log",
+        "engineering/evidence/FP-0008/raw/mutation-pending-cr.log",
+        "engineering/evidence/FP-0008/raw/integration-tests.log",
+        "engineering/evidence/FP-0008/raw/integration-entities-regenerate.log"
+      ],
       "review": null,
       "notes": [
         "The frozen contract is engineering/evidence/FP-0008/CONTRACT.md, drafted by worker FP0008Contract and frozen by the root integrator on the accepted FP-0054 base.",
-        "It freezes the HTML Standard at whatwg/html efc54f7b; raw/html-standard-pin.log records the source digest."
+        "It freezes the HTML Standard at whatwg/html efc54f7b; raw/html-standard-pin.log records the source digest. Integrator amendment 1 (bcbe5a4) replaced the named build import with a committed generated table.",
+        "Commit 9fe40c4 implements it with 188 of 188 controller tests and 218 of 218 Zig tests. Awaiting fairpane-review."
       ]
     },
     "FP-0009": {
