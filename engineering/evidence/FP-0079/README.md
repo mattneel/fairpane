@@ -18,7 +18,7 @@ This task adds no wrapper code and makes no support claim for the Rust wrapper.
 | Install under `.tools` with size and digest checks and no global change | Cases 5, 6, and 7, controls M3 and M4, `raw/install-rust.log`, and `raw/global-state.log`. |
 | Name the locked version in `rust-toolchain.toml` and check it | Case 3 and control M2. |
 | Execute the installed toolchain on Windows and Linux | Case 8, `raw/toolchain-versions.log`, `raw/toolchain-smoke.log`, and the `raw/linux-*` logs. |
-| Protect the lock and the selection file | Policy change P1 and the integration gates on its head. The integrator lands both. |
+| Protect the lock and the selection file | Policy change P1 (`9fb8d8f`) protects the lock, and P2 (`2e07f89`) protects `rust-toolchain.toml`, which P1 had only made a policy root; the integration gates ran on the P1 head and on a head that contains P2. |
 
 ## Records
 
@@ -319,3 +319,10 @@ The integrator landed policy change P1 as `9fb8d8f`, which cites both acceptance
 - `raw/integration-binding.log` records `HEAD` `9fb8d8f` and a status that includes ignored files for every source root of the new policy, before and after the runs below; both statuses are empty.
 - `gates/2026-10-09T13-58-47-056Z-repo-check-f14a0604.json` and `gates/2026-10-09T13-58-47-436Z-controller-test-a7bcec78.json` pass.
 - `raw/bun-selftest.log` records Bun 1.4.2 and `tools/selftest.mjs` with 209 of 209 tests.
+
+Plan review 3 found that P1 left `rust-toolchain.toml` out of `protected_paths`, so criterion 6 held for the lock alone.
+`reviews/policy-p2-approve.json` approves P2, which adds it, and the integrator landed P2 alone as `2e07f89`.
+
+- `raw/integration-binding-p2.log` records `HEAD` `1a15063`, which contains P2, and an empty status that includes ignored files for every source root, before and after the runs below.
+- `gates/2026-10-09T17-25-55-745Z-repo-check-4031b2bc.json` and `gates/2026-10-09T17-25-56-127Z-controller-test-3ee9a861.json` pass with the P2 policy digest.
+- `raw/bun-selftest-p2.log` records Bun and `tools/selftest.mjs` with 236 of 236 tests.
