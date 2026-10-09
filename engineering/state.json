@@ -643,23 +643,25 @@
       ]
     },
     "FP-0054": {
-      "status": "active",
+      "status": "implemented",
       "owner": "fairpane-core worker FP0054R1, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0054/README.md",
-        "engineering/evidence/FP-0054/gates/2026-10-09T09-30-14-403Z-repo-check-36895c39.json",
-        "engineering/evidence/FP-0054/gates/2026-10-09T09-30-14-629Z-controller-test-3bd5fe05.json",
-        "engineering/evidence/FP-0054/gates/2026-10-09T09-30-38-580Z-zig-fmt-d934cf34.json",
-        "engineering/evidence/FP-0054/gates/2026-10-09T09-30-38-772Z-zig-test-f29ff3ec.json",
-        "engineering/evidence/FP-0054/raw/tests-before.log",
-        "engineering/evidence/FP-0054/raw/integration-tests.log"
+        "engineering/evidence/FP-0054/gates/2026-10-09T10-02-10-701Z-repo-check-d21465f7.json",
+        "engineering/evidence/FP-0054/gates/2026-10-09T10-02-11-009Z-controller-test-964bb3a4.json",
+        "engineering/evidence/FP-0054/gates/2026-10-09T10-02-48-555Z-zig-fmt-521f1a7c.json",
+        "engineering/evidence/FP-0054/gates/2026-10-09T10-02-48-799Z-zig-test-2c060ba1.json",
+        "engineering/evidence/FP-0054/raw/tests-before-r1.log",
+        "engineering/evidence/FP-0054/raw/mutation-r1.log",
+        "engineering/evidence/FP-0054/raw/r1-integration-tests.log"
       ],
       "review": null,
       "notes": [
         "Created from the minor findings and notes in the FP-0007 and FP-0053 review-1 records.",
         "The frozen contract is engineering/evidence/FP-0054/CONTRACT.md, based on commit ab2e2ed.",
         "Commit 0dda99b implements it with 158 of 158 controller tests and 136 of 136 Zig tests.",
-        "fairpane-review rejected 0dda99b and 6f515b3 in reviews/review-1-reject.json because the output guard compares path strings, not file identities. Contract revision 1 is frozen in 005ef1e."
+        "fairpane-review rejected 0dda99b and 6f515b3 in reviews/review-1-reject.json because the output guard compares path strings, not file identities. Contract revision 1 is frozen in 005ef1e.",
+        "Commit 78c8f7d implements revision 1 with 181 of 181 controller tests and 177 of 177 Zig tests. Awaiting fairpane-review."
       ]
     },
     "FP-0055": {

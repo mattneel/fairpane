@@ -142,3 +142,19 @@ That command exits with status 1 because the files differ.
   Control 2 left both oversized files in `out/fp0054-r1-mutation-2`, and they were removed by hand after the run.
 - FP-0054 case 5 keeps its `WriteFiles` copy unchanged, because revision 1 changes only the cases that it adds.
 - The contract states that opening follows symbolic links, but no revision 1 case creates a symbolic link, so no test covers that path.
+
+### Integration
+
+The integrator applied the patch without conflicts and committed it as `78c8f7d`.
+The integrator accepts the case 3 resolution: the requirement exists to show that case 3 detects a guard without identities, and control 4 shows that.
+The deleted failed attempts at `raw/tests-before-r1.log` were harness setup failures that the worker disclosed above; no test result was replaced.
+
+`raw/r1-integration-binding.log` records `HEAD` `78c8f7d` and an empty status, including ignored files, for every source root before the gates and again after the last run.
+
+- `gates/2026-10-09T10-02-10-701Z-repo-check-d21465f7.json`
+- `gates/2026-10-09T10-02-11-009Z-controller-test-964bb3a4.json`, with 181 of 181 controller tests.
+- `gates/2026-10-09T10-02-48-555Z-zig-fmt-521f1a7c.json`
+- `gates/2026-10-09T10-02-48-799Z-zig-test-2c060ba1.json`
+
+`raw/r1-integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0054-r1-integration-cache` and the recorded override `ZIG_GLOBAL_CACHE_DIR`: 58 of 58 build steps and 177 of 177 tests.
+`raw/r1-integration-bun.log` records Bun 1.4.2 with 181 of 181 controller tests.
