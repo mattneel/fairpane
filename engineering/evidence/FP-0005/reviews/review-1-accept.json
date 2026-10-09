@@ -1,0 +1,139 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "9e073e2"
+  ],
+  "summary": "I found no blocker or major defects in src/web_string.zig. I traced all sixteen contract cases by hand against the code, and each produces the contract's exact output. The decoder follows the WHATWG UTF-8 state machine step by step. That includes the E0/ED/F0/F4 boundaries, leaving the offending byte in the stream, and reporting exactly one error at end of input. Allocation discipline holds: each result gets one allocation of exactly the needed length, nothing is allocated before validation passes, empty results never allocate, the UTF-8 output length is computed with a checked add, and deinit on an empty string does nothing. All five gate receipts bind source digest 236167df…89af4 and policy digest a62931e5…a8f. The raw logs show the claimed exit statuses: before 1 (23 compile errors), mutation 1 (35/38 passed, cases 6, 7 and 16 failed), and after 0 (38/38). I had no shell, so I could not recompute the digest or confirm that the working-tree file matches commit 9e073e2. Every finding is minor or a note, and all of them are gaps in test coverage or evidence rather than code defects. The biggest gap is that no test feeds F0 with a following byte in 80–8F. Deleting the F0 lower-boundary line, which would accept overlong 4-byte sequences, would therefore pass every test.",
+  "criteria": [
+    {
+      "criterion": "Plan: Preserve arbitrary UTF-16 code units, including isolated surrogates.",
+      "met": true,
+      "evidence": "WebString.units is a []const u16 that fromCodeUnits copies exactly (joinUnits, lines 140-148). Test 1 checks {0x41,0xD800,0,0xDC00,0xDC00,0xD800} and that the result is a copy, not the caller's buffer. Test 12 keeps a lone surrogate after slicing a pair."
+    },
+    {
+      "criterion": "Plan: Define ownership and explicit UTF-8 convenience conversions.",
+      "met": true,
+      "evidence": "Doc comments on WebString say the caller passes the same allocator to every allocating function and to deinit. The four conversions have explicit names: fromUtf8 (strict, InvalidUtf8), fromUtf8Lossy (WHATWG with U+FFFD), toUtf8Alloc (strict, UnpairedSurrogate) and toUtf8LossyAlloc (Infra scalar value string)."
+    },
+    {
+      "criterion": "Plan: Test empty strings, embedded zero, surrogates, normalization differences, and failed allocation.",
+      "met": true,
+      "evidence": "Empty strings: test 2, using testing.failing_allocator. Its fail_index is 0 and it sits on a zero-byte FixedBufferAllocator (std/testing.zig:14-18). Embedded zero: tests 1 and 3. Surrogates: tests 1, 8, 9, 12 and 15. Normalization: test 10. Failed allocation: test 16 with checkAllAllocationFailures, which also fails on swallowed out-of-memory errors and on leaks (std/testing.zig:1158-1185)."
+    },
+    {
+      "criterion": "Plan: Keep code-unit and byte offsets distinct in types or API names.",
+      "met": true,
+      "evidence": "CodeUnitIndex and Utf8ByteIndex are distinct non-exhaustive enum(usize) types (lines 10-13). slice, codeUnitAt, codeUnitIndexForUtf8Offset and utf8OffsetForCodeUnitIndex take and return these types."
+    },
+    {
+      "criterion": "Contract cases 1-4 (preservation, empty with failing allocator, NUL round trip, C3A9/F09F9880/F48FBFBF)",
+      "met": true,
+      "evidence": "Tests 1-4 at lines 403-452 use the contract's exact inputs and outputs. Test 2 also checks codeUnitAt(0)==null and that both UTF-8 encodings return empty slices without allocating."
+    },
+    {
+      "criterion": "Contract case 5 (seven ill-formed inputs return InvalidUtf8, no leaks)",
+      "met": true,
+      "evidence": "Line 456 uses all seven inputs with testing.allocator. fromUtf8 returns the error during the counting pass at line 64, before any allocation."
+    },
+    {
+      "criterion": "Contract cases 6-7 (WHATWG lossy decoding with byte restoration and maximal subparts)",
+      "met": true,
+      "evidence": "Hand trace of case 6: 61→a; F1 80 80 then E1 is out of range → FFFD with E1 restored; E1 80 then C2 → FFFD with C2 restored; C2 then 62 → FFFD with 62 restored; 62→b; 80→FFFD; 63→c; 80→FFFD; BF→FFFD; 64→d. That is the contract's 10 units. Case 7 gives 3, 4, 2 and 1 replacements. The mutation log shows that consuming the offending byte instead turns case 6 into 9 units, which matches a hand trace of that mutation."
+    },
+    {
+      "criterion": "Contract cases 8-9 (strict and lossy UTF-8 encoding)",
+      "met": true,
+      "evidence": "CodePointIterator implements CodePointAt pairing. toUtf8Alloc rejects every surrogate code point at line 118. toUtf8LossyAlloc maps each one through toScalar to EF BF BD. Tests 8 and 9 use the exact inputs."
+    },
+    {
+      "criterion": "Contract cases 10-11 (eql and order by code unit)",
+      "met": true,
+      "evidence": "View.order uses std.mem.order(u16), which compares lexicographically by code unit with the shorter prefix first, matching IsLessThan for strings. 0xE9>0x65 gives .gt, and 0xFF61>0xD83D gives .gt."
+    },
+    {
+      "criterion": "Contract cases 12-13 (slice and concat)",
+      "met": true,
+      "evidence": "slice checks first>last or last>len before any allocation (line 108). concat copies both views into one allocation. Tests 12 and 13 use the exact bounds."
+    },
+    {
+      "criterion": "Contract cases 14-15 (offset conversion)",
+      "met": true,
+      "evidence": "Tracing \"a é 😀 b\" gives offsets 0,1,3,7,8 → 0,1,2,4,5. Offsets 2,4,5,6 never match decoder.index, so they return NotScalarBoundary, and 9 returns OutOfBounds. On the decoded view, index 3 lands inside the pair (code_points.index 4 > 3) and index 6 is beyond length 5. For {D800,61}, index 2 hits D800 first and returns UnpairedSurrogate. An extra test covers the inverse mapping, including the end index 5→8."
+    },
+    {
+      "criterion": "Contract case 16 (all eight allocating operations under induced failure)",
+      "met": true,
+      "evidence": "allocationFailureScenario (line 564) calls fromCodeUnits, fromUtf8, fromUtf8Lossy, clone, concat, slice, toUtf8Alloc and toUtf8LossyAlloc on non-empty data. Each therefore allocates once and is made to fail once."
+    },
+    {
+      "criterion": "Check 2: WHATWG decoder state machine exactness",
+      "met": true,
+      "evidence": "Each call to next() starts in the initial state, which is valid because the spec resets after every emitted code point and every error. Lead-byte ranges, boundaries and bit masks match the spec. An out-of-range byte returns failure without advancing index, which restores it. End of input with bytes pending returns one failure, and the next call returns null. My extra hand traces: E0 9F 80 → 3×FFFD; ED 9F BF → U+D7FF; F0 8F → 2×FFFD; F0 90 80 <EOF> → 1×FFFD; C2 41 → FFFD, A; DE 00 FF → FFFD, U+0000, FFFD; F5 → FFFD. All match the spec."
+    },
+    {
+      "criterion": "Check 3: Allocation discipline",
+      "met": true,
+      "evidence": "There is one gpa.alloc per operation, sized by a counting pass, and std.debug.assert(written == len) checks the length. fromUtf8 and toUtf8Alloc validate before allocating. Empty results return `empty` or &.{} without calling the allocator. Allocator.free returns early on zero length (Allocator.zig:474), and deinit additionally skips it. The UTF-8 output length uses checked addLength, and its overflow becomes OutOfMemory. UTF-16 lengths are bounded by the input length (at most one unit per input byte), and gpa.alloc catches overflow in the n*2 byte size."
+    },
+    {
+      "criterion": "Check 4: Offset conversion semantics and error precedence",
+      "met": true,
+      "evidence": "codeUnitIndexForUtf8Offset validates the whole input first: InvalidUtf8, then OutOfBounds, then NotScalarBoundary. Its doc comment documents this ('Ill-formed input returns error.InvalidUtf8 for every offset'). utf8OffsetForCodeUnitIndex checks OutOfBounds first, then walks the prefix: UnpairedSurrogate for a lone surrogate before the target, InsideSurrogatePair when the target splits a pair. This is consistent with the contract and the doc comments."
+    },
+    {
+      "criterion": "Check 5: Evidence logs and digest binding",
+      "met": true,
+      "evidence": "All five receipts (repo-check, controller-test, zig-fmt, zig-test, zig-build) have status pass with exit_code 0. Each has identical source_before and source_after sha256 236167df5e6347b70e81ba835fffbfcf42e40382479df49c69a6d02d4db89af4 and policy a62931e5…a8f. The raw logs show the locked compiler path and the claimed exit statuses and counts. state.json says 'implemented' with review null, so nothing claims acceptance. I did not recompute the digest myself."
+    },
+    {
+      "criterion": "Check 6: Tests catch plausible regressions",
+      "met": true,
+      "evidence": "The recorded mutation (consuming the offending byte) fails 3 tests. By reasoning, these regressions are also caught: dropping the E0, ED or F4 boundary (tests 5 and 7); accepting C0/C1 (C0 AF); not reporting the error at end of input (E2 82); mis-pairing reversed surrogates ({DC00,D800}); counting lossy output lengths wrongly (tests 9 and 16). The gaps are listed as minor findings."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "src/web_string.zig",
+      "line": 265,
+      "issue": "No test exercises the F0 lower boundary. Deleting `if (byte == 0xF0) lower_boundary = 0x90;` would make the decoder accept overlong 4-byte sequences such as F0 80 80 80 → U+0000, and all 38 tests would still pass. The check E0 80 AF guards E0, ED A0 80 guards ED and F4 90 80 80 guards F4, but nothing guards F0. Reproduction by reasoning: with that line removed, fromUtf8(\"\\xF0\\x80\\x80\\x80\") returns {0x0000} instead of error.InvalidUtf8.",
+      "recommendation": "In a contract revision, add F0 80 80 80 and F0 8F BF BF to the strict-rejection and lossy maximal-subpart cases. Also add positive edge cases E0 A0 80 (U+0800), ED 9F BF (U+D7FF) and F0 90 80 80 (U+10000), so that off-by-one boundary values are caught too."
+    },
+    {
+      "severity": "minor",
+      "path": "src/web_string.zig",
+      "line": 256,
+      "issue": "No test rejects lead bytes F5–FE. The only one tested is FF. A regression that widens the four-byte lead range to F0...F7 would pass every test. It would then decode F5 80 80 80 to a code point above 0x10FFFF and trip the @intCast in writeUtf16. That is a panic in safe builds and wrong output in ReleaseFast.",
+      "recommendation": "Add F5 80 80 80 (strict error, and 4×FFFD lossy) and C1 BF to the decoder cases."
+    },
+    {
+      "severity": "minor",
+      "path": "src/web_string.zig",
+      "line": 199,
+      "issue": "No test covers the error.InvalidUtf8 path of codeUnitIndexForUtf8Offset, nor its documented precedence (InvalidUtf8 before OutOfBounds). A regression that counts a decoder failure as one unit, the way the lossy decoder does, would pass every test.",
+      "recommendation": "Add a case such as codeUnitIndexForUtf8Offset(\"a\\x80\", 1) and offset 5 on the same input, both expecting error.InvalidUtf8."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0005/raw/mutation-restore.log",
+      "line": null,
+      "issue": "The mutation log records the test results but not the mutated source or a diff. The README describes the mutation in prose. The observed 9-unit output for case 6 is consistent with that description by hand trace, but the mutation itself cannot be re-applied from the record.",
+      "recommendation": "Store the mutation diff next to the log in future mutation controls."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0005/raw/integration-tests.log",
+      "line": null,
+      "issue": "The 38/38 test count comes from a raw record, not a gate receipt, so it carries no source digest. Its timestamp (01:27:12) follows the gate runs, and its working directory is C:\\src\\fairpane, so it very likely ran on the same tree, but the record does not prove it. The README states this limit.",
+      "recommendation": "Consider a gate variant that runs `zig build test --summary all`, so the test count is bound to the source digest."
+    },
+    {
+      "severity": "note",
+      "path": "src/web_string.zig",
+      "line": 141,
+      "issue": "`a.len + b.len` in joinUnits is an unchecked add. It cannot overflow for real u16 slices, because each is under 2^63 elements. It differs from the checked addLength used for UTF-8 output lengths.",
+      "recommendation": "No change is required. Optionally use addLength here for consistency."
+    }
+  ],
+  "commands_run": []
+}

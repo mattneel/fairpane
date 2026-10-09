@@ -2320,6 +2320,54 @@
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0047",
+      "title": "Close the FP-0005 review findings",
+      "workstream": "substrate",
+      "depends_on": [
+        "FP-0005"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "tests",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Reject F0 80 80 80 and F0 8F BF BF in strict UTF-8 decoding.",
+        "Replace each maximal subpart of F0 80 80 80 and F0 8F BF BF with U+FFFD in lossy decoding.",
+        "Decode E0 A0 80, ED 9F BF, and F0 90 80 80 to U+0800, U+D7FF, and U+10000.",
+        "Reject F5 80 80 80 and C1 BF in strict decoding.",
+        "Replace F5 80 80 80 with four U+FFFD units and C1 BF with two in lossy decoding.",
+        "Test that codeUnitIndexForUtf8Offset returns InvalidUtf8 for ill-formed input before it reports OutOfBounds.",
+        "Store the source diff of each mutation control beside its log.",
+        "Show through a mutation control that removing the F0 lower boundary fails a test."
+      ],
+      "read": [
+        "engineering/evidence/FP-0005/reviews/review-1-accept.json",
+        "engineering/evidence/FP-0005/CONTRACT.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
   ]
 }
