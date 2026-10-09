@@ -1,0 +1,62 @@
+{
+  "verdict": "accept",
+  "summary": "I reviewed this statically. I read `src/js/lexer.zig` and `src/js/parser.zig` (the statement, expression, object, cover-grammar, and strict-retroactive paths), the frozen cases in `CONTRACT.md` and their copies in `parser.zig`, the oracle script and log, the census output, and `engineering/plan.json`. I compared them with the live ECMA-262 multipage draft fetched today, the ECMAScript 2027 draft (chapters 8, 10, 11, 12, 13, 14, 15, 16, and Annex B). I ran no build, test, or census.\n\n(1) All 55 case 2 rows, 117 case 6 rows, and 75 case 7 rows agree with ECMA-262 plus Annex B on validity. Every decoded value I recomputed matches: SV, NumericValue, PropName, VarDeclaredNames, and the functionsToInitialize lists of 16.1.7 and 10.2.11. Every offset I recomputed also matches. The only offset disagreements are with the contract's own code definitions, never with the specification.\n\n(2) I read the code for every boundary listed in item 2 and found no case where the parser reports a syntax error that the full language accepts. This covers contextual words, `let [` and `let` before a line terminator, regex versus division, ASI and restricted productions including `++`/`--`, HTML-like comments including `-->` after a multi-line comment with a line terminator, legacy octal literals and escapes with a retroactive Use Strict Directive, escaped keywords, the Annex B function, catch, and for-in forms, the cover-grammar `__proto__` and CoverInitializedName handling, strict-only binding errors, jump placement, and `new.target`. The lexer always scans `/` as a punctuator, and the parser stops at a regex-position `/` before requesting a later token. The `line_start` flag matches the B.1.1 HTMLCloseComment contexts, including the start of input. The pending cover-error mechanism defers through parentheses before `=>`, for-in and for-of heads, `async(...)` arguments, and nested object values. It saves and restores the outer pending error across nested assignment, for-head, and parenthesis frames, so a nested function body does not fail on it.\n\n(3) The Annex B numbers (B.1.1, B.3.1 to B.3.5, B.3.9) and the cited sections exist with the stated content in the draft. A few citations are imprecise; see the minor findings.\n\n(4) `raw/oracle-v8.log` disagrees only on E54, E55, and E56. Section 8.6.4 returns web-compat for a call target only when IsStrict is false and otherwise returns invalid, and 13.15.1 and 13.4.1 make invalid an early error. V8 accepting these three is therefore a deviation from the specification.\n\n(5) The four `proposal_mismatch` records in `out/fp0082-census.jsonl` are the decorator `identifier-reference-yield` tests. Each has `features: [class, decorators]`, and `decorators` is under `## Proposed language features` in the extracted, blob-verified `features.txt`.\n\n(6) Every unsupported code names one of FP-0086 to FP-0097. Each of those tasks exists in `plan.json`, and its acceptance explicitly removes that code and covers the construct.\n\nNo blocker or major finding remains.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0082/CONTRACT.md",
+      "line": 565,
+      "issue": "E96 freezes `()` as `syntax-error unexpected_token @1`. ECMA-262 only requires an error, so validity is correct. However, the full grammar continues `(` with `)` (CoverParenthesizedExpressionAndArrowParameterList : `( )`, 13.2), and the parse first fails at the end of input. Under the contract's own definitions (`unexpected_token`: no production continues with this token; `unexpected_end`: input ends inside a production, offset = source length), the matching outcome is `syntax-error unexpected_end @2`. The implementation generalizes this, so `() + 1` and `(a,) + 1` also report at `)` rather than at the first failing token. The README records this as a resolved ambiguity instead of applying the stop rule.",
+      "recommendation": "Record an integrator amendment. Either change E96 to `unexpected_end @2` and report at the first token after `)` that is not `=>`, or reword the `unexpected_token` definition to cover the empty and trailing-comma parenthesis forms."
+    },
+    {
+      "severity": "minor",
+      "path": "src/js/parser.zig",
+      "line": 769,
+      "issue": "The comment says \"12.10 rule 3\" inserts a semicolon after the `)` of a do-while statement. In the pinned draft, that is the third condition of rule 1 in 12.10.1. Rule 3 covers restricted productions.",
+      "recommendation": "Change the comment to cite 12.10.1 rule 1, third condition."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0082/CONTRACT.md",
+      "line": 200,
+      "issue": "The contract places PropName in 13.2.5. In the pinned draft, PropName is 8.6.5 Static Semantics: PropName, and PropertyNameList is 13.2.5.4.",
+      "recommendation": "Cite PropName (8.6.5) and PropertyNameList (13.2.5.4)."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0082/CONTRACT.md",
+      "line": 267,
+      "issue": "`function_declaration_position` cites only the IsLabelledFunction early errors (14.6.1, 14.7.2.1, 14.7.3.1, 14.7.4.1) and 14.13.1. E62, E64, and E66 are grammar errors, not early errors. Statement does not derive FunctionDeclaration, and the ExpressionStatement lookahead (14.5) excludes `function`. B.3.3 applies only to non-strict code. The 14.11.1 and 14.7.5.1 IsLabelledFunction rules are omitted, which has no current effect because `with`, for-in, and for-of are unsupported.",
+      "recommendation": "Add 14.5 and B.3.3 (non-strict only) as the basis for the bare-declaration cases. Add 14.7.5.1 and 14.11.1 when FP-0087, FP-0088, or FP-0096 make those statements supported."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0082/README.md",
+      "line": 79,
+      "issue": "The README says the four proposal mismatches occur \"in both modes\". The census records show one non-strict run per file, because these tests are flagged `noStrict`. Four files times one run gives the four records.",
+      "recommendation": "Correct the sentence to say that each of the four noStrict files mismatches in non-strict mode only."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0082/CONTRACT.md",
+      "line": 20,
+      "issue": "The decision says the parser treats UTF-16 code units as code points \"as ECMA-262 section 11.1 does\". ParseText (11.1.6) applies StringToCodePoints (11.1.5) and CodePointAt (11.1.4), which combine a surrogate pair into one code point. Only a lone surrogate is its own code point. Validity is unaffected because every surrogate outside strings and comments yields `unsupported non_ascii_identifier`. The same wording appears in the `src/js/lexer.zig` module comment, line 4.",
+      "recommendation": "Reword: the parser reads code units, which matches 11.1 for every position where the FP-0082 subset accepts non-ASCII input. FP-0095 must pair surrogates per 11.1.4."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0082/CONTRACT.md",
+      "line": 594,
+      "issue": "U14 freezes `async (x) => x` at @0, the `async` token. The general rule at line 213 says the offset is the first code unit of the trigger token, and the `async_function` trigger text names `=>` as the trigger for this form. The README resolves this by reporting at `async`.",
+      "recommendation": "State explicitly in the trigger text that the offset of the `async (...) =>` form is the `async` token."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0082/CONTRACT.md",
+      "line": 516,
+      "issue": "E47 (`a + 1 = 2`) and E53 (`typeof a = 1`) fail the grammar at `=`; they are not AssignmentTargetType early errors under 13.15.1. The frozen code `invalid_assignment_target @0` is a naming convention. Validity agrees with the specification.",
+      "recommendation": "No change required. Optionally note in the code table that `invalid_assignment_target` also covers non-LeftHandSideExpression operands of assignment and update operators."
+    }
+  ]
+}

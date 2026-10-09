@@ -863,3 +863,102 @@ Required reviewers are `fairpane-review` and `fairpane-spec`.
 2. Control M1 cannot fail case 14 as frozen, as worker `FP0082Parser` reported.
    Case 14 asserts only that each random source yields an outcome and that `writeOutcome` succeeds without a panic or a leak, and treating U+2028 as white space changes outcomes without either.
    M1 must fail case 2 on row T31, which it does; case 14 stays a robustness property, and no requirement of the parser changes.
+
+## Revision 1
+
+Base: the commit that freezes this revision.
+Source findings: `reviews/review-1-reject.json` and `reviews/spec-review-1-accept.json`.
+Every section above stays in force except where this revision replaces it.
+Writable paths stay as above.
+
+### Integrator decisions
+
+- Review 1 rejected `5d41509` for two major findings.
+  `corpus-extract` checks path components only between `/` separators, while `path.join` on Windows also splits on `\`, so a hostile tree path such as `test/..\..\..\x.js` can write outside `out/`.
+  `duplicateParameter` compares every parameter with every earlier one, so a strict function with many parameters takes quadratic time.
+- Extraction and the Rust archive reader share one path rule.
+  The rule moves from `acceptedArchivePath` in `tools/rust.mjs` into one function in `tools` that returns the reason a path is rejected, or null.
+  `acceptedArchivePath` keeps its exact results and its message `The archive path is not accepted: <name>`, so FP-0079's cases pass unchanged.
+  FP-0099's later fix of the reserved-name comparison then applies to both readers.
+- Row E96 changes, as spec review 1 recommends.
+  The full grammar continues `( )` and `( Expression , )` only with `=>`, through CoverParenthesizedExpressionAndArrowParameterList (13.2).
+  The source therefore fails at the first token after the closing `)` that is not `=>`, with `unexpected_token`, or at the end of the input, with `unexpected_end` at the source length.
+  An `=>` there keeps reporting `unsupported arrow_function` at `=>`, as the `arrow_function` trigger states.
+- The note on `enum = 1` is decided by the code table, not by new behavior.
+  Rows E93 and E100 freeze `unexpected_token` for a ReservedWord at the start of a statement, so a ReservedWord where no production continues with it keeps `unexpected_token`.
+  The `unexpected_token` definition applies there, and `reserved_word` applies where a production expects an IdentifierReference, a BindingIdentifier, or a LabelIdentifier and finds a ReservedWord.
+- The census `agree_error` class stays as frozen.
+  Each census record already keeps the code and offset of every run, so a later audit can compare them with each test's intended error.
+- Spec review 1's citation findings correct the text above as follows; behavior is unchanged.
+  - Line 20: the parser reads UTF-16 code units, which matches 11.1 at every position where the subset accepts non-ASCII input, because a surrogate outside strings and comments yields `unsupported non_ascii_identifier`; FP-0095 pairs surrogates as 11.1.4 requires.
+  - PropName is 8.6.5, and PropertyNameList is 13.2.5.4.
+  - `function_declaration_position` also rests on 14.5, whose lookahead excludes `function` from an ExpressionStatement, and on B.3.3, which applies to non-strict code only; 14.7.5.1 and 14.11.1 join it when FP-0087, FP-0088, or FP-0096 make those statements supported.
+  - The `async_function` trigger reports the `async (...) =>` form at the `async` token, as row U14 freezes.
+  - `invalid_assignment_target` also covers an operand of an assignment or update operator that is not a LeftHandSideExpression, as rows E47 and E53 freeze.
+
+### Behavior
+
+- The shared path rule rejects, in this order, with these reasons:
+  1. a code unit from U+0000 to U+001F: `a control character`;
+  2. a `\` anywhere: `a backslash`;
+  3. a `:` anywhere: `a colon`;
+  4. then, for each `/`-separated component in order, an empty component: `an empty path component`; a `.` or `..` component: `a "." path component` or `a ".." path component`; a component that ends in `.` or a space: `a path component that ends in "." or a space`; and a component whose text before its first `.` is a reserved Windows device name, compared without regard to case: `a reserved Windows device name`.
+  A rejected extraction entry fails with `<path> has <reason>.` before any directory or file is created.
+- Before it writes a file, extraction also checks that the resolved file path starts with the resolved output directory followed by the path separator, and fails with `<path> resolves outside the output directory.` otherwise.
+- Before it writes anything, extraction compares the pinned commit's tree with `tree` in the snapshot record and recomputes the inventory with the function that `corpus-verify` uses.
+  A difference fails with `Corpus test262 failed extraction checks:` followed by one line per difference in the `corpus-verify` form, such as `- tree: recorded "<a>", found "<b>"` and `- inventory.sha256: recorded "<a>", found "<b>"`.
+- Duplicate parameters are found in time linear in the number of parameters, through a hashed set, and the reported offset stays the first parameter that repeats an earlier name.
+  A counter that only test builds compile counts the name comparisons of the duplicate check.
+- After `( )` or `( Expression , )`, a token other than `=>` reports `syntax-error unexpected_token` at that token, and the end of the input reports `syntax-error unexpected_end` at the source length.
+- `parse` allocates no write stack; the stack is allocated when a caller writes the tree.
+  `keywordOf` selects candidates by length and first code unit instead of scanning every keyword.
+  `scanNumber` passes the source slice to the numeric conversion when the literal has no separator and needs no rewriting.
+- The comment at `src/js/parser.zig` line 769 cites the third condition of rule 1 in 12.10.1, and the module comment of `src/js/lexer.zig` states the code-unit reading as the first decision above does.
+
+### Exact test cases
+
+1. Case 6, row E96, becomes `E96 () ⇒ syntax-error unexpected_end @2`.
+   Case 6 gains `E96a () + 1 ⇒ syntax-error unexpected_token @3`, `E96b (a,) ⇒ syntax-error unexpected_end @4`, and `E96c (a,) + 1 ⇒ syntax-error unexpected_token @5`.
+   Row U18, `() => 1 ⇒ unsupported arrow_function @3`, already freezes the `=>` form and stays.
+   If any other frozen row would change, stop and report it.
+2. Case 18 gains these controller tests.
+   Each builds a fixture repository whose tree holds the named path with `git mktree`, runs `corpus-extract` in the temporary root that the controller tests create, and asserts the exact message, that the output directory stays absent or empty, and that no file appears at the path that an escape would reach:
+   `test/..\..\..\x.js` (`a backslash`), `test/a:b.js` (`a colon`), `test/a<U+0001>b.js` (`a control character`), `test/dir./x.js` and `test/x.js ` (`a path component that ends in "." or a space`), and `test/CON.js`, `test/aux/x.js`, and `test/Com1.txt.js` (`a reserved Windows device name`).
+   A unit test of the shared rule gives each listed reason for one path and null for `test/a/b.js` and `harness/assert.js`.
+   FP-0079 case 5 keeps passing unchanged.
+3. Case 18 gains an altered-tree test.
+   It replaces the loose object file of the fixture commit's tree with a valid zlib stream of a different tree under the same object ID, runs `corpus-extract`, and asserts the `inventory.sha256` line and an absent or empty output directory.
+   A second test edits `tree` in the fixture snapshot record and asserts the `tree` line.
+4. A new parser case: a function `function f(a0, a1, ..., a9999) { "use strict"; }` and a script that begins `"use strict";` and declares `function g(a0, ..., a9999) {}` each parse, and the duplicate check counts at most 20,000 comparisons for each.
+   With `a0` added as a last parameter, each reports `syntax-error duplicate_parameter` at that parameter's offset.
+5. The metadata case's invalid-phase row becomes `negative:⏎  phase: compile⏎  type: SyntaxError⏎`, and it asserts the reason `a phase outside the known set`.
+
+Cases 1 to 3 must fail on `5d41509` before the change; the README names any part that the old code already meets.
+Case 4's bound needs the comparison counter, which the base lacks, so control M11 shows that the bound fails for a quadratic check.
+Case 5 passes on the base, which checks the phase before the type, so control M12 shows that it fails without the phase check.
+The worker records every row of case 1 on `5d41509` as it is.
+
+### Mutation controls
+
+- M9: the shared rule stops rejecting `\`.
+  Case 2's backslash row must fail.
+- M10: extraction skips the inventory recomputation.
+  Case 3's altered-tree test must fail.
+- M11: the duplicate check compares every pair again.
+  Case 4 must fail on its comparison bound.
+- M12: the metadata reader stops checking the phase.
+  Case 5 must fail.
+- Controls M1 to M8 are rerun on the revised sources, each after a recorded `git apply --check` of its diff against them.
+  A diff that no longer applies is regenerated against the revised file and recorded with its new hash.
+
+### Revision 1 evidence
+
+Record each command with `node tools/fairpane.mjs record` under `engineering/evidence/FP-0082/raw/`, with the suffix `-r1`, and keep each failed attempt as its own log.
+
+1. `tests-before-r1.log` on the base, with `HEAD`, the staging command, and the blob ID of every staged file.
+2. An uncached `tests-after-r1.log`, `fmt-r1.log`, and `controller-tests-after-r1.log`.
+3. `mutation-r1.log` and its diffs for M1 to M12, with the hash of each changed file before, during, and after.
+4. `census-r1.log` with a fresh extraction and census at the revised commit; every summary count must equal the counts in "Integration" of the README.
+5. The README gains a `## Revision 1` section and corrects review 1's two README findings: the four proposal mismatches are four `noStrict` files, run once each in non-strict mode, and the opening line names amendments 1 and 2.
+
+The integrator records `git diff --stat a3e5cf9 <revision commit> -- AGENTS.md docs/CHARTER.md engineering/qualification.json engineering/policy.json engineering/gates.json toolchains specs` and confirms that it is empty.

@@ -1,0 +1,83 @@
+{
+  "verdict": "reject",
+  "summary": "Most of FP-0082 is well supported. Cases 1 to 19 match the frozen contract and its two amendments, including the T32 call row, T30's own case 9 row (`syntax-error invalid_character @14`), and M1's reduced scope. They run in `zig build test`, with case 18 in the controller tests; `integration-tests.log` shows 94 of 94 steps and 321 of 321 tests passing. The parser keeps the grammar state in heap frames, and the dump writer uses a heap stack. Case 10 shows constant native stack use of about 21 KB. The depth limit, `max_depth` 1024, the source-length limit, and the memory limiter are enforced. Cases 13 and 14 use `testing.allocator`, so they detect leaks. I reviewed the lexer and the parser for false syntax errors and found none. The census classes, the proposal rule (sections of the pinned `features.txt`), the extraction blob-ID check, the integrator's reruns (same summary and the same SHA-256 `0e5277cd…`), and the independent counts (53,616 discovered, 843 module, 4,455 negative parse) all match the README. Each control M1 to M8 fails its named case in `mutation.log`; M2 reports `false_accept` 10 and M3 reports `false_syntax_error` 195. Two major defects remain, so the verdict is reject. (1) `corpus-extract` checks path components only between `/` separators, but on Windows `path.join` also splits on `\\`, so a hostile tree path can write outside `out/`. (2) The strict duplicate-parameter check is quadratic in the number of parameters, and nothing bounds that number. Hostile input can therefore stall the parser. Several minor evidence and test gaps follow.",
+  "findings": [
+    {
+      "severity": "major",
+      "path": "tools/corpus.mjs",
+      "line": 662,
+      "issue": "`extractPathProblem` splits components only on `/` (0x2f). Line 703 then builds the output path with `path.join(target, ...e.path.toString('utf8').split('/'))`. On Windows, the project's host OS, `path.join` treats `\\` as a separator and resolves `..` [INFERENCE: from Node path.win32 semantics, not executed]. A tree entry such as `test/..\\..\\..\\x.js` passes the check, satisfies the `test/` prefix filter, and is written to `C:\\src\\fairpane\\x.js`, outside `out/`; `mkdirSync({recursive:true})` also creates directories there. A component with `:` would write an NTFS alternate data stream. The `wx` flag only prevents overwriting existing files, not escaping. Minimal reproduction: `corpus.extractPathProblem(Buffer.from('test/..\\\\..\\\\..\\\\x.js'))` returns null, and `path.win32.join('C:\\\\src\\\\fairpane\\\\out\\\\x', 'test', '..\\\\..\\\\..\\\\x.js')` gives `C:\\\\src\\\\fairpane\\\\x.js`. The case 18 controller test (tools/selftest.mjs:1116-1120) covers only `/`-separated forms.",
+      "recommendation": "Reject any component that contains `\\\\`, `:`, or NUL, and consider rejecting Windows device names and trailing dots or spaces. Before any mkdir or write, also assert that `path.resolve(file)` starts with `target + path.sep`. Add selftest rows for these paths, including a fixture tree built with `git mktree` that holds a backslash path, and show that extraction refuses it and writes nothing."
+    },
+    {
+      "severity": "major",
+      "path": "src/js/parser.zig",
+      "line": 2279,
+      "issue": "`duplicateParameter` compares every parameter with every earlier one, so it is O(n²). `parseParams` calls it for every function in strict code, and `becomeStrict` calls it after a function's Use Strict Directive. Parameters do not count toward `max_depth`; only source length and the 256 MiB memory limit bound them, which allows millions of parameters. Minimal reproduction: `\"use strict\"; function f(a0,a1,...,a999999){}` with distinct names. This would do about 5×10^11 `std.mem.eql` calls before reporting a result [INFERENCE: not executed]. That is an availability defect for a parser of hostile web content and avoidable computation in compiled code. The parser already uses a hashed `NameSet` for VarDeclaredNames.",
+      "recommendation": "Detect duplicate parameters in linear time, for example with the existing `NameSet` keyed by the function's scope id, and keep the first-repetition offset. Add a bounded test with about 10^5 distinct parameters in strict code, sized for the 400 s zig-test budget."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0082/README.md",
+      "line": 144,
+      "issue": "The README states that every mutation diff 'still applies to the final files (`git apply --check`)', but no log records that command. `mutation.log` ran the controls on parser.zig blob `a6246a6`, not on the delivered blob that `tests-after.log` records. Nothing in the evidence ties the control results to the delivered source.",
+      "recommendation": "Record a new log at `5d41509` that runs `git apply --check` for every `mutation-M*.diff`, or rerun the controls there. Cite that log in the README."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0082/README.md",
+      "line": 79,
+      "issue": "The README says the four proposal mismatches come from four decorator files 'in both modes'. All four files (`decorator-member-expr-…-yield.js` and `decorator-parenthesized-expr-…-yield.js` in the expressions and statements directories) carry `flags: [generated, noStrict]`. The census therefore runs each of them once, in non-strict mode: four files, one run each, four mismatches.",
+      "recommendation": "Replace 'in both modes' with 'once each, in non-strict mode, because the files are flagged `noStrict`'."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0082/README.md",
+      "line": 4,
+      "issue": "The opening line names only amendment 1 (`7ffafd3`). The M1 result depends on amendment 2 (`41aaa7e`).",
+      "recommendation": "Name both amendments in the opening line."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 689,
+      "issue": "`extractCorpus` takes `tree` from the commit object and lists entries with `git ls-tree`. It does not compare the tree with `record.tree` or the listing's inventory digest with the snapshot record. Git does not rehash loose tree objects, so an altered tree object changes the listing and every blob check still passes against it. Only a separate `corpus-verify` run, done before extraction, covers this. M7 tests altered blobs only.",
+      "recommendation": "In `extractCorpus`, assert `tree === record.tree` and recompute the inventory digest against the record before writing anything. Add a case 18 test with an altered tree object."
+    },
+    {
+      "severity": "minor",
+      "path": "src/js/test262_metadata.zig",
+      "line": 237,
+      "issue": "The invalid-phase row `negative:⏎  phase: compile⏎` has no `type:` line. If phase validation were removed, `finish` would still report 'a negative without a type', so this row cannot detect a regression in phase validation.",
+      "recommendation": "Add `type: SyntaxError` to the row and assert the reason 'a phase outside the known set'."
+    },
+    {
+      "severity": "minor",
+      "path": "src/js/parser.zig",
+      "line": 1208,
+      "issue": "Every successful parse allocates `write_stack` (height × sizeof WriteFrame), even when `writeOutcome` is never called, which the census does on every accepted run. `keywordOf` (lexer.zig:184) scans 36 keywords linearly for each unescaped identifier. `scanNumber` copies digits into scratch even when the literal has no separator and is not legacy octal. Each of these is avoidable allocation, copying, or computation in compiled code.",
+      "recommendation": "Allocate the write stack only when a caller writes the tree, or record the height and size the stack at write time. Switch the keyword lookup on length and first character, or use a perfect hash. Pass the source slice directly to `stringToNumber` when the literal needs no rewriting."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/parse_census.zig",
+      "line": 56,
+      "issue": "`classify` counts any syntax error in a negative test as `agree_error`, whatever its code or offset. A false syntax error that occurs earlier in a negative-test file is therefore hidden from the soundness check. This matches the contract's class definitions but limits what the census proves.",
+      "recommendation": "In a later task, consider recording the code and offset of each `agree_error` run, and a sample audit against the test's intended error."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/parser.zig",
+      "line": 1997,
+      "issue": "An unescaped ReservedWord in expression position (for example `enum = 1`) reports `unexpected_token`, while the code table describes `reserved_word` for a ReservedWord used as an IdentifierReference. Both are syntax errors, so soundness is unaffected, and no frozen row pins this case.",
+      "recommendation": "Either report `reserved_word` for `kw_*` tokens in PrimaryExpression position, or state in the contract notes that `unexpected_token` applies there."
+    },
+    {
+      "severity": "note",
+      "path": "specs/applicability/test262.json",
+      "line": 10,
+      "issue": "Read-only tools cannot diff commits, so I could not confirm that protected paths are unchanged between `a3e5cf9` and `5d41509`. The gates record identical policy digests before and after the run. `integration-binding.log` shows a clean status. The applicability record shows commit `2e0a567…`, 53,616 discovered and 0 selected, and `corpus-verify` passes [INFERENCE: unchanged].",
+      "recommendation": "Have the integrator record `git diff --stat a3e5cf9 5d41509 -- AGENTS.md docs/CHARTER.md engineering/qualification.json engineering/policy.json engineering/gates.json toolchains/zig.lock.json specs` and confirm it is empty."
+    }
+  ]
+}
