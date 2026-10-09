@@ -91,3 +91,52 @@ Required reviewer: `fairpane-review`.
 - No license, legal identity, signing key, security contact, domain, or maintainer appointment is created or invented.
 - No release is published, and no artifact is uploaded.
 - No protected runner exists in this task.
+
+## Revision 1
+
+Base: the commit that freezes this revision, whose parent is `f95fab6`.
+Source finding: `engineering/evidence/FP-0027/reviews/review-1-reject.json`.
+Every section above stays in force except where this revision replaces it.
+The root integrator implements this revision.
+
+### Identifiers
+
+SLSA Provenance version 1 requires `runDetails.builder.id` to be a URI.
+The builder ID becomes `https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#unsigned-local-builder-1`.
+ADR 0009 gains the section "Unsigned local builder 1", which states that no verifier trusts this builder.
+ADR 0009 states that the meaning of build type 1 and of unsigned local builder 1 never changes.
+A changed definition gets a new numbered section and anchor, and an existing statement keeps the anchor that it names.
+
+### Source archive inputs
+
+The manifest records `git_version`, the first line of `git --version` from the same hardened Git calls.
+ADR 0009 and `tools/README.md` state that the tar depends on the commit and on the Git implementation that wrote it.
+Configuration cannot change the bytes, but another Git version may.
+The tar itself is not committed as evidence, because `source-archive` regenerates it and the manifest and the log record its size and SHA-256.
+
+### Provenance toolchain fields
+
+ADR 0009 states that the toolchain fields come from the commit's lock and from the host that runs `provenance`, not from an observation of the build.
+A protected runner must bind them to the build that it performs.
+
+### Reproducibility report
+
+The report's top-level `build_command` becomes `build_type_command`, the canonical command of build type 1.
+Each entry of `builds` keeps the exact arguments of its tree.
+
+### Revision 1 test cases
+
+- Case 1 also expects the manifest's `git_version` to start with `git version `.
+- Case 4 expects the URI builder ID, and both `buildType` and `builder.id` parse as absolute `https:` URLs.
+
+### Revision 1 evidence
+
+The integrator records these runs under `engineering/evidence/FP-0027/raw/` on the commit that implements this revision.
+
+1. `HEAD`, a status that includes ignored files for every source root, `git --version`, `node --version`, and the locked compiler's version.
+2. `source-archive` with an output directory outside the repository, and a copy of the manifest that it writes.
+3. A release build in a directory that did not exist before.
+   The log records the tar's SHA-256 before extraction, the extraction, and the build with fresh local and global caches inside that directory.
+4. `provenance` for every file that the release build installs, and a copy of the statement.
+5. `reproduce-check`, whatever its result.
+6. `repo-check` and `controller-test` with `--evidence-dir engineering/evidence/FP-0027/gates`.
