@@ -3386,10 +3386,10 @@
       "id": "FP-0083",
       "title": "Compile and run the subset on a generic bytecode interpreter with safepoints",
       "workstream": "javascript",
-      "depends_on": ["FP-0082"],
+      "depends_on": ["FP-0082", "FP-0128", "FP-0129"],
       "role": "fairpane-js",
       "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/decisions", "engineering/evidence"],
-      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
       "authority": "routine-local-engineering",
       "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
       "required_reviewers": ["fairpane-review", "fairpane-spec"],
@@ -3404,7 +3404,7 @@
         "Record the bytecode format and the dispatch reference in architecture decision record 0011.",
         "Keep the native stack use of every syntax-tree and bytecode traversal from growing with nesting depth, as FP-0082 amendment 1 requires of the parser, and show that the parser's deepest accepted inputs compile and run on a 1 MiB stack in the Debug test build."
       ],
-      "read": ["docs/JAVASCRIPT_RUNTIME.md", "engineering/decisions/0008-javascript-values-and-heap.md", "engineering/evidence/FP-0082/CONTRACT.md"],
+      "read": ["docs/JAVASCRIPT_RUNTIME.md", "engineering/decisions/0008-javascript-values-and-heap.md", "engineering/evidence/FP-0082/CONTRACT.md", "engineering/evidence/FP-0128/CONTRACT.md", "engineering/evidence/FP-0129/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -3427,7 +3427,7 @@
         "Stop a runaway test at an execution safepoint under a recorded budget and report it as a timeout, and keep a crash of one test from hiding the results of the others.",
         "Read Test262 files only through the controller's verified extraction, bind each run to the source digest, the corpus commit, and the runner binary, and never evaluate test code on the development host."
       ],
-      "read": ["docs/QUALIFICATION.md", "engineering/evidence/FP-0082/CONTRACT.md", "engineering/evidence/FP-0083/CONTRACT.md", "engineering/decisions/0003-corpus-snapshots.md"],
+      "read": ["docs/QUALIFICATION.md", "engineering/evidence/FP-0082/CONTRACT.md", "engineering/decisions/0003-corpus-snapshots.md", "engineering/evidence/FP-0128/CONTRACT.md", "engineering/evidence/FP-0129/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -3450,7 +3450,7 @@
         "Pre-register the workloads and the separability rules before the first run, and record a process list or processor-load samples around every run.",
         "Record the outcome in architecture decision record 0012, and make no speed claim beyond the recorded samples."
       ],
-      "read": ["docs/JAVASCRIPT_RUNTIME.md", "docs/QUALIFICATION.md", "engineering/decisions/0008-javascript-values-and-heap.md", "engineering/evidence/FP-0011/reviews/review-2-accept.json", "engineering/evidence/FP-0083/CONTRACT.md"],
+      "read": ["docs/JAVASCRIPT_RUNTIME.md", "docs/QUALIFICATION.md", "engineering/decisions/0008-javascript-values-and-heap.md", "engineering/evidence/FP-0011/reviews/review-2-accept.json", "engineering/evidence/FP-0129/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion. The workloads use arrays, so FP-0085 follows FP-0087."
     },
@@ -4157,6 +4157,53 @@
         "Keep every FP-0009 and FP-0014 outcome, and record each shadow-tree behavior that selectors, style, and the laboratory do not yet support, with its owner task."
       ],
       "read": ["engineering/evidence/FP-0009/CONTRACT.md", "docs/ARCHITECTURE.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0128",
+      "title": "Compile and run the FP-0082 subset on a generic bytecode interpreter",
+      "workstream": "javascript",
+      "depends_on": ["FP-0082"],
+      "role": "fairpane-js",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Execute a bounded language subset through an actual first-party parser and VM.",
+        "Compile every syntax tree that FP-0082 accepts to bytecode and run it in a generic interpreter loop over the reference representation and the generated tracer that ADR 0008 selects, and keep it built and tested under every representation and both tracers.",
+        "Implement the realm, the global environment record, declarative and function environments, ECMAScript function objects with [[Call]] and [[Construct]], completions with break, continue, try, catch, and finally, ToObject with primitive wrapper objects, and the intrinsics that these algorithms require, following the cited ECMA-262 steps.",
+        "Record the bytecode format and the dispatch reference in architecture decision record 0011.",
+        "Keep the native stack use of every syntax-tree and bytecode traversal from growing with nesting depth, as FP-0082 amendment 1 requires of the parser, and show that the parser's deepest accepted inputs compile and run on a 1 MiB stack in the Debug test build.",
+        "Implement the runtime obligations that FP-0082 assigns to FP-0083: function name inference, the B.3.9 ReferenceError, and Function.prototype.toString from the recorded source ranges.",
+        "Run every call of user code, including calls that conversions and built-ins make, through VM frames rather than native re-entry, so that the native stack stays constant in ECMAScript call depth, and report each resource limit as an outcome distinct from a normal completion and from a thrown exception.",
+        "Report a reference to a standard global that the realm does not yet implement as an unsupported outcome, distinct from a thrown ReferenceError, using a frozen list of names."
+      ],
+      "read": ["docs/JAVASCRIPT_RUNTIME.md", "engineering/decisions/0008-javascript-values-and-heap.md", "engineering/evidence/FP-0082/CONTRACT.md", "engineering/evidence/FP-0082/README.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0129",
+      "title": "Describe frames at explicit safepoints, collect at every safepoint under stress, and report interrupts",
+      "workstream": "javascript",
+      "depends_on": ["FP-0128"],
+      "role": "fairpane-js",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec", "fairpane-security"],
+      "acceptance": [
+        "Expose explicit generic execution and collection safepoints.",
+        "Describe each frame's logical state and roots at every safepoint, and collect at every safepoint under stress mode without a dead resolution.",
+        "Report an interrupt or a resource limit as an abrupt outcome distinct from a thrown exception, never as a normal completion.",
+        "Keep a context's host_context from giving its holder the runtime or the heap, either by documenting that rule where a host sets it or by requiring an effect to read it.",
+        "Add the safepoint, frame-description, and interrupt sections to architecture decision record 0011, keep every FP-0128 case passing, including its 1 MiB native-stack cases, and add no native recursion."
+      ],
+      "read": ["docs/JAVASCRIPT_RUNTIME.md", "engineering/decisions/0008-javascript-values-and-heap.md", "engineering/evidence/FP-0011/reviews/review-2-accept.json", "engineering/evidence/FP-0128/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
