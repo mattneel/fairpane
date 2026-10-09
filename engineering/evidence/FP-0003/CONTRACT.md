@@ -196,3 +196,48 @@ ADR 0003 keeps the symbolic-link count only with a recorded listing command, or 
 No committed record contains a local user path.
 The acceptance commands run exactly as the Acceptance section lists them, without environment overrides.
 Both reviewers review the revision, and `fairpane-spec` explicitly approves the policy-root additions under `specs`.
+
+## Revision 2
+
+Revision 2 follows `engineering/evidence/FP-0003/reviews/spec-review-2-reject.json` and the minor findings of `engineering/evidence/FP-0003/reviews/review-2-accept.json`.
+It supersedes each earlier statement that it contradicts.
+Every earlier exact test case still applies.
+
+### WPT `test262` items
+
+Upstream assigns the `test262` item type to any `.js` file with a `test262` directory component, not only to the vendored copy.
+WPT discovery therefore excludes `test262` items only under `third_party/test262/`, the vendored Test262 copy.
+Every `test262` item elsewhere, such as the WPT-authored smoke tests under `infrastructure/test262/`, counts in WPT discovery.
+The record reports the excluded items separately with a count for each path prefix.
+It ties only the `third_party/test262/` items to the revision in `third_party/test262/vendored.toml`.
+It names the `third_party/test262/harness/` items as harness includes, not tests.
+
+### Denominators and manifests
+
+A manifest without any test item fails binding.
+An applicability record with zero discovered tests fails validation.
+
+### Fetch integrity
+
+The fetch sets `fetch.fsckObjects` as well as `transfer.fsckObjects`, so a user or system setting cannot disable object checks.
+ADR 0003 states what the fetch checks and what it cannot check, including reachability of the pinned commit from the upstream branch.
+
+### Import requirements and notes
+
+`specs/IMPORT_REQUIREMENTS.md` adds Joining_Type data for UTS #46 ContextJ rules, RFC 5892 Appendix A, and the URL Standard.
+It adds the shaping inputs Joining_Type, Indic_Syllabic_Category, and Indic_Positional_Category.
+It adds collation data, naming either the DUCET or the CLDR root collation plus CLDR tailorings, for ECMA-402 `Intl.Collator`.
+It adds CLDR plural and ordinal rules for ECMA-402 `Intl.PluralRules`.
+It widens the consumer descriptions of East_Asian_Width and DerivedCoreProperties.txt.
+ADR 0003 adds applicability notes for `wdspec`, `aamtest`, and `visual` items.
+The evidence README cites the integration receipts and the appended acceptance runs.
+
+### Additional exact test cases
+
+17. A fixture manifest with `test262` items under `third_party/test262/test/`, `third_party/test262/harness/`, and `infrastructure/test262/` counts only the `infrastructure/test262/` item in discovery and reports the others by path.
+18. A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation.
+19. `corpus-fetch` against a local fixture upstream fetches the pinned commit after the upstream branch moves.
+20. A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged.
+21. `corpus-repin` against a local fixture upstream moves the snapshot to the new head and reports the pin differences.
+
+Expected test denominator: the existing controller tests plus cases 17 through 21.
