@@ -1,0 +1,36 @@
+{
+  "verdict": "accept",
+  "summary": "FP-0108 at 6cf88af with amendment 1 (7f2a7e7) meets UAX #29 revision 49 for extended grapheme clusters at Unicode 18.0.0, and I found no blocker or major issue. I fetched tr29-49.html and checked the rules in grapheme.zig against section 3.1.1. GB3 through GB999 appear in the specified order. GB9c uses the revised form, `\\p{InCB=Linker} \\p{InCB=Extend}* × \\p{InCB=Consonant}`. GB11 reads Extend as Grapheme_Cluster_Break=Extend, and GB12 and GB13 use RI parity. The iterator keeps constant-size state, reads every code unit through one counting accessor, allocates nothing, and does linear work. Lone surrogates are their own code points, as CodePointIterator treats them. The tables derive from the cited files: GCB uses the single-property mode with the @missing Other default and only the occurring values. InCB uses the field-selected mode with the @missing None default from DerivedCoreProperties.txt line 13319. Extended_Pictographic uses the binary mode with the stated No default and 2830 elements, and an independent reference parser compares every code point. The gate receipts for repo-check, controller-test, zig-fmt, and zig-test all pass with exit status 0 inside a binding window at HEAD 7f2a7e7 with a clean status. For amendment 1, I recomputed the M7 line set from the rules. U+0903 changes a boundary only where it follows a code point whose Grapheme_Cluster_Break is not Control, CR, LF, or Prepend. That gives 37 of the 79 lines that contain U+0903: 46, 86, 126, 165, 166, 205, 206, 245, 246, 285, 286, 325, 326, 366, 405, 406, 445, 446, 485, 486, 525, 526, 565, 566, 605, 606, 645, 646, 685, 686, 725, 726, 765, 766, 805, 806, and 841. This set exactly matches the M7 failures in raw/mutation.log. Unsupported behavior is reported: the capability record and the text.zig documentation name legacy clusters, tailoring, random-access queries, and their owner tasks (FP-0118, FP-0055, FP-0030, and FP-0026). Those owner tasks exist in plan.json.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0108/raw/integration-tests.log",
+      "line": 204,
+      "issue": "The uncached integration test started at 2026-10-09T18:16:25Z. That is before commit 6cf88af (18:18:25Z), before commit 7f2a7e7 (18:18:38Z), and before the binding window, which opens at 18:18:46Z. The log is therefore not tied to any recorded HEAD. The zig-test gate receipt inside the binding window covers the same tests with a source digest, so acceptance does not depend on this log."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0108/README.md",
+      "line": 180,
+      "issue": "The README says the worker read every cited line number in the imported files, and it admits that no log records those reads. That is an unrecorded claim. Cases 7, 8, and 9 pass in recorded logs, and my spot checks of GBP line 17, DCP lines 13311 to 13340, and emoji-data lines 1, 8, 845, 847, and 1303 match the contract, so the values themselves are supported."
+    },
+    {
+      "severity": "note",
+      "path": "tools/ucd.mjs",
+      "line": 173,
+      "issue": "parseBinaryProperty receives @missing lines from forEachLine and does not check l.missing. An `@missing` line whose only field is the property would therefore set its whole range to true instead of being read as a default. The pinned emoji-data.txt has no @missing line, so the output is correct. The README (line 160) and tools/README.md do not document this edge case."
+    },
+    {
+      "severity": "note",
+      "path": "specs/capabilities/text-fonts.json",
+      "line": 38,
+      "issue": "The grapheme-segmentation summary says the boundaries serve 'caret movement and selection'. The preceding and following boundary queries that caret movement needs remain with FP-0118. The engine_behavior field states that random-access boundary queries are not offered, so the gap is disclosed, but the summary could be read as claiming more than this task delivers."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0108/README.md",
+      "line": null,
+      "issue": "The worker did not retrieve UAX #29 revision 49 and worked from the contract's rule list and the informative GraphemeBreakTest.html. This review fetched tr29-49.html. Its section 3.1.1 rule table, Table 1c, and the Modifications entry for 187-C47 match the implemented rules and their order."
+    }
+  ]
+}

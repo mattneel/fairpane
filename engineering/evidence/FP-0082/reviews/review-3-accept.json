@@ -1,0 +1,41 @@
+{
+  "verdict": "accept",
+  "summary": "Review 3, read-only, of FP-0082 revision 2 (implementation 84ffa53, amendments c28afb0 and f397d8d). Both review 2 majors are closed, and every point you asked about holds. I found no blocker, major, or minor finding.\n\n**(1) Hash sets.** No set is emptied with `remove` anymore; parser.zig contains no `.remove(` call. `resetSet` (parser.zig:388-390) releases a set whose capacity exceeds 4×max(n, 8) and otherwise clears it in place. Each reset therefore costs at most 4×max(n, 8) slots, and inserts go into a table without tombstones.\n- `params_seen` (1338-1346) and `function_names` (1363-1377) call it with their own count before reserving.\n- VarDeclaredNames now uses one set per nesting level (`seen: ArrayList(NameSet)`, 561, 631-634, 1219). `finishNames` resets the current level with count 0 (1354-1355), so an enclosing body keeps its own set.\n- The function name is declared before `enterBody` (1789-1792), so it lands in the enclosing body's set.\n- Revision 2 case 1 checks every capacity record against 4×max(n, 8), along with the check counts and both outcomes. It fails on the base (`tests-before-r2.log`: 'record 2, params_seen with 0 names has capacity 16384'). M14 and M15 fail it, and M6-r2 and M11-r2 fail their named cases.\n\n**(2) Census `--replace` cannot hide a census failure.**\n- Only `census --replace <root> <out>` selects `.replace`, which drops `exclusive` and keeps the default `truncate = true` (std Io/Dir.zig:594). The plain `census` form keeps `.create`.\n- Discovery, classification, the summary, and the exit status are the same code in both modes. The sound and unsound steps still assert this run's exit status (0 or 1) and standard output, and nothing reads `census.jsonl`.\n- The refusal step (build.zig:322-329) is unchanged: no `--replace`, an existing file, exit 3.\n- `census-rerun-before-r2.log` shows the old failure (97 of 100 steps, `PathAlreadyExists`). `census-rerun-after-r2.log` shows both census steps executing ('success 25ms' and 'success 28ms') after their manifests were deleted.\n- The evidence census in `census-r2.log` uses create mode and is byte-identical to the earlier runs (SHA-256 0e5277cd…).\n\n**(3) The Limiter change is sound and covered.**\n- `resize` and `remap` are `Allocator.noResize` and `Allocator.noRemap` (parser.zig:284). Every caller falls back to allocate, copy, and free.\n- ArrayList and HashMap growth stay geometric. The arena handles a failed `rawResize` by creating a new node of (prev_size + min_size + 16) × 1.5 (ArenaAllocator.zig:397-411 and 515-519), so copying stays linear.\n- Each `free` receives the length that was allocated, so `used` stays exact. The memory limit becomes deterministic but counts the old and new block together during each growth step.\n- The new allocation test asserts zero resizes and one allocation count across twelve perturbed allocator states. M17 fails it ('6 resizes') and case 13 (`NondeterministicMemoryUsage`).\n\n**(4) Letter-case check.** It runs after the path rule and the resolved-path check and before `mkdirSync` (corpus.mjs:703-713). Two rows cover it, M16 fails both, and the adjacent-pair rows match the frozen order.\n\n**(5) Results.** `tests-after-r2.log` passes 324 of 324, `integration-tests-r2.log` passes 350 of 350 uncached, and all four gate receipts pass. The protected-path diff from 7715859 to f397d8d is empty. The README annotates the old `git apply --check` sentence in place. FP-0026's notes in state.json:391 record the hash-flooding obligation.\n\nThe notes below are optional hardening. I ran nothing; every claim cites the file or log that I read.",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "src/js/parse_census.zig",
+      "line": 100,
+      "issue": "The claim that a replaced `census.jsonl` holds only this run's records rests on reading the code: the default `truncate = true` (std/Io/Dir.zig:594) with `exclusive = false`. No test asserts the file's contents after `--replace` over a longer stale file. The steps never read the file, so this cannot hide a census result, but a future `.truncate = false` would go unnoticed.",
+      "recommendation": "Optionally add a run step, or a rerun-log check, that pre-fills the output with longer junk, runs `census --replace`, and asserts that the file ends with this run's last record."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0082/raw/integration-protected-paths-r2.log",
+      "line": 2,
+      "issue": "The revision 2 protected-path diff covers 7715859..f397d8d over the nine protected paths. It does not include `specs/applicability/test262.json`, which the original contract requires to stay unchanged, and nothing records it for the range 9a68167..f397d8d. `integration-protected-diff-r1.log` covered it only through 9a68167.",
+      "recommendation": "When closing the task, record `git diff --stat --exit-code a3e5cf9 <closing commit> -- specs/applicability/test262.json`."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0082/raw/mutation-r2.log",
+      "line": 14,
+      "issue": "M1 to M5, M7-r1, M8 to M10, and M12 were only checked with `git apply --check` against the revision 2 sources and were not rerun. Revision 2 evidence item 3 requires only the check, so this conforms. Their failing results are bound to the revision 1 blobs, and [INFERENCE] the set rework does not touch the behavior they mutate.",
+      "recommendation": "None required. When FP-0082 closes, optionally rerun the parser controls (M2, M3, M5, M8) on the final blobs in one recorded log."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/parser.zig",
+      "line": 1355,
+      "issue": "No mutation control targets the per-level `seen` reset, for example by restoring a parse-wide set or skipping `resetSet` in `finishNames`. Case 1 records `seen` capacities against the same bound, so [INFERENCE] such a regression would fail case 1, but no control demonstrates it.",
+      "recommendation": "Optionally add a control that replaces `resetSet(&p.seen.items[…], p.gpa, 0)` with `clearRetainingCapacity()`, and show that case 1 fails."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 709,
+      "issue": "The letter-case keys use JavaScript `toLowerCase`, while NTFS compares names through its own upper-case table. The README records this with [INFERENCE] (for example, final and medial sigma), and FP-0099 owns the shared path rule. A pair that this check misses still fails closed at the `wx` write, but only after the output directory exists.",
+      "recommendation": "Leave this to FP-0099, as recorded. If FP-0099 adopts a simple upper-case fold, apply it to both `readArchive` and `extractCorpus`."
+    }
+  ]
+}
