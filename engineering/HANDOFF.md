@@ -8,16 +8,22 @@ The owner approved Unicode data, OFL test fonts, the WHATWG `entities.json`, and
 
 | Task | State | Next step |
 | --- | --- | --- |
-| `FP-0064` tokenizer states | Implemented in `cb8427d`; the binding in `b7369a3` passes all four gates and 292 of 292 tests. | Record the verdict of `fairpane-review` worker `FP0064Review`. |
-| `FP-0067` Gates checks and Linux Zig gates | Implemented in `152ed53`; `repo-check` and `controller-test` pass at that head. | Record the first `Gates` run with the change (37936609533) and its Linux receipts under `engineering/evidence/FP-0067/ci/`, then request review. |
-| `FP-0079` Rust toolchain | Implemented in `04342e2`; security review 1 accepts, review 1 rejects the PATH `rustc` probe in `doctor`. Revision 1 frozen in `e6d215c`. | Integrate worker `FP0079R1`, request both reviews, then record `rust-lock-verify`, land policy change P1, and run the gates on the P1 head. |
-| `FP-0081` engine allocation limit | Contract frozen in `d17abb0`, amendment 1 in `e659254`. | Integrate worker `FP0081Budget` and request `fairpane-review` and `fairpane-security`. |
-| `FP-0082` script parser | Contract frozen in `a3e5cf9`. | Integrate worker `FP0082Parser` and request `fairpane-review` and `fairpane-spec`. |
-| `FP-0052`, `FP-0066`, `FP-0076` | Contracts frozen in `42c5e07`, `3640a79`, and `297f1d3`. | Dispatch `fairpane-core` for each as agent slots free. |
+| `FP-0064` tokenizer states | Implemented in `cb8427d`; review 1 accepts; amendment 3 (`b95bef1`) gives the foreign-flag fix to `FP-0104`. | Accept once the CI ledger's `FP-0098` condition clears. |
+| `FP-0066` release builds | Implemented in `81481a3`; `reproduce-check` is reproducible on Windows and WSL Ubuntu; review 1 accepts. | Accept once the ledger condition clears. |
+| `FP-0067` Gates checks | Implemented in `152ed53`; review 2 accepts with acceptance run 37941660067 (`4d11e84`). | Accept once the ledger condition clears. |
+| `FP-0076` guard identity | Implemented in `d56bc5f` with amendment 1; review 1 accepts. | Accept once the ledger condition clears. |
+| `FP-0079` Rust toolchain | Implemented in `04342e2` with revision `d2c1e5b`; both reviews accept; P1 `9fb8d8f` and P2 `2e07f89` protect the lock and `rust-toolchain.toml`. | Bind `repo-check` and `controller-test` on a head with P2, cite P2 in the criterion 6 row, then accept. |
+| `FP-0081` allocation limit | Implemented in `f40a902`; review and security review accept. | Accept once the ledger condition clears. |
+| `FP-0098` zig-test timeout | Implemented in `9d5638b`; ten dispatched runs pass, the slowest at 191 s; review 1 rejects for missing CI phase durations; revision 1 (`e42f789`) sets `ZIG_BUILD_SUMMARY` on both `zig-test` steps. | Integrate worker `FP0098Revision1`, then dispatch ten runs that also serve `FP-0107`, re-review, and accept; that clears the ledger's nine conditional replacements. |
+| `FP-0052` corpus fixes | Implemented in `775d988`; case 2 revised in `8bc2f91`; amendment 2 (`0954a37`) makes the stand-in work under Bun. | Integrate worker `FP0052BunHost`, bind with `corpus-verify` of `test262` and `wpt`, and request `fairpane-review` and `fairpane-spec`. |
+| `FP-0082` script parser | Implemented in `5d41509`; review 1 rejects a Windows path escape and a quadratic check, spec review 1 accepts; revision 1 in `9a68167` passes 322 of 322 Zig tests. | Bind revision 1 and request both reviews. |
+| `FP-0107` controller-test timeout | Contract frozen in `01d7e39`. | Dispatch after the `FP-0052` and `FP-0098` revisions land. |
+| Splits of `FP-0010`, `FP-0015`, `FP-0056`, and `FP-0065` | Plan commits `36782a5`, `66ad8ad`, `c122677`, `42043a7`, and `f719aed` add `FP-0100` to `FP-0105`, `FP-0108` to `FP-0127`. | Record plan review 4; freeze `FP-0108`, `FP-0119`, and `FP-0123` after their pre-freeze checks, and `FP-0100` after `FP-0064` is accepted. |
+| `FP-0083` VM | Agent `FP0083Draft` proposes a compile-and-run slice and a safepoint slice, to become `FP-0128` and `FP-0129`. | Add the plan entries, and freeze the first slice after `FP-0082` is accepted. |
 
-Tasks `FP-0064` through `FP-0098` hold the tokenizer states, encoding sniffing, release reproducibility, review follow-ups, the CSS obligations, notices, html5lib-tests, the Rust toolchain and wrapper split, the engine allocation limit, the JavaScript parser, VM, runner, and obligation tasks, and the CI timeout margin.
-Tasks `FP-0055` through `FP-0063` own the remaining text obligations.
-The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, the engine and document lifecycle, a DOM node store with attributes, a generated C ABI, the headless laboratory `fairpane-lab`, JavaScript value and heap catalogs, Unicode property lookup, an OpenType parser, a resumable HTML tokenizer, and CSS syntax, selectors, cascade, and computed values.
+`engineering/evidence/ci/README.md` records every failed `Gates` attempt since 13:00 UTC and its disposition; it must be extended to each acceptance head, including the failed `repo-check` of `66d71bd`, whose fix `f5be48f` plan review 4 reviews.
+Tasks `FP-0055` through `FP-0063` own the remaining text obligations, and `FP-0099` and `FP-0106` own review follow-ups.
+The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, the engine and document lifecycle, a DOM node store with attributes, a generated C ABI, the headless laboratory `fairpane-lab`, JavaScript value and heap catalogs, a bounded Script parser with a Test262 parse census, Unicode property lookup, an OpenType parser, a resumable HTML tokenizer, and CSS syntax, selectors, cascade, and computed values.
 No renderer, JavaScript interpreter, tree constructor, or native browser window exists yet.
 
 The repository is public at <https://github.com/mattneel/fairpane>.
@@ -35,14 +41,13 @@ ADR 0007 makes the frontend language independent of the renderer and reserves th
 
 ## Next action
 
-1. Integrate each worker patch as it arrives, check `git diff --cached --name-only` before each commit, run the gates with `HEAD` and status records before and after, and request review.
-   Worker patches arrive as `<Name>.patch` in the session directory; `git apply --3way` stages what it applies.
-2. Check the `Gates` run of each pushed head, and record any failure in the affected task's evidence before acceptance.
-3. Record each pending review verdict, and route minor findings to the follow-up tasks in their own `plan:` commits.
-4. Request plan review 3 for `49f2a81`'s successors: `efc3dd3` and any later `plan:` commit.
-5. Dispatch the frozen contracts `FP-0052`, `FP-0066`, and `FP-0076`, at most four agents at a time.
-6. After `FP-0064` is accepted, delegate the `FP-0010` split and first contract to `fairpane-spec`; tree construction has 21 insertion modes plus foreign content at the pin.
-7. Freeze `FP-0078` after `FP-0052`, `FP-0075` after `FP-0066`, `FP-0077` after `FP-0052` and `FP-0064`, and `FP-0098` after `FP-0067`.
+1. Integrate each worker patch from the worker's own `out/*.patch`, check `git diff --cached --name-only` before each commit, run the gates with `HEAD` and status records before and after, and commit locally.
+2. Push only at the push boundaries of `docs/GIT_OPERATIONS.md`, and only after the previous push's `Gates` run concludes.
+3. Record plan review 4, then freeze `FP-0108`, `FP-0119`, and `FP-0123` with the fixes of agents `Check0108`, `Check0119`, and `Check0123`, and dispatch them.
+4. Dispatch `FP-0107` once the `FP-0052` and `FP-0098` revisions land; one set of ten dispatched runs, at most two at a time, serves `FP-0098` and `FP-0107`.
+5. After `FP-0098` is accepted, extend the CI ledger to the acceptance head and accept `FP-0064`, `FP-0066`, `FP-0067`, `FP-0076`, `FP-0079`, and `FP-0081` in `plan:` acceptance commits.
+6. Ask the owner the open questions: the TN5176 tables for `FP-0120`, and the shaping reference fixtures and the fontTools boundary for `FP-0111` to `FP-0115`.
+7. Remove stale worker worktrees under the OMP worktree directory, as `docs/GIT_OPERATIONS.md` requires.
 
 ```text
 node tools/fairpane.mjs check
@@ -56,14 +61,14 @@ node tools/fairpane.mjs next
   Gates use only the locked compiler under `.tools`.
 - Isolated OMP worktrees do not contain `.tools`.
   Workers run the locked compiler at `C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe`.
-- Workers base on the latest pushed `master`, and the integrator commits before each dispatch, because a worktree copies uncommitted edits.
+- Isolated worktrees can start at an older commit, so each dispatch names its base commit, and the worker checks it out first; worktrees share the repository's objects, so a local commit is enough.
 - The recorded tool versions are Node v26.7.0, Bun 1.4.2, and Git 2.54.0.windows.1.
 - Windows PowerShell 5.1 inherits a PowerShell 7 module path on this host.
   `scripts/Get-Zig.ps1` therefore hashes through .NET instead of `Get-FileHash`.
 - The OMP shell's builtin `sha256sum` mistranslates CRLF in check mode.
   Use `node tools/fairpane.mjs record` with GNU `sha256sum` for recorded checks.
 - WSL Ubuntu on this host runs as the non-root user `autark`, uid 1000.
-  The locked `x86_64-linux` compiler is installed under `$HOME/fairpane-linux/tools` there, and `engineering/evidence/FP-0067/raw/linux-baseline.log` records its digest check and a passing suite.
+  The locked `x86_64-linux` compiler is `$HOME/fairpane-linux/tools/zig-x86_64-linux-0.18.0-dev.120+9fe22a29b/zig`; a clone links that directory as `.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-linux`, and `engineering/evidence/FP-0067/raw/linux-baseline.log` records its digest check and a passing suite.
   Node v26.7.0 is installed at `$HOME/fairpane-linux/node`, outside `PATH`, and `engineering/evidence/hosts/wsl-ubuntu/node-install.log` records its digest check.
   Copy a tree into a WSL-native directory before a Linux run, because the `/mnt/c` mount does not keep Linux file modes.
 - The compiler installer does not retry a failed download, so a transient network failure fails a `Gates` job; rerun the failed job.
@@ -80,6 +85,7 @@ node tools/fairpane.mjs next
 
 The owner made the repository public at <https://github.com/mattneel/fairpane> on October 8, 2026.
 The owner authorized continuous commits and pushes to `master` on `origin`.
+On October 9, 2026, the owner reported that pushing every commit floods CI, so commits are now pushed in batches under the push rules of `docs/GIT_OPERATIONS.md`.
 `docs/GIT_OPERATIONS.md` records the Git and GitHub rules.
 The owner requested public documentation as an mdBook site on GitHub Pages, deployed by GitHub Actions.
 The owner made the browser the engine's first embedder, written in a first-party wrapper language.
