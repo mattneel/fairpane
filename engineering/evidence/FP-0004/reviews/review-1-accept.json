@@ -1,0 +1,195 @@
+{
+  "verdict": "accept",
+  "reviewer": "fairpane-review",
+  "task": "FP-0004",
+  "commit": "9ce3154",
+  "scope_note": "Read-only review. I ran no commands. Statements about test outcomes come from the raw logs and gate receipts. Statements about allocator behavior come from the pinned std source at .tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-windows/lib/std.",
+  "contract_test_mapping": [
+    {
+      "case": 1,
+      "test": "src/handles.zig:280",
+      "code": "insert:135, get/getPtr via liveSlot:223, remove:170",
+      "gap": "none"
+    },
+    {
+      "case": 2,
+      "test": "src/handles.zig:308 (forged includes owner[1] index maxInt(u32) gen 1 and gen 0; get/getPtr/validate/remove all return WrongOwner)",
+      "code": "liveSlot:224 checks the owner before the range check at :225",
+      "gap": "none"
+    },
+    {
+      "case": 3,
+      "test": "src/handles.zig:340",
+      "code": "remove:176-178 increments the generation and pushes the LIFO free list; insert:136-142 reuses it",
+      "gap": "none"
+    },
+    {
+      "case": 4,
+      "test": "src/handles.zig:365 (index 2, maxInt(u32), gen 0, and an empty-table probe)",
+      "code": "liveSlot:225",
+      "gap": "none"
+    },
+    {
+      "case": 5,
+      "test": "src/handles.zig:394",
+      "code": "remove:173-174 retires at max_generation",
+      "gap": "none"
+    },
+    {
+      "case": 6,
+      "test": "src/handles.zig:426 (allocation-freedom asserted at :456-463 through FailingAllocator fail_index, allocations, and has_induced_failure)",
+      "code": "insert:144 returns before reserveSlot",
+      "gap": "none"
+    },
+    {
+      "case": 7,
+      "test": "src/handles.zig:466 (resize_fail_index=0 forces growth through alloc; checks count, len, capacity, free_head, every live handle, and the retired handle)",
+      "code": "reserveSlot:152-157, which runs before appendAssumeCapacity:146",
+      "gap": "none"
+    },
+    {
+      "case": 8,
+      "test": "src/handles.zig:553 with allocationScenario:522 and insertChecked:506",
+      "code": "reserveSlot:156",
+      "gap": "none; it is not vacuous (see defect_analysis.allocation_failure_test)"
+    },
+    {
+      "case": 9,
+      "test": "src/handles.zig:565 (OOM, WrongOwner, InvalidHandle, StaleHandle, HandleSpaceExhausted; invariants checked after each; bytes and alloc/dealloc counts checked after deinit)",
+      "code": "deinit:128",
+      "gap": "minor: deinit runs once after all five outcomes, not once per outcome. OOM is exercised on an empty table; tests 7 and 8 cover the non-empty case."
+    },
+    {
+      "case": 10,
+      "test": "src/handles.zig:608",
+      "code": "OwnerIdSource.issue:31-39",
+      "gap": "none"
+    },
+    {
+      "case": 11,
+      "test": "src/handles.zig:620 (4x1000, strictly increasing per thread, sorted set equals 1..4000)",
+      "code": "issue:35 cmpxchgWeak loop",
+      "gap": "none"
+    },
+    {
+      "case": 12,
+      "test": "src/handles.zig:644 (comptime: distinct Handle types, not .pointer, every field int/enum)",
+      "code": "Handle:87-91",
+      "gap": "none"
+    },
+    {
+      "case": 13,
+      "test": "src/handles.zig:668",
+      "code": "Iterator.next (around :204-219)",
+      "gap": "none"
+    },
+    {
+      "case": 14,
+      "test": "src/handles.zig:839 with runModel:708 (3 seeds x 3 configs; also checks that no triple is issued twice through issued[index][generation])",
+      "code": "whole Table",
+      "gap": "none"
+    },
+    {
+      "case": "invariant fn",
+      "test": "expectInvariants src/handles.zig:236 (free list acyclic and complete, live count, gen!=0, free gen>1, retired gen==max)",
+      "gap": "none"
+    },
+    {
+      "case": "extra",
+      "test": "src/handles.zig:601 tests issueEngineOwnerId:45 (process-wide source:42)",
+      "gap": "none"
+    }
+  ],
+  "acceptance_criteria_mapping": [
+    {
+      "criterion": "Engine-scoped handles with explicit stale-handle and wrong-owner rejection",
+      "evidence": "issueEngineOwnerId src/handles.zig:42-47; liveSlot:223-233; tests 2, 3, 5, 14, and :601",
+      "gap": "Owner uniqueness per table is a convention, not enforced (finding F3)."
+    },
+    {
+      "criterion": "Generation exhaustion without stale identity reuse",
+      "evidence": "remove:173-174 retires the slot; insert:144 returns HandleSpaceExhausted; tests 5 (:394), 6 (:426), 14 (issued-triple check in runModel)",
+      "gap": "none"
+    },
+    {
+      "criterion": "Allocation failure at every targeted allocation point",
+      "evidence": "reserveSlot:152-157 is the only allocation; tests 7 (:466), 8 (:553), 9 (:565)",
+      "gap": "none"
+    },
+    {
+      "criterion": "Destructibility after each documented failure outcome",
+      "evidence": "test 9 (:565-599) covers all five table errors. OwnerIdsExhausted owns no resources and is stable across repeated calls (test 10).",
+      "gap": "minor; see case 9"
+    },
+    {
+      "criterion": "Internal handles distinct from native pointers and wire identifiers",
+      "evidence": "test 12 (:644); module doc src/handles.zig:1-5; api/README.md:22-27; grep finds no handles reference in src/c_api.zig, include/, or build.zig",
+      "gap": "none"
+    }
+  ],
+  "defect_analysis": {
+    "duplicate_triple": "None found within a table. Generations only increase (remove:176), the slot retires at max (:174), retired slots never rejoin the free list, new slots start at gen 1 with a fresh index (:146-148), and storage never shrinks. runModel's issued[][] check confirms this empirically.",
+    "owner_wrap": "None. issue:35 uses current +% 1, so issuing maxInt stores 0. The loop at :33 then returns OwnerIdsExhausted for every later call. Zero is never returned.",
+    "stale_or_foreign_acceptance": "None. Owner is checked first (:224), then gen==0 or index>=len (:225), then free/retired state and generation mismatch. One caveat: tables that share an OwnerId accept each other's handles (F3).",
+    "state_before_failure": "None. The free-list path never allocates. The growth path runs the exhaustion check (:144) and reserveSlot (:145) before appendAssumeCapacity (:146) and the live_count update. In pinned std array_list.zig:1355-1381, ensureTotalCapacityPrecise changes nothing before alignedAlloc fails.",
+    "leaks": "None. deinit frees slot storage. Values are not destroyed, which matches the contract. Tests 7, 8, and 9 assert zero leaked bytes, and testing.allocator checks again at test end.",
+    "thread_double_join": "None. Test 11 (:620-641) defers join over threads[0..spawned], joins explicitly, then sets spawned=0. The deferred join therefore covers only a partial spawn failure.",
+    "allocation_failure_test": "Not vacuous. Checked against the pinned std: (1) FailingAllocator.remap and resize return null/false whenever resize_index == resize_fail_index. resize_index starts at 0 and increments only on success, so resize_fail_index=0 fails every remap. (2) Allocator.remap (mem/Allocator.zig:378-405) returns null for a zero-length allocation. (3) ArrayList.ensureTotalCapacityPrecise (array_list.zig:1355-1381) calls gpa.remap, falls back to gpa.alignedAlloc on null, and changes no state before the try. (4) checkAllAllocationFailures (testing.zig:1145-1191) wraps the backing allocator in FailingAllocator with only fail_index set. Its remap forwards to no_remap.rawRemap, which returns null, so every growth reaches the checker's alloc and is counted in alloc_index. The scenario needs capacities 8 -> 20 -> 38, so needed_alloc_count = 3. Each fail index returns OOM through insertChecked, which checks unchanged state and invariants. The probe at :558-560 asserts >= 3 allocations."
+  },
+  "evidence_check": {
+    "failing_first": "raw/failing-first.log: exit 1, 16 AstGen undeclared-identifier errors covering every contract case's test or helper (lines 9-433 of the pre-implementation file). Because the whole file fails AstGen, every case 'does not compile', which meets CONTRACT.md:96. The extra process-wide test (:601) has no error line, so it was added after the failing-first run.",
+    "test_count": "22/22 is consistent. Earlier tests: src/c_api.zig:30,37 (2), src/web_string.zig:22,31,38,47 (4), and the anonymous test in src/root.zig:11 (1), for 7. FP-0001 raw/zig-test-summary.log also reports 7/7. handles.zig adds 15 tests (14 contract cases plus :601). raw/integrator-zig-test-summary.log shows a fresh --cache-dir, compile success, 'run test 22 pass (22 total)', and exit 0.",
+    "gates": "All six contract gates are present (repo-check, controller-test, zig-fmt, zig-test, zig-build, c-abi), each with status pass. All command exit codes are 0; c-abi has three commands at 0/0/0. None timed out. Source and policy digests are identical before and after: source 6bab90ec…/78 files, policy 0d9ebeb6…/12 files. raw/gate-evidence-check.log shows every receipt passing evidence-check with current_source true. The three plan-required gates (repo-check, controller-test, zig-test) are covered.",
+    "protected_policy": "Unchanged. The policy digest 0d9ebeb6… equals the one bound by the preceding FP-0028 receipts. The source file count went from 77 to 78, matching one new file (src/handles.zig). Policy roots include every protected path.",
+    "readme_claims": "Matches the logs except F2 (wording). The gate table, digests, 22/22 breakdown, LIFO free list, and the single allocation point are all supported by the logs and the code."
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "low",
+      "file": "engineering/evidence/FP-0004/CONTRACT.md",
+      "line": 97,
+      "reasoning": "The contract says the gate commands are 'run by the integrator after review'. The receipts (2026-10-09T00:33:52Z-57Z) and their commit 9ce3154 were produced before this required fairpane-review review. This review requests no source change, so the bound source digest stays valid. Before recording acceptance, the integrator should re-run `node tools/fairpane.mjs evidence-check` on each receipt in gates/ (or re-run the six gates) and confirm current_source true."
+    },
+    {
+      "id": "F2",
+      "severity": "low",
+      "file": "engineering/evidence/FP-0004/README.md",
+      "line": 21,
+      "reasoning": "'shows the tests compiled before the implementation existed' contradicts the log, which shows a compile failure (exit 1, 16 errors). It should read 'failed to compile'. It could also note that the process-wide owner test (src/handles.zig:601) was added after the failing-first run."
+    },
+    {
+      "id": "F3",
+      "severity": "info",
+      "file": "src/handles.zig",
+      "line": 121,
+      "reasoning": "Owner isolation depends on each table getting its own OwnerId. Two scenarios break it. (a) Two tables of the same instantiation built with the same owner accept each other's handles. Minimal repro: `var a: Table(u64,.{}) = .init(o); var b: Table(u64,.{}) = .init(o); const h = try a.insert(gpa,1); _ = try b.insert(gpa,2); try b.get(h)` returns 2, not WrongOwner. (b) After deinit, init(o) again reissues (o,0,1). The contract scopes the no-duplicate rule to one table and assigns lifecycle to FP-0006, so this is not a defect here. FP-0006 must issue a fresh owner per table instance."
+    },
+    {
+      "id": "F4",
+      "severity": "info",
+      "file": "src/handles.zig",
+      "line": 14,
+      "reasoning": "The doc comment says only OwnerIdSource creates values. OwnerId is a non-exhaustive enum, though, so `@enumFromInt(x)` compiles anywhere, including for 0 or `@intFromPtr(p)`. Nonzero is enforced only by debug asserts at :26 and :122. Zig offers no stronger encapsulation, so the comment should describe this as a convention rather than a guarantee."
+    },
+    {
+      "id": "F5",
+      "severity": "info",
+      "file": "src/handles.zig",
+      "line": 456,
+      "reasoning": "Test 6 checks allocation-freedom only through alloc counters. The default resize_fail_index means a remap would go uncounted. This is not a real gap: insert returns at :144 before reserveSlot, and with capacity 4 == slot_limit, ensureTotalCapacityPrecise would return early anyway."
+    },
+    {
+      "id": "F6",
+      "severity": "info",
+      "file": "engineering/evidence/FP-0004/raw/zig-test.log",
+      "line": 2,
+      "reasoning": "The worker's raw logs (zig-fmt, zig-test, zig-build, failing-first) record no cwd, so the README:23 claim of an 'isolated worktree' cannot be checked from the logs. The integrator logs do record cwd. zig-fmt.log honestly shows a first failing check before the passing one."
+    }
+  ],
+  "blocking_findings": 0,
+  "checks_for_integrator": [
+    "node tools/fairpane.mjs evidence-check on each of the six receipts in engineering/evidence/FP-0004/gates (or re-run the six gate commands from CONTRACT.md:99-106)",
+    "Optionally fix the README.md:21 wording before recording acceptance"
+  ]
+}

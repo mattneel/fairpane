@@ -1,0 +1,85 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","add","--detach","out/wt-3bfb686","3bfb686"]
+Preparing worktree (detached HEAD 3bfb686)
+HEAD is now at 3bfb686 FP-0028: Harden controller command records
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","add","--detach","out/wt-3bfb686","3bfb686"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:46:42.312Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":100}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/wt-3bfb686","rev-parse","HEAD","HEAD^{tree}"]
+3bfb6869ffa29fd577690b9d107b9f95d1f3a7d0
+fcf0c0afafa75c7ba052efffd1a2e5d7af7f8324
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/wt-3bfb686","rev-parse","HEAD","HEAD^{tree}"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:46:42.480Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/wt-3bfb686/tools/fairpane.mjs","fingerprint"]
+{
+  "source": {
+    "sha256": "f48dd23ed10031195dcb9fe177cb9b046b16f31e2f6074d3db4f20c9ac53d02e",
+    "file_count": 77
+  },
+  "policy": {
+    "sha256": "0d9ebeb68c7cd21f2e2d7cec6ce68cefc1b4aec3d59be8a6a4668b69bda345e1",
+    "file_count": 12
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/wt-3bfb686/tools/fairpane.mjs","fingerprint"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:46:42.552Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/wt-3bfb686/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0028/gates/2026-10-09T00-29-56-437Z-repo-check-49eea8ab.json"]
+{
+  "result": "pass",
+  "gate": "repo-check",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/wt-3bfb686/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0028/gates/2026-10-09T00-29-56-437Z-repo-check-49eea8ab.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:46:42.713Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":75}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/wt-3bfb686/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0028/gates/2026-10-09T00-29-56-585Z-controller-test-96190cb1.json"]
+{
+  "result": "pass",
+  "gate": "controller-test",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/wt-3bfb686/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0028/gates/2026-10-09T00-29-56-585Z-controller-test-96190cb1.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:46:42.844Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/wt-3bfb686/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0028/gates/2026-10-09T00-29-58-183Z-zig-test-2ed9ae83.json"]
+{
+  "result": "pass",
+  "gate": "zig-test",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/wt-3bfb686/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0028/gates/2026-10-09T00-29-58-183Z-zig-test-2ed9ae83.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:46:42.965Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/wt-3bfb686/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0028/gates/2026-10-09T00-29-58-368Z-c-abi-671644d4.json"]
+{
+  "result": "pass",
+  "gate": "c-abi",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/wt-3bfb686/tools/fairpane.mjs","evidence-check","engineering/evidence/FP-0028/gates/2026-10-09T00-29-58-368Z-c-abi-671644d4.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:46:43.085Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":68}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","3bfb686^","3bfb686","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains/zig.lock.json","toolchains/zig-version.txt","specs/corpora.json"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","3bfb686^","3bfb686","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains/zig.lock.json","toolchains/zig-version.txt","specs/corpora.json"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:46:43.202Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--name-status","3bfb686^","3bfb686"]
+A	engineering/evidence/FP-0028/README.md
+A	engineering/evidence/FP-0028/controls/mutants.mjs
+A	engineering/evidence/FP-0028/gates/2026-10-09T00-29-56-437Z-repo-check-49eea8ab.json
+A	engineering/evidence/FP-0028/gates/2026-10-09T00-29-56-437Z-repo-check-49eea8ab.log
+A	engineering/evidence/FP-0028/gates/2026-10-09T00-29-56-585Z-controller-test-96190cb1.json
+A	engineering/evidence/FP-0028/gates/2026-10-09T00-29-56-585Z-controller-test-96190cb1.log
+A	engineering/evidence/FP-0028/gates/2026-10-09T00-29-58-183Z-zig-test-2ed9ae83.json
+A	engineering/evidence/FP-0028/gates/2026-10-09T00-29-58-183Z-zig-test-2ed9ae83.log
+A	engineering/evidence/FP-0028/gates/2026-10-09T00-29-58-368Z-c-abi-671644d4.json
+A	engineering/evidence/FP-0028/gates/2026-10-09T00-29-58-368Z-c-abi-671644d4.log
+A	engineering/evidence/FP-0028/raw/controller-hosts.log
+A	engineering/evidence/FP-0028/raw/gate-evidence-check.log
+A	engineering/evidence/FP-0028/raw/mutation-control.log
+M	engineering/state.json
+M	tools/README.md
+M	tools/lib.mjs
+M	tools/selftest.mjs
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--name-status","3bfb686^","3bfb686"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:46:43.274Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","remove","--force","out/wt-3bfb686"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","remove","--force","out/wt-3bfb686"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:46:43.348Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":43}

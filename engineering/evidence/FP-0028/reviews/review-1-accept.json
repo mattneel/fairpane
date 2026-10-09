@@ -1,0 +1,289 @@
+{
+  "verdict": "accept",
+  "summary": "I recommend accept. Commit 3bfb686 implements each behavior in the FP-0028 contract. All ten frozen test cases exist as tests 60 to 69, and both host runs and the controller-test receipt show 70 of 70 passing. That total equals the old 60 tests plus 10, so the denominator was not weakened. I found no runProcess path that lets a failed command pass a gate, resolves twice, or writes to the log after closing it. Two narrow exceptions to the contract's no-throw and no-lost-error claims exist, listed below as a note and a minor finding. The six mutants are real kills when I trace them through the test code. I found no blocking defect. The minor findings are coverage gaps for contract behaviors that only the code supports: capture-start failure, a log write failing mid-run, and keeping a capture error alongside a spawn error. Other minor findings: the 'log written before path validation' test covers recordCommand but not runGate, a short write to the log goes undetected, the README overstates two points, and engineering/HANDOFF.md is stale. I read files only and ran nothing. I could not decode the parent commit's git objects, so 'watchdog unchanged' rests on comparing the code with review-2's description of it [INFERENCE].",
+  "contract_behavior_checks": [
+    {
+      "behavior": "RESULT lines and receipt records add `cwd` (absolute) and `started_at` (UTC ISO 8601); COMMAND keeps its JSON array form",
+      "status": "supported",
+      "evidence": "tools/lib.mjs:298-300 commandRecord (path.resolve(cwd), new Date(started).toISOString()), used at lib.mjs:312 and in recordCommand's unresolved branch (lib.mjs:396-398). COMMAND at lib.mjs:323 is unchanged in form. Every RESULT line in gates/*c-abi-671644d4.log, zig-test, repo-check and controller-test logs has cwd and a Z-suffixed started_at, and receipt commands[] carry the same fields (e.g. c-abi json commands[0]). Test 60 (selftest.mjs:331-338)."
+    },
+    {
+      "behavior": "runProcess never throws after argument validation",
+      "status": "supported with one edge",
+      "evidence": "Every fs, spawn and copy step sits in try/catch (lib.mjs:320-328, 332-340, 347-348, 352-366), and finishRecord catches its own write (302-307). Edge: commandRecord's path.resolve(cwd) at 298/312 runs outside any try. A `cwd` that spawn accepts, such as a file URL, makes it throw synchronously. No current caller passes a non-string."
+    },
+    {
+      "behavior": "Log cannot be opened → failed result with error, no log",
+      "status": "supported",
+      "evidence": "lib.mjs:320-328. Test 61 (selftest.mjs:339-343) passes on Node and Bun (raw/controller-hosts.log)."
+    },
+    {
+      "behavior": "Capture cannot be created → RESULT line with error, log closed",
+      "status": "code only",
+      "evidence": "lib.mjs:332-340 removes the directory, records 'Output capture failed', and calls finishRecord, which writes RESULT and closes fd. No test or raw record exercises it."
+    },
+    {
+      "behavior": "Capture copy or log write fails → result carries error; every descriptor closes",
+      "status": "copy failure tested; log-write failure code only",
+      "evidence": "Copy: lib.mjs:346-350 plus test 62 (selftest.mjs:344-353) and the killed mutant 'copy failure is swallowed'. Log write: finishRecord (lib.mjs:302-307) catches it and closes the log in finally. No test makes the RESULT write fail, which was review-2's crash case (b). By inspection every descriptor closes: outFd at 346, the source fd in copyFileToDescriptor's finally (294), the log fd at 305 and 325. No test observes descriptor closure."
+    },
+    {
+      "behavior": "A capture error is kept even when a spawn error already exists",
+      "status": "code only",
+      "evidence": "The errors[] array (lib.mjs:312) accumulates the spawn error (355/366) and the copy error (348), then joins them (313-314). No test pairs a missing executable with a forced copy failure."
+    },
+    {
+      "behavior": "Private temporary capture directory; POSIX 0700/0600; directory removed after copy",
+      "status": "supported on Windows; POSIX modes by code only (README Limits says so)",
+      "evidence": "lib.mjs:333 mkdtempSync, which uses mkdtemp(3) and so gets mode 0700 [INFERENCE], and 335 openSync 'wx' 0o600. Removal at 349, checked by test 64 and the killed mutant 'capture directory is kept'. Removal is best-effort: removeQuietly (297) swallows the failure."
+    },
+    {
+      "behavior": "gateEnvironment(root, gate) gives ZIG_GLOBAL_CACHE_DIR only to zig and c-abi; runGate uses it",
+      "status": "supported",
+      "evidence": "lib.mjs gateEnvironment (~409-412). runGate uses it at 424-426. Test 69 (selftest.mjs:395-401) and the killed mutant. The gate logs show environment_overrides on the zig-test and c-abi commands and none on repo-check or controller-test."
+    },
+    {
+      "behavior": "runProcess `copyOutput` option; recordCommand `pathEnv` passed to resolveExecutable",
+      "status": "supported",
+      "evidence": "lib.mjs:309 (copyOutput default copyFileToDescriptor) and 394 (pathEnv forwarded only when defined). Tests 62 and 66 use them."
+    }
+  ],
+  "exact_test_case_checks": [
+    {
+      "case": 1,
+      "test": "selftest.mjs:331 (#60)",
+      "status": "present and passing",
+      "note": "Only Date.parse is checked, so it does not enforce UTC or ISO format. See findings."
+    },
+    {
+      "case": 2,
+      "test": "selftest.mjs:339 (#61)",
+      "status": "present and passing"
+    },
+    {
+      "case": 3,
+      "test": "selftest.mjs:344 (#62)",
+      "status": "present and passing; mutant killed"
+    },
+    {
+      "case": 4,
+      "test": "selftest.mjs:354 (#63)",
+      "status": "present and passing"
+    },
+    {
+      "case": 5,
+      "test": "selftest.mjs:359 (#64)",
+      "status": "present and passing; mutant killed"
+    },
+    {
+      "case": 6,
+      "test": "selftest.mjs:368 (#65)",
+      "status": "present and passing; mutant killed. Removing filter(Boolean) at lib.mjs:387 would also fail it, because the empty PATH entry resolves against cwd."
+    },
+    {
+      "case": 7,
+      "test": "selftest.mjs:375 (#66)",
+      "status": "present and passing; mutant killed"
+    },
+    {
+      "case": 8,
+      "test": "selftest.mjs:382 (#67)",
+      "status": "present and passing; no mutant"
+    },
+    {
+      "case": 9,
+      "test": "selftest.mjs:387 (#68)",
+      "status": "present and passing. It requires status 1 and 'Usage:' on stderr, so falling through to 'Unknown gate' would also fail it."
+    },
+    {
+      "case": 10,
+      "test": "selftest.mjs:395 (#69)",
+      "status": "present and passing; mutant killed"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": 1,
+      "criterion": "Record the working directory and UTC start time in every command record.",
+      "status": "supported",
+      "evidence": "lib.mjs:298-300, 312, 396-398; all four FP-0028 gate logs and receipts; test 60."
+    },
+    {
+      "id": 2,
+      "criterion": "Complete failure record and release every descriptor when output capture cannot start or copy.",
+      "status": "partially evidenced",
+      "evidence": "The copy failure is tested (test 62 plus a mutant). For start failure (lib.mjs:332-340) and descriptor release, the only evidence is code inspection. Neither has a test or a raw record."
+    },
+    {
+      "id": 3,
+      "criterion": "Return a failed result instead of crashing when the log itself cannot be written.",
+      "status": "supported for open failure; mid-run write failure by code only",
+      "evidence": "Test 61 covers mkdir and open failure. The RESULT write failure that review-2 (b) named as a crash is handled at lib.mjs:302-307 but no test exercises it. A short write is not detected (see findings)."
+    },
+    {
+      "id": 4,
+      "criterion": "Create output capture files with owner-only access in a private temporary directory.",
+      "status": "code only; POSIX not exercised (disclosed in README Limits)",
+      "evidence": "lib.mjs:333, 335."
+    },
+    {
+      "id": 5,
+      "criterion": "Add tests that fail when resolution searches the working directory, when a record logs an unresolved bare name, or when a log is written before path validation.",
+      "status": "mostly supported",
+      "evidence": "Tests 65 and 66 are each killed by a mutant (raw/mutation-control.log). Test 67 covers recordCommand only. The finding that prompted this criterion, review-2's old selftest:287, was about runGate. A runGate regression that writes the log before evidencePath still passes test 56 (selftest.mjs:288-294), which checks only ran.txt. No mutant demonstrates test 67."
+    },
+    {
+      "id": 6,
+      "criterion": "Add tests for capture-copy failure, capture-file removal, stderr capture, run and record argument parsing, and the Zig gate cache override.",
+      "status": "supported",
+      "evidence": "Tests 62, 64, 63, 68 and 69, with mutants for 62, 64 and 69. Test 69 checks the pure gateEnvironment seam. That runGate actually uses it (lib.mjs:426) shows only in the committed zig-test and c-abi logs."
+    }
+  ],
+  "runProcess_defect_review": {
+    "throws_after_validation": "Only path.resolve(cwd) in commandRecord (lib.mjs:298, called at 312) can throw, when cwd is a non-string or process.cwd() fails. No current caller reaches it.",
+    "descriptor_or_directory_leak": "No descriptor leak by inspection. The capture directory can survive silently when removal fails (removeQuietly, lib.mjs:297, 349). On Windows this happens when a grandchild that inherited outFd still holds output.log, or when antivirus briefly locks the file. Nothing is recorded, and child output stays in %TEMP%.",
+    "lost_errors": "Errors from closeQuietly and removeQuietly are dropped by design. In copyFileToDescriptor, a closeSync(source) throw in the finally block (lib.mjs:294) would mask the write error. That is negligible.",
+    "double_resolve": "None. The settled guard at lib.mjs:344-345 covers both the spawn-failure sequence ('error' then 'close') and a synchronous spawn throw.",
+    "write_after_close": "None. finish runs once, and an 'error' that arrives after settling only appends to errors[] after the result has been built.",
+    "failed_command_passing_gate": "None found. runGate's run() at lib.mjs:426-428 rejects any error, so copy and log-write errors fail the gate. validateReceipt at lib.mjs:268-271 does the same. A short RESULT write could leave a truncated log while the result reports no error, but a full disk would also make the receipt write in runGate throw, so no passing receipt follows [INFERENCE].",
+    "watchdog_and_kill": "The timer at lib.mjs:357-365 calls taskkill /T /F, falls back to SIGKILL, and on POSIX kills the process group with detached set (354). This matches review-2's description of the FP-0001 code (review-2-reject.json findings, the note at old line 371). Test 39 ('hung child reaches its watchdog') passes under Node and Bun. I could not diff it byte for byte against the parent commit [INFERENCE]."
+  },
+  "mutation_control_assessment": "raw/mutation-control.log records 6 of 6 mutants killed under `record` with exit 0. I traced each kill to its target test's assertion (assert.throws, r.executable, r.error, readdirSync, r.cwd, deepEqual), so the kills are genuine. The harness has two weaknesses. First, it never runs an unmutated copy as a baseline: test 70 and the lock tests fail in every mutant directory because root points at the temporary copy. The six target tests do not depend on root, so this does not invalidate the results. Second, it logs only the test-name line, not the failure message. Important regressions that no test catches: (a) capture-start failure throwing or leaking the log fd, review-2 (a); (b) removing the try/catch around the RESULT write in finishRecord, review-2 (b); (c) dropping the capture error when a spawn error exists, review-2 (c); (d) runGate writing its log before evidencePath; (e) runGate no longer passing env to runProcess; (f) started_at in non-UTC or non-ISO form; (g) recordCommand's unresolved-name branch dropping cwd or started_at; (h) POSIX capture modes.",
+  "readme_claim_checks": [
+    {
+      "claim": "Tests 60-69 add the ten contract cases; 70 of 70 pass under Node and Bun",
+      "status": "supported",
+      "evidence": "raw/controller-hosts.log has two runs at 70/70 with exit_code 0. The controller-test gate log shows 70/70."
+    },
+    {
+      "claim": "raw/controller-hosts.log shows Node v26.7.0 and Bun 1.4.2",
+      "status": "misattributed",
+      "evidence": "That log contains only executable paths, no version output. v26.7.0 appears in the receipts' host.runtime. Bun 1.4.2 is recorded only in FP-0001/raw/host-versions.log for the same bun.exe path."
+    },
+    {
+      "claim": "Six mutants, each target test fails",
+      "status": "supported",
+      "evidence": "raw/mutation-control.log"
+    },
+    {
+      "claim": "Source digest f48dd23…/77 and policy digest 0d9ebeb…/12 in every receipt; gate exits 0 / 0 / 0 / 0,0,0",
+      "status": "supported",
+      "evidence": "gates/*.json and *.log"
+    },
+    {
+      "claim": "Each receipt passes evidence-check with current_source true",
+      "status": "supported",
+      "evidence": "raw/gate-evidence-check.log, four records each with exit 0."
+    },
+    {
+      "claim": "The c-abi log shows cwd and started_at in each RESULT line",
+      "status": "supported",
+      "evidence": "gates/2026-10-09T00-29-58-368Z-c-abi-671644d4.log"
+    },
+    {
+      "claim": "'It keeps every error message and closes every descriptor.'",
+      "status": "overstated",
+      "evidence": "Failures in removeQuietly and closeQuietly are discarded (lib.mjs:296-297)."
+    },
+    {
+      "claim": "Limits (no MSYS2 reproduction; POSIX modes not exercised)",
+      "status": "accurate"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "file": "tools/selftest.mjs",
+      "line": 339,
+      "title": "Three contract failure behaviors have no test or raw evidence",
+      "reasoning": "The contract's Behavior section requires a RESULT line and a closed log when capture creation fails (lib.mjs:332-340). It requires an error result instead of a crash when the RESULT write fails (lib.mjs:302-307). It requires keeping the capture error alongside a spawn error (lib.mjs:312-314, 348, 355). These are review-2 items (a), (b) and (c), and plan criteria 2 and 3 name them. The code handles all three. Only inspection supports them, and reverting any one would leave all 70 tests passing.",
+      "reproduction": "Remove the try/catch in finishRecord (lib.mjs:303-304) and run selftest: 70/70 still pass. To test it, pass copyOutput: (f, fd) => fs.closeSync(fd) so the RESULT write gets EBADF. For capture-start failure, use withPrivateTemp with TMP/TEMP/TMPDIR pointing at a regular file. For the combined case, run a missing executable with a throwing copyOutput and assert both messages."
+    },
+    {
+      "severity": "minor",
+      "file": "tools/selftest.mjs",
+      "line": 288,
+      "title": "A runGate log written before path validation is still undetected",
+      "reasoning": "Review-2 finding (3) cited the runGate test (old line 287), which checks only that ran.txt is absent. New test 67 (line 382) covers recordCommand, so plan criterion 5 holds only for the record path. If runGate wrote `${evidenceDir}/…log` before calling evidencePath at lib.mjs:419, test 56 would still pass with evidenceDir 'tools'.",
+      "reproduction": "Move fs.writeFileSync(path.join(root, logRelative), …) above evidencePath in runGate. Test 56 still passes, and dir/tools/<ts>-fixture-*.log exists."
+    },
+    {
+      "severity": "minor",
+      "file": "tools/lib.mjs",
+      "line": 303,
+      "title": "A short write to the log goes undetected",
+      "reasoning": "fs.writeSync(fd, string) returns the number of bytes written, and finishRecord (303) and the COMMAND write (323) ignore it. On a nearly full disk, a regular-file write can return fewer bytes without raising an error. The RESULT line is then truncated while the result reports error: null, which contradicts 'When … a log write fails, the result carries an error'. copyFileToDescriptor already loops on writeSync, so the two code paths are inconsistent. This cannot produce a passing receipt, because the receipt write would also fail [INFERENCE].",
+      "reproduction": "Inspection. Compare lib.mjs:303 with the write loop at 292."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/evidence/FP-0028/README.md",
+      "line": 24,
+      "title": "The cited log does not show the runtime versions",
+      "reasoning": "raw/controller-hosts.log records the paths C:\\nvm4w\\nodejs\\node.exe and …\\WinGet\\Links\\bun.exe, but no version output. The Node version appears in the receipts. The Bun version appears only in FP-0001/raw/host-versions.log. AGENTS.md evidence rules require claims to point at actual output.",
+      "reproduction": "Search raw/controller-hosts.log for '1.4.2' or 'v26.7.0': no match."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/evidence/FP-0028/README.md",
+      "line": 12,
+      "title": "'Keeps every error message' is overstated; failed capture removal is silent",
+      "reasoning": "removeQuietly (lib.mjs:297, 349) and closeQuietly (296) discard their errors. If removal fails, the contract's 'the controller removes that directory' does not happen. Child output stays in %TEMP% and nothing in the record says so. On Windows this happens when a grandchild that inherited outFd keeps output.log open after the child's 'close' event.",
+      "reproduction": "Run a child that starts a detached grandchild inheriting stdout and sleeping 10 s. After the result returns, a fairpane-capture-* directory remains in %TEMP%, and r.error is null."
+    },
+    {
+      "severity": "minor",
+      "file": "engineering/HANDOFF.md",
+      "line": 49,
+      "title": "The handoff was not updated for FP-0028",
+      "reasoning": "HANDOFF.md:22 still names 'Implement FP-0028' as the next action. Lines 49-50 still say command records lack the working directory and start time. AGENTS.md work procedure step 8 requires updating the handoff with exact next actions. The commit changed state.json but not HANDOFF.md.",
+      "reproduction": "Read engineering/HANDOFF.md:19-24 and 49-50."
+    },
+    {
+      "severity": "note",
+      "file": "tools/selftest.mjs",
+      "line": 334,
+      "title": "The started_at check does not enforce UTC ISO 8601",
+      "reasoning": "Date.parse accepts the local-time output of Date.prototype.toString() and other non-ISO strings. The test meets the contract's literal wording ('parseable') but does not protect the stated behavior. Asserting r.started_at === new Date(r.started_at).toISOString() would.",
+      "reproduction": "Change commandRecord to new Date(started).toString(). Test 60 still passes."
+    },
+    {
+      "severity": "note",
+      "file": "tools/lib.mjs",
+      "line": 298,
+      "title": "commandRecord can throw after argument validation",
+      "reasoning": "path.resolve(cwd ?? process.cwd()) runs outside any try. spawn accepts a URL cwd, but path.resolve throws TypeError on one, and process.cwd() throws if the current directory was deleted. No current caller reaches either case.",
+      "reproduction": "Call runProcess(process.execPath, [], { cwd: new URL('file:///C:/'), logPath }). It throws synchronously."
+    },
+    {
+      "severity": "note",
+      "file": "engineering/evidence/FP-0028/controls/mutants.mjs",
+      "line": 44,
+      "title": "The mutation harness has no unmutated baseline and no failure messages",
+      "reasoning": "Mutant directories hold only tools/{lib,selftest,fairpane}.mjs, so root-dependent tests such as 70 and the lock tests fail in every mutant. Only the target line is checked. An unmutated control run, plus logging each target's message, would show that every 'KILLED' result comes from the mutation. My trace of the six target tests shows they do not depend on root."
+    },
+    {
+      "severity": "note",
+      "file": "engineering/evidence/FP-0028/README.md",
+      "line": 34,
+      "title": "The policy digest differs from FP-0001's, and no protected-path diff is recorded for 3bfb686",
+      "reasoning": "The FP-0001 receipts and state.json:19 bind policy ec150588…/12. The FP-0028 receipts bind 0d9ebeb…/12. The file list I was given for 3bfb686 contains no policy roots, so the change probably predates this commit, between 05d2d42 and the FP-0028 base [INFERENCE]. FP-0028 has no raw record showing that the protected paths are unchanged. Review-3 also did not verify commits after 05d2d42."
+    }
+  ],
+  "protected_policy_changes": "None found in the stated change set. The changed files are tools/lib.mjs, tools/selftest.mjs, tools/README.md, engineering/state.json and engineering/evidence/FP-0028/**. tools/ and engineering/evidence are allowed paths, and the integrator owns state.json (docs/AGENT_OPERATIONS.md:5, 64). The FP-0028 receipts do not show gates.json changing: they pass evidence-check with current_source true, and gate_sha256 matches the current gates.json. The policy digest moved from ec150588 (FP-0001) to 0d9ebeb (FP-0028) somewhere before or at 3bfb686. FP-0028 has no committed protected-path diff, so the integrator should confirm it with git.",
+  "unsupported_success_claims": [
+    "README.md:24 cites raw/controller-hosts.log for the Node and Bun versions, but that log contains none.",
+    "README.md:12 says 'keeps every error message'; removal and close errors are discarded.",
+    "'Watchdog unchanged' rests on inspection against review-2's description, not on a diff (reviewer limitation, not an implementer claim)."
+  ],
+  "unmet_criteria": [],
+  "blocking_items": [],
+  "checks_for_main_agent": [
+    "git diff --stat <FP-0001 acceptance commit> 3bfb686 -- AGENTS.md docs/CHARTER.md engineering/qualification.json engineering/policy.json engineering/gates.json toolchains specs engineering/dependencies.json (expect empty). Then find the commit that moved the policy digest from ec150588… to 0d9ebeb….",
+    "git show --stat 3bfb686 (confirm it changes only tools/lib.mjs, tools/selftest.mjs, tools/README.md, engineering/state.json and engineering/evidence/FP-0028/**)",
+    "git diff 3bfb686^ 3bfb686 -- tools/lib.mjs (confirm the watchdog block, now at lib.mjs:357-365, is byte-identical apart from moved lines)",
+    "At 3bfb686: node tools/fairpane.mjs evidence-check on each FP-0028 gates/*.json (later FP-0004 commits make them stale at master tip)",
+    "Before recording acceptance: update engineering/HANDOFF.md:19-24 and 49-50, and correct README.md:24 so it cites the receipts' host.runtime and FP-0001/raw/host-versions.log for the versions",
+    "Optionally add follow-up tests for capture-start failure, RESULT-write failure, combined spawn and capture errors, and runGate log-before-validation"
+  ]
+}

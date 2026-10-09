@@ -276,7 +276,8 @@
         "Queue host requests with identifiers, cancellation, and bounded ownership.",
         "Provide step outcomes without reentrant external mutation.",
         "Exercise destruction with outstanding requests and resource responses.",
-        "Do not claim that internal pauses create arbitrary JavaScript task boundaries."
+        "Do not claim that internal pauses create arbitrary JavaScript task boundaries.",
+        "Issue a fresh owner identity for each engine and each handle table instance, so no two live tables share an owner."
       ],
       "read": [
         "docs/ARCHITECTURE.md",
@@ -1429,6 +1430,53 @@
         "docs/PRODUCT.md",
         "docs/RENDERING_AND_TEXT.md",
         "docs/ABI_AND_WRAPPERS.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0031",
+      "title": "Close the FP-0028 review findings",
+      "workstream": "laboratory",
+      "depends_on": [
+        "FP-0028"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "tools",
+        "tests",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Test that a capture-start failure writes a RESULT line, closes the log, and returns an error.",
+        "Test that a failed RESULT write returns an error result instead of crashing.",
+        "Test that a spawn error and a capture error both remain in the result.",
+        "Test that runGate writes nothing before it validates the evidence directory.",
+        "Detect short writes to the log and report them as errors.",
+        "Report a failed capture-directory removal in the command record.",
+        "Assert that started_at is a canonical UTC ISO 8601 timestamp.",
+        "Give the mutation control an unmutated baseline run and the failure message of each target test."
+      ],
+      "read": [
+        "engineering/evidence/FP-0028/reviews/review-1-accept.json",
+        "tools/README.md"
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."

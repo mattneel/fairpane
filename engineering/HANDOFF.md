@@ -2,9 +2,8 @@
 
 ## Actual state
 
-Task `FP-0001` is accepted.
-Tasks `FP-0004` and `FP-0028` are implemented and await `fairpane-review`.
-Task `FP-0003` is in progress in an isolated `fairpane-core` worker.
+Tasks `FP-0001`, `FP-0004`, and `FP-0028` are accepted.
+Task `FP-0003` is implemented by an isolated `fairpane-core` worker and awaits integration review.
 Task `FP-0002` is in progress in the root session.
 The candidate Zig library contains a capability probe, a lossless UTF-16 view, and checked generational handles.
 No renderer, JavaScript engine, or native browser window exists yet.
@@ -20,9 +19,9 @@ Fairpane renders the browser chrome as a trusted document.
 
 ## Next action
 
-1. Record the `fairpane-review` acceptance of `FP-0004` and `FP-0028`.
-2. Review and integrate the `FP-0003` worker patch, then obtain `fairpane-review` and `fairpane-spec` verdicts.
-3. Finish `FP-0002` and request its review.
+1. Review and integrate the `FP-0003` worker patch, then obtain `fairpane-review` and `fairpane-spec` verdicts.
+2. Finish `FP-0002` and request its review.
+3. Start the ready tasks `FP-0005`, `FP-0006`, and `FP-0031`.
 4. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
 
 ```text

@@ -10,7 +10,7 @@ It qualifies controller behavior only.
 
 - `runProcess` adds `cwd` and `started_at` to every command record and `RESULT` line.
 - `runProcess` returns a failed result instead of throwing when the log or the output capture fails.
-  It keeps every error message and closes every descriptor.
+  It keeps the error of every failed step except best-effort cleanup, and it closes every descriptor.
 - Each child writes its output to a file in a new private temporary directory.
   On POSIX that directory has mode `0700` and the file has mode `0600`.
   The controller copies the output into the log and removes the directory.
@@ -21,7 +21,7 @@ It qualifies controller behavior only.
 ## Tests
 
 `tools/selftest.mjs` adds the ten contract cases as tests 60 through 69.
-`raw/controller-hosts.log` shows 70 of 70 tests passing under Node `v26.7.0` and under Bun `1.4.2`.
+`raw/controller-hosts.log` shows 70 of 70 tests passing under the Node and Bun executables that `engineering/evidence/FP-0001/raw/host-versions.log` identifies as Node `v26.7.0` and Bun `1.4.2`.
 The Bun result is informational.
 
 `controls/mutants.mjs` builds six mutants of `tools/lib.mjs`.
@@ -42,6 +42,12 @@ Every receipt binds policy digest `0d9ebeb68c7cd21f2e2d7cec6ce68cefc1b4aec3d59be
 
 `raw/gate-evidence-check.log` shows each receipt passing `evidence-check` with `current_source: true`.
 The `c-abi` log shows `cwd` and `started_at` in each `RESULT` line.
+
+## Review
+
+`reviews/review-1-accept.json` accepted commit `3bfb686` with minor coverage findings.
+Task `FP-0031` holds those findings as acceptance criteria.
+`raw/accepted-commit-verification.log` rechecks every receipt in a clean worktree of `3bfb686`.
 
 ## Limits
 

@@ -18,9 +18,16 @@ The free list is last in, first out.
 
 ## Worker records
 
-`raw/failing-first.log` shows the tests compiled before the implementation existed.
+`raw/failing-first.log` shows that the tests failed to compile before the implementation existed.
 That run exited with status 1 and 16 undeclared-identifier errors.
-`raw/zig-fmt.log`, `raw/zig-test.log`, and `raw/zig-build.log` hold the worker's runs in its isolated worktree.
+The test of the process-wide owner source was added after that run.
+`raw/zig-fmt.log`, `raw/zig-test.log`, and `raw/zig-build.log` hold the worker's runs, which record no working directory.
+
+## Review
+
+`reviews/review-1-accept.json` accepted commit `9ce3154` with low and informational findings.
+`raw/accepted-commit-verification.log` rechecks every receipt in a clean worktree of `9ce3154`.
+Review finding F3 moves owner uniqueness per table instance into task `FP-0006`.
 
 ## Integration gates
 

@@ -39,7 +39,7 @@
       "notes": []
     },
     "FP-0004": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0004Handles, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0004/README.md",
@@ -47,9 +47,11 @@
         "engineering/evidence/FP-0004/gates/2026-10-09T00-33-53-098Z-controller-test-87b2d7ae.json",
         "engineering/evidence/FP-0004/gates/2026-10-09T00-33-54-792Z-zig-test-0a8cce03.json"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0004/reviews/review-1-accept.json",
       "notes": [
-        "Source digest 6bab90ec12824f17db3abbfbab6866ba260db37133fda289f29f8d51bb21dbde. 22 of 22 Zig tests pass. Awaiting fairpane-review."
+        "Accepted implementation commit 9ce3154. Source digest 6bab90ec12824f17db3abbfbab6866ba260db37133fda289f29f8d51bb21dbde. 22 of 22 Zig tests pass.",
+        "Review 1 accepted with low and informational findings. raw/accepted-commit-verification.log rechecks every receipt at 9ce3154.",
+        "Review finding F3: FP-0006 must issue a fresh owner identity for each table instance."
       ]
     },
     "FP-0005": {
@@ -214,7 +216,7 @@
       "notes": []
     },
     "FP-0028": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "root-integrator",
       "evidence": [
         "engineering/evidence/FP-0028/README.md",
@@ -223,10 +225,11 @@
         "engineering/evidence/FP-0028/gates/2026-10-09T00-29-58-183Z-zig-test-2ed9ae83.json",
         "engineering/evidence/FP-0028/gates/2026-10-09T00-29-58-368Z-c-abi-671644d4.json"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0028/reviews/review-1-accept.json",
       "notes": [
         "Created from the minor controller findings in the second FP-0001 review.",
-        "Source digest f48dd23ed10031195dcb9fe177cb9b046b16f31e2f6074d3db4f20c9ac53d02e. Awaiting fairpane-review."
+        "Accepted implementation commit 3bfb686. Source digest f48dd23ed10031195dcb9fe177cb9b046b16f31e2f6074d3db4f20c9ac53d02e.",
+        "Review 1 accepted with minor coverage findings, which task FP-0031 now holds. raw/accepted-commit-verification.log rechecks every receipt at 3bfb686."
       ]
     },
     "FP-0029": {
@@ -245,6 +248,15 @@
       "review": null,
       "notes": [
         "Created for the owner's engine-rendered chrome decision in ADR 0004."
+      ]
+    },
+    "FP-0031": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": [
+        "Created from the minor findings in engineering/evidence/FP-0028/reviews/review-1-accept.json."
       ]
     }
   }
