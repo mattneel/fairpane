@@ -1,0 +1,786 @@
+
+COMMAND ["C:srcfairpane.toolszig0.18.0-dev.120+9fe22a29bx86_64-windowszig.exe","build","test","--summary","all","--cache-dir","out/fp0008-cache-before"]
+RESULT {"executable":"C:srcfairpane.toolszig0.18.0-dev.120+9fe22a29bx86_64-windowszig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0008-cache-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m\\out\\fp0008-base","started_at":"2026-10-09T10:45:16.110Z","exit_code":null,"signal":null,"timed_out":false,"error":"The executable is not on PATH: C:srcfairpane.toolszig0.18.0-dev.120+9fe22a29bx86_64-windowszig.exe","duration_ms":0,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:srcfairpane.zig-cacheglobal"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0008-cache-before"]
+test
++- FP-0011 case 8: layout_plain_reference.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: field hidden of layout Probe holds a heap reference but is declared plain
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_plain_reference.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 35: leaf_widens_context.zig failure
+error: ========= expected to find in stderr: =========
+       expected type '*js.runtime.Runtime(.reference)', found '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_widens_context.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: allocation_invokes_call.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {allocation} cannot invoke Call, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/allocation_invokes_call.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke Number::toString, which has effects {allocation}
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_number_to_string.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_nan_box_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_nan_box_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 36: binding_stray_kernel.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel stub_kernel belongs to no operation
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/binding_stray_kernel.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_reference_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_reference_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_allocates.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: allocateString requires effects {allocation}; the context has effects {}
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_allocates.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_positive.zig failure
+src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+src\root.zig:8:26: note: file imported here
+pub const html = @import("html/root.zig");
+                         ^~~~~~~~~~~~~~~
+error: process exited with code 1 (expected exited with code 0)
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_positive.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_calls_behavior.zig failure
+error: ========= expected to find in stderr: =========
+       expected type
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_calls_behavior.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke ToNumber, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_to_number.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 34: leaf_reaches_heap.zig failure
+error: ========= expected to find in stderr: =========
+       no field or member function named 'allocateString' in 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_reaches_heap.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 36: binding_missing_kernel.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation StubOperation has no kernel
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/binding_missing_kernel.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_missing_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe describes field ghost, which does not exist
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_missing_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::sameValue returns error.Throw, but the operation does not have the exception effect
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_undeclared_throw.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: mutation_throws.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: throwTypeError requires effects {allocation, exception}; the context has effects {heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/mutation_throws.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_undescribed_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe does not describe field extra
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_undescribed_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_callback_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadCallback declares callback without allocation, exception, and heap_mutation
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_callback_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_tagged_index_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_tagged_index_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_duplicate_id.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: duplicate operation id number_add
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_duplicate_id.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_exception_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadException declares exception without allocation
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_exception_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: kernel_wider_context.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::add takes a context with effects {allocation}, but the operation has effects {}
+       ========= but stderr does not contain it: =====
+       src\html\root.zig:1:1: error: unable to load "root.zig": FileNotFound
+       src\root.zig:8:26: note: file imported here
+       pub const html = @import("html/root.zig");
+                                ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_wider_context.zig -Mfairpane=src/root.zig
+
+test
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest
+   +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file
+      +- FP-0054 revision 1 case 4: create a fresh directory
+         +- compile exe fairpane-lab-check debug native
+            +- generate the HTML named character reference table
+               +- compile exe fairpane-html-entities-gen debug native 1 errors
+src\html\entities_gen.zig:1:1: error: unable to load "entities_gen.zig": FileNotFound
+C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\std.zig:116:22: note: file imported here
+const root = @import("root");
+                     ^~~~~~
+error: 1 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-exe -Odebug "-Mroot=src\\html\\entities_gen.zig" --cache-dir "out\\fp0008-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane-html-entities-gen --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 1/67 steps succeeded (23 failed)
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native transitive failure
+|     +- generate the HTML named character reference table transitive failure
+|        +- compile exe fairpane-html-entities-gen debug native 1 errors
++- run test transitive failure
+|  +- compile test debug native transitive failure
+|     +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0007 case 13: case 2 passes with exit status 0 transitive failure
+|  +- install fairpane-lab transitive failure
+|     +- compile exe fairpane-lab debug native transitive failure
+|        +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0007 case 13: case 3 fails with exit status 1 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal transitive failure
+|  +- compile exe fairpane-lab-check debug native transitive failure
+|  |  +- generate the HTML named character reference table (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing transitive failure
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged transitive failure
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory transitive failure
+|     +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged transitive failure
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory transitive failure
+|     +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged transitive failure
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory transitive failure
+|     +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged transitive failure
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory transitive failure
+|     +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest transitive failure
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files transitive failure
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: create a fresh directory transitive failure
+|  |  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit transitive failure
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file transitive failure
+|  |  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit transitive failure
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit transitive failure
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
++- FP-0011 case 4: allocation_invokes_call.zig failure
++- FP-0011 case 4: leaf_allocates.zig failure
++- FP-0011 case 4: mutation_throws.zig failure
++- FP-0011 case 4: leaf_calls_behavior.zig failure
++- FP-0011 case 4: leaf_positive.zig failure
++- FP-0011 case 5: catalog_callback_alone.zig failure
++- FP-0011 case 5: catalog_exception_alone.zig failure
++- FP-0011 case 5: catalog_duplicate_id.zig failure
++- FP-0011 case 5: kernel_wider_context.zig failure
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
++- FP-0011 case 8: layout_undescribed_field.zig failure
++- FP-0011 case 8: layout_plain_reference.zig failure
++- FP-0011 case 8: layout_missing_field.zig failure
++- FP-0011 case 20: abi_reference_value.zig failure
++- FP-0011 case 20: abi_nan_box_value.zig failure
++- FP-0011 case 20: abi_tagged_index_value.zig failure
++- FP-0011 case 34: leaf_reaches_heap.zig failure
++- FP-0011 case 35: leaf_widens_context.zig failure
++- FP-0011 case 36: binding_missing_kernel.zig failure
++- FP-0011 case 36: binding_stray_kernel.zig failure
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x7965b5b9 test --summary all --cache-dir out/fp0008-cache-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0008-cache-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m\\out\\fp0008-base","started_at":"2026-10-09T10:45:20.999Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3451,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","out/fp0008-base-build.zig.orig","out/fp0008-base/build.zig"]
+diff --git a/out/fp0008-base-build.zig.orig b/out/fp0008-base/build.zig
+index cb0229e..110f37a 100644
+--- a/out/fp0008-base-build.zig.orig
++++ b/out/fp0008-base/build.zig
+@@ -199,6 +199,9 @@ fn addLabCases(
+         .{ .name = "FP-0007 case 13: case 1 is a harness error with exit status 3", .args = &.{"run"}, .fixture = "case-01-unknown-field.json", .status = 3 },
+         .{ .name = "FP-0007 case 13: case 8 times out with exit status 4", .args = &.{"run"}, .fixture = "case-08-timeout.json", .status = 4 },
+         .{ .name = "FP-0007 case 13: an unknown command exits with status 64 and writes no result", .args = &.{"frobnicate"}, .fixture = null, .status = 64 },
++        .{ .name = "FP-0008 case 26: case 18 passes with exit status 0", .args = &.{"run"}, .fixture = "fp0008-tokenize-pass.json", .status = 0 },
++        .{ .name = "FP-0008 case 26: the token_count variant of case 19 fails with exit status 1", .args = &.{"run"}, .fixture = "fp0008-tokenize-token-count.json", .status = 1 },
++        .{ .name = "FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2", .args = &.{"run"}, .fixture = "fp0008-tokenize-no-bom.json", .status = 2 },
+     };
+     const results = [_][]const u8{ "pass", "fail", "unsupported", "harness-error", "timeout" };
+     for (exits) |case| {
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","out/fp0008-base-build.zig.orig","out/fp0008-base/build.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m","started_at":"2026-10-09T10:45:48.112Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0008-cache-before-behavior"]
+test
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 failure
+error: ========= expected to find in stdout: =========
+       "result": "fail"
+       ========= but stdout does not contain it: =====
+       {
+         "format": "fairpane-lab-result",
+         "version": 1,
+         "case": "4cbe90632358c58fda2ffb3f3db351012c6e3e60d29619dc54b47fd6ac717d59",
+         "corpus": null,
+         "inputs": {
+           "document": {
+             "url": "https://example.test/tokenize-pass.html",
+             "length": 40,
+             "sha256": "d3796aff60219a6f9558b522bd40b9a8b2d5e955fa87f1cea0997da5300b71a6"
+           },
+           "resources": [],
+           "environment": {
+             "time_origin_ms": 0,
+             "random_seed": "0000000000000000000000000000000000000000000000000000000000000000",
+             "viewport": {
+               "width": 1024,
+               "height": 768,
+               "device_pixel_ratio_milli": 1000
+             },
+             "locale": "en-US",
+             "time_zone": "UTC"
+           }
+         },
+         "environment_consumers": {
+           "time_origin_ms": [],
+           "random_seed": [],
+           "viewport": [],
+           "locale": [],
+           "time_zone": []
+         },
+         "stages": [
+           {
+             "stage": "fetch",
+             "status": "completed",
+             "requests": [
+               {
+                 "request": 1,
+                 "url": "https://example.test/tokenize-pass.html",
+                 "answer": "response"
+               }
+             ],
+             "document_state": "loaded",
+             "body_length": 40,
+             "body_sha256": "d3796aff60219a6f9558b522bd40b9a8b2d5e955fa87f1cea0997da5300b71a6"
+           },
+           {
+             "stage": "decode",
+             "status": "unsupported"
+           },
+           {
+             "stage": "tokenize",
+             "status": "unsupported"
+           },
+           {
+             "stage": "tree",
+             "status": "unsupported"
+           },
+           {
+             "stage": "style",
+             "status": "unsupported"
+           },
+           {
+             "stage": "layout",
+             "status": "unsupported"
+           },
+           {
+             "stage": "paint",
+             "status": "unsupported"
+           },
+           {
+             "stage": "script",
+             "status": "unsupported"
+           }
+         ],
+         "events": [
+           {
+             "event": "request_issued",
+             "document": 1,
+             "request": 1,
+             "kind": "resource",
+             "version": 1,
+             "url": "https://example.test/tokenize-pass.html"
+           },
+           {
+             "event": "document_state_changed",
+             "document": 1,
+             "request": 1,
+             "kind": "resource",
+             "version": 1,
+             "state": "loading",
+             "reject_reason": null
+           },
+           {
+             "event": "document_state_changed",
+             "document": 1,
+             "request": 1,
+             "kind": "resource",
+             "version": 1,
+             "state": "loaded",
+             "reject_reason": null
+           }
+         ],
+         "steps": 1,
+         "outcome": {
+           "result": "unsupported",
+           "stage": "tokenize",
+           "check": null,
+           "expected": null,
+           "observed": null,
+           "detail": "tokenize: this stage is not implemented"
+         }
+       }
+       
+failed command: ".\\zig-out\\bin\\fairpane-lab.exe" run ".\\tests\\lab\\fp0008-tokenize-token-count.json"
+
+test
++- FP-0008 case 26: case 18 passes with exit status 0 failure
+error: ========= expected to find in stdout: =========
+       "result": "pass"
+       ========= but stdout does not contain it: =====
+       {
+         "format": "fairpane-lab-result",
+         "version": 1,
+         "case": "3a9cf9bad9a8e41ddc07060c957230540b9a26594053cf7b897a9d49848d106a",
+         "corpus": null,
+         "inputs": {
+           "document": {
+             "url": "https://example.test/tokenize-pass.html",
+             "length": 40,
+             "sha256": "d3796aff60219a6f9558b522bd40b9a8b2d5e955fa87f1cea0997da5300b71a6"
+           },
+           "resources": [],
+           "environment": {
+             "time_origin_ms": 0,
+             "random_seed": "0000000000000000000000000000000000000000000000000000000000000000",
+             "viewport": {
+               "width": 1024,
+               "height": 768,
+               "device_pixel_ratio_milli": 1000
+             },
+             "locale": "en-US",
+             "time_zone": "UTC"
+           }
+         },
+         "environment_consumers": {
+           "time_origin_ms": [],
+           "random_seed": [],
+           "viewport": [],
+           "locale": [],
+           "time_zone": []
+         },
+         "stages": [
+           {
+             "stage": "fetch",
+             "status": "completed",
+             "requests": [
+               {
+                 "request": 1,
+                 "url": "https://example.test/tokenize-pass.html",
+                 "answer": "response"
+               }
+             ],
+             "document_state": "loaded",
+             "body_length": 40,
+             "body_sha256": "d3796aff60219a6f9558b522bd40b9a8b2d5e955fa87f1cea0997da5300b71a6"
+           },
+           {
+             "stage": "decode",
+             "status": "unsupported"
+           },
+           {
+             "stage": "tokenize",
+             "status": "unsupported"
+           },
+           {
+             "stage": "tree",
+             "status": "unsupported"
+           },
+           {
+             "stage": "style",
+             "status": "unsupported"
+           },
+           {
+             "stage": "layout",
+             "status": "unsupported"
+           },
+           {
+             "stage": "paint",
+             "status": "unsupported"
+           },
+           {
+             "stage": "script",
+             "status": "unsupported"
+           }
+         ],
+         "events": [
+           {
+             "event": "request_issued",
+             "document": 1,
+             "request": 1,
+             "kind": "resource",
+             "version": 1,
+             "url": "https://example.test/tokenize-pass.html"
+           },
+           {
+             "event": "document_state_changed",
+             "document": 1,
+             "request": 1,
+             "kind": "resource",
+             "version": 1,
+             "state": "loading",
+             "reject_reason": null
+           },
+           {
+             "event": "document_state_changed",
+             "document": 1,
+             "request": 1,
+             "kind": "resource",
+             "version": 1,
+             "state": "loaded",
+             "reject_reason": null
+           }
+         ],
+         "steps": 1,
+         "outcome": {
+           "result": "unsupported",
+           "stage": "tokenize",
+           "check": null,
+           "expected": null,
+           "observed": null,
+           "detail": "tokenize: this stage is not implemented"
+         }
+       }
+       
+failed command: ".\\zig-out\\bin\\fairpane-lab.exe" run ".\\tests\\lab\\fp0008-tokenize-pass.json"
+
+Build Summary: 62/65 steps succeeded (2 failed); 178/178 tests passed
+test transitive failure
++- run test 145 pass (145 total) 4s MaxRSS:19M
+|  +- compile test debug native success 6s MaxRSS:681M
++- run test 33 pass (33 total) 210ms MaxRSS:15M
+|  +- compile test debug native success 3s MaxRSS:406M
++- FP-0007 case 13: case 2 passes with exit status 0 success 40ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:333M
++- FP-0007 case 13: case 3 fails with exit status 1 success 35ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 44ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 37ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 70ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 9ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 13ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:318M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 46ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 31ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 34ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 42ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 35ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 42ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 45ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 42ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 46ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 42ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 37ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 47ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 42ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 7ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 35ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 41ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 43ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 40ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 40ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 417ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 413ms
++- FP-0011 case 4: allocation_invokes_call.zig success 409ms
++- FP-0011 case 4: leaf_allocates.zig success 380ms
++- FP-0011 case 4: mutation_throws.zig success 357ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 374ms
++- FP-0011 case 4: leaf_positive.zig success 402ms
++- FP-0011 case 5: catalog_callback_alone.zig success 361ms
++- FP-0011 case 5: catalog_exception_alone.zig success 373ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 337ms
++- FP-0011 case 5: kernel_wider_context.zig success 355ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 355ms
++- FP-0011 case 8: layout_undescribed_field.zig success 367ms
++- FP-0011 case 8: layout_plain_reference.zig success 349ms
++- FP-0011 case 8: layout_missing_field.zig success 356ms
++- FP-0011 case 20: abi_reference_value.zig success 377ms
++- FP-0011 case 20: abi_nan_box_value.zig success 344ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 356ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 360ms
++- FP-0011 case 35: leaf_widens_context.zig success 368ms
++- FP-0011 case 36: binding_missing_kernel.zig success 393ms
++- FP-0011 case 36: binding_stray_kernel.zig success 341ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x7e0b311e test --summary all --cache-dir out/fp0008-cache-before-behavior
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0008-cache-before-behavior"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m\\out\\fp0008-base","started_at":"2026-10-09T10:45:48.186Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":13595,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

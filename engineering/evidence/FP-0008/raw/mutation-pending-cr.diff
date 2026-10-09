@@ -1,0 +1,13 @@
+diff --git a/out/fp0008-tokenizer.fixed.zig b/src/html/tokenizer.zig
+index 7ee21c8..7b449fa 100644
+--- a/out/fp0008-tokenizer.fixed.zig
++++ b/src/html/tokenizer.zig
+@@ -373,7 +373,7 @@ pub const Tokenizer = struct {
+         switch (first) {
+             '\r' => {
+                 switch (t.peek(1)) {
+-                    .more => return null,
++                    .more => {},
+                     .end => {},
+                     .unit => |unit| if (unit == '\n') {
+                         len = 2;

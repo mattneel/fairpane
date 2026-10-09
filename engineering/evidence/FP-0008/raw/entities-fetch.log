@@ -1,0 +1,41 @@
+
+COMMAND ["C:\\Windows\\system32\\curl.exe","-sS","-f","-D","-","-o","src/html/entities.json","https://html.spec.whatwg.org/entities.json"]
+HTTP/1.1 200 OK
+Server: nginx/1.10.3
+Date: Fri, 09 Oct 2026 10:23:22 GMT
+Content-Type: application/json
+Content-Length: 145897
+Last-Modified: Wed, 12 Nov 2025 00:20:03 GMT
+Connection: keep-alive
+Vary: Accept-Encoding
+ETag: "6913d2b3-239e9"
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+Accept-Ranges: bytes
+
+RESULT {"executable":"C:\\Windows\\system32\\curl.exe","arguments":["-sS","-f","-D","-","-o","src/html/entities.json","https://html.spec.whatwg.org/entities.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m","started_at":"2026-10-09T10:23:19.402Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1080}
+
+COMMAND ["C:\\Windows\\system32\\curl.exe","-sS","-f","-D","-","-o","out/fp0008-multipage-index.html","https://html.spec.whatwg.org/multipage/"]
+HTTP/1.1 200 OK
+Server: nginx/1.10.3
+Date: Fri, 09 Oct 2026 10:23:27 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 154859
+Last-Modified: Fri, 09 Oct 2026 08:28:17 GMT
+Connection: keep-alive
+Vary: Accept-Encoding
+ETag: "6ac8a5a1-25ceb"
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+Accept-Ranges: bytes
+
+RESULT {"executable":"C:\\Windows\\system32\\curl.exe","arguments":["-sS","-f","-D","-","-o","out/fp0008-multipage-index.html","https://html.spec.whatwg.org/multipage/"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m","started_at":"2026-10-09T10:23:25.379Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":956}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\grep.exe","-o","Last Updated <span class=\"pubdate\">[^<]*</span>","out/fp0008-multipage-index.html"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\grep.exe","arguments":["-o","Last Updated <span class=\"pubdate\">[^<]*</span>","out/fp0008-multipage-index.html"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m","started_at":"2026-10-09T10:23:26.387Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":13}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\grep.exe","-o","Last Updated <span class=pubdate>[^<]*</span>","out/fp0008-multipage-index.html"]
+Last Updated <span class=pubdate>9 October 2026</span>
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\grep.exe","arguments":["-o","Last Updated <span class=pubdate>[^<]*</span>","out/fp0008-multipage-index.html"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m","started_at":"2026-10-09T10:23:34.111Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":14}

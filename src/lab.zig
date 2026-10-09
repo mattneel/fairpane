@@ -3,6 +3,10 @@
 //! The laboratory runs one case document against a new engine through the Zig API in `engine.zig`.
 //! It creates one document, loads the case's document URL, and answers each issued request
 //! from the case only, by exact byte equality of the URL.
+//! When the document loads, the `decode` stage applies BOM sniffing, step 1 of the HTML encoding sniffing algorithm,
+//! and decodes a body that starts with the UTF-8 byte order mark. The `tokenize` stage then runs `html.Tokenizer`
+//! on the decoded code units in one chunk, because the engine has no parser hook before task FP-0010.
+//! The engine document itself does not tokenize.
 //! Its only I/O is `readInputFile`, which `lab_main.zig` calls to read the files named on the command line;
 //! `lab_main.zig` also writes the documents that this module renders.
 //!
@@ -12,6 +16,8 @@
 
 const std = @import("std");
 const engine = @import("engine.zig");
+const html = @import("html/root.zig");
+const WebString = @import("web_string.zig").WebString;
 const Allocator = std.mem.Allocator;
 const Io = std.Io;
 const Writer = Io.Writer;
@@ -32,9 +38,12 @@ pub const transcript_size_limit: usize = 4 * case_size_limit;
 /// The fixed pipeline stages, in order.
 pub const Stage = enum { fetch, decode, tokenize, tree, style, layout, paint, script };
 
-/// Whether this task implements `stage`. Only `fetch` exists.
+/// Whether this task implements `stage`: `fetch`, `decode`, and `tokenize` exist.
 pub fn implemented(stage: Stage) bool {
-    return stage == .fetch;
+    return switch (stage) {
+        .fetch, .decode, .tokenize => true,
+        else => false,
+    };
 }
 
 pub const Status = enum {
@@ -79,7 +88,7 @@ pub const Result = enum {
 pub const EnvironmentField = enum { time_origin_ms, random_seed, viewport, locale, time_zone };
 
 /// Returns the stages that consume `field`.
-/// The only implemented stage, `fetch`, answers requests from the case bytes and reads no environment field.
+/// `fetch` answers requests from the case bytes, and `decode` and `tokenize` read only the loaded body, so no stage reads an environment field.
 pub fn environmentConsumers(field: EnvironmentField) []const Stage {
     return switch (field) {
         .time_origin_ms, .random_seed, .viewport, .locale, .time_zone => &.{},
@@ -181,8 +190,51 @@ pub const FetchExpectation = struct {
     body_sha256: ?[32]u8,
 };
 
+/// An encoding that BOM sniffing can select.
+pub const Encoding = enum { @"UTF-8", @"UTF-16BE", @"UTF-16LE" };
+
+pub const Confidence = enum { certain, tentative };
+
+pub const DecodeExpectation = struct {
+    encoding: Encoding,
+    confidence: Confidence,
+    /// The SHA-256 of the decoded code units in little-endian order.
+    output_sha256: [32]u8,
+};
+
+/// A tokenizer parse error, as a result or an expectation records it.
+pub const ErrorRecord = struct {
+    code: html.ErrorCode,
+    line: u64,
+    column: u64,
+    offset: u64,
+
+    fn eql(a: ErrorRecord, b: ErrorRecord) bool {
+        return a.code == b.code and a.line == b.line and a.column == b.column and a.offset == b.offset;
+    }
+};
+
+fn errorsEql(a: []const ErrorRecord, b: []const ErrorRecord) bool {
+    if (a.len != b.len) return false;
+    for (a, b) |left, right| {
+        if (!left.eql(right)) return false;
+    }
+    return true;
+}
+
+pub const TokenizeExpectation = struct {
+    /// The number of lines of the token dump: the canonical dump with spans and without error lines.
+    token_count: u64,
+    /// The SHA-256 of the token dump.
+    tokens_sha256: [32]u8,
+    /// Every parse error in step order.
+    errors: []const ErrorRecord,
+};
+
 pub const Expectation = union(enum) {
     fetch: FetchExpectation,
+    decode: DecodeExpectation,
+    tokenize: TokenizeExpectation,
     /// An expectation for a stage that this task does not implement. Its other fields stay uninterpreted.
     unsupported: Stage,
 };
@@ -501,12 +553,31 @@ const Parser = struct {
     }
 
     /// Parses `expect`. An expectation for an unimplemented stage keeps its other fields uninterpreted.
-    fn expectation(p: *Parser, value: Value) error{Invalid}!Expectation {
+    fn expectation(p: *Parser, value: Value) ParseError!Expectation {
         if (value != .object) return p.fail("expect", "expected an object");
         const stage_value = try p.field(value.object, "expect.", "stage");
         const stage = if (stage_value == .string) std.meta.stringToEnum(Stage, stage_value.string) else null;
         if (stage == null) return p.fail("expect.stage", "expected a stage name");
         if (!implemented(stage.?)) return .{ .unsupported = stage.? };
+        switch (stage.?) {
+            .decode => {
+                const map = try p.object(value, "expect", &.{ "stage", "encoding", "confidence", "output_sha256" });
+                return .{ .decode = .{
+                    .encoding = try p.enumeration(Encoding, try p.field(map, "expect.", "encoding"), "expect.encoding"),
+                    .confidence = try p.enumeration(Confidence, try p.field(map, "expect.", "confidence"), "expect.confidence"),
+                    .output_sha256 = try p.digest(try p.field(map, "expect.", "output_sha256"), "expect.output_sha256"),
+                } };
+            },
+            .tokenize => {
+                const map = try p.object(value, "expect", &.{ "stage", "token_count", "tokens_sha256", "errors" });
+                return .{ .tokenize = .{
+                    .token_count = try p.integer(try p.field(map, "expect.", "token_count"), "expect.token_count", 0, (1 << 53) - 1),
+                    .tokens_sha256 = try p.digest(try p.field(map, "expect.", "tokens_sha256"), "expect.tokens_sha256"),
+                    .errors = try p.errorRecords(try p.field(map, "expect.", "errors")),
+                } };
+            },
+            else => {},
+        }
         const map = try p.object(value, "expect", &.{ "stage", "document_state", "body_sha256" });
         const state_value = try p.field(map, "expect.", "document_state");
         const state = if (state_value == .string) std.meta.stringToEnum(FinalState, state_value.string) else null;
@@ -519,6 +590,26 @@ const Parser = struct {
             },
         };
         return .{ .fetch = .{ .document_state = state.?, .body_sha256 = body_sha256 } };
+    }
+
+    /// Parses the `errors` array of a `tokenize` expectation.
+    fn errorRecords(p: *Parser, value: Value) ParseError![]const ErrorRecord {
+        const subject = "expect.errors[]";
+        const prefix = subject ++ ".";
+        if (value != .array) return p.fail("expect.errors", "expected an array");
+        const records = try p.arena.alloc(ErrorRecord, value.array.items.len);
+        for (value.array.items, records) |item, *record| {
+            const map = try p.object(item, subject, &.{ "code", "line", "column", "offset" });
+            const code_value = try p.field(map, prefix, "code");
+            const code = if (code_value == .string) html.errors.fromName(code_value.string) else null;
+            record.* = .{
+                .code = code orelse return p.fail(prefix ++ "code", "expected a parse error code"),
+                .line = try p.integer(try p.field(map, prefix, "line"), prefix ++ "line", 1, (1 << 53) - 1),
+                .column = try p.integer(try p.field(map, prefix, "column"), prefix ++ "column", 1, (1 << 53) - 1),
+                .offset = try p.integer(try p.field(map, prefix, "offset"), prefix ++ "offset", 0, (1 << 53) - 1),
+            };
+        }
+        return records;
     }
 
     /// Parses a version 2 transcript, whose `action_count` must equal the number of its actions,
@@ -780,6 +871,27 @@ pub const BodySummary = struct {
     sha256: [32]u8,
 };
 
+/// What the `decode` stage recorded when it completed.
+pub const Decoded = struct {
+    encoding: Encoding,
+    confidence: Confidence,
+    /// The length of the byte order mark that BOM sniffing removed.
+    bom_bytes: usize,
+    /// The number of decoded UTF-16 code units.
+    code_units: usize,
+    /// The SHA-256 of the decoded code units in little-endian order.
+    output_sha256: [32]u8,
+};
+
+/// What the `tokenize` stage recorded when it completed.
+pub const Tokenized = struct {
+    /// The number of lines of the token dump.
+    token_count: u64,
+    tokens_sha256: [32]u8,
+    /// Every parse error in step order.
+    errors: []const ErrorRecord,
+};
+
 /// The pipeline state of one run.
 pub const Execution = struct {
     fetch: Status = .not_reached,
@@ -792,6 +904,16 @@ pub const Execution = struct {
     records: std.ArrayList(Record) = .empty,
     /// The number of `Engine.step` calls.
     steps: u64 = 0,
+    decode: Status = .not_reached,
+    /// The record of a completed `decode` stage, or null.
+    decoded: ?Decoded = null,
+    /// Why an `unsupported` `decode` stage could not decode the body, or null.
+    decode_detail: ?[]const u8 = null,
+    tokenize: Status = .not_reached,
+    /// The record of a completed `tokenize` stage, or null.
+    tokenized: ?Tokenized = null,
+    /// The stage that a harness error interrupted.
+    harness_stage: Stage = .fetch,
 };
 
 /// Drives one engine and normalizes the events that it drains.
@@ -956,18 +1078,131 @@ fn execute(gpa: Allocator, arena: Allocator, case: *const Case, execution: *Exec
         view = eng.document(document) catch |err| return x.engineError("Engine.document", err);
     }
     execution.document_state = view.state;
-    if (view.state == .loaded) execution.body = .{ .length = view.body.len, .sha256 = digestOf(view.body) };
     if (view.state != .loading) execution.fetch = .completed;
+    if (view.state != .loaded) return;
+    execution.body = .{ .length = view.body.len, .sha256 = digestOf(view.body) };
+    // The engine's body stays valid until `eng.destroy`.
+    const decoded = try decode(arena, view.body, execution) orelse return;
+    try tokenize(gpa, arena, decoded, execution, failure);
+}
+
+const utf8_bom = "\xEF\xBB\xBF";
+
+/// Runs the `decode` stage on a loaded body: step 1 of the encoding sniffing algorithm, BOM sniffing.
+/// A UTF-8 byte order mark selects UTF-8 with confidence `certain`, and the stage decodes the remaining bytes
+/// with the UTF-8 decoder with replacement. Every other body is `unsupported`, because task FP-0065 owns
+/// the UTF-16 decoders and the encoding sniffing steps after BOM sniffing.
+/// Returns the decoded code units, or null when the stage is unsupported.
+fn decode(arena: Allocator, body: []const u8, execution: *Execution) Allocator.Error!?[]const u16 {
+    execution.harness_stage = .decode;
+    if (!std.mem.startsWith(u8, body, utf8_bom)) {
+        execution.decode = .unsupported;
+        execution.decode_detail = if (std.mem.startsWith(u8, body, "\xFE\xFF"))
+            "UTF-16BE byte order mark; the UTF-16BE decoder is not implemented"
+        else if (std.mem.startsWith(u8, body, "\xFF\xFE"))
+            "UTF-16LE byte order mark; the UTF-16LE decoder is not implemented"
+        else
+            "no byte order mark; encoding sniffing after BOM sniffing is not implemented";
+        return null;
+    }
+    const output = try WebString.fromUtf8Lossy(arena, body[utf8_bom.len..]);
+    execution.decoded = .{
+        .encoding = .@"UTF-8",
+        .confidence = .certain,
+        .bom_bytes = utf8_bom.len,
+        .code_units = output.units.len,
+        .output_sha256 = digestOfUnits(output.units),
+    };
+    execution.decode = .completed;
+    return output.units;
+}
+
+/// Returns the SHA-256 of `units` in little-endian order.
+fn digestOfUnits(units: []const u16) [32]u8 {
+    var hasher: Sha256 = .init(.{});
+    var buffer: [512]u8 = undefined;
+    var index: usize = 0;
+    while (index < units.len) {
+        const count = @min(buffer.len / 2, units.len - index);
+        for (units[index..][0..count], 0..) |unit, position| {
+            std.mem.writeInt(u16, buffer[2 * position ..][0..2], unit, .little);
+        }
+        hasher.update(buffer[0 .. 2 * count]);
+        index += count;
+    }
+    return hasher.finalResult();
+}
+
+/// Runs the `tokenize` stage: `html.Tokenizer` on the decoded code units in one chunk.
+/// It records the number of lines and the SHA-256 of the token dump, and every parse error in step order.
+/// The laboratory never sets `adjusted_current_node_is_foreign`, so any tokenizer error is a harness error.
+fn tokenize(gpa: Allocator, arena: Allocator, units: []const u16, execution: *Execution, failure: *Detail) Interrupt!void {
+    execution.harness_stage = .tokenize;
+    execution.tokenize = .failed;
+    var tokenizer: html.Tokenizer = .init(gpa);
+    defer tokenizer.deinit();
+    var buffer: [4096]u8 = undefined;
+    var hashing: Writer.Hashing(Sha256) = .init(&buffer);
+    var dumper: html.dump.Dumper = .init(gpa, &hashing.writer, html.dump.tokens);
+    defer dumper.deinit();
+    var errors: std.ArrayList(ErrorRecord) = .empty;
+    tokenizer.feed(units) catch |err| return tokenizerError(failure, "Tokenizer.feed", err);
+    tokenizer.finish() catch |err| return tokenizerError(failure, "Tokenizer.finish", err);
+    while (tokenizer.next() catch |err| return tokenizerError(failure, "Tokenizer.next", err)) |step| {
+        switch (step) {
+            .need_input => {
+                failure.* = .{ .subject = "Tokenizer.next", .message = "need_input after finish" };
+                return error.Harness;
+            },
+            .parse_error => |e| try errors.append(arena, .{
+                .code = e.code,
+                .line = e.position.line,
+                .column = e.position.column,
+                .offset = @backingInt(e.position.offset),
+            }),
+            .token => {},
+        }
+        dumper.step(step) catch |err| return dumpError(err);
+    }
+    dumper.finish() catch |err| return dumpError(err);
+    // A hashing writer never fails.
+    hashing.writer.flush() catch unreachable;
+    execution.tokenized = .{
+        .token_count = dumper.lines,
+        .tokens_sha256 = hashing.hasher.finalResult(),
+        .errors = errors.items,
+    };
+    execution.tokenize = .completed;
+}
+
+fn tokenizerError(failure: *Detail, operation: []const u8, err: html.Error) Interrupt {
+    if (err == error.OutOfMemory) return error.OutOfMemory;
+    failure.* = .{ .subject = operation, .message = @errorName(err) };
+    return error.Harness;
+}
+
+fn dumpError(err: html.dump.Dumper.Error) error{OutOfMemory} {
+    return switch (err) {
+        error.OutOfMemory => error.OutOfMemory,
+        // A hashing writer never fails.
+        error.WriteFailed => unreachable,
+    };
 }
 
 // Outcomes.
 
-pub const Check = enum { document_state, body_sha256 };
+pub const Check = enum { document_state, body_sha256, encoding, confidence, output_sha256, token_count, tokens_sha256, errors };
 
 /// The first differing check of a `fail` outcome and both of its values.
 pub const Mismatch = union(Check) {
     document_state: struct { expected: FinalState, observed: engine.DocumentState },
     body_sha256: struct { expected: ?[32]u8, observed: ?[32]u8 },
+    encoding: struct { expected: Encoding, observed: Encoding },
+    confidence: struct { expected: Confidence, observed: Confidence },
+    output_sha256: struct { expected: [32]u8, observed: [32]u8 },
+    token_count: struct { expected: u64, observed: u64 },
+    tokens_sha256: struct { expected: [32]u8, observed: [32]u8 },
+    errors: struct { expected: []const ErrorRecord, observed: []const ErrorRecord },
 };
 
 pub const Outcome = struct {
@@ -1004,6 +1239,9 @@ pub const Signature = struct {
 /// A document that is still loading after `max_steps` calls to `Engine.step` is a `timeout`, even when the expectation names an
 /// unimplemented stage. Otherwise an expectation for an unimplemented stage is `unsupported`, and a `fetch` expectation
 /// is `fail` at its first differing check or `pass`.
+/// A `decode` or `tokenize` expectation for a document that did not load is `fail` on `document_state`;
+/// otherwise it is `unsupported` with the `decode` detail when the `decode` stage is unsupported,
+/// and then `fail` at its first differing check or `pass`.
 fn conclude(case: *const Case, execution: *const Execution) Outcome {
     const state = execution.document_state.?;
     if (state == .loading) return .{
@@ -1035,7 +1273,49 @@ fn conclude(case: *const Case, execution: *const Execution) Outcome {
             };
             return .{ .result = .pass, .stage = .fetch };
         },
+        .decode, .tokenize => {
+            const stage: Stage = if (case.expect == .decode) .decode else .tokenize;
+            if (state != .loaded) return .{
+                .result = .fail,
+                .stage = stage,
+                .mismatch = .{ .document_state = .{ .expected = .loaded, .observed = state } },
+            };
+            if (execution.decode == .unsupported) return .{
+                .result = .unsupported,
+                .stage = .decode,
+                .detail = .{ .message = execution.decode_detail.? },
+            };
+            return switch (case.expect) {
+                .decode => |expected| concludeDecode(expected, execution.decoded.?),
+                .tokenize => |expected| concludeTokenize(expected, execution.tokenized.?),
+                else => unreachable,
+            };
+        },
     }
+}
+
+fn concludeDecode(expected: DecodeExpectation, observed: Decoded) Outcome {
+    const mismatch: ?Mismatch = if (expected.encoding != observed.encoding)
+        .{ .encoding = .{ .expected = expected.encoding, .observed = observed.encoding } }
+    else if (expected.confidence != observed.confidence)
+        .{ .confidence = .{ .expected = expected.confidence, .observed = observed.confidence } }
+    else if (!std.mem.eql(u8, &expected.output_sha256, &observed.output_sha256))
+        .{ .output_sha256 = .{ .expected = expected.output_sha256, .observed = observed.output_sha256 } }
+    else
+        null;
+    return .{ .result = if (mismatch == null) .pass else .fail, .stage = .decode, .mismatch = mismatch };
+}
+
+fn concludeTokenize(expected: TokenizeExpectation, observed: Tokenized) Outcome {
+    const mismatch: ?Mismatch = if (expected.token_count != observed.token_count)
+        .{ .token_count = .{ .expected = expected.token_count, .observed = observed.token_count } }
+    else if (!std.mem.eql(u8, &expected.tokens_sha256, &observed.tokens_sha256))
+        .{ .tokens_sha256 = .{ .expected = expected.tokens_sha256, .observed = observed.tokens_sha256 } }
+    else if (!errorsEql(expected.errors, observed.errors))
+        .{ .errors = .{ .expected = expected.errors, .observed = observed.errors } }
+    else
+        null;
+    return .{ .result = if (mismatch == null) .pass else .fail, .stage = .tokenize, .mismatch = mismatch };
 }
 
 /// Runs `case` against a new engine and returns the signature of its outcome.
@@ -1047,7 +1327,7 @@ pub fn signatureOf(gpa: Allocator, case: *const Case) Allocator.Error!Signature 
     var failure: Detail = undefined;
     execute(gpa, arena.allocator(), case, &execution, &failure) catch |err| switch (err) {
         error.OutOfMemory => return error.OutOfMemory,
-        error.Harness => return .{ .result = .harness_error, .stage = .fetch, .check = null },
+        error.Harness => return .{ .result = .harness_error, .stage = execution.harness_stage, .check = null },
     };
     return .of(conclude(case, &execution));
 }
@@ -1080,9 +1360,16 @@ pub const Run = struct {
     /// `failed` means the stage did not finish, after a `timeout` or a harness error;
     /// `not-reached` means the case did not run.
     /// A `fetch` status of `failed` therefore differs from a `document_state` of `failed`.
+    /// `decode` runs only when the document loaded, and it is `completed` or `unsupported`.
+    /// `tokenize` runs only when `decode` completed, and it is `completed`, or `failed` after a harness error.
+    /// Otherwise each of them is `not-reached`.
     pub fn stageStatus(run: *const Run, stage: Stage) Status {
-        if (!implemented(stage)) return .unsupported;
-        return run.execution.fetch;
+        return switch (stage) {
+            .fetch => run.execution.fetch,
+            .decode => run.execution.decode,
+            .tokenize => run.execution.tokenize,
+            else => .unsupported,
+        };
     }
 
     /// Whether the run has a transcript: the case ran without a harness error.
@@ -1120,7 +1407,12 @@ pub const Run = struct {
             try s.write(@tagName(stage));
             try s.objectField("status");
             try s.write(run.stageStatus(stage).name());
-            if (stage == .fetch) try run.writeFetch(&s);
+            switch (stage) {
+                .fetch => try run.writeFetch(&s),
+                .decode => try run.writeDecode(&s),
+                .tokenize => try run.writeTokenize(&s),
+                else => {},
+            }
             try s.endObject();
         }
         try s.endArray();
@@ -1155,6 +1447,34 @@ pub const Run = struct {
         try s.write(if (execution.body) |body| body.length else null);
         try s.objectField("body_sha256");
         try writeDigest(s, if (execution.body) |body| body.sha256 else null);
+    }
+
+    /// Writes the `decode` record. Each member is null unless the stage reached the state that records it.
+    fn writeDecode(run: *const Run, s: *Stringify) Writer.Error!void {
+        const decoded = run.execution.decoded;
+        try s.objectField("encoding");
+        try s.write(if (decoded) |d| @tagName(d.encoding) else null);
+        try s.objectField("confidence");
+        try s.write(if (decoded) |d| @tagName(d.confidence) else null);
+        try s.objectField("bom_bytes");
+        try s.write(if (decoded) |d| d.bom_bytes else null);
+        try s.objectField("code_units");
+        try s.write(if (decoded) |d| d.code_units else null);
+        try s.objectField("output_sha256");
+        try writeDigest(s, if (decoded) |d| d.output_sha256 else null);
+        try s.objectField("detail");
+        try s.write(run.execution.decode_detail);
+    }
+
+    /// Writes the `tokenize` record. Each member is null unless the stage completed.
+    fn writeTokenize(run: *const Run, s: *Stringify) Writer.Error!void {
+        const tokenized = run.execution.tokenized;
+        try s.objectField("token_count");
+        try s.write(if (tokenized) |t| t.token_count else null);
+        try s.objectField("tokens_sha256");
+        try writeDigest(s, if (tokenized) |t| t.tokens_sha256 else null);
+        try s.objectField("errors");
+        if (tokenized) |t| try writeErrors(s, t.errors) else try s.write(null);
     }
 
     /// Writes every host action and the normalized events drained after it.
@@ -1213,7 +1533,7 @@ fn runOutcome(run: *Run, gpa: Allocator, case_bytes: []const u8) Outcome {
     var failure: Detail = undefined;
     execute(gpa, arena, &run.case.?, &run.execution, &failure) catch |err| return .{
         .result = .harness_error,
-        .stage = .fetch,
+        .stage = run.execution.harness_stage,
         .detail = switch (err) {
             error.OutOfMemory => out_of_memory,
             error.Harness => failure,
@@ -1427,19 +1747,20 @@ fn optionalBytesEql(a: ?[]const u8, b: ?[]const u8) bool {
 
 // Minimization.
 
-/// Reduces `input` with the `ddmin` algorithm of Zeller and Hildebrandt,
+/// Reduces `input`, a sequence of `T`, with the `ddmin` algorithm of Zeller and Hildebrandt,
 /// "Simplifying and Isolating Failure-Inducing Input", IEEE TSE 28(2), 2002.
 /// `predicate.holds(candidate)` must be deterministic, and it must hold for `input`;
 /// otherwise this returns `error.PredicateDoesNotHold`.
 /// The result is a subsequence of `input` for which the predicate holds, and it is 1-minimal:
-/// removing any single byte makes the predicate false.
+/// removing any single element makes the predicate false.
+/// The laboratory reduces bytes, so its callers pass `u8`; the HTML partition harness reduces UTF-16 code units.
 /// The caller frees the result with `gpa`.
-pub fn ddmin(gpa: Allocator, input: []const u8, predicate: anytype) ![]u8 {
+pub fn ddmin(comptime T: type, gpa: Allocator, input: []const T, predicate: anytype) ![]T {
     if (!try predicate.holds(input)) return error.PredicateDoesNotHold;
-    const buffer = try gpa.alloc(u8, input.len);
+    const buffer = try gpa.alloc(T, input.len);
     errdefer gpa.free(buffer);
     @memcpy(buffer, input);
-    const scratch = try gpa.alloc(u8, input.len);
+    const scratch = try gpa.alloc(T, input.len);
     defer gpa.free(scratch);
     var length = input.len;
     var granularity: usize = 2;
@@ -1451,7 +1772,7 @@ pub fn ddmin(gpa: Allocator, input: []const u8, predicate: anytype) ![]u8 {
             const start = part * length / parts;
             const end = (part + 1) * length / parts;
             if (try predicate.holds(current[start..end])) {
-                std.mem.copyForwards(u8, buffer, current[start..end]);
+                std.mem.copyForwards(T, buffer, current[start..end]);
                 length = end - start;
                 granularity = 2;
                 continue :reduce;
@@ -1473,7 +1794,7 @@ pub fn ddmin(gpa: Allocator, input: []const u8, predicate: anytype) ![]u8 {
                 }
             }
         }
-        // Increase the granularity, or stop when every part is a single byte.
+        // Increase the granularity, or stop when every part is a single element.
         if (parts == length) break;
         granularity = @min(length, 2 * parts);
     }
@@ -1625,7 +1946,7 @@ fn minimizeOutcome(m: *Minimization, gpa: Allocator, case_bytes: []const u8) All
 
     if (case.document.body) |body| {
         var predicate: BodyPredicate = .{ .gpa = gpa, .case = current, .target = original, .runs = &m.predicate_runs };
-        const reduced = ddmin(arena, body, &predicate) catch |err| switch (err) {
+        const reduced = ddmin(u8, arena, body, &predicate) catch |err| switch (err) {
             error.OutOfMemory => return error.OutOfMemory,
             error.PredicateDoesNotHold => return .{
                 .result = .harness_error,
@@ -1898,6 +2219,42 @@ fn writeOutcome(s: *Stringify, outcome: Outcome) Writer.Error!void {
             try s.objectField("observed");
             try writeDigest(s, values.observed);
         },
+        .encoding => |values| {
+            try s.objectField("expected");
+            try s.write(@tagName(values.expected));
+            try s.objectField("observed");
+            try s.write(@tagName(values.observed));
+        },
+        .confidence => |values| {
+            try s.objectField("expected");
+            try s.write(@tagName(values.expected));
+            try s.objectField("observed");
+            try s.write(@tagName(values.observed));
+        },
+        .output_sha256 => |values| {
+            try s.objectField("expected");
+            try writeDigest(s, values.expected);
+            try s.objectField("observed");
+            try writeDigest(s, values.observed);
+        },
+        .tokens_sha256 => |values| {
+            try s.objectField("expected");
+            try writeDigest(s, values.expected);
+            try s.objectField("observed");
+            try writeDigest(s, values.observed);
+        },
+        .token_count => |values| {
+            try s.objectField("expected");
+            try s.write(values.expected);
+            try s.objectField("observed");
+            try s.write(values.observed);
+        },
+        .errors => |values| {
+            try s.objectField("expected");
+            try writeErrors(s, values.expected);
+            try s.objectField("observed");
+            try writeErrors(s, values.observed);
+        },
     } else {
         try s.objectField("expected");
         try s.write(null);
@@ -1907,6 +2264,24 @@ fn writeOutcome(s: *Stringify, outcome: Outcome) Writer.Error!void {
     try s.objectField("detail");
     try writeDetail(s, outcome.detail);
     try s.endObject();
+}
+
+/// Writes parse error records as an array of `{code, line, column, offset}` objects.
+fn writeErrors(s: *Stringify, records: []const ErrorRecord) Writer.Error!void {
+    try s.beginArray();
+    for (records) |record| {
+        try s.beginObject();
+        try s.objectField("code");
+        try s.write(html.errors.name(record.code));
+        try s.objectField("line");
+        try s.write(record.line);
+        try s.objectField("column");
+        try s.write(record.column);
+        try s.objectField("offset");
+        try s.write(record.offset);
+        try s.endObject();
+    }
+    try s.endArray();
 }
 
 fn writeRange(s: *Stringify, range: ?Range) Writer.Error!void {
@@ -2054,7 +2429,7 @@ test "FP-0007 case 1: a valid case parses, and each invalid fixture reports harn
     }
 }
 
-test "FP-0007 case 2: a body with a matching fetch expectation passes, fetch completes, and every other stage is unsupported" {
+test "FP-0007 case 2 and FP-0008 case 25: a matching fetch expectation passes, fetch completes, decode is unsupported without a byte order mark, tokenize is not reached, and every other stage is unsupported" {
     var run = try runFixture("case-02-pass.json");
     defer run.deinit();
     try testing.expectEqual(Result.pass, run.outcome.result);
@@ -2069,7 +2444,19 @@ test "FP-0007 case 2: a body with a matching fetch expectation passes, fetch com
     try testing.expectEqual(@as(usize, 8), stages.len);
     for (stages, std.enums.values(Stage)) |entry, stage| {
         try expectString(@tagName(stage), try member(entry, "stage"));
-        try expectString(if (stage == .fetch) "completed" else "unsupported", try member(entry, "status"));
+        const status = switch (stage) {
+            .fetch => "completed",
+            .tokenize => "not-reached",
+            else => "unsupported",
+        };
+        try expectString(status, try member(entry, "status"));
+    }
+    try testing.expectEqual(Status.unsupported, run.stageStatus(.decode));
+    try testing.expectEqual(Status.not_reached, run.stageStatus(.tokenize));
+    {
+        const decode_stage = stages[@backingInt(Stage.decode)];
+        try expectString("no byte order mark; encoding sniffing after BOM sniffing is not implemented", try member(decode_stage, "detail"));
+        try testing.expect((try member(decode_stage, "encoding")) == .null);
     }
     const fetch = stages[0];
     try expectString("loaded", try member(fetch, "document_state"));
@@ -2343,7 +2730,7 @@ const ABeforeB = struct {
 
 test "FP-0007 case 11: ddmin reduces xxaxxbxx to ab, its result is 1-minimal, and a false input is an error" {
     var predicate: ABeforeB = .{};
-    const reduced = try ddmin(testing.allocator, "xxaxxbxx", &predicate);
+    const reduced = try ddmin(u8, testing.allocator, "xxaxxbxx", &predicate);
     defer testing.allocator.free(reduced);
     try testing.expectEqualStrings("ab", reduced);
     var scratch: [8]u8 = undefined;
@@ -2352,7 +2739,7 @@ test "FP-0007 case 11: ddmin reduces xxaxxbxx to ab, its result is 1-minimal, an
         @memcpy(scratch[index .. reduced.len - 1], reduced[index + 1 ..]);
         try testing.expect(!try predicate.holds(scratch[0 .. reduced.len - 1]));
     }
-    try testing.expectError(error.PredicateDoesNotHold, ddmin(testing.allocator, "xxbxxaxx", &predicate));
+    try testing.expectError(error.PredicateDoesNotHold, ddmin(u8, testing.allocator, "xxbxxaxx", &predicate));
 }
 
 fn runUnderAllocationFailure(gpa: Allocator, bytes: []const u8) !void {
@@ -2509,4 +2896,210 @@ test "FP-0054 case 4: derived_from in version 1, its absence in version 2, and a
         var buffer: [128]u8 = undefined;
         try testing.expectEqualStrings(fixture.detail, try detailText(&buffer, run.outcome.detail.?));
     }
+}
+
+/// `L_BODY` of the FP-0008 contract.
+const l_body = "<!DOCTYPE html><p class=x>a&amp;b</p>";
+
+/// The token dump of case 18.
+const l_body_tokens =
+    \\["DOCTYPE","html",null,null,false,[0,15]]
+    \\["StartTag","p",[["class","x",[18,23],[24,25]]],false,[15,26]]
+    \\["Character","a&b",[26,33]]
+    \\["EndTag","p",[],false,[33,37]]
+    \\["EOF",[37,37]]
+    \\
+;
+
+/// Returns the hexadecimal SHA-256 of the UTF-16LE encoding of ASCII `text`.
+fn utf16LeDigest(comptime text: []const u8) [64]u8 {
+    var bytes: [2 * text.len]u8 = undefined;
+    for (text, 0..) |c, index| {
+        bytes[2 * index] = c;
+        bytes[2 * index + 1] = 0;
+    }
+    return hexDigest(&bytes);
+}
+
+/// Runs a fixture and returns its parsed result document, the outcome, and the decode and tokenize stage records.
+const StageResult = struct {
+    arena: std.heap.ArenaAllocator,
+    run: Run,
+    outcome: std.json.Value,
+    decode: std.json.Value,
+    tokenize: std.json.Value,
+
+    fn init(fixture: []const u8) !StageResult {
+        var result: StageResult = .{ .arena = .init(testing.allocator), .run = try runFixture(fixture), .outcome = undefined, .decode = undefined, .tokenize = undefined };
+        errdefer result.deinit();
+        const json = try resultJson(result.arena.allocator(), &result.run);
+        const stages = (try member(json, "stages")).array.items;
+        result.outcome = try member(json, "outcome");
+        result.decode = stages[@backingInt(Stage.decode)];
+        result.tokenize = stages[@backingInt(Stage.tokenize)];
+        try expectString("decode", try member(result.decode, "stage"));
+        try expectString("tokenize", try member(result.tokenize, "stage"));
+        return result;
+    }
+
+    fn deinit(r: *StageResult) void {
+        r.run.deinit();
+        r.arena.deinit();
+    }
+};
+
+fn expectInteger(expected: i64, value: std.json.Value) !void {
+    try testing.expect(value == .integer);
+    try testing.expectEqual(expected, value.integer);
+}
+
+test "FP-0008 case 18: a UTF-8 byte order mark body with a matching tokenize expectation passes, and both stages record their results" {
+    var r = try StageResult.init("fp0008-tokenize-pass.json");
+    defer r.deinit();
+    try testing.expectEqual(Result.pass, r.run.outcome.result);
+    try testing.expectEqual(@as(?Stage, .tokenize), r.run.outcome.stage);
+    try expectString("pass", try member(r.outcome, "result"));
+    try expectString("tokenize", try member(r.outcome, "stage"));
+
+    try expectString("completed", try member(r.decode, "status"));
+    try expectString("UTF-8", try member(r.decode, "encoding"));
+    try expectString("certain", try member(r.decode, "confidence"));
+    try expectInteger(3, try member(r.decode, "bom_bytes"));
+    try expectInteger(37, try member(r.decode, "code_units"));
+    try testing.expectEqual(@as(usize, 37), l_body.len);
+    try expectString(&utf16LeDigest(l_body), try member(r.decode, "output_sha256"));
+    try testing.expect((try member(r.decode, "detail")) == .null);
+
+    try expectString("completed", try member(r.tokenize, "status"));
+    try expectInteger(5, try member(r.tokenize, "token_count"));
+    try expectString(&hexDigest(l_body_tokens), try member(r.tokenize, "tokens_sha256"));
+    try testing.expectEqual(@as(usize, 0), (try member(r.tokenize, "errors")).array.items.len);
+}
+
+test "FP-0008 case 18: each induced allocation failure in a run that decodes and tokenizes reports harness-error and leaks nothing" {
+    for ([_][]const u8{ "fp0008-tokenize-pass.json", "fp0008-tokenize-errors.json" }) |name| {
+        const bytes = try readFixture(name);
+        defer testing.allocator.free(bytes);
+        try testing.checkAllAllocationFailures(testing.allocator, runUnderAllocationFailure, .{bytes});
+    }
+}
+
+test "FP-0008 case 19: a tokenize expectation fails at its first differing check with both values" {
+    {
+        var r = try StageResult.init("fp0008-tokenize-token-count.json");
+        defer r.deinit();
+        try testing.expectEqual(Result.fail, r.run.outcome.result);
+        try testing.expectEqual(@as(u8, 1), r.run.outcome.result.exitStatus());
+        try expectString("tokenize", try member(r.outcome, "stage"));
+        try expectString("token_count", try member(r.outcome, "check"));
+        try expectInteger(4, try member(r.outcome, "expected"));
+        try expectInteger(5, try member(r.outcome, "observed"));
+    }
+    {
+        var r = try StageResult.init("fp0008-tokenize-zero-digest.json");
+        defer r.deinit();
+        try testing.expectEqual(Result.fail, r.run.outcome.result);
+        try expectString("tokens_sha256", try member(r.outcome, "check"));
+        try expectString(&@as([64]u8, @splat('0')), try member(r.outcome, "expected"));
+        try expectString(&hexDigest(l_body_tokens), try member(r.outcome, "observed"));
+    }
+    {
+        var r = try StageResult.init("fp0008-tokenize-wrong-errors.json");
+        defer r.deinit();
+        try testing.expectEqual(Result.fail, r.run.outcome.result);
+        try expectString("errors", try member(r.outcome, "check"));
+        const expected = (try member(r.outcome, "expected")).array.items;
+        try testing.expectEqual(@as(usize, 1), expected.len);
+        try expectString("eof-in-tag", try member(expected[0], "code"));
+        try expectInteger(1, try member(expected[0], "line"));
+        try expectInteger(1, try member(expected[0], "column"));
+        try expectInteger(0, try member(expected[0], "offset"));
+        try testing.expectEqual(@as(usize, 0), (try member(r.outcome, "observed")).array.items.len);
+    }
+}
+
+test "FP-0008 case 20: a body with tokenizer parse errors records them in step order and passes" {
+    var r = try StageResult.init("fp0008-tokenize-errors.json");
+    defer r.deinit();
+    try testing.expectEqual(Result.pass, r.run.outcome.result);
+    try expectInteger(3, try member(r.tokenize, "token_count"));
+    try expectString(&hexDigest(
+        \\["StartTag","a",[["b","c'd",[3,4],[5,8]]],false,[0,9]]
+        \\["Character","\u00ACit;",[9,16]]
+        \\["EOF",[16,16]]
+        \\
+    ), try member(r.tokenize, "tokens_sha256"));
+    const errors = (try member(r.tokenize, "errors")).array.items;
+    try testing.expectEqual(@as(usize, 2), errors.len);
+    const expected = [_]struct { code: []const u8, line: i64, column: i64, offset: i64 }{
+        .{ .code = "unexpected-character-in-unquoted-attribute-value", .line = 1, .column = 7, .offset = 6 },
+        .{ .code = "missing-semicolon-after-character-reference", .line = 1, .column = 13, .offset = 12 },
+    };
+    for (errors, expected) |observed, record| {
+        try testing.expectEqual(@as(usize, 4), observed.object.count());
+        try expectString(record.code, try member(observed, "code"));
+        try expectInteger(record.line, try member(observed, "line"));
+        try expectInteger(record.column, try member(observed, "column"));
+        try expectInteger(record.offset, try member(observed, "offset"));
+    }
+}
+
+test "FP-0008 case 21: a body without a UTF-8 byte order mark makes decode and tokenize expectations unsupported at decode" {
+    const cases = [_]struct { fixture: []const u8, detail: []const u8 }{
+        .{ .fixture = "fp0008-tokenize-no-bom.json", .detail = "no byte order mark; encoding sniffing after BOM sniffing is not implemented" },
+        .{ .fixture = "fp0008-decode-utf16le-bom.json", .detail = "UTF-16LE byte order mark; the UTF-16LE decoder is not implemented" },
+        .{ .fixture = "fp0008-decode-utf16be-bom.json", .detail = "UTF-16BE byte order mark; the UTF-16BE decoder is not implemented" },
+    };
+    for (cases) |case| {
+        var r = try StageResult.init(case.fixture);
+        defer r.deinit();
+        try testing.expectEqual(Result.unsupported, r.run.outcome.result);
+        try testing.expectEqual(@as(u8, 2), r.run.outcome.result.exitStatus());
+        try expectString("unsupported", try member(r.outcome, "result"));
+        try expectString("decode", try member(r.outcome, "stage"));
+        try testing.expect((try member(r.outcome, "check")) == .null);
+        try expectString(case.detail, try member(r.outcome, "detail"));
+        try expectString("unsupported", try member(r.decode, "status"));
+        try expectString(case.detail, try member(r.decode, "detail"));
+        try expectString("not-reached", try member(r.tokenize, "status"));
+    }
+}
+
+test "FP-0008 case 22: a tokenize expectation for a failed document fails on document_state, and neither new stage is reached" {
+    var r = try StageResult.init("fp0008-tokenize-null-body.json");
+    defer r.deinit();
+    try testing.expectEqual(Result.fail, r.run.outcome.result);
+    try expectString("tokenize", try member(r.outcome, "stage"));
+    try expectString("document_state", try member(r.outcome, "check"));
+    try expectString("loaded", try member(r.outcome, "expected"));
+    try expectString("failed", try member(r.outcome, "observed"));
+    try expectString("not-reached", try member(r.decode, "status"));
+    try expectString("not-reached", try member(r.tokenize, "status"));
+}
+
+test "FP-0008 case 23: a decode expectation passes for the case 18 body and fails on encoding when it names UTF-16LE" {
+    {
+        var r = try StageResult.init("fp0008-decode-pass.json");
+        defer r.deinit();
+        try testing.expectEqual(Result.pass, r.run.outcome.result);
+        try expectString("decode", try member(r.outcome, "stage"));
+    }
+    {
+        var r = try StageResult.init("fp0008-decode-wrong-encoding.json");
+        defer r.deinit();
+        try testing.expectEqual(Result.fail, r.run.outcome.result);
+        try expectString("decode", try member(r.outcome, "stage"));
+        try expectString("encoding", try member(r.outcome, "check"));
+        try expectString("UTF-16LE", try member(r.outcome, "expected"));
+        try expectString("UTF-8", try member(r.outcome, "observed"));
+    }
+}
+
+test "FP-0008 case 24: the UTF-8 decoder with replacement turns an invalid byte into U+FFFD" {
+    var r = try StageResult.init("fp0008-tokenize-replacement.json");
+    defer r.deinit();
+    try testing.expectEqual(Result.pass, r.run.outcome.result);
+    try expectInteger(3, try member(r.decode, "code_units"));
+    try expectInteger(2, try member(r.tokenize, "token_count"));
+    try expectString(&hexDigest("[\"Character\",\"a\\uFFFDb\",[0,3]]\n[\"EOF\",[3,3]]\n"), try member(r.tokenize, "tokens_sha256"));
 }

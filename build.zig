@@ -24,6 +24,18 @@ const lab_fixtures = [_][]const u8{
     "fp0054-case-04-v1-derived.json",
     "fp0054-case-04-v2-missing-derived.json",
     "fp0054-case-04-v2-corpus.json",
+    "fp0008-tokenize-pass.json",
+    "fp0008-tokenize-token-count.json",
+    "fp0008-tokenize-zero-digest.json",
+    "fp0008-tokenize-wrong-errors.json",
+    "fp0008-tokenize-errors.json",
+    "fp0008-tokenize-no-bom.json",
+    "fp0008-decode-utf16le-bom.json",
+    "fp0008-decode-utf16be-bom.json",
+    "fp0008-tokenize-null-body.json",
+    "fp0008-decode-pass.json",
+    "fp0008-decode-wrong-encoding.json",
+    "fp0008-tokenize-replacement.json",
 };
 
 /// A compile-failure fixture of FP-0011 and the exit status and standard-error texts that it must produce.
@@ -77,6 +89,26 @@ pub fn build(b: *std.Build) void {
     }
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+
+    // `zig build entities-generate` regenerates the committed named character reference table from the unedited `entities.json`.
+    // FP-0008 contract case 3 compares the committed table with a parse of `entities.json`, so a stale table fails the tests.
+    const entities_gen = b.addExecutable(.{
+        .name = "fairpane-html-entities-gen",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/html/entities_gen.zig"),
+            .target = b.graph.host,
+            .optimize = .Debug,
+        }),
+    });
+    const generate_entities = b.addRunArtifact(entities_gen);
+    generate_entities.setName("generate the HTML named character reference table");
+    generate_entities.addFileArg(b.path("src/html/entities.json"));
+    const generated_table = generate_entities.addOutputFileArg2("entities_table.zig", .{});
+    const update_table = b.addUpdateSourceFiles();
+    update_table.addCopyFileToSource(generated_table, "src/html/entities_table.zig");
+    const entities_step = b.step("entities-generate", "Regenerate src/html/entities_table.zig from src/html/entities.json");
+    entities_step.dependOn(&update_table.step);
+
     const module = b.addModule("fairpane", .{
         .root_source_file = b.path("src/root.zig"),
         .target = target,
@@ -187,7 +219,7 @@ pub fn build(b: *std.Build) void {
     }
 }
 
-/// Adds FP-0007 contract cases 13 and 14 and FP-0054 contract case 5 and revision 1 cases 1 to 5,
+/// Adds FP-0007 contract cases 13 and 14, FP-0054 contract case 5 and revision 1 cases 1 to 5, and FP-0008 contract case 26,
 /// which run the installed `fairpane-lab` executable.
 fn addLabCases(
     b: *std.Build,
@@ -203,6 +235,9 @@ fn addLabCases(
         .{ .name = "FP-0007 case 13: case 1 is a harness error with exit status 3", .args = &.{"run"}, .fixture = "case-01-unknown-field.json", .status = 3 },
         .{ .name = "FP-0007 case 13: case 8 times out with exit status 4", .args = &.{"run"}, .fixture = "case-08-timeout.json", .status = 4 },
         .{ .name = "FP-0007 case 13: an unknown command exits with status 64 and writes no result", .args = &.{"frobnicate"}, .fixture = null, .status = 64 },
+        .{ .name = "FP-0008 case 26: case 18 passes with exit status 0", .args = &.{"run"}, .fixture = "fp0008-tokenize-pass.json", .status = 0 },
+        .{ .name = "FP-0008 case 26: the token_count variant of case 19 fails with exit status 1", .args = &.{"run"}, .fixture = "fp0008-tokenize-token-count.json", .status = 1 },
+        .{ .name = "FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2", .args = &.{"run"}, .fixture = "fp0008-tokenize-no-bom.json", .status = 2 },
     };
     const results = [_][]const u8{ "pass", "fail", "unsupported", "harness-error", "timeout" };
     for (exits) |case| {

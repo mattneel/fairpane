@@ -1,0 +1,440 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","out/fp0008-tokenizer.fixed.zig","src/html/tokenizer.zig"]
+diff --git a/out/fp0008-tokenizer.fixed.zig b/src/html/tokenizer.zig
+index 7ee21c8..7b449fa 100644
+--- a/out/fp0008-tokenizer.fixed.zig
++++ b/src/html/tokenizer.zig
+@@ -373,7 +373,7 @@ pub const Tokenizer = struct {
+         switch (first) {
+             '\r' => {
+                 switch (t.peek(1)) {
+-                    .more => return null,
++                    .more => {},
+                     .end => {},
+                     .unit => |unit| if (unit == '\n') {
+                         len = 2;
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","out/fp0008-tokenizer.fixed.zig","src/html/tokenizer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m","started_at":"2026-10-09T10:50:16.463Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0008-cache-mutation"]
+test
++- run test 167 pass, 5 fail (172 total); 4 leaks
+error: 'html.tokenizer_test.test.FP-0008 case 10: input stream preprocessing, whole and one code unit per chunk, and N6's end-of-file position' failed:
+       FP-0008 case N1, one code unit per chunk:
+       expected:
+       ["Character","a\u000Ab\u000A\u000Ac\u000A"]
+       ["EOF"]
+       observed:
+       ["Character","a\u000A\u000Ab\u000A\u000Ac\u000A"]
+       ["EOF"]
+       FP-0008 case N6, one code unit per chunk:
+       expected:
+       ["StartTag","a",[["b","\u000A"]],false]
+       ["Character","\u000A"]
+       ["EOF"]
+       observed:
+       ["StartTag","a",[["b","\u000A\u000A"]],false]
+       ["Character","\u000A"]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:727:46: 0x7ff630330105 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:728:70: 0x7ff63032affd in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032d2f2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:728:70: 0x7ff63032affd in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032d2f2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032d2f2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:727:46: 0x7ff63032afa5 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\handles.zig:730:69: 0x7ff63032b072 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\tokenizer_test.zig:445:17: 0x7ff6304185b9 in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\tokenizer_test.zig:595:5: 0x7ff630419b21 in test.FP-0008 case 10: input stream preprocessing, whole and one code unit per chunk, and N6's end-of-file position (test_zcu.obj)
+           try checkTable(&preprocessing);
+           ^
+error: 'html.tokenizer_test.test.FP-0008 case 11: cases 4 to 10 and case 16 execute every listed branch of every implemented state' failed:
+       FP-0008 case N1, one code unit per chunk:
+       expected:
+       ["Character","a\u000Ab\u000A\u000Ac\u000A"]
+       ["EOF"]
+       observed:
+       ["Character","a\u000A\u000Ab\u000A\u000Ac\u000A"]
+       ["EOF"]
+       FP-0008 case N6, one code unit per chunk:
+       expected:
+       ["StartTag","a",[["b","\u000A"]],false]
+       ["Character","\u000A"]
+       ["EOF"]
+       observed:
+       ["StartTag","a",[["b","\u000A\u000A"]],false]
+       ["Character","\u000A"]
+       ["EOF"]
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\tokenizer_test.zig:445:17: 0x7ff6304185b9 in checkTable (test_zcu.obj)
+           if (failed) return error.TestExpectedEqual;
+                       ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\tokenizer_test.zig:626:26: 0x7ff630418698 in test.FP-0008 case 11: cases 4 to 10 and case 16 execute every listed branch of every implemented state (test_zcu.obj)
+           for (tables) |table| try checkTable(table);
+                                ^
+error: 'html.partition_test.test.FP-0008 case 13: set P compares every composition of each input into nonempty chunks with the whole input' failed:
+       FP-0008 partition mismatch on input P1: "a\u000D\u000Ab\u000D\u000Dc\u000D"
+       partition: [0,2) [2,8)
+       reference dump:
+       ["Character","a\u000Ab\u000A\u000Ac\u000A",[0,8]]
+       ["EOF",[8,8]]
+       partition dump:
+       ["Character","a\u000A\u000Ab\u000A\u000Ac\u000A",[0,8]]
+       ["EOF",[8,8]]
+       1-minimal input: "\u000D\u000A"
+       FP-0008 partition mismatch on input P21: "<a\u000Db='\u000D\u000A'>\u000D"
+       partition: [0,7) [7,11)
+       reference dump:
+       ["StartTag","a",[["b","\u000A",[3,4],[6,8]]],false,[0,10]]
+       ["Character","\u000A",[10,11]]
+       ["EOF",[11,11]]
+       partition dump:
+       ["StartTag","a",[["b","\u000A\u000A",[3,4],[6,8]]],false,[0,10]]
+       ["Character","\u000A",[10,11]]
+       ["EOF",[11,11]]
+       1-minimal input: "\u000D\u000A"
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:584:14: 0x7ff630183bbf in expect (test_zcu.obj)
+           if (!ok) return error.TestUnexpectedResult;
+                    ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:211:5: 0x7ff63040c139 in test.FP-0008 case 13: set P compares every composition of each input into nonempty chunks with the whole input (test_zcu.obj)
+           try testing.expect(!failed);
+           ^
+error: 'html.partition_test.test.FP-0008 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input' failed:
+       FP-0008 partition mismatch on input S1: "ab<c d=\"e\">&amp;f<!--g--><?h i?>&#x41\u000D\u000A<!DOCTYPE j>"
+       partition: [0,38) [38,51)
+       reference dump:
+       ["Character","ab",[0,2]]
+       ["StartTag","c",[["d","e",[5,6],[8,9]]],false,[2,11]]
+       ["Character","&f",[11,17]]
+       ["Comment","g",[17,25]]
+       ["PI","h","i",[25,32]]
+       ["error","missing-semicolon-after-character-reference",1,38,37]
+       ["Character","A\u000A",[32,39]]
+       ["DOCTYPE","j",null,null,false,[39,51]]
+       ["EOF",[51,51]]
+       partition dump:
+       ["Character","ab",[0,2]]
+       ["StartTag","c",[["d","e",[5,6],[8,9]]],false,[2,11]]
+       ["Character","&f",[11,17]]
+       ["Comment","g",[17,25]]
+       ["PI","h","i",[25,32]]
+       ["error","missing-semicolon-after-character-reference",1,38,37]
+       ["Character","A\u000A\u000A",[32,39]]
+       ["DOCTYPE","j",null,null,false,[39,51]]
+       ["EOF",[51,51]]
+       1-minimal input: "\u000D\u000A"
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:584:14: 0x7ff630183bbf in expect (test_zcu.obj)
+           if (!ok) return error.TestUnexpectedResult;
+                    ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:229:5: 0x7ff63040b385 in test.FP-0008 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input (test_zcu.obj)
+           try testing.expect(!failed);
+           ^
+error: 'html.partition_test.test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks' failed:
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:584:14: 0x7ff630183bbf in expect (test_zcu.obj)
+           if (!ok) return error.TestUnexpectedResult;
+                    ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:261:5: 0x7ff630404383 in test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks (test_zcu.obj)
+           try testing.expect((try check(gpa, input, .all)) == null);
+           ^
+       [SafeAllocator] (err): leaked [addr: 2ff0968, len: 57 (0x39) align: 1] allocated at: 
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\tokenizer_test.zig:410:28: 0x7ff6303fe76f in tokenizeChunksForeign (test_zcu.obj)
+           return out.toOwnedSlice();
+                                  ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\tokenizer_test.zig:379:33: 0x7ff6303fe91c in tokenizeChunks (test_zcu.obj)
+           return tokenizeChunksForeign(gpa, input, boundaries, options, false);
+                                       ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:130:46: 0x7ff630403148 in checkWith__func_3887 (test_zcu.obj)
+           const observed = try cases.tokenizeChunks(gpa, input, boundaries, dump.full);
+                                                    ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:142:21: 0x7ff6304035a1 in check (test_zcu.obj)
+           return checkWith(gpa, input, set, &partitions, &inputs);
+                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:261:34: 0x7ff630404208 in test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks (test_zcu.obj)
+           try testing.expect((try check(gpa, input, .all)) == null);
+                                        ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff63014b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff63014b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 2ff04f8, len: 51 (0x33) align: 1] allocated at: 
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\tokenizer_test.zig:410:28: 0x7ff6303fe76f in tokenizeChunksForeign (test_zcu.obj)
+           return out.toOwnedSlice();
+                                  ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\tokenizer_test.zig:379:33: 0x7ff6303fe91c in tokenizeChunks (test_zcu.obj)
+           return tokenizeChunksForeign(gpa, input, boundaries, options, false);
+                                       ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:128:47: 0x7ff630402fcb in checkWith__func_3887 (test_zcu.obj)
+           const reference = try cases.tokenizeChunks(gpa, input, &.{}, dump.full);
+                                                     ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:142:21: 0x7ff6304035a1 in check (test_zcu.obj)
+           return checkWith(gpa, input, set, &partitions, &inputs);
+                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:261:34: 0x7ff630404208 in test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks (test_zcu.obj)
+           try testing.expect((try check(gpa, input, .all)) == null);
+                                        ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff63014b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff63014b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 2ff0148, len: 8 (0x8) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\mem\Allocator.zig:481:40: 0x7ff6301d473b in dupe__func_1452 (test_zcu.obj)
+           const new_buf = try allocator.alloc(T, m.len);
+                                              ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:54:70: 0x7ff6304015b3 in firstMismatch__func_3888 (test_zcu.obj)
+                   if (try predicate.mismatches(chosen)) return try gpa.dupe(usize, chosen);
+                                                                            ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:126:41: 0x7ff630402f5c in checkWith__func_3887 (test_zcu.obj)
+           const boundaries = try firstMismatch(gpa, input.len, set, partitions) orelse return null;
+                                               ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:142:21: 0x7ff6304035a1 in check (test_zcu.obj)
+           return checkWith(gpa, input, set, &partitions, &inputs);
+                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:261:34: 0x7ff630404208 in test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks (test_zcu.obj)
+           try testing.expect((try check(gpa, input, .all)) == null);
+                                        ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff63014b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff63014b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 30115f0, len: 4 (0x4) align: 2] allocated at: 
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\lab.zig:1802:23: 0x7ff630402bb3 in ddmin__func_3889 (test_zcu.obj)
+           return gpa.realloc(buffer, length);
+                             ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:132:34: 0x7ff63040326b in checkWith__func_3887 (test_zcu.obj)
+           const minimal = try lab.ddmin(u16, gpa, input, inputs);
+                                        ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:142:21: 0x7ff6304035a1 in check (test_zcu.obj)
+           return checkWith(gpa, input, set, &partitions, &inputs);
+                           ^
+       C:\Users\requi\.omp\wt\td1e0b7a40\m\src\html\partition_test.zig:261:34: 0x7ff630404208 in test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks (test_zcu.obj)
+           try testing.expect((try check(gpa, input, .all)) == null);
+                                        ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff63014b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff63014b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff63014980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff63014980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       (additional stack frames may have been skipped...)
+failed command: cd . && ".\\out\\fp0008-cache-mutation\\o\\8585f44073dd6df485e756e90f48aada\\test.exe" "--cache-dir=.\\out\\fp0008-cache-mutation" --seed=0xcfa71b16 --listen=-
+
+Build Summary: 65/67 steps succeeded (1 failed); 200/205 tests passed (5 failed)
+test transitive failure
++- run test 167 pass, 5 fail (172 total); 4 leaks
+|  +- compile test debug native success 7s MaxRSS:739M
+|     +- generate the HTML named character reference table success 45ms
+|        +- compile exe fairpane-html-entities-gen debug native success 2s MaxRSS:306M
++- run test 33 pass (33 total) 223ms MaxRSS:15M
+|  +- compile test debug native success 3s MaxRSS:422M
+|     +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0007 case 13: case 2 passes with exit status 0 success 54ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 3s MaxRSS:369M
+|        +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0007 case 13: case 3 fails with exit status 1 success 59ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 51ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 52ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 57ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 48ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 59ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 50ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 53ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 83ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 15ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 26ms
+|  +- compile exe fairpane-lab-check debug native success 3s MaxRSS:353M
+|  |  +- generate the HTML named character reference table (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 56ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 47ms
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 57ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- WriteFile case.json success
+|  +- WriteFile case.json (reused)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 46ms
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- WriteFile case.json (reused)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 268ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 163ms
+|     +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 58ms
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 265ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 163ms
+|     +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 59ms
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 265ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 167ms
+|     +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 65ms
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 268ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 165ms
+|     +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 58ms
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: remove the oversized files success 18ms
+|  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 164ms
+|  |  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: run reports a case file one byte above the size limit success 261ms
+|  |  +- install fairpane-lab (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: the failed minimization creates no output file success 49ms
+|  |  +- compile exe fairpane-lab-check debug native (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  |  +- FP-0054 revision 1 case 5: minimize reports a case file one byte above the size limit success 263ms
+|  |     +- install fairpane-lab (+1 more reused dependencies)
+|  |     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 5: replay reports a transcript file one byte above the size limit success 262ms
+|     +- install fairpane-lab (+1 more reused dependencies)
+|     +- FP-0054 revision 1 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 449ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 488ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 4: allocation_invokes_call.zig success 495ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 4: leaf_allocates.zig success 450ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 4: mutation_throws.zig success 402ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 4: leaf_calls_behavior.zig success 415ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 4: leaf_positive.zig success 484ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 5: catalog_callback_alone.zig success 392ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 5: catalog_exception_alone.zig success 398ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 5: catalog_duplicate_id.zig success 400ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 5: kernel_wider_context.zig success 368ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 5: kernel_undeclared_throw.zig success 406ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 8: layout_undescribed_field.zig success 375ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 8: layout_plain_reference.zig success 439ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 8: layout_missing_field.zig success 439ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 20: abi_reference_value.zig success 377ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 20: abi_nan_box_value.zig success 396ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 20: abi_tagged_index_value.zig success 386ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 34: leaf_reaches_heap.zig success 443ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 35: leaf_widens_context.zig success 385ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 36: binding_missing_kernel.zig success 412ms
+|  +- generate the HTML named character reference table (+1 more reused dependencies)
++- FP-0011 case 36: binding_stray_kernel.zig success 402ms
+   +- generate the HTML named character reference table (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xcfa71b16 test --summary all --cache-dir out/fp0008-cache-mutation
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0008-cache-mutation"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m","started_at":"2026-10-09T10:50:16.553Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":27739,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--exit-code","out/fp0008-tokenizer.fixed.zig","src/html/tokenizer.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--exit-code","out/fp0008-tokenizer.fixed.zig","src/html/tokenizer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td1e0b7a40\\m","started_at":"2026-10-09T10:51:04.747Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
