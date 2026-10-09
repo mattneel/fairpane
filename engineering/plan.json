@@ -431,14 +431,21 @@
       "depends_on": [
         "FP-0008",
         "FP-0009",
-        "FP-0064"
+        "FP-0064",
+        "FP-0100",
+        "FP-0101",
+        "FP-0102",
+        "FP-0103",
+        "FP-0104",
+        "FP-0105"
       ],
       "role": "fairpane-core",
       "allowed_paths": [
         "src",
         "tests",
         "tools",
-        "build.zig"
+        "build.zig",
+        "engineering/evidence"
       ],
       "protected_paths": [
         "AGENTS.md",
@@ -447,16 +454,20 @@
         "engineering/policy.json",
         "engineering/gates.json",
         "toolchains/zig.lock.json",
+        "toolchains/rust.lock.json",
+        "rust-toolchain.toml",
         "specs/corpora.json"
       ],
       "authority": "routine-local-engineering",
       "required_gates": [
         "repo-check",
         "controller-test",
+        "zig-fmt",
         "zig-test"
       ],
       "required_reviewers": [
-        "fairpane-review"
+        "fairpane-review",
+        "fairpane-spec"
       ],
       "acceptance": [
         "Implement frozen tree-construction modes with standard recovery.",
@@ -466,7 +477,9 @@
         "Run the tree-construction .dat tests of the pinned WPT corpus under html/syntax/parsing, where html5lib-tests moved them in commit 224991ec, and report pass, fail, and unsupported counts separately."
       ],
       "read": [
-        "docs/RENDERING_AND_TEXT.md"
+        "docs/RENDERING_AND_TEXT.md",
+        "engineering/evidence/FP-0100/CONTRACT.md",
+        "engineering/evidence/FP-0101/CONTRACT.md"
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
@@ -875,7 +888,8 @@
       "depends_on": [
         "FP-0009",
         "FP-0012",
-        "FP-0018"
+        "FP-0018",
+        "FP-0100"
       ],
       "role": "fairpane-js",
       "allowed_paths": [
@@ -3015,7 +3029,7 @@
       "id": "FP-0068",
       "title": "Run tree construction and style resolution in the laboratory",
       "workstream": "laboratory",
-      "depends_on": ["FP-0010", "FP-0014"],
+      "depends_on": ["FP-0100", "FP-0014"],
       "role": "fairpane-core",
       "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
@@ -3057,7 +3071,7 @@
       "id": "FP-0070",
       "title": "Implement the remaining selectors, nesting, and HTML selector rules",
       "workstream": "css-layout",
-      "depends_on": ["FP-0010", "FP-0014"],
+      "depends_on": ["FP-0100", "FP-0014"],
       "role": "fairpane-core",
       "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
@@ -3105,7 +3119,7 @@
       "id": "FP-0072",
       "title": "Complete the cascade inputs and the HTML user-agent stylesheet",
       "workstream": "css-layout",
-      "depends_on": ["FP-0010", "FP-0014"],
+      "depends_on": ["FP-0100", "FP-0014"],
       "role": "fairpane-core",
       "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
@@ -3474,6 +3488,161 @@
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
     {
+      "id": "FP-0100",
+      "title": "Construct HTML document trees outside tables, templates, framesets, and foreign content",
+      "workstream": "html-dom",
+      "depends_on": ["FP-0008", "FP-0009", "FP-0064"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Implement frozen tree-construction modes with standard recovery.",
+        "Exercise malformed nesting and chunk boundaries through the actual DOM.",
+        "Preserve parser continuation and future script-reentrancy boundaries.",
+        "Emit inspectable DOM dumps from real parsing.",
+        "Implement the initial, before html, before head, in head, in head noscript, after head, in body, text, after body, and after after body insertion modes, the stack of open elements, the list of active formatting elements, and the adoption agency algorithm at the pinned standard, and execute each of their 130 branches in a test.",
+        "Report each token that needs another insertion mode, a template, or foreign content as unsupported with its owner task, never as a partial success.",
+        "Return a script outcome at each script end tag in the text insertion mode before the tokenizer consumes a later character, and keep every node that the parser references alive across a caller's sweep.",
+        "Compare whole-input results with every partition of small adversarial inputs, including the document dump, the parse errors with their positions, and the outcome sequence.",
+        "Extend the DOM store with HTML documents, document modes, doctype identifiers, processing-instruction targets, and text appends, and keep every FP-0009 outcome.",
+        "Record whether a character token can change the adjusted current node's namespace, as FP-0064 amendment 2 requires.",
+        "Record speculative parsing, custom element definitions, form-owner association, the reset algorithm of resettable elements, and process internal resource links as non-goals owned by the FP-0026 frontier decomposition, never as done."
+      ],
+      "read": ["engineering/evidence/FP-0008/CONTRACT.md", "engineering/evidence/FP-0009/CONTRACT.md", "engineering/evidence/FP-0064/CONTRACT.md", "docs/RENDERING_AND_TEXT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0101",
+      "title": "Run the WPT tree-construction .dat files against the HTML parser",
+      "workstream": "html-dom",
+      "depends_on": ["FP-0100", "FP-0003", "FP-0052"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Run the tree-construction .dat tests of the pinned WPT corpus under html/syntax/parsing, where html5lib-tests moved them in commit 224991ec, and report pass, fail, and unsupported counts separately.",
+        "Emit inspectable DOM dumps from real parsing.",
+        "Read every .dat blob under html/syntax/parsing/resources/ from the verified WPT snapshot by Git object, and record each file's blob ID, #data entry count, fragment entry count, and scripting flags.",
+        "Parse entries exactly as the pinned resources/test.js parseDat does, and fail the run when a file's parsed entry count differs from its #data heading count.",
+        "Expand each unflagged entry into a scripting-enabled and a scripting-disabled scenario, each #script-on entry into an enabled scenario, and each #script-off entry into a disabled scenario.",
+        "Run scripting-enabled scenarios in the Normal scripting mode, and classify a scenario as unsupported for script execution only when it comes from a scripted_*.dat file or its #data runs a script.",
+        "Count every scenario exactly once as pass, fail, unsupported, crash, or timeout, name the feature of each unsupported scenario, and never count an unsupported scenario as a pass.",
+        "Map only the scripting-enabled scenario of each entry to its html5lib_url.html, html5lib_write.html, or html5lib_write_single.html subtest, and report noscript01.dat, #script-off entries, and the disabled scenarios of unflagged entries as html5lib-only.",
+        "Compare each dump with the #document section without normalization, and record for each scenario whether merging adjacent text nodes alone would change its result.",
+        "Record each scenario's tree-construction parse error count beside its #errors and #new-errors line count without changing its result."
+      ],
+      "read": ["engineering/evidence/FP-0100/CONTRACT.md", "engineering/decisions/0003-corpus-snapshots.md", "tools/corpus.mjs"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0102",
+      "title": "Construct tables with foster parenting",
+      "workstream": "html-dom",
+      "depends_on": ["FP-0100", "FP-0101"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Implement frozen tree-construction modes with standard recovery.",
+        "Exercise malformed nesting and chunk boundaries through the actual DOM.",
+        "Implement the in table, in table text, in caption, in column group, in table body, in row, and in cell insertion modes at the pinned standard, and execute every branch of each in a test.",
+        "Implement foster parenting in the appropriate place for inserting a node, the algorithms that clear the stack back to a table, table body, or table row context, close the cell, and the pending table character tokens, with cases that place text, elements, comments, and processing instructions before a table.",
+        "Implement reset the insertion mode appropriately, and test each of its branches that a document parse can reach.",
+        "Remove the table modes from the parser's unsupported set and from modes.owner in a clean cutover.",
+        "Compare whole-input results with every partition of small adversarial table inputs.",
+        "Rerun the FP-0101 harness and report every scenario whose result changed, with no pass becoming a fail."
+      ],
+      "read": ["engineering/evidence/FP-0100/CONTRACT.md", "engineering/evidence/FP-0101/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0103",
+      "title": "Construct templates and framesets",
+      "workstream": "html-dom",
+      "depends_on": ["FP-0102", "FP-0127"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Implement frozen tree-construction modes with standard recovery.",
+        "Exercise malformed nesting and chunk boundaries through the actual DOM.",
+        "Implement the in template, in frameset, after frameset, and after after frameset insertion modes and the stack of template insertion modes at the pinned standard, and execute every branch of each in a test.",
+        "Implement the template branches of the in head, after head, and in body modes, and the template branch of reset the insertion mode appropriately.",
+        "Give each template element template contents whose node document is the template's inert template contents owner document, and dump them with the content line of the pinned WPT format.",
+        "Implement template content patching through the for attribute, with the insertion target and the insertion start and end markers.",
+        "Decide the parser's allow declarative shadow roots flag for documents in the contract, and attach declarative shadow roots through shadowrootmode with every attribute and failure path of the pinned standard.",
+        "Remove the template and frameset entries from the parser's unsupported set and from modes.owner in a clean cutover.",
+        "Rerun the FP-0101 harness and report every scenario whose result changed, with no pass becoming a fail."
+      ],
+      "read": ["engineering/evidence/FP-0100/CONTRACT.md", "engineering/evidence/FP-0102/CONTRACT.md", "engineering/evidence/FP-0127/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0104",
+      "title": "Construct MathML and SVG foreign content",
+      "workstream": "html-dom",
+      "depends_on": ["FP-0100", "FP-0101"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Implement frozen tree-construction modes with standard recovery.",
+        "Exercise malformed nesting and chunk boundaries through the actual DOM.",
+        "Implement the tree construction dispatcher's foreign-content conditions and the rules for parsing tokens in foreign content at the pinned standard, and execute every branch in a test.",
+        "Implement the math and svg start tags in body, MathML, SVG, and foreign attribute adjustment, and SVG tag-name adjustment from the pinned tables.",
+        "Implement the MathML text integration points and the HTML integration points, including annotation-xml with each encoding value that the standard names.",
+        "Make the tokenizer return pending characters to tree construction before the markup declaration open state reads adjusted_current_node_is_foreign, and show that <math><mi><p><b></p>x<![CDATA[y]]> gives the same tree under every partition, as FP-0064 amendment 3 records.",
+        "Remove the foreign start tag entry from the parser's unsupported set in a clean cutover.",
+        "Rerun the FP-0101 harness and report every scenario whose result changed, with no pass becoming a fail."
+      ],
+      "read": ["engineering/evidence/FP-0064/CONTRACT.md", "engineering/evidence/FP-0100/CONTRACT.md", "engineering/evidence/FP-0101/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0105",
+      "title": "Implement the HTML fragment parsing algorithm",
+      "workstream": "html-dom",
+      "depends_on": ["FP-0102", "FP-0103", "FP-0104"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Implement frozen tree-construction modes with standard recovery.",
+        "Preserve parser continuation and future script-reentrancy boundaries.",
+        "Implement the HTML fragment parsing algorithm with its context element, document mode inheritance, initial tokenizer state, root html element, form element pointer, and returned DocumentFragment.",
+        "Implement the Inert and Fragment scripting modes and every branch that the standard marks as the fragment case.",
+        "Run every #document-fragment entry of the pinned .dat files through the FP-0101 harness, with context elements in the HTML, SVG, and MathML namespaces, and report each result.",
+        "Compare whole-input results with every partition of small adversarial fragment inputs.",
+        "Rerun the FP-0101 harness and report every scenario whose result changed, with no pass becoming a fail."
+      ],
+      "read": ["engineering/evidence/FP-0064/CONTRACT.md", "engineering/evidence/FP-0100/CONTRACT.md", "engineering/evidence/FP-0101/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
       "id": "FP-0106",
       "title": "Close the FP-0066 and FP-0076 review findings",
       "workstream": "laboratory",
@@ -3512,6 +3681,28 @@
         "Rerun the gate on the Windows CI runner at least ten times after the change and report each duration."
       ],
       "read": ["engineering/evidence/FP-0098/ci/README.md", "engineering/evidence/ci/runs-2026-10-09.log", "engineering/evidence/ci/run-37952850522-attempt-1/README.md", "engineering/gates.json", "tools/selftest.mjs"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0127",
+      "title": "Add shadow roots to the DOM store",
+      "workstream": "html-dom",
+      "depends_on": ["FP-0009"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Implement shadow root nodes in the DOM store through the DOM Standard's attach a shadow root algorithm, with its mode, delegates focus, slot assignment, clonable, serializable, declarative, available to element internals, and custom element registry fields, and its exact errors.",
+        "Make pre-insert, replace, remove, and adopt use host-including inclusive ancestors, and reject every invalid mutation that involves a shadow root with its standard error and no change.",
+        "Keep a shadow root alive while its host is reachable, report it through forEachRoot and sweep, and test teardown, retention, and mutation during iteration.",
+        "Run std.testing.checkAllAllocationFailures over shadow root creation and attachment, leaving the store unchanged on each failure.",
+        "Keep every FP-0009 and FP-0014 outcome, and record each shadow-tree behavior that selectors, style, and the laboratory do not yet support, with its owner task."
+      ],
+      "read": ["engineering/evidence/FP-0009/CONTRACT.md", "docs/ARCHITECTURE.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
