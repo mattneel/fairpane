@@ -149,7 +149,8 @@ The integrator applied the patch without conflicts and committed it as `78c8f7d`
 The integrator accepts the case 3 resolution: the requirement exists to show that case 3 detects a guard without identities, and control 4 shows that.
 The deleted failed attempts at `raw/tests-before-r1.log` were harness setup failures that the worker disclosed above; no test result was replaced.
 
-`raw/r1-integration-binding.log` records `HEAD` `78c8f7d` and an empty status, including ignored files, for every source root before the gates and again after the last run.
+`raw/r1-integration-binding.log` records `HEAD` `78c8f7d` and an empty status, including ignored files, for every source root before the gates, and the status alone again after the last run.
+Review 2 notes that `HEAD` was not recorded again; the reflog shows `HEAD` at `78c8f7d` until 10:05:39Z, after the last run.
 
 - `gates/2026-10-09T10-02-10-701Z-repo-check-d21465f7.json`
 - `gates/2026-10-09T10-02-11-009Z-controller-test-964bb3a4.json`, with 181 of 181 controller tests.

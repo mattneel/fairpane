@@ -1,0 +1,156 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "78c8f7de48869b415dba8e67bbd9567417a9cfe3",
+    "c6d0ce1cfc4e58f4392397e9a36968fc5ae363ec"
+  ],
+  "summary": "Accept. There are no blocker or major findings. Revision 1 replaces the canonical-path guard with a file-identity guard, as the plan criterion requires.\n\n- src/lab_main.zig:149-157 keeps the equal-spelling check first. When the output exists, it opens both files and compares their identities with std.meta.eql. A missing output file is not the input file. Any other failure to open or identify either file is a harness error that names that file's subject. The guard compares no other path strings.\n- Windows: the identity is FILE_ID_INFORMATION (VolumeSerialNumber plus the 128-bit FileId) from NtQueryInformationFile with class `.Id`, which is 59 in the pinned std/os/windows.zig:565. The local struct layout, a u64 and then [16]u8, matches the Windows definition.\n- Linux: the identity comes from statx with AT_EMPTY_PATH on the open descriptor, using dev_major, dev_minor, and ino, and checking the INO mask bit.\n- Other POSIX systems: the identity is fstat's st_dev and st_ino.\n- The Linux path differs from the contract text, which says fstat for all non-Windows systems. The deviation is forced and disclosed: the pinned std/posix.zig:139-141 makes Stat void on Linux, std/c.zig:10408 makes c.fstat `{}` on Linux, and std/os/linux.zig has no fstat wrapper.\n- Opening follows symbolic links: OpenFileOptions.follow_symlinks defaults to true (Dir.zig:554), and on Windows OPEN_REPARSE_POINT is false.\n- Refused and failed commands write nothing. A refused `run` returns initHarnessError with no case, so hasTranscript (src/lab.zig:1089-1091) is false. `minimize` writes only on pass (src/lab_main.zig:134-139).\n\nTests:\n- All six revision 1 cases are implemented as the contract states (build.zig:287-363, tests/lab/check.zig, tools/selftest.mjs:590-599).\n- Each build-step case runs in a directory that `check fresh` deletes and recreates on every run (check.zig:120-145). Every step that touches the directory has has_side_effects set. The maker puts side-effect outputs at the stable o/<hash> path (lib/compiler/Maker/Step/Run.zig:582-583), so the deleteTree in `check fresh` is what makes each run fresh, and it is present.\n- Case 3 is added only on Windows hosts (build.zig:302). The host is recorded in tests-after-r1.log (`ver` and Windows 11 Pro), and in the receipts as win32 10.0.26200.\n- Case 5 runs `run`, `minimize`, and `replay` against files extended with setLength and checks the exact details. It checks that minimized.json is absent and removes both files in a step that depends on all three readers.\n\nBefore and mutation evidence:\n- tests-before-r1.log shows cases 1 and 2 failing. minimize and run both proceed over the hard link with exit 0 and exit 1.\n- Case 3 passes in that run. This contradicts the contract's literal 'Cases 1 to 3 must fail before the fix', and the README discloses it.\n- The integrator's acceptance is sound. In the before run, FP-0054 case 5 passes and case 3 passes, which shows the old realpath guard normalized letter case on this host. So no letter-case defect existed for case 3 to detect, and 8.3 names are excluded by contract. Control 4 (identity comparison removed) shows case 3 does fail a guard without identities, together with cases 1 and 2 and FP-0054 case 5 (49 of 58 steps).\n- Controls 1, 2, and 3 match the contract text exactly in their recorded diffs. Each kills only its target:\n  - Control 1: case 4 refused with the same-file detail, 55 of 58.\n  - Control 2: only the case 5 `run` step fails, 55 of 58.\n  - Control 3: only revision 1 case 6 fails, 180 of 181, with actual null instead of the message.\n- The restoration diffs exit 0. The saved fixed lab_main.zig blob is c78c460, which is the blob that 78c8f7d commits.\n\nEarlier minor findings:\n- Command-line size test: resolved. Case 5 runs through the executable, and control 2 kills the subject mutant that review 1 named.\n- No-code retry count: resolved. Revision 1 case 6 asserts exactly one attempt and the recorded message, and control 3 kills review 1's mutant.\n- Stale HANDOFF.md: not resolved.\n\nBinding:\n- The reflog shows 78c8f7d committed at 10:02:01Z, with parent bdcc84c. The worker's base 005ef1e is disclosed.\n- r1-integration-binding.log records HEAD 78c8f7d and an empty status, including ignored files, at 10:02:10Z.\n- All four receipts record source b225474b…/230 and policy 70e1709e…/22, the same before and after, all with status pass.\n- r1-integration-tests.log shows 58 of 58 steps and 177 of 177 tests with a fresh cache and the recorded ZIG_GLOBAL_CACHE_DIR. Bun 1.4.2 passes 181 of 181.\n- The status was recorded again at 10:03:41Z. HEAD was not recorded again, but the reflog shows HEAD stayed at 78c8f7d until 10:05:39Z.\n- The GitHub API lists the files of each commit. c6d0ce1 touches only engineering/evidence/FP-0054/** and engineering/state.json. 78c8f7d touches build.zig, the FP-0054 evidence, src/lab_main.zig, tests/lab/check.zig, and tools/selftest.mjs.\n- No protected path changed. tools/selftest.mjs is a policy root, and its change only adds a test.\n\nI had no shell, so I ran no commands and executed none of the reproductions below.",
+  "criteria": [
+    {
+      "criterion": "Revision 1 guard: equal-spelling check first, then compare file identities when the output exists, with no other path-string comparison.",
+      "met": true,
+      "evidence": "src/lab_main.zig:149-157. Line 150 compares equal spellings. Lines 151-154 get the output identity, where FileNotFound returns null and any other error returns fileFailure(output.subject). Line 155 gets the input identity, where an error returns fileFailure(input.subject). Line 156 returns std.meta.eql(input_identity, output_identity). No realpath or other path comparison remains."
+    },
+    {
+      "criterion": "Windows identity is VolumeSerialNumber and the 128-bit FileId of FILE_ID_INFORMATION from NtQueryInformationFile(FileIdInformation).",
+      "met": true,
+      "evidence": "src/lab_main.zig:162 and 170-174 define the struct, and 181-189 call NtQueryInformationFile(file.handle, &iosb, &info, @sizeOf(FILE_ID_INFORMATION), .Id). Pinned std/os/windows.zig:565 defines `Id = 59` (FileIdInformation). The status mapping is SUCCESS to the identity, ACCESS_DENIED to AccessDenied, and anything else to unexpectedStatus, which yields error.Unexpected."
+    },
+    {
+      "criterion": "Linux identity via statx; other POSIX via fstat st_dev/st_ino.",
+      "met": true,
+      "evidence": "src/lab_main.zig:191-206 call statx(fd, \"\", AT.EMPTY_PATH, .{.INO=true}) and require mask.INO. The identity is dev_major, dev_minor, and ino, and dev_* are always filled. Lines 207-215 call posix.system.fstat for the dev and ino fields. The contract text names fstat for every non-Windows system. The deviation is forced by the pinned std (posix.zig:139-141, where Stat is void on Linux; c.zig:10408, where fstat is {} on Linux; no fstat in os/linux.zig) and is disclosed in README:132-133. cross-build-r1.log compiles fairpane-lab and fairpane-lab-check for x86_64-linux and aarch64-macos with exit 0. It does not run them."
+    },
+    {
+      "criterion": "Open/identify failures are harness errors naming the file's subject with exit 3; a nonexistent output is not the input.",
+      "met": true,
+      "evidence": "src/lab_main.zig:151-155 map errors with lab.fileFailure (src/lab.zig:122-129, which uses @errorName for other errors). Callers return the error through initHarnessError (src/lab_main.zig:92-93 and 124-125), which exits 3. No test exercises the failure path; see the notes."
+    },
+    {
+      "criterion": "A refused or failed command writes nothing.",
+      "met": true,
+      "evidence": "`run`: the refusal at src/lab_main.zig:92-93 produces a Run with case == null, so hasTranscript (src/lab.zig:1089-1091) is false and nothing is written at lines 101-104. `minimize`: lines 134-139 write only when outcome is pass. Cases 1-3 check that case.json still equals the fixture. Case 5 checks that minimized.json is absent (build.zig:347-349)."
+    },
+    {
+      "criterion": "Each revision 1 build step works in a directory created fresh for its run; case.json is copied from case-03-body-mismatch.json.",
+      "met": true,
+      "evidence": "tests/lab/check.zig:120-145 run deleteTree and createDirPath, then copy the fixture to case.json. The link layout adds CreateHardLinkW on Windows (147-167) and dir.hardLink elsewhere. build.zig:366-376: the fresh step has has_side_effects. build.zig:379-393: every lab or check step in the directory has has_side_effects. The maker's side-effect output path is o/<hash> (Run.zig:582-583), which is stable, so the deleteTree in `fresh` provides the freshness. The logs show a distinct o/ directory for each case."
+    },
+    {
+      "criterion": "Case 1: hard-link minimize --out link.json exits 3 with the refusal detail; case.json equals the fixture; fails before the fix.",
+      "met": true,
+      "evidence": "build.zig:298 and 303-319. tests-after-r1.log and r1-integration-tests.log show success for both steps. tests-before-r1.log shows failure: minimize returned pass and wrote 888 bytes through link.json, with the unchanged check at transitive failure. Control 4 also kills it."
+    },
+    {
+      "criterion": "Case 2: hard-link run --transcript link.json exits 3 with the refusal detail; case.json equals the fixture; fails before the fix.",
+      "met": true,
+      "evidence": "build.zig:299 and 303-319. The after and integration runs succeed. tests-before-r1.log shows the run reporting `fail` instead of harness-error, so the transcript would be written over the linked case. Control 4 also kills it."
+    },
+    {
+      "criterion": "Case 3 (Windows only): minimize --out CASE.JSON exits 3 with the detail; case.json equals the fixture; other hosts skip it; evidence names the host.",
+      "met": true,
+      "evidence": "build.zig:300 and 302 add the step only when b.graph.host.result.os.tag is windows. tests-after-r1.log:2-9 records `Microsoft Windows [Version 10.0.26200.9457]` and `win32 x64 10.0.26200 Windows 11 Pro`. The after and integration runs succeed. The case passed before the fix, which contradicts the contract's 'must fail before the fix'. The README discloses this (README.md:128-131), and the integrator accepted it. The acceptance is justified: tests-before-r1 shows the old realpath guard refused the case-variant spelling on this host, so there was no defect to detect. Control 4 shows case 3 fails a guard without identities (mutation-r1.log:828-862)."
+    },
+    {
+      "criterion": "Case 4: separate byte-identical other.json; minimize exits 0 with pass; other.json is a version 2 case whose derived_from.case_sha256 is the digest of case.json; mutation control 1 kills it.",
+      "met": true,
+      "evidence": "build.zig:321-331. check.zig:176-199 parse other.json. Parsing succeeds with derived_from present only for version 2 cases, and the check compares the [32]u8 digest with SHA-256(case.json). Control 1 diff (mutation-r1.log:2-17): `return same_file;` for every existing output. Only case 4 fails, with the same-file detail (lines 21-42, 55 of 58)."
+    },
+    {
+      "criterion": "Case 5: oversized case and transcript files via the executable with the exact details; minimize --out new path stays absent; files removed; mutation control 2 kills it.",
+      "met": true,
+      "evidence": "check.zig:138-141 and 170-174 call setLength to case_size_limit+1 and transcript_size_limit+1 and write no data. build.zig:333-362 cover run, minimize, absent, replay, and removal. The removal depends on all three readers. Control 2 diff (mutation-r1.log:153-167) matches the contract. Only the case 5 `run` step fails, on the detail (lines 169-241). On failure the removal is skipped, which is disclosed (README.md:140-142)."
+    },
+    {
+      "criterion": "Case 6: removal error without a code gets exactly one attempt and the recorded error names it; mutation control 3 kills it.",
+      "met": true,
+      "evidence": "tools/selftest.mjs:590-599 assert r.error, times.length === 1, the lastResult error, and a surviving capture directory. Control 3 diff (mutation-r1.log:352-366) is exactly the contract mutant at tools/lib.mjs:316. Result: 180 of 181, with not ok 156 because actual was null (lines 552-555 and 646-651). After the fix the test passes in Node (controller-tests-after-r1.log:194), Bun 1.4.2 (r1-integration-bun.log:190), and the controller gate."
+    },
+    {
+      "criterion": "Earlier minor findings resolved: command-line size test and no-code retry count.",
+      "met": true,
+      "evidence": "Size: revision 1 case 5 runs the fairpane-lab executable, and control 2 kills review 1's subject mutant. No-code retry: revision 1 case 6 counts calls, and control 3 kills review 1's mutant. The third earlier minor finding, the stale HANDOFF, is not resolved; see the findings."
+    },
+    {
+      "criterion": "Revision 1 evidence: tests-before-r1, mutation-r1, uncached tests-after-r1 with --summary all, controller-tests-after-r1, host OS and bun --version, README corrections.",
+      "met": true,
+      "evidence": "All four logs are present and use the locked zig.exe with the ZIG_GLOBAL_CACHE_DIR override. tests-after-r1 uses the fresh cache out/fp0054-r1-after and shows 58 of 58 steps and 177 of 177 tests. controller-tests-after-r1 records bun 1.4.2 and node v26.7.0, 181 of 181 tests, and zig fmt exit 0. The README criterion row is corrected (README.md, table row 5). The README states the bases: the original work was on f53f465 and this revision on 005ef1e."
+    },
+    {
+      "criterion": "Evidence binds to 78c8f7d; HEAD and status recorded before and after the four gates.",
+      "met": true,
+      "evidence": "r1-integration-binding.log records rev-parse HEAD = 78c8f7de… and an empty `status --porcelain --untracked-files=all --ignored` over every source root at 10:02:10Z. It records the status again at 10:03:41Z, after the gates, the Zig run, and Bun. The reflog shows 78c8f7d at 1791540121 (10:02:01Z) and the next HEAD move at 1791540339 (10:05:39Z). All four receipts (10:02:10-10:02:54Z) record source b225474b…/230 and policy 70e1709e…/22, identical before and after, with status pass. HEAD was not recorded again after the gates; see the minor finding."
+    },
+    {
+      "criterion": "Protected paths unchanged; no gate or threshold weakened.",
+      "met": true,
+      "evidence": "The GitHub API file lists show 78c8f7d changes only build.zig, engineering/evidence/FP-0054/{README.md, raw/*-r1.log}, src/lab_main.zig, tests/lab/check.zig, and tools/selftest.mjs (+10/-0). c6d0ce1 changes only engineering/evidence/FP-0054/** and engineering/state.json. No protected path is touched. The selftest change adds one test."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "src/lab_main.zig",
+      "line": 178,
+      "issue": "fileIdentity opens the output path for reading with default options before any write. On POSIX, opening a named FIFO with O_RDONLY blocks until a writer appears. The guard therefore hangs `fairpane-lab run case.json --transcript fifo` (or `minimize ... --out fifo`) when the only intended writer is fairpane-lab itself, for example with `mkfifo t; fairpane-lab run case.json --transcript t & cat t`. The realpath guard it replaced did not open the output. Opening for read also requires read permission, so an existing write-only output now becomes a harness error. That failure is in the safe direction. [INFERENCE: not executed; derived from Threaded.zig:4919-4945, which adds no O_NONBLOCK or O_PATH by default.]",
+      "recommendation": "On Linux and FreeBSD, open with `.path_only = true` (O_PATH, Dir.zig:521). statx with AT_EMPTY_PATH and fstat both work on O_PATH descriptors. On other POSIX systems, use a non-blocking open or stat the path with symlinks followed. Optionally add a FIFO case on POSIX hosts."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0054/README.md",
+      "line": 152,
+      "issue": "The README says r1-integration-binding.log records 'HEAD 78c8f7d and an empty status ... before the gates and again after the last run'. The log records `git rev-parse HEAD` only before the gates, at 10:02:10Z. The after record at 10:03:41Z is the status alone. The contract requires HEAD and status both before and after. The reflog shows HEAD unchanged until 10:05:39Z, so the binding itself holds.",
+      "recommendation": "Record `git rev-parse HEAD` again after the last run in future integrations, or change the README sentence to say that only the status was recorded again."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0054/README.md",
+      "line": 137,
+      "issue": "Two earlier attempts at tests-before-r1.log were deleted. One failed because Io.Dir.hardLink is unsupported on Windows; the other failed because the shell mangled the compiler path. The README discloses this, and both were harness setup failures, not test results. Deleting raw records still conflicts with the evidence rule to keep failures distinct and prevents an auditor from confirming the stated causes.",
+      "recommendation": "Keep failed attempts as separately named raw logs, such as tests-before-r1-attempt-1.log, instead of deleting them."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/HANDOFF.md",
+      "line": 16,
+      "issue": "The handoff still says FP-0054 is 'Frozen in 005ef1e; isolated worker FP0054R1'. engineering/state.json:667 says 78c8f7d implements revision 1 and awaits review. Neither 78c8f7d nor c6d0ce1 updated the handoff, which repeats review 1's minor finding.",
+      "recommendation": "Record that FP-0054 revision 1 is implemented in 78c8f7d with evidence in c6d0ce1, and give the next action."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0054/CONTRACT.md",
+      "line": null,
+      "issue": "Two literal contract deviations are disclosed, and both are justified. (1) Case 3 passed before the fix, but the contract says cases 1 to 3 must fail before the fix. The old realpath guard already refused the case-variant spelling on this host, and control 4 shows case 3 detects a guard without identities. (2) Linux uses statx instead of fstat because the pinned std has no Linux fstat. statx dev_major, dev_minor, and ino are the fstat st_dev and st_ino values.",
+      "recommendation": "Record both resolutions in the contract or task record when FP-0054 is accepted, so the frozen text and the accepted behavior agree."
+    },
+    {
+      "severity": "note",
+      "path": "src/lab_main.zig",
+      "line": 187,
+      "issue": "Any NtQueryInformationFile status other than SUCCESS or ACCESS_DENIED becomes '<subject>: Unexpected'. File systems or redirectors that do not implement FileIdInformation (some FAT and exFAT drivers or third-party SMB servers) would make every run --transcript or minimize --out with an existing output path fail as a harness error. The failure is in the safe direction. [INFERENCE: not executed.] In Debug builds unexpectedStatus also prints to stderr. The open/identify failure path and the symbolic-link path have no test; the README discloses the latter at line 144.",
+      "recommendation": "None required. Consider adding a test for the failure detail, for example an existing output path that is a directory, and a POSIX symlink case."
+    },
+    {
+      "severity": "note",
+      "path": "build.zig",
+      "line": 357,
+      "issue": "When any case 5 reader fails, the build skips the removal step, leaving 64 MiB + 1 and 256 MiB + 1 byte files in the cache directory until the next run's `check fresh`. Control 2 shows this happening (README.md:142). Contract case 5 says the step removes each oversized file afterward. That holds on success only.",
+      "recommendation": "Optional: run the removal as part of the next `check fresh`, which already happens, and document that removal is guaranteed only on success. Alternatively, create and remove the files inside one check invocation that runs fairpane-lab itself."
+    },
+    {
+      "severity": "note",
+      "path": "build.zig",
+      "line": 257,
+      "issue": "FP-0054 case 5 still runs `minimize` in a cached WriteFiles directory. A guard regression would overwrite the cached case.json, as control 4 shows in its private cache (mutation-r1.log:865-897), and a later run against the default cache would compare a corrupted copy. The README documents this choice at line 143. It fails in the safe direction.",
+      "recommendation": "Optional: move FP-0054 case 5 onto freshDirectory in a later change."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/policy.json",
+      "line": null,
+      "issue": "tools/selftest.mjs is a policy root, so 78c8f7d changes the policy digest to 70e1709e…/22. The change only adds revision 1 case 6. It weakens no gate, threshold, or exclusion. The reflog also shows a first evidence commit, 0d92950, that was reset and recommitted as c6d0ce1 23 seconds later. Binding is unaffected.",
+      "recommendation": "None. Recorded for the protected-policy audit."
+    }
+  ],
+  "commands_run": []
+}

@@ -649,7 +649,7 @@
       ]
     },
     "FP-0054": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0054R1, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0054/README.md",
@@ -661,13 +661,15 @@
         "engineering/evidence/FP-0054/raw/mutation-r1.log",
         "engineering/evidence/FP-0054/raw/r1-integration-tests.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0054/reviews/review-2-accept.json",
       "notes": [
         "Created from the minor findings and notes in the FP-0007 and FP-0053 review-1 records.",
         "The frozen contract is engineering/evidence/FP-0054/CONTRACT.md, based on commit ab2e2ed.",
         "Commit 0dda99b implements it with 158 of 158 controller tests and 136 of 136 Zig tests.",
         "fairpane-review rejected 0dda99b and 6f515b3 in reviews/review-1-reject.json because the output guard compares path strings, not file identities. Contract revision 1 is frozen in 005ef1e.",
-        "Commit 78c8f7d implements revision 1 with 181 of 181 controller tests and 177 of 177 Zig tests. Awaiting fairpane-review."
+        "Commit 78c8f7d implements revision 1 with 181 of 181 controller tests and 177 of 177 Zig tests.",
+        "The accepted behavior differs from the frozen text in two disclosed ways: Linux identities come from statx, because the pinned std has no Linux fstat, and case 3 already passed before the fix, because the old guard normalized letter case on this host.",
+        "fairpane-review accepted 78c8f7d and c6d0ce1 with four minor findings; FP-0076 carries the code findings, and docs/AGENT_OPERATIONS.md now states the evidence rules for failed attempts and post-run HEAD records."
       ]
     },
     "FP-0055": {
@@ -816,6 +818,20 @@
       "evidence": [],
       "review": null,
       "notes": ["Created from a note in the FP-0013 review-1 record: Unicode License v3 requires its notice in documentation that ships with binary distributions."]
+    },
+    "FP-0076": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created from the minor findings and notes in engineering/evidence/FP-0054/reviews/review-2-accept.json."]
+    },
+    "FP-0077": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created because the FP-0008 contract draft found that the pinned WPT tree holds no html5lib tokenizer tests and that html5lib-tests differs from the standard on two error conventions."]
     }
   }
 }

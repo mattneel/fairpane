@@ -3161,6 +3161,48 @@
       "read": ["engineering/decisions/0009-release-and-stewardship.md", "LICENSE-DECISION.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0076",
+      "title": "Close the FP-0054 review findings",
+      "workstream": "laboratory",
+      "depends_on": ["FP-0054"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Identify an existing output file without opening it for reading, so a FIFO or an unreadable file cannot block or refuse the guard, and test a FIFO on POSIX hosts.",
+        "Test the guard's failure detail for an output path that cannot be identified, and a symbolic link to the input on POSIX hosts.",
+        "Run FP-0054 case 5 in a fresh directory, and remove the oversized files of revision 1 case 5 even when a reader step fails.",
+        "Keep every FP-0007 and FP-0054 case passing."
+      ],
+      "read": ["engineering/evidence/FP-0054/reviews/review-2-accept.json"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0077",
+      "title": "Import html5lib-tests and run its tokenizer tests",
+      "workstream": "html-dom",
+      "depends_on": ["FP-0008"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Pin html5lib-tests with a license record and inventory, applying the pin through a separate protected change.",
+        "Run every tokenizer test against the HTML tokenizer and report pass, fail, and unsupported counts separately.",
+        "Record each difference between html5lib-tests and the HTML Standard, such as error positions and error order, with the standard's text.",
+        "Run the tree-construction tests once FP-0010 lands, or name the task that runs them."
+      ],
+      "read": ["engineering/evidence/FP-0008/CONTRACT.md", "engineering/decisions/0003-corpus-snapshots.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
   ]
 }

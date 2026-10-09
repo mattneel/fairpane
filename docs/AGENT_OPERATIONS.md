@@ -52,6 +52,10 @@ It includes failing cases and unresolved questions.
 The result names any unmet acceptance criterion.
 A prose claim of success is not an acceptance receipt.
 
+A worker keeps each failed or abandoned attempt as its own raw log, such as `tests-before-attempt-1.log`, and never deletes it.
+Every recorded Zig command names its cache override through `node tools/fairpane.mjs record --env`.
+The integrator records `HEAD` and a status that includes ignored files for every source root before the gates, and records both again after the last run.
+
 ## Durable state
 
 `engineering/plan.json` contains task contracts.
