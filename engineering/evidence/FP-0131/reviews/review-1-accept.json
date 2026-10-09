@@ -1,0 +1,62 @@
+{
+  "verdict": "accept",
+  "summary": "I recommend accepting FP-0131 at 9b47a37, bound in 831161f. I found no blocker or major issue; the four minor findings and four notes below do not block acceptance. Every plan criterion and contract case is met. Criterion 1: the DerivedGeneralCategory row (specs/IMPORT_REQUIREMENTS.md:69) and the S37 purpose (specs/sources.json:306) match the frozen texts. Criterion 2: the narrowed support-item sentence is in the corpus.mjs comment (:259), WPT_RULE (:396), ADR 0003:224, S47 (:386), and the regenerated wpt.json. Outside frozen evidence, no copy of the old 'other such file' wording remains. applicability.log exits 0, and applicability-diff.log shows one changed line, discovery.rule. Criterion 3: the Bidi row (:68), the ContextJ row (:74), and S41 (:338) use 'domain parser ToASCII and domain to Unicode'. Outside evidence, the repository has no 'domain to ASCII'. Criterion 4, lock ordering in tools/corpus.mjs: fetchCorpus resolves the ref (:540), runs beforeLock once (:541), takes withFetchLock (:542), and only then calls selectPins (:543). The same lock covers the format check, replaceSnapshot, and commitSnapshot, and it is released after any error, including the missing-record error. replaceSnapshot no longer takes the lock. repinCorpus wraps the same replaceSnapshot call in withFetchLock after resolveHead (:565), and nothing else calls replaceSnapshot. No path nests locks. ADR 0003:97-98 match the frozen steps, and ADR line 20 is still true. Base failures: tests-before.log records HEAD b8313e6, the base blob IDs, the staging command, node v26.7.0, and exit status 1, with 249 of 253 passing. Cases 1 to 4 fail and case 5 passes, and case 4 fails with calls 0 and fetched, recorded, and snapshot_head all equal to u.first, as the contract predicts. Mutation controls: M1 and M2 each record hash-object before, during, and after (a6ed746b, 206b8bf3 or 4c05748c, a6ed746b), the diff, and a test run exiting 1 with 252 of 253 passing. M1 fails only case 4, with the fetch reinstalling u.first. M2 fails only case 2, and a recorded probe shows the wpt.json equality is also false under M2. Durations: each of the three after runs exits 0 with 253 of 253, and their sums are 6135, 4108, and 3818 ms, so the median of 4108 ms is under 5000 ms. check-after.log exits 0. Protected paths: protected-paths.log shows an empty diff for the protected list and exactly three changed spec files in the wider diff, with fingerprints taken at the base and the after tree. Binding: the integration-binding log has HEAD 9b47a37 and a status including ignored files before and after both gates, and the gate receipts pass. Their source digest, 2ba85a71…, and policy digest, 428949ab…, equal the worker's after-tree fingerprint. corpus-verify test262 and corpus-verify wpt both exit 0 with no missing denominators. Stop rules: no wpt.json field other than discovery.rule changed, and the local snapshots were used without a fetch. source-check.log quotes the UAX #14 'Only Mn or Mc' and 'Any except Mn and Mc' rows and the URL Standard 'domain parser ToASCII' and 'domain to Unicode' sentences, and it finds no 'domain to ASCII'. The median duration is within its limit.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/corpus.mjs",
+      "line": 539,
+      "issue": "The frozen Behavior text says that after taking the lock, 'Only then does it read the pins: from specs/corpora.json when the policy has a revision'. fetchCorpus reads the corpora.json policy before resolveHead and before the lock, and selectPins later only chooses from that copy in memory. The README discloses this as a resolved ambiguity (README.md:87-89), but no contract amendment covers it. In practice the risk is small, because corpora.json is protected and no fetch or repin writes it. Still, a protected change to the revision made during that window would be ignored.",
+      "recommendation": "Read corpusPolicy again inside the withFetchLock callback and pass that copy to selectPins, keeping the early read only for the upstream URL. Alternatively, have the integrator record a contract amendment that accepts the early read."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0131/README.md",
+      "line": 38,
+      "issue": "No log supports the claim that the staged tools/selftest.mjs blob (51ca833…, from tests-before.log) is the after-tree blob. No recorded command lists the after-tree blob of tools/selftest.mjs; protected-paths.log records only write-tree 6caecf3 and the fingerprints.",
+      "recommendation": "Record `git ls-tree 6caecf3 -- tools/selftest.mjs` or `git rev-parse 9b47a37:tools/selftest.mjs` in a new log, or drop the sentence."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0131/raw/integration-binding.log",
+      "line": null,
+      "issue": "corpus-verify test262 and corpus-verify wpt ran at 20:54:02 and 20:54:06, after the binding log's last HEAD and status record at 20:53:49. The HEAD and worktree state during those two runs are therefore inferred from their cwd. The add and remove commands for the temporary worktree out/fp0131-binding are also not recorded, so the README's statement that it was removed (README.md:97) has no command behind it.",
+      "recommendation": "In later bindings, put the corpus-verify runs between recorded HEAD and status records, and record the worktree add and remove commands, with a final `git worktree list`."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0131/raw/source-check.log",
+      "line": 2,
+      "issue": "The URL Standard check fetches the live https://url.spec.whatwg.org/ page, so it does not show that the text matches the cited whatwg/url commit fde3f74f…. It matches the quoted sentences, but the binding to the cited revision is an inference.",
+      "recommendation": "For pinned citations, fetch url.bs at the cited commit, or record the commit that the page reports, along with the match."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 480,
+      "issue": "The contract says the doc comments of fetchCorpus and replaceSnapshot state the lock order and the option. The fetchCorpus comment (:524-531) states both. The replaceSnapshot comment states the order the caller follows but does not mention beforeLock, which is reasonable because replaceSnapshot never receives it.",
+      "recommendation": "No change is needed. Optionally, add one clause saying that only fetchCorpus runs beforeLock before it takes the lock."
+    },
+    {
+      "severity": "note",
+      "path": "tools/corpus.mjs",
+      "line": 544,
+      "issue": "This behavior change is disclosed. A malformed corpora.json revision, or a missing snapshot record, is now reported after `git ls-remote` instead of before it. A fetch with no record also now creates the corpora root before it fails. Case 5 checks that the directory is empty afterward, and the error text is unchanged.",
+      "recommendation": "No change is needed."
+    },
+    {
+      "severity": "note",
+      "path": "tools/selftest.mjs",
+      "line": 1560,
+      "issue": "Case 4 checks that a repin which finishes before the lock is honored. It cannot run a repin between the pin read and the lock, because under the new code there is no such window. That matches integrator decision 1. The plan criterion's phrase 'between the first read and the lock' is therefore met by removing the window, not by detecting a change, as the contract's resolved questions state.",
+      "recommendation": "No change is needed. FP-0131's acceptance record should state that criterion 4 took its first branch."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0131/raw/tests-before.log",
+      "line": 11,
+      "issue": "The base run used the worker's own working tree, with the other files restored to b8313e6, not a separate worktree at the base. The recorded `git status --short` shows only tools/selftest.mjs modified, plus untracked evidence directories, so the base state is still shown.",
+      "recommendation": "No change is needed."
+    }
+  ]
+}

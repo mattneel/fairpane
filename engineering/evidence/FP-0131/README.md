@@ -35,7 +35,7 @@ The worker did not commit or push.
 
 `raw/tests-before.log` records `HEAD`, the base blob IDs, the staging command `git add -- tools/selftest.mjs`, the staged blob ID, `node --version`, and `node tools/fairpane.mjs test`.
 That run exits with status 1: 249 of 253 cases pass, cases 1 to 4 fail, and case 5 passes.
-The staged `tools/selftest.mjs` blob is the after-tree blob.
+The staged `tools/selftest.mjs` blob is the after-tree blob: `raw/review-1-records.log` records `git rev-parse 9b47a37:tools/selftest.mjs`, which prints the staged `51ca83329bcadd8516a7263c32d72a24cdf08520` of `raw/tests-before.log`.
 
 ## Mutation controls
 
@@ -78,6 +78,7 @@ The evidence files that the patch adds later lie outside both path lists, so the
 - The local WPT snapshot and its manifest exist under `C:\src\fairpane\.tools\corpora\wpt`, and nothing was fetched.
 - `raw/source-check.log` retrieves UAX #14 revision 57 and the URL Standard.
   It finds "Only Mn or Mc" and "Any except Mn and Mc" once each in UAX #14, the quoted domain parser ToASCII and domain to Unicode sentences in the URL Standard, `domain-to-ASCII` only in its validation-error table, the validation-error step, the index, and the definition data, and no "domain to ASCII".
+  [INFERENCE] The URL Standard check fetched the live page, not the commit snapshot, so its tie to `fde3f74f` rests on spec review 1, which found the same sentences in a local copy of that snapshot.
 - The median duration is 4108 ms, within the limit.
 
 ## Resolved ambiguities
@@ -95,6 +96,7 @@ The evidence files that the patch adds later lie outside both path lists, so the
 
 Commit `9b47a37` integrates the worker's patch, and the push of `5859de7` carried it to `origin`.
 The integrator recorded the binding after that push, in a temporary detached worktree of `9b47a37` without `.tools`, and removed the worktree afterward.
+The worktree's creation and removal are not recorded; `raw/review-1-records.log` records `git worktree list`, which lists only the main tree.
 `raw/integration-binding.log` records `HEAD` `9b47a3707910a0791ad784da260f81a954faee30` and a status of the whole worktree, ignored files included, before and after both gates.
 The only entries are this log and the new receipts.
 
@@ -106,4 +108,12 @@ The only entries are this log and the new receipts.
 | `corpus-verify wpt` at `9b47a37` | `raw/corpus-verify-wpt.log` | exit 0, no missing denominator |
 
 Both `corpus-verify` runs set `FAIRPANE_CORPORA_DIR` to the local snapshots through the record tool's `--env` option.
+They ran after the binding's last `HEAD` and status records, so the binding does not cover them; their logs record the worktree as their working directory.
 The receipts and logs were copied from the worktree into this tree unchanged.
+
+## Review dispositions
+
+- Review 1's minor on the early read of `specs/corpora.json`: contract amendment 1 accepts the order and states why.
+- Review 1's minors on the after-tree blob, the worktree's removal, the `corpus-verify` timing, and the live URL page: answered above, with `raw/review-1-records.log`.
+- Criterion 4 took its first branch: the fetch removes the window between the pin read and the lock, as integrator decision 1 and the resolved questions state, instead of detecting a change in it.
+- Spec review 1's minor on S41: the URL Standard calls "domain to Unicode" from URL rendering (§4.8), not from host parsing, so S41 and rows 68, 73, and 74 of `specs/IMPORT_REQUIREMENTS.md` attribute it too widely; the contract's non-goals forbid that change here, so a plan change gives it an owner.

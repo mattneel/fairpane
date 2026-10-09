@@ -1,0 +1,27 @@
+{
+  "verdict": "accept",
+  "summary": "I accept FP-0131 at 9b47a37 from the fairpane-spec side. I checked every changed text against its pinned source, and none of them states a quotation, name, or claim that its source contradicts. The UAX #14 sources were the revision 57 copy in out/fp0052-src/tr14.html and source-check.log. LB1's table resolves SA to CM for \"Only Mn or Mc\" and to AL for \"Any except Mn and Mc\" (tr14.html:3838-3849). LB15a and LB15b use \\p{Pi} and \\p{Pf} (:4010, :4016). LB19 uses [QU - \\p{Pi}] and [QU - \\p{Pf}] (:4040-4041). LB30b uses [\\p{Extended_Pictographic}&\\p{Cn}] (:4223). LB19a and LB30 use $EastAsian. LB10 says to treat a remaining CM or ZWJ as U+0041, \"Line_Break=AL, General_Category=Lu, East_Asian_Width=Na\" (:3943-3946). That supports the General_Category row, the Lu and Na clauses of S37, and its LB1 text. The URL Standard copy in out/fp0052-src/url.html is the fde3f74f snapshot, last updated 7 October 2026. In §3.3 it defines \"domain parser ToASCII\" and \"domain to Unicode\" with CheckBidi and CheckJoiners set to true (:1858-1865, :1882-1890). It uses \"domain-to-ASCII\" only as a validation error, and the phrase \"domain to ASCII\" does not appear. For WPT I read sourcefile.py and test262.py at b60c4b3 and checked them against the narrowed clause in WPT_RULE, the corpus.mjs comment, ADR 0003 line 224, S47, and wpt.json. In the elif chain of manifest_items, the name_is_test262 branch gives \"support\" when test262_test_record is None. test262.parse returns None only for a name ending in '_FIXTURE.js' or a source without a /*--- to ---*/ block (test262.py:56-65). The clause therefore matches the source exactly, and applicability-diff.log shows that only discovery.rule changed. ADR 0003 steps 3 and 4 now say the lock is taken before the commit is selected. That matches fetchCorpus (resolveHead, then beforeLock, then withFetchLock, then selectPins at tools/corpus.mjs:540-543). It is also consistent with ADR line 20 and with the fallback pin rule. The findings below are one minor wording imprecision that the contract frozen as-is, plus notes on how the evidence binds to its sources.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "specs/sources.json",
+      "line": 338,
+      "issue": "S41 says \"Host parsing through Unicode ToASCII and ToUnicode\". The IMPORT_REQUIREMENTS rows at lines 68 and 74 tie CheckBidi and CheckJoiners in \"domain to Unicode\" to URL host parsing. At the fde3f74f pin, the host parser reaches UTS #46 only through \"domain parser\" and \"domain parser ToASCII\" (url.html:1789-1865). \"domain to Unicode\" (§3.3, url.html:1882) is called only by §4.8 URL rendering (url.html:5274) and is mentioned in the round-trip note (url.html:1901). The new algorithm names are correct, but attributing ToUnicode to host parsing is wider than the source supports. The contract froze this text, and its non-goals forbid other URL citation changes in this task.",
+      "recommendation": "In a follow-up policy-text task, attribute domain parser ToASCII to host parsing and domain to Unicode to URL rendering (§4.8) in S41 and in rows 68 and 74. Also review the unchanged idna/IdnaMappingTable.txt row at line 73, which says that the host parser uses ToUnicode."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0131/raw/source-check.log",
+      "line": null,
+      "issue": "The source check fetched the live https://url.spec.whatwg.org/ and tr14-57.html, but it did not record which commit or bytes it read. The Stop-rule claim therefore binds to the fde3f74f pin only indirectly. The local copy out/fp0052-src/url.html shows the commit-snapshot link fde3f74f063341a28d437216f75735b8b40128f5 (:415), and its quoted text matches the log.",
+      "recommendation": "In future source checks, fetch the commit snapshot (https://url.spec.whatwg.org/commit-snapshots/<sha>/) or record the commit-snapshot link and a SHA-256 of the retrieved bytes."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0131/CONTRACT.md",
+      "line": null,
+      "issue": "The Sources section cites tools/manifest/sourcefile.py at b60c4b3 lines 428-431 for name_is_test262 and 1155-1162 for the support branch. In the raw file at that pin, name_is_test262 spans lines 429-433, and its return expression is on line 433. The test262 branch spans lines 1157-1163. The cited ranges are slightly off, and the first one leaves out the predicate. No changed normative text carries these line numbers, so the drift has no effect on acceptance. The out/fp0052-src/sourcefile.py copy is not the pinned revision: name_is_test262 is at :439 and the branch at :1168 there.",
+      "recommendation": "Cite pinned line ranges from the file at the pin. The fix is to cite lines 429-433 and 1157-1163 in any later record that reuses these citations. Do not cite the out/ copy for b60c4b3."
+    }
+  ]
+}

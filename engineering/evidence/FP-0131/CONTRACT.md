@@ -178,3 +178,11 @@ The required reviewers are `fairpane-review` and `fairpane-spec`.
 
 - The fetch reads its pins under the lock, so it removes the race instead of detecting it. A fetch that failed on a changed record would add an error path that protects nothing.
 - The WPT clause wording follows the plan criterion and FP-0052 spec review 1, so no pre-freeze confirmation is needed. `fairpane-spec` reviews the result.
+
+## Amendments
+
+1. Review 1 (`reviews/review-1-accept.json`) found that `fetchCorpus` reads `specs/corpora.json` before `git ls-remote` and the lock, while "Pin record under the lock" says that only after the lock does it read the pins.
+   The worker disclosed the order as a resolved ambiguity: the upstream URL comes from that file, and the pins are selected from that read or from the snapshot record only under the lock.
+   The integrator accepts that order and narrows the sentence to the snapshot record: under the lock, the fetch reads `specs/snapshots/<id>.json` and selects the pins.
+   `specs/corpora.json` is a protected policy file that changes only in a reviewed `policy:` commit, and no fetch or repin writes it.
+   The race that this task removes is a repin that rewrites the snapshot record, and case 4 still covers it.
