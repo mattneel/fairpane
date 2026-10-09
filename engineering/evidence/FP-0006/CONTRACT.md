@@ -133,3 +133,17 @@ The integrator also records an uncached `zig build test --summary all` run, beca
 ## Review
 
 `fairpane-review` reviews the integrated change.
+
+## Revision 1
+
+Revision 1 records clarifications that the implementation adopted after the contract froze.
+The reviewer judges each one against the base text and the exact test cases.
+
+- Document operations take effect during the call: creation, destruction, and load.
+  Only request answers, which are responses, rejections, and cancellations, queue until a step applies them.
+  Cases 3, 9, and 12 expect a synchronous announcement or refusal from a load, so the base sentence "Host operations only queue input" covers request answers only.
+- A load of a loading document replaces its outstanding request, so it does not count against the request bound.
+- An empty event queue returns `FP_STATUS_OK` with the event kind `FP_EVENT_NONE`.
+- Exhaustion of process-wide identifiers, owner identities, or table handles returns `FP_STATUS_LIMIT_EXCEEDED` through the C API.
+- Destroying a loading document can return `FP_STATUS_OUT_OF_MEMORY`, because it reserves its cancellation event first.
+- The URL in a request event is readable only while the request is live; after the request ends, the event carries no URL.

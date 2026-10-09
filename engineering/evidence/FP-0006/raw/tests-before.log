@@ -1,0 +1,130 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all"]
+test
++- run test
+   +- compile test debug native 38 errors
+src\c_api.zig:46:21: error: use of undeclared identifier 'EngineOptions'
+const test_options: EngineOptions = .{
+                    ^~~~~~~~~~~~~
+src\c_api.zig:52:47: error: use of undeclared identifier 'Engine'
+fn createTestEngine(gpa: std.mem.Allocator) !*Engine {
+                                              ^~~~~~
+src\c_api.zig:58:27: error: use of undeclared identifier 'Engine'
+fn documentState(engine: *Engine, document: u64) !u32 {
+                          ^~~~~~
+src\c_api.zig:64:22: error: use of undeclared identifier 'Engine'
+fn stepOnce(engine: *Engine, budget: u32) !StepOutcome {
+                     ^~~~~~
+src\c_api.zig:70:21: error: use of undeclared identifier 'Engine'
+fn loadUrl(engine: *Engine, document: u64, url: []const u8) !u64 {
+                    ^~~~~~
+src\c_api.zig:77:19: error: use of undeclared identifier 'Engine'
+    var handle: ?*Engine = null;
+                  ^~~~~~
+src\c_api.zig:99:14: error: use of undeclared identifier 'Engine'
+    engine: *Engine,
+             ^~~~~~
+src\c_api.zig:134:41: error: use of undeclared identifier 'testing'
+    const engine = try createTestEngine(testing.allocator);
+                                        ^~~~~~~
+src\c_api.zig:158:18: error: use of undeclared identifier 'testing'
+    var failing: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+                 ^~~~~~~
+src\c_api.zig:232:36: error: use of undeclared identifier 'testing'
+    const a = try createTestEngine(testing.allocator);
+                                   ^~~~~~~
+src\engine.zig:8:21: error: use of undeclared identifier 'Options'
+const test_options: Options = .{ .max_outstanding_requests = 8, .max_response_body_bytes = 1024 };
+                    ^~~~~~~
+src\engine.zig:10:21: error: use of undeclared identifier 'DocumentId'
+fn issued(document: DocumentId, request: RequestId, url: ?[]const u8) Event {
+                    ^~~~~~~~~~
+src\engine.zig:14:24: error: use of undeclared identifier 'DocumentId'
+fn cancelled(document: DocumentId, request: RequestId) Event {
+                       ^~~~~~~~~~
+src\engine.zig:18:22: error: use of undeclared identifier 'DocumentId'
+fn changed(document: DocumentId, request: RequestId, state: DocumentState, reason: ?RejectReason) Event {
+                     ^~~~~~~~~~
+src\engine.zig:29:29: error: use of undeclared identifier 'Engine'
+fn expectNextEvent(engine: *Engine, expected: Event) !void {
+                            ^~~~~~
+src\engine.zig:33:27: error: use of undeclared identifier 'Engine'
+fn expectNoEvent(engine: *Engine) !void {
+                          ^~~~~~
+src\engine.zig:37:25: error: use of undeclared identifier 'Engine'
+fn expectState(engine: *Engine, document: DocumentId, state: DocumentState) !void {
+                        ^~~~~~
+src\engine.zig:42:25: error: use of undeclared identifier 'Engine'
+fn fingerprint(engine: *Engine) u64 {
+                        ^~~~~~
+src\engine.zig:68:34: error: use of undeclared identifier 'Engine'
+fn freeEventSlots(engine: *const Engine) usize {
+                                 ^~~~~~
+src\engine.zig:73:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, test_options);
+                       ^~~~~~
+src\engine.zig:95:19: error: use of undeclared identifier 'Engine'
+    const a = try Engine.create(testing.allocator, test_options);
+                  ^~~~~~
+src\engine.zig:115:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, test_options);
+                       ^~~~~~
+src\engine.zig:152:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, test_options);
+                       ^~~~~~
+src\engine.zig:183:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, test_options);
+                       ^~~~~~
+src\engine.zig:207:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, test_options);
+                       ^~~~~~
+src\engine.zig:230:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, test_options);
+                       ^~~~~~
+src\engine.zig:254:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, test_options);
+                       ^~~~~~
+src\engine.zig:282:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, test_options);
+                       ^~~~~~
+src\engine.zig:310:36: error: use of undeclared identifier 'Engine'
+fn destroyLoadingDocument(engine: *Engine) !void {
+                                   ^~~~~~
+src\engine.zig:335:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(counting.allocator(), test_options);
+                       ^~~~~~
+src\engine.zig:349:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(counting.allocator(), test_options);
+                       ^~~~~~
+src\engine.zig:373:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, .{ .max_outstanding_requests = 2, .max_response_body_bytes = 4 });
+                       ^~~~~~
+src\engine.zig:404:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, test_options);
+                       ^~~~~~
+src\engine.zig:439:14: error: use of undeclared identifier 'Engine'
+    engine: *Engine,
+             ^~~~~~
+src\engine.zig:462:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(testing.allocator, test_options);
+                       ^~~~~~
+src\engine.zig:485:21: error: use of undeclared identifier 'Engine'
+fn guarded(engine: *Engine, comptime operation: anytype, args: anytype) !OperationPayload(operation) {
+                    ^~~~~~
+src\engine.zig:495:28: error: use of undeclared identifier 'Engine'
+fn fillEventQueue(engine: *Engine, document: DocumentId) !void {
+                           ^~~~~~
+src\engine.zig:503:24: error: use of undeclared identifier 'Engine'
+    const engine = try Engine.create(gpa, .{ .max_outstanding_requests = 4, .max_response_body_bytes = 64 });
+                       ^~~~~~
+error: 38 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir .zig-cache --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+test transitive failure
++- run test transitive failure
+   +- compile test debug native 38 errors
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x857ba80a test --summary all
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tde2de9f5e\\m","started_at":"2026-10-09T01:41:01.313Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":4695,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

@@ -25,11 +25,288 @@
           "unit": "bytes"
         }
       ]
+    },
+    {
+      "name": "fp_engine_create",
+      "return": "uint32_t",
+      "thread": "The calling thread owns the new engine.",
+      "parameters": [
+        {
+          "name": "options",
+          "type": "const fp_engine_options *",
+          "ownership": "borrowed readable storage for the call",
+          "nullable": false
+        },
+        {
+          "name": "out_engine",
+          "type": "fp_engine **",
+          "ownership": "borrowed writable aligned storage for the call; receives an engine that the caller releases with fp_engine_destroy",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "fp_engine_destroy",
+      "return": "uint32_t",
+      "thread": "owner",
+      "effect": "Releases the engine, its documents, outstanding requests, queued answers, undrained events, URLs, and bodies.",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "fp_engine *",
+          "ownership": "consumed on success",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "fp_document_create",
+      "return": "uint32_t",
+      "thread": "owner",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "fp_engine *",
+          "nullable": false
+        },
+        {
+          "name": "out_document",
+          "type": "uint64_t *",
+          "ownership": "borrowed writable aligned storage for the call",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "fp_document_destroy",
+      "return": "uint32_t",
+      "thread": "owner",
+      "effect": "Releases the document, cancels and announces its outstanding request, and discards that request's queued answer.",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "fp_engine *",
+          "nullable": false
+        },
+        {
+          "name": "document",
+          "type": "uint64_t",
+          "identifier": "document"
+        }
+      ]
+    },
+    {
+      "name": "fp_document_get",
+      "return": "uint32_t",
+      "thread": "owner",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "fp_engine *",
+          "nullable": false
+        },
+        {
+          "name": "document",
+          "type": "uint64_t",
+          "identifier": "document"
+        },
+        {
+          "name": "out",
+          "type": "fp_document_info *",
+          "ownership": "borrowed writable aligned storage for the call",
+          "nullable": false
+        },
+        {
+          "name": "out_size",
+          "type": "size_t",
+          "unit": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "fp_document_load",
+      "return": "uint32_t",
+      "thread": "owner",
+      "effect": "Issues a version 1 resource request, moves the document to loading, and cancels and announces any earlier outstanding request.",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "fp_engine *",
+          "nullable": false
+        },
+        {
+          "name": "document",
+          "type": "uint64_t",
+          "identifier": "document"
+        },
+        {
+          "name": "url",
+          "type": "const uint8_t *",
+          "ownership": "borrowed readable bytes for the call; the engine copies them",
+          "nullable": false
+        },
+        {
+          "name": "url_len",
+          "type": "size_t",
+          "unit": "bytes"
+        },
+        {
+          "name": "out_request",
+          "type": "uint64_t *",
+          "ownership": "borrowed writable aligned storage for the call",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "fp_request_respond",
+      "return": "uint32_t",
+      "thread": "owner",
+      "effect": "Queues a response for the next step.",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "fp_engine *",
+          "nullable": false
+        },
+        {
+          "name": "response",
+          "type": "const fp_response *",
+          "ownership": "borrowed readable storage for the call; the engine copies the body",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "fp_request_reject",
+      "return": "uint32_t",
+      "thread": "owner",
+      "effect": "Queues a rejection for the next step.",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "fp_engine *",
+          "nullable": false
+        },
+        {
+          "name": "request",
+          "type": "uint64_t",
+          "identifier": "request"
+        },
+        {
+          "name": "reason",
+          "type": "uint32_t",
+          "constants": "reject_reasons"
+        }
+      ]
+    },
+    {
+      "name": "fp_request_cancel",
+      "return": "uint32_t",
+      "thread": "owner",
+      "effect": "Queues the host's withdrawal of a request for the next step.",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "fp_engine *",
+          "nullable": false
+        },
+        {
+          "name": "request",
+          "type": "uint64_t",
+          "identifier": "request"
+        }
+      ]
+    },
+    {
+      "name": "fp_engine_step",
+      "return": "uint32_t",
+      "thread": "owner",
+      "effect": "Applies up to budget queued answers in arrival order. The budget is an engine scheduling boundary only and creates no JavaScript task boundary.",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "fp_engine *",
+          "nullable": false
+        },
+        {
+          "name": "budget",
+          "type": "uint32_t",
+          "unit": "queued inputs"
+        },
+        {
+          "name": "out",
+          "type": "fp_step_outcome *",
+          "ownership": "borrowed writable aligned storage for the call",
+          "nullable": false
+        },
+        {
+          "name": "out_size",
+          "type": "size_t",
+          "unit": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "fp_engine_next_event",
+      "return": "uint32_t",
+      "thread": "owner",
+      "effect": "Removes the oldest event, or reports FP_EVENT_NONE when no event is ready.",
+      "parameters": [
+        {
+          "name": "engine",
+          "type": "fp_engine *",
+          "nullable": false
+        },
+        {
+          "name": "out",
+          "type": "fp_event *",
+          "ownership": "borrowed writable aligned storage for the call",
+          "nullable": false
+        },
+        {
+          "name": "out_size",
+          "type": "size_t",
+          "unit": "bytes"
+        }
+      ]
     }
   ],
   "errors": {
     "0": "success",
-    "1": "invalid argument"
+    "1": "invalid argument",
+    "2": "unknown identifier",
+    "3": "invalid state",
+    "4": "unsupported version",
+    "5": "limit exceeded",
+    "6": "out of memory",
+    "7": "wrong thread"
+  },
+  "constants": {
+    "document_states": {
+      "FP_DOCUMENT_EMPTY": 1,
+      "FP_DOCUMENT_LOADING": 2,
+      "FP_DOCUMENT_LOADED": 3,
+      "FP_DOCUMENT_FAILED": 4
+    },
+    "request_kinds": {
+      "FP_REQUEST_RESOURCE": 1
+    },
+    "request_versions": {
+      "FP_RESOURCE_REQUEST_VERSION": 1
+    },
+    "reject_reasons": {
+      "FP_REJECT_UNSUPPORTED_VERSION": 1
+    },
+    "event_kinds": {
+      "FP_EVENT_NONE": 0,
+      "FP_EVENT_REQUEST_ISSUED": 1,
+      "FP_EVENT_REQUEST_CANCELLED": 2,
+      "FP_EVENT_DOCUMENT_STATE_CHANGED": 3
+    },
+    "deadlines": {
+      "FP_DEADLINE_NONE": "0xFFFFFFFFFFFFFFFF"
+    }
   },
   "structs": {
     "fp_capabilities": [
@@ -45,7 +322,133 @@
         "feature_bits",
         "uint64_t"
       ]
+    ],
+    "fp_engine_options": [
+      [
+        "struct_size",
+        "uint32_t"
+      ],
+      [
+        "max_outstanding_requests",
+        "uint32_t"
+      ],
+      [
+        "max_response_body_bytes",
+        "uint64_t"
+      ]
+    ],
+    "fp_document_info": [
+      [
+        "struct_size",
+        "uint32_t"
+      ],
+      [
+        "state",
+        "uint32_t"
+      ],
+      [
+        "body",
+        "const uint8_t *"
+      ],
+      [
+        "body_len",
+        "size_t"
+      ]
+    ],
+    "fp_response": [
+      [
+        "struct_size",
+        "uint32_t"
+      ],
+      [
+        "version",
+        "uint32_t"
+      ],
+      [
+        "request_id",
+        "uint64_t"
+      ],
+      [
+        "body",
+        "const uint8_t *"
+      ],
+      [
+        "body_len",
+        "size_t"
+      ]
+    ],
+    "fp_step_outcome": [
+      [
+        "struct_size",
+        "uint32_t"
+      ],
+      [
+        "work_remaining",
+        "uint32_t"
+      ],
+      [
+        "applied",
+        "uint64_t"
+      ],
+      [
+        "events_ready",
+        "uint64_t"
+      ],
+      [
+        "next_deadline",
+        "uint64_t"
+      ]
+    ],
+    "fp_event": [
+      [
+        "struct_size",
+        "uint32_t"
+      ],
+      [
+        "kind",
+        "uint32_t"
+      ],
+      [
+        "document_id",
+        "uint64_t"
+      ],
+      [
+        "request_id",
+        "uint64_t"
+      ],
+      [
+        "request_kind",
+        "uint32_t"
+      ],
+      [
+        "request_version",
+        "uint32_t"
+      ],
+      [
+        "document_state",
+        "uint32_t"
+      ],
+      [
+        "reject_reason",
+        "uint32_t"
+      ],
+      [
+        "url",
+        "const uint8_t *"
+      ],
+      [
+        "url_len",
+        "size_t"
+      ]
     ]
+  },
+  "opaque_types": {
+    "fp_engine": "An engine that belongs to the thread that created it."
+  },
+  "lifetimes": {
+    "document_info.body": "Readable until the document's next load or its destruction.",
+    "event.url": "Readable until the request ends; null when the request ended before the event was drained.",
+    "borrowed_inputs": "The engine copies URL and body bytes during the call and keeps no pointer to caller storage."
   },
   "note": "The header is handwritten in this bootstrap. Schema generation is an explicit later task."
 }

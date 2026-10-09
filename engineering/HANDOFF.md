@@ -6,7 +6,7 @@ Tasks `FP-0001`, `FP-0004`, `FP-0005`, and `FP-0028` are accepted.
 Task `FP-0003` is implemented again after contract revision 1, and it awaits `fairpane-review` and `fairpane-spec` verdicts on the rework.
 The WPT record now has an explicit denominator of 76600 tests at commit `b60c4b34`, from the wpt.fyi manifest bound to the pinned tree.
 Task `FP-0047` closes the minor test gaps that the accepting `FP-0005` review found.
-Task `FP-0006` is active in the isolated `fairpane-core` worker `FP0006Lifecycle`.
+Task `FP-0006` is implemented with 57 passing Zig tests and the C smoke test, and it awaits `fairpane-review`.
 Task `FP-0002` is implemented in the root session and awaits `fairpane-review`; `release-check` still fails closed.
 The candidate Zig library contains a capability probe, lossless owned web strings, and checked generational handles.
 No renderer, JavaScript engine, or native browser window exists yet.
@@ -30,7 +30,7 @@ ADR 0007 makes the frontend language independent of the renderer and reserves th
 2. Correct the WPT `test262` attribution that `engineering/evidence/FP-0003/reviews/spec-review-2-reject.json` found, then request `fairpane-spec` again; `fairpane-review` already accepted the rework.
 3. Apply the `specs/corpora.json` pins in a separate commit only after both FP-0003 reviewers accept.
 4. Request `fairpane-review` on `FP-0002`, implemented in commit `e2eaace`.
-5. Integrate the `FP0006Lifecycle` patch, run its gates, and request `fairpane-review`.
+5. Record the `fairpane-review` verdict on `FP-0006`.
 6. Start the ready tasks `FP-0031`, `FP-0033`, and `FP-0047`.
 7. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
 

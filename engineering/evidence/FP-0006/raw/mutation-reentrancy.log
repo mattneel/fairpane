@@ -1,0 +1,667 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all"]
+test
++- run test 47 pass, 10 fail (57 total); 21 leaks
+error: 'c_api.test.FP-0006 case 16: injected allocation failure through the C entry points returns FP_STATUS_OUT_OF_MEMORY with unchanged state' failed:
+       expected 6, found 0
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff625c93be3 in expectEqualInner__func_943 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff625d0eaf4 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:479:5: 0x7ff625d0eb48 in test.FP-0006 case 16: injected allocation failure through the C entry points returns FP_STATUS_OUT_OF_MEMORY with unchanged state (test_zcu.obj)
+           try testing.expectEqual(out_of_memory, fp_engine_step(engine, 8, &outcome, @sizeOf(StepOutcome)));
+           ^
+       [SafeAllocator] (err): leaked [addr: 1650da8, len: 26 (0x1a) align: 1] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\mem\Allocator.zig:481:40: 0x7ff625b49aeb in dupe__func_96 (test_zcu.obj)
+           const new_buf = try allocator.alloc(T, m.len);
+                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:301:38: 0x7ff625cdcaa1 in load (test_zcu.obj)
+               const url_copy = try gpa.dupe(u8, url);
+                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:234:32: 0x7ff625d0d3a7 in fp_document_load (test_zcu.obj)
+           const request = engine.load(@fromBackingInt(document), bytes[0..url_len]) catch |err| return statusOf(err);
+                                      ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:334:49: 0x7ff625d0abcf in loadUrl (test_zcu.obj)
+           try testing.expectEqual(ok, fp_document_load(engine, document, url.ptr, url.len, &request));
+                                                       ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:474:24: 0x7ff625d0e951 in test.FP-0006 case 16: injected allocation failure through the C entry points returns FP_STATUS_OUT_OF_MEMORY with unchanged state (test_zcu.obj)
+               _ = try loadUrl(engine, spare, "https://example.test/spare");
+                              ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650d10, len: 16 (0x10) align: 1] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\mem\Allocator.zig:481:40: 0x7ff625b49aeb in dupe__func_96 (test_zcu.obj)
+           const new_buf = try allocator.alloc(T, m.len);
+                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:353:46: 0x7ff625cdbc4c in respond (test_zcu.obj)
+               const body_copy = try engine.gpa.dupe(u8, body);
+                                                    ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:249:19: 0x7ff625d0cdec in fp_request_respond (test_zcu.obj)
+           engine.respond(@fromBackingInt(input.request_id), input.version, body) catch |err| return statusOf(err);
+                         ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:464:51: 0x7ff625d0e6c4 in test.FP-0006 case 16: injected allocation failure through the C entry points returns FP_STATUS_OUT_OF_MEMORY with unchanged state (test_zcu.obj)
+           try testing.expectEqual(ok, fp_request_respond(engine, &response));
+                                                         ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff625c5980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff625c5980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650be8, len: 160 (0xa0) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:87:49: 0x7ff625cda64a in ensureTotalCapacityPrecise (test_zcu.obj)
+                       const new_buffer = try gpa.alloc(T, new_capacity);
+                                                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:59:52: 0x7ff625cda3f6 in ensureTotalCapacity (test_zcu.obj)
+                   return deque.ensureTotalCapacityPrecise(gpa, std.ArrayList(T).growCapacity(new_capacity));
+                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:109:45: 0x7ff625cda178 in ensureUnusedCapacity (test_zcu.obj)
+                   return deque.ensureTotalCapacity(gpa, try addOrOom(deque.len, additional_count));
+                                                   ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:352:47: 0x7ff625cdbbdf in respond (test_zcu.obj)
+               try engine.inputs.ensureUnusedCapacity(engine.gpa, 1);
+                                                     ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:249:19: 0x7ff625d0cdec in fp_request_respond (test_zcu.obj)
+           engine.respond(@fromBackingInt(input.request_id), input.version, body) catch |err| return statusOf(err);
+                         ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:464:51: 0x7ff625d0e6c4 in test.FP-0006 case 16: injected allocation failure through the C entry points returns FP_STATUS_OUT_OF_MEMORY with unchanged state (test_zcu.obj)
+           try testing.expectEqual(ok, fp_request_respond(engine, &response));
+                                                         ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650960, len: 512 (0x200) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\array_list.zig:1375:56: 0x7ff625cddfc0 in ensureTotalCapacityPrecise (test_zcu.obj)
+                       const new_memory = try gpa.alignedAlloc(T, alignment, new_capacity);
+                                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\handles.zig:156:54: 0x7ff625cddd22 in reserveSlot (test_zcu.obj)
+                   try self.slots.ensureTotalCapacityPrecise(gpa, @min(grown, slot_limit));
+                                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\handles.zig:145:33: 0x7ff625cdda43 in insert (test_zcu.obj)
+                   try self.reserveSlot(gpa);
+                                       ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:304:54: 0x7ff625cdcc50 in load (test_zcu.obj)
+               const request_handle = engine.requests.insert(gpa, .{
+                                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:234:32: 0x7ff625d0d3a7 in fp_document_load (test_zcu.obj)
+           const request = engine.load(@fromBackingInt(document), bytes[0..url_len]) catch |err| return statusOf(err);
+                                      ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:334:49: 0x7ff625d0abcf in loadUrl (test_zcu.obj)
+           try testing.expectEqual(ok, fp_document_load(engine, document, url.ptr, url.len, &request));
+                                                       ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:449:26: 0x7ff625d0e32b in test.FP-0006 case 16: injected allocation failure through the C entry points returns FP_STATUS_OUT_OF_MEMORY with unchanged state (test_zcu.obj)
+           request = try loadUrl(engine, document, url);
+                                ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650750, len: 224 (0xe0) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1480:53: 0x7ff625cdf810 in allocate (test_zcu.obj)
+                   const slice = try allocator.alignedAlloc(u8, max_align, total_size);
+                                                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1437:29: 0x7ff625cdf120 in grow (test_zcu.obj)
+                   try map.allocate(allocator, new_cap);
+                                   ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1298:30: 0x7ff625cdef98 in growIfNeeded (test_zcu.obj)
+                       try self.grow(allocator, capacityForSize(self.load() + new_count), ctx);
+                                    ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:752:38: 0x7ff625cdee73 in ensureTotalCapacityContext (test_zcu.obj)
+                       try self.growIfNeeded(allocator, new_size - self.size, ctx);
+                                            ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:761:46: 0x7ff625cdecfe in ensureUnusedCapacityContext (test_zcu.obj)
+                   return ensureTotalCapacityContext(self, allocator, self.count() + additional_size, ctx);
+                                                    ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:758:47: 0x7ff625cde8da in ensureUnusedCapacity (test_zcu.obj)
+                   return ensureUnusedCapacityContext(self, allocator, additional_size, undefined);
+                                                     ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:300:52: 0x7ff625cdca0b in load (test_zcu.obj)
+               try engine.request_ids.ensureUnusedCapacity(gpa, 1);
+                                                          ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 16505d8, len: 240 (0xf0) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:87:49: 0x7ff625cd4a2a in ensureTotalCapacityPrecise (test_zcu.obj)
+                       const new_buffer = try gpa.alloc(T, new_capacity);
+                                                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:59:52: 0x7ff625cd4796 in ensureTotalCapacity (test_zcu.obj)
+                   return deque.ensureTotalCapacityPrecise(gpa, std.ArrayList(T).growCapacity(new_capacity));
+                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:109:45: 0x7ff625cd46d8 in ensureUnusedCapacity (test_zcu.obj)
+                   return deque.ensureTotalCapacity(gpa, try addOrOom(deque.len, additional_count));
+                                                   ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:299:47: 0x7ff625cdc960 in load (test_zcu.obj)
+               try engine.events.ensureUnusedCapacity(gpa, 2);
+                                                     ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:234:32: 0x7ff625d0d3a7 in fp_document_load (test_zcu.obj)
+           const request = engine.load(@fromBackingInt(document), bytes[0..url_len]) catch |err| return statusOf(err);
+                                      ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:334:49: 0x7ff625d0abcf in loadUrl (test_zcu.obj)
+           try testing.expectEqual(ok, fp_document_load(engine, document, url.ptr, url.len, &request));
+                                                       ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:449:26: 0x7ff625d0e32b in test.FP-0006 case 16: injected allocation failure through the C entry points returns FP_STATUS_OUT_OF_MEMORY with unchanged state (test_zcu.obj)
+           request = try loadUrl(engine, document, url);
+                                ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650310, len: 576 (0x240) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\array_list.zig:1375:56: 0x7ff625ce1f90 in ensureTotalCapacityPrecise (test_zcu.obj)
+                       const new_memory = try gpa.alignedAlloc(T, alignment, new_capacity);
+                                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\handles.zig:156:54: 0x7ff625ce1cf2 in reserveSlot (test_zcu.obj)
+                   try self.slots.ensureTotalCapacityPrecise(gpa, @min(grown, slot_limit));
+                                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\handles.zig:145:33: 0x7ff625ce1a1e in insert (test_zcu.obj)
+                   try self.reserveSlot(gpa);
+                                       ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:255:47: 0x7ff625ce0f19 in createDocument (test_zcu.obj)
+               const handle = engine.documents.insert(engine.gpa, .{ .id = id, .state = .empty, .request = null, .body = no_bytes }) catch |err| return switch (err) {
+                                                     ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:205:37: 0x7ff625d0d541 in fp_document_create (test_zcu.obj)
+           const id = engine.createDocument() catch |err| return statusOf(err);
+                                           ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:438:51: 0x7ff625d0deb4 in test.FP-0006 case 16: injected allocation failure through the C entry points returns FP_STATUS_OUT_OF_MEMORY with unchanged state (test_zcu.obj)
+           try testing.expectEqual(ok, fp_document_create(engine, &document));
+                                                         ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 16501a8, len: 224 (0xe0) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1480:53: 0x7ff625ce50b0 in allocate (test_zcu.obj)
+                   const slice = try allocator.alignedAlloc(u8, max_align, total_size);
+                                                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1437:29: 0x7ff625ce2db0 in grow (test_zcu.obj)
+                   try map.allocate(allocator, new_cap);
+                                   ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1298:30: 0x7ff625ce27e8 in growIfNeeded (test_zcu.obj)
+                       try self.grow(allocator, capacityForSize(self.load() + new_count), ctx);
+                                    ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:752:38: 0x7ff625ce26c3 in ensureTotalCapacityContext (test_zcu.obj)
+                       try self.growIfNeeded(allocator, new_size - self.size, ctx);
+                                            ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:761:46: 0x7ff625ce231e in ensureUnusedCapacityContext (test_zcu.obj)
+                   return ensureTotalCapacityContext(self, allocator, self.count() + additional_size, ctx);
+                                                    ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:758:47: 0x7ff625ce212a in ensureUnusedCapacity (test_zcu.obj)
+                   return ensureUnusedCapacityContext(self, allocator, additional_size, undefined);
+                                                     ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:253:53: 0x7ff625ce0df6 in createDocument (test_zcu.obj)
+               try engine.document_ids.ensureUnusedCapacity(engine.gpa, 1);
+                                                           ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650010, len: 272 (0x110) align: 8] allocated at: 
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:210:38: 0x7ff625cd11e7 in create (test_zcu.obj)
+               const engine = try gpa.create(Engine);
+                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:127:41: 0x7ff625d0c676 in createEngine (test_zcu.obj)
+           const created = native.Engine.create(gpa, .{
+                                               ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:316:45: 0x7ff625d0aa75 in createTestEngine (test_zcu.obj)
+           try testing.expectEqual(ok, createEngine(gpa, &test_options, &handle));
+                                                   ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\c_api.zig:429:40: 0x7ff625d0dc60 in test.FP-0006 case 16: injected allocation failure through the C entry points returns FP_STATUS_OUT_OF_MEMORY with unchanged state (test_zcu.obj)
+           const engine = try createTestEngine(gpa);
+                                              ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff625c5980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff625c5980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       (additional stack frames may have been skipped...)
+error: 'engine.test.FP-0006 case 3: a load announces a version 1 resource request whose URL stays readable until the request ends' failed:
+       ====== expected this output: =========
+       https://example.test/case-3␃
+       
+       ======== instead found this: =========
+       UUUUUUUUUUUUUUUUUUUUUUUUUUU␃
+       
+       ======================================
+       First difference occurs on line 1:
+       expected:
+       https://example.test/case-3
+       ^ ('\x68')
+       found:
+       UUUUUUUUUUUUUUUUUUUUUUUUUUU
+       ^ ('\x55')
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:696:9: 0x7ff625ccf3db in expectEqualStrings (test_zcu.obj)
+               return error.TestExpectedEqual;
+               ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:635:5: 0x7ff625d09408 in test.FP-0006 case 3: a load announces a version 1 resource request whose URL stays readable until the request ends (test_zcu.obj)
+           try testing.expectEqualStrings("https://example.test/case-3", url);
+           ^
+error: 'engine.test.FP-0006 case 4: a response and a step load exactly that body and end the request' failed:
+       expected 1, found 0
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff625c82d2a in expectEqualInner__func_829 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff625d07f54 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:655:5: 0x7ff625d07fc0 in test.FP-0006 case 4: a response and a step load exactly that body and end the request (test_zcu.obj)
+           try testing.expectEqual(1, outcome.applied);
+           ^
+error: 'engine.test.FP-0006 case 5: a queued response leaves the document loading until a step applies it' failed:
+       expected .loading, found .loaded
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff625ccf4a3 in expectEqualInner__func_1186 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff625d07457 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:683:5: 0x7ff625d074cc in test.FP-0006 case 5: a queued response leaves the document loading until a step applies it (test_zcu.obj)
+           try testing.expectEqual(DocumentState.loading, view.state);
+           ^
+error: 'engine.test.FP-0006 case 6: a version 2 response is unsupported and keeps the request live for a version 1 response' failed:
+       expected 1, found 0
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff625c82d2a in expectEqualInner__func_829 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff625d06e8f in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:715:5: 0x7ff625d06f01 in test.FP-0006 case 6: a version 2 response is unsupported and keeps the request live for a version 1 response (test_zcu.obj)
+           try testing.expectEqual(1, outcome.applied);
+           ^
+error: 'engine.test.FP-0006 case 9: a second load cancels the first request and issues a second one' failed:
+       expected .request_cancelled, found .document_state_changed
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff625cfe46c in expectEqualInner__func_1397 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff625cfe519 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:900:13: 0x7ff625cfe56a in expectEqualDeepInner__func_1374 (test_zcu.obj)
+                   try expectEqual(expectedTag, actualTag);
+                   ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:771: 0x7ff625cfb08b in expectEqualDeep (test_zcu.obj)
+           return expectEqualDeepInner(T, expected, actual);
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:913:21: 0x7ff625cfb0b6 in expectEqualDeepInner__func_1368 (test_zcu.obj)
+                           try expectEqualDeep(expected_payload, actual_payload);
+                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:771: 0x7ff625cf9cf3 in expectEqualDeep (test_zcu.obj)
+           return expectEqualDeepInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:522:5: 0x7ff625cf9d24 in expectNextEvent (test_zcu.obj)
+           try testing.expectEqualDeep(@as(?Event, expected), try engine.nextEvent());
+           ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:788:5: 0x7ff625d04bc1 in test.FP-0006 case 9: a second load cancels the first request and issues a second one (test_zcu.obj)
+           try expectNextEvent(engine, cancelled(document, first));
+           ^
+error: 'engine.test.FP-0006 case 10: destroying a loading document with a queued response cancels it, applies nothing, and leaks nothing' failed:
+       expected 1, found 0
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff625c82d2a in expectEqualInner__func_829 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff625cfa0ae in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:806:5: 0x7ff625cfa0f1 in destroyLoadingDocument (test_zcu.obj)
+           try testing.expectEqual(1, engine.inputs.len);
+           ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:831:5: 0x7ff625cfa87d in test.FP-0006 case 10: destroying a loading document with a queued response cancels it, applies nothing, and leaks nothing (test_zcu.obj)
+           try destroyLoadingDocument(engine);
+           ^
+error: 'engine.test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing' failed:
+       expected 4, found 3
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff625c82d2a in expectEqualInner__func_829 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff625cf99e4 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:856:5: 0x7ff625cf9a39 in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+           try testing.expectEqual(4, engine.requests.count());
+           ^
+       [SafeAllocator] (err): leaked [addr: 1651378, len: 960 (0x3c0) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:87:49: 0x7ff625cd4a2a in ensureTotalCapacityPrecise (test_zcu.obj)
+                       const new_buffer = try gpa.alloc(T, new_capacity);
+                                                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:59:52: 0x7ff625cd4796 in ensureTotalCapacity (test_zcu.obj)
+                   return deque.ensureTotalCapacityPrecise(gpa, std.ArrayList(T).growCapacity(new_capacity));
+                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:109:45: 0x7ff625cd46d8 in ensureUnusedCapacity (test_zcu.obj)
+                   return deque.ensureTotalCapacity(gpa, try addOrOom(deque.len, additional_count));
+                                                   ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:355:47: 0x7ff625cdbce3 in respond (test_zcu.obj)
+               try engine.events.ensureUnusedCapacity(engine.gpa, 1);
+                                                     ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:852:23: 0x7ff625cf98a3 in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+           try engine.respond(requests[1], 1, "queued body");
+                             ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 16512e0, len: 11 (0xb) align: 1] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\mem\Allocator.zig:481:40: 0x7ff625b49aeb in dupe__func_96 (test_zcu.obj)
+           const new_buf = try allocator.alloc(T, m.len);
+                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:353:46: 0x7ff625cdbc4c in respond (test_zcu.obj)
+               const body_copy = try engine.gpa.dupe(u8, body);
+                                                    ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:852:23: 0x7ff625cf98a3 in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+           try engine.respond(requests[1], 1, "queued body");
+                             ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff625c5980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff625c5980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       ???:?:?: 0x7ff862a1cd86 in ??? (KERNEL32.DLL)
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1651248, len: 11 (0xb) align: 1] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\mem\Allocator.zig:481:40: 0x7ff625b49aeb in dupe__func_96 (test_zcu.obj)
+           const new_buf = try allocator.alloc(T, m.len);
+                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:353:46: 0x7ff625cdbc4c in respond (test_zcu.obj)
+               const body_copy = try engine.gpa.dupe(u8, body);
+                                                    ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:849:23: 0x7ff625cf9673 in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+           try engine.respond(requests[0], 1, "loaded body");
+                             ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff625c5980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff625c5980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       ???:?:?: 0x7ff862a1cd86 in ??? (KERNEL32.DLL)
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1651120, len: 160 (0xa0) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:87:49: 0x7ff625cda64a in ensureTotalCapacityPrecise (test_zcu.obj)
+                       const new_buffer = try gpa.alloc(T, new_capacity);
+                                                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:59:52: 0x7ff625cda3f6 in ensureTotalCapacity (test_zcu.obj)
+                   return deque.ensureTotalCapacityPrecise(gpa, std.ArrayList(T).growCapacity(new_capacity));
+                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\deque.zig:109:45: 0x7ff625cda178 in ensureUnusedCapacity (test_zcu.obj)
+                   return deque.ensureTotalCapacity(gpa, try addOrOom(deque.len, additional_count));
+                                                   ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:352:47: 0x7ff625cdbbdf in respond (test_zcu.obj)
+               try engine.inputs.ensureUnusedCapacity(engine.gpa, 1);
+                                                     ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:849:23: 0x7ff625cf9673 in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+           try engine.respond(requests[0], 1, "loaded body");
+                             ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1651078, len: 28 (0x1c) align: 1] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\mem\Allocator.zig:481:40: 0x7ff625b49aeb in dupe__func_96 (test_zcu.obj)
+           const new_buf = try allocator.alloc(T, m.len);
+                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:301:38: 0x7ff625cdcaa1 in load (test_zcu.obj)
+               const url_copy = try gpa.dupe(u8, url);
+                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:847:36: 0x7ff625cf975c in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+               request.* = try engine.load(document.*, "https://example.test/case-11");
+                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff625c5980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff625c5980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       ???:?:?: 0x7ff862a1cd86 in ??? (KERNEL32.DLL)
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650fd0, len: 28 (0x1c) align: 1] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\mem\Allocator.zig:481:40: 0x7ff625b49aeb in dupe__func_96 (test_zcu.obj)
+           const new_buf = try allocator.alloc(T, m.len);
+                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:301:38: 0x7ff625cdcaa1 in load (test_zcu.obj)
+               const url_copy = try gpa.dupe(u8, url);
+                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:847:36: 0x7ff625cf975c in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+               request.* = try engine.load(document.*, "https://example.test/case-11");
+                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff625c5980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff625c5980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       ???:?:?: 0x7ff862a1cd86 in ??? (KERNEL32.DLL)
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650f28, len: 28 (0x1c) align: 1] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\mem\Allocator.zig:481:40: 0x7ff625b49aeb in dupe__func_96 (test_zcu.obj)
+           const new_buf = try allocator.alloc(T, m.len);
+                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:301:38: 0x7ff625cdcaa1 in load (test_zcu.obj)
+               const url_copy = try gpa.dupe(u8, url);
+                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:847:36: 0x7ff625cf975c in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+               request.* = try engine.load(document.*, "https://example.test/case-11");
+                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff625c5980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff625c5980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       ???:?:?: 0x7ff862a1cd86 in ??? (KERNEL32.DLL)
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650960, len: 512 (0x200) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\array_list.zig:1375:56: 0x7ff625cddfc0 in ensureTotalCapacityPrecise (test_zcu.obj)
+                       const new_memory = try gpa.alignedAlloc(T, alignment, new_capacity);
+                                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\handles.zig:156:54: 0x7ff625cddd22 in reserveSlot (test_zcu.obj)
+                   try self.slots.ensureTotalCapacityPrecise(gpa, @min(grown, slot_limit));
+                                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\handles.zig:145:33: 0x7ff625cdda43 in insert (test_zcu.obj)
+                   try self.reserveSlot(gpa);
+                                       ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:304:54: 0x7ff625cdcc50 in load (test_zcu.obj)
+               const request_handle = engine.requests.insert(gpa, .{
+                                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:847:36: 0x7ff625cf975c in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+               request.* = try engine.load(document.*, "https://example.test/case-11");
+                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650750, len: 224 (0xe0) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1480:53: 0x7ff625cdf810 in allocate (test_zcu.obj)
+                   const slice = try allocator.alignedAlloc(u8, max_align, total_size);
+                                                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1437:29: 0x7ff625cdf120 in grow (test_zcu.obj)
+                   try map.allocate(allocator, new_cap);
+                                   ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1298:30: 0x7ff625cdef98 in growIfNeeded (test_zcu.obj)
+                       try self.grow(allocator, capacityForSize(self.load() + new_count), ctx);
+                                    ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:752:38: 0x7ff625cdee73 in ensureTotalCapacityContext (test_zcu.obj)
+                       try self.growIfNeeded(allocator, new_size - self.size, ctx);
+                                            ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:761:46: 0x7ff625cdecfe in ensureUnusedCapacityContext (test_zcu.obj)
+                   return ensureTotalCapacityContext(self, allocator, self.count() + additional_size, ctx);
+                                                    ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:758:47: 0x7ff625cde8da in ensureUnusedCapacity (test_zcu.obj)
+                   return ensureUnusedCapacityContext(self, allocator, additional_size, undefined);
+                                                     ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:300:52: 0x7ff625cdca0b in load (test_zcu.obj)
+               try engine.request_ids.ensureUnusedCapacity(gpa, 1);
+                                                          ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650310, len: 576 (0x240) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\array_list.zig:1375:56: 0x7ff625ce1f90 in ensureTotalCapacityPrecise (test_zcu.obj)
+                       const new_memory = try gpa.alignedAlloc(T, alignment, new_capacity);
+                                                              ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\handles.zig:156:54: 0x7ff625ce1cf2 in reserveSlot (test_zcu.obj)
+                   try self.slots.ensureTotalCapacityPrecise(gpa, @min(grown, slot_limit));
+                                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\handles.zig:145:33: 0x7ff625ce1a1e in insert (test_zcu.obj)
+                   try self.reserveSlot(gpa);
+                                       ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:255:47: 0x7ff625ce0f19 in createDocument (test_zcu.obj)
+               const handle = engine.documents.insert(engine.gpa, .{ .id = id, .state = .empty, .request = null, .body = no_bytes }) catch |err| return switch (err) {
+                                                     ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:846:47: 0x7ff625cf96fa in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+               document.* = try engine.createDocument();
+                                                     ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 16501a8, len: 224 (0xe0) align: 8] allocated at: 
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1480:53: 0x7ff625ce50b0 in allocate (test_zcu.obj)
+                   const slice = try allocator.alignedAlloc(u8, max_align, total_size);
+                                                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1437:29: 0x7ff625ce2db0 in grow (test_zcu.obj)
+                   try map.allocate(allocator, new_cap);
+                                   ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:1298:30: 0x7ff625ce27e8 in growIfNeeded (test_zcu.obj)
+                       try self.grow(allocator, capacityForSize(self.load() + new_count), ctx);
+                                    ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:752:38: 0x7ff625ce26c3 in ensureTotalCapacityContext (test_zcu.obj)
+                       try self.growIfNeeded(allocator, new_size - self.size, ctx);
+                                            ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:761:46: 0x7ff625ce231e in ensureUnusedCapacityContext (test_zcu.obj)
+                   return ensureTotalCapacityContext(self, allocator, self.count() + additional_size, ctx);
+                                                    ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\hash_map.zig:758:47: 0x7ff625ce212a in ensureUnusedCapacity (test_zcu.obj)
+                   return ensureUnusedCapacityContext(self, allocator, additional_size, undefined);
+                                                     ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:253:53: 0x7ff625ce0df6 in createDocument (test_zcu.obj)
+               try engine.document_ids.ensureUnusedCapacity(engine.gpa, 1);
+                                                           ^
+       (additional stack frames may have been skipped...)
+       
+       [SafeAllocator] (err): leaked [addr: 1650010, len: 272 (0x110) align: 8] allocated at: 
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:210:38: 0x7ff625cd11e7 in create (test_zcu.obj)
+               const engine = try gpa.create(Engine);
+                                            ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:841:37: 0x7ff625cf94e8 in test.FP-0006 case 11: destroying an engine with outstanding requests, queued answers, and undrained events leaks nothing (test_zcu.obj)
+           const engine = try Engine.create(counting.allocator(), test_options);
+                                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff625c5b26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff625c5b89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff625c5980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff625c5980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       ???:?:?: 0x7ff862a1cd86 in ??? (KERNEL32.DLL)
+       ???:?:?: 0x7ff863d6caeb in ??? (ntdll.dll)
+       (additional stack frames may have been skipped...)
+error: 'engine.test.FP-0006 case 13: a budget of two applies two of three queued responses in arrival order' failed:
+       expected 2, found 0
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff625c82d2a in expectEqualInner__func_829 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff625cf7517 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:910:5: 0x7ff625cf7583 in test.FP-0006 case 13: a budget of two applies two of three queued responses in arrival order (test_zcu.obj)
+           try testing.expectEqual(2, first.applied);
+           ^
+error: 'engine.test.FP-0006 case 15: every induced allocation failure returns OutOfMemory, changes nothing, and leaks nothing' failed:
+       expected 0, found 8
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff625c82d2a in expectEqualInner__func_829 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff625cd0242 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:1013:5: 0x7ff625cd02be in lifecycleScenario (test_zcu.obj)
+           try testing.expectEqual(0, freeEventSlots(engine));
+           ^
+       C:\Users\requi\.omp\wt\tde2de9f5e\m\src\engine.zig:1033:5: 0x7ff625cd0fb6 in test.FP-0006 case 15: every induced allocation failure returns OutOfMemory, changes nothing, and leaks nothing (test_zcu.obj)
+           try lifecycleScenario(probe.allocator());
+           ^
+failed command: ".\\.zig-cache\\o\\94944a7306f811d124506461fe24bc21\\test.exe" "--cache-dir=.\\.zig-cache" --seed=0x7cb01429 --listen=-
+
+Build Summary: 1/3 steps succeeded (1 failed); 47/57 tests passed (10 failed)
+test transitive failure
++- run test 47 pass, 10 fail (57 total); 21 leaks
+   +- compile test debug native success 2s MaxRSS:358M
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x7cb01429 test --summary all
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tde2de9f5e\\m","started_at":"2026-10-09T01:46:04.303Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3121,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
