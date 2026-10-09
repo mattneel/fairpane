@@ -1,0 +1,34 @@
+{
+  "verdict": "approve",
+  "summary": "Plan review 13: I approve local commit 4e65397 ('plan: name ADR 0012 for the bytecode tasks and route FP-0111 notes'). No criterion is weakened, and every new criterion is testable and owned by a task whose paths and reviewers fit. Two minor problems remain: the renumbering gives ADR 0012 to two different decisions, and FP-0072's note names it as the owner of ::slotted().\n\nHow I checked: I read the working-tree plan.json and state.json with jq, engineering/decisions/, the FP-0128 check (out/drafts/FP-0128-check.json), and engineering/evidence/FP-0111/reviews/security-review-1-accept.json. I could not diff the commit; that the working tree equals 4e65397 is your statement and [INFERENCE] here. I ran nothing.\n\n**ADR renumbering.**\n- FP-0083 criterion 8 (plan.json:3493), FP-0128 criterion 4 (4273), and FP-0129 criterion 5 (4299) now all name architecture decision record 0012. That follows the check's major finding (FP-0128-check.json:15-17). engineering/decisions/0011-concurrent-controller-tests.md exists, and no file uses 0012.\n- The three tasks agree with each other, and FP-0128 still carries FP-0083's criterion 8 word for word.\n- But FP-0085 criterion 6 (3540) still says 'Record the outcome in architecture decision record 0012', which now names a different decision (finding 1).\n\n**Coverage and ClassDef validation cost.** FP-0112 and FP-0113 each gain criterion 6: charge the validation of every lookup, subtable, Coverage, and ClassDef that a run opens to the run's work limit, or open each at most once per run, and test a font that shares one large Coverage many times.\n- This follows FP-0111 security review 1's first note (security-review-1-accept.json:9-10) and its recommendation word for word in substance.\n- It extends each task's existing work-limit criterion, so it strengthens rather than weakens.\n- Both tasks require fairpane-security, may write src and tests, and now read that review.\n\n**NULL list offsets.** FP-0058 criterion 7 now also compares the reading of a NULL ScriptList, FeatureList, or LookupList offset as an empty list, which follows the review's second note (:16-17). FP-0058 already depends on FP-0111.\n\n**State notes.**\n- FP-0112's note follows the review's third note on the stale extension type.\n- FP-0072's note follows the FP-0127 re-check on src/css/css.zig row 30, but it routes ::slotted() to FP-0072 (finding 2).",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3540,
+      "issue": "Before 4e65397, the bytecode ADR was 0011 (FP-0083, FP-0128, FP-0129) and FP-0085's adaptive-dispatch outcome was 0012. The commit moves the bytecode ADR to 0012, because 0011 is taken, but leaves FP-0085 criterion 6 at 0012 ('Record the outcome in architecture decision record 0012, and make no speed claim beyond the recorded samples'). Two different decisions now claim ADR 0012. FP-0085 would either write a second 0012 file or put its measured outcome into the bytecode and dispatch ADR.",
+      "recommendation": "In the same kind of plan commit, change FP-0085 criterion 6 to 'architecture decision record 0013'. Alternatively, have it name 'a new architecture decision record' and let its contract assign the next free number, so a later ADR cannot collide again."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/state.json",
+      "line": null,
+      "issue": "FP-0072's new note says its contract narrows src/css/css.zig row 30 'so that :host, :host(), :host-context(), and ::slotted() name this task'. Since plan review 10, FP-0072 owns only :host, :host(), and :host-context() (criterion 5). Its criterion 6 reports ::slotted() as unsupported 'with its owner task', and FP-0026's note holds ::slotted() matching until a slot-assignment task exists. A css.zig row that names FP-0072 as the owner of ::slotted() contradicts both, and would make FP-0072's unsupported report cite itself.",
+      "recommendation": "Reword the note so that the css.zig row names FP-0072 for :host, :host(), and :host-context(), and names FP-0026's frontier decomposition, or the future slot-assignment task, for ::slotted()."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/state.json",
+      "line": null,
+      "issue": "The FP-0128 check recommended adding notes to FP-0083 and FP-0129 that record the renumbering from 0011 to 0012 and its reason (FP-0128-check.json:17). This commit adds state notes only to FP-0112 and FP-0072, so the reason for 0012 appears only in the commit message.",
+      "recommendation": "Add a one-line note to FP-0083, FP-0128, and FP-0129: 'ADR 0012, not 0011, because ADR 0011 records concurrent controller tests (plan commit 4e65397).'"
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0111/reviews/security-review-1-accept.json",
+      "line": 30,
+      "issue": "Two of the review's six notes still have no owner:\n- Coverage.index and its iterator cast to u16 on the assumption that glyph_count <= 65536. A hand-built Coverage could panic, or in ReleaseFast cause undefined behavior.\n- No coverage-guided fuzz target or ReleaseSafe run covers parseLayout, the opening calls, or selectLookups.\nThe font_expectations pre-read digest note is already FP-0078 criterion 1.",
+      "recommendation": "Add the Coverage handle note to FP-0112's state note beside the extension-type note. Route the fuzz target to the laboratory task that owns fuzzing, or to FP-0026's note, together with the FP-0119 items that FP-0121's note leaves to its contract."
+    }
+  ]
+}
