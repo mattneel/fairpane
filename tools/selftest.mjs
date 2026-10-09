@@ -431,6 +431,152 @@ test('Only Zig and C ABI gates receive the repository-local compiler cache', () 
   assert.equal(gateEnvironment(dir, { kind: 'controller-check' }), undefined);
   assert.equal(gateEnvironment(dir, { kind: 'controller-test' }), undefined);
 });
+// FP-0031: failure paths behind command records. The `fileSystem` seam replaces single node:fs operations.
+function trackingFs(overrides = {}) {
+  const opened = new Map(), closed = new Set();
+  const fileSystem = {
+    openSync: (file, ...rest) => { const fd = fs.openSync(file, ...rest); opened.set(fd, file); return fd; },
+    closeSync: fd => { closed.add(fd); fs.closeSync(fd); },
+    ...overrides,
+  };
+  const logClosed = logPath => [...opened].some(([fd, file]) => file === logPath && closed.has(fd));
+  return { fileSystem, logClosed };
+}
+const lastResult = logPath => JSON.parse(fs.readFileSync(logPath, 'utf8').split('\n').filter(l => l.startsWith('RESULT ')).at(-1).slice(7));
+const failOutputOpen = (fileSystem, message) => {
+  const open = fileSystem.openSync;
+  fileSystem.openSync = (file, ...rest) => { if (path.basename(file) === 'output.log') throw new Error(message); return open(file, ...rest); };
+};
+test('A capture-start failure writes a RESULT line, closes the log, and returns an error result', async () => {
+  const dir = temp(), logPath = path.join(dir, 'log');
+  const t = trackingFs({ mkdtempSync: () => { throw new Error('forced capture start failure'); } });
+  const r = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath, fileSystem: t.fileSystem });
+  assert.equal(r.exit_code, null); assert.equal(r.error, 'Output capture failed: forced capture start failure');
+  assert.equal(lastResult(logPath).error, r.error); assert.ok(t.logClosed(logPath), 'The log descriptor stayed open.');
+  const tmp = await withPrivateTemp(async () => {
+    const u = trackingFs(), second = path.join(dir, 'second.log');
+    failOutputOpen(u.fileSystem, 'forced capture open failure');
+    const s = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: second, fileSystem: u.fileSystem });
+    assert.equal(s.exit_code, null); assert.equal(s.error, 'Output capture failed: forced capture open failure');
+    assert.equal(lastResult(second).error, s.error); assert.ok(u.logClosed(second), 'The log descriptor stayed open.');
+  });
+  assert.deepEqual(fs.readdirSync(tmp), []);
+});
+test('A failed RESULT write returns an error result instead of throwing', async () => {
+  const failResult = (fd, data, ...rest) => {
+    if (String(data).startsWith('RESULT ')) throw new Error('forced result write failure');
+    return fs.writeSync(fd, data, ...rest);
+  };
+  // The unresolved-name and capture-start paths write RESULT synchronously, so a throw there reaches this test.
+  const gate = gateFixture(), t = trackingFs({ writeSync: failResult });
+  const missing = await recordCommand(gate, 'out/evidence/result.log', 'fairpane-absent-tool', [], { fileSystem: t.fileSystem });
+  assert.match(missing.error, /not on PATH: fairpane-absent-tool Log write failed: forced result write failure$/);
+  assert.ok(t.logClosed(path.join(gate, 'out/evidence/result.log')), 'The log descriptor stayed open.');
+  const dir = temp(), early = path.join(dir, 'early.log');
+  const u = trackingFs({ writeSync: failResult, mkdtempSync: () => { throw new Error('forced capture start failure'); } });
+  const e = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: early, fileSystem: u.fileSystem });
+  assert.equal(e.error, 'Output capture failed: forced capture start failure Log write failed: forced result write failure');
+  assert.ok(u.logClosed(early), 'The log descriptor stayed open.');
+  const logPath = path.join(dir, 'log'), v = trackingFs({ writeSync: failResult });
+  const r = await runProcess(process.execPath, ['-e', 'console.log("before-result")'], { cwd: dir, logPath, fileSystem: v.fileSystem });
+  assert.equal(r.exit_code, 0); assert.equal(r.error, 'Log write failed: forced result write failure');
+  assert.ok(v.logClosed(logPath), 'The log descriptor stayed open.');
+  const text = fs.readFileSync(logPath, 'utf8');
+  assert.match(text, /before-result/); assert.doesNotMatch(text, /^RESULT /m);
+});
+test('A spawn error and a capture error both remain in the result', async () => {
+  const dir = temp(), missing = path.join(dir, 'absent-executable');
+  const plain = await runProcess(missing, [], { cwd: dir, logPath: path.join(dir, 'plain.log') });
+  assert.equal(plain.exit_code, null); assert.ok(plain.error);
+  const logPath = path.join(dir, 'log');
+  const fileSystem = { readSync: () => { throw new Error('forced capture read failure'); } };
+  const r = await runProcess(missing, [], { cwd: dir, logPath, fileSystem });
+  assert.equal(r.exit_code, null); assert.equal(r.error, `${plain.error} Output capture failed: forced capture read failure`);
+  assert.equal(lastResult(logPath).error, r.error);
+});
+test('runGate writes nothing when its evidence directory fails validation', async () => {
+  const listing = dir => fs.readdirSync(dir, { recursive: true }).map(String).sort();
+  for (const evidenceDir of ['tools', 'out/evidence/../tools', 'engineering/evidence-other']) {
+    const dir = gateFixture(), before = listing(dir);
+    await assert.rejects(() => runGate(dir, 'fixture', { evidenceDir }), /outside an allowed directory|traversal/);
+    assert.deepEqual(listing(dir), before, evidenceDir);
+  }
+});
+test('A short write to the log produces an error result', async () => {
+  const shortOn = kind => ({ writeSync: (fd, data, offset = 0, length = data.length - offset) => {
+    const text = Buffer.from(data).subarray(offset, offset + length).toString();
+    const k = text.startsWith('\nCOMMAND ') ? 'COMMAND' : text.startsWith('RESULT ') ? 'RESULT' : 'output';
+    return fs.writeSync(fd, data, offset, k === kind ? length - 1 : length);
+  } });
+  for (const kind of ['COMMAND', 'output', 'RESULT']) {
+    const dir = temp();
+    const r = await runProcess(process.execPath, ['-e', 'console.log("short-write-output")'],
+      { cwd: dir, logPath: path.join(dir, 'log'), fileSystem: shortOn(kind) });
+    assert.match(r.error ?? '', /Short write: \d+ of \d+ bytes/, kind);
+  }
+  const dir = gateFixture();
+  const missing = await recordCommand(dir, 'out/evidence/short.log', 'fairpane-absent-tool', [], { fileSystem: shortOn('RESULT') });
+  assert.match(missing.error, /not on PATH/); assert.match(missing.error, /Log write failed: Short write: \d+ of \d+ bytes/);
+});
+test('A failed capture-directory removal appears in the command record', async () => {
+  const dir = temp(), logPath = path.join(dir, 'log');
+  const tmp = await withPrivateTemp(async () => {
+    const fileSystem = { rmSync: () => { throw new Error('forced removal failure'); } };
+    const r = await runProcess(process.execPath, ['-e', 'console.log("kept")'], { cwd: dir, logPath, fileSystem });
+    assert.equal(r.exit_code, 0); assert.equal(r.error, 'Capture directory removal failed: forced removal failure');
+    assert.equal(lastResult(logPath).error, r.error);
+    const second = path.join(dir, 'second.log'), t = trackingFs({ rmSync: fileSystem.rmSync });
+    failOutputOpen(t.fileSystem, 'forced capture open failure');
+    const s = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: second, fileSystem: t.fileSystem });
+    assert.equal(s.error, 'Output capture failed: forced capture open failure Capture directory removal failed: forced removal failure');
+    assert.equal(lastResult(second).error, s.error);
+  });
+  assert.equal(fs.readdirSync(tmp).length, 2, 'Both capture directories survive, as their records state.');
+});
+test('started_at in every command record is a canonical UTC ISO 8601 timestamp', async () => {
+  const dir = gateFixture(), log = 'out/evidence/times.log', logPath = path.join(dir, log);
+  put(dir, 'blocker', 'a regular file');
+  const records = [
+    await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath }),
+    await runProcess(path.join(dir, 'absent-executable'), [], { cwd: dir, logPath }),
+    await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: path.join(dir, 'blocker', 'log') }),
+    await recordCommand(dir, log, process.execPath, ['-e', '']),
+    await recordCommand(dir, log, 'fairpane-absent-tool', []),
+    ...(await runGate(dir, 'fixture')).commands,
+  ];
+  const logged = fs.readFileSync(logPath, 'utf8').split('\n').filter(l => l.startsWith('RESULT ')).map(l => JSON.parse(l.slice(7)));
+  assert.equal(logged.length, 4);
+  for (const r of [...records, ...logged]) {
+    assert.match(r.started_at, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, JSON.stringify(r));
+    assert.equal(new Date(r.started_at).toISOString(), r.started_at);
+  }
+});
+test('The mutation control runs an unmutated baseline first and records each killed test name and message', async () => {
+  const { runControl } = await import(pathToFileURL(path.join(root, 'engineering/evidence/FP-0028/controls/harness.mjs')).href);
+  const tap = results => ['TAP version 13', ...results.flatMap(([ok, name, message], i) => ok ? [`ok ${i + 1} - ${name}`]
+    : [`not ok ${i + 1} - ${name}`, '  ---', `  message: ${JSON.stringify(message)}`, '  ...'])].join('\n');
+  const mutants = [['kills first', 'A1', 'A2', /first target/], ['misses second', 'B1', 'B2', /second target/],
+    ['absent text', 'C1', 'C2', /first target/], ['ambiguous target', 'B1', 'B3', /target/]];
+  const calls = [], lines = [];
+  const r = runControl({ source: 'A1 B1', mutants, log: l => lines.push(l), runSuite: text => {
+    calls.push(text);
+    return { status: text === null ? 0 : 1, stdout: tap([[!text?.includes('A2'), 'first target', 'first failed'], [true, 'second target']]) };
+  } });
+  assert.deepEqual(calls, [null, 'A2 B1', 'A1 B2']);
+  assert.deepEqual(r, { baseline: true, killed: 1, survived: 3 });
+  const out = lines.join('\n');
+  assert.match(out, /^BASELINE exit 0: 2 tests, 0 failing$/m);
+  assert.match(out, /^KILLED kills first: not ok 1 - first target\n {2}message: "first failed"$/m);
+  assert.match(out, /^SURVIVED misses second: ok 2 - second target$/m);
+  assert.match(out, /^SETUP-FAILED absent text:/m); assert.match(out, /^SETUP-FAILED ambiguous target:/m);
+  const again = [], failedLines = [];
+  const failed = runControl({ source: 'A1 B1', mutants, log: l => failedLines.push(l), runSuite: text => {
+    again.push(text);
+    return { status: 1, stdout: tap([[false, 'first target', 'broken baseline'], [true, 'second target']]) };
+  } });
+  assert.deepEqual(again, [null]); assert.deepEqual(failed, { baseline: false, killed: 0, survived: mutants.length });
+  assert.match(failedLines.join('\n'), /^BASELINE-FAILED not ok 1 - first target\n {2}message: "broken baseline"$/m);
+});
 // Corpus snapshots. Fixtures use Git plumbing with no user or system configuration.
 const gitConfigFile = path.join(temp(), 'empty-gitconfig');
 fs.writeFileSync(gitConfigFile, '');

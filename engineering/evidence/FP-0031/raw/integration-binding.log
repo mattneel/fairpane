@@ -1,0 +1,34 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+cd4f25c1aa8463af1ad4d3007f99998c9e293221
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:16:22.855Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--cached","--stat"]
+ engineering/evidence/FP-0028/README.md             |   3 +
+ engineering/evidence/FP-0028/controls/harness.mjs  |  45 +++++++
+ engineering/evidence/FP-0028/controls/mutants.mjs  |  95 +++++++++++---
+ engineering/evidence/FP-0031/README.md             |  54 ++++++++
+ .../evidence/FP-0031/raw/mutation-control.log      |  32 +++++
+ engineering/evidence/FP-0031/raw/tests-after.log   | 122 +++++++++++++++++
+ engineering/evidence/FP-0031/raw/tests-before.log  | 140 ++++++++++++++++++++
+ engineering/evidence/FP-0031/raw/tests-bun.log     | 122 +++++++++++++++++
+ tools/README.md                                    |   2 +
+ tools/lib.mjs                                      |  94 ++++++++-----
+ tools/selftest.mjs                                 | 146 +++++++++++++++++++++
+ 11 files changed, 800 insertions(+), 55 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--cached","--stat"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:16:22.919Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--porcelain","--untracked-files=all"]
+M  engineering/evidence/FP-0028/README.md
+A  engineering/evidence/FP-0028/controls/harness.mjs
+M  engineering/evidence/FP-0028/controls/mutants.mjs
+A  engineering/evidence/FP-0031/README.md
+A  engineering/evidence/FP-0031/raw/mutation-control.log
+A  engineering/evidence/FP-0031/raw/tests-after.log
+A  engineering/evidence/FP-0031/raw/tests-before.log
+A  engineering/evidence/FP-0031/raw/tests-bun.log
+M  tools/README.md
+M  tools/lib.mjs
+M  tools/selftest.mjs
+?? engineering/evidence/FP-0031/raw/integration-binding.log
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--porcelain","--untracked-files=all"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:16:22.990Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}

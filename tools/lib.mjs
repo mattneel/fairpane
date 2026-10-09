@@ -282,33 +282,59 @@ export function validateReceipt(root, relative, { current = true } = {}) {
   }
   return { result: 'pass', gate: r.gate_id, trust: r.trust, current_source: current };
 }
-function copyFileToDescriptor(file, fd) {
-  const source = fs.openSync(file, 'r'), buffer = Buffer.alloc(128 * 1024);
+/** The node:fs operations behind a command record. Tests replace single members through `fileSystem` to force failures. */
+const RECORD_FS = Object.freeze({ mkdirSync: fs.mkdirSync, openSync: fs.openSync, writeSync: fs.writeSync, readSync: fs.readSync,
+  closeSync: fs.closeSync, mkdtempSync: fs.mkdtempSync, rmSync: fs.rmSync });
+const recordFs = overrides => overrides ? { ...RECORD_FS, ...overrides } : RECORD_FS;
+/** Write a byte range to a log in one call. A short count is an error, never a silent truncation. */
+function writeLog(io, fd, data, length = data.length) {
+  const written = io.writeSync(fd, data, 0, length);
+  if (written !== length) throw new Error(`Short write: ${written} of ${length} bytes.`);
+}
+function copyFileToDescriptor(io, file, fd) {
+  const source = io.openSync(file, 'r'), buffer = Buffer.alloc(128 * 1024);
   try {
     for (;;) {
-      const count = fs.readSync(source, buffer, 0, buffer.length, null);
+      const count = io.readSync(source, buffer, 0, buffer.length, null);
       if (!count) break;
-      let offset = 0;
-      while (offset < count) offset += fs.writeSync(fd, buffer, offset, count - offset);
+      writeLog(io, fd, buffer, count);
     }
-  } finally { fs.closeSync(source); }
+  } finally { io.closeSync(source); }
 }
-function closeQuietly(fd) { try { fs.closeSync(fd); } catch { /* The descriptor is already unusable. */ } }
-function removeQuietly(dir) { try { fs.rmSync(dir, { recursive: true, force: true }); } catch { /* A surviving descendant can still hold the file. */ } }
+function closeQuietly(io, fd) { try { io.closeSync(fd); } catch { /* The descriptor is already unusable. */ } }
+/** Remove a private capture directory. A surviving directory still holds child output, so the record names the failure. */
+function removeCapture(io, dir, errors) {
+  try { io.rmSync(dir, { recursive: true, force: true }); }
+  catch (e) { errors.push(`Capture directory removal failed: ${e.message}`); }
+}
 function commandRecord(executable, args, cwd, started) {
   return { executable, arguments: args, cwd: path.resolve(cwd ?? process.cwd()), started_at: new Date(started).toISOString() };
 }
+/** Open a log for appending and write its COMMAND line. On failure, close the log and rethrow. */
+function openLog(io, logPath, executable, args) {
+  let fd;
+  try {
+    io.mkdirSync(path.dirname(logPath), { recursive: true });
+    fd = io.openSync(logPath, 'a');
+    writeLog(io, fd, Buffer.from(`\nCOMMAND ${JSON.stringify([executable, ...args])}\n`));
+    return fd;
+  } catch (e) {
+    if (fd !== undefined) closeQuietly(io, fd);
+    throw e;
+  }
+}
 /** Append the RESULT line and close the log. A failed write becomes part of the result instead of an exception. */
-function finishRecord(fd, result) {
-  try { fs.writeSync(fd, `RESULT ${JSON.stringify(result)}\n`); }
+function finishRecord(io, fd, result) {
+  try { writeLog(io, fd, Buffer.from(`RESULT ${JSON.stringify(result)}\n`)); }
   catch (e) { result.error = [result.error, `Log write failed: ${e.message}`].filter(Boolean).join(' '); }
-  finally { closeQuietly(fd); }
+  finally { closeQuietly(io, fd); }
   return result;
 }
 /** Execute without a shell. OS sandboxing and disk quotas remain separate. Never rejects after argument validation. */
-export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env, copyOutput = copyFileToDescriptor } = {}) {
+export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env, copyOutput, fileSystem } = {}) {
   invariant(typeof executable === 'string' && Array.isArray(args), 'An executable and argument array are required.');
   invariant(typeof logPath === 'string' && logPath.length > 0, 'A log path is required.');
+  const io = recordFs(fileSystem), copy = copyOutput ?? ((file, out) => copyFileToDescriptor(io, file, out));
   const started = Date.now(), base = commandRecord(executable, args, cwd, started), errors = [];
   const result = (code, signal, timedOut) => {
     const r = { ...base, exit_code: code, signal, timed_out: timedOut, error: errors.length ? errors.join(' ') : null,
@@ -317,12 +343,8 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, 
     return r;
   };
   let fd;
-  try {
-    fs.mkdirSync(path.dirname(logPath), { recursive: true });
-    fd = fs.openSync(logPath, 'a');
-    fs.writeSync(fd, `\nCOMMAND ${JSON.stringify([executable, ...args])}\n`);
-  } catch (e) {
-    if (fd !== undefined) closeQuietly(fd);
+  try { fd = openLog(io, logPath, executable, args); }
+  catch (e) {
     errors.push(`Log write failed: ${e.message}`);
     return Promise.resolve(result(null, null, false));
   }
@@ -330,24 +352,24 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, 
   // MSYS2 programs on Windows exit with status 1 and no output when given an append-only handle.
   let captureDir, capture, outFd;
   try {
-    captureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fairpane-capture-'));
+    captureDir = io.mkdtempSync(path.join(os.tmpdir(), 'fairpane-capture-'));
     capture = path.join(captureDir, 'output.log');
-    outFd = fs.openSync(capture, 'wx', 0o600);
+    outFd = io.openSync(capture, 'wx', 0o600);
   } catch (e) {
-    if (captureDir) removeQuietly(captureDir);
     errors.push(`Output capture failed: ${e.message}`);
-    return Promise.resolve(finishRecord(fd, result(null, null, false)));
+    if (captureDir) removeCapture(io, captureDir, errors);
+    return Promise.resolve(finishRecord(io, fd, result(null, null, false)));
   }
   return new Promise(resolve => {
     let child, timer, timedOut = false, settled = false;
     const finish = (code, signal) => {
       if (settled) return;
       settled = true; clearTimeout(timer);
-      closeQuietly(outFd);
-      try { copyOutput(capture, fd); }
+      closeQuietly(io, outFd);
+      try { copy(capture, fd); }
       catch (e) { errors.push(`Output capture failed: ${e.message}`); }
-      removeQuietly(captureDir);
-      resolve(finishRecord(fd, result(code, signal, timedOut)));
+      removeCapture(io, captureDir, errors);
+      resolve(finishRecord(io, fd, result(code, signal, timedOut)));
     };
     try {
       child = spawn(executable, args, { cwd, stdio: ['ignore', outFd, outFd], shell: false,
@@ -388,22 +410,21 @@ export function resolveExecutable(root, name, { pathEnv = process.env.PATH ?? ''
   throw new Error(`The executable is not on PATH: ${name}`);
 }
 /** Run one command without a shell and append its actual output and result to an evidence log. */
-export async function recordCommand(root, logRelative, executable, args, { cwd = root, env, timeoutMs = 600000, pathEnv } = {}) {
+export async function recordCommand(root, logRelative, executable, args, { cwd = root, env, timeoutMs = 600000, pathEnv, fileSystem } = {}) {
   const logPath = evidencePath(root, logRelative, { mustExist: false });
   let resolved;
   try { resolved = resolveExecutable(root, executable, pathEnv === undefined ? {} : { pathEnv }); }
   catch (e) {
-    const started = Date.now();
+    const io = recordFs(fileSystem), started = Date.now();
     const result = { ...commandRecord(executable, args, cwd, started), exit_code: null, signal: null, timed_out: false,
       error: e.message, duration_ms: 0 };
     if (env) result.environment_overrides = env;
-    try {
-      fs.mkdirSync(path.dirname(logPath), { recursive: true });
-      fs.appendFileSync(logPath, `\nCOMMAND ${JSON.stringify([executable, ...args])}\nRESULT ${JSON.stringify(result)}\n`);
-    } catch (w) { result.error = `${result.error} Log write failed: ${w.message}`; }
-    return result;
+    let fd;
+    try { fd = openLog(io, logPath, executable, args); }
+    catch (w) { result.error = `${result.error} Log write failed: ${w.message}`; return result; }
+    return finishRecord(io, fd, result);
   }
-  return runProcess(resolved, args, { cwd, logPath, timeoutMs, env });
+  return runProcess(resolved, args, { cwd, logPath, timeoutMs, env, fileSystem });
 }
 /** Environment overrides for a gate's child commands. */
 export function gateEnvironment(root, gate) {
@@ -415,7 +436,11 @@ export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
   invariant(gate, `Unknown gate: ${id}`);
   const before = fingerprints(root);
   const prefix = `${evidenceDir}/${new Date().toISOString().replace(/[:.]/g, '-')}-${id}-${crypto.randomUUID().slice(0, 8)}`;
+  // Validate both evidence paths before the first write, so a rejected directory receives no file.
+  // The receipt path is checked again when it is written, after the gate's commands have run.
   const logRelative = `${prefix}.log`, logPath = evidencePath(root, logRelative, { mustExist: false });
+  const receiptRelative = `${prefix}.json`;
+  evidencePath(root, receiptRelative, { mustExist: false });
   fs.mkdirSync(path.dirname(logPath), { recursive: true });
   fs.writeFileSync(logPath, `Fairpane local gate: ${id}\nTrust: unsigned-local-integrity-only\n`);
   const commands = [], started = new Date().toISOString();
@@ -460,7 +485,6 @@ export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
       runtime: process.version, bun_version: process.versions.bun ?? null, zig_version: zigVersion },
     source_before: before.source, source_after: after.source, policy_before: before.policy, policy_after: after.policy,
     commands, error, outputs: [{ path: logRelative, size: fs.statSync(logPath).size, sha256: fileHash(logPath) }] };
-  const receiptRelative = `${prefix}.json`;
   writeJson(evidencePath(root, receiptRelative, { mustExist: false }), receipt);
   return { ...receipt, receipt_path: receiptRelative };
 }

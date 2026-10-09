@@ -65,6 +65,7 @@ It never searches the working directory for an executable.
 A relative executable path resolves from the repository root.
 The `RESULT` line keeps the working directory, UTC start time, exit status, signal, watchdog outcome, and environment overrides.
 A command that cannot write its log or capture its output returns a failed result instead of an exception.
+A short write to the log is a failed log write, not a truncated success.
 The `record` command exits with status 1 when the recorded command fails.
 
 ## Evidence boundary
@@ -112,6 +113,7 @@ A metadata edit alone cannot enable release success.
 
 Child commands receive argument arrays without shell interpolation.
 Each child writes its output to a file in a new private temporary directory, which the controller copies into the log and removes.
+If the removal fails, the command record carries that error, and the command fails.
 A watchdog terminates a hung process group on POSIX or a process tree on Windows.
 The caller still needs operating-system isolation and resource quotas for hostile inputs.
 The tool does not enforce disk quotas or a network policy.

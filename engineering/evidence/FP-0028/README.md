@@ -27,6 +27,9 @@ The Bun result is informational.
 `controls/mutants.mjs` builds six mutants of `tools/lib.mjs`.
 Each mutant reintroduces one defect that a review-2 finding or the contract names.
 `raw/mutation-control.log` shows that the target test fails for each of the six mutants.
+Task `FP-0031` later extended this control with an unmutated baseline, failure messages, and seven more mutants.
+`raw/mutation-control.log` predates that extension.
+`engineering/evidence/FP-0031/raw/mutation-control.log` records the extended control.
 
 ## Gates
 
