@@ -2937,7 +2937,7 @@
         "Reject malformed or oversized inputs within declared memory bounds.",
         "Compare the sfnt parser's strictness with web-font practice, including table tags outside printable ASCII and known tables that overlap the table directory, as the FP-0013 security review notes.",
         "Compare the outline strictness choices that the FP-0119 and FP-0120 contracts list with web-font practice, and record each kept or changed choice.",
-        "Compare the OpenType layout strictness choices that the FP-0111 contract lists with web-font practice, and record each kept or changed choice."
+        "Compare the OpenType layout strictness choices that the FP-0111 contract lists, and its reading of a NULL ScriptList, FeatureList, or LookupList offset as an empty list, with web-font practice, and record each kept or changed choice."
       ],
       "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md", "engineering/evidence/FP-0111/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
@@ -3490,7 +3490,7 @@
         "Describe each frame's logical state and roots at every safepoint, and collect at every safepoint under stress mode without a dead resolution.",
         "Report an interrupt or a resource limit as an abrupt outcome distinct from a thrown exception, never as a normal completion.",
         "Keep a context's host_context from giving its holder the runtime or the heap, either by documenting that rule where a host sets it or by requiring an effect to read it.",
-        "Record the bytecode format and the dispatch reference in architecture decision record 0011.",
+        "Record the bytecode format and the dispatch reference in architecture decision record 0012.",
         "Keep the native stack use of every syntax-tree and bytecode traversal from growing with nesting depth, as FP-0082 amendment 1 requires of the parser, and show that the parser's deepest accepted inputs compile and run on a 1 MiB stack in the Debug test build."
       ],
       "read": ["docs/JAVASCRIPT_RUNTIME.md", "engineering/decisions/0008-javascript-values-and-heap.md", "engineering/evidence/FP-0082/CONTRACT.md", "engineering/evidence/FP-0128/CONTRACT.md", "engineering/evidence/FP-0129/CONTRACT.md"],
@@ -3906,9 +3906,10 @@
         "Keep each glyph's source code-unit cluster, merging clusters on ligature, multiple, and contextual substitution, and record ligature component indexes for mark attachment.",
         "Bound nested contextual lookups and total work with explicit limits that report a limit outcome.",
         "Test every lookup type and format with synthetic fonts whose expected outputs derive from the GSUB chapter.",
-        "Report malformed and unsupported subtables honestly."
+        "Report malformed and unsupported subtables honestly.",
+        "Charge the validation of every lookup, subtable, Coverage, and ClassDef that a run opens to that run's work limit, or open each at most once per run, and test a font whose lookups and subtables share one large Coverage many times."
       ],
-      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md", "engineering/evidence/FP-0111/reviews/security-review-1-accept.json"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -3928,9 +3929,10 @@
         "Produce per-glyph advances and offsets in font units while preserving cluster mapping.",
         "Bound attachment chains without native recursion.",
         "Test every lookup type with synthetic fonts whose expected outputs derive from the GPOS chapter.",
-        "Report Device, VariationIndex, and contour-point anchor data that is not applied."
+        "Report Device, VariationIndex, and contour-point anchor data that is not applied.",
+        "Charge the validation of every lookup, subtable, Coverage, and ClassDef that a run opens to that run's work limit, or open each at most once per run, and test a font whose lookups and subtables share one large Coverage many times."
       ],
-      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md", "engineering/evidence/FP-0111/reviews/security-review-1-accept.json"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -4268,7 +4270,7 @@
         "Execute a bounded language subset through an actual first-party parser and VM.",
         "Compile every syntax tree that FP-0082 accepts to bytecode and run it in a generic interpreter loop over the reference representation and the generated tracer that ADR 0008 selects, and keep it built and tested under every representation and both tracers.",
         "Implement the realm, the global environment record, declarative and function environments, ECMAScript function objects with [[Call]] and [[Construct]], completions with break, continue, try, catch, and finally, ToObject with primitive wrapper objects, and the intrinsics that these algorithms require, following the cited ECMA-262 steps.",
-        "Record the bytecode format and the dispatch reference in architecture decision record 0011.",
+        "Record the bytecode format and the dispatch reference in architecture decision record 0012.",
         "Keep the native stack use of every syntax-tree and bytecode traversal from growing with nesting depth, as FP-0082 amendment 1 requires of the parser, and show that the parser's deepest accepted inputs compile and run on a 1 MiB stack in the Debug test build.",
         "Implement the runtime obligations that FP-0082 assigns to FP-0083: function name inference, the B.3.9 ReferenceError, and Function.prototype.toString from the recorded source ranges.",
         "Run every call of user code, including calls that conversions and built-ins make, through VM frames rather than native re-entry, so that the native stack stays constant in ECMAScript call depth, and report each resource limit as an outcome distinct from a normal completion and from a thrown exception.",
@@ -4294,7 +4296,7 @@
         "Describe each frame's logical state and roots at every safepoint, and collect at every safepoint under stress mode without a dead resolution.",
         "Report an interrupt or a resource limit as an abrupt outcome distinct from a thrown exception, never as a normal completion.",
         "Keep a context's host_context from giving its holder the runtime or the heap, either by documenting that rule where a host sets it or by requiring an effect to read it.",
-        "Add the safepoint, frame-description, and interrupt sections to architecture decision record 0011, keep every FP-0128 case passing, including its 1 MiB native-stack cases, and add no native recursion."
+        "Add the safepoint, frame-description, and interrupt sections to architecture decision record 0012, keep every FP-0128 case passing, including its 1 MiB native-stack cases, and add no native recursion."
       ],
       "read": ["docs/JAVASCRIPT_RUNTIME.md", "engineering/decisions/0008-javascript-values-and-heap.md", "engineering/evidence/FP-0011/reviews/review-2-accept.json", "engineering/evidence/FP-0128/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
