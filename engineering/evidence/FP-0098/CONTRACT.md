@@ -5,7 +5,7 @@
 Task ID: `FP-0098`, "Keep the zig-test gate within its timeout and make a timeout diagnosable".
 Workstream: `laboratory`.
 Base: the commit that freezes this contract.
-Prerequisites: `FP-0067`, accepted.
+Prerequisites: none; amendment 1 removed `FP-0067`, whose code is already in the base.
 The root integrator drafted and froze this contract.
 Assigned role: `fairpane-core`.
 Authority: `routine-local-engineering`.
@@ -19,6 +19,9 @@ The integrator collected these facts on 2026-10-09 from `gh run view` of 52 comp
 - Runs 37931192952 (`9cc81ea`), 37934034077 (`4531b33`), and 37935108213 (`d526219`) failed when the gate stopped `zig build test` at its 600000 ms timeout.
   Each receipt has `timed_out: true` and no build output, so no record shows which step was running.
 - `engineering/evidence/FP-0064/raw/integration-tests.log` shows that, on the development host, the unit-test binary's run step takes about 2 minutes for 247 tests, while its compile step takes 8 seconds.
+- Amendment 1 adds two facts.
+  The jump begins with `ef8ad1c`, which added the FP-0014 CSS tests: the last run before it took 119 seconds, and the first run that contains it took 573 seconds.
+  Run 37936609533 of `152ed53`, the first run whose Linux job runs `zig-test`, timed out at 600004 ms on Linux and was stopped with `SIGKILL`; `engineering/evidence/FP-0067/ci/` records it.
 
 ### Integrator decisions
 
@@ -87,3 +90,9 @@ Required reviewer: `fairpane-review`.
 - No change to the gate's arguments, its timeout, or any other gate.
 - No new CI job, runner, action, or cache.
 - No conclusion about the three timed-out runs beyond what the records show.
+
+## Amendments
+
+1. Before dispatch, the integrator removed the prerequisite `FP-0067` in plan commit `1600761`.
+   `FP-0067`'s first `Gates` run timed out in `zig-test`, so `FP-0067` cannot be accepted until this task lands, and its code is already in the base.
+   The two facts that this amendment adds to "Measured inputs" narrow the search: the cost arrived with the FP-0014 CSS tests, and both runners exceed the timeout.

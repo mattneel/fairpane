@@ -97,3 +97,11 @@ Required reviewer: `fairpane-review`.
 - No new gate, threshold, runner, or action, and no change to `REVIEWED_ACTIONS`.
 - No retry inside the compiler installer.
 - No change to the verifier's behavior.
+
+## Amendments
+
+1. The first `Gates` run with the change, run 37936609533 of `152ed53`, timed out in `zig-test` on the Linux job after 600004 ms, so its Linux receipt cannot report `pass`.
+   `ci/` records that run.
+   The suite's cost, not this task's change, exceeds the gate's timeout, and `FP-0098` owns it.
+   The acceptance record becomes the first `Gates` run after `FP-0098` lands whose Linux `zig-test` receipt reports `pass`; the integrator records it under `ci/` with `gh run view` and the Linux receipts, and the review re-checks that record.
+   Review 1's other findings are handled as `reviews/review-1-reject.json` and the README record.
