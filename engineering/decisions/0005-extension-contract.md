@@ -133,15 +133,14 @@ The baseline still needs these properties before its public interfaces stabilize
 
 ## Release scope
 
-The owner selected no release-scope option, and the confirmation answer began with "No."
-As an engineering decision derived from the SDK memo, which makes a first-party extension in every supported language a product obligation, the qualification profile requires the `extensions` capability family.
-The owner's confirmation of that family remains an open question beside the one that blocks `FP-0040`.
+The owner decided the release scope on October 9, 2026, after two unanswered rounds.
+The `extensions` capability family is required and release-blocking.
+Compatibility with existing browser extensions is required for release, as the separate `webextensions-compat` family.
+Extension-language parity does not establish that compatibility.
 
-The extension memo also proposed compatibility with existing browser extensions as a separate qualification target.
-An earlier record read the owner's reply "YES." as approval of a required `webextensions-compat` family.
-That reading was wrong, because the reply was the SDK memo, not a choice among the offered options.
-The family is therefore absent from the qualification profile until the owner decides its release scope.
-`FP-0040` stays blocked on that decision.
+An earlier record had read the owner's reply "YES." as approval of both families.
+That reading was wrong, because the reply was the SDK memo, so the family was removed until the owner decided.
+The owner's later answers now authorize both families directly.
 
 ## Sources and evidence
 
@@ -149,3 +148,4 @@ The family is therefore absent from the qualification profile until the owner de
 - `engineering/evidence/extensions/release-scope-question.log` holds the first release-scope question and the first characters of the owner's reply.
 - `engineering/evidence/extensions/owner-sdk-memo-extraction.log` and `engineering/evidence/extensions/owner-sdk-memo-2026-10-09.md` hold that reply in full.
 - `engineering/evidence/extensions/owner-answers-2.log` holds the confirmation question and the owner's clarification.
+- `engineering/evidence/extensions/owner-answers-3.log` holds the release-scope questions and the owner's answers.

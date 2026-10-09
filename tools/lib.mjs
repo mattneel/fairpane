@@ -10,7 +10,7 @@ export const REQUIRED_CAPABILITIES = Object.freeze([
   'html-dom', 'css-layout', 'text-fonts', 'javascript', 'web-idl', 'fetch-network',
   'storage-workers', 'svg-canvas-images', 'audio-video', 'guest-graphics', 'webassembly',
   'web-security', 'web-app-apis', 'input-accessibility', 'browser-product',
-  'embedding-wrappers', 'extensions', 'cross-platform', 'performance', 'maintenance-adoption',
+  'embedding-wrappers', 'extensions', 'webextensions-compat', 'cross-platform', 'performance', 'maintenance-adoption',
 ]);
 const HASH = /^[a-f0-9]{64}$/;
 const VERSION = /^\d+\.\d+\.\d+-dev\.\d+\+[a-f0-9]+$/;
