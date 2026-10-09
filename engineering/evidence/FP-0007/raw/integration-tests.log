@@ -1,0 +1,34 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0007-integration-cache"]
+Build Summary: 17/17 steps succeeded; 101/101 tests passed
+test success
++- run test 101 pass (101 total) 71ms MaxRSS:7M
+|  +- compile test debug native success 3s MaxRSS:457M
++- FP-0007 case 13: case 2 passes with exit status 0 success 35ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:332M
++- FP-0007 case 13: case 3 fails with exit status 1 success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 35ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 48ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 47ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 73ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 14ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 18ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:315M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 45ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 42ms
+   +- compile exe fairpane-lab-check debug native (reused)
+   +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
+
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0007-integration-cache"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:23:43.039Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":6799}
