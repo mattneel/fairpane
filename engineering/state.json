@@ -834,11 +834,11 @@
       "notes": ["Created because the FP-0027 worker's reproduce-check found that the static library differs between two build directories."]
     },
     "FP-0067": {
-      "status": "planned",
-      "owner": null,
-      "evidence": [],
+      "status": "active",
+      "owner": "fairpane-core worker FP0067Gates, integrated by root-integrator",
+      "evidence": ["engineering/evidence/FP-0067/CONTRACT.md", "engineering/evidence/FP-0067/README.md", "engineering/evidence/FP-0067/raw/integration-binding.log", "engineering/evidence/FP-0067/ci/ci-record.log"],
       "review": null,
-      "notes": ["Created from the minor findings in the FP-0033 review-4 and FP-0051 review-3 records."]
+      "notes": ["Created from the minor findings in the FP-0033 review-4 and FP-0051 review-3 records.", "Implemented in 152ed53. fairpane-review rejected it in reviews/review-1-reject.json only because the first Gates run with the change, 37936609533, timed out in Linux zig-test; amendment 1 makes the first Linux pass after FP-0098 the acceptance record, and FP-0099 carries the review's minor finding."]
     },
     "FP-0068": {
       "status": "planned",
@@ -932,11 +932,11 @@
       "notes": ["Split from FP-0029. It takes FP-0029 criteria 2 to 5, 17 to 20 word for word, and a narrowed form of criterion 14 for fairpane-sys, and FP-0029 cites its evidence for them."]
     },
     "FP-0081": {
-      "status": "planned",
-      "owner": null,
-      "evidence": [],
+      "status": "active",
+      "owner": "fairpane-core worker FP0081Budget, integrated by root-integrator",
+      "evidence": ["engineering/evidence/FP-0081/CONTRACT.md", "engineering/evidence/FP-0081/README.md"],
       "review": null,
-      "notes": ["Created because the C ABI takes no allocator, so no foreign consumer could induce the allocation-failure scenario that FP-0029 criterion 16 lists."]
+      "notes": ["Created because the C ABI takes no allocator, so no foreign consumer could induce the allocation-failure scenario that FP-0029 criterion 16 lists.", "Implemented in f40a902 with amendments 1 and 2; fairpane-review and fairpane-security review it."]
     },
     "FP-0082": { "status": "active", "owner": "fairpane-js worker FP0082Parser, integrated by root-integrator", "evidence": ["engineering/evidence/FP-0082/CONTRACT.md"], "review": null, "notes": ["Split from FP-0012 by fairpane-js worker FP0012Contract as the parser part. It carries no FP-0012 criterion word for word and feeds criteria 1 and 4.", "The integrator froze the contract with a measured 1 MiB stack requirement for the depth cases, after plan reviews 1 and 2 approved the split."] },
     "FP-0083": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0012. It carries FP-0012 criteria 1, 3, and 7 word for word."] },
@@ -954,7 +954,7 @@
     "FP-0095": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Owns the non_ascii_identifier unsupported code of the FP-0082 parser."] },
     "FP-0096": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Owns the with unsupported code of the FP-0082 parser, eval, and dynamic functions."] },
     "FP-0097": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Owns the using_declaration unsupported code of the FP-0082 parser."] },
-    "FP-0098": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created because the Windows zig-test gate of Gates run 37931192952 timed out at 600 s on 9cc81ea without output, while passing runs took 4 to 7.6 minutes; engineering/evidence/FP-0014/ci/README.md records the runs."] },
+    "FP-0098": { "status": "active", "owner": "fairpane-core worker FP0098Speed, integrated by root-integrator", "evidence": ["engineering/evidence/FP-0098/CONTRACT.md", "engineering/evidence/FP-0098/raw/ci-durations.log"], "review": null, "notes": ["Created because the Windows zig-test gate of Gates run 37931192952 timed out at 600 s on 9cc81ea without output, while passing runs took 4 to 7.6 minutes; engineering/evidence/FP-0014/ci/README.md records the runs.", "Dispatched after amendment 1 removed the FP-0067 prerequisite, because FP-0067's first Gates run timed out in Linux zig-test."] },
     "FP-0099": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from FP-0067 review 1's minor finding and notes and FP-0079 security review 2's minor finding and notes."] }
   }
 }
