@@ -137,3 +137,10 @@ Required reviewers: `fairpane-review` and `fairpane-spec`.
    - Whatever happens, the case stops the sleeping command itself before it ends, as the frozen test already does.
    Case 2 must fail on the base on Windows, where the watchdog starts `taskkill.exe` by bare name.
    The mutation control that starts `taskkill.exe` by bare name must fail case 2 on Windows.
+2. Amendment 1's stand-in fails under Bun, which `AGENTS.md` names as an alternative development host.
+   Under Bun, `process.execPath` is the Bun executable, which ignores `NODE_OPTIONS`, so the stand-in tries to load `/PID` as a module and exits with status 1; `raw/bun-selftest.log` at `a342961` records it.
+   The stand-in therefore follows the host that runs the suite.
+   - Under Node, it stays as amendment 1 defines.
+   - Under Bun, the case's directory also holds a `bunfig.toml` whose `preload` names the same script, if a recorded probe shows that Bun runs that preload before it resolves `/PID`.
+   - Otherwise, under a host other than Node, the stand-in is built from the Node executable that `PATH` resolves, with `NODE_OPTIONS` as under Node, and without a Node executable the case fails with `FP-0052 case 2 needs Node on PATH to build its stand-in.`
+   Case 2 must pass under Node and under Bun on Windows, and the bare-name mutation control must fail it under both hosts.
