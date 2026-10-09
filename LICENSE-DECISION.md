@@ -36,4 +36,8 @@ WHATWG publishes the standard under CC BY 4.0 and the portions incorporated into
 The table keeps that license text, its attribution, and a recorded digest beside it.
 `engineering/evidence/FP-0008/owner-answers.log` records the question and the answer.
 
+On 2026-10-09, the owner also approved the Encoding Standard's index files, `https://encoding.spec.whatwg.org/index-*.txt`, and tables generated from them.
+They enter the repository on the same terms as the named character reference table: WHATWG's license text, its attribution, and a recorded digest beside them.
+`engineering/evidence/FP-0065/owner-answers.log` records the question and the answer.
+
 See `docs/SOURCES.md` for [S20].
