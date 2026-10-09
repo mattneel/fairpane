@@ -1,0 +1,42 @@
+{
+  "verdict": "accept",
+  "summary": "This accept covers everything except criterion 3, which still lacks its CI record, so FP-0107 cannot be accepted as a task until that record arrives. Revision 2 closes the major finding from review 1. All five withPrivateTemp cases now declare 'TMPDIR, TMP, and TEMP in process.env': in tools/selftest.mjs they are at lines 584, 655, 686, 696, and 706, which are cases 185, 190, 192, 193, and 194 of the 248-case suite. The README lists them and says why the search missed them. The minor findings from review 1 are closed as follows. First, the declaration list is now complete. Second, all seven case modules now pass the third array element through with ...declaration. Third, ADR 0011 now records workerEnvironment and why SHARE_ENV was rejected. Fourth, every revision 2 log records HEAD 0f187af and the blob IDs of the runner, tools/selftest.mjs, and the five changed modules. Fifth, engineering/evidence/ci/runs-3e7128c.log records gh run view for all 11 runs of 3e7128c. Each of those runs shows a passing Linux job and a Windows controller-test failure after 31 to 47 s. The new evidence holds up. tests-after-r2, r2-repro-after with the search path named Path, bun-selftest-r2, and bun-r2-repro-after each exit 0 with 248 of 248. M3 is now diffed against the committed blob 02fc9919 and changes only the Worker env option. It fails only case 3, and the runner is 02fc9919 before and after and 81adfe43 during, with git diff --exit-code HEAD returning 0 before and after. The binding at 0cf7c95 shows clean status, and repo-check, controller-test (248 of 248, 47,388 ms, gate_sha256 43baf0f8…), zig-fmt, and zig-test all pass. Bun also passes 248 of 248. Runner semantics are unchanged from review 1: result order, a duration line after each result, declared cases run alone on the main thread, and no assertion changed. Three minor findings remain, and none of them blocks acceptance. For the CI record, criterion 3 needs the following:\n- At least ten 'gh workflow run Gates --ref master' dispatches on 57df855, each recorded with its exit status and run URL.\n- A listing in the format of runs-3e7128c.log that covers every run and attempt in the series window, including any push run, with head SHA 57df855 and each job's and step's conclusion and duration.\n- Both jobs' receipts for every run, with gate_sha256 43baf0f8….\n- Every run passes both jobs, every receipt log reports 248 of 248, and Windows shows 'ok … FP-0107 revision 1 case 3'.\n- A ci/README.md that gives, for each run, the Windows and Linux controller-test step time and receipt duration_ms, plus the ten '# slowest' lines of each job.\n- Under criterion 2, the tests that dominate Windows time and their causes, named from those CI records.\n- A slowest Windows controller-test step of at most 80 s, judged on the step time and checked against duration_ms.\n- No omitted or retried attempt.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0107/README.md",
+      "line": 224,
+      "issue": "The revision 1 section still says flatly that 'the hosted Windows runner names the search path Path'. Revision 2 marks that spelling as an inference at line 268 and in ADR 0011, so the README now contradicts itself. Revision 2's decision to mark the claim as an inference is therefore not applied at line 224."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0107/README.md",
+      "line": 268,
+      "issue": "The inference cites push run 37978329724 of 96bad1c as passing on the hosted runner, but nothing in the repository records a gh run view or a receipt for that run. A repository search for 37978329724 finds only this sentence. Either add the run to the recorded listing or drop the citation."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0011-concurrent-controller-tests.md",
+      "line": 16,
+      "issue": "The ADR says that SHARE_ENV was rejected partly because 'a declared case that changes TMP reaches concurrent workers'. That misreads the evidence. A declared case runs alone. In raw/tests-after-r1-attempt-1.log, the cases that failed under SHARE_ENV were 190, 192, and 194, which were undeclared at that point and ran on workers whose environment was shared. Bun's failure in attempt 2 is the separate os.tmpdir() defect. The sentence should name undeclared worker cases."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0107/raw/integration-binding-r2-binding.log",
+      "line": 2,
+      "issue": "The revision 2 suite logs ran on HEAD 0f187af with uncommitted changes and record their blob IDs, but the 0cf7c95 binding log records no blob IDs. Nothing therefore shows that the tested blobs (02fc9919, 23b37b06, and the module blobs) are the ones committed in 0cf7c95. The gate receipts at 0cf7c95 do bind a passing run of the committed tree, so no acceptance claim depends on the gap."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0107/README.md",
+      "line": 280,
+      "issue": "The README states SHA-256 values and sizes for the two withheld logs, but no command that computed them is recorded."
+    },
+    {
+      "severity": "note",
+      "path": "tools/selftest.mjs",
+      "line": 584,
+      "issue": "The five new declarations add drain barriers among cases 185 to 194 and move those cases to the main thread. They are short (1 to 202 ms in tests-after-r2.log), and the local totals barely changed. The CI series must still show that the slowest Windows controller-test step stays at or below 80 s with these barriers in place."
+    }
+  ]
+}
