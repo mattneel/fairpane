@@ -169,7 +169,7 @@ No log was deleted or overwritten.
 - [INFERENCE] The jump at `ef8ad1c` from 119 to 573 seconds on Windows fits the 167-second local cost of case 46, but no CI record decides the cause of the three timed-out runs.
 - The worker's `raw/linux-node-probe.log` listed every name in the WSL user's home directory, which the probe did not need and which included unrelated private file and project names.
   It landed in the public commit `9d5638b`, and the integrator removed it from the tree in the next evidence commit.
-  It stays in Git history unless the owner chooses to rewrite history, which only the owner may authorize.
+  It stays in Git history: on 2026-10-09 the owner chose to leave history as is, and `owner-answers.log` records the question and the answer.
 
 ## Integration
 
