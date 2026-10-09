@@ -292,7 +292,9 @@
       "owner": null,
       "evidence": [],
       "review": null,
-      "notes": []
+      "notes": [
+        "Split on 2026-10-09 into FP-0108 to FP-0118. FP-0015 keeps its five criteria word for word as the closing task and gains the zig-fmt gate."
+      ]
     },
     "FP-0016": {
       "status": "planned",
@@ -965,6 +967,17 @@
     "FP-0105": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0010 for the fragment parsing algorithm; it carries FP-0010 criteria 1 and 3 word for word."] },
     "FP-0106": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from FP-0066 review 1's code findings and FP-0076 review 1's Windows status mapping finding."] },
     "FP-0107": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created because the Windows controller-test gate of Gates run 37952850522 timed out at 120 s on a2dd9ed, and its Windows durations reached 62 to 121 s; engineering/evidence/FP-0098/ci/README.md records the runs."] },
+    "FP-0108": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: grapheme cluster data and UAX #29 segmentation."] },
+    "FP-0109": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: bidirectional data and UAX #9."] },
+    "FP-0110": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: line-breaking data and UAX #14 opportunities."] },
+    "FP-0111": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: OpenType layout common tables and GDEF."] },
+    "FP-0112": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: GSUB application with cluster mapping."] },
+    "FP-0113": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: GPOS application and mark positioning."] },
+    "FP-0114": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: Latin, CJK, and Arabic shaping. Its reference fixtures wait for the owner's oracle decision."] },
+    "FP-0115": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: Devanagari shaping. Its reference fixtures wait for the owner's oracle decision."] },
+    "FP-0116": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: itemization and per-cluster font fallback."] },
+    "FP-0117": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: inline layout under explicit available-size constraints. FP-0016 depends on it."] },
+    "FP-0118": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: carets, hit tests, and bidi selection."] },
     "FP-0127": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created during the FP-0010 split because the DOM store has no shadow roots and FP-0103's declarative shadow roots need them."] }
   }
 }

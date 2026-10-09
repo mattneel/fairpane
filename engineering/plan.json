@@ -683,13 +683,25 @@
       "workstream": "text",
       "depends_on": [
         "FP-0013",
-        "FP-0014"
+        "FP-0014",
+        "FP-0108",
+        "FP-0109",
+        "FP-0110",
+        "FP-0111",
+        "FP-0112",
+        "FP-0113",
+        "FP-0114",
+        "FP-0115",
+        "FP-0116",
+        "FP-0117",
+        "FP-0118"
       ],
       "role": "fairpane-text",
       "allowed_paths": [
         "src",
         "tests",
-        "build.zig"
+        "build.zig",
+        "engineering/evidence"
       ],
       "protected_paths": [
         "AGENTS.md",
@@ -698,12 +710,15 @@
         "engineering/policy.json",
         "engineering/gates.json",
         "toolchains/zig.lock.json",
+        "toolchains/rust.lock.json",
+        "rust-toolchain.toml",
         "specs/corpora.json"
       ],
       "authority": "routine-local-engineering",
       "required_gates": [
         "repo-check",
         "controller-test",
+        "zig-fmt",
         "zig-test"
       ],
       "required_reviewers": [
@@ -720,7 +735,7 @@
         "docs/RENDERING_AND_TEXT.md"
       ],
       "contract_state": "bootstrap-seed",
-      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion. FP-0108 to FP-0118 implement the slices, and FP-0015 closes when their evidence meets every criterion. The closing README records why FP-0015 runs no WPT test and names the owners: FP-0016 for paint, and the CSSOM and script tasks for testharness."
     },
     {
       "id": "FP-0016",
@@ -1448,7 +1463,8 @@
       "depends_on": [
         "FP-0015",
         "FP-0017",
-        "FP-0021"
+        "FP-0021",
+        "FP-0055"
       ],
       "role": "fairpane-text",
       "allowed_paths": [
@@ -2756,7 +2772,7 @@
       "id": "FP-0055",
       "title": "Import the remaining Unicode data",
       "workstream": "text",
-      "depends_on": ["FP-0013"],
+      "depends_on": ["FP-0013", "FP-0108", "FP-0109", "FP-0110"],
       "role": "fairpane-text",
       "allowed_paths": ["src", "tests", "tools", "build.zig", "specs"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
@@ -3681,6 +3697,252 @@
         "Rerun the gate on the Windows CI runner at least ten times after the change and report each duration."
       ],
       "read": ["engineering/evidence/FP-0098/ci/README.md", "engineering/evidence/ci/runs-2026-10-09.log", "engineering/evidence/ci/run-37952850522-attempt-1/README.md", "engineering/gates.json", "tools/selftest.mjs"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0108",
+      "title": "Import grapheme cluster data and segment extended grapheme clusters",
+      "workstream": "text",
+      "depends_on": ["FP-0013"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Import auxiliary/GraphemeBreakProperty.txt, DerivedCoreProperties.txt, emoji/emoji-data.txt, and auxiliary/GraphemeBreakTest.txt from the pinned Unicode 18.0.0 UCD.zip with per-file provenance.",
+        "Generate Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic lookups with a staleness check and an independent reference test for every code point.",
+        "Segment UTF-16 text into extended grapheme clusters under UAX #29 rules GB1 to GB999 without allocation and in linear time, with boundaries as code-unit indexes.",
+        "Pass every line of GraphemeBreakTest.txt and the six qualification seeds.",
+        "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0109",
+      "title": "Import bidirectional data and implement the Unicode Bidirectional Algorithm",
+      "workstream": "text",
+      "depends_on": ["FP-0108"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Import BidiBrackets.txt and BidiMirroring.txt with per-file provenance, and generate Bidi_Paired_Bracket, Bidi_Paired_Bracket_Type, and Bidi_Mirroring_Glyph lookups with a staleness check and an independent reference test.",
+        "Resolve paragraph and embedding levels under UAX #9 rules P2 to I2, including isolates, the explicit depth limit, overflow counters, and the paired-bracket stack limit, with heap state bounded by the input length and native stack independent of nesting.",
+        "Reorder lines under rules L1 and L2 and mirror under rule L4, producing logical-to-visual and visual-to-logical code-unit maps.",
+        "Run every line of BidiTest.txt and BidiCharacterTest.txt from the verified Unicode corpus snapshot in a recorded step outside zig-test, and report each inapplicable line with its reason.",
+        "Run in zig-test a committed subset of both files chosen by a rule that the contract freezes.",
+        "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0110",
+      "title": "Import line-breaking data and find UAX #14 break opportunities",
+      "workstream": "text",
+      "depends_on": ["FP-0108"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Import LineBreak.txt and EastAsianWidth.txt with per-file provenance, and generate Line_Break and East_Asian_Width lookups with a staleness check and an independent reference test.",
+        "Compute mandatory and allowed break opportunities under UAX #14 rules LB1 to LB31 over UTF-16 code units in linear time and without allocation.",
+        "Apply the LB1 resolution of class SA, and report dictionary-based breaking of SA text as unsupported with an owner task.",
+        "Check the 18.0.0 header of auxiliary/LineBreakTest.txt for any tailoring it assumes, and run every line from the verified Unicode corpus snapshot in a recorded step outside zig-test.",
+        "Run in zig-test a committed subset of LineBreakTest.txt chosen by a rule that the contract freezes.",
+        "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0111",
+      "title": "Parse OpenType layout common tables and GDEF for shaping",
+      "workstream": "text",
+      "depends_on": ["FP-0013"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Parse Coverage formats 1 and 2, ClassDef formats 1 and 2, LangSys tables, feature index lists, Lookup tables, lookup flags, and mark filtering sets with checked offsets and bounded work.",
+        "Select the lookups for a script tag, a language tag, and a feature set, with DFLT and default LangSys fallback as the OpenType common table formats chapter specifies.",
+        "Parse GDEF glyph classes, mark attachment classes, mark glyph sets, and ligature caret lists.",
+        "Report FeatureVariations, unknown lookup types and formats, and Device and VariationIndex data as unsupported, never as empty results.",
+        "Reject malformed subtables without a panic, unbounded allocation, or native recursion, tested with synthetic fonts from the first-party builder."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0112",
+      "title": "Apply GSUB lookups with cluster mapping",
+      "workstream": "text",
+      "depends_on": ["FP-0111"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Apply GSUB lookup types 1 to 8 to a glyph buffer under lookup flags and GDEF classes.",
+        "Keep each glyph's source code-unit cluster, merging clusters on ligature, multiple, and contextual substitution, and record ligature component indexes for mark attachment.",
+        "Bound nested contextual lookups and total work with explicit limits that report a limit outcome.",
+        "Test every lookup type and format with synthetic fonts whose expected outputs derive from the GSUB chapter.",
+        "Report malformed and unsupported subtables honestly."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0113",
+      "title": "Apply GPOS lookups and position marks",
+      "workstream": "text",
+      "depends_on": ["FP-0112"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Apply GPOS lookup types 1 to 9, including pair adjustment, cursive attachment with the RightToLeft flag, mark-to-base, mark-to-ligature by component, and mark-to-mark attachment.",
+        "Produce per-glyph advances and offsets in font units while preserving cluster mapping.",
+        "Bound attachment chains without native recursion.",
+        "Test every lookup type with synthetic fonts whose expected outputs derive from the GPOS chapter.",
+        "Report Device, VariationIndex, and contour-point anchor data that is not applied."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0114",
+      "title": "Shape Latin, CJK, and Arabic text with reference fixtures",
+      "workstream": "text",
+      "depends_on": ["FP-0108", "FP-0112", "FP-0113"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "specs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Shape runs through a default engine for Latin and the CJK seed scripts, and through an Arabic engine with Joining_Type joining and the specified feature order for right-to-left runs.",
+        "Decide normalization and mark reordering from the cited primary sources, and import extracted/DerivedCombiningClass.txt with per-file provenance if that decision needs Canonical_Combining_Class.",
+        "Map every glyph to its code-unit cluster, including marks such as U+064B on U+0628 and U+0301 after U+0065.",
+        "Compare the latin-baseline, arabic-greeting, and cjk-greeting seeds on the Noto fixtures with reference fixtures whose source the owner has approved, and freeze no third-party fixture before that approval.",
+        "Report every script outside Latin, Arabic, Devanagari, and the CJK seed scripts, every unapplied feature, and every missing glyph as unsupported, each with an owner task.",
+        "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0115",
+      "title": "Shape Devanagari through an Indic engine with reference fixtures",
+      "workstream": "text",
+      "depends_on": ["FP-0114"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Identify Devanagari syllables and reorder reph, pre-base matras, and below-base forms as the dev2 script specification states.",
+        "Apply the basic and presentation features in their specified stages.",
+        "Compare the devanagari-greeting seed on Noto Sans Devanagari with reference fixtures whose source the owner has approved, including the conjunct U+0938 U+094D U+0924 and the pre-base matra in U+0928 U+093F, and freeze no third-party fixture before that approval.",
+        "Report every other Indic and Universal Shaping Engine script as unsupported with an owner task.",
+        "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0116",
+      "title": "Itemize text and select fallback fonts per cluster",
+      "workstream": "text",
+      "depends_on": ["FP-0108", "FP-0109", "FP-0114"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Itemize text into runs by bidi level, resolved script with Script_Extensions and Common and Inherited resolution, and font.",
+        "Select a font for each grapheme cluster across a caller-ordered font list, and report each cluster that no font covers.",
+        "Test the mixed-direction seed across Noto Sans and Noto Sans Arabic, Devanagari text with Latin fallback, and the uncovered-emoji seed.",
+        "Keep platform font discovery out of the engine's text behavior, as FP-0063 requires.",
+        "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0117",
+      "title": "Lay out inline text under explicit available-size constraints",
+      "workstream": "text",
+      "depends_on": ["FP-0014", "FP-0109", "FP-0110", "FP-0116"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Take the font list, font size, direction, white-space behavior, and line height as explicit layout parameters, which FP-0071 later wires to CSS properties.",
+        "Break shaped runs into lines at UAX #14 opportunities for a definite available inline size, and report min-content and max-content sizes for indefinite constraints without using zero.",
+        "Reorder each line under UAX #9 rules L1 and L2, and keep code-unit-to-glyph mappings in every line fragment.",
+        "Process white space for the supported white-space behavior, and report every other behavior as unsupported.",
+        "Compute line box heights from font metrics, and test overflow when a line has no break opportunity.",
+        "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0014/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0118",
+      "title": "Map carets, hit tests, and selections across bidirectional text",
+      "workstream": "text",
+      "depends_on": ["FP-0111", "FP-0117"],
+      "role": "fairpane-text",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review"],
+      "acceptance": [
+        "Provide the preceding and following grapheme cluster boundary of any code-unit index without scanning from the start of the text for every query.",
+        "Place caret stops at grapheme cluster boundaries, and inside ligatures from GDEF ligature carets or by equal division.",
+        "Map a visual position to a logical code-unit offset with affinity, and a logical range to visual rectangles.",
+        "Convert a visual selection gesture into logical ranges across mixed-direction lines.",
+        "Test a Latin ligature, Arabic text, the mixed-direction seed, and a Devanagari conjunct."
+      ],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
