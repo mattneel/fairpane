@@ -72,7 +72,7 @@ Authority: `routine-local-engineering`.
 ### Modules
 
 `src/css/css.zig` is the public module, exported from `src/root.zig` as `css`.
-Its parts are `tokenizer.zig`, `parser.zig`, `stylesheet.zig`, `selectors.zig`, `registry.zig`, `properties.zon`, `named_colors.zon`, `values.zig`, `cascade.zig`, `substitution.zig`, `compute.zig`, `style.zig`, and `dump.zig`, all under `src/css/`.
+Its parts are `tokenizer.zig`, `parser.zig`, `stylesheet.zig`, `selectors.zig`, `registry.zig`, `properties.zig`, `named_colors.zig`, `values.zig`, `cascade.zig`, `substitution.zig`, `compute.zig`, `style.zig`, and `dump.zig`, all under `src/css/`.
 The library test block in `src/root.zig` references `css`.
 No file outside `src/css/`, `src/dom.zig`, and `src/root.zig` changes, except evidence files.
 
@@ -249,7 +249,7 @@ It computes no value.
 
 ### Property registry
 
-`src/css/properties.zon` holds one record per standard property, and `registry.zig` builds `PropertyId` and the registry table from it at compile time.
+`src/css/properties.zig` holds one record per standard property as a data-only declaration, and `registry.zig` builds `PropertyId` and the registry table from it at compile time.
 A record has exactly the fields `name`, `spec`, `initial`, `inherited`, `computed`, and `invalidation`.
 `registry.validate` rejects duplicate names with `error.DuplicateProperty`, names that are not lowercase ASCII with `error.NonCanonicalName`, and a record without an invalidation effect with `error.MissingInvalidation`.
 The compile-time build calls `validate`.
@@ -292,7 +292,7 @@ Its outer type becomes `block`; `inline flow-root` and `run-in flow-root` become
 
 `color` accepts these forms (Color 4 sections 4.1, 5.1, 5.2, 6.1 to 6.4, and Appendix A):
 - A `<hex-color>`: a hash token of either type with 3, 4, 6, or 8 hexadecimal digits.
-- The 148 named colors of section 6.1, stored in `src/css/named_colors.zon`, and `transparent`.
+- The 148 named colors of section 6.1, stored in the data-only file `src/css/named_colors.zig`, and `transparent`.
 - The 19 system colors of 6.2 and the 23 deprecated system colors of Appendix A, which resolve through the palette below.
 - `currentcolor`.
 - `rgb()` and `rgba()` in the legacy syntax (4.1.2) and in the modern syntax (4.1.1), with `none` allowed only in the modern syntax.
@@ -653,7 +653,7 @@ Every case uses `std.testing.allocator`, so a leak fails the case.
     `flex`, `inline-grid`, `block ruby`, and `ruby-text` report `unsupported_value`.
     On the root element, `inline`, `inline-block`, `run-in flow-root`, `table-cell`, and `contents` compute to block flow; `inline list-item` computes to block flow list-item; `inline table` computes to block table; and `none` computes to none.
 30. `color` values compute as follows: `#FFF` to 255 255 255 with alpha 1; `#0000ffcc` to 0 0 255 with alpha `204.0 / 255.0`; `#1234` to 17 34 51 with alpha `68.0 / 255.0`; `#AbCdEf` to 171 205 239; `RebeccaPurple` to 102 51 153; `transparent` to 0 0 0 with alpha 0; `CanvasText` to 0 0 0; `canvas` to 255 255 255; `InfoText` to 0 0 0; `ButtonHighlight` to 239 239 239; and `currentColor` to `current_color`.
-    `named_colors.zon` has 148 rows in ascending name order, and `aliceblue`, `darkgray`, `grey`, `rebeccapurple`, and `yellowgreen` give 240 248 255, 169 169 169, 128 128 128, 102 51 153, and 154 205 50.
+    `named_colors.zig` has 148 rows in ascending name order, and `aliceblue`, `darkgray`, `grey`, `rebeccapurple`, and `yellowgreen` give 240 248 255, 169 169 169, 128 128 128, 102 51 153, and 154 205 50.
     `#12345`, `#ggg`, `#1234567`, `blurple`, `red blue`, `rgb`, and `currentcolor red` report `invalid_value`.
 31. `rgb(255, 0, 0)` gives 255 0 0 with alpha 1; `rgba(255,0,0,0.5)` gives alpha 0.5; `rgb(255 0 0 / 50%)` gives alpha 0.5; `rgb(100% 50% 0%)` gives 255 127.5 0; `rgb(10% 20 30)` gives 25.5 20 30; `rgb(300 -5 0)` gives 255 0 0; `rgb(0 0 0 / 2)` gives alpha 1; `rgb(none 0 0)` gives a missing red component; `rgb(0 0 0 / none)` gives a missing alpha; `rgba(1 2 3)` gives 1 2 3 with alpha 1; `RGB(1,2,3)` gives 1 2 3; and `rgb(1.5, 2, 3)` gives 1.5 2 3.
     `rgb(1, 2)`, `rgb(1 2)`, `rgb(1, 2, none)`, `rgb(10%, 20, 30)`, `rgb(1, 2, 3,)`, `rgb(1 2 3 4)`, `rgb(1 2 3 /)`, and `rgb(1px 2 3)` report `invalid_value`.
@@ -780,7 +780,7 @@ The mutation control swaps the precedence of important user declarations and imp
 Store its exact diff in `mutation-cascade-origin.diff` beside its log.
 The control must fail case 35.
 The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` with `--evidence-dir engineering/evidence/FP-0014/gates`.
-The integrator also compares every row of `src/css/named_colors.zon` with the named-color table of `css-color-4/Overview.bs` at the pinned commit and records the comparison.
+The integrator also compares every row of `src/css/named_colors.zig` with the named-color table of `css-color-4/Overview.bs` at the pinned commit and records the comparison.
 
 ## Authority
 
@@ -806,3 +806,10 @@ On 2026-10-09 the worker `FP0014Css` reported under the stop rules that case 39'
 The frozen string opened four item lists, for the whole value, `function(bar)`, `block({)`, and `block([)`, and closed five.
 The dump format and Syntax section 5.5.9 make `[y]` one simple block, so the integrator corrected the expected value to close four lists.
 No other expected value changes.
+
+## Integrator amendment 2
+
+On 2026-10-09 the worker `FP0014Css` reported that importing `properties.zon` and `named_colors.zon` fails `repo-check`, whose import lint admits only relative `.zig` imports and the named modules `std`, `builtin`, and `root` under `src`.
+The repository keeps data tables as Zig source, such as `src/unicode/tables.zig` and `src/html/entities_table.zig`, so the integrator replaces both `.zon` files with data-only `.zig` files instead of changing the lint.
+A data-only file declares the table as `pub const` values and contains no function.
+No other requirement changes.
