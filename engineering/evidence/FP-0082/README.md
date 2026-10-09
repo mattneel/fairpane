@@ -168,15 +168,40 @@ M7 alters a blob as the contract describes: the test overwrites a loose object f
   Violation lines on standard output cover `false_accept`, `false_syntax_error`, `metadata_error`, and `input_error`.
 - `lexer.zig` writes the `kw_export` table entry with its tag first, because the FP-0011 case 20 needle `export ` would otherwise match `.kw_export }`.
 
-## Unmet criteria
+## Criteria resolved by amendment
 
 - M1 does not fail case 14.
   Case 14 asserts only that every source yields an outcome and that `writeOutcome` succeeds without a panic or a leak.
   Treating U+2028 as white space changes outcomes but causes no panic and no leak, so no implementation of case 14 as frozen can fail under M1.
   M1 does fail case 2 on row `T31 LS`.
-  This needs an integrator decision: amend M1's named cases, or name an added property for case 14.
+  Contract amendment 2 (`41aaa7e`) names only case 2 for M1, so this control now meets the contract.
 
 ## Remaining obligations
 
 Each unsupported code names its owner in the contract.
 `FP-0083` owns function name inference, the B.3.9 ReferenceError, and Function.prototype.toString from the recorded source ranges.
+
+## Integration
+
+The integrator applied the worker's own patch `out/fp0082.patch` (blob `71da06ed`, base `7ffafd3`) from the worker's worktree.
+It applied without conflicts and changed no contract text.
+An earlier attempt applied the harness's captured patch instead.
+That patch also carried changes from commits after the worker's base, so the integrator reset the uncommitted index and work tree to `41aaa7e` before applying the worker's patch.
+The implementation is commit `5d41509`.
+
+- `raw/integration-binding.log` records `HEAD` `5d41509` and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
+- `gates/2026-10-09T15-05-28-163Z-repo-check-bcee3391.json`, `gates/2026-10-09T15-05-28-539Z-controller-test-6a1da2e8.json`, `gates/2026-10-09T15-06-23-120Z-zig-fmt-ff858d4c.json`, and `gates/2026-10-09T15-06-23-420Z-zig-test-b22cbcf7.json` pass.
+- `raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0082-integration`: 94 of 94 build steps and 321 of 321 tests pass.
+- `raw/bun-selftest.log` records Bun and `tools/selftest.mjs` with 224 of 224 tests.
+- `raw/integration-steps.log` records `HEAD` `5d41509` before evidence steps 6 to 10 are rerun.
+- `raw/integration-js-tools-build.log` builds `js-tools` in ReleaseSafe with exit status 0.
+- `raw/integration-corpus-verify.log` verifies the Test262 snapshot with exit status 0.
+- `raw/integration-extract.log` extracts 53,975 files at `2e0a56762801e275a9fdf96dc49d90ba0cddcf63` with `entries_sha256` `95f65b6c…`, the same as `raw/extract.log`.
+- `raw/integration-harness-parse.log` parses `assert.js`, `sta.js`, `doneprintHandle.js`, and `compareArray.js` with exit status 0, and `propertyHelper.js` exits with status 2 and `unsupported array_literal @2981`.
+- `raw/integration-census.log` reproduces the worker's summary exactly: 53,616 discovered, 843 module, 102,151 runs, 28,777 `agree_valid`, 1,949 `agree_error`, 71,421 `unsupported`, 4 `proposal_mismatch`, and 0 `limit`, `false_accept`, `false_syntax_error`, `metadata_error`, and `input_error`.
+  The census file's SHA-256 is `0e5277cd…`, the same as in `raw/census.log`.
+- `raw/integrator-metadata-counts.log` counts the pinned commit's metadata with a Node script that shares no code with the Zig census.
+  The script lists `test/` files that end in `.js` and whose names lack `_FIXTURE`, reads each blob from the snapshot repository, and parses the frontmatter `flags` and `negative` keys itself.
+  It counts 53,616 discovered files, 843 module files, and 4,455 files outside modules with `negative.phase` `parse`.
+  A second script counts the census file's records: 53,616 records, 843 with `module` true, and 4,455 with `expect` `syntax-error`.
+  The counts are equal.
