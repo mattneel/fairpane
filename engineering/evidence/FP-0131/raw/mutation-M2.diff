@@ -1,0 +1,14 @@
+diff --git a/out/fp0131/mutation-M2/corpus.mjs b/tools/corpus.mjs
+index a6ed746..4c05748 100644
+--- a/out/fp0131/mutation-M2/corpus.mjs
++++ b/tools/corpus.mjs
+@@ -392,8 +392,7 @@ export const WPT_RULE = 'Read the manifest that wpt.fyi publishes for the pinned
+   'Count the items of each manifest item type; each file entry contributes its array length minus one, because the first element is the file hash and each other element is one test URL. ' +
+   `Discovered tests are the items of every type except "spec" and "support", minus the "test262" items whose path starts with "${WPT_VENDORED_TEST262_DIR}", the vendored Test262 copy. ` +
+   'Upstream gives the "test262" type to a ".js" file with a "test262" directory component only when no earlier rule of manifest_items applies to it, ' +
+-  'its name does not end in "_FIXTURE.js", and it contains a "/*---" to "---*/" frontmatter block. ' +
+-  'A file that reaches the test262 rule of manifest_items but fails its "_FIXTURE.js" or frontmatter condition becomes a "support" item. ' +
++  'its name does not end in "_FIXTURE.js", and it contains a "/*---" to "---*/" frontmatter block; any other such file becomes a "support" item. ' +
+   'The "test262" type therefore does not identify the vendored copy, and "test262" items elsewhere, such as the WPT tests under "infrastructure/test262/", count in discovery. ' +
+   `The record reports the vendored "test262" items separately, counted by their directory under "${WPT_VENDORED_TEST262_DIR}", with the vendored Test262 revision from ${WPT_VENDORED_TEST262}.`;
+ /** The vendored-copy directory of a manifest path under third_party/test262/, such as "third_party/test262/test/". */

@@ -94,8 +94,8 @@ The controller enforces no operating-system network policy; it simply opens no c
 
 1. Read the HTTPS upstream URL from `specs/corpora.json`.
 2. Run `git ls-remote --symref <upstream> HEAD` and read the branch ref for `HEAD`.
-3. Select the commit: the pin for `corpus-fetch`, or the reported head for `corpus-repin`.
-4. Create the lock file `<corpora-root>/<corpus-id>.lock`, or fail when it exists.
+3. Create the lock file `<corpora-root>/<corpus-id>.lock`, or fail when it exists.
+4. Select the commit while holding the lock: for `corpus-fetch`, the `specs/corpora.json` revision, or else the commit of `specs/snapshots/<corpus-id>.json`; for `corpus-repin`, the reported head.
 5. Create a fresh bare repository at `<corpora-root>/<corpus-id>.fetch/repository.git`.
 6. Run `git fetch --depth=1 --no-tags --no-write-fetch-head <upstream> +<commit>:<ref>` with `fetch.fsckObjects=true` and `transfer.fsckObjects=true`.
 7. Confirm that the local ref resolves to the selected commit.
@@ -221,7 +221,7 @@ The record reports counts for each item type.
 These item-type decisions apply.
 
 - Upstream gives the `test262` type to a `.js` file with a `test262` directory component only when no earlier rule of `manifest_items` applies to it, its name does not end in `_FIXTURE.js`, and it contains a `/*---` to `---*/` frontmatter block. [S47]
-  Any other such file becomes a `support` item.
+  A file that reaches the `test262` rule of `manifest_items` but fails its `_FIXTURE.js` or frontmatter condition becomes a `support` item.
   Files outside the vendored copy also meet these conditions, so the type does not identify the vendored copy; the path does.
   The `test262` items under `third_party/test262/` come from the vendored Test262 copy.
   The record reports them separately, counted by their directory under `third_party/test262/`.

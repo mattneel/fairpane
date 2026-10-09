@@ -1505,6 +1505,78 @@ test('FP-0052 case 6: of two Git corpus fetches started together, one passes and
   await u.classify();
   assert.equal((await u.verify(policyFile)).result, 'pass');
 });
+// FP-0131: the FP-0052 review findings. The cases read the specs and ADR files directly.
+const FP0131 = {
+  generalCategoryRow: '| `ucd/extracted/DerivedGeneralCategory.txt` | `General_Category`, listed explicitly for every range including `Cn`; the qualification seeds and the Universal Shaping Engine categories; UAX #14 rule LB1, which resolves SA to CM for `Mn` and `Mc` and to AL otherwise, rules LB15a and LB15b (`Pi` and `Pf`), LB19 (`Pi` and `Pf`), and LB30b (`Cn`), and rule LB10, which gives a remaining CM or ZWJ the value `Lu`; UTS #46 section 4.1 criterion 6, which rejects a label that begins with `General_Category=Mark`, for URL host parsing; imported by FP-0013 | [S27], [S50], [S37], [S39], [S41] |',
+  s37: 'LineBreak.txt; East_Asian_Width use in class AI resolution, directly in rules LB19a and LB30, and in rule LB10, which gives a remaining CM or ZWJ the value Na; General_Category use in rule LB1, which resolves SA to CM for Mn and Mc and to AL otherwise, in rules LB15a, LB15b, LB19, and LB30b, and in rule LB10, which gives a remaining CM or ZWJ the value Lu; Extended_Pictographic use; and line breaking rules.',
+  wptRule: 'A file that reaches the test262 rule of manifest_items but fails its "_FIXTURE.js" or frontmatter condition becomes a "support" item.',
+  wptComment: 'A file that reaches the test262 rule of `manifest_items` but fails its "_FIXTURE.js" or frontmatter condition becomes a "support" item.',
+  adrClause: '  A file that reaches the `test262` rule of `manifest_items` but fails its `_FIXTURE.js` or frontmatter condition becomes a `support` item.',
+  s47: 'Manifest version 9, item types in item.py, the [hash, ...items] leaf format in typedata.py, and the test262 type in sourcefile.py and test262.py: a .js file with a test262 directory component (SourceFile.name_is_test262) gets the test262 type only when no earlier rule of manifest_items applies to it, its name does not end in _FIXTURE.js, and test262.parse finds a /*--- to ---*/ frontmatter block; a file that reaches the test262 rule of manifest_items but fails its _FIXTURE.js or frontmatter condition becomes a support item.',
+  bidiRow: '| `ucd/extracted/DerivedBidiClass.txt` | `Bidi_Class` values, including defaults for unassigned code points (UAX #9); UTS #46 `CheckBidi`, which applies RFC 5893 section 2 to the labels of a Bidi domain name, for URL host parsing, because the URL Standard sets `CheckBidi` to true for domain parser ToASCII and domain to Unicode | [S14], [S27], [S39], [S101], [S41] |',
+  joiningRow: '| `ucd/extracted/DerivedJoiningType.txt` | `Joining_Type` for the ContextJ rules of RFC 5892 Appendix A, which UTS #46 section 4.1 applies when `CheckJoiners` is true, and the URL Standard sets `CheckJoiners` to true for domain parser ToASCII and domain to Unicode | [S49], [S39], [S41], [S27] |',
+  s41: 'Host parsing through Unicode ToASCII and ToUnicode from UTS #46, with CheckBidi and CheckJoiners set to true in domain parser ToASCII and domain to Unicode.',
+  adrFetch: ['3. Create the lock file `<corpora-root>/<corpus-id>.lock`, or fail when it exists.',
+    '4. Select the commit while holding the lock: for `corpus-fetch`, the `specs/corpora.json` revision, or else the commit of `specs/snapshots/<corpus-id>.json`; for `corpus-repin`, the reported head.'],
+};
+const fp0131Text = relative => fs.readFileSync(path.join(root, relative), 'utf8');
+const fp0131Lines = relative => fp0131Text(relative).split(/\r?\n/);
+/** The rows of specs/IMPORT_REQUIREMENTS.md whose first cell is `file` in backticks. */
+const fp0131Rows = file => fp0131Lines('specs/IMPORT_REQUIREMENTS.md').filter(l => l.startsWith('|') && l.split('|')[1].trim() === `\`${file}\``);
+const fp0131Purpose = id => {
+  const matches = readJson(path.join(root, 'specs/sources.json')).sources.filter(s => s.id === id);
+  assert.equal(matches.length, 1, `specs/sources.json has ${matches.length} entries with ID ${id}.`);
+  return matches[0].purpose;
+};
+const FP0131_ADR = 'engineering/decisions/0003-corpus-snapshots.md';
+test('FP-0131 case 1: the General_Category row and the S37 purpose name UAX #14 rule LB1', () => {
+  assert.deepEqual(fp0131Rows('ucd/extracted/DerivedGeneralCategory.txt'), [FP0131.generalCategoryRow]);
+  assert.equal(fp0131Purpose('S37'), FP0131.s37);
+});
+test('FP-0131 case 2: every copy of the WPT support-item clause names only files that reach the test262 rule, and wpt.json records the rule', () => {
+  assert.ok(corpus.WPT_RULE.includes(FP0131.wptRule), 'WPT_RULE lacks the narrowed support-item sentence.');
+  assert.ok(fp0131Text('tools/corpus.mjs').replace(/\r?\n\s*\* ?/g, ' ').includes(FP0131.wptComment), 'The tools/corpus.mjs comment lacks the narrowed sentence.');
+  const adr = fp0131Lines(FP0131_ADR), upstream = adr.findIndex(l => l.startsWith('- Upstream gives the `test262` type'));
+  const clauses = adr.flatMap((l, i) => l === FP0131.adrClause ? [i] : []);
+  assert.ok(upstream >= 0, 'ADR 0003 has no line that starts "- Upstream gives the `test262` type".');
+  assert.equal(clauses.length, 1, `ADR 0003 contains the frozen clause ${clauses.length} times.`);
+  assert.ok(clauses[0] > upstream, 'The ADR 0003 clause precedes the upstream rule line.');
+  assert.equal(fp0131Purpose('S47'), FP0131.s47);
+  for (const file of ['tools/corpus.mjs', FP0131_ADR, 'specs/sources.json', 'specs/applicability/wpt.json'])
+    assert.doesNotMatch(fp0131Text(file), /other such file/i, file);
+  const wpt = readJson(path.join(root, 'specs/applicability/wpt.json'));
+  assert.deepEqual({ rule: wpt.discovery.rule, discovered: wpt.discovered, selected: wpt.selected, unclassified: wpt.unclassified,
+    sha256: wpt.manifest.sha256, item_counts: wpt.manifest.item_counts }, { rule: corpus.WPT_RULE, discovered: 76620, selected: 0, unclassified: 76620,
+    sha256: '86d55bee991997a4753d0987397883249a0d6fc94e0901ed3efb84cceed53067',
+    item_counts: { aamtest: 190, crashtest: 2030, manual: 3047, 'print-reftest': 432, reftest: 28489, support: 41779, test262: 53660, testharness: 39050,
+      visual: 2714, wdspec: 648 } });
+});
+test('FP-0131 case 3: the Bidi and ContextJ rows and the S41 purpose use the URL Standard algorithm names', () => {
+  assert.deepEqual(fp0131Rows('ucd/extracted/DerivedBidiClass.txt'), [FP0131.bidiRow]);
+  assert.deepEqual(fp0131Rows('ucd/extracted/DerivedJoiningType.txt').filter(l => l.includes('ContextJ')), [FP0131.joiningRow]);
+  assert.equal(fp0131Purpose('S41'), FP0131.s41);
+  for (const file of ['specs/IMPORT_REQUIREMENTS.md', 'specs/sources.json']) assert.ok(!fp0131Text(file).includes('domain to ASCII'), file);
+});
+test('FP-0131 case 4: a fetch honors a repin that finishes between its ref resolution and its lock', async () => {
+  const u = upstreamFixture();
+  await u.fetch(u.policy({ revision: u.first }));
+  const head = u.move(), unpinned = u.policy({});
+  let calls = 0, repinned;
+  const beforeLock = async () => { calls += 1; repinned = (await corpus.repinCorpus(u.dir, 'test262', u.options(unpinned))).commit; };
+  const r = await corpus.fetchCorpus(u.dir, 'test262', { ...u.options(unpinned), beforeLock });
+  assert.deepEqual({ calls, repinned, fetched: r.commit, pinned_by: r.pinned_by, recorded: readJson(u.recordFile).commit,
+    snapshot_head: fixtureGit(u.snapshot, ['rev-parse', 'refs/heads/main']), corpora: fs.readdirSync(u.corporaDir) },
+  { calls: 1, repinned: head, fetched: head, pinned_by: 'specs/snapshots/test262.json', recorded: head, snapshot_head: head, corpora: ['test262'] });
+  const adr = fp0131Lines(FP0131_ADR), fetch = adr.indexOf('### Fetch');
+  const steps = FP0131.adrFetch.map(line => adr.indexOf(line, fetch + 1));
+  assert.ok(fetch >= 0 && steps[0] > fetch && steps[1] > steps[0], `ADR 0003 lacks the frozen lock and selection steps in order after "### Fetch": ${steps}`);
+});
+test('FP-0131 case 5: a fetch with no policy revision and no record fails with the missing-record error and releases the lock', async () => {
+  const u = upstreamFixture();
+  await assert.rejects(() => u.fetch(u.policy({})),
+    e => e.message === 'Corpus test262 has no pinned revision and no snapshot record. Run corpus-repin test262.');
+  assert.deepEqual(fs.readdirSync(u.corporaDir), []);
+});
 test('The actual bootstrap repository passes its integrity check', () => {
   const r = checkRepository(root); assert.equal(r.result, 'pass'); assert.equal(r.level, 'bootstrap-integrity-only');
 });

@@ -1,0 +1,70 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","add","--","tools/corpus.mjs","tools/selftest.mjs","specs/IMPORT_REQUIREMENTS.md","specs/sources.json","specs/applicability/wpt.json","engineering/decisions/0003-corpus-snapshots.md"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["add","--","tools/corpus.mjs","tools/selftest.mjs","specs/IMPORT_REQUIREMENTS.md","specs/sources.json","specs/applicability/wpt.json","engineering/decisions/0003-corpus-snapshots.md"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:28.184Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":46}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","write-tree"]
+6caecf3f38916abf8cedb4ee870e37f41736c4d6
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["write-tree"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:28.321Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":65}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+b8313e622326ba6ba8438455d947a487c8ac3add
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:28.496Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--name-status","b8313e6","6caecf3f38916abf8cedb4ee870e37f41736c4d6","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains/zig.lock.json","toolchains/rust.lock.json","rust-toolchain.toml","specs/corpora.json"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--name-status","b8313e6","6caecf3f38916abf8cedb4ee870e37f41736c4d6","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains/zig.lock.json","toolchains/rust.lock.json","rust-toolchain.toml","specs/corpora.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:35.312Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":30}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","restore","--source=b8313e6","--worktree","--","tools/corpus.mjs","tools/selftest.mjs","specs/IMPORT_REQUIREMENTS.md","specs/sources.json","specs/applicability/wpt.json","engineering/decisions/0003-corpus-snapshots.md"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["restore","--source=b8313e6","--worktree","--","tools/corpus.mjs","tools/selftest.mjs","specs/IMPORT_REQUIREMENTS.md","specs/sources.json","specs/applicability/wpt.json","engineering/decisions/0003-corpus-snapshots.md"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:35.413Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":78}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--short","--untracked-files=no"]
+MM engineering/decisions/0003-corpus-snapshots.md
+MM specs/IMPORT_REQUIREMENTS.md
+MM specs/applicability/wpt.json
+MM specs/sources.json
+MM tools/corpus.mjs
+MM tools/selftest.mjs
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--short","--untracked-files=no"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:35.576Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","fingerprint"]
+{
+  "source": {
+    "sha256": "4d2e853fba0667f675300f94b530e11ec9c2b66b955ba85ddbcc40e823528644",
+    "file_count": 343
+  },
+  "policy": {
+    "sha256": "29d3333e47b6bd5348370ff23baeb443b7579ff82a58fff942da03f2c720c6a7",
+    "file_count": 24
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","fingerprint"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:35.682Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":214}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","restore","--worktree","--","tools/corpus.mjs","tools/selftest.mjs","specs/IMPORT_REQUIREMENTS.md","specs/sources.json","specs/applicability/wpt.json","engineering/decisions/0003-corpus-snapshots.md"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["restore","--worktree","--","tools/corpus.mjs","tools/selftest.mjs","specs/IMPORT_REQUIREMENTS.md","specs/sources.json","specs/applicability/wpt.json","engineering/decisions/0003-corpus-snapshots.md"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:35.974Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--short","--untracked-files=no"]
+M  engineering/decisions/0003-corpus-snapshots.md
+M  specs/IMPORT_REQUIREMENTS.md
+M  specs/applicability/wpt.json
+M  specs/sources.json
+M  tools/corpus.mjs
+M  tools/selftest.mjs
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--short","--untracked-files=no"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:36.089Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","fingerprint"]
+{
+  "source": {
+    "sha256": "2ba85a7105f2f89f2f245c998c2a0ab7df3353111974049d294b844b84156d24",
+    "file_count": 343
+  },
+  "policy": {
+    "sha256": "428949ab12432f1189e6739ff4e6018e8441a5d7fa8951457cddfda2c501c297",
+    "file_count": 24
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","fingerprint"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:36.200Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":199}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--name-status","b8313e6","6caecf3f38916abf8cedb4ee870e37f41736c4d6","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","engineering/dependencies.json","toolchains","rust-toolchain.toml","specs"]
+M	specs/IMPORT_REQUIREMENTS.md
+M	specs/applicability/wpt.json
+M	specs/sources.json
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--name-status","b8313e6","6caecf3f38916abf8cedb4ee870e37f41736c4d6","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","engineering/dependencies.json","toolchains","rust-toolchain.toml","specs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td47b91ea2\\m","started_at":"2026-10-09T20:20:36.471Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}

@@ -1,0 +1,15 @@
+diff --git a/out/fp0131/mutation-M1/corpus.mjs b/tools/corpus.mjs
+index a6ed746..206b8bf 100644
+--- a/out/fp0131/mutation-M1/corpus.mjs
++++ b/tools/corpus.mjs
+@@ -538,9 +538,9 @@ export async function fetchCorpus(root, id, { corporaDir = corporaRoot(root), po
+   const policy = corpusPolicy(policyFile, id, allowFileUpstream);
+   console.log(`Git: ${gitExecutable()} (${(await git(null, ['--version'])).toString('utf8').trim()})`);
+   const { ref } = await resolveHead(policy.upstream);
++  const { pins, pinSource } = selectPins(root, id, policy);
+   await beforeLock?.();
+   return withFetchLock(corporaDir, id, async () => {
+-    const { pins, pinSource } = selectPins(root, id, policy);
+     invariant(typeof pins.revision === 'string' && OID.test(pins.revision), `The pinned revision of ${id} is not a 40-hex commit ID: ${pins.revision}`);
+     console.log(`Pinned commit ${pins.revision} from ${pinSource}.`);
+     const { snapshot, record } = await replaceSnapshot(root, id, { upstream: policy.upstream, ref, commit: pins.revision, corporaDir,

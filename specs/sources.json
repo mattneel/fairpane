@@ -303,7 +303,7 @@
       "id": "S37",
       "title": "UAX #14: Unicode Line Breaking Algorithm",
       "url": "https://www.unicode.org/reports/tr14/",
-      "purpose": "LineBreak.txt; East_Asian_Width use in class AI resolution, directly in rules LB19a and LB30, and in rule LB10, which gives a remaining CM or ZWJ the value Na; General_Category use in rules LB15a, LB15b, LB19, and LB30b, and in rule LB10, which gives a remaining CM or ZWJ the value Lu; Extended_Pictographic use; and line breaking rules.",
+      "purpose": "LineBreak.txt; East_Asian_Width use in class AI resolution, directly in rules LB19a and LB30, and in rule LB10, which gives a remaining CM or ZWJ the value Na; General_Category use in rule LB1, which resolves SA to CM for Mn and Mc and to AL otherwise, in rules LB15a, LB15b, LB19, and LB30b, and in rule LB10, which gives a remaining CM or ZWJ the value Lu; Extended_Pictographic use; and line breaking rules.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
@@ -335,7 +335,7 @@
       "id": "S41",
       "title": "URL Standard",
       "url": "https://url.spec.whatwg.org/",
-      "purpose": "Host parsing through Unicode ToASCII and ToUnicode from UTS #46, with CheckBidi and CheckJoiners set to true in domain to ASCII and domain to Unicode.",
+      "purpose": "Host parsing through Unicode ToASCII and ToUnicode from UTS #46, with CheckBidi and CheckJoiners set to true in domain parser ToASCII and domain to Unicode.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
@@ -383,7 +383,7 @@
       "id": "S47",
       "title": "WPT manifest tool at the pinned commit",
       "url": "https://github.com/web-platform-tests/wpt/tree/b60c4b349d9d167bf354a40bc0d4cbed15174606/tools/manifest",
-      "purpose": "Manifest version 9, item types in item.py, the [hash, ...items] leaf format in typedata.py, and the test262 type in sourcefile.py and test262.py: a .js file with a test262 directory component (SourceFile.name_is_test262) gets the test262 type only when no earlier rule of manifest_items applies to it, its name does not end in _FIXTURE.js, and test262.parse finds a /*--- to ---*/ frontmatter block; any other such file becomes a support item.",
+      "purpose": "Manifest version 9, item types in item.py, the [hash, ...items] leaf format in typedata.py, and the test262 type in sourcefile.py and test262.py: a .js file with a test262 directory component (SourceFile.name_is_test262) gets the test262 type only when no earlier rule of manifest_items applies to it, its name does not end in _FIXTURE.js, and test262.parse finds a /*--- to ---*/ frontmatter block; a file that reaches the test262 rule of manifest_items but fails its _FIXTURE.js or frontmatter condition becomes a support item.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
