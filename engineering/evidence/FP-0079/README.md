@@ -300,3 +300,15 @@ Every reused archive matched the lock, and every installed `rustc -vV` matched t
 The WSL Node printed `v26.7.0`, and the global rustup and Cargo state did not change across the controller tests.
 `toolchains/rust.lock.json` is unchanged.
 After both reviews accept this revision, the integrator records `rust-lock-verify` on the committed manifest, lands P1, and runs the gates on the P1 head, as the contract's revision 1 states.
+
+### Integration of revision 1
+
+The worker's tree was based on `e6d215c`, and the integrator committed revision 1 as `d2c1e5b` on top of `937a06b`, nine commits later.
+Those commits include `152ed53` (FP-0067), which changed other files under `tools`, so the revision 1 logs bind the worker's tree, and the P1-head gates and `raw/integration-binding.log` bind the integrated tree.
+`reviews/review-2-accept.json` accepts revision 1.
+
+`raw/p1-prerequisites.log` records, at `HEAD` `d2c1e5b`:
+
+- an empty `git diff --exit-code` of `toolchains/rust.lock.json` and `rust-toolchain.toml` between `04342e2` and `d2c1e5b`, and between `HEAD` and the working tree, including the provenance files;
+- `rust-lock-verify` on the committed manifest, with result `pass`, manifest SHA-256 `ce6dddc8…b6a2`, and no problems;
+- the SHA-256 of the manifest, `ce6dddc8…b6a2`, and of both key copies, which are equal at `e54b09a4…bc6b`.

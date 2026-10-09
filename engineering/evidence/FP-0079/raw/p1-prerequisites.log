@@ -1,0 +1,24 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+d2c1e5b113cd808be8c72251804a2748b3aa090e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T13:52:40.686Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--exit-code","--stat","04342e2","d2c1e5b","--","toolchains/rust.lock.json","rust-toolchain.toml"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--exit-code","--stat","04342e2","d2c1e5b","--","toolchains/rust.lock.json","rust-toolchain.toml"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T13:52:40.752Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":23}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--exit-code","--stat","HEAD","--","toolchains/rust.lock.json","rust-toolchain.toml","engineering/evidence/FP-0079/raw/provenance"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--exit-code","--stat","HEAD","--","toolchains/rust.lock.json","rust-toolchain.toml","engineering/evidence/FP-0079/raw/provenance"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T13:52:40.828Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.EXE","tools/fairpane.mjs","rust-lock-verify","engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml"]
+{
+  "result": "pass",
+  "manifest_sha256": "ce6dddc886364f8d786514771212cebe9b731ba82d6b859951c6b0ccc516b6a2",
+  "problems": []
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.EXE","arguments":["tools/fairpane.mjs","rust-lock-verify","engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T13:52:40.902Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":77}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml","engineering/evidence/FP-0079/raw/provenance/rust-key.gpg.ascii","engineering/evidence/FP-0079/raw/provenance/rust-key-keybase.asc"]
+ce6dddc886364f8d786514771212cebe9b731ba82d6b859951c6b0ccc516b6a2 *engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml
+e54b09a439647e006b4831eec9785cbaaf3e07ab371c3a6ee6a68e1bdb9fbc6b *engineering/evidence/FP-0079/raw/provenance/rust-key.gpg.ascii
+e54b09a439647e006b4831eec9785cbaaf3e07ab371c3a6ee6a68e1bdb9fbc6b *engineering/evidence/FP-0079/raw/provenance/rust-key-keybase.asc
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml","engineering/evidence/FP-0079/raw/provenance/rust-key.gpg.ascii","engineering/evidence/FP-0079/raw/provenance/rust-key-keybase.asc"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T13:52:41.023Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
