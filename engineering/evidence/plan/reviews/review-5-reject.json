@@ -1,0 +1,53 @@
+{
+  "verdict": "reject",
+  "summary": "Plan review 5: I approve 1a15063 but reject 75dd48b, so the overall verdict is reject. 75dd48b closes both majors from review 4 and every minor finding it claims to fix. But the new task it adds, FP-0130, repeats the same kind of dependency gap: its criterion 3 needs parsed documents, and its dependency closure contains no parser. Adding \"FP-0100\" to FP-0130's depends_on fixes this without a cycle.\n\nHow I checked: I read both patches on GitHub and plan.json and state.json in the current tree. I ran nothing; that `node tools/fairpane.mjs check` passes is [INFERENCE]. Every new dependency names an existing task, no cycle forms, and FP-0128, FP-0129, and FP-0130 have state entries.\n\n75dd48b against review 4:\n- **Major 1 closed.** FP-0072 now depends on FP-0127 (plan.json:3145).\n- **Major 2 closed.** FP-0058 now depends on FP-0119 and FP-0120 (2841).\n- **seac minor closed.** FP-0059 owns it (2879).\n- **change-the-encoding hook minor closed.** FP-0126 gains FP-0100 and a testable criterion to call the hook from FP-0100's in head meta branch.\n- **reference-fixture note addressed.** FP-0122 now names its reference fixtures.\n- **FP-0065 evidence-path note addressed.** FP-0065 may now write engineering/evidence.\n- **FP-0117 routing minor closed.** FP-0117 now routes CSS wiring to the new FP-0130.\n- **New gap.** FP-0130 criterion 3, 'Test each property's effect on real layout output from parsed documents and style sheets' (4225), needs the HTML parser. FP-0130 depends only on FP-0071 and FP-0117, and neither reaches FP-0100.\n\n1a15063 is a correct split.\n- FP-0083 keeps its nine criteria word for word and depends on both slices.\n- FP-0128 carries criteria 1, 2, 3, 8, and 9 verbatim; FP-0129 carries criteria 4 to 7 verbatim.\n- The added requirements are testable: no native re-entry, an unsupported outcome for the 57 frozen globals, and the FP-0082 runtime obligations.\n- FP-0129 adds fairpane-security for the host_context boundary.\n- FP-0084 and FP-0085 now read the slice contracts.\n- FP-0026's state note now lists every obligation routed to it, which answers review 4's concern that the routing was vague.\n- One minor remains: FP-0084 must decide how it counts FP-0128's runtime unsupported outcome, given its rule to 'classify unsupported only by frozen static rules'.",
+  "commits": [
+    {
+      "commit": "75dd48b",
+      "verdict": "reject",
+      "notes": "**Review 4 findings, fix by fix.**\n- FP-0072's depends_on is now [\"FP-0100\", \"FP-0014\", \"FP-0127\"], so the encapsulation-contexts criterion waits for DOM shadow roots. Major 1 is closed.\n- FP-0058's depends_on is now [\"FP-0013\", \"FP-0119\", \"FP-0120\"], so FP-0058 is no longer ready before the strictness lists exist. Major 2 is closed.\n- FP-0059 criterion 7 (2879) implements seac through the TN5176 StandardEncoding once the owner approves those tables. Until then it keeps cff-seac recorded as a capability obligation. The blocker is named and the obligation stays tracked. FP-0059 reaches FP-0120 through FP-0056.\n- FP-0126 depends on [\"FP-0125\", \"FP-0100\"] and adds a criterion to call the hook from FP-0100's in head meta branch and test a tentative-confidence restart. The hook now has an owner, and no cycle forms.\n- FP-0122 gains 'Treat the FP-0121 oracle masks and the hand-computed masks as the reference fixtures that FP-0056 criterion 4 names'. FP-0056's closing test is now fixed.\n- FP-0065 may now write engineering/evidence.\n- FP-0117 criterion 1 now says FP-0130 feeds its parameters from computed CSS values.\n\nThe commit also records review 4 as engineering/evidence/plan/reviews/review-4-reject.json. It changes only plan, state, and that review record.\n\n**New task FP-0130 (4212).** Its first two criteria are concrete: 16 named computed values, and an unsupported report with an owner for each property not yet honored. The dependency on FP-0071 is right, because word-break, letter-spacing, and similar properties are outside the FP-0014 registry.\n\n**Major.** Criterion 3 needs parsed documents, so FP-0130 needs FP-0100; 'lang' also derives from HTML's language of a node. FP-0071 depends only on FP-0014, and FP-0117 depends on FP-0014, FP-0109, FP-0110, and FP-0116. Neither reaches FP-0100 (see findings)."
+    },
+    {
+      "commit": "1a15063",
+      "verdict": "approve",
+      "notes": "**The closing task.** FP-0083's nine criteria are unchanged. It now depends on [\"FP-0082\", \"FP-0128\", \"FP-0129\"], reads both slice contracts, and its protected list matches policy.json.\n\n**FP-0128 (depends on FP-0082).** It carries FP-0083 criteria 1, 2, 3, 8, and 9 word for word. Its added criteria are testable:\n- the FP-0082 runtime obligations: function name inference, the Annex B.3.9 call-assignment ReferenceError, and Function.prototype.toString from recorded source ranges;\n- every user-code call, including those from conversions and built-ins, runs in VM frames with constant native stack, and resource limits stay distinct;\n- an unsupported outcome, distinct from a ReferenceError, for a frozen list of unimplemented standard globals.\n\nThe state note records the integrator's decisions: 57 names, a 30-second zig-test budget, and Test262 smoke runs used as evidence only.\n\n**FP-0129 (depends on FP-0128).** It carries FP-0083 criteria 4 to 7 word for word, including FP-0012's host_context criterion. It adds the ADR 0011 safepoint sections and allows no native recursion. Adding fairpane-security fits the host_context capability boundary that the state note cites (runtime.zig:354-360).\n\n**Readers.** FP-0084 replaces the nonexistent FP-0083/CONTRACT.md with the two slice contracts. FP-0085 reads FP-0129's contract.\n\n**FP-0026's state note** lists every obligation routed to it today: tail calls, legacy caller and arguments, CLDR tailoring, encoders and TextDecoder, Content-Type plumbing, the parser non-goals, srcdoc, unsupported scripts, and SA dictionary breaking.\n\nMinor: how FP-0084 counts the runtime unsupported outcome (see findings)."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 4215,
+      "issue": "FP-0130 criterion 3 (4225) is 'Test each property's effect on real layout output from parsed documents and style sheets'. Criterion 1 also feeds 'lang' values, which come from HTML's language of a node. Both need the HTML parser, FP-0100. FP-0130's depends_on is [\"FP-0071\", \"FP-0117\"]:\n- FP-0071 depends only on FP-0014.\n- FP-0117 depends on FP-0014, FP-0109, FP-0110, and FP-0116.\n\nNeither reaches FP-0100, which is planned (state.json:965). readyTasks (tools/lib.mjs:170-171) can release FP-0130 before any HTML parser exists. Plan reviews 1 and 4 treated this kind of gap as major.",
+      "recommendation": "Add \"FP-0100\" to FP-0130's depends_on. FP-0100 depends only on FP-0008, FP-0009, and FP-0064, so this adds no cycle. If 'real layout output' is meant to be box and fragment output, not FP-0117 line output alone, also add FP-0016, or say in FP-0130's contract which layout output counts."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 4183,
+      "issue": "FP-0128 criterion 8 reports a reference to an unimplemented standard global as an unsupported outcome at runtime. FP-0084 criterion 4 (3427) requires the Test262 runner to 'classify unsupported only by frozen static rules'. FP-0084's contract does not yet say how a test whose run returns FP-0128's runtime unsupported outcome is counted. Counting it as unsupported without a static rule would contradict FP-0084 criterion 4. It could also hide failures behind a list that can grow, against AGENTS.md's ban on weakening the test denominator.",
+      "recommendation": "When freezing FP-0084's contract, treat FP-0128's frozen list of 57 names as part of its static unsupported rules. Count a runtime unsupported outcome as unsupported only when that list or the test's frontmatter statically predicts it, and as fail otherwise. Optionally add FP-0128/CONTRACT.md's list to FP-0084's frozen inputs."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/state.json",
+      "line": 989,
+      "issue": "FP-0126's state note still ends 'The tree-construction task that handles meta in head calls this task's hook once both exist.' Since 75dd48b, FP-0126 itself depends on FP-0100 and owns the call from the in head meta branch.",
+      "recommendation": "Update the note to say that FP-0126 makes the call, so state.json and plan.json agree."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 2841,
+      "issue": "FP-0058's allowed_paths are [src, tests, tools, build.zig, specs]. Its criterion 6 asks it to 'record each kept or changed choice' of FP-0119 and FP-0120. engineering/evidence is an allowed evidence root in policy.json, but this task does not list it, unlike the closing tasks that gained it in this review set.",
+      "recommendation": "Optionally add \"engineering/evidence\" to FP-0058's allowed_paths when the plan next changes, or name in its contract the file that records the choices."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 744,
+      "issue": "FP-0016 depends on FP-0117 and FP-0122 but not on FP-0130. Its criterion 4, 'Use real parser and layout output instead of fixture-specific pixels', may then lay out text with explicit parameters instead of computed CSS text values until FP-0130 lands.",
+      "recommendation": "In FP-0016's contract, say which text parameters come from FP-0014's computed values and which stay explicit until FP-0130. Alternatively, make FP-0016 depend on FP-0130 if its vertical slice needs computed font-family and white-space."
+    }
+  ]
+}
