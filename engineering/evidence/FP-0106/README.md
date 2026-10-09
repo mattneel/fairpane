@@ -124,7 +124,22 @@ No stop rule fired: the ReleaseSafe build took less than 300 s, case 5 took less
 - `RESULT` lines record each command's working directory and resolved executable, and the controller suite prints temporary paths under the user profile, as earlier evidence does.
   No recorded command lists the contents of a home directory or a user profile.
 
-## Integrator steps
+## Integration
 
-The integrator records `HEAD` and a status that includes ignored files before and after it runs `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, and `c-abi` with `--evidence-dir engineering/evidence/FP-0106/gates`.
+Commit `63e14ca` applies the worker's `out/fp0106.patch`, blob `cdeb5c30f9df80ef0ed4612cc51e4b942ea5d374`, on `9307a36`, and all 37 files apply cleanly.
+
+`raw/integration-binding.log` records `HEAD` `63e14ca` and a status that includes ignored files for every source root before and after these runs:
+
+| Run | Record | Result |
+| --- | --- | --- |
+| `repo-check` | `gates/2026-10-09T20-38-10-058Z-repo-check-2b6ce7b1.json` | pass, 182 ms |
+| `controller-test` | `gates/2026-10-09T20-38-10-468Z-controller-test-bc7b2993.json` | pass, 253 of 253, 47,942 ms |
+| `zig-fmt` | `gates/2026-10-09T20-38-58-706Z-zig-fmt-e04f442f.json` | pass, 75 ms |
+| `zig-test` | `gates/2026-10-09T20-38-59-070Z-zig-test-f144d6e6.json` | pass, 4,703 ms on the warm local cache |
+| `c-abi` | `gates/2026-10-09T20-39-04-027Z-c-abi-ecbae2e5.json` | pass; the ReleaseSafe `zig build` took 3,245 ms, and both `abi-exports` runs report 15 exports |
+| Uncached `zig build test --summary all` | `raw/integration-tests.log`, with the fresh cache directory `out/fp0106-integration` | exit 0; `Build Summary: 104/104 steps succeeded; 397/397 tests passed` |
+| Bun 1.4.2 | `raw/bun-selftest.log` | 253 of 253 |
+
+## Open items
+
 After the push, the integrator records `gh run view` of the first `Gates` run that contains the change and the Windows `c-abi` receipt and log under `engineering/evidence/FP-0106/ci/`, and reports the duration of the ReleaseSafe `zig build` command here.
