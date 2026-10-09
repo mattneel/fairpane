@@ -240,3 +240,6 @@ The integrator implemented revision 1 and its amendment 1, as `CONTRACT.md` reco
 
 Two earlier recordings of `tests-before-r1.log` printed the host's whole search path in case 3's failure message, first through the message and then through `assert.equal`'s value diff.
 They are withheld from the repository, and case 3 now reports only whether each value is present and its length, through `assert.ok`.
+
+`raw/integration-binding-r1-binding.log` records `HEAD` `d4de685` and a status that includes ignored files before and after the four gates: `gates/2026-10-09T19-07-24-699Z-repo-check-e98f573b.json`, `gates/2026-10-09T19-07-25-511Z-controller-test-4c916c75.json` (248 of 248, 61,330 ms beside running workers' builds), `gates/2026-10-09T19-08-27-291Z-zig-fmt-bbe5c452.json`, and `gates/2026-10-09T19-08-27-841Z-zig-test-5e6b3d66.json` pass.
+`raw/bun-selftest-r1-binding.log` records Bun 1.4.2 with 248 of 248 cases.
