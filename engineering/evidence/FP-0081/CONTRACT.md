@@ -90,7 +90,7 @@ Its calls induce each failure through the limit alone:
 4. Zig: `fp_engine_set_memory_limit` below `allocated_bytes` succeeds, every allocating call then returns `out_of_memory`, and raising the limit again lets the same calls succeed.
 5. Zig and C: `fp_engine_get_memory` with a too-small `out_size`, a null `out`, or a null engine returns `invalid_argument` and writes nothing, and both functions return `wrong_thread` from a foreign thread before any other check.
 6. C: `tests/c/abi_smoke.c` runs `Scenario allocation-failure:` through the limit, with every call and effect of the scenario.
-7. Zig: `src/abi_scenarios.zig` keeps its `FailingAllocator` run of every allocation point, which `testing.checkAllAllocationFailures` enumerates with `.resize_fail_index = 0`, and adds the same scenario through the limit.
+7. Zig: `src/abi_scenarios.zig` keeps its existing `FailingAllocator` run of every allocation point, the `failEachAllocation` loop with `.resize_fail_index = 0`, unchanged, and adds the same scenario through the limit.
 8. Controller: the generated header, the generated Zig declarations, and the layout model agree on the sizes and offsets of `engine_options` and `engine_memory` on 32-bit and 64-bit targets, and the scenario checks require the C smoke test to name `allocation-failure`.
 
 Cases 1 to 6 and 8 must fail before the change.
@@ -119,3 +119,9 @@ Required reviewers: `fairpane-review` and `fairpane-security`.
 - No peak or history statistics.
 - No change to `max_outstanding_requests`, `max_response_body_bytes`, or `FP_STATUS_LIMIT_EXCEEDED`.
 - No Rust code; `FP-0029` runs the scenario through the Rust wrapper.
+
+## Amendments
+
+1. Case 7 named the wrong enumerator.
+   The existing run in `src/abi_scenarios.zig` enumerates allocation points with its own `failEachAllocation` loop over a `testing.FailingAllocator` with `.resize_fail_index = 0`, not with `testing.checkAllAllocationFailures`.
+   Worker `FP0081Budget` found the difference, and the case now names that loop; the requirement to keep the run and add the limit run is unchanged.
