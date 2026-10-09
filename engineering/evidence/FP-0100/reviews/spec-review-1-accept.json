@@ -1,0 +1,36 @@
+{
+  "verdict": "accept",
+  "summary": "FP-0100 at f17b396 meets its frozen contract, its FP-0008, FP-0064, and FP-0009 parent contracts, and the eleven criteria of the plan entry. I found no blocker or major defect. I checked every implemented branch of the ten modes against the pinned source: initial, including both quirks lists and the limited-quirks list (145851 to 146002); before html; before head; in head, including the script steps; in head noscript; after head, including the head-pointer push and removal; all 55 in body entries; close a p element; the adoption agency algorithm, including both loop counters, the bookmark, removal followed by a guarded insert, and the stack replacement; text; after body; after after body; and step 4 of stop parsing. The special category, the scope lists (with select as an in-scope boundary), the implied end tags, the Noah's Ark clause on stored attributes, reconstruct, and clear to the last marker follow 142134 to 142397 exactly. The README's rb/rtc and rp/rt reading is the literal reading of 147705 to 147723, and the code follows it. The parser reports every behavior outside the subset as unsupported with its owner: in_table goes to FP-0102, in_frameset goes to FP-0103 through the mode check, the template start tag goes to FP-0103 before any step of its branch runs, and the math and svg start tags go to FP-0104 before their reconstruct step. Nothing outside the subset is skipped silently, and every other omission is a non-goal that the contract freezes. Parse-error positions use the token start, each character's own characterPosition, and the input length for end of file. The self-closing error follows the token's other errors. The evidence logs record the actual commands with their exit statuses: tests-before failed to compile as expected, tests-after passed uncached with 297 unit tests in 54 s, the mutation control failed cases 8 (A9 and A10) and 12 (Q8), and the restored file is byte-identical. integration-binding.log records HEAD f17b396 and a clean status that includes ignored files before and after the four passing gates and the uncached integration run, which passed 394 of 394 tests. FP-0064 amendment 3 is recorded in the FP-0064 contract and in FP-0104's plan entry.",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "src/html/tree.zig",
+      "line": 276,
+      "issue": "The comment says \"The five scope algorithms\", but `Scope` has four values. The table-scope arm of `isScopeBoundary` (line 283) is never reached in this subset, so it is dead code until FP-0102 uses it."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0100/README.md",
+      "line": 302,
+      "issue": "The rb/rtc and rp/rt reading checks the current node even when no ruby element is in scope. This follows the pinned text literally, but html5lib nests the check inside the scope condition. No frozen case distinguishes the two readings, so FP-0101 should confirm that the WPT results do not depend on it."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0100/README.md",
+      "line": 309,
+      "issue": "A start tag that ends in an unsupported outcome raises no trailing-solidus error, because the branch that would acknowledge its flag never runs. The contract does not state this case. The outcome is terminal, so nothing observable changes, but the FP-0102 to FP-0104 contracts should freeze the behavior when they implement those branches."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0100/README.md",
+      "line": 324,
+      "issue": "The uncached integration run used the cache directory `out/out/fp0100-integration`, which doubles the `out` prefix of the contract's command form. The directory was still fresh, and the README reports it accurately, so the result stands."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0100/README.md",
+      "line": 106,
+      "issue": "On its first characters step, each tokenizer reserves 8194 character records in one allocation, even for tiny inputs. This adds about 7.4 s to the FP-0008 and FP-0064 tests. The contract permits the reservation and the total stays well under the 400 s limit, but FP-0098 should measure whether the cost matters for many small parses."
+    }
+  ]
+}
