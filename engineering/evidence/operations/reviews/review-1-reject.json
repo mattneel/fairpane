@@ -1,0 +1,55 @@
+{
+  "verdict": "reject",
+  "summary": "I reject 483a239 as written. The idea is sound, but one gap means the new rule cannot be applied mechanically without the risk of weakening a gate. I read the commit's patch from GitHub and the current text of docs/AGENT_OPERATIONS.md:84-94, AGENTS.md:61-62, docs/GIT_OPERATIONS.md, and .github/workflows/gates.yml. I ran nothing and could not list Gates runs.\n\n**The idea keeps the rule's purpose.** The old rule needs two things for a failed head: a recorded cause and one passing rerun of that head. The new path still needs the recorded cause, and adds named evidence for it, a fixing commit, and a passing run of a head that contains both the task's implementation and the fix. On the cause, it asks for at least as much as the old rule. One passing run proves no more about an intermittent cause than the old one-rerun rule did, so it is no weaker on that axis either. Treating a timeout as a failure, and requiring a concluded same-head run for a cancelled run, are both strict and clear.\n\n**The major gap (finding 1).** Only the fixing commit is barred from weakening anything. A same-head rerun runs under the failed head's own gates.json, workflow, toolchain, and tests. A later head may not: any commit between the two heads could change them. The obvious example is the separate reviewed timeout increase that FP-0098 criterion 4 explicitly allows. The replacement run could then pass because of that change rather than the fix, and the text would still be satisfied.\n\n**Smaller gaps (findings 2-6).**\n- The later head is not bounded to the acceptance range.\n- The cause's evidence need not tie to the specific failed run.\n- 'Itself reviewed' does not say where the review is recorded or when it must exist.\n- 'Exclusions' and timeouts are not named, although AGENTS.md:61 lists exclusions.\n- The rule does not say how many runs must show the fix for an intermittent cause.\n\nWith the amendments in the findings, I would approve. This approval should then be recorded like the plan reviews, before any acceptance relies on the new path.",
+  "findings": [
+    {
+      "severity": "major",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 89,
+      "issue": "The replacement run is on a different head from the failed run. Only the fixing commit is required to 'remove or weaken no test, gate, or threshold' (line 91). Nothing constrains the other commits between the failed head and the replacing head.\n\nIf any of them changes the failed gate, the replacing run can pass for that reason and not because of the fix. Possible changes:\n- the gate's entry in engineering/gates.json, such as zig-test timeout_ms 600000;\n- the workflow job in .github/workflows/gates.yml (`timeout-minutes`, steps, runner image);\n- the locked compiler;\n- a test that the failed step runs, such as removing it, skipping it, or adding an exclusion.\n\nThis is a live scenario. FP-0098 criterion 4 (plan.json:3445) permits 'a separate reviewed change to the timeout' for exactly the zig-test timeouts this rule targets. A same-head rerun cannot be affected this way, because it reuses the failed head's gate definitions. As written, the text lets a weakening split off into another commit carry an acceptance, against AGENTS.md:61 ('Do not weaken protected gates, exclusions, or performance thresholds').",
+      "recommendation": "Add a condition that can be checked from the commit range. Suggested text: 'No commit between the failed head and the replacing head changes the failed gate's entry in engineering/gates.json, its workflow job, or the locked toolchain, or removes, skips, excludes, or weakens a test that the failed gate runs; otherwise the record names each such change and its own review record, and the replacement is not allowed if any such change raises a timeout or threshold.' The integrator checks this with `git diff <failed>..<replacing> -- engineering/gates.json .github/workflows toolchains` and a diff of the test files of the failed step."
+    },
+    {
+      "severity": "minor",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 89,
+      "issue": "'A passing run of a later head' does not bound the head. Line 87 already requires every head from the implementation commit to the head before the acceptance commit to conclude. A replacing head outside that range is either not yet pushed, or after the acceptance, so it cannot support the acceptance. A head inside the range is already subject to line 88, so its run must itself pass or be explained.",
+      "recommendation": "Say 'a passing run of a later head in that range', so the replacing run is one of the runs that line 87 already requires to conclude."
+    },
+    {
+      "severity": "minor",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 90,
+      "issue": "'Names the cause's evidence' does not require the evidence to concern the failed run. Without output from that run, an intermittent failure that the task's own code caused, such as a hang or a race, could be attributed to an unrelated known cause that a later commit fixed.\n\nThis is a real case. The failed timeout runs before FP-0098 kept no build output. engineering/evidence/FP-0014/ci/README.md says that record 'cannot tell a slow runner from an intermittent hang'. So for those heads the attribution is necessarily inference.",
+      "recommendation": "Require the failure record to:\n- name the failed gate and step from the failed run's own receipt or log;\n- give evidence that the cause makes that step fail on the failed head's sources, for example FP-0098's measurement of FP-0014 case 46 on the pre-fix tree;\n- mark the attribution [INFERENCE] where the failed run kept no output.\n\nIf the cause cannot be tied to the failed step even by inference, only a passing same-head rerun is allowed."
+    },
+    {
+      "severity": "minor",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 91,
+      "issue": "'Belongs to an accepted task or is itself reviewed' does not fix the timing or the record. It does not say whether the task must be accepted before the acceptance that relies on it, or which reviewer must review the commit and where that review is recorded. Unlike the plan reviews at AGENT_OPERATIONS.md:79-80, no evidence path is named, so a reviewer cannot check this condition mechanically.",
+      "recommendation": "Write: 'The fixing commit is the implementation of a task accepted before this acceptance, or it has its own fairpane-review record in engineering/evidence that predates this acceptance.' The failure record then cites that acceptance or review path."
+    },
+    {
+      "severity": "minor",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 91,
+      "issue": "'Removes or weakens no test, gate, or threshold' leaves out exclusions and timeouts. AGENTS.md:61 names 'protected gates, exclusions, or performance thresholds'. A fixing commit that adds an applicability exclusion, skips a slow case, or raises a gate timeout could be argued not to 'remove' a test or weaken a 'threshold'.",
+      "recommendation": "Write 'removes, skips, excludes, or weakens no test, gate, timeout, or threshold', matching AGENTS.md:61."
+    },
+    {
+      "severity": "note",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 89,
+      "issue": "One passing run of the later head does not show that an intermittent cause is gone; some heads in the 152ed53..9d5638b range passed even before the fix. The old same-head rule has the same weakness, so the change does not reduce strength here. FP-0098's ten dispatched runs on 29a9f8e are the evidence that actually shows the fix works.",
+      "recommendation": "Optionally require the fixing commit's own evidence to show that the cause no longer fails the gate, using repeated runs when the cause is intermittent, as FP-0098 recorded. The failure record should cite that evidence."
+    },
+    {
+      "severity": "note",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 92,
+      "issue": "The cancelled-run clause is precise and can be met. Master runs do not cancel each other: concurrency groups by run ID, and cancel-in-progress applies only to pull requests (gates.yml:14-17). A same-head rerun of an old head is available through GitHub's re-run of that run; workflow_dispatch would run master's current head instead. Commit 483a239 changes only this file, so it is a separate commit as AGENTS.md:62 requires.",
+      "recommendation": "No change is needed. Record this approval, after the amendments land, under engineering/evidence/plan/reviews/ or a docs-policy equivalent, before any acceptance uses the new path."
+    }
+  ]
+}

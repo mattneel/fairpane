@@ -1,0 +1,27 @@
+{
+  "verdict": "approve",
+  "summary": "I approve c315be1: it fixes every finding from my review of 483a239, and no blocker or major finding remains. One minor gap and two notes remain, and none of them blocks approval. I read the c315be1 diff on GitHub and the current docs/AGENT_OPERATIONS.md:86-102, and ran nothing.\n\nHow each earlier finding is resolved:\n- **Major (commits between the two heads).** No commit from the failed head to the replacing head may change the failed gate's gates.json entry, its workflow job, or its locked toolchain, or remove, skip, exclude, or weaken a test that the failed step runs. The record must include `git diff --stat` of that range (lines 98-99). A timeout raised in a separate commit, such as FP-0098 criterion 4 allows, can no longer carry an acceptance.\n- **Range.** The replacing head must be 'a later head in that range' (line 89), and must contain both the task's implementation and the fix (line 90).\n- **Cause attribution.** The record must name the failed gate and step from the failed run's own record. It must tie the cause to that step on the failed head's sources, marked [INFERENCE] where the run kept no output (lines 92-93). If the cause cannot be tied even as an inference, only a same-head rerun is allowed (line 101).\n- **Review timing.** The fix must be the implementation of a task accepted before this acceptance, or have a fairpane-review record that predates it (line 94).\n- **Exclusions and timeouts.** These are now named among the things the fixing commit may not change (line 96), matching AGENTS.md:61.\n- **Repeated runs.** The fix's evidence must show that the cause no longer fails the gate, with repeated runs for an intermittent cause (line 95).\n\nThe timeout and cancellation rules (lines 102-103) are unchanged and clear. The commit touches only this file, as AGENTS.md:62 requires.\n\nThe rule still serves its purpose: no task is accepted while a gate failure that its code might cause is unexplained, and no gate is weakened. Most conditions can be checked from the commit range and the evidence paths. The one remaining judgment call, whether a test was weakened, falls to the reviewer, as it already does under AGENTS.md:61.\n\nRecord this approval under engineering/evidence before any acceptance relies on the new path.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 98,
+      "issue": "The range condition covers the gates.json entry, the workflow job, the locked toolchain, and the tests of the failed step. It does not cover the gate runner or the build definition, which also decide what a gate runs and how it is judged:\n- the timeout and exit-status handling in tools/lib.mjs runGate and runProcess;\n- the cache settings that runGate passes;\n- build.zig, which defines which steps `zig build test` runs.\n\nA reviewed, non-weakening change to any of these in the range could still make the replacing run pass for a reason other than the fix. Line 95, which requires the fix's own evidence to show that the cause is gone, limits the risk. 'For those paths' (line 99) is also not a fixed path list, so the `git diff --stat` record is not fully mechanical.",
+      "recommendation": "Name the paths explicitly, for example: '`git diff --stat <failed>..<replacing> -- engineering/gates.json .github/workflows toolchains tools/lib.mjs build.zig` and the test sources of the failed step'. Treat any change to the gate runner or the build steps in that range like a gates.json change: name it in the record, or fall back to a same-head rerun."
+    },
+    {
+      "severity": "note",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 95,
+      "issue": "'With repeated runs when the cause is intermittent' sets no minimum. Two runs would satisfy it literally, although FP-0098 recorded ten dispatched runs on 29a9f8e.",
+      "recommendation": "Optionally state a floor, such as at least ten concluded runs or the count that the fixing task's contract froze, so the condition can be checked without judgment."
+    },
+    {
+      "severity": "note",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 94,
+      "issue": "'The fixing commit' is singular. A fix can span an implementation commit and later revision commits of the same task.",
+      "recommendation": "Optionally write 'the fixing commits' or 'the fixing task's implementation', so a multi-commit fix is covered and every one of its commits falls under lines 94-96."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "verdict": "approve",
+  "summary": "Confirmed: 3bab256 only tightens c315be1, and my approval carries over. I read the 3bab256 diff on GitHub and ran nothing. The commit changes only docs/AGENT_OPERATIONS.md lines 94-100, and no condition from c315be1 is removed or loosened.\n\n1. **Fixing commits (line 94).** 'Fixing commit' becomes 'fixing commits', covering a task's implementation and its revisions. In the reviewed-commit branch, each commit now needs its own fairpane-review record that predates this acceptance. Every commit of a multi-commit fix is now under the rule.\n2. **Repeated runs (lines 95-96).** 'Repeated runs' becomes at least ten concluded runs, or the larger count the fixing task's contract froze. That gives a fixed floor where c315be1 had none.\n3. **No-weakening rule (line 97).** It now applies to every fixing commit.\n4. **Diff record (line 99).** The `git diff --stat` record is now an explicit, mechanically checkable path list: `engineering/gates.json`, `.github/workflows` (the whole directory, broader than 'the workflow job'), `toolchains`, `tools/lib.mjs`, and `build.zig`, plus the test sources of the failed step.\n5. **Runner and build-step changes (line 100).** This bullet is new. The record must name each change in the range to the gate runner or the build steps and say why it cannot make the replacing run pass; otherwise only a same-head rerun is allowed. This closes the minor finding from my c315be1 review.\n\nAll the c315be1 conditions are kept unchanged: the range bound, the replacing head containing both the task's implementation and the fix, cause attribution with [INFERENCE], the same-head fallback for a cause that cannot be tied to the failed step, timeouts counting as failures, and the cancelled-run rule.\n\nTwo wording notes remain. Neither loosens the rule.",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 95,
+      "issue": "The bullet now says 'The fixing task's evidence'. Line 94 also allows fixing commits that have only their own fairpane-review records and no task. For such a fix, there is no 'fixing task', so it is unclear which evidence must show that the cause is gone. Read literally, that branch can never meet line 95 and falls back to a same-head rerun. That is stricter, not looser, but it is probably not what was intended.",
+      "recommendation": "Optionally write 'The fixing task's evidence, or the fixing commits' review evidence, shows …' so both branches of line 94 have a defined evidence source."
+    },
+    {
+      "severity": "note",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 96,
+      "issue": "'At least ten concluded runs' counts every concluded run, including failed ones. Line 95 already requires the evidence to show that the cause no longer fails the gate, so a run that the cause fails contradicts it. Still, the count alone does not say whether runs that failed for other reasons count toward the ten.",
+      "recommendation": "Optionally write 'at least ten concluded runs, none of which the cause fails, and each other failure recorded with its cause', so the count can be checked without interpretation."
+    }
+  ]
+}
