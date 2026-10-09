@@ -1,0 +1,108 @@
+{
+  "verdict": "approve",
+  "summary": "Plan review 3: I approve all six commits. No criterion is dropped, weakened, or made conditional without a named owner, so I found no blocker and no major finding. Six minor findings and four notes follow.\n\nHow I checked: I read each commit's diff or patch on GitHub, the plan.json and state.json at the current tree, engineering/policy.json, P1 (9fb8d8f), FP-0082 CONTRACT.md amendment 1, and every review and CI record named in the request. I ran nothing; that `node tools/fairpane.mjs check` passes is [INFERENCE]. Every new dependency names an existing task, no cycle appears, and FP-0099, FP-0106, and FP-0107 have state entries.\n\nWhat each commit does:\n- **efc3dd3** applies plan review 2's wording fixes exactly. FP-0070 criterion 5 now uses the Bloom-filter text I proposed, FP-0070 and FP-0071 cite 'FP-0014 review 1' and read both reviews, and FP-0098 criterion 3 is now decidable.\n- **1600761** removes FP-0098's only dependency. That is justified, because FP-0067 cannot pass its Gates run until FP-0098 lands, and FP-0067's code is already on master.\n- **54cf4d4** moves the Rust pin paths of FP-0023 and FP-0029 from writable to protected and adds FP-0099. FP-0099's criteria trace to FP-0067 review 1 and FP-0079 security review 2.\n- **0a980f8** gives FP-0083 FP-0082 amendment 1's depth-independent native stack rule. It is measurable on the parser's frozen case-10 inputs.\n- **f31eb22** routes the FP-0081 memory-limit statement into FP-0099 and allows api/README.md for it.\n- **a1b28f6** adds FP-0099's mutation control, FP-0106 for the FP-0066 and FP-0076 code findings, and FP-0107 for the Windows controller-test timeout of run 37952850522. Each new criterion is testable, and both timeout tasks forbid removing, skipping, excluding, or weakening any test.\n\nThe minor findings:\n1. Task protected lists name rust-toolchain.toml, which policy.json does not protect, and FP-0079 still lists both pin files as writable.\n2. FP-0099 criterion 5 documents FP-0081's limit without depending on FP-0081.\n3. FP-0099 may write to all of docs/ and .github/, which its criteria do not need.\n4. FP-0106 may extend the c-abi gate without requiring it.\n5. FP-0023's criterion 5 now needs a protected-path change that the criterion does not mention.\n6. FP-0099 criterion 5 cites 'the FP-0081 reviews', but only the security review raised the point.",
+  "commits": [
+    {
+      "commit": "efc3dd3",
+      "verdict": "approve",
+      "notes": "**FP-0070 criterion 5 (plan.json:3072).** Replaced word for word by plan review 2's suggested text. It keeps the obligation and can no longer be read as refusing valid selectors. It is measurable on FP-0014 case 46 (a 100000-deep chain) and case 53 (2000).\n\n**Review citations.** FP-0070 criterion 6 (3073) and FP-0071 criterion 4 now cite 'FP-0014 review 1'. FP-0070 now reads review-1-reject.json and review-2-accept.json, and FP-0071 reads review-1-reject.json, as review 2 asked.\n\n**FP-0098 criterion 3 (3445).** It now requires at least ten Windows reruns with criterion 2's output capture, a duration for each step, a fix for any hang a run shows, and the 37931192952 cause stated only as [INFERENCE] unless a record decides it. This replaces a criterion that could not be met, as plan review 2 approved, and weakens no gate or threshold.\n\nstate.json is not touched."
+    },
+    {
+      "commit": "1600761",
+      "verdict": "approve",
+      "notes": "Changes FP-0098's depends_on from [\"FP-0067\"] to [] (plan.json:3435); its criteria are unchanged.\n\nThe rationale holds. FP-0067's first Gates run (37936609533) timed out in Linux zig-test: FP-0067 review 2 cites a Linux zig-test receipt with timed_out true, 600004 ms, SIGKILL. Under docs/AGENT_OPERATIONS.md, FP-0067 cannot be accepted until a fix lands, and FP-0098 is that fix. Keeping the dependency would deadlock both tasks.\n\nFP-0098 criterion 1 needs the Linux CI zig-test job. FP-0067's workflow change already provides it on master, and FP-0098/ci/README.md records ten Linux zig-test durations at 29a9f8e. The commit is plan-only, as AGENTS.md:62 requires."
+    },
+    {
+      "commit": "54cf4d4",
+      "verdict": "approve",
+      "notes": "**FP-0023 and FP-0029.**\n- FP-0023 drops toolchains/rust.lock.json from writable and adds it to protected.\n- FP-0029 drops toolchains/rust.lock.json and rust-toolchain.toml from writable and adds both to protected (plan.json:1386-1387).\n- Neither task's criteria change.\n- FP-0023 criterion 5 ('Pin, build, and execute the first-party wrapper … on actual Linux and macOS hosts') now needs a protected lock change for macOS (finding 5).\n\n**FP-0099 (3453).**\n- Criteria 1 and 2 trace to FP-0067 review 1's minor finding at workflow-check.mjs:457 and its repo-check note.\n- Criterion 3 traces to FP-0079 security review 2's minor finding at rust.mjs:113 and its note at :284.\n- Criterion 4 traces to the doctor-probe note at fairpane.mjs:96.\n- All four are concrete and testable. The dependency on FP-0052 is justified by the shared resolver and system-program work in tools/lib.mjs.\n- fairpane-security is a required reviewer, which suits the archive and doctor changes.\n- FP-0099 has a state entry.\n\n**Inconsistencies (findings 1 and 3).**\n- P1 put rust-toolchain.toml into policy_roots and required_files, but not into policy.json's protected_paths. The commit message's 'P1 protects … rust-toolchain.toml' is therefore inaccurate.\n- FP-0079 still lists both files as writable (3257).\n- FP-0099's .github and docs paths are broader than its criteria need."
+    },
+    {
+      "commit": "0a980f8",
+      "verdict": "approve",
+      "notes": "Adds FP-0083 criterion 9 (plan.json:3367). Every syntax-tree and bytecode traversal must keep native stack use from growing with nesting depth. The parser's deepest accepted inputs must compile and run on a 1 MiB stack in the Debug test build.\n\nThis matches FP-0082 CONTRACT.md amendment 1 (lines 853-858): about 3.8 KB of stack per nesting level, overflow near depth 265, max_depth stays 1024, and cases 10 and 11 run on a 1 MiB thread. It is measurable on the frozen case 10 inputs, such as `a` inside 1021 parentheses. It only adds an obligation, and FP-0083 already depends on FP-0082.\n\nNote: running the case 10 inputs throws a ReferenceError for `a`. The contract should freeze the expected completion for each input, so that a stack overflow cannot be mistaken for an expected abrupt outcome."
+    },
+    {
+      "commit": "f31eb22",
+      "verdict": "approve",
+      "notes": "Adds FP-0099 criterion 5 (plan.json:3468) and the writable path api/README.md, which is a source root and not protected. It also adds FP-0081 security-review-1-accept.json to the read list.\n\nThe criterion matches that review's minor finding at line 229, that the limit counts requested bytes and not resident memory. It also matches its note that the limit is in-process self-accounting, a local integrity check that documentation should not describe as containment. It is testable by reading the README.\n\nTwo gaps:\n- 'as the FP-0081 reviews note' is inaccurate: review-1-accept.json has no such finding, and only the security review does (finding 6).\n- FP-0099 does not depend on FP-0081, whose limit it documents (finding 2)."
+    },
+    {
+      "commit": "a1b28f6",
+      "verdict": "approve",
+      "notes": "**FP-0099 criterion 6.** The mutation control for the Linux job's gate-order check traces to FP-0067 review 1's note on raw/tests-before.log. FP-0067 review 2 noted that this item was neither fixed nor moved, and it is now owned.\n\n**FP-0106 (3476).**\n- Criteria 1 and 2 trace to FP-0066 review 1's minor findings at build.zig:269 (ReleaseSafe abi-exports in no gate) and library_check.zig:127 (a case-folded copy of the library per needle).\n- Criterion 3 traces to FP-0076 review 1's minor finding at lab_main.zig:206, with every status the review listed and a pending-deletion test.\n- Criterion 4 preserves the existing cases. All four are testable.\n- The dependencies FP-0066 and FP-0076 are correct. FP-0076 is still 'planned' in state.json:899, the stale entry its review flagged, so FP-0106 stays blocked until FP-0076's state is corrected and it is accepted.\n- The required gates omit c-abi, although criterion 1 may extend that gate (finding 4).\n\n**FP-0107 (3497).**\n- The run 37952850522 attempt 1 record shows a Windows controller-test receipt with timed_out true at 120572 ms, and runs-2026-10-09.log and FP-0098/ci/README.md show Windows durations of 62 to 121 s against a 120 s timeout.\n- Its criteria require per-test durations over at least ten runs on both hosts, the dominant tests and their causes, a slowest Windows duration of at most 80 s by reducing test time or through a separate reviewed timeout change, and ten Windows reruns after the change.\n- It does not weaken any gate, exclusion, or threshold. The empty depends_on and the writable paths (tools, tests, decisions, evidence) are sufficient and minimal.\n\nThe new state entries exist. The commit is plan and state only."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 1387,
+      "issue": "The task protected lists no longer match engineering/policy.json, and one task still allows the protected files.\n- **Commit message.** It says 'P1 protects toolchains/rust.lock.json and rust-toolchain.toml'. P1 (9fb8d8f) added rust-toolchain.toml to source_roots, policy_roots, and required_files, but not to protected_paths. policy.json:52-61 lists toolchains/rust.lock.json only.\n- **Lists stricter than policy.** FP-0029 (1387), FP-0099, FP-0106, and FP-0107 list rust-toolchain.toml as protected.\n- **Stale writable paths.** FP-0079 still lists both toolchains/rust.lock.json and rust-toolchain.toml as writable (3257), which contradicts the commit's stated rule.\n\nNo tool reads either protected list, so this is documentary, and a policy-root change already alters the policy digest that gate receipts compare (tools/lib.mjs:358, 376). FP-0079 criterion 6 ('Protect the lock and the selection file') is satisfied only for the lock.",
+      "recommendation": "Choose one of two ways to align the lists:\n- Add rust-toolchain.toml to policy.json protected_paths in a separate reviewed policy commit, which completes FP-0079 criterion 6.\n- Drop it from the task protected lists and state that it is protected as a policy root that repo-check binds to the lock.\n\nIn the same plan commit, remove both pin paths from FP-0079's allowed_paths, or record why FP-0079 keeps them until it is accepted."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3456,
+      "issue": "FP-0099 criterion 5 (3468) documents FP-0081's engine memory limit in api/README.md, but depends_on is [\"FP-0052\", \"FP-0067\", \"FP-0079\"]. FP-0081 is still 'active' (state.json:934). readyTasks can therefore release FP-0099 before the behavior it documents is accepted. It is the same class of gap as plan review 1's major finding, limited here to documentation.",
+      "recommendation": "Add \"FP-0081\" to FP-0099's depends_on. FP-0081 depends only on FP-0050, so this adds no cycle."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3458,
+      "issue": "FP-0099 may write to \".github\" and \"docs\", but none of its six criteria needs either.\n- Criterion 1's renamed-job case is a checker fixture under tools or tests.\n- Criterion 2's 'record why' belongs in evidence or tools/README.md.\n- Criterion 5 already has its own path, api/README.md.\n\n\"docs\" covers docs/AGENT_OPERATIONS.md, whose acceptance-policy text AGENTS.md:62 requires to change only in separate, independently approved commits.",
+      "recommendation": "Remove \".github\" and \"docs\" from FP-0099's allowed_paths. If the contract freeze shows a specific file is needed, add that file alone, as f31eb22 did for api/README.md."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3487,
+      "issue": "FP-0106 criterion 1 allows the ReleaseSafe export check to go 'in a gate'. The existing abi-exports step runs inside the c-abi gate (tools/lib.mjs:694-698, as FP-0066 review 1 cites). FP-0106's required_gates are repo-check, controller-test, zig-fmt, and zig-test, so a change to the c-abi gate would never have to pass that gate for acceptance.",
+      "recommendation": "Add \"c-abi\" to FP-0106's required_gates, or freeze in its contract that criterion 1 is met through reproduce-check and recorded as evidence."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 1115,
+      "issue": "54cf4d4 removes toolchains/rust.lock.json from FP-0023's writable paths. FP-0023 criterion 5 ('Pin, build, and execute the first-party wrapper and the browser shell on actual Linux and macOS hosts') needs a macOS host entry in that lock, which is now a protected change. The criterion does not say so, unlike FP-0080 criterion 10 ('through a reviewed lock change').",
+      "recommendation": "In the next plan commit, append 'through a separate reviewed lock change' to FP-0023 criterion 5's pin step, so the worker does not expect to edit the lock directly."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3468,
+      "issue": "FP-0099 criterion 5 ends 'as the FP-0081 reviews note', and the f31eb22 message says 'Both FP-0081 reviews asked'. Only security-review-1-accept.json raises the requested-bytes and containment points (its minor finding at line 229 and its following note). review-1-accept.json has no such finding. The security review's recommendation also says real usage can exceed the limit by allocator granularity and that hosts needing a hard cap should combine it with OS-level limits; the criterion omits both.",
+      "recommendation": "Write 'as FP-0081 security review 1 notes'. Consider adding that resident memory can exceed the limit by allocator granularity, and that hosts that need a hard cap combine it with OS-level limits."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3510,
+      "issue": "FP-0107 criterion 3, 'Keep the gate's slowest recorded Windows duration at most two thirds of its timeout', does not say which records count. Criterion 1's records are taken before the change and already include 121 s, more than the 80 s bound. Read literally, the criterion cannot pass. FP-0098 criterion 4 has the same wording, and its CI record applied it to the post-change dispatched runs.",
+      "recommendation": "When freezing FP-0107's contract, state that criterion 3 applies to the criterion 4 runs after the change. Optionally make the same correction to FP-0098 criterion 4."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/ci/run-37952850522-attempt-1/README.md",
+      "line": 17,
+      "issue": "FP-0107 reads two records that disagree on where the timed-out suite stopped.\n- ci/run-37952850522-attempt-1/README.md says the log 'ends while the suite runs test 223, after ok 222'.\n- engineering/evidence/FP-0098/ci/README.md says the suite 'was at its test 222 of 224'.\n\nFP-0107 criterion 2 names the dominant tests from these records.",
+      "recommendation": "Correct one of the two records, citing the receipt log line, before FP-0107 is dispatched."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3476,
+      "issue": "a1b28f6 adds FP-0106 and FP-0107 after FP-0099, and no file in the repository mentions FP-0100 to FP-0105. validatePlan allows gaps, so nothing breaks, but readers may look for missing tasks.",
+      "recommendation": "If those IDs are reserved, for example for other workers' drafts, say so in HANDOFF.md. Otherwise, use the next free ID for new tasks."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3466,
+      "issue": "FP-0099 criterion 3 follows FP-0079 security review 2's recommendation, which strips trailing spaces before the device-name check and checks component names. The same finding also says CONIN$ and CONOUT$, which Python's os.path.isreserved reserves, are not covered. Two other FP-0067 review 1 notes have no owner: the workflow_dispatch rationale that cites FP-0033 14, and the unlogged Windows and Node claim on README line 8. FP-0067 review 2 also flagged them as neither fixed nor moved.",
+      "recommendation": "Optionally extend criterion 3 to the reserved names CONIN$ and CONOUT$. Record the disposition of the two FP-0067 README notes in FP-0067's README."
+    }
+  ]
+}

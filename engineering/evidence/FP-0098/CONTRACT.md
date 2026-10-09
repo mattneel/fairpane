@@ -96,3 +96,58 @@ Required reviewer: `fairpane-review`.
 1. Before dispatch, the integrator removed the prerequisite `FP-0067` in plan commit `1600761`.
    `FP-0067`'s first `Gates` run timed out in `zig-test`, so `FP-0067` cannot be accepted until this task lands, and its code is already in the base.
    The two facts that this amendment adds to "Measured inputs" narrow the search: the cost arrived with the FP-0014 CSS tests, and both runners exceed the timeout.
+
+## Revision 1
+
+Base: the commit that freezes this revision.
+Source findings: `reviews/review-1-reject.json`.
+Every section above stays in force except where this revision replaces it.
+Writable paths stay as above.
+
+### Integrator decisions
+
+- Review 1 rejected `9d5638b` for one major finding: plan criteria 1 and 3 ask for the compile and run phase durations of `zig-test` on both CI jobs, and the contract recorded only whole-step durations without an approved change.
+  The locked build runner reads `ZIG_BUILD_SUMMARY` from the environment (`lib/compiler/Maker.zig`, lines 296 to 300), and the gate runner passes the job's environment to the gate's command.
+  Setting `ZIG_BUILD_SUMMARY: all` on the `zig-test` step of both jobs therefore puts each build step's result and duration into the gate log, which the uploaded receipts keep.
+  That changes neither the gate's arguments nor its timeout and adds no job, runner, action, or cache, so criteria 1 and 3 stay as written.
+- Criterion 4 applies to the runs that criterion 3 dispatches after the change, as `ci/README.md` already applied it.
+- Review 1's minor finding on criterion 2 is a real gap: the fixture of cases 1 and 2 prints nothing, so no case shows that a timed-out gate keeps its command's output.
+- Review 1's note on a command that ends during the listing is folded in, because a log without a timeout section does not explain itself, and this task makes timeouts diagnosable.
+
+### Behavior
+
+- When the command ends while the timeout listing runs, the log still gets the line `TIMEOUT The command ended during the listing.` before the gate closes it, and the receipt keeps `timed_out: true`.
+  The gate stops any descendant that is still alive, as it does after a listing.
+- Both `Run gate zig-test` steps of `.github/workflows/gates.yml` set `ZIG_BUILD_SUMMARY: all` in their `env`, and no other step or gate changes.
+  The workflow checker accepts that key on those steps, and only there.
+
+### Exact test cases
+
+1. Cases 1 and 2: the hung fixture prints the line `fp0098-output <marker>` before it waits, and each case asserts that the gate log holds that line after the `TIMEOUT` section.
+2. A new controller case, every host: `runProcess` of a sleeping command with a timeout of at most 500 ms and a `processListing` stand-in that stops the command itself and resolves only after the command has exited.
+   The result has `timed_out: true`, the log holds `TIMEOUT The command ended during the listing.`, and no descendant of the command keeps running.
+3. A workflow checker case: the committed workflow passes, a `zig-test` step without the key fails with a message that names the step, and the key on any other step fails.
+
+Cases 2 and 3 must fail before the change.
+Case 1 passes before the change, because `finish` already copies the output after a stop, so a mutation control that skips that copy for a stopped command must fail it.
+A mutation control that drops the new line must fail case 2.
+
+### README corrections
+
+- The part-to-construct mapping of the case 46 split in `raw/probe-case46-parts.log` is marked [INFERENCE], because no diff of the split was recorded.
+- "No log was deleted or overwritten" is limited to the worker's session, and the integrator's removal of `raw/linux-node-probe.log` in `29a9f8e` is stated there.
+- The open item about the dispatched runs points to `ci/README.md` and its result.
+- One sentence explains that the integration run has 300 tests and the worker's tree 293, because commits between the worker's base `937a06b` and `9d5638b` added tests.
+- The statements that other agents ran builds on the same host and that the worker did not commit, push, or dispatch a run are marked [INFERENCE].
+
+### Revision 1 evidence
+
+Record each command with `node tools/fairpane.mjs record` under `engineering/evidence/FP-0098/raw/`, with the suffix `-r1`, and keep each failed attempt as its own log.
+
+1. `tests-before-r1.log` on the base, with `HEAD`, the staging command, and the blob ID of every staged file.
+2. `mutation-r1.log` and its diffs for both controls, with the hash of each changed file before, during, and after.
+3. `controller-tests-after-r1.log` with `node tools/fairpane.mjs test`, which reports the duration of each new or changed case.
+
+The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs `repo-check` and `controller-test`, and re-records `ci/dispatched-runs.log` with each run's `headBranch`.
+After the push, the integrator starts the `Gates` workflow on `master` at least ten times with `gh workflow run`, records each run with `gh run view`, downloads both jobs' receipts, and reports in `ci/README.md` each run's `zig-test` duration and the duration that the build summary gives for each compile step and each run step.
+The task is accepted only when every one of those runs passes and its slowest `zig-test` duration is at most 400 seconds.

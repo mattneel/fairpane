@@ -1,0 +1,90 @@
+{
+  "verdict": "reject",
+  "summary": "I recommend rejecting FP-0098 for now. One major gap remains, and all seven items you asked me to check otherwise hold up.\n\nThe major gap: plan criterion 1 asks for the zig-test gate's compile and run phase durations on the Windows and Linux CI jobs over at least ten runs. The CI record has only the whole gate step's duration. The contract narrowed this without a recorded approval, even though the plan requires every criterion to be kept.\n\nThe seven items:\n\n1. **Cause and fix are correct.** In `raw/probe-case46-parts.log`, the chain part of case 46 takes 177806 ms, and after the change it takes 2164 ms (`raw/probe-case46-parts-leaf-shortcut.log`). The shortcut in `src/dom.zig:759-763` is correct for every tree shape. Only `link` (dom.zig:696-699) sets a parent pointer, and it always sets the parent's `first_child`. `remove` (dom.zig:709-723) clears `first_child` only when the last child leaves. Public mutators check every handle before use (dom.zig:450-469). `isInclusiveAncestorByWalk` stays as the reference, and the new test compares the two for all 144 ordered pairs of 12 nodes. The expected count is 12 + 17 = 29, and the arithmetic checks out.\n2. **Nothing is weakened.** `engineering/gates.json:31-38` still has `[\"build\",\"test\"]` with a 600000 ms timeout. Both workflow jobs still run zig-test. The worker's records show no change to `build.zig`, `tests`, `src/css`, `src/html`, `src/js`, or `src/lab.zig`. The test-name comparison shows 292 tests before and 293 after, with none missing. I had no git access, so the exact file list of the integrator's commit `9d5638b` is [INFERENCE]; it rests on the README and on the clean status in `raw/integration-binding.log`.\n3. **Timeout listing works on both hosts.** At a timeout, `tools/lib.mjs` lists the process tree before it stops the command, and the command's output is still copied into the log. Cases 1 to 3 fail as expected before the change (`raw/tests-before.log`) and pass on Windows (`raw/controller-tests-after.log`) and under WSL Linux (`raw/linux-controller-tests.log`). They also pass in the CI controller-test steps of all ten dispatched runs. The mutation control makes cases 1 and 2 fail (`raw/mutation.log`).\n4. **The profiler is accurate.** `tools/zig/test_profile_runner.zig` sets up each test the way the locked default runner does (test_runner.zig:125-134 and 275-288). It times only the test function and prints milliseconds and percentage shares correctly. Totals and rankings match the README: 188281.739 ms with case 46 at 88.7% before, and 24987.779 ms with partition set P at 30.5% after.\n5. **CI runs pass.** `ci/dispatched-runs.log` shows ten `workflow_dispatch` runs on `29a9f8e`, all successful. The slowest zig-test step is 191 s on Windows and 188 s on Linux, and every table row matches the log.\n6. **The timeout cause stays [INFERENCE].** The only causal statement about the three timed-out runs, including 37931192952, is README line 169, and it is marked [INFERENCE].\n7. **Privacy and claims.** No log in the tree lists the contents of a home directory, and the probe log that did is gone from the tree. Logs do still contain `C:\\Users\\requi` paths. Several README and CI README claims have no log behind them; those are in the minor findings.",
+  "findings": [
+    {
+      "severity": "major",
+      "path": "engineering/plan.json",
+      "line": 3443,
+      "issue": "Plan criterion 1 requires the duration of the zig-test gate \"and of its compile and run phases on the Windows and Linux CI jobs over at least ten runs\". Criterion 3 also asks to \"report each step's duration\". `ci/README.md:10-24` and `ci/dispatched-runs.log` report only the whole gate step's duration from GitHub's step timestamps. The gate runs `zig build test` without `--summary` (gates.json:33-37), so its CI logs hold no phase timing. The only phase durations in the evidence are local ones (`raw/tests-after.log:5-8`, `raw/integration-tests.log:5-8`). The frozen contract dropped the CI phase requirement (CONTRACT.md \"Evidence\" section), although the plan's expansion rule says \"Preserve every criterion\". No review or plan commit approves that narrowing.",
+      "recommendation": "Record the compile and run phase durations of `zig build test` on both CI jobs over at least ten runs, without changing the gate's arguments or timeout. Otherwise, land a reviewed plan amendment that narrows criteria 1 and 3 to gate-step durations plus the local phase profile, and cite it in the README."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/selftest.mjs",
+      "line": 323,
+      "issue": "Item 3 requires that a timed-out gate keep its output. The implementation does keep it, because `finish` copies the capture after the stop (tools/lib.mjs, the `finish` closure). But no test checks this: the `hungGateFixture` command prints nothing, so cases 1 and 2 would pass even if the output were lost. Reproduction: change the fixture script to `console.log('fp0098-output'); setInterval(() => {}, 1000)`. Nothing asserts that `fp0098-output` follows the `TIMEOUT Stopping` line in the log.",
+      "recommendation": "Have the fixture print a marker before it hangs, and assert in cases 1 and 2 that the log contains the marker after the TIMEOUT section."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0098/README.md",
+      "line": 88,
+      "issue": "The cause analysis rests on a temporary three-way split of case 46 (\"PROBE part 2\" and \"part 3\" in `raw/probe-case46-parts.log`). No diff or blob of that split is recorded. So the claim that part 2 is \"the chain of 100000 elements\" has no log behind it. The revert itself is shown by the `src/css/tests.zig` blob `96068291` in `raw/tests-after.log:147`.",
+      "recommendation": "Record the split as a diff, for example with `git diff --no-index` or `git stash show -p` through `record`, or mark the part-to-construct mapping [INFERENCE]."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0098/README.md",
+      "line": 132,
+      "issue": "\"No log was deleted or overwritten.\" contradicts lines 147 and 170-171, which say the integrator removed `raw/linux-node-probe.log` after `9d5638b`.",
+      "recommendation": "Limit the sentence to the worker's session, or state the integrator's removal there."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0098/README.md",
+      "line": 167,
+      "issue": "This open item still says the integrator \"runs the ten dispatched Gates runs\". `ci/README.md` now records that those runs are done and pass.",
+      "recommendation": "Replace the item with a pointer to `ci/README.md` and its result."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0098/ci/README.md",
+      "line": 8,
+      "issue": "No record exists for the claim that the runs were started with `gh workflow run Gates --ref master`. `ci/dispatched-runs.log` selects runs by event and head SHA only and does not request `headBranch`, so the `master` ref is not shown.",
+      "recommendation": "Add `headBranch` to the `gh run view` fields and re-record, or mark the dispatch command [INFERENCE]."
+    },
+    {
+      "severity": "minor",
+      "path": "docs/AGENT_OPERATIONS.md",
+      "line": 88,
+      "issue": "Acceptance needs concluded, passing runs for every pushed head from `9d5638b` to the head before the acceptance commit. `engineering/evidence/ci/runs-2026-10-09.log` ends at `483a239`. The reflog shows later pushed heads with no recorded run: `c315be1`, `3bab256`, `2002f5e`, `a695d51`, `5eeece2`, `4d11e84`, `2982ab1`, `7861102`, and `1682d32`. Run 37952850522 of `a2dd9ed` is recorded with a passing rerun, but the cause given is only its 120 s controller-test timeout.",
+      "recommendation": "Before the acceptance commit, record the runs of every head through the one before acceptance, and give a cause and a passing rerun for any failure, as lines 85-104 require."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0098/owner-answers.log",
+      "line": 2,
+      "issue": "No log in the tree lists the contents of a home directory. Logs do contain user-profile paths: the worktree path `C:\\Users\\requi\\.omp\\wt\\...` (raw/*.log RESULT lines), `C:/Users/requi/AppData/Local/Temp/...` (controller-test logs), the Bun path under `AppData` (raw/bun-selftest.log:2), and a session-transcript path (owner-answers.log:2). Earlier tasks do the same, and FP-0003 reviews 2 and 3 flagged the question as unresolved.",
+      "recommendation": "Get a ruling on whether profile paths may appear in raw logs, or normalize them in future records."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0098/README.md",
+      "line": 9,
+      "issue": "Line 9 (\"Other agents ran builds on the same host\") and line 11 (\"The worker did not commit, push, or dispatch a workflow run\") have no log and no [INFERENCE] mark.",
+      "recommendation": "Mark both [INFERENCE] or cite a record."
+    },
+    {
+      "severity": "note",
+      "path": "tools/lib.mjs",
+      "line": 610,
+      "issue": "If the command exits during the listing, which can take up to 10 s, the callback returns early. The receipt then says `timed_out: true` with no TIMEOUT section in the log, and any orphaned descendants are not stopped. The gate still fails, so nothing passes wrongly, but such a log does not explain itself.",
+      "recommendation": "Consider writing a short line such as `TIMEOUT the command ended during the listing` before the log closes, and document the case."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0098/ci/README.md",
+      "line": 34,
+      "issue": "Cases FP-0098 1 and 2 add at least two 2-second gate timeouts, plus a Windows PowerShell listing, to the Windows controller-test gate. That gate has a 120 s timeout and timed out in run 37952850522. How much FP-0098 contributed is [INFERENCE]. The README defers the gate to a separate task.",
+      "recommendation": "Include the cost of the FP-0098 cases in the proposed controller-test timeout task."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0098/README.md",
+      "line": 180,
+      "issue": "The integration run shows 300 tests (255 unit), while the worker tree shows 293 (248 unit). The README does not explain the 7 extra tests. [INFERENCE] They come from commits that landed between base `937a06b` and `9d5638b`.",
+      "recommendation": "Add one sentence explaining the difference."
+    }
+  ]
+}

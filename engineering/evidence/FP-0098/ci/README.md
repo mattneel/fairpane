@@ -31,7 +31,7 @@ The push run of the same head, 37942079501, also passes.
 The `controller-test` gate has a 120-second timeout.
 In these runs its Windows step takes 55 to 86 seconds, and its Linux step takes 12 to 15 seconds.
 After later tasks added controller tests, the Windows step took 62 to 121 seconds on the push runs of the heads from `775d988` to `a6ac7aa`; `engineering/evidence/ci/runs-2026-10-09.log` records every run and attempt since 13:00 UTC with each gate step's duration.
-Run 37952850522 of `a2dd9ed` timed out at 120,572 milliseconds while the suite was at its test 222 of 224.
+Run 37952850522 of `a2dd9ed` timed out at 120,572 milliseconds while the suite was running its test 223 of 224: the last result line of the receipt log is `ok 222`.
 `engineering/evidence/ci/run-37952850522-attempt-1/` keeps that attempt's Windows receipts; the integrator downloaded them with `gh run download` before the rerun but did not record that command, so the directory lists them with their SHA-256 values.
 Attempt 2 of the same head passed, with the controller-test step at 63,566 milliseconds, as `engineering/evidence/ci/run-37952850522.log` and `engineering/evidence/ci/run-37952850522/` record.
-That gate is outside this task's criteria, which cover `zig-test`; the integrator proposes a separate task for it in a reviewed plan change.
+That gate is outside this task's criteria, which cover `zig-test`; plan commit `a1b28f6` gives it to FP-0107.
