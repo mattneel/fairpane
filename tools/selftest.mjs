@@ -696,11 +696,20 @@ function otherApplicability(dir, id) {
   writeJson(path.join(dir, 'specs/applicability', `${id}.json`), { schema_version: 1, corpus: id, commit: 'a'.repeat(40), status: 'counted',
     discovery: { rule: 'Fixture rule.' }, discovered: 1, selected: 0, excluded: [], unclassified: 1, breakdown: { by: 'fixture', counts: { fixture: 1 } } });
 }
+/** The repository's corpus policy with every pin removed, so a fixture snapshot meets only the pins that its test sets. */
+function unpinnedCorpora() {
+  const policy = readJson(path.join(root, 'specs/corpora.json'));
+  for (const corpus of policy.corpora) {
+    for (const field of ['revision', 'license_record', 'inventory_sha256', 'manifest_sha256', 'local_path']) if (field in corpus) corpus[field] = null;
+    corpus.status = 'not-fetched';
+  }
+  return policy;
+}
 /** A fixture repository root with a snapshot of corpus `id`, its snapshot record, and its applicability record. */
 async function corpusFixture(id, files, { manifest } = {}) {
   const dir = temp(), corporaDir = temp(), g = bareRepo(snapshotGitDir(corporaDir, id));
   const policyFile = path.join(dir, 'specs/corpora.json');
-  fs.mkdirSync(path.dirname(policyFile)); fs.copyFileSync(path.join(root, 'specs/corpora.json'), policyFile);
+  fs.mkdirSync(path.dirname(policyFile)); writeJson(policyFile, unpinnedCorpora());
   const commit = fixtureCommit(g, files), ref = id === 'wpt' ? 'refs/heads/master' : 'refs/heads/main';
   fixtureGit(g, ['update-ref', ref, commit]);
   let manifestFile;
@@ -944,7 +953,7 @@ function upstreamFixture() {
   const first = fixtureCommit(upstream, T262_FILES);
   fixtureGit(upstream, ['update-ref', 'refs/heads/main', first]);
   const policy = pins => {
-    const p = readJson(path.join(root, 'specs/corpora.json')), file = path.join(temp(), 'corpora.json');
+    const p = unpinnedCorpora(), file = path.join(temp(), 'corpora.json');
     Object.assign(p.corpora.find(c => c.id === 'test262'), { upstream: url }, pins);
     writeJson(file, p); return file;
   };
