@@ -703,13 +703,14 @@
       ]
     },
     "FP-0052": {
-      "status": "active",
+      "status": "accepted",
       "owner": "fairpane-core workers FP0052Corpus, FP0052Revision, and FP0052BunHost, integrated by root-integrator",
-      "evidence": ["engineering/evidence/FP-0052/CONTRACT.md", "engineering/evidence/FP-0052/README.md", "engineering/evidence/FP-0052/raw/integration-binding.log"],
-      "review": null,
+      "evidence": ["engineering/evidence/FP-0052/CONTRACT.md", "engineering/evidence/FP-0052/README.md", "engineering/evidence/FP-0052/raw/integration-binding-a2.log", "engineering/evidence/FP-0052/raw/bun-selftest-a2.log", "engineering/evidence/FP-0052/raw/integration-corpus-verify-test262.log", "engineering/evidence/FP-0052/raw/integration-corpus-verify-wpt.log", "engineering/evidence/FP-0052/raw/integration-protected-paths.log", "engineering/evidence/ci/README.md"],
+      "review": "engineering/evidence/FP-0052/reviews/review-1-accept.json",
       "notes": [
         "Created from the minor findings and notes in the FP-0003 review-3 and spec-review-3 records.",
-        "Implemented in 775d988. Amendment 1 (7861102) replaces case 2's whoami.exe stand-in, which exited 1 so the base passed; 8bc2f91 implements it. Amendment 2 (0954a37) makes the stand-in work under Bun, where the binding at a342961 failed case 2."
+        "Implemented in 775d988. Amendment 1 (7861102) replaces case 2's whoami.exe stand-in, which exited 1 so the base passed; 8bc2f91 implements it. Amendment 2 (0954a37) makes the stand-in work under Bun, where the binding at a342961 failed case 2.",
+        "Accepted: fairpane-review (reviews/review-1-accept.json) and fairpane-spec (reviews/spec-review-1-accept.json) accept 775d988 with 8bc2f91 and 05001ab, and the Gates ledger through 0276268 gives every failed attempt in its window a disposition. FP-0131 carries the minor findings."
       ]
     },
     "FP-0053": {
@@ -819,11 +820,11 @@
       "notes": ["Created to own platform font discovery from the FP-0013 capability record."]
     },
     "FP-0064": {
-      "status": "active",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0064States, integrated by root-integrator",
-      "evidence": ["engineering/evidence/FP-0064/CONTRACT.md", "engineering/evidence/FP-0064/raw/integrator-switch-points.log", "engineering/evidence/FP-0064/README.md", "engineering/evidence/FP-0064/gates/2026-10-09T13-12-29-122Z-repo-check-f57f5dcd.json", "engineering/evidence/FP-0064/gates/2026-10-09T13-12-29-520Z-controller-test-4fc456f4.json", "engineering/evidence/FP-0064/gates/2026-10-09T13-13-10-018Z-zig-fmt-825ad6f2.json", "engineering/evidence/FP-0064/gates/2026-10-09T13-13-10-278Z-zig-test-261a8ecf.json", "engineering/evidence/FP-0064/raw/integration-binding.log", "engineering/evidence/FP-0064/raw/integration-tests.log", "engineering/evidence/FP-0064/raw/bun-selftest.log"],
-      "review": null,
-      "notes": ["Created for the tokenizer states that the FP-0008 contract defers, which FP-0010 tree construction needs.", "The contract, drafted by fairpane-spec worker FP0064Contract-2, was frozen with a separate SwitchError set, no laboratory case, and the switch points that the integrator confirmed at the pin.", "Worker FP0064States implemented it in cb8427d with contract amendment 1 for row Q11. The binding at ed95bc5 passes all four gates, 292 of 292 Zig tests uncached, and 202 of 202 controller tests under Bun 1.4.2."]
+      "evidence": ["engineering/evidence/FP-0064/CONTRACT.md", "engineering/evidence/FP-0064/raw/integrator-switch-points.log", "engineering/evidence/FP-0064/README.md", "engineering/evidence/FP-0064/gates/2026-10-09T13-12-29-122Z-repo-check-f57f5dcd.json", "engineering/evidence/FP-0064/gates/2026-10-09T13-12-29-520Z-controller-test-4fc456f4.json", "engineering/evidence/FP-0064/gates/2026-10-09T13-13-10-018Z-zig-fmt-825ad6f2.json", "engineering/evidence/FP-0064/gates/2026-10-09T13-13-10-278Z-zig-test-261a8ecf.json", "engineering/evidence/FP-0064/raw/integration-binding.log", "engineering/evidence/FP-0064/raw/integration-tests.log", "engineering/evidence/FP-0064/raw/bun-selftest.log", "engineering/evidence/ci/README.md"],
+      "review": "engineering/evidence/FP-0064/reviews/review-1-accept.json",
+      "notes": ["Created for the tokenizer states that the FP-0008 contract defers, which FP-0010 tree construction needs.", "The contract, drafted by fairpane-spec worker FP0064Contract-2, was frozen with a separate SwitchError set, no laboratory case, and the switch points that the integrator confirmed at the pin.", "Worker FP0064States implemented it in cb8427d with contract amendment 1 for row Q11. The binding at ed95bc5 passes all four gates, 292 of 292 Zig tests uncached, and 202 of 202 controller tests under Bun 1.4.2.", "Accepted: fairpane-review accepts cb8427d (reviews/review-1-accept.json), and the Gates ledger through 0276268 gives every failed attempt in its window a disposition. Amendment 3 (b95bef1) gives FP-0104 the foreign-flag fix that tree construction needs."]
     },
     "FP-0065": {
       "status": "planned",
@@ -833,18 +834,18 @@
       "notes": ["Created for encoding sniffing and decoders, which the FP-0008 contract leaves outside its decode stage.", "Split on 2026-10-09 into FP-0123, FP-0124, FP-0125, and FP-0126. FP-0065 keeps its four criteria word for word as the closing task: criterion 1 maps to FP-0126, criterion 2 to FP-0123 to FP-0125, criterion 3 to FP-0126, and criterion 4 to all four slices."]
     },
     "FP-0066": {
-      "status": "active",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0066Repro, integrated by root-integrator",
-      "evidence": ["engineering/evidence/FP-0066/CONTRACT.md", "engineering/evidence/FP-0066/README.md", "engineering/evidence/FP-0066/raw/integration-reproduce-windows.log", "engineering/evidence/FP-0066/raw/integration-reproduce-linux.log"],
+      "evidence": ["engineering/evidence/FP-0066/CONTRACT.md", "engineering/evidence/FP-0066/README.md", "engineering/evidence/FP-0066/raw/integration-reproduce-windows.log", "engineering/evidence/FP-0066/raw/integration-reproduce-linux.log", "engineering/evidence/ci/README.md"],
       "review": "engineering/evidence/FP-0066/reviews/review-1-accept.json",
-      "notes": ["Created because the FP-0027 worker's reproduce-check found that the static library differs between two build directories.", "Implemented in 81481a3; reproduce-check reports reproducible on Windows and WSL Ubuntu (7744e42). Review 1 accepts; FP-0106 owns its two code findings. Acceptance waits for the CI ledger."]
+      "notes": ["Created because the FP-0027 worker's reproduce-check found that the static library differs between two build directories.", "Implemented in 81481a3; reproduce-check reports reproducible on Windows and WSL Ubuntu (7744e42). Review 1 accepts; FP-0106 owns its two code findings.", "Accepted: the Gates ledger through 0276268 gives every failed attempt in its window a disposition."]
     },
     "FP-0067": {
-      "status": "active",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0067Gates, integrated by root-integrator",
-      "evidence": ["engineering/evidence/FP-0067/CONTRACT.md", "engineering/evidence/FP-0067/README.md", "engineering/evidence/FP-0067/raw/integration-binding.log", "engineering/evidence/FP-0067/ci/ci-record.log", "engineering/evidence/FP-0067/ci/acceptance-run.log"],
+      "evidence": ["engineering/evidence/FP-0067/CONTRACT.md", "engineering/evidence/FP-0067/README.md", "engineering/evidence/FP-0067/raw/integration-binding.log", "engineering/evidence/FP-0067/ci/ci-record.log", "engineering/evidence/FP-0067/ci/acceptance-run.log", "engineering/evidence/ci/README.md"],
       "review": "engineering/evidence/FP-0067/reviews/review-2-accept.json",
-      "notes": ["Created from the minor findings in the FP-0033 review-4 and FP-0051 review-3 records.", "Implemented in 152ed53. fairpane-review rejected it in reviews/review-1-reject.json only because the first Gates run with the change, 37936609533, timed out in Linux zig-test; amendment 1 makes the first Linux pass after FP-0098 the acceptance record, and FP-0099 carries the review's minor finding.", "Run 37941660067 of 9d5638b is that record (4d11e84), and review 2 accepts. Acceptance waits for the CI ledger."]
+      "notes": ["Created from the minor findings in the FP-0033 review-4 and FP-0051 review-3 records.", "Implemented in 152ed53. fairpane-review rejected it in reviews/review-1-reject.json only because the first Gates run with the change, 37936609533, timed out in Linux zig-test; amendment 1 makes the first Linux pass after FP-0098 the acceptance record, and FP-0099 carries the review's minor finding.", "Run 37941660067 of 9d5638b is that record (4d11e84), and review 2 accepts.", "Accepted: the Gates ledger through 0276268 gives every failed attempt in its window a disposition, including the nine zig-test timeouts that the approved FP-0098 fixing commits cover."]
     },
     "FP-0068": {
       "status": "planned",
@@ -903,11 +904,11 @@
       "notes": ["Created from a note in the FP-0013 review-1 record: Unicode License v3 requires its notice in documentation that ships with binary distributions."]
     },
     "FP-0076": {
-      "status": "active",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0076Guard, integrated by root-integrator",
-      "evidence": ["engineering/evidence/FP-0076/CONTRACT.md", "engineering/evidence/FP-0076/README.md", "engineering/evidence/FP-0076/raw/integration-binding.log", "engineering/evidence/FP-0076/raw/integration-mutation-4.log"],
+      "evidence": ["engineering/evidence/FP-0076/CONTRACT.md", "engineering/evidence/FP-0076/README.md", "engineering/evidence/FP-0076/raw/integration-binding.log", "engineering/evidence/FP-0076/raw/integration-mutation-4.log", "engineering/evidence/ci/README.md"],
       "review": "engineering/evidence/FP-0076/reviews/review-1-accept.json",
-      "notes": ["Created from the minor findings and notes in engineering/evidence/FP-0054/reviews/review-2-accept.json.", "Amendment 1 (3bea7a6) exempts case 4 from the red baseline and adds its control. Implemented in d56bc5f; review 1 accepts, and FP-0106 owns its Windows status mapping finding. Acceptance waits for the CI ledger."]
+      "notes": ["Created from the minor findings and notes in engineering/evidence/FP-0054/reviews/review-2-accept.json.", "Amendment 1 (3bea7a6) exempts case 4 from the red baseline and adds its control. Implemented in d56bc5f; review 1 accepts, and FP-0106 owns its Windows status mapping finding.", "Accepted: the Gates ledger through 0276268 gives every failed attempt in its window a disposition."]
     },
     "FP-0077": {
       "status": "planned",
@@ -924,11 +925,11 @@
       "notes": ["Created from the minor findings and notes in the FP-0013 review-2 and security-review-2 records."]
     },
     "FP-0079": {
-      "status": "active",
+      "status": "accepted",
       "owner": "fairpane-bindings workers FP0079Rust and FP0079R1, integrated by root-integrator",
-      "evidence": ["engineering/evidence/FP-0079/CONTRACT.md", "engineering/evidence/FP-0079/README.md"],
-      "review": null,
-      "notes": ["Split from FP-0029 by fairpane-bindings worker FP0029Contract-2, because the lock must land in a reviewed change before the wrapper and policy.json cannot name a root that does not exist yet.", "Worker FP0079Rust implemented it in 04342e2. fairpane-security accepted it in reviews/security-review-1-accept.json, and fairpane-review rejected it in reviews/review-1-reject.json because doctor started rustc from PATH at the repository root, where a rustup proxy may install the pinned toolchain during controller tests. Both reviews approved the lock values. Contract revision 1 removes that probe and hardens the archive path rules.", "Revision 1 (d2c1e5b) passed review 2 and security review 2. P1 (9fb8d8f) protected the lock; plan review 3 found that it did not protect rust-toolchain.toml, so P2 (2e07f89) does, under reviews/policy-p2-approve.json."]
+      "evidence": ["engineering/evidence/FP-0079/CONTRACT.md", "engineering/evidence/FP-0079/README.md", "engineering/evidence/FP-0079/raw/integration-binding.log", "engineering/evidence/FP-0079/raw/integration-binding-p2.log", "engineering/evidence/FP-0079/reviews/policy-p2-approve.json", "engineering/evidence/ci/README.md"],
+      "review": "engineering/evidence/FP-0079/reviews/review-2-accept.json",
+      "notes": ["Split from FP-0029 by fairpane-bindings worker FP0029Contract-2, because the lock must land in a reviewed change before the wrapper and policy.json cannot name a root that does not exist yet.", "Worker FP0079Rust implemented it in 04342e2. fairpane-security accepted it in reviews/security-review-1-accept.json, and fairpane-review rejected it in reviews/review-1-reject.json because doctor started rustc from PATH at the repository root, where a rustup proxy may install the pinned toolchain during controller tests. Both reviews approved the lock values. Contract revision 1 removes that probe and hardens the archive path rules.", "Revision 1 (d2c1e5b) passed review 2 and security review 2. P1 (9fb8d8f) protected the lock; plan review 3 found that it did not protect rust-toolchain.toml, so P2 (2e07f89) does, under reviews/policy-p2-approve.json.", "Accepted: fairpane-review (reviews/review-2-accept.json) and fairpane-security (reviews/security-review-2-accept.json) accept revision 1, P1 and P2 complete criterion 6, and the Gates ledger through 0276268 gives every failed attempt in its window a disposition. FP-0099 carries the security review's minor findings."]
     },
     "FP-0080": {
       "status": "planned",
@@ -938,11 +939,11 @@
       "notes": ["Split from FP-0029. It takes FP-0029 criteria 2 to 5, 17 to 20 word for word, and a narrowed form of criterion 14 for fairpane-sys, and FP-0029 cites its evidence for them."]
     },
     "FP-0081": {
-      "status": "active",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0081Budget, integrated by root-integrator",
-      "evidence": ["engineering/evidence/FP-0081/CONTRACT.md", "engineering/evidence/FP-0081/README.md"],
-      "review": null,
-      "notes": ["Created because the C ABI takes no allocator, so no foreign consumer could induce the allocation-failure scenario that FP-0029 criterion 16 lists.", "Implemented in f40a902 with amendments 1 and 2; fairpane-review and fairpane-security review it."]
+      "evidence": ["engineering/evidence/FP-0081/CONTRACT.md", "engineering/evidence/FP-0081/README.md", "engineering/evidence/ci/README.md"],
+      "review": "engineering/evidence/FP-0081/reviews/review-1-accept.json",
+      "notes": ["Created because the C ABI takes no allocator, so no foreign consumer could induce the allocation-failure scenario that FP-0029 criterion 16 lists.", "Implemented in f40a902 with amendments 1 and 2; fairpane-review and fairpane-security review it.", "Accepted: fairpane-review (reviews/review-1-accept.json) and fairpane-security (reviews/security-review-1-accept.json) accept f40a902, and the Gates ledger through 0276268 gives every failed attempt in its window a disposition. FP-0099 states the memory limit's scope, as the security review notes."]
     },
     "FP-0082": { "status": "active", "owner": "fairpane-js workers FP0082Parser and FP0082Revision1, integrated by root-integrator", "evidence": ["engineering/evidence/FP-0082/CONTRACT.md", "engineering/evidence/FP-0082/README.md"], "review": null, "notes": ["Split from FP-0012 by fairpane-js worker FP0012Contract as the parser part. It carries no FP-0012 criterion word for word and feeds criteria 1 and 4.", "The integrator froze the contract with a measured 1 MiB stack requirement for the depth cases, after plan reviews 1 and 2 approved the split.", "Implemented in 5d41509. Review 1 rejects a Windows path escape in corpus-extract and a quadratic duplicate-parameter check; spec review 1 accepts. Revision 1 (9a68167) fixes both."] },
     "FP-0083": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Split from FP-0012. It carries FP-0012 criteria 1, 3, and 7 word for word.", "Split on 2026-10-09 into FP-0128 and FP-0129. FP-0083 keeps its nine criteria word for word as the closing task. Criteria 1, 2, 3, 8, and 9 map to FP-0128. Criteria 4, 5, 6, and 7 map to FP-0129, and FP-0128's limit cases are further evidence for criterion 6."] },
