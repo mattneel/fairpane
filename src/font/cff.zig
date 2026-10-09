@@ -22,16 +22,20 @@ const Index = struct {
     data_base: u64,
     end: u64,
 
-    fn offsetValue(self: Index, i: u64) u64 {
+    /// INDEX offset `i`, or null when it lies outside the table.
+    fn offsetValue(self: Index, i: u64) ?u64 {
         var value: u64 = 0;
         var k: u64 = 0;
-        while (k < self.off_size) : (k += 1) value = (value << 8) | self.table.u8At(self.offsets_at + i * self.off_size + k).?;
+        while (k < self.off_size) : (k += 1) value = (value << 8) | (self.table.u8At(self.offsets_at + i * self.off_size + k) orelse return null);
         return value;
     }
 
-    fn item(self: Index, i: u64) []const u8 {
-        const start = self.data_base + self.offsetValue(i);
-        return self.table.slice(start, self.data_base + self.offsetValue(i + 1) - start).?;
+    /// The data of item `i`, or null when its offsets do not describe a range inside the table.
+    fn item(self: Index, i: u64) ?[]const u8 {
+        const start = self.data_base + (self.offsetValue(i) orelse return null);
+        const end = self.data_base + (self.offsetValue(i + 1) orelse return null);
+        if (end < start) return null;
+        return self.table.slice(start, end - start);
     }
 };
 
@@ -44,11 +48,12 @@ fn readIndex(table: Reader, at: u64) error{InvalidCff}!Index {
     const offsets_bytes = (@as(u64, count) + 1) * off_size;
     if (!table.fits(at + 3, offsets_bytes)) return error.InvalidCff;
     var index: Index = .{ .table = table, .count = count, .off_size = off_size, .offsets_at = at + 3, .data_base = at + 2 + offsets_bytes, .end = 0 };
-    if (index.offsetValue(0) != 1) return error.InvalidCff;
+    const first = index.offsetValue(0) orelse return error.InvalidCff;
+    if (first != 1) return error.InvalidCff;
     var previous: u64 = 1;
     var i: u64 = 1;
     while (i <= count) : (i += 1) {
-        const value = index.offsetValue(i);
+        const value = index.offsetValue(i) orelse return error.InvalidCff;
         if (value < previous) return error.InvalidCff;
         previous = value;
     }
@@ -74,10 +79,8 @@ fn parseTopDict(dict: Reader) error{InvalidCff}!TopDict {
     var operands: [max_operands]Operand = undefined;
     var depth: usize = 0;
     var at: u64 = 0;
-    while (at < dict.len()) {
-        const b0 = dict.u8At(at).?;
-        var operand: ?Operand = null;
-        switch (b0) {
+    while (dict.u8At(at)) |b0| {
+        const operand: Operand = switch (b0) {
             0...21 => {
                 var operator: u16 = b0;
                 at += 1;
@@ -95,15 +98,17 @@ fn parseTopDict(dict: Reader) error{InvalidCff}!TopDict {
                 depth = 0;
                 continue;
             },
-            28 => {
-                operand = .{ .integer = dict.i16At(at + 1) orelse return error.InvalidCff };
+            28 => blk: {
+                const value = dict.i16At(at + 1) orelse return error.InvalidCff;
                 at += 3;
+                break :blk .{ .integer = value };
             },
-            29 => {
-                operand = .{ .integer = dict.i32At(at + 1) orelse return error.InvalidCff };
+            29 => blk: {
+                const value = dict.i32At(at + 1) orelse return error.InvalidCff;
                 at += 5;
+                break :blk .{ .integer = value };
             },
-            30 => {
+            30 => blk: {
                 at += 1;
                 while (true) : (at += 1) {
                     const byte = dict.u8At(at) orelse return error.InvalidCff;
@@ -113,26 +118,26 @@ fn parseTopDict(dict: Reader) error{InvalidCff}!TopDict {
                     if (high == 0xF or low == 0xF) break;
                 }
                 at += 1;
-                operand = .real;
+                break :blk .real;
             },
-            32...246 => {
-                operand = .{ .integer = @as(i32, b0) - 139 };
+            32...246 => blk: {
                 at += 1;
+                break :blk .{ .integer = @as(i32, b0) - 139 };
             },
-            247...250 => {
+            247...250 => blk: {
                 const b1 = dict.u8At(at + 1) orelse return error.InvalidCff;
-                operand = .{ .integer = (@as(i32, b0) - 247) * 256 + b1 + 108 };
                 at += 2;
+                break :blk .{ .integer = (@as(i32, b0) - 247) * 256 + b1 + 108 };
             },
-            251...254 => {
+            251...254 => blk: {
                 const b1 = dict.u8At(at + 1) orelse return error.InvalidCff;
-                operand = .{ .integer = -(@as(i32, b0) - 251) * 256 - b1 - 108 };
                 at += 2;
+                break :blk .{ .integer = -(@as(i32, b0) - 251) * 256 - b1 - 108 };
             },
             22...27, 31, 255 => return error.InvalidCff,
-        }
+        };
         if (depth == max_operands) return error.InvalidCff;
-        operands[depth] = operand.?;
+        operands[depth] = operand;
         depth += 1;
     }
     if (depth != 0) return error.InvalidCff;
@@ -158,11 +163,11 @@ pub fn parse(table: Reader, num_glyphs: u16) error{InvalidCff}!Cff {
     const strings = try readIndex(table, top_dicts.end);
     _ = try readIndex(table, strings.end);
     if (names.count != 1 or top_dicts.count != 1) return error.InvalidCff;
-    const dict = try parseTopDict(Reader.init(top_dicts.item(0)));
+    const dict = try parseTopDict(Reader.init(top_dicts.item(0) orelse return error.InvalidCff));
     if (dict.charstring_type != 2) return error.InvalidCff;
     const charstrings_at = dict.charstrings orelse return error.InvalidCff;
     if (charstrings_at < 0) return error.InvalidCff;
     const charstrings = try readIndex(table, @intCast(charstrings_at));
     if (charstrings.count != num_glyphs) return error.InvalidCff;
-    return .{ .name = names.item(0), .charstrings_count = charstrings.count, .cid_keyed = dict.ros };
+    return .{ .name = names.item(0) orelse return error.InvalidCff, .charstrings_count = charstrings.count, .cid_keyed = dict.ros };
 }

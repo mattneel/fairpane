@@ -15,7 +15,7 @@
       "status": "implemented",
       "owner_task": "FP-0013",
       "summary": "The sfnt table directory and the head, hhea, maxp, hmtx, loca, glyf header, cmap, name, OS/2, post, CFF, GDEF, GSUB, and GPOS table headers.",
-      "engine_behavior": "fairpane.font.parse validates the directory and required tables without allocation, maps code points through cmap formats 4 and 12, returns advances and glyph headers, and reports optional-table defects as TableStatus values."
+      "engine_behavior": "fairpane.font.parse validates the directory and required tables without allocation, maps code points through cmap formats 4 and 12, returns advances and glyph headers, and reports optional-table defects as TableStatus values. It validates each distinct cmap subtable once and returns error.InvalidCmap for a cmap with more than 512 distinct subtable offsets."
     },
     {
       "id": "unicode-remaining-data",

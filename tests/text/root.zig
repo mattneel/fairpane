@@ -5,4 +5,5 @@ test {
     _ = @import("fixture_test.zig");
     _ = @import("synthetic_test.zig");
     _ = @import("malformed_test.zig");
+    _ = @import("bounds_test.zig");
 }

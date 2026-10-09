@@ -87,10 +87,30 @@ fn assignment(line: []const u8) !Assignment {
     };
 }
 
+/// Marks each code point that a parsed file assigns, so a gap in a file's coverage fails instead of reading an unset value.
+const Assigned = struct {
+    marks: std.DynamicBitSetUnmanaged,
+
+    fn init(arena: std.mem.Allocator) !Assigned {
+        return .{ .marks = try std.DynamicBitSetUnmanaged.initEmpty(arena, code_point_count) };
+    }
+
+    fn mark(self: *Assigned, range: Range) void {
+        self.marks.setRangeValue(.{ .start = range.first, .end = @as(usize, range.last) + 1 }, true);
+    }
+
+    /// Fails with `error.UnassignedCodePoint` when any code point is unassigned. The error trace names the property's call.
+    fn expectComplete(self: *const Assigned) !void {
+        var unset = self.marks.iterator(.{ .kind = .unset });
+        if (unset.next() != null) return error.UnassignedCodePoint;
+    }
+};
+
 fn Dense(comptime T: type) type {
     return struct {
         values: []T,
         aliases: std.StringHashMapUnmanaged([]const u8),
+        assigned: Assigned,
 
         fn apply(self: *@This(), a: Assignment) anyerror!void {
             const short = self.aliases.get(a.value) orelse {
@@ -98,7 +118,9 @@ fn Dense(comptime T: type) type {
                 return error.UnknownValue;
             };
             const value = std.meta.stringToEnum(T, short) orelse return error.UnknownValue;
+            if (a.range.first > a.range.last) return error.ReversedRange;
             @memset(self.values[a.range.first .. @as(usize, a.range.last) + 1], value);
+            self.assigned.mark(a.range);
         }
     };
 }
@@ -107,8 +129,10 @@ fn dense(comptime T: type, arena: std.mem.Allocator, property: []const u8, text:
     var state: Dense(T) = .{
         .values = try arena.alloc(T, code_point_count),
         .aliases = try shortAliases(arena, property),
+        .assigned = try .init(arena),
     };
     try forEachAssignment(text, &state, Dense(T).apply);
+    try state.assigned.expectComplete();
     return state.values;
 }
 
@@ -117,10 +141,13 @@ const Extensions = struct {
     sets: std.ArrayListUnmanaged([]const unicode.Script) = .empty,
     index: []u16,
     aliases: std.StringHashMapUnmanaged([]const u8),
+    assigned: Assigned,
 
     fn apply(self: *Extensions, a: Assignment) anyerror!void {
         const slot = if (std.mem.eql(u8, a.value, "<script>")) unlisted else try self.setIndex(a.value);
+        if (a.range.first > a.range.last) return error.ReversedRange;
         @memset(self.index[a.range.first .. @as(usize, a.range.last) + 1], slot);
+        self.assigned.mark(a.range);
     }
 
     fn lessThan(_: void, a: unicode.Script, b: unicode.Script) bool {
@@ -143,6 +170,15 @@ const Extensions = struct {
     }
 };
 
+test "the reference parser fails when a file leaves a code point unassigned" {
+    var arena_state = std.heap.ArenaAllocator.init(testing.allocator);
+    defer arena_state.deinit();
+    const arena = arena_state.allocator();
+    _ = try dense(unicode.BidiClass, arena, "bc", "0000..10FFFF; L\n");
+    try testing.expectError(error.UnassignedCodePoint, dense(unicode.BidiClass, arena, "bc", "0000..0040; L\n0042..10FFFF; L\n"));
+    try testing.expectError(error.UnassignedCodePoint, dense(unicode.BidiClass, arena, "bc", "# @missing: 0000..10FFFE; L\n"));
+}
+
 test "FP-0013 case 3: lookup equals an independent parse of the embedded UCD files for every code point" {
     var arena_state = std.heap.ArenaAllocator.init(testing.allocator);
     defer arena_state.deinit();
@@ -158,8 +194,10 @@ test "FP-0013 case 3: lookup equals an independent parse of the embedded UCD fil
         .arena = arena,
         .index = try arena.alloc(u16, code_point_count),
         .aliases = try shortAliases(arena, "sc"),
+        .assigned = try .init(arena),
     };
     try forEachAssignment(files.script_extensions, &scx, Extensions.apply);
+    try scx.assigned.expectComplete();
 
     for (0..code_point_count) |i| {
         const code_point: u21 = @intCast(i);

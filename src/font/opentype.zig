@@ -168,24 +168,31 @@ const WordSums = struct {
 
 /// Compares each directory checksum with the table bytes and the whole-file sum with 0xB1B0AFBA.
 /// Known tables never overlap, so summing them directly reads each byte at most once.
+/// The directory was checked in the same `parse` call; a record that no longer fits counts as a mismatch.
 fn checkIntegrity(r: Reader, num_tables: u16) Integrity {
     var sums: WordSums = undefined;
     sums.init(r.bytes);
     var integrity: Integrity = .{ .mismatched = .empty, .unknown_mismatches = 0, .head_adjustment_ok = sums.before(sums.words) == whole_file_sum };
     var i: u64 = 0;
     while (i < num_tables) : (i += 1) {
-        const at = 12 + 16 * i;
-        const tag = r.tagAt(at).?;
-        const offset = r.u32At(at + 8).?;
-        const length = r.u32At(at + 12).?;
-        const known = knownTag(tag);
-        const sum = if (known != null) checksum(r.slice(offset, length).?, known.? == .head) else sums.table(offset, length);
-        if (sum == r.u32At(at + 4).?) continue;
+        const known = if (r.fixed(16, 12 + 16 * i)) |record| check: {
+            const tag = knownTag(record.array(4, 0));
+            const offset = record.int(u32, 8);
+            const length = record.int(u32, 12);
+            const bytes = r.slice(offset, length) orelse break :check tag;
+            const sum = if (tag) |t| checksum(bytes, t == .head) else sums.table(offset, length);
+            if (sum == record.int(u32, 4)) continue;
+            break :check tag;
+        } else null;
         if (known) |known_tag| integrity.mismatched.insert(known_tag) else integrity.unknown_mismatches += 1;
     }
     return integrity;
 }
 
+/// A parsed font. It borrows the font bytes, and those bytes must stay unchanged for the lifetime of the `Font`,
+/// so a loader of memory that script can change, such as a `FontFace` buffer, must copy the bytes before `parse`.
+/// When that rule is broken, no accessor reaches illegal behavior or reads outside the bytes: each accessor's
+/// documentation states its result, which is null, glyph 0, zero, or an error.
 pub const Font = struct {
     bytes: []const u8,
     outline_kind: Outline,
@@ -209,27 +216,28 @@ pub const Font = struct {
         return self.num_tables;
     }
 
-    /// Directory record `i`, in directory order.
-    pub fn tableRecord(self: *const Font, i: u16) TableRecord {
-        std.debug.assert(i < self.num_tables);
-        const r = Reader.init(self.bytes);
-        const at = 12 + 16 * @as(u64, i);
-        return .{ .tag = r.tagAt(at).?, .checksum = r.u32At(at + 4).?, .offset = r.u32At(at + 8).?, .length = r.u32At(at + 12).? };
+    /// Directory record `i`, in directory order, as the bytes hold it now, or null when `i` is at or past `tableCount`.
+    pub fn tableRecord(self: *const Font, i: u16) ?TableRecord {
+        if (i >= self.num_tables) return null;
+        const record = Reader.init(self.bytes).fixed(16, 12 + 16 * @as(u64, i)) orelse return null;
+        return .{ .tag = record.array(4, 0), .checksum = record.int(u32, 4), .offset = record.int(u32, 8), .length = record.int(u32, 12) };
     }
 
-    /// The bytes of the first table with `tag`.
+    /// The bytes of the first table with `tag`, or null when no record has the tag or when that record no longer lies
+    /// inside the font, because the bytes changed after `parse`.
     pub fn findTable(self: *const Font, tag: Tag) ?[]const u8 {
         var i: u16 = 0;
         while (i < self.num_tables) : (i += 1) {
-            const record = self.tableRecord(i);
-            if (std.mem.eql(u8, &record.tag, &tag)) return self.bytes[record.offset..][0..record.length];
+            const record = self.tableRecord(i) orelse return null;
+            if (std.mem.eql(u8, &record.tag, &tag)) return Reader.init(self.bytes).slice(record.offset, record.length);
         }
         return null;
     }
 
+    /// A known table's bytes, from the record that `parse` checked and stored.
     fn knownTable(self: *const Font, tag: KnownTag) ?Reader {
         const record = self.known.get(tag) orelse return null;
-        return Reader.init(self.bytes[record.offset..][0..record.length]);
+        return Reader.init(self.bytes).sub(record.offset, record.length);
     }
 
     pub fn integrity(self: *const Font) Integrity {
@@ -252,17 +260,20 @@ pub const Font = struct {
         return self.maxp_table.num_glyphs;
     }
 
-    /// The advance width and left side bearing of `glyph`.
+    /// The advance width and left side bearing of `glyph`. `GlyphOutOfRange` means `glyph` is at or past numGlyphs,
+    /// or that `hmtx` does not hold the metric, which `parse` rules out.
     pub fn advance(self: *const Font, glyph: u16) error{GlyphOutOfRange}!HMetric {
         if (glyph >= self.glyphCount()) return error.GlyphOutOfRange;
-        return tables.hmetric(self.hmtx_table, self.hhea_table.number_of_h_metrics, glyph);
+        return tables.hmetric(self.hmtx_table, self.hhea_table.number_of_h_metrics, glyph) orelse error.GlyphOutOfRange;
     }
 
     pub fn cmapSubtableCount(self: *const Font) u16 {
         return self.cmap_table.subtableCount();
     }
 
-    pub fn cmapSubtable(self: *const Font, i: u16) CmapSubtable {
+    /// Encoding record `i` of the `cmap` table, or null when `i` is at or past `cmapSubtableCount`, or when the record
+    /// no longer names a subtable whose header fits, because the bytes changed after `parse`.
+    pub fn cmapSubtable(self: *const Font, i: u16) ?CmapSubtable {
         return self.cmap_table.subtable(i);
     }
 
@@ -272,40 +283,49 @@ pub const Font = struct {
     }
 
     /// The glyph for `code_point`, or 0 when the font does not map it or it is above U+10FFFF.
+    /// The result is always below `glyphCount`; when the bytes changed after `parse`, an unreadable mapping gives glyph 0.
     pub fn glyphIndex(self: *const Font, code_point: u21) u16 {
         if (code_point > 0x10FFFF) return 0;
         return self.cmap_table.glyphIndex(code_point);
     }
 
     /// The `glyf` header of `glyph`, or null for an empty glyph. Only the header and contour end points are checked.
+    /// `InvalidGlyph` also means that the `loca` entries no longer describe a range inside `glyf`, because the bytes changed after `parse`.
     pub fn glyphHeader(self: *const Font, glyph: u16) GlyphError!?GlyphHeader {
         if (glyph >= self.glyphCount()) return error.GlyphOutOfRange;
         const loca = self.loca_table orelse return error.NotTrueType;
-        const start = loca.offset(glyph);
-        const end = loca.offset(@as(u64, glyph) + 1);
-        return tables.glyphHeader(self.glyf_table.sub(start, end - start).?);
+        const start = loca.offset(glyph) orelse return error.InvalidGlyph;
+        const end = loca.offset(@as(u64, glyph) + 1) orelse return error.InvalidGlyph;
+        if (end < start) return error.InvalidGlyph;
+        return tables.glyphHeader(self.glyf_table.sub(start, end - start) orelse return error.InvalidGlyph);
     }
 
+    /// Each call checks the `name` table again, in time linear in its length.
     pub fn name(self: *const Font) TableStatus(Name) {
         return tables.parseName(self.knownTable(.name) orelse return .absent);
     }
 
+    /// Each call reads the `OS/2` table again, in constant time.
     pub fn os2(self: *const Font) TableStatus(Os2) {
         return tables.parseOs2(self.knownTable(.@"OS/2") orelse return .absent);
     }
 
+    /// Each call checks the `post` table again, in time linear in its length.
     pub fn post(self: *const Font) TableStatus(Post) {
         return tables.parsePost(self.knownTable(.post) orelse return .absent, self.glyphCount());
     }
 
+    /// Each call reads the `GDEF` header again, in constant time.
     pub fn gdef(self: *const Font) TableStatus(Gdef) {
         return layout.parseGdef(self.knownTable(.GDEF) orelse return .absent);
     }
 
+    /// Each call checks the `GSUB` table again, in time linear in its length.
     pub fn gsub(self: *const Font) TableStatus(Layout) {
         return layout.parseLayout(self.knownTable(.GSUB) orelse return .absent);
     }
 
+    /// Each call checks the `GPOS` table again, in time linear in its length.
     pub fn gpos(self: *const Font) TableStatus(Layout) {
         return layout.parseLayout(self.knownTable(.GPOS) orelse return .absent);
     }
@@ -319,8 +339,8 @@ pub const Font = struct {
 /// Parses `bytes`, which the returned `Font` borrows. `parse` takes no allocator and allocates nothing.
 pub fn parse(bytes: []const u8, options: ParseOptions) ParseError!Font {
     const r = Reader.init(bytes);
-    if (bytes.len < 12) return error.Truncated;
-    const outline: Outline = switch (r.u32At(0).?) {
+    const header = r.fixed(12, 0) orelse return error.Truncated;
+    const outline: Outline = switch (header.int(u32, 0)) {
         0x00010000 => .truetype,
         0x4F54544F => .cff, // "OTTO"
         0x74746366 => return error.UnsupportedCollection, // "ttcf"
@@ -330,15 +350,15 @@ pub fn parse(bytes: []const u8, options: ParseOptions) ParseError!Font {
         else => return error.UnknownSfntVersion,
     };
     // searchRange, entrySelector, and rangeShift are ignored; the directory length follows from numTables.
-    const num_tables = r.u16At(4).?;
+    const num_tables = header.int(u16, 4);
     if (!r.fits(12, 16 * @as(u64, num_tables))) return error.Truncated;
 
     var known = std.EnumArray(KnownTag, ?TableRecord).initFill(null);
     var previous: Tag = undefined;
     var i: u64 = 0;
     while (i < num_tables) : (i += 1) {
-        const at = 12 + 16 * i;
-        const record: TableRecord = .{ .tag = r.tagAt(at).?, .checksum = r.u32At(at + 4).?, .offset = r.u32At(at + 8).?, .length = r.u32At(at + 12).? };
+        const fields = r.fixed(16, 12 + 16 * i) orelse return error.Truncated;
+        const record: TableRecord = .{ .tag = fields.array(4, 0), .checksum = fields.int(u32, 4), .offset = fields.int(u32, 8), .length = fields.int(u32, 12) };
         if (i > 0) switch (std.mem.order(u8, &previous, &record.tag)) {
             .lt => {},
             .eq => return error.DuplicateTable,
@@ -381,25 +401,26 @@ pub fn parse(bytes: []const u8, options: ParseOptions) ParseError!Font {
     const integrity = checkIntegrity(r, num_tables);
     if (options.checksums == .reject and !integrity.clean()) return error.ChecksumMismatch;
 
+    // Every required table was found above, so `table` fails only if that check is changed.
     const table = struct {
-        fn get(b: []const u8, k: std.EnumArray(KnownTag, ?TableRecord), tag: KnownTag) Reader {
-            const record = k.get(tag).?;
-            return Reader.init(b[record.offset..][0..record.length]);
+        fn get(b: []const u8, k: std.EnumArray(KnownTag, ?TableRecord), tag: KnownTag) error{MissingRequiredTable}!Reader {
+            const record = k.get(tag) orelse return error.MissingRequiredTable;
+            return Reader.init(b).sub(record.offset, record.length) orelse error.MissingRequiredTable;
         }
     }.get;
-    const head = try tables.parseHead(table(bytes, known, .head), outline);
-    const maxp = try tables.parseMaxp(table(bytes, known, .maxp), outline);
-    const hhea = try tables.parseHhea(table(bytes, known, .hhea), maxp.num_glyphs);
-    const hmtx = table(bytes, known, .hmtx);
+    const head = try tables.parseHead(try table(bytes, known, .head), outline);
+    const maxp = try tables.parseMaxp(try table(bytes, known, .maxp), outline);
+    const hhea = try tables.parseHhea(try table(bytes, known, .hhea), maxp.num_glyphs);
+    const hmtx = try table(bytes, known, .hmtx);
     try tables.checkHmtx(hmtx, hhea.number_of_h_metrics, maxp.num_glyphs);
     var loca: ?tables.Loca = null;
     var glyf = Reader.init(&.{});
     if (outline == .truetype) {
-        glyf = table(bytes, known, .glyf);
-        loca = try tables.parseLoca(table(bytes, known, .loca), head.index_to_loc_format, maxp.num_glyphs, glyf.len());
+        glyf = try table(bytes, known, .glyf);
+        loca = try tables.parseLoca(try table(bytes, known, .loca), head.index_to_loc_format, maxp.num_glyphs, glyf.len());
     }
-    const cmap = try cmap_mod.parse(table(bytes, known, .cmap), maxp.num_glyphs);
-    const cff = if (outline == .cff) try cff_mod.parse(table(bytes, known, .@"CFF "), maxp.num_glyphs) else null;
+    const cmap = try cmap_mod.parse(try table(bytes, known, .cmap), maxp.num_glyphs);
+    const cff = if (outline == .cff) try cff_mod.parse(try table(bytes, known, .@"CFF "), maxp.num_glyphs) else null;
 
     return .{
         .bytes = bytes,

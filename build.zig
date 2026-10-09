@@ -104,6 +104,10 @@ pub fn build(b: *std.Build) void {
         .imports = &.{.{ .name = "fairpane", .module = module }},
     }) });
     const run_text_tests = b.addRunArtifact(text_tests);
+    // FP-0013 case 12 reads the expectation generator and the import-tool declaration relative to the build root.
+    run_text_tests.setCwd(b.path("."));
+    run_text_tests.addFileInput(b.path("tools/fonts/font_expectations.py"));
+    run_text_tests.addFileInput(b.path("engineering/dependencies.json"));
     test_step.dependOn(&run_text_tests.step);
 
     const lab_exe = b.addExecutable(.{

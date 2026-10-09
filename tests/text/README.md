@@ -31,8 +31,20 @@ Each font has a `<stem>.expect.json` file beside it, such as `NotoSans-Regular.e
 The file records the table directory, the raw fields of `head`, `hhea`, `maxp`, `OS/2`, and `post`, every `name` record,
 the `cmap` subtables and selection, the glyph of every seed code point, the metrics and glyph headers of every mapped glyph,
 the `GDEF`, `GSUB`, and `GPOS` versions and tags, and the CFF Name INDEX, CharStrings count, and CID keying.
-Case 13 compares every field with Fairpane's parser, and case 12 compares the font's SHA-256.
-Nobody edits an expectation file by hand; rerun the script instead.
+Case 13 compares every field with Fairpane's parser.
+Case 12 compares the font's SHA-256, the generator's script SHA-256 with the committed `tools/fonts/font_expectations.py`,
+and the generator's fontTools version with `engineering/dependencies.json`.
+The `tests/text` run step therefore runs in the build root and lists both files as inputs.
+Nobody edits an expectation file by hand.
+Run `node tools/fairpane.mjs font-expectations --check` to rerun the script under the hardened invocation that `tools/README.md` describes.
+
+## Bounds and changed bytes
+
+`bounds_test.zig` holds the revision 1 cases.
+Case 50 builds cmaps with 512 and 513 distinct subtables, and case 51 builds 65535 encoding records that share one costly format 4 subtable.
+Case 51 reads `Font.cmap_table.validations`, a counter that exists only in test builds.
+Case 52 calls every index accessor past its count, and it changes font bytes after `parse` to check that no accessor panics or reads outside the font.
+It changes each field that an accessor used to trust, then every single byte of `B_TT` and `B_CFF` in turn.
 
 ## Seeds
 

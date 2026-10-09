@@ -69,15 +69,18 @@ If the integrator changes `upstream`, the record no longer matches, so `corpus-f
 
 | Source | Size | SHA-256 | Release and commit | Check |
 | --- | --- | --- | --- | --- |
-| `UCD.zip`, Unicode 18.0.0 | 5657953 | `7b3e5555…a66a0d8` | 18.0.0 | 71 file members, inventory `37761bcf…8dd8b2f4` |
-| `license.txt` | 1995 | `e7a93b00…2bc53d96` | Unicode License v3 | Beside the data and reproduced in `tables.zig` |
-| `NotoSans-v2.015.zip` | 117491253 | `0c34df07…89b958f5` (no published digest) | `NotoSans-v2.015`, peeled commit `c4a321e123e4d4ff315f57f4e0adf294fe3a95be` | Size pin and tag commit matched |
+| `UCD.zip`, Unicode 18.0.0 | 5657953 | `7b3e5555…a66a0d8` | 18.0.0 | 71 file members, inventory `37761bcf…8dd8b2f4`; no published digest, so trusted on first use |
+| `license.txt` | 1995 | `e7a93b00…2bc53d96` | Unicode License v3 | Beside the data and reproduced in `tables.zig`; no published digest, so trusted on first use |
+| `NotoSans-v2.015.zip` | 117491253 | `0c34df07…89b958f5` (no published digest) | `NotoSans-v2.015`, peeled commit `c4a321e123e4d4ff315f57f4e0adf294fe3a95be` | Size pin and tag commit matched; the tag commit does not bind the release asset, so the bytes were trusted on first use |
 | `NotoSansArabic-v2.013.zip` | 18777381 | `1301acea…da7154f1` | `NotoSansArabic-v2.013`, peeled commit `1b2b7e5c6ce3ab4d50681c854892325530084c35` | Size, published GitHub digest, and tag commit matched |
 | `NotoSansDevanagari-v2.007.zip` | 18449254 | `820c7da4…f469b1` | `NotoSansDevanagari-v2.007`, peeled commit `e123d230c160ebe949d731cc19017cdb354180d1` | Size, published GitHub digest, and tag commit matched |
 | `NotoSansCJKjp-Regular.otf` at `Sans2.004` | 16467736 | `68a3fc98…7f375b5` | `Sans2.004`, lightweight tag at `523d033d6cb47f4a80c58a35753646f5c3608a78` | Size and Git blob `f56224957fb13a81b4c14bac34f2f058a017f9fb` matched |
 | noto-cjk `LICENSE` at `Sans2.004` | 4301 | `6a73f954…5efe2bf2` | Same tag | Size and Git blob `d952d62c065f3f35fb83a173496e90b21525aef3` matched |
 
 `specs/snapshots/unicode.json` and `specs/snapshots/opentype-fixtures.json` hold the full digests of every source, inventory, selected file, and derived file.
+The UCD files and the `noto-sans` archive were trusted on first use: TLS and, for `noto-sans`, a size pin were their only authentication at the first fetch.
+The `published_url` comparison for the UCD files is same-origin with `UCD.zip`, so it checks consistency, not independent authenticity.
+Every later fetch compares each source with the SHA-256 in the existing record before it parses it, and the proposed `specs/corpora.json` pins check the source listing independently of that record once the integrator applies them.
 ADR 0003 still says that only `wpt` and `test262` have fetch rules; that path is outside this task's writable paths, so the integrator may amend it to point at the file-set kind that `specs/README.md` now describes.
 `raw/corpus-fetch-unicode.log` also shows that each `published_url` under `https://www.unicode.org/Public/18.0.0/ucd/` served bytes equal to its `UCD.zip` member.
 
@@ -176,14 +179,53 @@ The library module also gained a reference test for the bounded checksum path: b
 
 ## Bounded work
 
+Revision 1 replaced this section, because its cmap argument covered only fonts with at most 512 distinct subtables, and its format 4 bound implied a cost proportional to subtable size.
+
 `parse` allocates nothing, recurses nowhere, and checks every count against the remaining bytes before its loop.
-Two inputs could have made the work grow faster than the input length, so the parser bounds them.
+A read below is one checked `Reader` access of at most 16 bytes, and `L` is the length of the table that the bound describes.
 
-- Unknown tables may overlap each other and the known tables. Their checksums use prefix sums at no more than 4096 block boundaries, 16 KiB of stack, so each unknown table costs at most two partial blocks. Known tables never overlap, so their direct sums read each byte once.
-- Encoding records may share a cmap subtable. A 1024-slot set of validated offsets, 4 KiB of stack, validates each shared format 4 or format 12 subtable once, for up to 512 distinct subtables.
+### Table directory and checksums
 
-A format 4 subtable reads at most one `glyphIdArray` entry per code point, so its validation reads at most 65536 entries.
-The reviewer should check these bounds against the contract's linear-time statement.
+The directory loop reads each of `numTables` 16-byte records once, after `12 + 16 * numTables` is checked against the input.
+The overlap check compares the at most 15 known tables pairwise.
+Known tables never overlap, so their direct checksums read each byte at most once.
+Unknown tables may overlap each other and the known tables.
+Their checksums use prefix sums at no more than 4096 block boundaries, 16 KiB of stack, so each unknown table costs at most two partial blocks, which is at most `2 * input length / 4096` words.
+
+### cmap
+
+Each encoding record costs a constant: one 8-byte record read, at most three header reads, one key comparison, one probe sequence in a 1024-slot set that holds at most 512 offsets, and four candidate comparisons.
+There are at most 65535 records, and `4 + 8 * count` is checked against `L` first.
+
+The set of validated offsets holds at most 512 distinct subtable offsets.
+A record that names an offset outside a full set makes `parse` return `InvalidCmap` before any further validation, as revision 1 requires.
+So each distinct offset is validated at most once, and at most 512 offsets are validated.
+
+The validation cost of one subtable depends on its format.
+
+| Format | Reads for one validation |
+| --- | --- |
+| 4 | `1 + 4 * segCount` reads for `segCountX2` and the four segment arrays, plus at most 65536 `glyphIdArray` reads, because the segments are disjoint and ascending inside U+0000 to U+FFFF and each code point of a segment with a nonzero `idRangeOffset` reads one entry. The 16-bit length field limits `segCount` to `(65535 - 16) / 8 = 8189`, so one validation reads at most `1 + 4 * 8189 + 65536 = 98293` entries, whatever its length. |
+| 12 | `1 + numGroups`, and `16 + 12 * numGroups` is checked against the subtable length before the loop, so at most `1 + L / 12`. |
+| 0, 2, 6, 8, 10, 13, 14 | The header and length check only: at most three reads. |
+
+A format 4 subtable's cost is bounded by a constant, not by its size: 256 segments that share one 256-entry `glyphIdArray` reach 65536 reads from a 2576-byte subtable.
+Case 51 builds exactly that subtable and names it from 65535 encoding records.
+It parses, and the test-build counter `Font.cmap_table.validations` shows one validation.
+
+The total across all encoding records is therefore at most `65535 * C + 512 * 98293` reads for format 4, where `C` is the constant per-record cost, plus the format 12 cost.
+When distinct subtables do not overlap, the format 12 lengths sum to at most `L`, so all format 12 validations read at most `512 + L / 12` groups.
+When distinct subtables overlap, each format 12 subtable can still span almost the whole table, so the format 12 bound becomes `512 * (1 + L / 12)` reads.
+That bound is linear in `L` with a factor of at most 43, and the format 4 term stays the constant `512 * 98293`, about 5.0 * 10^7 reads.
+Case 50 shows the capacity: 512 distinct subtables parse, a 513th distinct valid subtable returns `InvalidCmap`, and so does the reviewers' construction of 512 cheap subtables followed by 4096 records that repeat one format 4 subtable.
+`raw/mutation-cmap-r1.log` shows that removing the full-set rejection fails case 50.
+
+### Other tables and accessors
+
+`loca` validation reads `numGlyphs + 1` entries, the CFF INDEX checks read each offset once, and the Top DICT loop advances at least one byte per iteration.
+`glyphIndex` is a binary search, so it reads `O(log segCount)` or `O(log numGroups)` entries.
+`name`, `post`, `gsub`, and `gpos` parse their table again on each call, in time linear in the table length; `os2` and `gdef` read a fixed-size header on each call.
+A caller that needs these values for every glyph must keep the returned value instead of calling the accessor again.
 
 ## Checks for the integrator
 
@@ -217,3 +259,90 @@ The patch contains no change to `tools/workflow-check.mjs`, and the integrated c
 `raw/integration-bun.log` records Bun 1.4.2 with 180 of 180 controller tests.
 `raw/integration-corpus.log` records `ucd-check`, `corpus-verify unicode`, and `corpus-verify opentype-fixtures`, each with exit status 0 and result `pass`, against the unpinned `specs/corpora.json` entries.
 The proposed pins wait for review acceptance and a separate protected commit.
+
+## Revision 1
+
+### Scope
+
+This section covers `## Revision 1` of `CONTRACT.md`, which answers `reviews/review-1-reject.json` and `reviews/security-review-1-reject.json`.
+The `fairpane-text` worker `FP0013R1` wrote the patch in an isolated worktree whose `HEAD` is `bdcc84c`, the commit that froze the revision.
+Nothing is committed, and the protected paths, `engineering/state.json`, and `engineering/HANDOFF.md` are unchanged.
+The patch changes no snapshot record, no applicability record, no expectation file, no expectation format, and no proposed pin.
+The section "Bounded work" above is the rewritten bounded-work argument.
+
+Every Zig command ran with `ZIG_GLOBAL_CACHE_DIR=C:\src\fairpane\.zig-cache\global` and the locked compiler, and every corpus command ran with `FAIRPANE_CORPORA_DIR=C:\src\fairpane\.tools\corpora`, as each `RESULT` line's `environment_overrides` shows.
+The fontTools environment was missing from this worktree, so `raw/fonttools-install-r1.log` installed it from the wheel that `engineering/dependencies.json` names.
+
+### Files changed
+
+Modified: `build.zig`, `src/font/reader.zig`, `src/font/cmap.zig`, `src/font/tables.zig`, `src/font/layout.zig`, `src/font/cff.zig`, `src/font/opentype.zig`, `src/unicode/reference_test.zig`, `tests/text/root.zig`, `tests/text/fixture_test.zig`, `tests/text/synthetic_test.zig`, `tests/text/README.md`, `tools/fileset.mjs`, `tools/fileset.test.mjs`, `tools/corpus.mjs`, `tools/fairpane.mjs`, `tools/README.md`, `specs/README.md`, `specs/capabilities/text-fonts.json`, and this README.
+
+Added: `tests/text/bounds_test.zig`, `mutation-cmap-r1.diff`, and the `raw/*-r1.log` files below.
+
+### Changes
+
+- cmap: the validated-offset set keeps its capacity of 512, and a record that names a new offset when the set is full makes `parse` return `InvalidCmap` before it validates anything more.
+  `Cmap.validations`, which exists only when `builtin.is_test` is true, counts validations.
+- Accessors: the `Font` documentation states that the bytes must stay unchanged for the lifetime of the `Font`, so a loader of script-visible memory must copy them first.
+  `src/font` now contains no `.?` and no `unreachable`; each remaining `@intCast` follows a range check in the same function.
+  Fixed-size records are copied with `Reader.fixed`, whose field reads check their range at compile time.
+  `tableRecord`, `cmapSubtable`, `Name.record`, `Layout.scriptTag`, and `Layout.featureTag` now return `null` for an index out of range, or when changed bytes no longer describe a readable record.
+  `findTable` returns `null` for a record that no longer lies inside the font.
+  `glyphIndex` returns glyph 0 for an unreadable mapping or a glyph at or past numGlyphs, so its result is always below numGlyphs.
+  `glyphHeader` returns `InvalidGlyph` when the `loca` entries no longer describe a range inside `glyf`, and `advance` returns `GlyphOutOfRange` if `hmtx` cannot hold the metric, which `parse` rules out.
+  `Layout` keeps the script, feature, and lookup counts that its check read, and `Name` keeps its record count and storage offset.
+  The `name`, `post`, `gsub`, and `gpos` documentation states that each call parses the table again in time linear in its length.
+  `parse` copies each directory record and table header before it checks the copy, and its integrity pass, which reads the directory again, counts a record that no longer fits as a mismatch.
+- ZIP reading: `readZip` checks the whole archive before any inflation, as `specs/README.md` lists, and inflation still stops at each declared size.
+- Fetch order: `corpus-fetch` compares each source with the pinned size, published digest, Git blob ID, previous record size and SHA-256, and `specs/corpora.json` pins before it parses any archive.
+  `corpus-verify` and `corpus-applicability` parse no local source whose size or SHA-256 differs from the record.
+- Network: downloads follow at most 10 redirects manually, every hop must use `https:` on the five allowlisted hosts, and the body stops at its pinned size, the previous record's size, or 256 MiB.
+- Atomic replacement: the write phase stages every file and the record beside its target, moves old files aside, swaps the source directory, writes the record last, and restores everything on any failure.
+- fontTools: `corpus-derive` and the new `font-expectations [--check]` command check every installed fontTools file against the verified wheel's `RECORD`, then run Python in a staging directory with `PYTHONSAFEPATH=1` and no other `PYTHON*` variable.
+  A probe also requires `sys.flags.safe_path` and an import of fontTools from the verified site-packages directory.
+  fontTools runs without an operating-system sandbox, on inputs pinned by Git blob or SHA-256 only.
+  `sfntCopyright` stops at the first `name` record and checks the sfnt header, the table range, the 6-byte `name` header, and the record array before it reads them.
+- Evidence integrity: case 12 compares `generator.script` and `generator.script_sha256` with the committed `tools/fonts/font_expectations.py`, and `generator.fonttools` with `engineering/dependencies.json`.
+  The `tests/text` run step now runs in the build root and lists both files as inputs.
+  The reference test marks every code point that a parsed file assigns and fails when any stays unassigned, and a new unit test shows that check failing for a one-code-point gap.
+- Trust on first use: the "Imported sources" section above and `specs/README.md` state that the UCD files and the `noto-sans` archive were trusted on first use.
+- The `opentype-core-tables` capability record now states the 512-subtable `InvalidCmap` limit.
+
+### Revision 1 cases
+
+| Case | Where | Before the fix | After the fix |
+| --- | --- | --- | --- |
+| 50 | `tests/text/bounds_test.zig` | Fails: 513 distinct subtables parse instead of returning `InvalidCmap` | Passes |
+| 51 | Same | Fails to compile: no validation counter. The old set also validated one shared offset once, so only the counter was missing | Passes with one validation |
+| 52 | Same, ten tests | Fails to compile on the optional index results; the four tests that compile against the old API panic: `attempt to use null value` for a changed format 12 group count and a changed format 4 segment count, `integer does not fit in destination type` for a format 12 start glyph, and `integer overflow` for decreasing `loca` entries | Passes, including a sweep that changes every single byte of `B_TT` and `B_CFF` after `parse` |
+| 53 | `tools/fileset.test.mjs` | 13 of 18 parts fail: overlap, five local-header mismatches, a local ZIP64 extra field, flag bit 13, a symbolic link, a reparse point, case folding, a total over 1 GiB, and a ratio over 1024. The old code already rejected a CRC-32 mismatch, both inflated-size mismatches, and both drive-letter names before writing anything | Passes |
+| 54 | Same, three tests | All parts fail: 4 of 4 digest-order parts, 6 of 6 network parts, and the write-phase injection, which injected no failure | Passes; the injection test requires at least 10 write steps and checks the state after a failure at each one |
+| 55 | Same, three tests | All parts fail except that a font without a `name` table was already rejected | Passes |
+
+Each controller case runs its parts and reports every failing part, so `raw/tests-before-r1.log` shows each part that the old code did not meet.
+After the before runs, five case 53 patterns changed from `local header disagrees` to `local header that disagrees`, to match the new message.
+The old code threw no error for those archives, so their before results do not depend on the pattern.
+
+### Evidence logs
+
+| Log | Runs and exit statuses |
+| --- | --- |
+| `raw/fonttools-install-r1.log` | `curl.exe` download of the wheel, `sha256sum --check` (`OK`), `python -m venv`, `pip install --no-index --no-deps`, and an import check printing `4.66.1 3.13.15`; all exit 0. |
+| `raw/tests-before-r1.log` | Nine runs at the revision base with the new tests, all exit 1. Run 1, `zig build test`, failed to compile on a test-code error, the removed `**` operator. Run 2, after that fix, failed to compile on the missing counter and optional accessors of cases 51 and 52. Runs 3 to 7 use `zig test --test-filter` on `tests/text/root.zig`: case 50 fails, and the four case 52 tests above panic. Runs 8 and 9 run `node tools/fileset.test.mjs`: 9 of 16 pass and cases 53 to 55 fail; run 9 follows only the split of the `sfntCopyright` case into reported parts. |
+| `raw/mutation-cmap-r1.log` | Two `zig build test` runs with `mutation-cmap-r1.diff` applied, both exit 1 with only case 50 failing: 189 of 190 tests. The first ran on an intermediate tree whose reference test printed two diagnostic lines; the second ran on the final tree. The diff was then reverted. |
+| `raw/tests-after-r1.log` | Uncached `zig build test --summary all --cache-dir out/fp0013-cache-after-r1`, exit 0: 40 of 40 steps and 190 of 190 tests, 145 in the library module and 45 in `tests/text`. |
+| `raw/controller-tests-after-r1.log` | Two runs of `node tools/fairpane.mjs test`, both exit 0 with 187 of 187. The second run follows the last change to `tools/fileset.mjs`, which replaced a recursive `readdirSync` in the installation check with a portable walk. |
+| `raw/ucd-check-r1.log` | Two runs of `ucd-check`, both exit 0 with `pass`; the second is on the final tree. |
+| `raw/corpus-verify-r1.log` | `corpus-verify unicode` and `corpus-verify opentype-fixtures`, twice each, all exit 0 with `pass`; the second pair is on the final tree. |
+| `raw/font-expectations-r1.log` | Three `font-expectations --check` runs and one `sha256sum` run, all exit 0. Each `font-expectations` run verified 350 installed files against the wheel's `RECORD`, ran the script for all four fixtures in a staging directory, and found every output byte-identical to the committed file. The `sha256sum` run shows the committed files and the script, `ea1ee96f…c350c51b`. The last run is on the final tree. |
+| `raw/corpus-derive-r1.log` | Two `corpus-derive opentype-fixtures` runs under the hardened invocation, both exit 0; the second is on the final tree. Each reproduced `cjk-subset.otf` byte for byte, 9564 bytes with SHA-256 `3f435bdd…afb682a83c`, and rewrote `specs/snapshots/opentype-fixtures.json` with identical bytes. |
+
+The mutation control `mutation-directory-order.diff` describes the parser before this revision; its context lines no longer match `src/font/opentype.zig`, which now reads directory records with `Reader.fixed`.
+
+### Open questions
+
+- Case 55 observes the child environment by running Node through `runPython`, the only function that starts an import tool, rather than through a full `corpus-derive` run, because controller tests cannot assume Python.
+  The real `corpus-derive` and `font-expectations` runs above confirm `sys.flags.safe_path` and the verified import path through the probe.
+- The installation check does not verify bytecode under `__pycache__`, and it does not inspect `.pth` files in site-packages.
+- The usage line inside `tools/fonts/font_expectations.py` still shows a direct run from the repository root; changing it would change the script digest that every expectation file records.
+- The integrator records the search of the CJK subset's bytes for `Source` in ASCII and in UTF-16BE, as the contract assigns.

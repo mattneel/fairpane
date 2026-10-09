@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * File-set corpus, record, and capability tests for FP-0013 cases 41 through 49.
+ * File-set corpus, record, and capability tests for FP-0013 cases 41 through 49 and revision 1 cases 53 through 55.
  * Run standalone with `node tools/fileset.test.mjs`, or through `node tools/fairpane.mjs test`.
- * Fetches read `file://` fixture sources that only these tests enable; no case uses the network.
+ * Fetches read `file://` fixture sources that only these tests enable, and download cases pass an in-memory `fetch`; no case uses the network.
  */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -13,8 +13,10 @@ import crypto from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { readJson, writeJson } from './lib.mjs';
-import { classifyCorpus, fetchCorpus, verifyCorpus } from './corpus.mjs';
-import { FILE_SET_IDS, crc32, gitBlobId, readZip, validateFileSetRecord, zipInventory } from './fileset.mjs';
+import { classifyCorpus, deriveCorpus, fetchCorpus, verifyCorpus } from './corpus.mjs';
+import { FILE_SET_IDS, crc32, gitBlobId, readZip, sfntCopyright, validateFileSetRecord, zipInventory } from './fileset.mjs';
+// Revision 1 functions are read through the namespace, so a missing export fails only the case that uses it.
+import * as fileset from './fileset.mjs';
 import { TEXT_FONT_OBLIGATIONS, validateCapabilityRecord } from './capabilities.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -26,31 +28,51 @@ function temp() {
   temporary.push(dir); return dir;
 }
 
+/** Run each named part, then fail with the message of every failing part, so one run reports each part that fails. */
+async function parts(list) {
+  const failures = [];
+  for (const [label, fn] of list) {
+    try { await fn(); } catch (e) { failures.push(`${label}: ${String(e.message).replace(/\s+/g, ' ').slice(0, 400)}`); }
+  }
+  if (failures.length) throw new Error(`${failures.length} of ${list.length} parts failed:\n- ${failures.join('\n- ')}`);
+}
+
 /**
- * Write a ZIP archive. Each entry is `{ path, data, method }` or `{ path, directory: true }`.
- * `edit(central, local)` may change the header buffers of an entry before they are written.
+ * One ZIP member: its local record (header, name, local extra field, and data) and its central directory entry.
+ * `e` is `{ path, data, method }` or `{ path, directory: true }`. `crc`, `size`, `compressedSize`, `flags`, `external`, `madeBy`,
+ * and `localExtra` override header fields, and `edit(central, local)` may change both headers before they are joined.
+ */
+export function zipMember(e, offset) {
+  const name = Buffer.from(e.path, 'utf8');
+  const data = e.directory ? Buffer.alloc(0) : Buffer.from(e.data);
+  const method = e.method ?? 0;
+  const stored = method === 8 ? zlib.deflateRawSync(data) : data;
+  const crc = e.crc ?? crc32(data), localExtra = e.localExtra ?? Buffer.alloc(0);
+  const local = Buffer.alloc(30);
+  local.writeUInt32LE(0x04034b50, 0); local.writeUInt16LE(20, 4); local.writeUInt16LE(e.flags ?? 0, 6);
+  local.writeUInt16LE(method, 8); local.writeUInt32LE(crc, 14);
+  local.writeUInt32LE(e.compressedSize ?? stored.length, 18); local.writeUInt32LE(e.size ?? data.length, 22);
+  local.writeUInt16LE(name.length, 26); local.writeUInt16LE(localExtra.length, 28);
+  const central = Buffer.alloc(46);
+  central.writeUInt32LE(0x02014b50, 0); central.writeUInt16LE(e.madeBy ?? 20, 4); central.writeUInt16LE(20, 6);
+  central.writeUInt16LE(e.flags ?? 0, 8); central.writeUInt16LE(method, 10); central.writeUInt32LE(crc, 16);
+  central.writeUInt32LE(e.compressedSize ?? stored.length, 20); central.writeUInt32LE(e.size ?? data.length, 24);
+  central.writeUInt16LE(name.length, 28); central.writeUInt32LE(e.external ?? (e.directory ? 0x10 : 0), 38); central.writeUInt32LE(offset, 42);
+  e.edit?.(central, local);
+  return { local: Buffer.concat([local, name, localExtra, stored]), central: Buffer.concat([central, name]) };
+}
+
+/**
+ * Write a ZIP archive from `zipMember` entries in order. An entry with `localOffset` writes no local record of its own;
+ * its central directory entry names that offset instead.
  */
 export function makeZip(entries, { truncateCentral = 0 } = {}) {
   const locals = [], centrals = [];
   let offset = 0;
   for (const e of entries) {
-    const name = Buffer.from(e.path, 'utf8');
-    const data = e.directory ? Buffer.alloc(0) : Buffer.from(e.data);
-    const method = e.method ?? 0;
-    const stored = method === 8 ? zlib.deflateRawSync(data) : data;
-    const local = Buffer.alloc(30);
-    local.writeUInt32LE(0x04034b50, 0); local.writeUInt16LE(20, 4); local.writeUInt16LE(e.flags ?? 0, 6);
-    local.writeUInt16LE(method, 8); local.writeUInt32LE(crc32(data), 14);
-    local.writeUInt32LE(e.compressedSize ?? stored.length, 18); local.writeUInt32LE(e.size ?? data.length, 22);
-    local.writeUInt16LE(name.length, 26);
-    const central = Buffer.alloc(46);
-    central.writeUInt32LE(0x02014b50, 0); central.writeUInt16LE(20, 4); central.writeUInt16LE(20, 6);
-    central.writeUInt16LE(e.flags ?? 0, 8); central.writeUInt16LE(method, 10); central.writeUInt32LE(crc32(data), 16);
-    central.writeUInt32LE(e.compressedSize ?? stored.length, 20); central.writeUInt32LE(e.size ?? data.length, 24);
-    central.writeUInt16LE(name.length, 28); central.writeUInt32LE(e.directory ? 0x10 : 0, 38); central.writeUInt32LE(offset, 42);
-    locals.push(local, name, stored);
-    centrals.push(central, name);
-    offset += local.length + name.length + stored.length;
+    const m = zipMember(e, e.localOffset ?? offset);
+    if (e.localOffset === undefined) { locals.push(m.local); offset += m.local.length; }
+    centrals.push(m.central);
   }
   let directory = Buffer.concat(centrals);
   const eocd = Buffer.alloc(22);
@@ -106,7 +128,7 @@ function fileSetFixture() {
   return {
     dir, corporaDir, upstream, rule, urls, recordFile, zip,
     applicabilityFile: path.join(dir, 'specs/applicability/unicode.json'),
-    fetch: (changed) => fetchCorpus(dir, 'unicode', options({ rule: changed })),
+    fetch: (changed, extra = {}) => fetchCorpus(dir, 'unicode', { ...options({ rule: changed }), ...extra }),
     classify: () => classifyCorpus(dir, 'unicode', { corporaDir, allowFileSources: true }),
     verify: () => verifyCorpus(dir, 'unicode', { corporaDir, allowFileSources: true }),
   };
@@ -399,7 +421,284 @@ export const fileSetCases = [
       assert.throws(() => validateCapabilityRecord(r, plan), pattern);
     }
   }],
+  ['FP-0013 case 53: overlapping, inconsistent, symbolic-link, case-folded, oversized, corrupt, and drive-letter archives fail before any member is written', async () => {
+    await parts(rejectedArchives().map(([label, bytes, pattern, structural]) => [label, async () => {
+      if (structural) assert.throws(() => readZip(bytes), pattern, 'readZip, which inflates nothing, must reject it');
+      else assert.throws(() => zipInventory(readZip(bytes)), pattern);
+      const f = fileSetFixture();
+      fs.writeFileSync(path.join(f.upstream, 'UCD.zip'), bytes);
+      const rule = structuredClone(f.rule);
+      rule.sources[0].size = null;
+      rule.sources[0].published_digest = null;
+      await assert.rejects(() => f.fetch(rule), pattern);
+      assert.equal(fs.existsSync(f.recordFile), false);
+      assert.equal(fs.existsSync(path.join(f.dir, 'src')), false);
+      assert.deepEqual(fs.readdirSync(f.corporaDir), []);
+    }]));
+  }],
+  ['FP-0013 case 54: a fetch compares every known digest before parsing a source', async () => {
+    // The bytes are not a zip, so readZip would fail with its own message about the central directory.
+    const notZip = Buffer.from('These bytes are not a zip archive.\n');
+    const unpinnedRule = fixture => {
+      const rule = structuredClone(fixture.rule);
+      rule.sources[0].size = null;
+      rule.sources[0].published_digest = null;
+      return rule;
+    };
+    const f = fileSetFixture();
+    await f.fetch();
+    otherApplicability(f.dir, 'unicode');
+    await f.classify();
+    const failure = async run => {
+      const error = await run().then(() => null, e => e);
+      assert.ok(error, 'The command must fail.');
+      assert.doesNotMatch(error.message, /central directory/, 'The command parsed a source whose digest differs.');
+      return error;
+    };
+    await parts([
+      ['the previous record\'s SHA-256', async () => {
+        const before = snapshot(f.corporaDir, path.join(f.dir, 'src'), path.join(f.dir, 'specs'));
+        fs.writeFileSync(path.join(f.upstream, 'UCD.zip'), notZip);
+        assert.match((await failure(() => f.fetch(unpinnedRule(f)))).message, /pin sources\.ucd\.sha256/);
+        assert.deepEqual(snapshot(f.corporaDir, path.join(f.dir, 'src'), path.join(f.dir, 'specs')), before);
+      }],
+      ['corpus-verify', async () => {
+        fs.writeFileSync(path.join(f.corporaDir, 'unicode/sources/UCD.zip'), notZip);
+        assert.match((await failure(f.verify)).message, /source ucd sha256/);
+      }],
+      ['corpus-applicability', async () => {
+        fs.writeFileSync(path.join(f.corporaDir, 'unicode/sources/UCD.zip'), notZip);
+        assert.match((await failure(f.classify)).message, /source ucd/);
+      }],
+      ['a specs/corpora.json pin', async () => {
+        const g = fileSetFixture();
+        const policyFile = path.join(g.dir, 'specs/corpora.json'), policy = readJson(policyFile);
+        policy.corpora.find(c => c.id === 'unicode').inventory_sha256 = '0'.repeat(64);
+        writeJson(policyFile, policy);
+        fs.writeFileSync(path.join(g.upstream, 'UCD.zip'), notZip);
+        assert.match((await failure(() => g.fetch(unpinnedRule(g)))).message, /inventory_sha256/);
+        assert.equal(fs.existsSync(g.recordFile), false);
+        assert.deepEqual(fs.readdirSync(g.corporaDir), []);
+      }],
+    ]);
+  }],
+  ['FP-0013 case 54: downloads follow redirects manually on allowlisted HTTPS hosts and stop at their size limit', async () => {
+    const dir = temp(), file = path.join(dir, 'download.bin');
+    const calls = [];
+    const fake = routes => async (url, init) => {
+      calls.push({ url: String(url), redirect: init?.redirect });
+      const route = routes[String(url)];
+      assert.ok(route, `unexpected request ${url}`);
+      return route();
+    };
+    const redirect = location => () => new Response(null, { status: 302, headers: { location } });
+    const download = (url, routes, limit = 1024) => fileset.downloadSource(url, file, { limit, httpFetch: fake(routes) });
+    let pulls = 0;
+    const endless = () => new Response(new ReadableStream({ pull(controller) { pulls++; controller.enqueue(new Uint8Array(1000)); } }));
+    await parts([
+      ['a manual redirect on allowlisted hosts', async () => {
+        calls.length = 0;
+        const ok = await download('https://github.com/a', { 'https://github.com/a': redirect('/b'), 'https://github.com/b': () => new Response('body') });
+        assert.deepEqual(ok, { size: 4, sha256: sha256('body') });
+        assert.deepEqual(calls.map(c => [c.url, c.redirect]), [['https://github.com/a', 'manual'], ['https://github.com/b', 'manual']]);
+      }],
+      ['an http: hop', async () => {
+        calls.length = 0;
+        await assert.rejects(() => download('https://www.unicode.org/a', { 'https://www.unicode.org/a': redirect('http://www.unicode.org/b') }), /https:/);
+        assert.deepEqual(calls.map(c => c.url), ['https://www.unicode.org/a']);
+      }],
+      ['a hop to another host', async () => {
+        calls.length = 0;
+        await assert.rejects(() => download('https://github.com/a', { 'https://github.com/a': redirect('https://downloads.example.org/b') }), /downloads\.example\.org/);
+        assert.deepEqual(calls.map(c => c.url), ['https://github.com/a']);
+      }],
+      ['a first URL on another host', async () => {
+        calls.length = 0;
+        await assert.rejects(() => download('https://example.org/a', {}), /example\.org/);
+        assert.deepEqual(calls, []);
+      }],
+      ['a download over its limit', async () => {
+        pulls = 0;
+        await assert.rejects(() => download('https://raw.githubusercontent.com/a', { 'https://raw.githubusercontent.com/a': endless }, 4096), /exceeds its limit of 4096 bytes/);
+        assert.ok(pulls <= 16, `the download read ${pulls} chunks after it passed its limit`);
+        assert.equal(fs.existsSync(file), false);
+        await assert.rejects(() => fileset.fetchBytes('https://www.unicode.org/a', { limit: 4096, httpFetch: fake({ 'https://www.unicode.org/a': endless }) }),
+          /exceeds its limit of 4096 bytes/);
+      }],
+      ['the pinned size, else 256 MiB', () => {
+        assert.equal(fileset.downloadLimit({ size: 10 }, null), 10);
+        assert.equal(fileset.downloadLimit({ size: null }, { size: 20 }), 20);
+        assert.equal(fileset.downloadLimit({ size: null }, null), 256 * 1024 * 1024);
+      }],
+    ]);
+  }],
+  ['FP-0013 case 54: a failure injected at each write step leaves every previous file, the source directory, and the record unchanged', async () => {
+    const f = fileSetFixture();
+    await f.fetch();
+    // Local changes that a complete fetch replaces: an edited file, a missing file and directory, and an extra source file.
+    fs.appendFileSync(path.join(f.dir, 'src/unicode/ucd/Scripts.txt'), '# local edit\n');
+    fs.rmSync(path.join(f.dir, 'src/unicode/ucd/extracted'), { recursive: true });
+    fs.writeFileSync(path.join(f.corporaDir, 'unicode/sources/marker.txt'), 'The previous source directory.\n');
+    const roots = [f.corporaDir, path.join(f.dir, 'src'), path.join(f.dir, 'specs')];
+    const before = snapshot(...roots);
+    let steps = 0;
+    for (let k = 0; ; k++) {
+      let seen = 0;
+      const labels = [];
+      const onWriteStep = label => { labels.push(label); if (seen++ === k) throw new Error(`injected failure at ${label}`); };
+      const error = await f.fetch(undefined, { onWriteStep }).then(() => null, e => e);
+      if (!error) { steps = k; break; }
+      assert.match(error.message, /injected failure/);
+      assert.deepEqual(snapshot(...roots), before, `after a failure at ${labels.at(-1)}`);
+      assert.equal(fs.existsSync(path.join(f.dir, 'src/unicode/ucd/extracted')), false, `after a failure at ${labels.at(-1)}`);
+      assert.equal(fs.readdirSync(f.corporaDir).join(), 'unicode', `after a failure at ${labels.at(-1)}`);
+    }
+    // Staging three files and the record, replacing three files, swapping the source directory, and writing the record.
+    assert.ok(steps >= 10, `only ${steps} write steps were injected`);
+    assert.deepEqual(fs.readFileSync(path.join(f.dir, 'src/unicode/ucd/Scripts.txt')), Buffer.from(SCRIPTS));
+    assert.deepEqual(fs.readFileSync(path.join(f.dir, 'src/unicode/ucd/extracted/DerivedBidiClass.txt')), Buffer.from(DERIVED));
+    assert.equal(fs.existsSync(path.join(f.corporaDir, 'unicode/sources/marker.txt')), false);
+    assert.equal(fs.readdirSync(f.corporaDir).join(), 'unicode');
+  }],
+  ['FP-0013 case 55: corpus-derive refuses a fontTools installation with one changed file', async () => {
+    const derive = install => deriveCorpus(install.dir, 'opentype-fixtures', { corporaDir: temp() });
+    await parts([
+      ['an unchanged installation', async () => {
+        const unchanged = fakeFontTools();
+        assert.ok(fileset.verifyToolInstallation(unchanged.dir, unchanged.tool).files >= 4);
+        // Verification passes, so the command stops later, at the missing snapshot record of this fixture repository.
+        await assert.rejects(() => derive(unchanged), /Missing snapshot record/);
+      }],
+      ['a changed package file', async () => {
+        const changed = fakeFontTools();
+        fs.appendFileSync(path.join(changed.sitePackages, 'fontTools/subset/__init__.py'), '# changed\n');
+        await assert.rejects(() => derive(changed), /fontTools\/subset\/__init__\.py.*RECORD/);
+      }],
+      ['a changed data file', async () => {
+        const data = fakeFontTools();
+        fs.appendFileSync(path.join(data.venv, 'share/man/man1/ttx.1'), 'changed\n');
+        await assert.rejects(() => derive(data), /share\/man\/man1\/ttx\.1.*RECORD/);
+      }],
+      ['a planted package file', async () => {
+        const planted = fakeFontTools();
+        fs.writeFileSync(path.join(planted.sitePackages, 'fontTools/planted.py'), 'raise SystemExit(1)\n');
+        await assert.rejects(() => derive(planted), /fontTools\/planted\.py.*not listed/);
+      }],
+      ['a changed wheel', async () => {
+        const wheel = fakeFontTools();
+        fs.appendFileSync(wheel.wheel, 'x');
+        await assert.rejects(() => derive(wheel), /wheel/);
+      }],
+    ]);
+  }],
+  ['FP-0013 case 55: the Python child process sees PYTHONSAFEPATH=1, no other PYTHON* variable, and the staging directory', () => {
+    const staging = temp();
+    const script = 'console.log(JSON.stringify({ env: Object.fromEntries(Object.entries(process.env).filter(([k]) => /^python/i.test(k))), cwd: process.cwd() }))';
+    const baseEnv = { ...process.env, PYTHONPATH: 'planted', PYTHONHOME: 'planted', PYTHONSTARTUP: 'planted', PYTHONSAFEPATH: '0', PythonUserBase: 'planted' };
+    const r = fileset.runPython(process.execPath, ['-e', script], { cwd: staging, baseEnv });
+    assert.equal(r.status, 0, `${r.stdout}${r.stderr}`);
+    const seen = JSON.parse(r.stdout);
+    assert.deepEqual(seen.env, { PYTHONSAFEPATH: '1' });
+    assert.equal(fs.realpathSync(seen.cwd), fs.realpathSync(staging));
+    assert.throws(() => fileset.runPython(process.execPath, ['-e', ''], { cwd: 'relative' }), /absolute/);
+  }],
+  ['FP-0013 case 55: sfntCopyright stops at the first name record and checks the name table header length', async () => {
+    const records = nameTable('First');
+    records.writeUInt16BE(9, 2);
+    await parts([
+      ['the first of two name records', () => assert.equal(sfntCopyright(sfnt([['name', nameTable('First')], ['name', nameTable('Second')]])), 'First')],
+      ['a name table shorter than its header', () => assert.throws(() => sfntCopyright(sfnt([['name', Buffer.alloc(4)]])), /name table is shorter than its 6-byte header/)],
+      ['name records past the table', () => assert.throws(() => sfntCopyright(sfnt([['name', records]])), /name records run past the name table/)],
+      ['no name table', () => assert.throws(() => sfntCopyright(sfnt([['post', Buffer.alloc(32)]])), /no name table/)],
+      ['a truncated sfnt header', () => assert.throws(() => sfntCopyright(Buffer.alloc(8)), /shorter than an sfnt header/)],
+    ]);
+  }],
 ].map(([name, fn]) => ({ name, fn }));
+
+/** Archives that the zip reader must reject, each with its label, error pattern, and whether readZip rejects it without inflating. */
+function rejectedArchives() {
+  const inner = zipMember({ path: 'b.txt', data: 'bee\n' }, 0).local;
+  const random = crypto.randomBytes(1100000);
+  const zeros = Buffer.alloc(65536), kernel = zlib.deflateRawSync(zeros);
+  const zip64Extra = Buffer.alloc(20);
+  zip64Extra.writeUInt16LE(0x0001, 0); zip64Extra.writeUInt16LE(16, 2);
+  return [
+    ['overlapping members', makeZip([{ path: 'a.txt', data: inner }, { path: 'b.txt', data: 'bee\n', localOffset: 30 + 'a.txt'.length }]), /overlap/, true],
+    ['a local CRC-32', makeZip([{ path: 'a.txt', data: 'a', edit: (c, l) => l.writeUInt32LE(0x12345678, 14) }]), /local header that disagrees .* in CRC-32/, true],
+    ['a local compressed size', makeZip([{ path: 'a.txt', data: 'a', edit: (c, l) => l.writeUInt32LE(2, 18) }]), /local header that disagrees .* in sizes/, true],
+    ['a local uncompressed size', makeZip([{ path: 'a.txt', data: 'aaaa', method: 8, edit: (c, l) => l.writeUInt32LE(3, 22) }]), /local header that disagrees .* in sizes/, true],
+    ['a local method', makeZip([{ path: 'a.txt', data: 'aaaa', method: 8, edit: (c, l) => l.writeUInt16LE(0, 8) }]), /local header that disagrees .* in method/, true],
+    ['local flags', makeZip([{ path: 'a.txt', data: 'a', edit: (c, l) => l.writeUInt16LE(0x0800, 6) }]), /local header that disagrees .* in flags/, true],
+    ['a local ZIP64 extra field', makeZip([{ path: 'a.txt', data: 'a', localExtra: zip64Extra }]), /ZIP64/, true],
+    ['flag bit 13', makeZip([{ path: 'a.txt', data: 'a', flags: 0x2000 }]), /flag bit 13/, true],
+    ['a symbolic link', makeZip([{ path: 'link', data: 'target', madeBy: 0x0314, external: 0o120777 * 0x10000 }]), /symbolic link/, true],
+    ['a reparse point', makeZip([{ path: 'link', data: 'target', external: 0x400 }]), /symbolic link/, true],
+    ['names equal under case folding', makeZip([{ path: 'Read.txt', data: 'a' }, { path: 'read.TXT', data: 'b' }]), /case folding/, true],
+    ['a declared total over 1 GiB', makeZip([{ path: 'big.bin', data: random, method: 8, size: 2 ** 30 + 1 }]), /1 GiB/, true],
+    ['a ratio over 1024', makeZip([{ path: 'bomb.bin', data: zeros, method: 8, size: 1025 * kernel.length }]), /1024/, true],
+    ['a CRC-32 mismatch', makeZip([{ path: 'a.txt', data: 'a', crc: 0xDEADBEEF }]), /CRC-32/, false],
+    ['a larger declared size', makeZip([{ path: 'a.txt', data: 'sea sea', method: 8, size: 12 }]), /7 bytes, not 12/, false],
+    ['a smaller declared size', makeZip([{ path: 'a.txt', data: 'sea sea', method: 8, size: 3 }]), /does not inflate|bytes, not 3/, false],
+    ['a drive-letter name', makeZip([{ path: 'C:/x.txt', data: 'x' }]), /absolute path/, true],
+    ['a drive-relative name', makeZip([{ path: 'C:x.txt', data: 'x' }]), /absolute path/, true],
+  ];
+}
+
+/** A fontTools installation from a fixture wheel: a repository root with the wheel, its `dependencies.json` digest, and the installed files. */
+function fakeFontTools() {
+  const dir = temp();
+  const files = {
+    'fontTools/__init__.py': 'version = "4.66.1"\n',
+    'fontTools/subset/__init__.py': 'def main():\n    pass\n',
+    'fonttools-4.66.1.dist-info/METADATA': 'Name: fonttools\nVersion: 4.66.1\n',
+    'fonttools-4.66.1.data/data/share/man/man1/ttx.1': '.TH TTX 1\n',
+  };
+  const digest = data => crypto.createHash('sha256').update(data).digest('base64url');
+  const record = [...Object.entries(files).map(([p, text]) => `${p},sha256=${digest(text)},${Buffer.byteLength(text)}`), 'fonttools-4.66.1.dist-info/RECORD,,'].join('\r\n');
+  const wheelBytes = makeZip([...Object.entries(files).map(([p, data]) => ({ path: p, data, method: 8 })), { path: 'fonttools-4.66.1.dist-info/RECORD', data: `${record}\r\n` }]);
+  const dependencies = readJson(path.join(root, 'engineering/dependencies.json'));
+  const tool = dependencies.development.import_tools.find(t => t.name === 'fontTools');
+  tool.wheel_sha256 = sha256(wheelBytes);
+  writeJson(path.join(dir, 'engineering/dependencies.json'), dependencies);
+  const wheel = path.join(dir, '.tools/downloads', path.posix.basename(new URL(tool.wheel_url).pathname));
+  fs.mkdirSync(path.dirname(wheel), { recursive: true });
+  fs.writeFileSync(wheel, wheelBytes);
+  const venv = path.join(dir, '.tools/python/fonttools-4.66.1');
+  const sitePackages = process.platform === 'win32' ? path.join(venv, 'Lib/site-packages') : path.join(venv, 'lib/python3.13/site-packages');
+  const put = (file, data) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, data); };
+  for (const [p, text] of Object.entries(files)) {
+    put(p.startsWith('fonttools-4.66.1.data/data/') ? path.join(venv, p.slice('fonttools-4.66.1.data/data/'.length)) : path.join(sitePackages, p), text);
+  }
+  // Files that pip writes: bytecode, its own RECORD, and the installer marker.
+  put(path.join(sitePackages, 'fontTools/__pycache__/__init__.cpython-313.pyc'), 'bytecode');
+  put(path.join(sitePackages, 'fonttools-4.66.1.dist-info/RECORD'), 'installed record\n');
+  put(path.join(sitePackages, 'fonttools-4.66.1.dist-info/INSTALLER'), 'pip\n');
+  put(process.platform === 'win32' ? path.join(venv, 'Scripts/python.exe') : path.join(venv, 'bin/python'), '');
+  return { dir, tool, venv, sitePackages, wheel };
+}
+
+/** A minimal sfnt with the given tables, laid out after the directory without checksums. */
+function sfnt(tables) {
+  const header = Buffer.alloc(12 + 16 * tables.length);
+  header.writeUInt32BE(0x00010000, 0); header.writeUInt16BE(tables.length, 4);
+  let offset = header.length;
+  tables.forEach(([tag, data], i) => {
+    header.write(tag, 12 + 16 * i, 'latin1');
+    header.writeUInt32BE(offset, 12 + 16 * i + 8); header.writeUInt32BE(data.length, 12 + 16 * i + 12);
+    offset += data.length;
+  });
+  return Buffer.concat([header, ...tables.map(([, data]) => data)]);
+}
+
+/** A format 0 name table with one (3, 1, 0x409, 0) record. */
+function nameTable(copyright) {
+  const text = Buffer.from(copyright, 'utf16le').swap16();
+  const t = Buffer.alloc(6 + 12);
+  t.writeUInt16BE(0, 0); t.writeUInt16BE(1, 2); t.writeUInt16BE(18, 4);
+  t.writeUInt16BE(3, 6); t.writeUInt16BE(1, 8); t.writeUInt16BE(0x409, 10); t.writeUInt16BE(0, 12);
+  t.writeUInt16BE(text.length, 14); t.writeUInt16BE(0, 16);
+  return Buffer.concat([t, text]);
+}
 
 export function removeFileSetFixtures() {
   const failures = [];

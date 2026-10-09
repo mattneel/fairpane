@@ -513,12 +513,13 @@ async function replaceSnapshot(root, id, { upstream, ref, commit, corporaDir, ch
 
 /**
  * Fetch the pinned commit: the `specs/corpora.json` revision, or else the commit of the existing snapshot record.
- * A file-set corpus downloads its frozen sources instead; controller tests pass `rules` and `allowFileSources` for `file://` fixture sources.
+ * A file-set corpus downloads its frozen sources instead; controller tests pass `rules` and `allowFileSources` for `file://` fixture sources,
+ * and `onWriteStep` to inject a failure into the file-set write phase.
  */
 export async function fetchCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false,
-  rules = FILE_SET_RULES, allowFileSources = false } = {}) {
+  rules = FILE_SET_RULES, allowFileSources = false, onWriteStep } = {}) {
   if (Object.hasOwn(rules, id)) {
-    return fetchFileSet(root, id, { corporaDir, policy: corpusPolicy(policyFile, id, allowFileUpstream), rule: rules[id], allowFileSources });
+    return fetchFileSet(root, id, { corporaDir, policy: corpusPolicy(policyFile, id, allowFileUpstream), rule: rules[id], allowFileSources, onWriteStep });
   }
   corpusRule(id);
   const policy = corpusPolicy(policyFile, id, allowFileUpstream), recordFile = recordPath(root, id);

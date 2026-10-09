@@ -16,9 +16,23 @@ fn hexLower(bytes: []const u8, out: []u8) []const u8 {
     return out[0 .. 2 * bytes.len];
 }
 
-test "FP-0013 case 12: each embedded font's SHA-256 equals font_sha256 in its expectation file" {
+/// Reads a repository file. The `tests/text` run step runs in the build root and lists these files as inputs.
+fn readRepositoryFile(arena: std.mem.Allocator, path: []const u8) ![]u8 {
+    return std.Io.Dir.cwd().readFileAlloc(testing.io, path, arena, .limited(1 << 20));
+}
+
+test "FP-0013 case 12: each embedded font's SHA-256 equals font_sha256, and its generator is the committed script and the declared fontTools" {
     var arena = std.heap.ArenaAllocator.init(testing.allocator);
     defer arena.deinit();
+    const script_path = "tools/fonts/font_expectations.py";
+    const script = try readRepositoryFile(arena.allocator(), script_path);
+    var script_digest: [32]u8 = undefined;
+    std.crypto.hash.sha2.Sha256.hash(script, &script_digest, .{});
+    var script_hex: [64]u8 = undefined;
+    const dependencies = try std.json.parseFromSliceLeaky(Value, arena.allocator(), try readRepositoryFile(arena.allocator(), "engineering/dependencies.json"), .{});
+    const fonttools_version = for (dependencies.object.get("development").?.object.get("import_tools").?.array.items) |tool| {
+        if (std.mem.eql(u8, tool.object.get("name").?.string, "fontTools")) break tool.object.get("version").?.string;
+    } else return error.TestUnexpectedResult;
     for (fixtures.fonts) |f| {
         const root = try std.json.parseFromSliceLeaky(Value, arena.allocator(), f.expectation, .{});
         var digest: [32]u8 = undefined;
@@ -27,6 +41,10 @@ test "FP-0013 case 12: each embedded font's SHA-256 equals font_sha256 in its ex
         try testing.expectEqualStrings(root.object.get("font_sha256").?.string, hexLower(&digest, &hex));
         const expected_path = try std.fmt.allocPrint(arena.allocator(), "{s}/{s}", .{ f.dir, f.file });
         try testing.expectEqualStrings(expected_path, root.object.get("font").?.string);
+        const generator = root.object.get("generator").?.object;
+        try testing.expectEqualStrings(script_path, generator.get("script").?.string);
+        try testing.expectEqualStrings(hexLower(&script_digest, &script_hex), generator.get("script_sha256").?.string);
+        try testing.expectEqualStrings(fonttools_version, generator.get("fonttools").?.string);
     }
 }
 
@@ -100,10 +118,10 @@ fn expectLayout(what: []const u8, expected: Value, status: font.TableStatus(font
     try testing.expectEqual(int(o.get("version").?), layout.version);
     const scripts = o.get("scripts").?.array.items;
     try testing.expectEqual(scripts.len, layout.scriptCount());
-    for (scripts, 0..) |s, i| try testing.expectEqualStrings(s.string, &layout.scriptTag(@intCast(i)));
+    for (scripts, 0..) |s, i| try testing.expectEqualStrings(s.string, &(layout.scriptTag(@intCast(i)) orelse return error.TestUnexpectedResult));
     const features = o.get("features").?.array.items;
     try testing.expectEqual(features.len, layout.featureCount());
-    for (features, 0..) |s, i| try testing.expectEqualStrings(s.string, &layout.featureTag(@intCast(i)));
+    for (features, 0..) |s, i| try testing.expectEqualStrings(s.string, &(layout.featureTag(@intCast(i)) orelse return error.TestUnexpectedResult));
     try testing.expectEqual(int(o.get("lookup_count").?), layout.lookupCount());
     try testing.expectEqual(@as(usize, 4), o.count());
 }
@@ -132,7 +150,7 @@ fn checkFixture(arena: std.mem.Allocator, f: fixtures.Font) !void {
     const tables = e.get("tables").?.array.items;
     try testing.expectEqual(tables.len, parsed.tableCount());
     for (tables, 0..) |t, i| {
-        const r = parsed.tableRecord(@intCast(i));
+        const r = parsed.tableRecord(@intCast(i)) orelse return error.TestUnexpectedResult;
         try testing.expectEqualStrings(t.object.get("tag").?.string, &r.tag);
         try testing.expectEqual(int(t.object.get("checksum").?), r.checksum);
         try testing.expectEqual(int(t.object.get("offset").?), r.offset);
@@ -165,7 +183,7 @@ fn checkFixture(arena: std.mem.Allocator, f: fixtures.Font) !void {
     const name = parsed.name().valid;
     try testing.expectEqual(names.len, name.count());
     for (names, 0..) |n, i| {
-        const r = name.record(@intCast(i));
+        const r = name.record(@intCast(i)) orelse return error.TestUnexpectedResult;
         const o = n.object;
         try testing.expectEqual(int(o.get("platform").?), r.platform_id);
         try testing.expectEqual(int(o.get("encoding").?), r.encoding_id);
@@ -180,7 +198,7 @@ fn checkFixture(arena: std.mem.Allocator, f: fixtures.Font) !void {
     const subtables = cmap.get("subtables").?.array.items;
     try testing.expectEqual(subtables.len, parsed.cmapSubtableCount());
     for (subtables, 0..) |s, i| {
-        const r = parsed.cmapSubtable(@intCast(i));
+        const r = parsed.cmapSubtable(@intCast(i)) orelse return error.TestUnexpectedResult;
         const o = s.object;
         try testing.expectEqual(int(o.get("platform").?), r.platform_id);
         try testing.expectEqual(int(o.get("encoding").?), r.encoding_id);
@@ -265,7 +283,7 @@ test "FP-0013 case 14: the CJK subset is a CFF font whose name table keeps only 
     const name = parsed.name().valid;
     try testing.expect(name.count() > 0);
     for (0..name.count()) |i| {
-        const id = name.record(@intCast(i)).name_id;
+        const id = (name.record(@intCast(i)) orelse return error.TestUnexpectedResult).name_id;
         try testing.expect(id == 0 or id == 7 or id == 13 or id == 14);
     }
 }

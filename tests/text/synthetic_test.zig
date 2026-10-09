@@ -49,9 +49,9 @@ test "FP-0013 case 16: B_TT maps, measures, and describes its glyphs and optiona
     try testing.expectEqual(@as(u16, 0), f.glyphIndex(0x110000));
     try testing.expectEqual(font.CmapSelection{ .platform_id = 3, .encoding_id = 10, .format = 12 }, f.unicodeCmap());
     try testing.expectEqual(@as(u16, 3), f.cmapSubtableCount());
-    try testing.expectEqual(font.CmapSubtable{ .platform_id = 0, .encoding_id = 3, .format = 4, .language = 0 }, f.cmapSubtable(0));
-    try testing.expectEqual(font.CmapSubtable{ .platform_id = 3, .encoding_id = 1, .format = 4, .language = 0 }, f.cmapSubtable(1));
-    try testing.expectEqual(font.CmapSubtable{ .platform_id = 3, .encoding_id = 10, .format = 12, .language = 0 }, f.cmapSubtable(2));
+    try testing.expectEqual(font.CmapSubtable{ .platform_id = 0, .encoding_id = 3, .format = 4, .language = 0 }, f.cmapSubtable(0).?);
+    try testing.expectEqual(font.CmapSubtable{ .platform_id = 3, .encoding_id = 1, .format = 4, .language = 0 }, f.cmapSubtable(1).?);
+    try testing.expectEqual(font.CmapSubtable{ .platform_id = 3, .encoding_id = 10, .format = 12, .language = 0 }, f.cmapSubtable(2).?);
 
     const metrics = [_]font.HMetric{ .{ .advance = 500, .lsb = 50 }, .{ .advance = 250, .lsb = 0 }, .{ .advance = 600, .lsb = 10 }, .{ .advance = 600, .lsb = 10 } };
     for (metrics, 0..) |m, glyph| try testing.expectEqual(m, try f.advance(@intCast(glyph)));
@@ -97,13 +97,13 @@ test "FP-0013 case 16: B_TT maps, measures, and describes its glyphs and optiona
     const gsub = f.gsub().valid;
     try testing.expectEqual(@as(u32, 0x00010000), gsub.version);
     try testing.expectEqual(@as(u16, 2), gsub.scriptCount());
-    try testing.expectEqualStrings("DFLT", &gsub.scriptTag(0));
-    try testing.expectEqualStrings("latn", &gsub.scriptTag(1));
+    try testing.expectEqualStrings("DFLT", &gsub.scriptTag(0).?);
+    try testing.expectEqualStrings("latn", &gsub.scriptTag(1).?);
     try testing.expectEqual(@as(u16, 0), gsub.featureCount());
     try testing.expectEqual(@as(u16, 0), gsub.lookupCount());
     const gpos = f.gpos().valid;
     try testing.expectEqual(@as(u16, 1), gpos.scriptCount());
-    try testing.expectEqualStrings("latn", &gpos.scriptTag(0));
+    try testing.expectEqualStrings("latn", &gpos.scriptTag(0).?);
     try testing.expectEqual(@as(u16, 0), gpos.featureCount());
     try testing.expectEqual(@as(u16, 0), gpos.lookupCount());
     const gdef = f.gdef().valid;

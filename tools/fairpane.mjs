@@ -11,6 +11,7 @@ import { AttestationError, candidateIdentity, candidateRepository, enclosingGitD
 import { abiCheck, abiExports, abiGenerate } from './abi.mjs';
 import { lockedCompiler, provenanceStatement, reproduceCheck, reproduceExitCode, sourceArchive } from './release.mjs';
 import { ucdCheck, ucdGenerate } from './ucd.mjs';
+import { fontExpectations } from './fileset.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command = 'help', ...args] = process.argv.slice(2);
@@ -42,6 +43,10 @@ function help() {
   corpus-applicability <id>   Count discovered tests or files in a local snapshot.
   corpus-verify <id>          Recompute a local snapshot and compare its records and pins.
   corpus-derive <id>          Run the declared import-tool derivations of a file-set corpus and record them.
+  font-expectations [--check] Run tools/fonts/font_expectations.py for every fixture font in a staging
+                              directory after checking fontTools against its wheel's RECORD. --check exits
+                              with status 1 when an output differs from the committed file; otherwise the
+                              command replaces each differing file.
   attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>
                               Verify a signed result against protected trust
                               input and a full commit ID in a candidate
@@ -144,6 +149,9 @@ try {
     output(validateReceipt(root, args[0]));
   } else if (command.startsWith('corpus-')) {
     const r = await corpusCommand(root, command, args); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
+  } else if (command === 'font-expectations') {
+    if (args.some(a => a !== '--check')) throw new Error('Usage: font-expectations [--check]');
+    const r = fontExpectations(root, { check: args.includes('--check') }); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
   } else if (command === 'attest-verify') {
     const usage = 'Usage: attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>';
     const options = {}, files = [];

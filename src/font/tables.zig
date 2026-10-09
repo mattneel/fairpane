@@ -53,26 +53,26 @@ pub const Head = struct {
 
 /// Length at least 54, major version 1, the magic number, unitsPerEm from 16 to 16384, and for TrueType a loca format of 0 or 1.
 pub fn parseHead(r: Reader, outline: Outline) error{InvalidHead}!Head {
-    if (r.len() < 54) return error.InvalidHead;
+    const h = r.fixed(54, 0) orelse return error.InvalidHead;
     const head: Head = .{
-        .major_version = r.u16At(0).?,
-        .minor_version = r.u16At(2).?,
-        .font_revision = r.i32At(4).?,
-        .checksum_adjustment = r.u32At(8).?,
-        .magic_number = r.u32At(12).?,
-        .flags = r.u16At(16).?,
-        .units_per_em = r.u16At(18).?,
-        .created = r.i64At(20).?,
-        .modified = r.i64At(28).?,
-        .x_min = r.i16At(36).?,
-        .y_min = r.i16At(38).?,
-        .x_max = r.i16At(40).?,
-        .y_max = r.i16At(42).?,
-        .mac_style = r.u16At(44).?,
-        .lowest_rec_ppem = r.u16At(46).?,
-        .font_direction_hint = r.i16At(48).?,
-        .index_to_loc_format = r.i16At(50).?,
-        .glyph_data_format = r.i16At(52).?,
+        .major_version = h.int(u16, 0),
+        .minor_version = h.int(u16, 2),
+        .font_revision = h.int(i32, 4),
+        .checksum_adjustment = h.int(u32, 8),
+        .magic_number = h.int(u32, 12),
+        .flags = h.int(u16, 16),
+        .units_per_em = h.int(u16, 18),
+        .created = h.int(i64, 20),
+        .modified = h.int(i64, 28),
+        .x_min = h.int(i16, 36),
+        .y_min = h.int(i16, 38),
+        .x_max = h.int(i16, 40),
+        .y_max = h.int(i16, 42),
+        .mac_style = h.int(u16, 44),
+        .lowest_rec_ppem = h.int(u16, 46),
+        .font_direction_hint = h.int(i16, 48),
+        .index_to_loc_format = h.int(i16, 50),
+        .glyph_data_format = h.int(i16, 52),
     };
     if (head.major_version != 1 or head.magic_number != 0x5F0F3CF5) return error.InvalidHead;
     if (head.units_per_em < 16 or head.units_per_em > 16384) return error.InvalidHead;
@@ -114,23 +114,22 @@ pub fn parseMaxp(r: Reader, outline: Outline) error{InvalidMaxp}!Maxp {
             return .{ .version = version, .num_glyphs = num_glyphs, .v1 = null };
         },
         .truetype => {
-            if (version != 0x00010000 or r.len() < 32) return error.InvalidMaxp;
-            var fields: [13]u16 = undefined;
-            for (&fields, 0..) |*f, i| f.* = r.u16At(6 + 2 * i).?;
+            if (version != 0x00010000) return error.InvalidMaxp;
+            const m = r.fixed(32, 0) orelse return error.InvalidMaxp;
             return .{ .version = version, .num_glyphs = num_glyphs, .v1 = .{
-                .max_points = fields[0],
-                .max_contours = fields[1],
-                .max_composite_points = fields[2],
-                .max_composite_contours = fields[3],
-                .max_zones = fields[4],
-                .max_twilight_points = fields[5],
-                .max_storage = fields[6],
-                .max_function_defs = fields[7],
-                .max_instruction_defs = fields[8],
-                .max_stack_elements = fields[9],
-                .max_size_of_instructions = fields[10],
-                .max_component_elements = fields[11],
-                .max_component_depth = fields[12],
+                .max_points = m.int(u16, 6),
+                .max_contours = m.int(u16, 8),
+                .max_composite_points = m.int(u16, 10),
+                .max_composite_contours = m.int(u16, 12),
+                .max_zones = m.int(u16, 14),
+                .max_twilight_points = m.int(u16, 16),
+                .max_storage = m.int(u16, 18),
+                .max_function_defs = m.int(u16, 20),
+                .max_instruction_defs = m.int(u16, 22),
+                .max_stack_elements = m.int(u16, 24),
+                .max_size_of_instructions = m.int(u16, 26),
+                .max_component_elements = m.int(u16, 28),
+                .max_component_depth = m.int(u16, 30),
             } };
         },
     }
@@ -155,22 +154,22 @@ pub const Hhea = struct {
 
 /// Length at least 36, major version 1, and numberOfHMetrics from 1 to numGlyphs.
 pub fn parseHhea(r: Reader, num_glyphs: u16) error{InvalidHhea}!Hhea {
-    if (r.len() < 36) return error.InvalidHhea;
+    const h = r.fixed(36, 0) orelse return error.InvalidHhea;
     const hhea: Hhea = .{
-        .major_version = r.u16At(0).?,
-        .minor_version = r.u16At(2).?,
-        .ascender = r.i16At(4).?,
-        .descender = r.i16At(6).?,
-        .line_gap = r.i16At(8).?,
-        .advance_width_max = r.u16At(10).?,
-        .min_left_side_bearing = r.i16At(12).?,
-        .min_right_side_bearing = r.i16At(14).?,
-        .x_max_extent = r.i16At(16).?,
-        .caret_slope_rise = r.i16At(18).?,
-        .caret_slope_run = r.i16At(20).?,
-        .caret_offset = r.i16At(22).?,
-        .metric_data_format = r.i16At(32).?,
-        .number_of_h_metrics = r.u16At(34).?,
+        .major_version = h.int(u16, 0),
+        .minor_version = h.int(u16, 2),
+        .ascender = h.int(i16, 4),
+        .descender = h.int(i16, 6),
+        .line_gap = h.int(i16, 8),
+        .advance_width_max = h.int(u16, 10),
+        .min_left_side_bearing = h.int(i16, 12),
+        .min_right_side_bearing = h.int(i16, 14),
+        .x_max_extent = h.int(i16, 16),
+        .caret_slope_rise = h.int(i16, 18),
+        .caret_slope_run = h.int(i16, 20),
+        .caret_offset = h.int(i16, 22),
+        .metric_data_format = h.int(i16, 32),
+        .number_of_h_metrics = h.int(u16, 34),
     };
     if (hhea.major_version != 1) return error.InvalidHhea;
     if (hhea.number_of_h_metrics == 0 or hhea.number_of_h_metrics > num_glyphs) return error.InvalidHhea;
@@ -181,18 +180,22 @@ pub const HMetric = struct { advance: u16, lsb: i16 };
 
 /// The `hmtx` length must hold numberOfHMetrics long metrics and one left side bearing for each remaining glyph.
 pub fn checkHmtx(r: Reader, number_of_h_metrics: u16, num_glyphs: u16) error{InvalidHmtx}!void {
+    if (number_of_h_metrics > num_glyphs) return error.InvalidHmtx;
     const needed = 4 * @as(u64, number_of_h_metrics) + 2 * @as(u64, num_glyphs - number_of_h_metrics);
     if (r.len() < needed) return error.InvalidHmtx;
 }
 
-/// The horizontal metric of `glyph`, which the caller checked against numGlyphs.
-pub fn hmetric(r: Reader, number_of_h_metrics: u16, glyph: u16) HMetric {
+/// The horizontal metric of `glyph`, or null when the `hmtx` table does not hold it, which `checkHmtx` rules out
+/// for every glyph below numGlyphs.
+pub fn hmetric(r: Reader, number_of_h_metrics: u16, glyph: u16) ?HMetric {
+    if (number_of_h_metrics == 0) return null;
     if (glyph < number_of_h_metrics) {
-        return .{ .advance = r.u16At(4 * @as(u64, glyph)).?, .lsb = r.i16At(4 * @as(u64, glyph) + 2).? };
+        const m = r.fixed(4, 4 * @as(u64, glyph)) orelse return null;
+        return .{ .advance = m.int(u16, 0), .lsb = m.int(i16, 2) };
     }
     return .{
-        .advance = r.u16At(4 * @as(u64, number_of_h_metrics - 1)).?,
-        .lsb = r.i16At(4 * @as(u64, number_of_h_metrics) + 2 * @as(u64, glyph - number_of_h_metrics)).?,
+        .advance = r.u16At(4 * @as(u64, number_of_h_metrics - 1)) orelse return null,
+        .lsb = r.i16At(4 * @as(u64, number_of_h_metrics) + 2 * @as(u64, glyph - number_of_h_metrics)) orelse return null,
     };
 }
 
@@ -200,9 +203,10 @@ pub const Loca = struct {
     table: Reader,
     long: bool,
 
-    /// The byte offset of glyph entry `i` inside `glyf`; short entries are doubled.
-    pub fn offset(self: Loca, i: u64) u64 {
-        return if (self.long) self.table.u32At(4 * i).? else 2 * @as(u64, self.table.u16At(2 * i).?);
+    /// The byte offset of glyph entry `i` inside `glyf`, or null when the entry lies outside `loca`. Short entries are doubled.
+    pub fn offset(self: Loca, i: u64) ?u64 {
+        if (self.long) return @as(u64, self.table.u32At(4 * i) orelse return null);
+        return 2 * @as(u64, self.table.u16At(2 * i) orelse return null);
     }
 };
 
@@ -214,7 +218,7 @@ pub fn parseLoca(r: Reader, index_to_loc_format: i16, num_glyphs: u16, glyf_len:
     var previous: u64 = 0;
     var i: u64 = 0;
     while (i < entries) : (i += 1) {
-        const o = loca.offset(i);
+        const o = loca.offset(i) orelse return error.InvalidLoca;
         if (o < previous) return error.InvalidLoca;
         previous = o;
     }
@@ -233,13 +237,13 @@ pub const GlyphHeader = struct {
 /// Checks one glyph's header. Outline points, flags, and composite components are not decoded.
 pub fn glyphHeader(glyph: Reader) error{InvalidGlyph}!?GlyphHeader {
     if (glyph.len() == 0) return null;
-    if (glyph.len() < 10) return error.InvalidGlyph;
+    const h = glyph.fixed(10, 0) orelse return error.InvalidGlyph;
     const header: GlyphHeader = .{
-        .number_of_contours = glyph.i16At(0).?,
-        .x_min = glyph.i16At(2).?,
-        .y_min = glyph.i16At(4).?,
-        .x_max = glyph.i16At(6).?,
-        .y_max = glyph.i16At(8).?,
+        .number_of_contours = h.int(i16, 0),
+        .x_min = h.int(i16, 2),
+        .y_min = h.int(i16, 4),
+        .x_max = h.int(i16, 6),
+        .y_max = h.int(i16, 8),
     };
     if (header.number_of_contours >= 0) {
         const contours: u64 = @intCast(header.number_of_contours);
@@ -248,7 +252,7 @@ pub fn glyphHeader(glyph: Reader) error{InvalidGlyph}!?GlyphHeader {
         var previous: u16 = 0;
         var i: u64 = 0;
         while (i < contours) : (i += 1) {
-            const end = glyph.u16At(10 + 2 * i).?;
+            const end = glyph.u16At(10 + 2 * i) orelse return error.InvalidGlyph;
             if (i > 0 and end < previous) return error.InvalidGlyph;
             previous = end;
         }
@@ -266,6 +270,8 @@ pub const NameRecord = struct {
     bytes: []const u8,
 };
 
+/// A `name` table that `parseName` checked. `count` and the storage offset come from that check.
+/// The records and strings are read again on each call.
 pub const Name = struct {
     table: Reader,
     format: u16,
@@ -276,38 +282,38 @@ pub const Name = struct {
         return self.record_count;
     }
 
-    pub fn record(self: Name, i: u16) NameRecord {
-        std.debug.assert(i < self.record_count);
-        const at = 6 + 12 * @as(u64, i);
-        const t = self.table;
-        const length = t.u16At(at + 8).?;
-        const offset = @as(u64, self.storage) + t.u16At(at + 10).?;
+    /// Record `i`, or null when `i` is at or past `count`, or when its string no longer lies inside the table
+    /// because the font bytes changed after the check.
+    pub fn record(self: Name, i: u16) ?NameRecord {
+        if (i >= self.record_count) return null;
+        const r = self.table.fixed(12, 6 + 12 * @as(u64, i)) orelse return null;
         return .{
-            .platform_id = t.u16At(at).?,
-            .encoding_id = t.u16At(at + 2).?,
-            .language_id = t.u16At(at + 4).?,
-            .name_id = t.u16At(at + 6).?,
-            .bytes = t.slice(offset, length).?,
+            .platform_id = r.int(u16, 0),
+            .encoding_id = r.int(u16, 2),
+            .language_id = r.int(u16, 4),
+            .name_id = r.int(u16, 6),
+            .bytes = self.table.slice(@as(u64, self.storage) + r.int(u16, 10), r.int(u16, 8)) orelse return null,
         };
     }
 
-    /// The raw string of the first record with these identifiers.
+    /// The raw string of the first readable record with these identifiers.
     pub fn find(self: Name, platform_id: u16, encoding_id: u16, language_id: u16, name_id: u16) ?[]const u8 {
         var i: u16 = 0;
         while (i < self.record_count) : (i += 1) {
-            const r = self.record(i);
+            const r = self.record(i) orelse continue;
             if (r.platform_id == platform_id and r.encoding_id == encoding_id and r.language_id == language_id and r.name_id == name_id) return r.bytes;
         }
         return null;
     }
 };
 
+/// Checks the `name` table in time linear in its length.
 pub fn parseName(r: Reader) TableStatus(Name) {
     const format = r.u16At(0) orelse return .{ .rejected = .too_short };
     if (format > 1) return .{ .unsupported_version = format };
-    if (r.len() < 6) return .{ .rejected = .too_short };
-    const count = r.u16At(2).?;
-    const storage = r.u16At(4).?;
+    const header = r.fixed(6, 0) orelse return .{ .rejected = .too_short };
+    const count = header.int(u16, 2);
+    const storage = header.int(u16, 4);
     const records_end = 6 + 12 * @as(u64, count);
     if (!r.fits(0, records_end)) return .{ .rejected = .count_out_of_bounds };
     var lang_tags: u64 = 0;
@@ -319,19 +325,19 @@ pub fn parseName(r: Reader) TableStatus(Name) {
     var previous: u64 = 0;
     var i: u64 = 0;
     while (i < count) : (i += 1) {
-        const at = 6 + 12 * i;
-        const platform = r.u16At(at).?;
-        const length = r.u16At(at + 8).?;
-        if (!r.fits(@as(u64, storage) + r.u16At(at + 10).?, length)) return .{ .rejected = .offset_out_of_bounds };
-        const key = (@as(u64, platform) << 48) | (@as(u64, r.u16At(at + 2).?) << 32) | (@as(u64, r.u16At(at + 4).?) << 16) | r.u16At(at + 6).?;
+        const record = r.fixed(12, 6 + 12 * i) orelse return .{ .rejected = .count_out_of_bounds };
+        const platform = record.int(u16, 0);
+        const length = record.int(u16, 8);
+        if (!r.fits(@as(u64, storage) + record.int(u16, 10), length)) return .{ .rejected = .offset_out_of_bounds };
+        const key = std.mem.readInt(u64, record.bytes[0..8], .big);
         if (i > 0 and key < previous) return .{ .rejected = .unsorted_records };
         previous = key;
         if ((platform == 0 or platform == 3) and length % 2 != 0) return .{ .rejected = .odd_utf16_length };
     }
     i = 0;
     while (i < lang_tags) : (i += 1) {
-        const at = records_end + 2 + 4 * i;
-        if (!r.fits(@as(u64, storage) + r.u16At(at + 2).?, r.u16At(at).?)) return .{ .rejected = .offset_out_of_bounds };
+        const tag = r.fixed(4, records_end + 2 + 4 * i) orelse return .{ .rejected = .count_out_of_bounds };
+        if (!r.fits(@as(u64, storage) + tag.int(u16, 2), tag.int(u16, 0))) return .{ .rejected = .offset_out_of_bounds };
     }
     return .{ .valid = .{ .table = r, .format = format, .record_count = count, .storage = storage } };
 }
@@ -400,49 +406,62 @@ pub fn parseOs2(r: Reader) TableStatus(Os2) {
         else => 100,
     };
     if (r.len() < minimum) return .{ .rejected = .too_short };
-    return .{ .valid = .{
-        .version = version,
-        .x_avg_char_width = r.i16At(2).?,
-        .us_weight_class = r.u16At(4).?,
-        .us_width_class = r.u16At(6).?,
-        .fs_type = r.u16At(8).?,
-        .y_subscript_x_size = r.i16At(10).?,
-        .y_subscript_y_size = r.i16At(12).?,
-        .y_subscript_x_offset = r.i16At(14).?,
-        .y_subscript_y_offset = r.i16At(16).?,
-        .y_superscript_x_size = r.i16At(18).?,
-        .y_superscript_y_size = r.i16At(20).?,
-        .y_superscript_x_offset = r.i16At(22).?,
-        .y_superscript_y_offset = r.i16At(24).?,
-        .y_strikeout_size = r.i16At(26).?,
-        .y_strikeout_position = r.i16At(28).?,
-        .s_family_class = r.i16At(30).?,
-        .panose = r.arrayAt(10, 32).?,
-        .ul_unicode_range1 = r.u32At(42).?,
-        .ul_unicode_range2 = r.u32At(46).?,
-        .ul_unicode_range3 = r.u32At(50).?,
-        .ul_unicode_range4 = r.u32At(54).?,
-        .ach_vend_id = r.arrayAt(4, 58).?,
-        .fs_selection = r.u16At(62).?,
-        .us_first_char_index = r.u16At(64).?,
-        .us_last_char_index = r.u16At(66).?,
-        .typo = if (r.len() < 78) null else .{
-            .s_typo_ascender = r.i16At(68).?,
-            .s_typo_descender = r.i16At(70).?,
-            .s_typo_line_gap = r.i16At(72).?,
-            .us_win_ascent = r.u16At(74).?,
-            .us_win_descent = r.u16At(76).?,
+    const b = r.fixed(68, 0) orelse return .{ .rejected = .too_short };
+    return .{
+        .valid = .{
+            .version = version,
+            .x_avg_char_width = b.int(i16, 2),
+            .us_weight_class = b.int(u16, 4),
+            .us_width_class = b.int(u16, 6),
+            .fs_type = b.int(u16, 8),
+            .y_subscript_x_size = b.int(i16, 10),
+            .y_subscript_y_size = b.int(i16, 12),
+            .y_subscript_x_offset = b.int(i16, 14),
+            .y_subscript_y_offset = b.int(i16, 16),
+            .y_superscript_x_size = b.int(i16, 18),
+            .y_superscript_y_size = b.int(i16, 20),
+            .y_superscript_x_offset = b.int(i16, 22),
+            .y_superscript_y_offset = b.int(i16, 24),
+            .y_strikeout_size = b.int(i16, 26),
+            .y_strikeout_position = b.int(i16, 28),
+            .s_family_class = b.int(i16, 30),
+            .panose = b.array(10, 32),
+            .ul_unicode_range1 = b.int(u32, 42),
+            .ul_unicode_range2 = b.int(u32, 46),
+            .ul_unicode_range3 = b.int(u32, 50),
+            .ul_unicode_range4 = b.int(u32, 54),
+            .ach_vend_id = b.array(4, 58),
+            .fs_selection = b.int(u16, 62),
+            .us_first_char_index = b.int(u16, 64),
+            .us_last_char_index = b.int(u16, 66),
+            // A legacy version 0 table may end at usLastCharIndex.
+            .typo = if (r.fixed(10, 68)) |t| .{
+                .s_typo_ascender = t.int(i16, 0),
+                .s_typo_descender = t.int(i16, 2),
+                .s_typo_line_gap = t.int(i16, 4),
+                .us_win_ascent = t.int(u16, 6),
+                .us_win_descent = t.int(u16, 8),
+            } else null,
+            .v1 = if (version < 1) null else blk: {
+                const v = r.fixed(8, 78) orelse return .{ .rejected = .too_short };
+                break :blk .{ .ul_code_page_range1 = v.int(u32, 0), .ul_code_page_range2 = v.int(u32, 4) };
+            },
+            .v2 = if (version < 2) null else blk: {
+                const v = r.fixed(10, 86) orelse return .{ .rejected = .too_short };
+                break :blk .{
+                    .sx_height = v.int(i16, 0),
+                    .s_cap_height = v.int(i16, 2),
+                    .us_default_char = v.int(u16, 4),
+                    .us_break_char = v.int(u16, 6),
+                    .us_max_context = v.int(u16, 8),
+                };
+            },
+            .v5 = if (version < 5) null else blk: {
+                const v = r.fixed(4, 96) orelse return .{ .rejected = .too_short };
+                break :blk .{ .us_lower_optical_point_size = v.int(u16, 0), .us_upper_optical_point_size = v.int(u16, 2) };
+            },
         },
-        .v1 = if (version < 1) null else .{ .ul_code_page_range1 = r.u32At(78).?, .ul_code_page_range2 = r.u32At(82).? },
-        .v2 = if (version < 2) null else .{
-            .sx_height = r.i16At(86).?,
-            .s_cap_height = r.i16At(88).?,
-            .us_default_char = r.u16At(90).?,
-            .us_break_char = r.u16At(92).?,
-            .us_max_context = r.u16At(94).?,
-        },
-        .v5 = if (version < 5) null else .{ .us_lower_optical_point_size = r.u16At(96).?, .us_upper_optical_point_size = r.u16At(98).? },
-    } };
+    };
 }
 
 pub const Post = struct {
@@ -458,19 +477,20 @@ pub const Post = struct {
     max_mem_type1: u32,
 };
 
-/// A 32-byte header with version 1.0, 2.0, or 3.0. Version 2.0 also checks its glyph count and every custom name index.
+/// A 32-byte header with version 1.0, 2.0, or 3.0. Version 2.0 also checks its glyph count and every custom name index,
+/// in time linear in the table length.
 pub fn parsePost(r: Reader, num_glyphs: u16) TableStatus(Post) {
-    if (r.len() < 32) return .{ .rejected = .too_short };
+    const p = r.fixed(32, 0) orelse return .{ .rejected = .too_short };
     const post: Post = .{
-        .version = r.u32At(0).?,
-        .italic_angle = r.i32At(4).?,
-        .underline_position = r.i16At(8).?,
-        .underline_thickness = r.i16At(10).?,
-        .is_fixed_pitch = r.u32At(12).?,
-        .min_mem_type42 = r.u32At(16).?,
-        .max_mem_type42 = r.u32At(20).?,
-        .min_mem_type1 = r.u32At(24).?,
-        .max_mem_type1 = r.u32At(28).?,
+        .version = p.int(u32, 0),
+        .italic_angle = p.int(i32, 4),
+        .underline_position = p.int(i16, 8),
+        .underline_thickness = p.int(i16, 10),
+        .is_fixed_pitch = p.int(u32, 12),
+        .min_mem_type42 = p.int(u32, 16),
+        .max_mem_type42 = p.int(u32, 20),
+        .min_mem_type1 = p.int(u32, 24),
+        .max_mem_type1 = p.int(u32, 28),
     };
     switch (post.version) {
         0x00010000, 0x00030000 => return .{ .valid = post },
@@ -484,15 +504,14 @@ pub fn parsePost(r: Reader, num_glyphs: u16) TableStatus(Post) {
     // Count the Pascal strings that lie completely inside the table.
     var strings: u64 = 0;
     var at = strings_at;
-    while (at < r.len()) {
-        const length = r.u8At(at).?;
+    while (r.u8At(at)) |length| {
         if (!r.fits(at + 1, length)) break;
         strings += 1;
         at += 1 + @as(u64, length);
     }
     var i: u64 = 0;
     while (i < count) : (i += 1) {
-        const index = r.u16At(34 + 2 * i).?;
+        const index = r.u16At(34 + 2 * i) orelse return .{ .rejected = .count_out_of_bounds };
         if (index >= 258 and index - 258 >= strings) return .{ .rejected = .invalid_string_index };
     }
     return .{ .valid = post };

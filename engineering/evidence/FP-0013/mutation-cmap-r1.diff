@@ -1,0 +1,11 @@
+--- a/src/font/cmap.zig
++++ b/src/font/cmap.zig
+@@ -121,7 +121,7 @@
+ 
+     /// Adds an offset that the set does not contain. A full set returns `InvalidCmap` instead.
+     fn insert(self: *ValidatedOffsets, offset: u32) error{InvalidCmap}!void {
+-        if (self.count == capacity) return error.InvalidCmap;
++        if (self.count == capacity) return;
+         var at = slot(offset);
+         while (self.offsets[at] != empty) at = (at + 1) % slots;
+         self.offsets[at] = offset;

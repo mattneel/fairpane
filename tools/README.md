@@ -268,6 +268,7 @@ The generated header lists each input's path, byte size, and SHA-256, and it rep
 
 `tools/ucd.test.mjs` holds FP-0013 cases 1 through 4.
 `src/unicode/reference_test.zig` holds the Zig part of case 3, which parses the embedded files independently and compares every code point.
+The reference parser marks each code point that a file assigns, and it fails when any code point stays unassigned.
 
 ## Import a file-set corpus
 
@@ -282,15 +283,33 @@ A change to those sources needs a frozen task contract, so `corpus-repin` refuse
 
 Install fontTools with these steps.
 
-1. Download the wheel that `engineering/dependencies.json` names into `.tools/downloads/`.
+1. Download the wheel that `engineering/dependencies.json` names into `.tools/downloads/`, under its file name from the wheel URL.
 2. Check its SHA-256 against the recorded digest.
 3. Run `python -m venv .tools/python/fonttools-4.66.1`.
 4. Run `.tools/python/fonttools-4.66.1/Scripts/python -m pip install --no-index --no-deps` with the verified wheel.
 
+Keep the wheel in `.tools/downloads/`, because every fontTools run checks the installation against it.
+That check requires the wheel's SHA-256 to equal `engineering/dependencies.json`.
+It requires every file that the wheel's `RECORD` lists to be installed with that SHA-256 and size.
+It also requires every file in the installed packages to appear in `RECORD`, except bytecode under `__pycache__`, which it does not verify.
+Each run then uses the staging directory as its working directory, sets `PYTHONSAFEPATH=1`, and removes every other `PYTHON*` variable.
+A probe confirms the fontTools version, the safe-path flag, and that the verified package is the one imported.
+fontTools runs without an operating-system sandbox, on inputs pinned by Git blob or SHA-256 only.
+
 `corpus-derive` runs only the frozen argument vector of each derived file and never changes an existing fixture.
 A different output fails the command, because the derivation is not reproducible.
-`tools/fonts/font_expectations.py` writes each font's expectation file with the same fontTools environment.
-`tools/fileset.test.mjs` holds FP-0013 cases 41 through 49, which read `file://` fixture sources and never use the network.
+
+Write or check the font expectation files with these steps.
+
+1. Install fontTools as above.
+2. Run `node tools/fairpane.mjs font-expectations --check` to rerun `tools/fonts/font_expectations.py` for every fixture font and compare its output with the committed files.
+3. Run `node tools/fairpane.mjs font-expectations` to replace each differing expectation file.
+
+The command copies the script, the seeds, and the fonts into a fresh staging directory and runs the script there, so the run itself changes nothing in the repository.
+Do not run `font_expectations.py` directly, because a direct run keeps the inherited `PYTHON*` environment and the repository as its working directory.
+The script's own usage line, which runs it from the repository root, predates this procedure.
+It stays unchanged, because each expectation file records the script's SHA-256 and case 12 compares that digest with the committed script.
+`tools/fileset.test.mjs` holds FP-0013 cases 41 through 49 and 53 through 55, which read `file://` or in-memory fixture sources and never use the network.
 
 ## Extend the controller
 

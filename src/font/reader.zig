@@ -69,7 +69,27 @@ pub const Reader = struct {
         const bytes = self.slice(offset, n) orelse return null;
         return bytes[0..n].*;
     }
+
+    /// A copy of the `n` bytes at `offset`, or null when they do not fit. Reads from the copy check their range at compile time.
+    pub fn fixed(self: Reader, comptime n: usize, offset: u64) ?Fixed(n) {
+        return .{ .bytes = self.arrayAt(n, offset) orelse return null };
+    }
 };
+
+/// A fixed-size big-endian record copied out of the font, so later changes to the font bytes cannot change it.
+pub fn Fixed(comptime n: usize) type {
+    return struct {
+        bytes: [n]u8,
+
+        pub fn int(self: *const @This(), comptime T: type, comptime at: usize) T {
+            return std.mem.readInt(T, self.bytes[at..][0..@sizeOf(T)], .big);
+        }
+
+        pub fn array(self: *const @This(), comptime len: usize, comptime at: usize) [len]u8 {
+            return self.bytes[at..][0..len].*;
+        }
+    };
+}
 
 test "reads stop at the end and offset sums do not wrap" {
     const r = Reader.init(&.{ 0x12, 0x34, 0x56, 0x78 });

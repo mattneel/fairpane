@@ -4,6 +4,7 @@
  * and only then writes the record. No code from a source runs, and `corpus-derive` runs only the declared import tool.
  */
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import zlib from 'node:zlib';
@@ -118,6 +119,11 @@ export function gitBlobId(data) {
 
 // ZIP archives.
 const EOCD = 0x06054b50, CENTRAL = 0x02014b50, LOCAL = 0x04034b50, ZIP64_LOCATOR = 0x07064b50;
+/** The largest sum of declared uncompressed member sizes that a zip may have. */
+export const ZIP_MAX_TOTAL = 2 ** 30;
+/** The largest ratio of a member's declared uncompressed size to its compressed size. */
+export const ZIP_MAX_RATIO = 1024;
+const S_IFMT = 0o170000, S_IFLNK = 0o120000, FILE_ATTRIBUTE_REPARSE_POINT = 0x400;
 
 /** Check one member path: relative, forward slashes, no `.` or `..` segment, and no empty segment except a directory's final slash. */
 function checkMemberPath(name) {
@@ -131,9 +137,16 @@ function checkMemberPath(name) {
 }
 
 /**
- * Read a ZIP archive from memory. Only stored and deflate members are accepted.
- * ZIP64, encryption, absolute paths, `..` segments, backslashes, and duplicate paths are rejected.
- * `read(path)` inflates one file member and checks its size and CRC-32.
+ * Read a ZIP archive from memory. Only stored and deflate members are accepted. Every check below runs before any member is inflated.
+ * - ZIP64, encryption, flag bit 13, absolute paths, `..` segments, backslashes, and duplicate paths are rejected.
+ * - Each local header must agree with its central directory entry in method, flags, CRC-32, and sizes, and carry no ZIP64 extra field,
+ *   so a member that uses a data descriptor is rejected.
+ * - A member whose external attributes mark a symbolic link or a reparse point is rejected.
+ * - Two names that are equal after ASCII case folding are rejected.
+ * - Each member's range, from its local header to the end of its compressed data, lies before the central directory,
+ *   and no two ranges overlap, so no compressed byte belongs to two members.
+ * - The declared uncompressed sizes sum to at most 1 GiB, and no member declares more than 1024 times its compressed size.
+ * `read(path)` inflates one file member, stops at its declared size, and checks its size and CRC-32.
  */
 export function readZip(bytes) {
   invariant(Buffer.isBuffer(bytes) && bytes.length >= 22, 'The zip is shorter than an end of central directory record.');
@@ -149,42 +162,63 @@ export function readZip(bytes) {
   invariant(count !== 0xFFFF && onDisk !== 0xFFFF && cdSize !== 0xFFFFFFFF && cdOffset !== 0xFFFFFFFF, 'ZIP64 archives are not accepted.');
   invariant(disk === 0 && cdDisk === 0 && onDisk === count, 'Multi-disk zip archives are not accepted.');
   invariant(cdOffset + cdSize === eocd, 'The zip central directory does not end at the end of central directory record.');
-  const entries = [], seen = new Set();
+  const entries = [], seen = new Set(), folded = new Map(), ranges = [];
+  let total = 0;
   let at = cdOffset;
   for (let i = 0; i < count; i++) {
     invariant(at + 46 <= eocd && bytes.readUInt32LE(at) === CENTRAL, `The zip central directory is truncated at entry ${i + 1}.`);
     const flags = bytes.readUInt16LE(at + 8), method = bytes.readUInt16LE(at + 10), crc = bytes.readUInt32LE(at + 16);
     const compressedSize = bytes.readUInt32LE(at + 20), size = bytes.readUInt32LE(at + 24);
     const nameLength = bytes.readUInt16LE(at + 28), extraLength = bytes.readUInt16LE(at + 30), commentLength = bytes.readUInt16LE(at + 32);
-    const localOffset = bytes.readUInt32LE(at + 42);
+    const external = bytes.readUInt32LE(at + 38), localOffset = bytes.readUInt32LE(at + 42);
     const end = at + 46 + nameLength + extraLength + commentLength;
     invariant(end <= eocd, `The zip central directory is truncated at entry ${i + 1}.`);
     const rawName = bytes.subarray(at + 46, at + 46 + nameLength), name = rawName.toString('utf8');
+    const member = `The zip member ${JSON.stringify(name)}`;
     invariant(Buffer.from(name, 'utf8').equals(rawName), `The zip member at entry ${i + 1} has a path that is not UTF-8.`);
     invariant(compressedSize !== 0xFFFFFFFF && size !== 0xFFFFFFFF && localOffset !== 0xFFFFFFFF, `ZIP64 member ${JSON.stringify(name)} is not accepted.`);
-    for (let x = at + 46 + nameLength; x + 4 <= at + 46 + nameLength + extraLength;) {
-      const id = bytes.readUInt16LE(x), len = bytes.readUInt16LE(x + 2);
-      invariant(id !== 0x0001, `ZIP64 member ${JSON.stringify(name)} is not accepted.`);
-      x += 4 + len;
-    }
-    invariant((flags & 0x41) === 0, `The zip member ${JSON.stringify(name)} is encrypted.`);
-    invariant(method === 0 || method === 8, `The zip member ${JSON.stringify(name)} uses unsupported compression method ${method}.`);
+    checkNoZip64Extra(bytes, at + 46 + nameLength, extraLength, name);
+    invariant((flags & 0x41) === 0, `${member} is encrypted.`);
+    invariant((flags & 0x2000) === 0, `${member} sets flag bit 13, which masks its local header.`);
+    invariant(method === 0 || method === 8, `${member} uses unsupported compression method ${method}.`);
     checkMemberPath(name);
     invariant(!seen.has(name), `The zip has a duplicate path ${JSON.stringify(name)}.`);
     seen.add(name);
+    const key = name.replace(/[A-Z]/g, c => c.toLowerCase());
+    invariant(!folded.has(key), `The zip paths ${JSON.stringify(folded.get(key))} and ${JSON.stringify(name)} are equal under ASCII case folding.`);
+    folded.set(key, name);
+    invariant(((external >>> 16) & S_IFMT) !== S_IFLNK && (external & FILE_ATTRIBUTE_REPARSE_POINT) === 0, `${member} is a symbolic link.`);
     const directory = name.endsWith('/');
     invariant(!directory || size === 0, `The zip directory member ${JSON.stringify(name)} has data.`);
-    invariant(localOffset + 30 <= cdOffset && bytes.readUInt32LE(localOffset) === LOCAL, `The zip member ${JSON.stringify(name)} has no local header.`);
+    invariant(method !== 0 || compressedSize === size, `The stored zip member ${JSON.stringify(name)} has inconsistent sizes.`);
+    invariant(size <= ZIP_MAX_RATIO * compressedSize,
+      `${member} declares ${size} uncompressed bytes from ${compressedSize} compressed bytes, a ratio over ${ZIP_MAX_RATIO}.`);
+    total += size;
+    invariant(total <= ZIP_MAX_TOTAL, `The zip members declare ${total} or more uncompressed bytes, more than 1 GiB.`);
+
+    invariant(localOffset + 30 <= cdOffset && bytes.readUInt32LE(localOffset) === LOCAL, `${member} has no local header.`);
     const localName = bytes.readUInt16LE(localOffset + 26), localExtra = bytes.readUInt16LE(localOffset + 28);
     invariant(localName === nameLength && bytes.subarray(localOffset + 30, localOffset + 30 + localName).equals(rawName),
-      `The zip member ${JSON.stringify(name)} has a local header with another path.`);
+      `${member} has a local header with another path.`);
     const dataStart = localOffset + 30 + localName + localExtra;
-    invariant(dataStart + compressedSize <= cdOffset, `The zip member ${JSON.stringify(name)} runs into the central directory.`);
-    invariant(method !== 0 || compressedSize === size, `The stored zip member ${JSON.stringify(name)} has inconsistent sizes.`);
+    invariant(dataStart <= cdOffset, `${member} has a local header that runs into the central directory.`);
+    const local = { method: bytes.readUInt16LE(localOffset + 8), flags: bytes.readUInt16LE(localOffset + 6), 'CRC-32': bytes.readUInt32LE(localOffset + 14),
+      sizes: [bytes.readUInt32LE(localOffset + 18), bytes.readUInt32LE(localOffset + 22)] };
+    const central = { method, flags, 'CRC-32': crc, sizes: [compressedSize, size] };
+    for (const field of Object.keys(central)) {
+      invariant(String(local[field]) === String(central[field]), `${member} has a local header that disagrees with its central directory entry in ${field}.`);
+    }
+    checkNoZip64Extra(bytes, localOffset + 30 + localName, localExtra, name);
+    invariant(dataStart + compressedSize <= cdOffset, `${member} runs into the central directory.`);
+    ranges.push({ name, start: localOffset, end: dataStart + compressedSize });
     entries.push({ path: name, method, size, compressedSize, crc, directory, dataStart });
     at = end;
   }
   invariant(at === eocd, 'The zip central directory has bytes after its last entry.');
+  ranges.sort((a, b) => a.start - b.start);
+  for (let k = 1; k < ranges.length; k++) {
+    invariant(ranges[k - 1].end <= ranges[k].start, `The zip members ${JSON.stringify(ranges[k - 1].name)} and ${JSON.stringify(ranges[k].name)} overlap.`);
+  }
   const byPath = new Map(entries.map(e => [e.path, e]));
   return {
     entries,
@@ -203,6 +237,15 @@ export function readZip(bytes) {
       return data;
     },
   };
+}
+
+/** Reject a ZIP64 extended information field (ID 0x0001) in an extra field. */
+function checkNoZip64Extra(bytes, start, length, name) {
+  for (let x = start; x + 4 <= start + length;) {
+    const id = bytes.readUInt16LE(x), len = bytes.readUInt16LE(x + 2);
+    invariant(id !== 0x0001, `ZIP64 member ${JSON.stringify(name)} is not accepted.`);
+    x += 4 + len;
+  }
 }
 
 /**
@@ -353,17 +396,25 @@ export function reservedFontNames(statement) {
   return [...new Set(names)];
 }
 
-/** Name ID 0 of an sfnt font, decoded from the first (3, 1, 0x409) record, or else the first (1, 0, 0) record. */
+/**
+ * Name ID 0 of an sfnt font, decoded from the first (3, 1, 0x409) record, or else the first (1, 0, 0) record.
+ * The first `name` directory record names the table, and every length is checked before the bytes behind it are read.
+ */
 export function sfntCopyright(bytes) {
+  invariant(bytes.length >= 12, 'The font is shorter than an sfnt header.');
   const tables = bytes.readUInt16BE(4);
+  invariant(12 + 16 * tables <= bytes.length, 'The font table directory runs past the end of the font.');
   let name = null;
-  for (let i = 0; i < tables; i++) {
+  for (let i = 0; i < tables && !name; i++) {
     const at = 12 + 16 * i;
     if (bytes.toString('latin1', at, at + 4) === 'name') name = { offset: bytes.readUInt32BE(at + 8), length: bytes.readUInt32BE(at + 12) };
   }
-  invariant(name && name.offset + name.length <= bytes.length, 'The font has no name table.');
+  invariant(name, 'The font has no name table.');
+  invariant(name.offset + name.length <= bytes.length, 'The name table runs past the end of the font.');
   const t = bytes.subarray(name.offset, name.offset + name.length);
+  invariant(t.length >= 6, 'The name table is shorter than its 6-byte header.');
   const count = t.readUInt16BE(2), storage = t.readUInt16BE(4);
+  invariant(6 + 12 * count <= t.length, 'The name records run past the name table.');
   const find = (platform, encoding, language) => {
     for (let i = 0; i < count; i++) {
       const at = 6 + 12 * i;
@@ -383,34 +434,100 @@ export function sfntCopyright(bytes) {
 }
 
 // Network and local sources.
-async function download(url, file, { allowFileSources }) {
+/** The only hosts that a download may reach, on its first URL and on every redirect. */
+export const DOWNLOAD_HOSTS = Object.freeze(['www.unicode.org', 'github.com', 'objects.githubusercontent.com', 'release-assets.githubusercontent.com', 'raw.githubusercontent.com']);
+/** The size limit of a download without a pinned size. */
+export const DEFAULT_DOWNLOAD_LIMIT = 256 * 1024 * 1024;
+const MAX_REDIRECTS = 10;
+
+/** The byte limit of a source download: its pinned size, else the previous record's size, else 256 MiB. */
+export function downloadLimit(source, previous) {
+  return source.size ?? previous?.size ?? DEFAULT_DOWNLOAD_LIMIT;
+}
+
+function checkHop(url) {
+  const u = new URL(url);
+  invariant(u.protocol === 'https:', `A download hop must use https:, not ${u.protocol}: ${url}`);
+  invariant(DOWNLOAD_HOSTS.includes(u.hostname) && u.port === '' && u.username === '' && u.password === '',
+    `A download hop may reach only ${DOWNLOAD_HOSTS.join(', ')}, not ${u.host}: ${url}`);
+  return u.href;
+}
+
+/**
+ * Request `url`, follow at most 10 redirects manually, and pass each body chunk to `onChunk`.
+ * Every hop must use https: on an allowlisted host. The body stops as soon as it exceeds `limit` bytes.
+ * `httpFetch` replaces `fetch` only in tests.
+ */
+async function streamDownload(url, { limit, httpFetch = fetch, onChunk }) {
+  invariant(Number.isSafeInteger(limit) && limit >= 0, `A download needs a byte limit: ${url}`);
+  let current = checkHop(url);
+  const signal = AbortSignal.timeout(NETWORK_TIMEOUT_MS);
+  for (let hop = 0; ; hop++) {
+    const response = await httpFetch(current, { redirect: 'manual', signal });
+    if ([301, 302, 303, 307, 308].includes(response.status)) {
+      await response.body?.cancel();
+      invariant(hop < MAX_REDIRECTS, `${url} redirected more than ${MAX_REDIRECTS} times.`);
+      const location = response.headers.get('location');
+      invariant(location, `${current} redirected without a Location header.`);
+      current = checkHop(new URL(location, current).href);
+      console.log(`Redirect to ${current}`);
+      continue;
+    }
+    invariant(response.ok, `${current} returned HTTP status ${response.status}.`);
+    const declared = Number(response.headers.get('content-length') ?? NaN);
+    if (declared > limit) {
+      await response.body?.cancel();
+      throw new Error(`The download of ${url} exceeds its limit of ${limit} bytes: it declares ${declared} bytes.`);
+    }
+    let received = 0;
+    if (response.body) {
+      for await (const chunk of response.body) {
+        received += chunk.length;
+        invariant(received <= limit, `The download of ${url} exceeds its limit of ${limit} bytes.`);
+        onChunk(chunk);
+      }
+    }
+    return received;
+  }
+}
+
+/**
+ * Download one source into `file` and return its size and SHA-256. A `file://` URL, which only tests enable, is copied.
+ * A failure removes the partial file.
+ */
+export async function downloadSource(url, file, { limit, allowFileSources = false, httpFetch } = {}) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  if (url.startsWith('file://')) {
-    invariant(allowFileSources === true, `Only HTTPS sources are accepted: ${url}`);
-    fs.copyFileSync(fileURLToPath(url), file);
-  } else {
-    invariant(url.startsWith('https://'), `Only HTTPS sources are accepted: ${url}`);
-    console.log(`Download ${url}`);
-    const response = await fetch(url, { redirect: 'follow', signal: AbortSignal.timeout(NETWORK_TIMEOUT_MS) });
-    invariant(response.ok, `${url} returned HTTP status ${response.status}.`);
-    invariant(response.url.startsWith('https://'), `${url} redirected to a non-HTTPS URL: ${response.url}`);
-    const out = fs.openSync(file, 'w');
-    try { for await (const chunk of response.body) fs.writeSync(out, chunk); } finally { fs.closeSync(out); }
+  try {
+    if (url.startsWith('file://')) {
+      invariant(allowFileSources === true, `Only HTTPS sources are accepted: ${url}`);
+      const size = fs.statSync(fileURLToPath(url)).size;
+      invariant(size <= limit, `The download of ${url} exceeds its limit of ${limit} bytes.`);
+      fs.copyFileSync(fileURLToPath(url), file);
+    } else {
+      console.log(`Download ${url}`);
+      const out = fs.openSync(file, 'w');
+      try { await streamDownload(url, { limit, httpFetch, onChunk: chunk => fs.writeSync(out, chunk) }); } finally { fs.closeSync(out); }
+    }
+  } catch (e) {
+    fs.rmSync(file, { force: true });
+    throw e;
   }
   const size = fs.statSync(file).size, digest = fileHash(file);
   console.log(`Stored ${url}: ${size} bytes, SHA-256 ${digest}`);
   return { size, sha256: digest };
 }
-async function downloadBytes(url, { allowFileSources }) {
+
+/** Download `url` into memory under the same rules as `downloadSource`. */
+export async function fetchBytes(url, { limit = DEFAULT_DOWNLOAD_LIMIT, allowFileSources = false, httpFetch } = {}) {
   if (url.startsWith('file://')) {
     invariant(allowFileSources === true, `Only HTTPS URLs are accepted: ${url}`);
-    return fs.readFileSync(fileURLToPath(url));
+    const bytes = fs.readFileSync(fileURLToPath(url));
+    invariant(bytes.length <= limit, `The download of ${url} exceeds its limit of ${limit} bytes.`);
+    return bytes;
   }
-  invariant(url.startsWith('https://'), `Only HTTPS URLs are accepted: ${url}`);
-  const response = await fetch(url, { redirect: 'follow', signal: AbortSignal.timeout(NETWORK_TIMEOUT_MS) });
-  invariant(response.ok, `${url} returned HTTP status ${response.status}.`);
-  invariant(response.url.startsWith('https://'), `${url} redirected to a non-HTTPS URL: ${response.url}`);
-  return Buffer.from(await response.arrayBuffer());
+  const chunks = [];
+  await streamDownload(url, { limit, httpFetch, onChunk: chunk => chunks.push(Buffer.from(chunk)) });
+  return Buffer.concat(chunks);
 }
 /** The commit that a tag names, through `git ls-remote`, peeled when the tag is annotated. */
 function tagCommit(repository, tag) {
@@ -475,11 +592,14 @@ function checkExtractionPath(root, p) {
 }
 
 /**
- * Download every source of a file-set corpus into a staging directory, check every pin and published digest,
- * extract the selected members in memory, and only then write the extracted files, the sources, and the record.
- * A failure leaves the existing sources, record, and extracted files unchanged.
+ * Download every source of a file-set corpus into a staging directory and compare each with every known digest:
+ * its pinned size, published digest, and Git blob ID, the previous record's size and SHA-256, and the `specs/corpora.json` pins.
+ * Only then parse the archives, extract the selected members in memory, and check the remaining pins.
+ * The write phase stages every new file beside its target, keeps the old files, and restores them on any failure; the record is written last.
+ * A failure leaves the existing sources, record, and extracted files unchanged and no staged or temporary file behind.
+ * `onWriteStep(label)`, which only tests pass, runs before each write step and may throw to inject a failure.
  */
-export async function fetchFileSet(root, id, { corporaDir, policy, rule, allowFileSources = false }) {
+export async function fetchFileSet(root, id, { corporaDir, policy, rule, allowFileSources = false, onWriteStep }) {
   invariant(rule, `No file-set rule exists for corpus ${id}.`);
   const recordFile = path.join(root, 'specs', 'snapshots', `${id}.json`);
   let previous = null;
@@ -489,21 +609,37 @@ export async function fetchFileSet(root, id, { corporaDir, policy, rule, allowFi
     invariant(previous.corpus === id, `The record names corpus ${previous.corpus}, not ${id}.`);
   }
   const target = path.join(corporaDir, id), staging = path.join(corporaDir, `${id}.fetch`), old = path.join(corporaDir, `${id}.old`);
+  const pinFailure = problems => `The fetched file set ${id} does not match its pins, so the existing sources, record, and files stay:\n- ${problems.join('\n- ')}`;
   fs.rmSync(staging, { recursive: true, force: true, maxRetries: 3 });
   fs.mkdirSync(staging, { recursive: true });
   try {
-    const sources = [], data = new Map();
+    // Download every source and compare it with every known digest. Nothing parses a source in this loop.
+    const downloaded = [];
     for (const s of rule.sources) {
       const file = path.join(staging, ...s.local.split('/'));
-      const got = await download(s.url, file, { allowFileSources });
-      invariant(s.size === null || s.size === got.size, `Source ${s.id} has ${got.size} bytes, not the expected ${s.size}.`);
-      invariant(s.published_digest === null || s.published_digest === `sha256:${got.sha256}`,
-        `Source ${s.id} does not match its published digest ${s.published_digest}: SHA-256 ${got.sha256}.`);
-      const bytes = fs.readFileSync(file);
-      if (s.git_blob !== null) {
-        const blob = gitBlobId(bytes);
-        invariant(blob === s.git_blob, `Source ${s.id} has Git blob ID ${blob}, not ${s.git_blob}.`);
+      const prior = previous?.sources.find(x => x.id === s.id) ?? null;
+      const got = await downloadSource(s.url, file, { limit: downloadLimit(s, prior), allowFileSources });
+      const problems = [];
+      if (s.size !== null && s.size !== got.size) problems.push(`Source ${s.id} has ${got.size} bytes, not the expected ${s.size}.`);
+      if (s.published_digest !== null && s.published_digest !== `sha256:${got.sha256}`) {
+        problems.push(`Source ${s.id} does not match its published digest ${s.published_digest}: SHA-256 ${got.sha256}.`);
       }
+      if (prior && prior.size !== got.size) problems.push(`pin sources.${s.id}.size: recorded ${prior.size}, fetched ${got.size}`);
+      if (prior && prior.sha256 !== got.sha256) problems.push(`pin sources.${s.id}.sha256: recorded ${JSON.stringify(prior.sha256)}, fetched ${JSON.stringify(got.sha256)}`);
+      if (s.git_blob !== null) {
+        const blob = gitBlobId(fs.readFileSync(file));
+        if (blob !== s.git_blob) problems.push(`Source ${s.id} has Git blob ID ${blob}, not ${s.git_blob}.`);
+      }
+      invariant(problems.length === 0, pinFailure(problems));
+      downloaded.push({ s, file, got });
+    }
+    const listing = { version: rule.version, sources: downloaded.map(({ s, got }) => ({ id: s.id, size: got.size, sha256: got.sha256 })) };
+    const corporaProblems = fileSetPinProblems(policy, id, listing);
+    invariant(corporaProblems.length === 0, pinFailure(corporaProblems));
+
+    // Every source matches every known digest, so the archives may be parsed.
+    const sources = [], data = new Map();
+    for (const { s, file, got } of downloaded) {
       const release = { ...s.release };
       if (release.repository !== null) {
         const commit = tagCommit(release.repository, release.tag);
@@ -512,6 +648,7 @@ export async function fetchFileSet(root, id, { corporaDir, policy, rule, allowFi
       }
       const entry = { id: s.id, url: s.url, kind: s.kind, release, size: got.size, sha256: got.sha256, published_digest: s.published_digest,
         git_blob: s.git_blob, local_path: localPathOf(id, s.local) };
+      const bytes = fs.readFileSync(file);
       if (s.kind === 'zip') {
         const zip = readZip(bytes);
         const inventory = zipInventory(zip);
@@ -530,7 +667,7 @@ export async function fetchFileSet(root, id, { corporaDir, policy, rule, allowFi
       const bytes = e.member === null ? source.bytes : source.zip.read(e.member);
       invariant(bytes, `Selected ${e.path} has no bytes.`);
       if (e.published_url !== null) {
-        const published = await downloadBytes(e.published_url, { allowFileSources });
+        const published = await fetchBytes(e.published_url, { allowFileSources });
         invariant(published.equals(bytes), `The published_url ${e.published_url} serves bytes that differ from member ${e.member}.`);
         console.log(`Published ${e.published_url} equals member ${e.member}.`);
       }
@@ -547,21 +684,11 @@ export async function fetchFileSet(root, id, { corporaDir, policy, rule, allowFi
       retrieved_at: new Date().toISOString(), sources, selected, derived: previous?.derived ?? [] };
     validateFileSetRecord(record, { allowFileSources });
     const problems = [...recordPinProblems(previous, record), ...fileSetPinProblems(policy, id, record)];
-    invariant(problems.length === 0, `The fetched file set ${id} does not match its pins, so the existing sources, record, and files stay:\n- ${problems.join('\n- ')}`);
+    invariant(problems.length === 0, pinFailure(problems));
 
-    // Every check passed. Write the extracted files, then replace the sources, then write the record.
-    for (const [p, bytes] of extracted) {
-      const file = checkExtractionPath(root, p);
-      fs.mkdirSync(path.dirname(file), { recursive: true });
-      const tmp = `${file}.${crypto.randomUUID()}.tmp`;
-      fs.writeFileSync(tmp, bytes, { flag: 'wx' });
-      fs.renameSync(tmp, file);
-    }
+    // Every check passed. Replace the extracted files, then the sources, then the record, or restore all of them.
     fs.rmSync(old, { recursive: true, force: true, maxRetries: 3 });
-    if (fs.existsSync(target)) fs.renameSync(target, old);
-    try { fs.renameSync(staging, target); } catch (e) { if (fs.existsSync(old)) fs.renameSync(old, target); throw e; }
-    fs.rmSync(old, { recursive: true, force: true, maxRetries: 3 });
-    writeJson(recordFile, record);
+    commitFileSet({ root, extracted, target, staging, old, recordFile, record, onWriteStep });
     return { result: 'pass', corpus: id, kind: 'file-set', record: `specs/snapshots/${id}.json`, version: record.version,
       sources: sources.map(s => ({ id: s.id, size: s.size, sha256: s.sha256, release: s.release, inventory: s.inventory })),
       selected: selected.map(e => ({ path: e.path, size: e.size, sha256: e.sha256 })), source_listing_sha256: sourceListingDigest(record) };
@@ -569,6 +696,79 @@ export async function fetchFileSet(root, id, { corporaDir, policy, rule, allowFi
     fs.rmSync(staging, { recursive: true, force: true, maxRetries: 3 });
     throw e;
   }
+}
+
+/**
+ * The write phase of `fetchFileSet`. It stages each extracted file and the record beside its target, moves each old file aside,
+ * installs the staged files, swaps the source directory, and writes the record last. On any failure it restores every old file,
+ * the old source directory, and the old record, and it removes every staged file and every directory that it created.
+ * After success it removes the old files and the old source directory.
+ */
+function commitFileSet({ root, extracted, target, staging, old, recordFile, record, onWriteStep }) {
+  const tag = crypto.randomUUID();
+  const step = label => onWriteStep?.(label);
+  const staged = [], replaced = [], created = [], dirs = [];
+  let sources = 'unchanged';
+  const ensureDir = dir => {
+    // Record each missing ancestor, outermost first, so a rollback can remove exactly the directories that this phase created.
+    const missing = [];
+    for (let d = path.resolve(dir); !fs.existsSync(d) && path.dirname(d) !== d; d = path.dirname(d)) missing.unshift(d);
+    for (const d of missing) {
+      fs.mkdirSync(d);
+      dirs.push(d);
+    }
+  };
+  const stage = (label, file, bytes) => {
+    ensureDir(path.dirname(file));
+    const temporary = `${file}.${tag}.new`;
+    step(label);
+    staged.push(temporary);
+    fs.writeFileSync(temporary, bytes, { flag: 'wx' });
+    return temporary;
+  };
+  try {
+    const files = [];
+    for (const [p, bytes] of extracted) files.push({ p, file: checkExtractionPath(root, p), temporary: null, bytes });
+    for (const f of files) f.temporary = stage(`stage ${f.p}`, f.file, f.bytes);
+    const recordTemporary = stage('stage the record', recordFile, `${JSON.stringify(record, null, 2)}\n`);
+    for (const f of files) {
+      if (fs.existsSync(f.file)) {
+        step(`back up ${f.p}`);
+        const backup = `${f.file}.${tag}.old`;
+        fs.renameSync(f.file, backup);
+        replaced.push({ file: f.file, backup });
+      } else created.push(f.file);
+      step(`replace ${f.p}`);
+      fs.renameSync(f.temporary, f.file);
+    }
+    if (fs.existsSync(target)) {
+      step('back up the sources');
+      fs.renameSync(target, old);
+      sources = 'backed-up';
+    }
+    step('replace the sources');
+    fs.renameSync(staging, target);
+    sources = sources === 'backed-up' ? 'replaced' : 'created';
+    step('replace the record');
+    fs.renameSync(recordTemporary, recordFile);
+  } catch (e) {
+    const problems = [];
+    const attempt = (what, fn) => { try { fn(); } catch (err) { problems.push(`${what}: ${err.message}`); } };
+    if (sources === 'replaced' || sources === 'created') attempt('move the new sources back to staging', () => fs.renameSync(target, staging));
+    if (sources === 'replaced' || sources === 'backed-up') attempt('restore the old sources', () => fs.renameSync(old, target));
+    for (const r of replaced.reverse()) attempt(`restore ${r.file}`, () => fs.renameSync(r.backup, r.file));
+    for (const file of created.reverse()) attempt(`remove ${file}`, () => fs.rmSync(file, { force: true }));
+    for (const file of staged) attempt(`remove ${file}`, () => fs.rmSync(file, { force: true }));
+    for (const dir of dirs.reverse()) attempt(`remove ${dir}`, () => fs.rmdirSync(dir));
+    if (problems.length) e.message += `\nThe rollback also failed:\n- ${problems.join('\n- ')}`;
+    throw e;
+  }
+  const problems = [];
+  for (const r of replaced) {
+    try { fs.rmSync(r.backup, { force: true, maxRetries: 3 }); } catch (err) { problems.push(`${r.backup}: ${err.message}`); }
+  }
+  try { fs.rmSync(old, { recursive: true, force: true, maxRetries: 3 }); } catch (err) { problems.push(`${old}: ${err.message}`); }
+  invariant(problems.length === 0, `The fetch wrote every file and the record, but could not remove the old copies:\n- ${problems.join('\n- ')}`);
 }
 
 // Applicability.
@@ -614,13 +814,18 @@ export function fileSetApplicability(record, zips, discoveryKind) {
     breakdown: { by: discovery.by, counts: sortedKeys(counts) } };
 }
 
-/** Read every zip source of a record from the local sources. */
+/** Read every zip source of a record from the local sources. A source whose size or SHA-256 differs from the record is not parsed. */
 function loadZips(record, corporaDir, problems) {
   const zips = new Map();
   for (const s of record.sources.filter(x => x.kind === 'zip')) {
     const file = resolveLocal(corporaDir, s.local_path);
     if (!fs.existsSync(file)) { problems.push(`source ${s.id}: missing ${file}`); continue; }
-    try { zips.set(s.id, readZip(fs.readFileSync(file))); } catch (e) { problems.push(`source ${s.id}: ${e.message}`); }
+    const bytes = fs.readFileSync(file);
+    if (bytes.length !== s.size || sha256(bytes) !== s.sha256) {
+      problems.push(`source ${s.id}: the local file has ${bytes.length} bytes with SHA-256 ${sha256(bytes)}, not the recorded ${s.size} bytes with SHA-256 ${s.sha256}`);
+      continue;
+    }
+    try { zips.set(s.id, readZip(bytes)); } catch (e) { problems.push(`source ${s.id}: ${e.message}`); }
   }
   return zips;
 }
@@ -653,16 +858,17 @@ export function verifyFileSet(root, id, { corporaDir, policy, discoveryKind, val
     if (recorded !== actual) problems.push(`${field}: recorded ${JSON.stringify(recorded)}, found ${JSON.stringify(actual)}`);
   };
   expect('upstream', record.upstream, policy.upstream);
+  // A source is parsed only when its size and SHA-256 equal the record.
   const sourceBytes = new Map();
   for (const s of record.sources) {
     const file = resolveLocal(corporaDir, s.local_path);
     if (!fs.existsSync(file)) { problems.push(`source ${s.id}: missing ${file}`); continue; }
-    const bytes = fs.readFileSync(file);
+    const bytes = fs.readFileSync(file), digest = sha256(bytes);
     expect(`source ${s.id} size`, s.size, bytes.length);
-    expect(`source ${s.id} sha256`, s.sha256, sha256(bytes));
+    expect(`source ${s.id} sha256`, s.sha256, digest);
     if (s.git_blob !== null) expect(`source ${s.id} git_blob`, s.git_blob, gitBlobId(bytes));
-    if (s.published_digest !== null) expect(`source ${s.id} published_digest`, s.published_digest, `sha256:${sha256(bytes)}`);
-    sourceBytes.set(s.id, bytes);
+    if (s.published_digest !== null) expect(`source ${s.id} published_digest`, s.published_digest, `sha256:${digest}`);
+    if (bytes.length === s.size && digest === s.sha256) sourceBytes.set(s.id, bytes);
   }
   const zips = new Map();
   for (const s of record.sources.filter(x => x.kind === 'zip' && sourceBytes.has(x.id))) {
@@ -720,31 +926,163 @@ function importTool(root, name) {
   invariant(tool, `engineering/dependencies.json declares no import tool ${name}.`);
   return tool;
 }
+/** The local environment of an import tool under `.tools/python/`. */
+function toolEnvironment(root, tool) {
+  return path.join(root, '.tools', 'python', `${tool.name.toLowerCase()}-${tool.version}`);
+}
 /** The interpreter of the local fontTools environment under `.tools/python/`. */
 export function toolPython(root, tool) {
-  const dir = path.join(root, '.tools', 'python', `${tool.name.toLowerCase()}-${tool.version}`);
-  return path.join(dir, ...(process.platform === 'win32' ? ['Scripts', 'python.exe'] : ['bin', 'python']));
+  return path.join(toolEnvironment(root, tool), ...(process.platform === 'win32' ? ['Scripts', 'python.exe'] : ['bin', 'python']));
+}
+/** The site-packages directory of a virtual environment. */
+function toolSitePackages(venv) {
+  if (process.platform === 'win32') return path.join(venv, 'Lib', 'site-packages');
+  const lib = path.join(venv, 'lib');
+  const versions = fs.existsSync(lib) ? fs.readdirSync(lib).filter(n => /^python3\.\d+$/.test(n)) : [];
+  invariant(versions.length === 1, `${venv} needs exactly one lib/python3.N directory.`);
+  return path.join(lib, versions[0], 'site-packages');
+}
+
+/**
+ * The environment of a Python import tool: the parent environment without any variable whose name starts with PYTHON,
+ * plus PYTHONSAFEPATH=1, so neither the working directory nor a script's directory joins `sys.path`.
+ */
+export function pythonEnvironment(base = process.env) {
+  const env = Object.fromEntries(Object.entries(base).filter(([name]) => !/^PYTHON/i.test(name)));
+  env.PYTHONSAFEPATH = '1';
+  return env;
+}
+
+/**
+ * Run a Python import tool without a shell, with `pythonEnvironment`, in the absolute working directory `cwd`, which is a staging directory.
+ * The tool runs without an operating-system sandbox, on inputs pinned by Git blob or SHA-256 only.
+ */
+export function runPython(python, argv, { cwd, baseEnv = process.env, timeout = TOOL_TIMEOUT_MS, stdio = 'pipe' } = {}) {
+  invariant(typeof cwd === 'string' && path.isAbsolute(cwd), 'A Python import tool runs only in an absolute staging directory.');
+  return spawnSync(python, argv, { cwd, env: pythonEnvironment(baseEnv), encoding: 'utf8', stdio, timeout, windowsHide: true });
+}
+
+/** The three fields of one wheel RECORD line, a CSV row of path, hash, and size. */
+function recordFields(line) {
+  const fields = [];
+  let i = 0;
+  while (i <= line.length) {
+    if (line[i] === '"') {
+      let value = '';
+      for (i += 1; ;) {
+        const quote = line.indexOf('"', i);
+        invariant(quote >= 0, `A wheel RECORD line has an unterminated quote: ${line}`);
+        value += line.slice(i, quote);
+        if (line[quote + 1] === '"') { value += '"'; i = quote + 2; } else { i = quote + 1; break; }
+      }
+      invariant(i === line.length || line[i] === ',', `A wheel RECORD line has text after a quoted field: ${line}`);
+      fields.push(value);
+      i += 1;
+    } else {
+      const comma = line.indexOf(',', i), end = comma < 0 ? line.length : comma;
+      fields.push(line.slice(i, end));
+      i = end + 1;
+    }
+  }
+  invariant(fields.length === 3, `A wheel RECORD line does not have three fields: ${line}`);
+  return fields;
+}
+
+/**
+ * Check an installed import tool against its verified wheel: the wheel's SHA-256 must equal `engineering/dependencies.json`,
+ * every file that the wheel's RECORD lists must be installed with that SHA-256 and size, and every file in the tool's packages
+ * must be listed, except bytecode that the installer compiled into `__pycache__`.
+ */
+export function verifyToolInstallation(root, tool) {
+  const wheelFile = path.join(root, '.tools', 'downloads', path.posix.basename(new URL(tool.wheel_url).pathname));
+  invariant(fs.existsSync(wheelFile), `The ${tool.name} wheel is missing: ${wheelFile}. Download it as tools/README.md describes.`);
+  const wheel = fs.readFileSync(wheelFile), wheelDigest = sha256(wheel);
+  invariant(wheelDigest === tool.wheel_sha256, `The ${tool.name} wheel ${wheelFile} has SHA-256 ${wheelDigest}, not ${tool.wheel_sha256}.`);
+  const zip = readZip(wheel);
+  const records = zip.entries.filter(e => /^[^/]+\.dist-info\/RECORD$/.test(e.path));
+  invariant(records.length === 1, `The ${tool.name} wheel has ${records.length} RECORD files, not 1.`);
+  const recordPath = records[0].path;
+  const dataPrefix = `${recordPath.slice(0, -'.dist-info/RECORD'.length)}.data/`;
+  const venv = toolEnvironment(root, tool), site = toolSitePackages(venv);
+  const listed = new Set(), packages = new Set();
+  let files = 0;
+  for (const line of zip.read(recordPath).toString('utf8').split(/\r?\n/)) {
+    if (!line) continue;
+    const [file, hash, size] = recordFields(line);
+    if (file === recordPath) continue;
+    checkMemberPath(file);
+    const digest = /^sha256=([A-Za-z0-9_-]{43})$/.exec(hash)?.[1];
+    invariant(digest && /^\d+$/.test(size), `The ${tool.name} wheel RECORD has no SHA-256 and size for ${file}.`);
+    let installed;
+    if (file.startsWith(dataPrefix)) {
+      const [scheme, ...rest] = file.slice(dataPrefix.length).split('/');
+      invariant(['data', 'purelib', 'platlib'].includes(scheme) && rest.length > 0, `The ${tool.name} wheel installs ${file}, which this check does not support.`);
+      installed = scheme === 'data' ? path.join(venv, ...rest) : path.join(site, ...rest);
+    } else {
+      installed = path.join(site, ...file.split('/'));
+      if (!file.split('/')[0].endsWith('.dist-info') && file.includes('/')) packages.add(file.split('/')[0]);
+    }
+    listed.add(path.resolve(installed));
+    invariant(fs.existsSync(installed), `The installed file ${file} is missing, so ${tool.name} does not match its wheel's RECORD.`);
+    const bytes = fs.readFileSync(installed);
+    invariant(bytes.length === Number(size) && crypto.createHash('sha256').update(bytes).digest('base64url') === digest,
+      `The installed file ${file} differs from its wheel's RECORD, so ${tool.name} is refused.`);
+    files++;
+  }
+  const pending = [...packages].map(name => path.join(site, name));
+  while (pending.length > 0) {
+    const dir = pending.pop();
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const file = path.join(dir, entry.name);
+      if (entry.isDirectory()) { pending.push(file); continue; }
+      const relative = path.relative(site, file).split(path.sep).join('/');
+      if (listed.has(path.resolve(file)) || (/(^|\/)__pycache__\/[^/]+\.pyc$/.test(relative) && entry.isFile())) continue;
+      throw new Error(`The installed file ${relative} is not listed in the ${tool.name} wheel's RECORD, so ${tool.name} is refused.`);
+    }
+  }
+  return { wheel: wheelFile, wheel_sha256: wheelDigest, files, site_packages: site };
+}
+
+const TOOL_PROBE = 'import sys, fontTools; print(fontTools.version); print(sys.version.split()[0]); print(sys.flags.safe_path); print(fontTools.__file__)';
+
+/** Run the interpreter once in `cwd` and require the declared fontTools version, safe-path mode, and the verified package. Returns the Python version. */
+function probeTool(python, tool, site, cwd) {
+  const probe = runPython(python, ['-c', TOOL_PROBE], { cwd, timeout: 60000 });
+  invariant(!probe.error && probe.status === 0, `${python} could not import ${tool.name}: ${probe.error?.message ?? probe.stderr}`);
+  const [toolVersion, pythonVersion, safePathFlag, imported] = probe.stdout.trim().split(/\r?\n/);
+  invariant(toolVersion === tool.version, `${python} has ${tool.name} ${toolVersion}, not ${tool.version}.`);
+  invariant(safePathFlag === 'True', `${python} did not run with PYTHONSAFEPATH=1.`);
+  const canonical = file => {
+    const real = fs.realpathSync.native(file);
+    return process.platform === 'win32' ? real.toLowerCase() : real;
+  };
+  invariant(fs.existsSync(imported ?? '') && canonical(imported) === canonical(path.join(site, 'fontTools', '__init__.py')),
+    `${python} imported ${tool.name} from ${imported}, not from the verified ${site}.`);
+  return pythonVersion;
 }
 
 /**
  * Run each declared derivation of a file-set corpus with its import tool, and record the result.
+ * The installation is checked against its wheel's RECORD before anything runs, and the tool runs in the staging directory under `runPython`.
  * The output must equal any existing fixture byte for byte, so a rerun proves the derivation reproducible.
  */
 export function deriveFileSet(root, id, { corporaDir, rule }) {
   invariant(rule && rule.derived.length > 0, `Corpus ${id} declares no derived files.`);
+  const tools = rule.derived.map(spec => {
+    const tool = importTool(root, spec.tool), python = toolPython(root, tool);
+    invariant(fs.existsSync(python), `The ${tool.name} environment is missing: ${python}. Install it from the verified wheel.`);
+    const verified = verifyToolInstallation(root, tool);
+    console.log(`Verified ${verified.files} installed ${tool.name} files against the RECORD of ${verified.wheel}.`);
+    return { tool, python, site: verified.site_packages };
+  });
   const record = readFileSetRecord(root, id);
   const staging = path.join(corporaDir, `${id}.derive`);
   fs.rmSync(staging, { recursive: true, force: true, maxRetries: 3 });
   fs.mkdirSync(staging, { recursive: true });
   try {
-    for (const spec of rule.derived) {
-      const tool = importTool(root, spec.tool), python = toolPython(root, tool);
-      invariant(fs.existsSync(python), `The ${tool.name} environment is missing: ${python}. Install it from the verified wheel.`);
-      const probe = spawnSync(python, ['-c', 'import sys, fontTools; print(fontTools.version); print(sys.version.split()[0])'],
-        { encoding: 'utf8', timeout: 60000, windowsHide: true });
-      invariant(probe.status === 0, `${python} could not import ${tool.name}: ${probe.stderr}`);
-      const [toolVersion, pythonVersion] = probe.stdout.trim().split(/\r?\n/);
-      invariant(toolVersion === tool.version, `${python} has ${tool.name} ${toolVersion}, not ${tool.version}.`);
+    for (const [i, spec] of rule.derived.entries()) {
+      const { tool, python, site } = tools[i];
+      const pythonVersion = probeTool(python, tool, site, staging);
       const input = record.sources.find(s => s.id === spec.input);
       invariant(input, `Derived ${spec.path} names an unknown input source ${spec.input}.`);
       const inputFile = resolveLocal(corporaDir, input.local_path);
@@ -752,8 +1090,8 @@ export function deriveFileSet(root, id, { corporaDir, rule }) {
       invariant(sha256(inputBytes) === input.sha256, `The local source ${input.id} differs from its record. Run corpus-fetch ${id}.`);
       const output = path.join(staging, path.posix.basename(spec.path));
       const argv = spec.argv.map(a => a.replaceAll(`${CORPORA_ROOT}/`, `${corporaDir}${path.sep}`.replaceAll('\\', '/')).replace('<output>', output));
-      console.log(`Run ${JSON.stringify([python, ...argv])}`);
-      const run = spawnSync(python, argv, { stdio: 'inherit', timeout: TOOL_TIMEOUT_MS, windowsHide: true });
+      console.log(`Run ${JSON.stringify([python, ...argv])} in ${staging}`);
+      const run = runPython(python, argv, { cwd: staging, stdio: 'inherit' });
       invariant(!run.error && run.status === 0, `${tool.name} exited with status ${run.status}${run.error ? `: ${run.error.message}` : ''}.`);
       const bytes = fs.readFileSync(output), digest = sha256(bytes);
       console.log(`Derived ${spec.path}: ${bytes.length} bytes, SHA-256 ${digest}`);
@@ -777,4 +1115,63 @@ export function deriveFileSet(root, id, { corporaDir, rule }) {
   } finally {
     fs.rmSync(staging, { recursive: true, force: true, maxRetries: 3 });
   }
+}
+
+/** The script that writes the font expectation files, and the fonts that it describes: every selected and derived font of `opentype-fixtures`. */
+export const EXPECTATION_SCRIPT = 'tools/fonts/font_expectations.py';
+export const EXPECTATION_FONTS = Object.freeze([
+  ...FILE_SET_RULES['opentype-fixtures'].selected.filter(e => e.role === 'font').map(e => e.path),
+  ...FILE_SET_RULES['opentype-fixtures'].derived.map(d => d.path),
+]);
+
+/**
+ * Run `tools/fonts/font_expectations.py` for every fixture font under `runPython`, after the installation check.
+ * A fresh staging directory holds copies of the script, the seeds, and the fonts, and it is the working directory, so the run
+ * reads and writes nothing in the repository. With `check`, the result fails when any output differs from the committed file;
+ * otherwise each differing committed file is replaced.
+ */
+export function fontExpectations(root, { check = false } = {}) {
+  const tool = importTool(root, 'fontTools'), python = toolPython(root, tool);
+  invariant(fs.existsSync(python), `The ${tool.name} environment is missing: ${python}. Install it from the verified wheel.`);
+  const verified = verifyToolInstallation(root, tool);
+  console.log(`Verified ${verified.files} installed ${tool.name} files against the RECORD of ${verified.wheel}.`);
+  const staging = fs.mkdtempSync(path.join(os.tmpdir(), 'fairpane-font-expectations-'));
+  try {
+    const copy = relative => {
+      const to = path.join(staging, ...relative.split('/'));
+      fs.mkdirSync(path.dirname(to), { recursive: true });
+      fs.copyFileSync(safePath(root, relative), to);
+    };
+    copy(EXPECTATION_SCRIPT);
+    for (const name of fs.readdirSync(path.join(root, 'tests', 'text', 'seeds')).filter(n => n.endsWith('.json')).sort()) copy(`tests/text/seeds/${name}`);
+    const pythonVersion = probeTool(python, tool, verified.site_packages, staging);
+    const expectations = [];
+    for (const font of EXPECTATION_FONTS) {
+      copy(font);
+      console.log(`Run ${JSON.stringify([python, EXPECTATION_SCRIPT, font])} in ${staging}`);
+      const run = runPython(python, [EXPECTATION_SCRIPT, font], { cwd: staging, stdio: 'inherit' });
+      invariant(!run.error && run.status === 0, `${EXPECTATION_SCRIPT} exited with status ${run.status}${run.error ? `: ${run.error.message}` : ''}.`);
+      const relative = font.replace(/\.[^./]+$/, '.expect.json');
+      const produced = fs.readFileSync(path.join(staging, ...relative.split('/')));
+      const committedFile = safePath(root, relative, { mustExist: false });
+      const equal = fs.existsSync(committedFile) && fs.readFileSync(committedFile).equals(produced);
+      if (!check && !equal) writeBytes(committedFile, produced);
+      expectations.push({ path: relative, size: produced.length, sha256: sha256(produced), equals_committed: equal });
+      console.log(`${relative}: ${produced.length} bytes, SHA-256 ${sha256(produced)}, ${equal ? 'byte-identical to' : 'different from'} the committed file`);
+    }
+    const differ = expectations.filter(e => !e.equals_committed).map(e => e.path);
+    return { result: check && differ.length ? 'fail' : 'pass', mode: check ? 'check' : 'write', tool: { name: tool.name, version: tool.version,
+      wheel_sha256: verified.wheel_sha256, verified_files: verified.files, python: pythonVersion }, environment: { PYTHONSAFEPATH: '1', other_python_variables: 'removed' },
+    expectations, differing: differ };
+  } finally {
+    fs.rmSync(staging, { recursive: true, force: true, maxRetries: 3 });
+  }
+}
+
+function writeBytes(file, bytes) {
+  const temporary = `${file}.${crypto.randomUUID()}.tmp`;
+  try {
+    fs.writeFileSync(temporary, bytes, { flag: 'wx' });
+    fs.renameSync(temporary, file);
+  } finally { fs.rmSync(temporary, { force: true }); }
 }
