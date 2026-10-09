@@ -1,0 +1,16 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.EXE","-e","\nconst fs=require(\"fs\"),path=require(\"path\");\nconst h=path.join(\".zig-cache\",\"h\");\nlet n=0;\nfor (const f of fs.readdirSync(h)) {\n  const p=path.join(h,f); const b=fs.readFileSync(p);\n  const s=b.toString(\"latin1\");\n  if (s.includes(\"tests\\\\js\\\\census\\\\sound\\\\EXTRACT.js\") && !s.includes(\"existing.jsonl\")) { console.log(\"manifest\", f, b.length, fs.statSync(p).mtime.toISOString()); fs.rmSync(p); console.log(\"removed\", p); n++; }\n}\nfor (const d of fs.readdirSync(path.join(\".zig-cache\",\"o\"))) for (const sub of [\"census-sound\",\"census-unsound\"]) { const f=path.join(\".zig-cache\",\"o\",d,sub,\"census.jsonl\"); if (fs.existsSync(f)) console.log(\"kept output\", f, fs.statSync(f).mtime.toISOString()); }\nconsole.log(\"removed manifests\", n);\n"]
+manifest 14011c40b260e46349179d253823b4ec 1457 2026-10-09T18:07:07.455Z
+removed .zig-cache\h\14011c40b260e46349179d253823b4ec
+manifest cc3fad5522987cd266cc3f62860655f9 1457 2026-10-09T18:07:07.503Z
+removed .zig-cache\h\cc3fad5522987cd266cc3f62860655f9
+kept output .zig-cache\o\2e7d395d1c3a26e0685d39aedc724ed9\census-unsound\census.jsonl 2026-10-09T15:43:33.828Z
+kept output .zig-cache\o\402c102b2af32213a6433349ce921e77\census-sound\census.jsonl 2026-10-09T18:07:07.453Z
+kept output .zig-cache\o\448efb2083a2ec0b2030573d17d9d3d1\census-unsound\census.jsonl 2026-10-09T18:07:07.501Z
+kept output .zig-cache\o\6dc9325dae7e3cbd58d1739ba422d957\census-unsound\census.jsonl 2026-10-09T15:06:29.602Z
+kept output .zig-cache\o\b088b650334b5811f424c676160edf70\census-sound\census.jsonl 2026-10-09T15:06:29.604Z
+kept output .zig-cache\o\ccd5bbf6eab758b781a2181d6edc697d\census-sound\census.jsonl 2026-10-09T15:47:59.437Z
+kept output .zig-cache\o\d30ea68386678c8b16883e3b255d7666\census-sound\census.jsonl 2026-10-09T15:43:33.826Z
+kept output .zig-cache\o\f20693d71888033ce4b7f512fa8dd56a\census-unsound\census.jsonl 2026-10-09T15:47:59.439Z
+removed manifests 2
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.EXE","arguments":["-e","\nconst fs=require(\"fs\"),path=require(\"path\");\nconst h=path.join(\".zig-cache\",\"h\");\nlet n=0;\nfor (const f of fs.readdirSync(h)) {\n  const p=path.join(h,f); const b=fs.readFileSync(p);\n  const s=b.toString(\"latin1\");\n  if (s.includes(\"tests\\\\js\\\\census\\\\sound\\\\EXTRACT.js\") && !s.includes(\"existing.jsonl\")) { console.log(\"manifest\", f, b.length, fs.statSync(p).mtime.toISOString()); fs.rmSync(p); console.log(\"removed\", p); n++; }\n}\nfor (const d of fs.readdirSync(path.join(\".zig-cache\",\"o\"))) for (const sub of [\"census-sound\",\"census-unsound\"]) { const f=path.join(\".zig-cache\",\"o\",d,sub,\"census.jsonl\"); if (fs.existsSync(f)) console.log(\"kept output\", f, fs.statSync(f).mtime.toISOString()); }\nconsole.log(\"removed manifests\", n);\n"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T18:10:15.863Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":111}

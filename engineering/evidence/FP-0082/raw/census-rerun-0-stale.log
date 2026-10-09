@@ -1,0 +1,7 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.EXE","-e","\nconst fs=require(\"fs\"),path=require(\"path\");\nfor (const h of [\"402c102b2af32213a6433349ce921e77\",\"448efb2083a2ec0b2030573d17d9d3d1\"]) {\n  const d=path.join(\".zig-cache\",\"o\",h);\n  for (const sub of fs.readdirSync(d)) { const f=path.join(d,sub,\"census.jsonl\"); const s=fs.statSync(f); console.log(\"stale\", f, s.size, s.mtime.toISOString()); }\n  fs.rmSync(d,{recursive:true,force:false}); console.log(\"removed\", d);\n}\n"]
+stale .zig-cache\o\402c102b2af32213a6433349ce921e77\census-sound\census.jsonl 1168 2026-10-09T17:23:26.031Z
+removed .zig-cache\o\402c102b2af32213a6433349ce921e77
+stale .zig-cache\o\448efb2083a2ec0b2030573d17d9d3d1\census-unsound\census.jsonl 488 2026-10-09T17:23:26.029Z
+removed .zig-cache\o\448efb2083a2ec0b2030573d17d9d3d1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.EXE","arguments":["-e","\nconst fs=require(\"fs\"),path=require(\"path\");\nfor (const h of [\"402c102b2af32213a6433349ce921e77\",\"448efb2083a2ec0b2030573d17d9d3d1\"]) {\n  const d=path.join(\".zig-cache\",\"o\",h);\n  for (const sub of fs.readdirSync(d)) { const f=path.join(d,sub,\"census.jsonl\"); const s=fs.statSync(f); console.log(\"stale\", f, s.size, s.mtime.toISOString()); }\n  fs.rmSync(d,{recursive:true,force:false}); console.log(\"removed\", d);\n}\n"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T18:07:06.574Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":64}

@@ -1022,3 +1022,16 @@ Record each command with `node tools/fairpane.mjs record` under `engineering/evi
 2. An uncached `tests-after-r2.log`, `fmt-r2.log`, `controller-tests-after-r2.log`, and `census-r2.log` with a fresh extraction and census whose summary counts equal the README's.
 3. `mutation-r2.log` and its diffs for M14 to M16, with the hash of each changed file before, during, and after, and a recorded `git apply --check` of M1 to M13 against the revised sources.
 4. The README gains a `## Revision 2` section.
+
+### Revision 2 amendments
+
+1. The integrator's FP-0107 binding found that case 17's sound and unsound census steps fail on a rerun in a local cache that holds their earlier output.
+   The census refuses an existing `<out.jsonl>`, as "Census" requires, and both steps name `census.jsonl` in an output directory that the pinned build runner reuses for the same inputs and never empties.
+   When a run writes that file but does not finalize the step's cache manifest, as an interrupted run does, every later `zig build test` in that cache fails both steps with `PathAlreadyExists`, until someone deletes the directory.
+   `raw/census-rerun-5-lost-manifest.log` deletes the two steps' manifests and keeps their outputs, and `raw/census-rerun-6.log` then fails with `Build Summary: 97/100 steps succeeded (2 failed)`.
+   The integrator's gate run at 18:02 UTC failed the same way (`engineering/evidence/FP-0107/gates/2026-10-09T18-02-06-479Z-zig-test-9b503199.json`) without a known interruption, and `raw/census-rerun-1.log` to `raw/census-rerun-4.log` show that an immediate rerun and a run after an install from another cache directory both pass, so that run's trigger is unknown.
+   Revision 2 therefore adds this rule: both census steps pass in a cache whose output directories already hold `census.jsonl` from a run without a manifest.
+   The census keeps refusing an existing `<out.jsonl>` that a caller names, and the refusal row of case 17 stays as frozen.
+   The worker chooses the mechanism, such as a census option that replaces the file and that only these two steps pass, or a step whose output path cannot exist before it runs, and the README states why the mechanism cannot hide a census failure.
+   Case 3 of revision 2 repeats the reproduction with recorded commands: a passing `zig build test --summary all` with a fresh `--cache-dir`, a recorded deletion of both census steps' manifests in that cache that keeps their outputs, and a second run in that cache, which must pass with both census steps executed rather than cached.
+   It must fail before the change, as `raw/census-rerun-6.log` shows, and its logs are `census-rerun-before-r2.log` and `census-rerun-after-r2.log`.
