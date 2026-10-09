@@ -93,3 +93,13 @@ The integrator records `HEAD` and a status that includes ignored files for every
 After the push, the integrator records `gh run view` of the first `Gates` run that contains the change, downloads its Linux receipts with `gh run download` through `record`, and commits them under `engineering/evidence/FP-0067/ci/`.
 The Linux `zig-test` receipt must report `pass`.
 `fairpane-review` reviews this task.
+
+### Integration record
+
+The integrator applied the worker's patch and committed it alone as `152ed53`.
+
+- `raw/integration-binding.log` records `HEAD` `152ed53` and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
+- `gates/2026-10-09T13-24-30-185Z-repo-check-4679bbe9.json` and `gates/2026-10-09T13-24-30-568Z-controller-test-dc888552.json` pass.
+- `raw/bun-selftest.log` records Bun 1.4.2 and `tools/selftest.mjs` with 207 of 207 tests.
+
+The first `Gates` run with the change is run 37936609533 of `152ed53`; `ci/` records it when it concludes.
