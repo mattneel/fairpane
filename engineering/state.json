@@ -827,7 +827,7 @@
       "owner": null,
       "evidence": [],
       "review": null,
-      "notes": ["Created for encoding sniffing and decoders, which the FP-0008 contract leaves outside its decode stage."]
+      "notes": ["Created for encoding sniffing and decoders, which the FP-0008 contract leaves outside its decode stage.", "Split on 2026-10-09 into FP-0123, FP-0124, FP-0125, and FP-0126. FP-0065 keeps its four criteria word for word as the closing task: criterion 1 maps to FP-0126, criterion 2 to FP-0123 to FP-0125, criterion 3 to FP-0126, and criterion 4 to all four slices."]
     },
     "FP-0066": {
       "status": "active",
@@ -982,6 +982,10 @@
     "FP-0120": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split: the CFF Type 2 charstring interpreter and the honest CFF2 report. Until the owner answers the TN5176 table question, endchar seac returns its named unsupported error."] },
     "FP-0121": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split: the scalar reference rasterizer, which uses 16 nonzero sub-scanlines per pixel row with exact horizontal span coverage, and its independent first-party oracle."] },
     "FP-0122": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split: glyph rendering, comparison of real glyphs with the FP-0121 oracle, and the glyph-rasterization capability update together with the FP-0013 case 49 lists."] },
+    "FP-0123": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created as the first FP-0065 slice. Commit f90350b admitted the Encoding Standard index files but committed none; this slice imports no index data.", "The fairpane-spec FP0065 split worker drafted its contract; the freeze records the SHA-256 of encoding.bs and LICENSE at whatwg/encoding a985b62a, the published Last Updated date, and whether LICENSE equals src/html/entities.LICENSE."] },
+    "FP-0124": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created as the second FP-0065 slice: the 27 single-byte index files, which LICENSE-DECISION.md admits, and the 28 single-byte decoders."] },
+    "FP-0125": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created as the third FP-0065 slice: the six CJK index files and seven decoders. index-iso-2022-jp-katakana.txt stays unimported until an encoder task under FP-0026's frontier decomposition consumes it.", "The drafting worker could not verify index-big5.txt above pointer 15350; the freeze checks every Big5 row against the imported file."] },
+    "FP-0126": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created as the fourth FP-0065 slice: sniffing, prescan, change the encoding, the laboratory decode stage, and the WPT encoding record in evidence.", "Laboratory Content-Type plumbing, encoders, TextDecoder and TextEncoder, URL query encoding, and form submission belong to FP-0026's frontier decomposition. The tree-construction task that handles meta in head calls this task's hook once both exist."] },
     "FP-0127": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created during the FP-0010 split because the DOM store has no shadow roots and FP-0103's declarative shadow roots need them."] }
   }
 }
