@@ -1,0 +1,54 @@
+{
+  "verdict": "accept",
+  "summary": "I reviewed f17b396 and 378d9d8 against the FP-0100 contract and the FP-0008, FP-0064, and FP-0009 contracts that it extends, using the pinned standard. I found no blocker or major defect. I checked these against the cited standard lines: the parser interface, the 130-branch table and its counters, the scope lists with select as a boundary, the Noah's Ark clause, reconstruct, the adoption agency algorithm (both loop counters, the bookmark, and the four insertion conditions), the script boundary, node retention, sticky errors, the unsupported outcomes and their owners, the doctype and quirks lists, the DOM store extensions, and the tree dump. All of them match. The recorded evidence includes exit statuses for every command. The uncached run passed 297 of 297 unit tests, and the uncached integration run passed 394 of 394 tests. The mutation control's diff exited 1, it failed A9, A10, and Q8, and the restored file is byte-identical (blob 6b89be5). The integration status was clean before and after the gates. The policy digest 29d3333e… matches the FP-0107 and FP-0123 receipts, so no protected policy changed. No shell or embedding code is touched. On the reservation: it conforms to the frozen 'Modules' text, which requires the 2 × (text_flush_threshold + 1) records to be reserved once on the first characters step. The unit step took 54 s, well under the 400 s stop-rule limit. No frozen engine memory budget exists, because docs/QUALIFICATION.md line 64 invents no universal number and no document load calls the parser yet. So the reservation is acceptable for this task. Even so, it is an avoidable fixed cost of about 320 KiB per tokenizer, and it should be revisited before fragment parsing or document load wires the parser in. The findings below record that cost and some smaller evidence gaps.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "src/html/tokenizer.zig",
+      "line": 102,
+      "issue": "The tokenizer reserves 8194 CharacterRecord entries on its first characters step (line 411) and keeps them until deinit. Each record holds a usize index, a Position of three usize fields, and a Layout, which pads to about 40 bytes on x64 [INFERENCE: from the field types, not a measured @sizeOf]. That is roughly 320 KiB per tokenizer, even for a one-character document, and about 40 times the roughly 8 KiB text buffer that the records index. This conforms to the frozen contract and stays inside the FP-0098 time budget, so it does not block acceptance. However, the reservation is avoidable. appendText already allocates through text.appendSlice, so growing the records in amortized steps alongside text would keep the same OutOfMemory semantics. Smaller field types could also cut the size of each record. The cost will matter once FP-0105 creates a tokenizer for each fragment parse, and once an FP-0081 engine memory limit counts this allocation. Record a contract amendment or a follow-up task with an owner before FP-0019 or FP-0105 wires the parser in."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0100/README.md",
+      "line": 106,
+      "issue": "The README states as fact that the 7.4 s growth of the FP-0008 and FP-0064 tests comes from the one-time reservation. No recorded command isolates that cause, such as a run with the reservation removed or a profile. raw/test-timing.log records only aggregate warm durations, and they vary widely: 32341 then 23120 ms in the tree, and 21082 then 15736 ms at the base. Mark the attribution as an inference, or record a control run."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0100/README.md",
+      "line": 114,
+      "issue": "The README claims that every FP-0008, FP-0009, FP-0014, and FP-0064 test passes 'with its expected values unchanged', and line 167 claims that no FP-0009 expected outcome changed. No recorded command shows the test-code diff against bd11c2b, and a passing run alone cannot show that expectations were not edited. Only the tests-before git hash-object record shows that tokenizer_test.zig and dom.zig changed. Record git diff bd11c2b f17b396 for the test files, so that the claim has evidence."
+    },
+    {
+      "severity": "minor",
+      "path": "src/html/tokenizer.zig",
+      "line": 411,
+      "issue": "No test drives a characters run past text_flush_threshold (4096 units) while it reads characterPosition. Case 15 checks only a 32-unit input. The 2 × (threshold + 1) bound therefore rests on the doc comment's reasoning and on the debug assertion in appendAssumeCapacity. In ReleaseFast builds, exceeding the bound would be undefined behavior on hostile input. My own reading supports the bound: compaction at each run() leaves fewer than 4096 pending records, and at most one threshold flush plus one short run can come before the next compaction. Even so, the bound deserves a test with a run of more than 4096 units in chunks."
+    },
+    {
+      "severity": "note",
+      "path": "src/html/tree_test.zig",
+      "line": 1418,
+      "issue": "Case 9 shows the script offset of 22 and the absence of \"c\" at the boundary, but nothing observes directly how much the tokenizer has consumed. The criterion 'before the tokenizer consumes a later character' rests on the tokenizer invariant that a tag token is the last step of its action, together with the Q7 and Q9 partitions. This evidence is acceptable for this task, but FP-0019 should assert consumption directly once the insertion point exists."
+    },
+    {
+      "severity": "note",
+      "path": "src/html/tree_dump.zig",
+      "line": null,
+      "issue": "writeAttributes takes time quadratic in the number of attributes of each element, because it selects the next key without storage. That is fine for the test dumps, but revisit it before FP-0068 exposes the dump to arbitrary laboratory input."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/HANDOFF.md",
+      "line": 17,
+      "issue": "The FP-0100 row still says that worker FP0100Tree implements the contract, and its next action is still 'Integrate, bind, and request review and spec review', although f17b396 and 378d9d8 already integrated and bound the work. Update the row when FP-0100 is accepted."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0100/raw/integration-tests.log",
+      "line": 2,
+      "issue": "The uncached integration run used the doubled path out/out/fp0100-integration. The cache was still fresh and outside the source roots, so the result is valid, but the doubled path looks accidental."
+    }
+  ]
+}

@@ -2899,7 +2899,7 @@
       "id": "FP-0057",
       "title": "Decide and qualify glyph hinting",
       "workstream": "text",
-      "depends_on": ["FP-0056", "FP-0061"],
+      "depends_on": ["FP-0056", "FP-0061", "FP-0111", "FP-0113"],
       "role": "fairpane-text",
       "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/decisions", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json", "toolchains/rust.lock.json", "rust-toolchain.toml"],
@@ -2911,7 +2911,8 @@
         "Implement the decided behavior, with a bounded interpreter if hinting programs run.",
         "Test malformed and hostile hinting programs for bounded execution.",
         "Decide and implement the ROUND_XY_TO_GRID composite offset rule and the Type 2 flex depth rule for hinted rendering, which the FP-0119 and FP-0120 unhinted outlines ignore.",
-        "Support composite point matching against phantom points, which FP-0119 reports as unsupported, with horizontal phantom points from hmtx, vertical phantom points from the FP-0061 vertical metrics, and the USE_MY_METRICS component flag."
+        "Support composite point matching against phantom points, which FP-0119 reports as unsupported, with horizontal phantom points from hmtx, vertical phantom points from the FP-0061 vertical metrics, and the USE_MY_METRICS component flag.",
+        "Apply non-variation Device table adjustments and contour-point anchors (AnchorFormat 2) at hinted sizes, replacing the reports of FP-0111 and FP-0113 that leave them unapplied."
       ],
       "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
@@ -2937,7 +2938,7 @@
         "Compare the outline strictness choices that the FP-0119 and FP-0120 contracts list with web-font practice, and record each kept or changed choice.",
         "Compare the OpenType layout strictness choices that the FP-0111 contract lists with web-font practice, and record each kept or changed choice."
       ],
-      "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md"],
+      "read": ["docs/RENDERING_AND_TEXT.md", "specs/IMPORT_REQUIREMENTS.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md", "engineering/evidence/FP-0111/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -2962,7 +2963,7 @@
         "Implement endchar seac through the TN5176 StandardEncoding and the font's charset, including the predefined ISOAdobe, Expert, and ExpertSubset charsets, replacing the FP-0120 unsupported error; the owner approved those tables on 2026-10-09.",
         "Evaluate GSUB and GPOS FeatureVariations condition sets for the selected instance, and apply the GDEF item variation store through VariationIndex tables in GDEF and GPOS, replacing the FP-0111 and FP-0113 unsupported reports."
       ],
-      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md"],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md", "engineering/evidence/FP-0111/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -3240,7 +3241,8 @@
         "Apply style attributes and HTML presentational hints at their cascade positions.",
         "Ship the HTML Standard's user-agent stylesheet as a reviewed source with its provenance.",
         "Keep selectors, cascade, and computed values separate.",
-        "Match :host, :host(), :host-context(), and ::slotted() within the encapsulation contexts of criterion 1, as the pinned CSS Scoping specification states."
+        "Match :host, :host(), and :host-context() within the encapsulation contexts of criterion 1, as the pinned CSS Scoping specification states.",
+        "Report ::slotted() as unsupported with its owner task until a task implements slot assignment."
       ],
       "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
@@ -4404,6 +4406,27 @@
         "Run both gates in the Gates workflow on Windows and Linux with the locked toolchain installed from its verified archives."
       ],
       "read": ["engineering/evidence/FP-0080/CONTRACT.md", "docs/ABI_AND_WRAPPERS.md", "engineering/evidence/FP-0079/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0135",
+      "title": "Protect internal hash maps from hash flooding",
+      "workstream": "javascript",
+      "depends_on": ["FP-0082"],
+      "role": "fairpane-core",
+      "allowed_paths": ["src", "tests", "build.zig", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Inventory every engine hash map that untrusted input can fill, including the FP-0082 parser's name sets, and record the protection that each one uses.",
+        "Make each such map resist crafted keys, through a per-instance seed from a first-party source or through bounded probe work, so that no input makes its lookups superlinear in the number of keys.",
+        "Test each protected map with a crafted set of colliding keys, and bound its work in the test.",
+        "Keep the parser's per-body cost bounds of FP-0082 revision 2."
+      ],
+      "read": ["engineering/evidence/FP-0082/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }

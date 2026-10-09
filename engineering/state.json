@@ -388,7 +388,7 @@
       "review": null,
       "notes": [
         "The 2026-10-09 splits route these obligations to this task's frontier decomposition, each reported as unsupported until a task owns it: proper tail calls; the legacy caller and arguments own properties of non-strict functions; CLDR segmentation tailoring; Encoding Standard encoders, TextDecoder and TextEncoder, URL query encoding, and form submission; laboratory Content-Type plumbing for the transport-layer encoding; speculative parsing, custom element definitions, form-owner association, the reset algorithm of resettable elements, process internal resource links, and iframe srcdoc documents; and the scripts and the dictionary-based SA line breaking that the FP-0015 slices report as unsupported.",
-        "Later routings add: hash-flooding resistance of the engine's internal hash maps, including the FP-0082 parser's name sets (FP-0082 revision 2); and custom element registries, the ::part() pseudo-element, slots, slot assignment, and the flat tree, which no shadow-DOM task owns (FP-0127 pre-freeze check)."
+        "Later routings add: custom element registries, the ::part() pseudo-element, slots, slot assignment, ::slotted() matching, and the flat tree, which no shadow-DOM task owns (FP-0127 pre-freeze check); and the shadow-root DOM bindings, namely attachShadow(), the shadowRoot getter, closed-mode hiding, event retargeting, and composed paths (plan review 9). Hash-flooding resistance, which FP-0082 revision 2 first routed here, belongs to FP-0135 since plan review 9."
       ]
     },
     "FP-0027": {
@@ -776,7 +776,7 @@
       "owner": null,
       "evidence": [],
       "review": null,
-      "notes": ["Created to own the glyph hinting decision from the FP-0013 capability record."]
+      "notes": ["Created to own the glyph hinting decision from the FP-0013 capability record.", "Plan review 9 found that non-variation Device tables and contour-point anchors, which FP-0111 and FP-0113 report as unapplied, had no owner; both need hinted sizes or hinted points, so criterion 6 gives them to this task."]
     },
     "FP-0058": {
       "status": "planned",
@@ -881,7 +881,7 @@
       "owner": null,
       "evidence": [],
       "review": null,
-      "notes": ["Created to own the cascade inputs and the HTML user-agent stylesheet that the FP-0014 contract has no input for.", "Criterion 5 adds the shadow-tree selectors :host, :host(), :host-context(), and ::slotted(), because FP-0072 is the only CSS task that depends on FP-0127, as the FP-0127 pre-freeze check found."]
+      "notes": ["Created to own the cascade inputs and the HTML user-agent stylesheet that the FP-0014 contract has no input for.", "Criterion 5 adds the shadow-tree selectors :host, :host(), and :host-context(), because FP-0072 is the only CSS task that depends on FP-0127, as the FP-0127 pre-freeze check found. Plan review 9 removed ::slotted() from it, because slot assignment has no owner yet; criterion 6 reports ::slotted() as unsupported."]
     },
     "FP-0073": {
       "status": "planned",
@@ -998,6 +998,7 @@
     "FP-0131": { "status": "active", "owner": "fairpane-core worker FP0131Fixes", "evidence": ["engineering/evidence/FP-0131/CONTRACT.md"], "review": null, "notes": ["Created from the minor findings and notes of FP-0052 review 1 and spec review 1.", "Contract frozen in b8313e6 after the pre-freeze check and re-check of agent CheckFindings; dispatched on that base."] },
     "FP-0132": { "status": "active", "owner": "fairpane-bindings worker FP0132Lock", "evidence": ["engineering/evidence/FP-0132/CONTRACT.md"], "review": null, "notes": ["Created from the FP-0080 split by fairpane-bindings worker FP0080Contract: the protected lock change that adds the i686-unknown-linux-gnu standard library, which FP-0080 criterion 10 requires. The integrator decided that rust-toolchain.toml gets no targets line, and that install-rust replaces a toolchain whose receipt differs from the lock only after the new one passes its checks.", "Contract frozen in 416130e after two pre-freeze checks by agent Check0132; dispatched on that base. P1 lands after an independent approval recorded in its own commit."] },
     "FP-0133": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0080 split by fairpane-bindings worker FP0080Contract: the generated fairpane-sys crate and its Rust layout assertions, carrying FP-0080 criteria 1 to 8 and 13 word for word. The workspace holds only fairpane-sys until FP-0029 adds the fairpane crate, because an empty crate would be a stub; this narrows the FP-0079 decision that the workspace holds the two wrapper crates."] },
-    "FP-0134": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0080 split by fairpane-bindings worker FP0080Contract: linking against the native library and the rust-fmt and rust-wrapper gates, carrying FP-0080 criteria 11 and 12 word for word. The integrator gave it the Gates workflow, because FP-0033 is accepted and FP-0034 waits for the browser window, so no other task would run the new gates in CI."] }
+    "FP-0134": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0080 split by fairpane-bindings worker FP0080Contract: linking against the native library and the rust-fmt and rust-wrapper gates, carrying FP-0080 criteria 11 and 12 word for word. The integrator gave it the Gates workflow, because FP-0033 is accepted and FP-0034 waits for the browser window, so no other task would run the new gates in CI."] },
+    "FP-0135": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from plan review 9's note: FP-0082 revision 2 routed hash-flooding resistance to FP-0026's frontier decomposition, which depends on FP-0019, FP-0020, and FP-0021, while the parser already accepts attacker-supplied scripts. This task replaces that routing."] }
   }
 }
