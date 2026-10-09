@@ -847,3 +847,16 @@ Required reviewers are `fairpane-review` and `fairpane-spec`.
 - No change is made to the C ABI, `include`, `api`, `specs`, or the gates.
 - No parse-speed measurement is made, and no performance claim results.
 - No Test262 file is copied into the repository.
+
+## Amendments
+
+1. Worker `FP0082Parser` reported two stop rules and two contract defects, and the integrator decides them as follows.
+   - Stack: a recursive-descent parser in the Debug build uses about 3.8 KB of native stack per nested parenthesis, so it overflows a 1 MiB stack near depth 265.
+     `parseScript` and `writeOutcome` therefore use native stack that does not grow with nesting depth.
+     Nesting state lives in heap storage that `max_depth` and `max_memory_bytes` bound.
+     Cases 10 and 11 stay as frozen, including the 1 MiB thread in the Debug test build, and `max_depth` stays 1024.
+     A mutation control that restores one recursive call per parenthesized expression must fail case 10.
+   - Case 2, row T32: the first source `a⏎(b)` is a call whose argument list holds `b` itself (ECMA-262 13.3.1 and 13.3.8; 12.10 inserts no semicolon), so its expected dump is `(expression (call (identifier a) (identifier b)))`.
+   - Case 9 covers T1 to T41 except T30, because a HashbangComment is allowed only at the start of a Script (12.5), and the prefix moves it away from offset 0.
+     For T30, the prefixed source gives `syntax-error invalid_character @14`, which case 9 asserts as its own row.
+   - Every other expectation stays as frozen.
