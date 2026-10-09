@@ -1,0 +1,41 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');for(const d of ['out/fp0066-a','out/fp0066-b']){fs.mkdirSync(d);fs.cpSync('out/fp0027-r2-release/src',d+'/src',{recursive:true})}"]
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');for(const d of ['out/fp0066-a','out/fp0066-b']){fs.mkdirSync(d);fs.cpSync('out/fp0027-r2-release/src',d+'/src',{recursive:true})}"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:15:20.743Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":84}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-lib","-static","-OReleaseSafe","-fstrip","--name","fairpane","--cache-dir","cache","--global-cache-dir","gcache","../src/root.zig"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-lib","-static","-OReleaseSafe","-fstrip","--name","fairpane","--cache-dir","cache","--global-cache-dir","gcache","../src/root.zig"],"cwd":"C:\\src\\fairpane\\out\\fp0066-a\\strip","started_at":"2026-10-09T12:15:20.887Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":2781}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-lib","-static","-OReleaseSafe","-fno-strip","--name","fairpane","--cache-dir","cache","--global-cache-dir","gcache","../src/root.zig"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-lib","-static","-OReleaseSafe","-fno-strip","--name","fairpane","--cache-dir","cache","--global-cache-dir","gcache","../src/root.zig"],"cwd":"C:\\src\\fairpane\\out\\fp0066-a\\nostrip","started_at":"2026-10-09T12:15:23.727Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":6070}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-lib","-static","-OReleaseSafe","-fstrip","--name","fairpane","--cache-dir","cache","--global-cache-dir","gcache","../src/root.zig"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-lib","-static","-OReleaseSafe","-fstrip","--name","fairpane","--cache-dir","cache","--global-cache-dir","gcache","../src/root.zig"],"cwd":"C:\\src\\fairpane\\out\\fp0066-b\\strip","started_at":"2026-10-09T12:15:29.857Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":3197}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build-lib","-static","-OReleaseSafe","-fno-strip","--name","fairpane","--cache-dir","cache","--global-cache-dir","gcache","../src/root.zig"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build-lib","-static","-OReleaseSafe","-fno-strip","--name","fairpane","--cache-dir","cache","--global-cache-dir","gcache","../src/root.zig"],"cwd":"C:\\src\\fairpane\\out\\fp0066-b\\nostrip","started_at":"2026-10-09T12:15:33.119Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":7056}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","out/fp0066-a/strip/fairpane.lib","out/fp0066-b/strip/fairpane.lib","out/fp0066-a/nostrip/fairpane.lib","out/fp0066-b/nostrip/fairpane.lib"]
+170e4b42bef378061c7a873df97eca4fb802957ff691713774b456f8775551d5 *out/fp0066-a/strip/fairpane.lib
+d8cf810147282bda5c8dfaadf3d3d4c3015b611a03f2617de7120f12e8e038c9 *out/fp0066-b/strip/fairpane.lib
+11137093b06e07677e1745347c553950060e111925169969b2cc6ba861eecb71 *out/fp0066-a/nostrip/fairpane.lib
+b017d786f211ed6e31b55e2c4e7903f91b1b6f4ca06a957c530b5793072b5a20 *out/fp0066-b/nostrip/fairpane.lib
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["out/fp0066-a/strip/fairpane.lib","out/fp0066-b/strip/fairpane.lib","out/fp0066-a/nostrip/fairpane.lib","out/fp0066-b/nostrip/fairpane.lib"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:15:40.228Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":28}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","ar","t","C:\\src\\fairpane\\out\\fp0066-a\\strip\\fairpane.lib"]
+cache\tmp\776c0874238e8dbc\fairpane_zcu.obj
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["ar","t","C:\\src\\fairpane\\out\\fp0066-a\\strip\\fairpane.lib"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:16:02.710Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","ar","x","..\\fairpane.lib"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["ar","x","..\\fairpane.lib"],"cwd":"C:\\src\\fairpane\\out\\fp0066-a\\strip\\x","started_at":"2026-10-09T12:16:02.777Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","ar","t","C:\\src\\fairpane\\out\\fp0066-b\\strip\\fairpane.lib"]
+cache\tmp\ebe8e787190647fb\fairpane_zcu.obj
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["ar","t","C:\\src\\fairpane\\out\\fp0066-b\\strip\\fairpane.lib"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:16:02.844Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":14}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","ar","x","..\\fairpane.lib"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["ar","x","..\\fairpane.lib"],"cwd":"C:\\src\\fairpane\\out\\fp0066-b\\strip\\x","started_at":"2026-10-09T12:16:02.927Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","out/fp0066-a/strip/x/fairpane_zcu.obj","out/fp0066-b/strip/x/fairpane_zcu.obj"]
+9dccdf15a05010a18e9d52f462d6bc354aae52e87c66d216f0c235f3139f1246 *out/fp0066-a/strip/x/fairpane_zcu.obj
+9dccdf15a05010a18e9d52f462d6bc354aae52e87c66d216f0c235f3139f1246 *out/fp0066-b/strip/x/fairpane_zcu.obj
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["out/fp0066-a/strip/x/fairpane_zcu.obj","out/fp0066-b/strip/x/fairpane_zcu.obj"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:16:03.019Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
