@@ -139,9 +139,9 @@ Neither control compiled, so this stop rule did not trigger.
     The sentence for `api/README.md:60` is appended inside the nullability cell of the table.
 14. The contract's sentence for `api/README.md:123` is added as its own line after line 123.
 
-## Remaining integrator steps
+## Integrator steps
 
-The contract assigns these steps to the integrator, and the worker did not run them.
+The contract assigns these steps to the integrator, and the worker did not run them; "Integration" below records each one.
 
 1. Record `raw/integration-binding.log` with `git rev-parse HEAD` and the status of every source root before the gates.
 2. Run `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, and `c-abi` with `--evidence-dir engineering/evidence/FP-0050/gates`.
@@ -152,9 +152,20 @@ The contract assigns these steps to the integrator, and the worker did not run t
 
 The integrator applied the patch without conflicts on top of `76ed5bd`, which already held the FP-0008 tokenizer.
 The first merged test run failed one test, FP-0008 case 18, with `error.NondeterministicMemoryUsage` from `checkAllAllocationFailures`.
-A temporary probe, which was not committed, showed that identical unlimited runs of that case's scenario made 17, 18, or 19 allocations, because whether the backing allocator grants a remap in place depends on its state from earlier runs.
+An unrecorded temporary probe showed that identical unlimited runs of that case's scenario made 17, 18, or 19 allocations, because whether the backing allocator grants a remap in place depends on its state from earlier runs.
 This patch's new reservation changed which run came first, so the checker met a run with fewer allocations than the first.
-Commit `6771856` therefore gave every `checkAllAllocationFailures` call the backing allocator with `resize_fail_index = 0` that the FP-0006 and FP-0009 checks already use, and the integrator committed this patch on top of it as `93a46fc`.
+Commit `6771856` therefore gave every `checkAllAllocationFailures` call the backing allocator with `resize_fail_index = 0` that the FP-0006 and FP-0009 checks already use.
+The integrator then committed this patch as `93a46fc`, whose parent is the FP-0014 contract amendment `1323095`, a child of `6771856`.
+
+Review 1 found that neither the failing run nor the probe had recorded output, so the integrator reproduced both after the review.
+`raw/remap-nondeterminism-repro.log` records these commands.
+
+1. `git worktree add --detach` with a guessed full commit ID, which exits with status 128, then `git rev-parse --verify 76ed5bd^{commit}` and the same command with the resolved ID `76ed5bdecbcb8db90884f93e6c2445165bd0e14e`.
+2. `git apply` of the worker's patch in that worktree, and a status that lists the changed files.
+3. `zig build test --summary all` with a fresh local cache, which exits with status 1: FP-0008 case 18 fails with `error.NondeterministicMemoryUsage`, and 221 of 222 tests pass.
+4. `git diff -- src/lab.zig` of an added probe test, which prints the allocation, remap, and byte counts of six unlimited runs per fixture.
+5. The same test run with the probe, which exits with status 1 again and prints 18, 19, 18, 19, 18, and 19 allocations for `fp0008-tokenize-pass.json` and 18, 17, 18, 17, 18, and 17 for `fp0008-tokenize-errors.json`.
+6. `git worktree remove --force` of the worktree.
 
 The integrator kept case 1 as frozen after the worker's stop-rule report, as "Stop-rule observations" records.
 
@@ -167,5 +178,6 @@ One uninterrupted sequence ran on `93a46fc`, with no commit or source edit durin
 - `gates/2026-10-09T11-13-32-417Z-zig-test-7f4a2e96.json`
 - `gates/2026-10-09T11-13-52-851Z-c-abi-fcb3da66.json`
 
-`raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0050-integration-cache` and the recorded override `ZIG_GLOBAL_CACHE_DIR`: 65 of 65 build steps and 222 of 222 tests.
+`raw/integration-tests.log` runs `zig build test --summary all` with the fresh local cache `out/fp0050-integration-cache` and the recorded override `ZIG_GLOBAL_CACHE_DIR`: 65 of 65 build steps and 222 of 222 tests.
+The contract names the cache `out/fp0050-integration` and the log `integration-abi-check.log`; the integrator used `out/fp0050-integration-cache` and `raw/integration-abi.log`, which record the same commands.
 `raw/integration-bun.log` records Bun 1.4.2 with 192 of 192 controller tests, and `raw/integration-abi.log` records `abi-check` with result `pass`.

@@ -1,0 +1,153 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "93a46fc",
+    "79de0e6",
+    "6771856"
+  ],
+  "summary": "I accept FP-0050. All eight plan criteria and all 11 contract cases are implemented, and the evidence covers each one. I found no blocker and no major defect.\n\nThe engine now keeps at least one unused event slot for each outstanding request. `load` reserves `requests.count() + added + 2` slots (src/engine.zig:306). `destroyDocument` uses `withdrawRequest`, which calls only `pushBackAssumeCapacity` (src/engine.zig:271-280, 438-448). `DestroyDocumentError` is `error{ WrongThread, UnknownId }` (src/engine.zig:122). `step` reserves `requests.count() - applied + announcements` slots (src/engine.zig:389). I traced every operation, and the invariant holds after each one. A step that applies a host cancellation can still return OutOfMemory, and the schema keeps that status for `fp_engine_step` (api/fairpane.schema.json:364).\n\nEvery byte range is `null_when_empty`, including `fp_event.url`, and the validator enforces it (tools/abi.mjs:153). One `inputRange` helper converts both input ranges (src/c_api.zig:104-109). `eventToC` leaves `url` null for an empty live URL (src/c_api.zig:140-147).\n\nThe evidence agrees with these claims:\n- The before logs fail exactly the cases that must fail.\n- Each mutation diff is taken against the committed 93a46fc file. The diff index lines match the 93a46fc blobs 6f319a6, 7683146, and f23f69d.\n- Every control fails as the contract requires.\n- The five integration receipts share source digest 27b6a27e… and policy digest b075f8f4…. The binding log brackets them with HEAD 93a46fc and an empty status that includes ignored files.\n\nCommit 6771856 is sound. All nine `checkAllAllocationFailures` calls in src now run over a FailingAllocator with `resize_fail_index = 0`. In the pinned std, that setting fails every remap and resize. This makes allocation counts independent of whether a remap happens in place, and it gives the checker at least as many failure points as before.\n\nThe remaining findings are minor or notes, mostly about the evidence record:\n- No log records the merged test failure that prompted 6771856, or the probe behind it.\n- Two integration log names differ from the contract.\n- The README mis-states the parent of 93a46fc.\n- The handoff is stale.\n- The case 1 stop-rule decision is recorded only in the README.\n\nNo protected path changed, and no gate or threshold was weakened. No shell code is involved. I executed nothing. I read repository files and public GitHub API pages for the commit file lists and the 6771856 diff.",
+  "criteria": [
+    {
+      "criterion": "Plan 1: Reserve each request's cancellation event when the request is issued, so destroying a document never fails for lack of memory.",
+      "met": true,
+      "evidence": "src/engine.zig:306 reserves count+added+2 slots before any state change. destroyDocument (271-280) and withdrawRequest (438-448) take no allocator path. DestroyDocumentError is { WrongThread, UnknownId } at :122. The schema status set for document_destroy is ok, invalid_argument, wrong_thread, and unknown_id (api/fairpane.schema.json:294), and finish() enforces it at compile time (src/c_api.zig:79-89). Cases 1, 2, and 3 fail in raw/tests-before.log:5,31,44-45, with case 2 finding a successful load (@fromBackingInt(380)). They pass in tests-after.log:8 and integration-tests.log:3."
+    },
+    {
+      "criterion": "One slot per outstanding request, and step's remaining OutOfMemory path",
+      "met": true,
+      "evidence": "Each operation keeps free slots >= requests.count(): load (+added+2, at most 2 pushes), destroy (one push, one request removed), and step (requests-applied+announcements, src/engine.zig:389). Responses, rejections, and cancels push no events, and nextEvent frees a slot. fp_engine_step keeps out_of_memory (schema:364). Adjustment A2 (src/c_api.zig:483-506) brings the queue down to the floor, cancels the spare request, and gets FP_STATUS_OUT_OF_MEMORY with applied 3, two inputs, and an unchanged event count. It then succeeds with applied 2. The allocation-failure scenario step (api/failure-scenarios.json:181, src/abi_scenarios.zig:536-542) is required to fail at least once (abi_scenarios.zig:435)."
+    },
+    {
+      "criterion": "Plan 2 / case 4: arrival order with responses 2, 0, 1",
+      "met": true,
+      "evidence": "src/engine.zig:904-944 responds r2, r0, r1. It checks that step(2) gives applied 2, work_remaining, 8 events, and deadline none. It checks the bodies of d2 and d0, that d1 is still loading, and the exact event order. Control 4 (raw/mutation-4.diff) applies the smallest request ID first. Case 4 then fails while the base 1, 0, 2 version passes (raw/mutation.log:3-29, '1 passed; 0 skipped; 1 failed', exit 1)."
+    },
+    {
+      "criterion": "Plan 3 / case 5: removal from the middle of a wrapped queue of three",
+      "met": true,
+      "evidence": "src/engine.zig:1138-1190 runs offsets 1 and 2. It asserts head == cap-offset and head+len > cap. It destroys b, then checks head, the cancelled(b, rb) event, and that a and c are applied in order. Controls 5a and 5b (raw/mutation-5a.diff, mutation-5b.diff) crash case 5 with StaleHandle and an assertion panic (mutation.log:31-111). The contract permits a crash."
+    },
+    {
+      "criterion": "Plan 4 / case 6: reject and cancel success at the C boundary",
+      "met": true,
+      "evidence": "tests/c/abi_smoke.c:245-283 asserts both calls return OK and both documents stay loading. It checks queues (0, 1) and step applied 2 with 3 events. It checks STATE_CHANGED/FAILED with reject_reason UNSUPPORTED_VERSION, then REQUEST_CANCELLED with state and reason 0 and a null url, then FAILED with reason 0. It also checks the document_get results and unknown requests. Control 6a fails at line 264 and control 6b at line 267 (gates-mutation-6a/…log:20, gates-mutation-6b/…log:20). The integration c-abi smoke run exits 0 (gates/…c-abi-fcb3da66.log:20)."
+    },
+    {
+      "criterion": "Plan 5: assert the size of every C structure in the C smoke test",
+      "met": true,
+      "evidence": "tests/c/abi_smoke.c:24 includes the generated abi_layout.h. Case 11 (tools/abi.test.mjs:482-497) requires exactly one sizeof assertion per schema structure. Control 11b fails the compile at abi_layout.h:45 (gates-mutation-11b/…log:18), and abi-check reports stale (mutation.log:173-186)."
+    },
+    {
+      "criterion": "Plan 6: matching sizes and offsets checked at compile time through src/c_api.zig",
+      "met": true,
+      "evidence": "src/abi_generated.zig:288-326 checks @sizeOf and every @offsetOf. c_api.zig imports it at :7 and declares no extern struct. Controls 11c and 11d fail 'compile lib fairpane', and the reference trace runs through src/c_api.zig:7:21 (mutation.log:204-209, 239). Control 11a makes case 11 fail (mutation.log:153-160). The integrator decision not to add hand-written assertions is reasoned in CONTRACT.md:18-27."
+    },
+    {
+      "criterion": "Plan 7: document that the host destroys an engine before its owning thread exits",
+      "met": true,
+      "evidence": "Schema :16 and :125. Generated header :82-83 and :191, and generated Zig :71. api/README.md:205-207. The Engine doc comment at src/engine.zig:196-198. Case 10 fails before (controller-tests-before.log:101-103) and passes after (integration-bun.log:99)."
+    },
+    {
+      "criterion": "Plan 8: one null_when_empty convention for every range, including fp_event.url, with a validator rule",
+      "met": true,
+      "evidence": "Schema :171, :189, :223, and :321 are all null_when_empty. tools/abi.mjs:153 rejects any other nullability, and it covers structure fields (:390) and parameters (:429). inputRange (c_api.zig:104-109) is used by documentLoad (:233-239) and requestRespond (:249-256). eventToC (:140-147) nulls an empty live URL. Case 7 (abi_smoke.c:285-320) stops the base executable (gates-before/…log:20) and passes after. Case 8 rejects three mutated copies. README lines :60, :124, :181, :258, and :324 are updated."
+    },
+    {
+      "criterion": "Identifier-gap note",
+      "met": true,
+      "evidence": "api/README.md:228-229, schema :132 and :137, and the generated header :85 and :90. Case 10 checks each one."
+    },
+    {
+      "criterion": "Contract cases 1-3 (reservation tests)",
+      "met": true,
+      "evidence": "Case 1 (engine.zig:1059-1131) matches the frozen text: 196 combinations, a FailingAllocator with resize_fail_index 0, fail_index set to alloc_index before destroy, then newest event, UnknownId, inputs 0, spare state, and leak checks. Case 2 (:1110-1135) matches, including the fingerprint and the 'free == requests+2' loop. Case 3 (c_api.zig:532-542) matches. All three fail before and pass after."
+    },
+    {
+      "criterion": "Contract cases 8-11 (controller)",
+      "met": true,
+      "evidence": "tools/abi.test.mjs:429-497 implements each assertion of the frozen text. Cases 8, 9, and 10 fail before and case 11 passes before (controller-tests-before.log:93-105). All 192 tests pass at integration (integration-bun.log:396-398, controller-test receipt)."
+    },
+    {
+      "criterion": "Adjustments A1-A4 and the scenario and README edits",
+      "met": true,
+      "evidence": "A1: fillEventQueue (engine.zig:1004-1012) and the lifecycleScenario assertion (:1031). A2: c_api.zig:483-506. A3: abi_scenarios.zig:448-455 and 544-560, with the DestroyDocument helper removed. A4: abi.test.mjs:194-202. Scenario lines 83, 181-182 plus the new effect, and 204 match. All README sentences in the contract are present."
+    },
+    {
+      "criterion": "Generated files produced by abi-generate, and abi-check passes",
+      "met": true,
+      "evidence": "raw/abi-generate.log (exit 0, written). raw/abi-check.log (pass, 11:03:10). After each control, abi-check passes once the file is restored (mutation.log:188-198, 223-233, 258-268). raw/integration-abi.log passes on 93a46fc. 93a46fc changes include/fairpane.h and src/abi_generated.zig, and leaves abi_layout.h unchanged because no layout changed."
+    },
+    {
+      "criterion": "Each mutation control behaves as the contract requires",
+      "met": true,
+      "evidence": "Controls 4, 5a, 5b, 6a, 6b, 11a, 11b (C compile and abi-check), 11c, and 11d all fail as specified (mutation.log entries 1-13). Restore checks pass, and grep finds no 'MUTATION CONTROL' or 'Shadow = extern' in src, tests, or tools."
+    },
+    {
+      "criterion": "Integrator handling of the case 1 stop-rule report",
+      "met": true,
+      "evidence": "The probe (raw/case-1-capacity-probe.zig, log:200) shows 20 floor failures and 12 OutOfMemory destroys. All 12 OutOfMemory rows have floor_holds=false (log lines 5-6, 17-18, 35-36, 65-66, 107-108, 173-174), so the README:79-88 reasoning is correct. Keeping case 1 as frozen still meets 'must fail before'. The decision is recorded only in the README (see the findings)."
+    },
+    {
+      "criterion": "Soundness of 6771856 (every checkAllAllocationFailures backed by resize_fail_index = 0)",
+      "met": true,
+      "evidence": "All 9 calls are backed. Pre-existing: dom.zig:1784-1788, engine.zig:1051-1055, handles.zig:555-561. Changed by 6771856: lab.zig:2768-2769 and 2987-2988, web_string.zig:591-592, html/tokenizer_test.zig:883-884, js/heap.zig:1096-1097. The commit diff touches only those test sites. In the pinned std, FailingAllocator.remap and resize return failure when resize_index == resize_fail_index, and the index never advances from 0 (FailingAllocator.zig:89-90 and 110). The checker's inner allocator forwards remaps to this backing allocator (testing.zig:1151-1161). Each also asserts allocated_bytes == freed_bytes."
+    },
+    {
+      "criterion": "Evidence bound to 93a46fc",
+      "met": true,
+      "evidence": "raw/integration-binding.log shows HEAD 93a46fc and an empty --ignored status at 11:12:56 and 11:14:48. Gate receipts from 11:12:56 to 11:13:54 share source digest 27b6a27e… with before equal to after. integration-tests.log (11:13:54, 222/222), integration-bun.log (11:14:16, 192/192), and integration-abi.log (11:14:48) fall inside that bracket. 93a46fc was committed at 11:12:47. The worker logs come from work tree tc1a4abe99, but the mutation diff index lines match the 93a46fc blobs."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0050/README.md",
+      "line": 154,
+      "issue": "Commit 6771856 rests on two observations that have no preserved output: the first merged test run that failed FP-0008 case 18 with NondeterministicMemoryUsage, and the uncommitted probe that showed 17, 18, or 19 allocations. AGENTS.md requires actual output for every claimed run and keeps failures distinct, but raw/ holds no log of either.",
+      "recommendation": "Record a reproduction of the failure and of the allocation-count probe at 76ed5bd plus the worker patch with `record`, under engineering/evidence/FP-0050/raw/. Alternatively, mark these README sentences and the 6771856 message as unlogged observations."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0050/README.md",
+      "line": 157,
+      "issue": "The README says the integrator committed the patch 'on top of' 6771856 as 93a46fc. The actual parent of 93a46fc is 1323095, an FP-0014 contract amendment, whose parent is 6771856.",
+      "recommendation": "State the actual ancestry: 6771856, then 1323095, then 93a46fc."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0050/CONTRACT.md",
+      "line": 402,
+      "issue": "The contract names `integration-abi-check.log` and the cache directory `out/fp0050-integration`. The integrator used `raw/integration-abi.log` and `out/fp0050-integration-cache` (README:170-171) and listed neither as a deviation. The run is called uncached, but only its local cache was fresh. The global cache `C:\\src\\fairpane\\.zig-cache\\global` was shared.",
+      "recommendation": "Add a resolved-ambiguity entry for the renamed log and cache directory. Note that the global cache was shared."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0050/README.md",
+      "line": 86,
+      "issue": "The case 1 stop-rule report and the integrator's decision appear only as README prose. They are not among the CONTRACT.md integrator decisions, and they carry no timestamp. The probe ran at 10:53:33, and abi-generate, the first implementation step, ran at 10:57:04. The record therefore cannot show that the worker stopped until the decision arrived.",
+      "recommendation": "Record the decision and its time as an integrator decision addendum in the evidence directory, or in a dated note next to the stop rule. Keep the frozen contract text unedited."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/HANDOFF.md",
+      "line": 41,
+      "issue": "The handoff still says 'Start `FP-0050` through the ABI schema and generator'. engineering/state.json:644 says it is implemented and awaiting fairpane-review. The README section 'Remaining integrator steps' (README:143-149) also still reads as pending after integration. AGENTS.md step 8 requires the handoff to carry exact next actions.",
+      "recommendation": "Change the FP-0050 next action in HANDOFF.md to 'request fairpane-review'. Mark the README integrator steps as done, with a pointer to the Integration section."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 2520,
+      "issue": "The plan entry's allowed_paths now lists the whole `tools` directory. The frozen contract grants only tools/abi.mjs and tools/abi.test.mjs (CONTRACT.md:40 and 408). CONTRACT.md:42 still says the plan entry does not list tools. 93a46fc respected the narrower scope and touched only those two files.",
+      "recommendation": "Narrow the plan entry to the two files, or note that the contract's narrower grant governs."
+    },
+    {
+      "severity": "note",
+      "path": "src/lab.zig",
+      "line": 2768,
+      "issue": "Commit 6771856 makes every remap fail in the five changed allocation-failure scenarios: tokenizer, heap, two lab checks, and web_string. Failure injection is now deterministic and covers at least as many points, but these scenarios never exercise a successful remap. That path is covered only by ordinary tests over testing.allocator.",
+      "recommendation": "No change required. Optionally, keep or add one ordinary test per module that grows storage over testing.allocator, so a successful in-place remap stays exercised."
+    }
+  ],
+  "commands_run": []
+}

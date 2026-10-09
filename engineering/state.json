@@ -640,7 +640,7 @@
       ]
     },
     "FP-0050": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0050Abi, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0050/README.md",
@@ -651,14 +651,17 @@
         "engineering/evidence/FP-0050/gates/2026-10-09T11-13-52-851Z-c-abi-fcb3da66.json",
         "engineering/evidence/FP-0050/raw/tests-before.log",
         "engineering/evidence/FP-0050/raw/mutation.log",
-        "engineering/evidence/FP-0050/raw/integration-tests.log"
+        "engineering/evidence/FP-0050/raw/integration-tests.log",
+        "engineering/evidence/FP-0050/raw/remap-nondeterminism-repro.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0050/reviews/review-1-accept.json",
       "notes": [
         "Created from the minor findings in engineering/evidence/FP-0006/reviews/review-1-accept.json.",
         "The frozen contract is engineering/evidence/FP-0050/CONTRACT.md, drafted by worker FP0050Contract and frozen by the root integrator in 189502e, with tools and zig-fmt added to the plan entry. It replaces the unimplemented version frozen in 1aa4365, which predates the FP-0021 schema and generator.",
         "Its reservation rule supersedes engineering/evidence/FP-0006/CONTRACT.md line 150: fp_document_destroy no longer returns FP_STATUS_OUT_OF_MEMORY.",
-        "Commit 93a46fc implements it with 192 of 192 controller tests and 222 of 222 Zig tests, after commit 6771856 made the allocation-failure checks independent of in-place remaps. Awaiting fairpane-review."
+        "Commit 93a46fc implements it with 192 of 192 controller tests and 222 of 222 Zig tests, after commit 6771856 made the allocation-failure checks independent of in-place remaps.",
+        "fairpane-review accepted 93a46fc, 79de0e6, and 6771856 with one minor finding and six notes. raw/remap-nondeterminism-repro.log now records the failing merged run and the allocation-count probe behind 6771856, and the README corrects the parent of 93a46fc and names the log and cache deviations.",
+        "The contract grants only tools/abi.mjs and tools/abi.test.mjs, although the plan entry lists all of tools, and 93a46fc changed only those two files. The case 1 stop-rule decision was given through the session channel, and the README records it without a timestamp."
       ]
     },
     "FP-0051": {

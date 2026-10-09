@@ -2,22 +2,21 @@
 
 ## Actual state
 
-Tasks `FP-0001` through `FP-0007`, `FP-0009`, `FP-0021`, `FP-0028`, `FP-0031`, `FP-0033`, `FP-0047`, `FP-0051`, `FP-0053`, and `FP-0054` are accepted.
-`specs/corpora.json` pins Test262 at `2e0a5676` and WPT at `b60c4b34`, and `release-check` still fails closed.
+Tasks `FP-0001` through `FP-0009`, `FP-0013`, `FP-0021`, `FP-0027`, `FP-0028`, `FP-0031`, `FP-0033`, `FP-0047`, `FP-0050`, `FP-0051`, `FP-0053`, and `FP-0054` are accepted; the `FP-0050` acceptance record lands with its reproduction log.
+`specs/corpora.json` pins Test262 at `2e0a5676`, WPT at `b60c4b34`, Unicode 18.0.0, and the OpenType fixtures, and `release-check` still fails closed.
 The owner approved Unicode data, OFL test fonts, and the WHATWG `entities.json` in the repository, as `LICENSE-DECISION.md` records.
 
 | Task | State | Next step |
 | --- | --- | --- |
-| `FP-0011` JavaScript catalogs | Revision 1 integrated in `60c0c90`; its gates pass. | Run the measurements on an idle machine, update ADR 0008 sections 3 to 6, then request `fairpane-review`. |
-| `FP-0013` Unicode data and fonts | Revision 1 frozen in `bdcc84c` after both reviews rejected the cmap work bound. | Integrate the isolated worker `FP0013R1`. |
-| `FP-0014` CSS syntax and cascade | Contract frozen in `1158696`. | Integrate the isolated worker `FP0014Css`, then compare the named colors with the pinned Color 4 table. |
-| `FP-0027` releases and stewardship | Revision 1 implemented in `ea3433a`, with release records in `aeebdf1`. | Request `fairpane-review`. |
-| `FP-0008` HTML tokenizer | The draft is being frozen on the accepted `FP-0054` base. | Freeze and dispatch `fairpane-core`. |
+| `FP-0011` JavaScript catalogs | Revision 1 in `60c0c90`; measurements rerun at that commit and ADR 0008 rewritten in `a1b2d1c`. `reference` stays the default representation. | Record the verdict of `fairpane-review` worker `FP0011R1Review`. |
+| `FP-0014` CSS syntax and cascade | Implemented in `ef8ad1c`, with evidence and the named-color check in `639ec81`. | Record the verdict of `fairpane-review` worker `FP0014Review`. |
+| `FP-0029` Rust wrapper | Contract and task split being drafted by `FP0029Contract`. | Freeze the first task, then make its protected toolchain and policy changes in separate `policy:` commits. |
+| `FP-0064` tokenizer states | Contract being drafted by `FP0064Contract`. | Freeze it and dispatch `fairpane-core`. |
 
-Tasks `FP-0064` through `FP-0077` hold the deferred tokenizer states, encoding sniffing, path-independent release builds, the `FP-0033`, `FP-0051`, and `FP-0054` findings, the CSS obligations, binary notices, and html5lib-tests.
+Tasks `FP-0064` through `FP-0078` hold the deferred tokenizer states, encoding sniffing, path-independent release builds, the review findings of `FP-0013`, `FP-0033`, `FP-0051`, and `FP-0054`, the CSS obligations, binary notices, and html5lib-tests.
 Tasks `FP-0055` through `FP-0063` own the remaining text obligations.
-The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, the engine and document lifecycle, a DOM node store, a generated C ABI, the headless laboratory `fairpane-lab`, JavaScript value and heap catalogs, Unicode property lookup, and an OpenType parser.
-No renderer, JavaScript interpreter, or native browser window exists yet.
+The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, the engine and document lifecycle, a DOM node store with attributes, a generated C ABI, the headless laboratory `fairpane-lab`, JavaScript value and heap catalogs, Unicode property lookup, an OpenType parser, a resumable HTML tokenizer, and CSS syntax, selectors, cascade, and computed values.
+No renderer, JavaScript interpreter, tree constructor, or native browser window exists yet.
 
 The repository is public at <https://github.com/mattneel/fairpane>.
 The documentation book is live at <https://mattneel.github.io/fairpane/>.
@@ -34,12 +33,12 @@ ADR 0007 makes the frontend language independent of the renderer and reserves th
 
 ## Next action
 
-1. Integrate each worker patch as it arrives, run the four gates with `HEAD` and status records before and after, and request review.
+1. Integrate each worker patch as it arrives, run the gates with `HEAD` and status records before and after, and request review.
    Worker patches arrive as `<Name>.patch` in the session directory; apply them with `git apply --3way` on a committed tree.
-2. Run the `FP-0011` measurements only while no worker builds, because the contract requires an otherwise idle machine.
-3. Apply the `unicode` and `opentype-fixtures` pins in a separate protected commit after `FP-0013` is accepted.
-4. Start `FP-0050` through the ABI schema and generator, and freeze the `FP-0029` Rust wrapper contract.
-5. Then start `FP-0052` after `FP-0013` lands, `FP-0076`, `FP-0067`, `FP-0066`, and `FP-0012` after `FP-0011` is accepted.
+2. Record each pending review verdict, and route minor findings to the follow-up tasks.
+3. Dispatch the ready follow-up tasks `FP-0052`, `FP-0076`, `FP-0067`, `FP-0066`, and `FP-0078`, and then `FP-0064` and `FP-0065` for the tokenizer and encodings.
+4. Start `FP-0012` after `FP-0011` is accepted, from `reference` and the generated tracer, as ADR 0008 decides.
+5. Start `FP-0010` tree construction after `FP-0064` is accepted.
 
 ```text
 node tools/fairpane.mjs check
