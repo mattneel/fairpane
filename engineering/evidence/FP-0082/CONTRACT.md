@@ -977,3 +977,48 @@ The integrator records `git diff --stat a3e5cf9 <revision commit> -- AGENTS.md d
    `unexpected_token` and `unexpected_end` therefore also report such a cover, at the first token after `)` that is not `=>`, or at the end of the input.
    The two code comments that call it a grammar failure, at the E96 rows and `arrowParametersOnly` in `src/js/parser.zig`, are corrected by `FP-0090` when it implements arrow functions.
    The emitted code table of case 1 stays frozen and is not authoritative for citations; this contract's code table is.
+
+## Revision 2
+
+Base: the commit that freezes this revision.
+Source findings: `reviews/review-2-reject.json`.
+Every section above stays in force except where this revision replaces it.
+Writable paths stay as above.
+
+### Integrator decisions
+
+- Review 2 rejected `9a68167` for two major findings, which share one cause: a parser-wide hash set sized for the largest earlier body.
+  `params_seen` and `seen` are emptied with `remove`, which leaves tombstones in the pinned standard library, so after one large body every later lookup can probe up to the large capacity.
+  `function_names` is emptied with `clearRetainingCapacity`, which writes metadata over the whole retained capacity for every body.
+  In both cases the work of a small body depends on the largest earlier body, so a hostile script of a few megabytes can cost far more than the limits imply.
+- Every set that the parser fills per function or per body costs work in proportion to that body's own names, whatever came before, and a nested body never drops entries that an enclosing body still needs.
+  For example, a set may be released and rebuilt when its capacity exceeds four times `@max(n, 8)` for the current count `n`, or kept per body and dropped at the body's end; no set is emptied with `remove`.
+- Hash flooding of parser-internal sets with crafted names is a separate hardening question, because the sets use a fixed seed.
+  It is recorded as an obligation of `FP-0026`'s frontier decomposition, together with the engine's other internal hash maps.
+- Review 2's minor and notes are folded in: the README sentence about `git apply --check` is annotated in place, the path rule gains rows with several defects, extraction rejects paths that differ only in letter case before it creates anything, as the Rust archive reader does, and the `writeOutcome` doc comment states the write stack's bound.
+  `FP-0099` confirms the reserved device names against Microsoft's page and updates the one shared rule.
+
+### Exact test cases
+
+1. A new parser case parses one strict script holding, in order, a function with 10,000 distinct parameters and 10,000 distinct `var` declarations and 10,000 function declarations in its body, and then 2,000 functions with five distinct parameters, five `var` declarations, and five function declarations each.
+   After each function's checks, the capacity of each per-body set is at most four times `@max(n, 8)`, where `n` is that function's own count; a test-only accessor reads the capacities.
+   The case also checks every outcome: the script parses, and the same script with a repeated parameter in the 2,000th small function reports `syntax-error duplicate_parameter` at that parameter.
+2. Case 18 gains a row for each adjacent pair of path rules, each with both defects, such as `test\a:b.js`, which gives `a backslash`, and a row with two tree paths that differ only in letter case, which extraction rejects with `<path> differs from <other path> only in letter case.` before it creates the output directory.
+
+Case 1 must fail before the change, on the capacity bound.
+Case 2's case-collision row must fail before the change; its order rows pass before the change, which the README records.
+
+### Mutation controls
+
+- M14: `params_seen` is emptied with `remove` again; case 1 must fail on the capacity bound or its work.
+- M15: `function_names` keeps its largest capacity; case 1 must fail on the capacity bound.
+- M16: extraction skips the letter-case check; case 2's collision row must fail.
+
+### Revision 2 evidence
+
+Record each command with `node tools/fairpane.mjs record` under `engineering/evidence/FP-0082/raw/`, with the suffix `-r2`, and keep each failed attempt as its own log.
+
+1. `tests-before-r2.log` on the base, with `HEAD`, the staging command, and the blob ID of every staged file.
+2. An uncached `tests-after-r2.log`, `fmt-r2.log`, `controller-tests-after-r2.log`, and `census-r2.log` with a fresh extraction and census whose summary counts equal the README's.
+3. `mutation-r2.log` and its diffs for M14 to M16, with the hash of each changed file before, during, and after, and a recorded `git apply --check` of M1 to M13 against the revised sources.
+4. The README gains a `## Revision 2` section.

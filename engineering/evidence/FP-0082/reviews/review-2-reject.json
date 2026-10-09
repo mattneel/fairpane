@@ -1,0 +1,55 @@
+{
+  "verdict": "reject",
+  "summary": "Review 2, read-only, of FP-0082 revision 1 (implementation 9a68167, evidence be432d9). Most of the revision is correct and well evidenced. (1) The shared rule `relativePathProblem` (tools/lib.mjs:74-85) checks control characters, then `\\\\`, then `:`, then per component: empty, `.` or `..`, a trailing `.` or space, and a reserved device name, with the frozen reason strings. `acceptedArchivePath` (tools/rust.mjs:99-101) returns exactly what the old version returned, which I checked against the old code in FP-0079 raw/mutation-M6.diff: a leading `/` becomes an empty component and a drive letter hits the colon rule. Its message `The archive path is not accepted: <name>` is unchanged. Extraction (tools/corpus.mjs:682-715) checks the tree against the record, recomputes the inventory with `computeInventory`, applies the path rule, and checks the resolved path, all before `mkdirSync`. The eight hostile-path tests, the altered-subtree test, and the record-tree test assert the exact messages and an absent or empty output. (2) Rows E96 and E96a to E96c match the revision, and `arrowParametersOnly` (parser.zig:2109-2113) keeps `=>` as `unsupported arrow_function`. (3) The write-stack, `keywordOf`, and `scanNumber` changes preserve behavior: the buckets compare the same tails, and the source slice equals the old scratch contents whenever no rewrite is needed. The census is byte-identical (census-r1.log SHA-256 0e5277cd…). The write stack is bounded: it holds `height` frames, `checkHeight` keeps height at or below `max_depth`, every level also costs arena memory under the limiter, and it is freed before `writeOutcome` returns. (4) mutation-r1.log runs `git apply --check` for every diff, regenerates M7, and shows M1 to M12 failing their named cases on blobs (parser 9268f00, lexer a33b788, metadata a4a6399, corpus 533a4ec, lib 921c9cf) equal to the ones `tests-after-r1.log` stages; M11 records 49,995,000 comparisons. The protected-path log shows that neither FP-0082 commit touches a protected path or `specs/applicability/test262.json`. Gates and tests pass: 322 of 322 Zig tests and 235 of 235 controller tests. One major remains, so the verdict is reject. The new duplicate-parameter check reuses one hash map and empties it with `remove`, which leaves tombstones in the pinned std. After one large strict function, each later lookup can scan up to the whole table, so the cost is not linear in each function's parameters, and case 4's counter cannot see that cost. The same reuse problem existed before the revision in `seen` and `function_names`; I missed it in review 1. I ran nothing; every complexity estimate below is [INFERENCE] drawn from reading the pinned std source.",
+  "findings": [
+    {
+      "severity": "major",
+      "path": "src/js/parser.zig",
+      "line": 1303,
+      "issue": "`duplicateParameter` keeps one long-lived `params_seen` map, grows it to the largest parameter list seen so far, and empties it with `remove` (lines 1304-1308). In the pinned std, `removeByIndex` leaves a tombstone and only increments `available` (lib/std/hash_map.zig:1229-1235). `getOrPutAssumeCapacityAdapted` probes until it finds a *free* slot, with `limit = capacity` (1156-1158), and only recycles tombstones (1180-1186). `ensureTotalCapacity` does not grow and therefore does not rehash, because `available` has been restored (748-752, 1296-1299). The std documents this exact degradation for 'repeated inserts and deletes' (480-484, 1343-1347). Free slots therefore only decrease across checks. Once they run out, each lookup in a later strict function scans up to the capacity left by the largest earlier function. Minimal reproduction [INFERENCE, not executed]: `\"use strict\"; function big(p0,…,p99999){}` (capacity 131,072) followed by roughly 13,500 functions of 100 globally distinct parameters each. This needs about 1.7×10^10 probe steps in total, and every further parameter then costs about 131,072 steps. The README line 'a later check never pays for the capacity that an earlier, larger function left' (README Revision 1 notes) is therefore wrong. Case 4 cannot detect this: it counts only `ParamContext.eql` calls, and tombstone probing never calls `eql`. It also checks a single function in a fresh parser. The revised behavior 'linear in the number of parameters' is not met.",
+      "recommendation": "Make each check cost O(params.len) whatever happened before. For example, at the start: `if (p.params_seen.capacity() > 4 * @max(params.len, 8)) p.params_seen.clearAndFree(p.gpa) else p.params_seen.clearRetainingCapacity();`, then insert without removing. A fresh map per call that is sized to `params.len` also works. Extend case 4 with one 10,000-parameter strict function followed by many small strict functions with distinct names. Bound a test-only count of probe steps, or assert that `params_seen.capacity()` stays at most 4×max(len, 8) after each call. Add a control that restores the `remove` loop and show that it fails the new case. Correct the README note."
+    },
+    {
+      "severity": "major",
+      "path": "src/js/parser.zig",
+      "line": 1320,
+      "issue": "This pattern predates the revision; review 1 missed it. `finishNames` empties the parse-long `seen` map with `remove` for every body (line 1320), so `seen` accumulates tombstones exactly as `params_seen` does. One function with many `var` names followed by many small functions makes later `declareVar` lookups scan up to the large capacity. `functionsToInitialize` calls `p.function_names.clearRetainingCapacity()` for every body (line 1329), which runs `initMetadatas` over the whole retained capacity (hash_map.zig:764-770). A body with 500,000 function declarations (capacity 2^20) followed by about 400,000 small functions memsets 1 MiB per function, roughly 400 GiB in total, from about 13 MB of source and within the 256 MiB limit [INFERENCE, not executed]. Both make total parse time superlinear in source length, which is the defect class of review 1's second major.",
+      "recommendation": "Apply the same rule to every per-body set: clear or shrink in proportion to the current body, never to an earlier maximum. For `function_names`, shrink (`clearAndFree`) when capacity exceeds a constant multiple of the declaration count. For `seen`, either key per body and drop the map at body end, or clear with the same shrink rule when no enclosing scope still needs its entries. Add a test with one large body followed by many small ones and a test-only work counter, plus a mutation control."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0082/README.md",
+      "line": 144,
+      "issue": "The 'Attempts' section still says that every diff 'still applies to the final files (`git apply --check`)'. The Revision 1 mutation section records that this was never logged at `5d41509` and that M7 no longer applies to the revised files. The unsupported sentence stays in place unannotated.",
+      "recommendation": "Strike or annotate the sentence in place, for example: 'not recorded; see Revision 1 mutation controls, where M7 no longer applies'."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/parser.zig",
+      "line": 387,
+      "issue": "`ParamContext.hash`, like `NameContext`, uses Wyhash with the fixed seed 0. An attacker who knows the function can generate offline many names that share their low hash bits (and fingerprint), which makes probe sequences long even without tombstones. That would turn the 'linear' check quadratic on crafted input [INFERENCE].",
+      "recommendation": "Consider a per-parse random seed for parser-internal sets. The seed does not affect output. Alternatively, document the flooding assumption and leave it to a later hardening task."
+    },
+    {
+      "severity": "note",
+      "path": "tools/selftest.mjs",
+      "line": 1190,
+      "issue": "The unit test gives each reason for a path with exactly one defect, so nothing tests the frozen *order*, such as `test\\\\a:b.js` yielding 'a backslash'. I verified the order only by reading lib.mjs:75-82. Extraction also does not detect paths that differ only in letter case before writing (the Rust reader does, with a lowercase `seen` set). On Windows such a pair fails mid-extraction through `wx` and leaves a partial directory.",
+      "recommendation": "Add one row with several defects for each adjacent pair of rules. Optionally reject paths that collide case-insensitively before `mkdirSync`, as `readArchive` does."
+    },
+    {
+      "severity": "note",
+      "path": "tools/lib.mjs",
+      "line": 67,
+      "issue": "[INFERENCE] Microsoft's current naming page may also reserve `COM0`, `LPT0`, `CONIN$`, and `CONOUT$`, which `RESERVED_DEVICE_NAME` does not list. The revision freezes the current list, and FP-0099 owns the later fix to the reserved-name comparison.",
+      "recommendation": "Have FP-0099 confirm the list against the page and update the one shared rule."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/parser.zig",
+      "line": 203,
+      "issue": "The write stack now comes from the caller's allocator outside the limiter, so it no longer counts against `max_memory_bytes`. It is bounded by `height` ≤ `max_depth` frames (about 32 KiB at the defaults) and freed before return, and the README records this. Memory therefore stays bounded.",
+      "recommendation": "None required. Optionally state the bound (`max_depth × @sizeOf(ast.WriteFrame)`) in the `writeOutcome` doc comment."
+    }
+  ]
+}
