@@ -70,6 +70,9 @@ The local controller does not act as a distributed scheduler or lock service.
 Task acceptance needs valid gate evidence and an independent review record.
 The first protected-runner task strengthens that boundary beyond local files.
 
+A change to a task's criteria, dependencies, or paths in `engineering/plan.json` lands in its own `plan:` commit, never inside a task's evidence or source commit.
+An independent reviewer approves each such change, and the approval record lands under `engineering/evidence/plan/reviews/`.
+
 ## Git operations
 
 The integrator alone commits to `master` and pushes it to `origin`.
@@ -78,6 +81,8 @@ Each checkpoint is committed and pushed as soon as its checks pass.
 `docs/GIT_OPERATIONS.md` defines the complete procedure and history rules.
 The integrator checks the `Gates` run of each pushed head.
 A failed run blocks acceptance of every task whose implementation it contains, and the failure is recorded in that task's evidence with its run ID.
+`git apply --3way` stages the patch that it applies.
+Before each commit, the integrator checks `git diff --cached --name-only`, so a commit holds only the files that its message names.
 
 ## Stop and continuation rules
 
