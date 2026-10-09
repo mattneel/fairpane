@@ -321,7 +321,8 @@ Folding them into one batched call would change which Git failure each check rep
   It writes each blob's bytes to a scratch file under the system temporary directory and removes the directory after `hash-object` returns.
   `--no-filters` keeps the bytes as `--stdin` did, which applies no filter.
   It computes each tree ID in Git's tree format and order and feeds the trees to `mktree` with each subtree first; `mktree` must print exactly those IDs, or the builder throws.
-  It passes `--missing` when a file is a submodule, as the base did for the level that held the submodule.
+  It passes `--missing` to the one `mktree --batch` call when any file is a submodule, so for those fixtures `mktree` skips its existence and type check of every listed object, where the base passed `--missing` only for the level that held the submodule, as review 3 found.
+  This cannot hide a wrong object, because the builder compares every tree ID that `mktree` prints with the ID that it computed and checks the count of blob IDs, and the blobs come from `hash-object -w` in the same function; only case 4 and case 202 build a submodule.
   It returns the root tree and a lookup of each path's blob or submodule ID.
 - `tools/selftest.mjs`:
   - `fixtureObjects` (new) calls `writeFixtureTree` and then `git commit-tree` with the base's arguments, and `fixtureCommit` returns its commit; `splitPath` moves into `tools/git-fixture.mjs`, and `addTree` there takes the place of `fixtureTree`.
@@ -366,6 +367,7 @@ It prints the IDs and asserts the commit and tree IDs, the WPT record's inventor
 
 `raw/tests-before-r3-attempt-1.log` added case 4 to the base with an empty expectation, so case 4 failed, 253 of 254 passed, and the base builders printed their IDs.
 `raw/tests-before-r3.log` records `HEAD` `9307a36`, the blobs of `tools/selftest.mjs` (`2f1d729c`) and `tools/release.test.mjs` (`523d897a`) with those IDs filled in and no builder changed, and `node tools/fairpane.mjs test` with 254 of 254 passing and the base builders' IDs printed.
+`raw/before-r3-reconstruction.log`, recorded at review 3's request, rebuilds both files from `9307a36`: `git hash-object` gives `2f1d729c` and `523d897a`, and `git diff --no-index` shows only the import of `releaseFixtureBuilder`, its two-line export after the base `commit` builder, and the 44 lines of case 4, with 47 insertions and 1 deletion.
 Every later run prints the same IDs and passes case 4.
 
 `raw/mutation-r3.log` records M4: `git hash-object tools/git-fixture.mjs` `cdf29df2` before, `raw/mutate.mjs` makes the builder write `alpha, mutated` for any file named `a.txt` (`raw/mutation-r3-M4.diff`), `9eccb612` during, `node tools/fairpane.mjs test` with exit status 1, the restoration, and `cdf29df2` after.
@@ -420,6 +422,7 @@ The runs share the host with other work, which the spread of the before runs sho
 ### Revision 3 integration
 
 Commit `c7d1830` applies the worker's `out/fp0107-r3.patch`, blob `f72a6a0dfa9f95fc8fe74928435b24a0ad2cd55e`, on `46e7ffb`, and all 22 files apply cleanly.
+`raw/integration-files-r3.log` records the commit's file list, with four changed files outside the evidence directory and no gate, workflow, or protected path, and the committed blobs of `tools/git-fixture.mjs` (`cdf29df2`), `tools/selftest.mjs` (`1157318e`), and `tools/release.test.mjs` (`3390b2a8`), the same blobs that the worker's logs record.
 That base also holds FP-0111 and FP-0106, which add no controller case.
 
 `raw/integration-binding-r3-binding.log` records `HEAD` `c7d1830` and a status that includes ignored files for every source root before and after these runs:

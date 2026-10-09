@@ -1,0 +1,101 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","9307a36:tools/selftest.mjs","9307a36:tools/release.test.mjs"]
+51ca83329bcadd8516a7263c32d72a24cdf08520
+9f0d0882dedc324196d745496b4c891f370edd09
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","9307a36:tools/selftest.mjs","9307a36:tools/release.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:35:11.844Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","out/fp0107-r3-before/base/selftest.mjs","out/fp0107-r3-before/base/release.test.mjs"]
+51ca83329bcadd8516a7263c32d72a24cdf08520
+9f0d0882dedc324196d745496b4c891f370edd09
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","out/fp0107-r3-before/base/selftest.mjs","out/fp0107-r3-before/base/release.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:35:11.927Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":28}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","out/fp0107-r3-before/before/selftest.mjs","out/fp0107-r3-before/before/release.test.mjs"]
+2f1d729c82f777f3fa789385bf080a641200a955
+523d897a65fffe50de41ed5fcd1a8f7d1d7b74f0
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","out/fp0107-r3-before/before/selftest.mjs","out/fp0107-r3-before/before/release.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:35:12.016Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":35}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--stat","out/fp0107-r3-before/base","out/fp0107-r3-before/before"]
+ .../{base => before}/release.test.mjs              |  2 +
+ out/fp0107-r3-before/{base => before}/selftest.mjs | 46 +++++++++++++++++++++-
+ 2 files changed, 47 insertions(+), 1 deletion(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--stat","out/fp0107-r3-before/base","out/fp0107-r3-before/before"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:35:12.113Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":35}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","out/fp0107-r3-before/base","out/fp0107-r3-before/before"]
+diff --git a/out/fp0107-r3-before/base/release.test.mjs b/out/fp0107-r3-before/before/release.test.mjs
+index 9f0d088..523d897 100644
+--- a/out/fp0107-r3-before/base/release.test.mjs
++++ b/out/fp0107-r3-before/before/release.test.mjs
+@@ -56,6 +56,8 @@ function commit(dir, files) {
+     mode: f.mode ?? '100644', oid: git(dir, ['hash-object', '-w', '--stdin'], Buffer.from(f.text)) }));
+   return git(dir, ['-c', 'commit.gpgsign=false', 'commit-tree', tree(dir, entries), '-m', 'fixture']);
+ }
++/** The repository and commit builders of these cases, which FP-0107 revision 3 case 4 in `tools/selftest.mjs` checks. */
++export const releaseFixtureBuilder = Object.freeze({ repository, commit });
+ /** The manifest file list that a fixture commit must produce: sorted by UTF-8 path bytes. */
+ function expectedFiles(files) {
+   return [...files].sort((a, b) => Buffer.compare(Buffer.from(a.path), Buffer.from(b.path)))
+diff --git a/out/fp0107-r3-before/base/selftest.mjs b/out/fp0107-r3-before/before/selftest.mjs
+index 51ca833..2f1d729 100644
+--- a/out/fp0107-r3-before/base/selftest.mjs
++++ b/out/fp0107-r3-before/before/selftest.mjs
+@@ -24,7 +24,7 @@ import * as lib from './lib.mjs';
+ import { attestationCases, removeAttestationFixtures } from './attest.test.mjs';
+ import { workflowCases } from './workflow-check.test.mjs';
+ import { abiCases, removeAbiFixtures } from './abi.test.mjs';
+-import { releaseCases, removeReleaseFixtures } from './release.test.mjs';
++import { releaseCases, releaseFixtureBuilder, removeReleaseFixtures } from './release.test.mjs';
+ import { ucdCases, removeUcdFixtures } from './ucd.test.mjs';
+ import { fileSetCases, removeFileSetFixtures } from './fileset.test.mjs';
+ import { rustCases, removeRustFixtures } from './rust.test.mjs';
+@@ -1655,6 +1655,50 @@ test('FP-0107 revision 1 case 3: a case on a worker thread reads process.env as
+   assert.ok(seen.worker === seen.main, `The worker read ${describe(seen.worker)} as PATH, and the main thread read ${describe(seen.main)}.`);
+   if (process.platform === 'win32') assert.ok(seen.main !== null, 'The main thread must read Path as PATH on Windows.');
+ });
++// FP-0107 revision 3, case 4: each Git fixture builder that revision 3 changes writes, for one fixed input, the objects that
++// the base builder wrote. The expected IDs are the ones that the base builders printed in raw/tests-before-r3.log.
++const R3_FIXTURE_FILES = [
++  { path: 'a.txt', text: 'alpha\n' }, { path: 'a.b', text: 'dot\n' }, { path: 'a/b.txt', text: 'nested\n' },
++  { path: 'a/c/d.txt', text: 'alpha\n' }, { path: 'empty.txt', text: '' }, { path: 'run.sh', text: '#!/bin/sh\n', mode: '100755' },
++  { path: 'link', text: 'a/b.txt', mode: '120000' }, { path: Buffer.from('caf\u00e9/na\u00efve.txt'), text: 'utf-8\n' },
++  { path: Buffer.from([0x72, 0x61, 0x77, 0xff, 0x2e, 0x62]), text: 'raw\n' }, { path: 'tab\there.txt', text: 'tab\n' },
++  { path: 'test/a:b.js', text: 'colon;\n' }, { path: 'test/x.js ', text: 'space;\n' }, { path: 'test/dir./x.js', text: 'dot;\n' },
++  { path: 'test/..\\x.js', text: 'backslash;\n' }, { path: 'test/CON.js', text: 'device;\n' }];
++const R3_SUBMODULE = { path: 'vendor/lib', submodule: '0123456789abcdef0123456789abcdef01234567' };
++const R3_BASE_IDS = {
++  fixtureCommit: { first: 'abb78d6953553ff4d39b0a95409b2bd508efdc6d', tree: 'a2bc98fe0d6d23d4e598f8003843b2e3792cceff',
++    child: '1c3c1720c1e557adc19ee6d2d8add45cf9d4b259' },
++  corpusFixture: { commit: '4eab98b4627dffd16ff86c9917edc3b4782456fc', tree: '512ed7b995eb1e5abeee4845ed35a5e7f0273b77',
++    inventory: '68dc3aa2cc4e93fe232e90ebd8d2a326901e4002057a772007793780c96c7324',
++    manifest: '040f56d7716f899a4a06f8b2c4d28d5c89110df5952396213efe794b38ea0faf' },
++  upstreamFixture: { first: 'cc0f937227cc7d5ae867e8000069b258e8a4a91d', moved: '8895bafe72a888c3b313a5445f281a68f01b1822',
++    head: 'ref: refs/heads/main\n', main: '8895bafe72a888c3b313a5445f281a68f01b1822' },
++  releaseCommit: { commit: 'de280e9b72acfbf047738fe1d71d8312196ceea1', tree: '5584fde227b246171d4e75277d52d5c56c7ae288' },
++};
++/** Every object that `commit` reaches, other than a submodule commit, must be a loose object file, as the base builders wrote it. */
++function assertLoose(gitDir, commit) {
++  const listing = fixtureGit(gitDir, ['ls-tree', '-r', '-t', '-z', commit]).split('\0').filter(Boolean);
++  const ids = [commit, ...listing.map(line => /^\d+ (\w+) ([0-9a-f]{40})\t/.exec(line)).filter(m => m[1] !== 'commit').map(m => m[2])];
++  for (const id of ids) assert.ok(fs.existsSync(path.join(gitDir, 'objects', id.slice(0, 2), id.slice(2))), `${id} is not a loose object.`);
++}
++test('FP-0107 revision 3 case 4: each changed Git fixture builder writes the objects of the base builder for a fixed input', async () => {
++  const ids = {};
++  const g = bareRepo(), first = fixtureCommit(g, [...R3_FIXTURE_FILES, R3_SUBMODULE]), child = fixtureCommit(g, R3_FIXTURE_FILES.slice(0, 3), [first]);
++  ids.fixtureCommit = { first, tree: fixtureGit(g, ['rev-parse', `${first}^{tree}`]), child };
++  assertLoose(g, first); assertLoose(g, child);
++  const f = await corpusFixture('wpt', WPT_FILES, { manifest: wptManifest });
++  ids.corpusFixture = { commit: f.commit, tree: f.record.tree, inventory: f.record.inventory.sha256, manifest: fileHash(f.manifestFile) };
++  assertLoose(f.g, f.commit);
++  const u = upstreamFixture(), moved = u.move();
++  ids.upstreamFixture = { first: u.first, moved, head: fs.readFileSync(path.join(u.upstream, 'HEAD'), 'latin1'),
++    main: fixtureGit(u.upstream, ['rev-parse', 'refs/heads/main']) };
++  assertLoose(u.upstream, moved);
++  const release = releaseFixtureBuilder.repository(), released = releaseFixtureBuilder.commit(release, R3_FIXTURE_FILES);
++  ids.releaseCommit = { commit: released, tree: fixtureGit(release, ['rev-parse', `${released}^{tree}`]) };
++  assertLoose(path.join(release, '.git'), released);
++  console.log(`FP-0107 revision 3 case 4 IDs ${JSON.stringify(ids)}`);
++  assert.deepEqual(ids, R3_BASE_IDS);
++});
+ 
+ /** Remove this thread's temporary fixtures and return the problems. */
+ function removeFixtures() {
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","out/fp0107-r3-before/base","out/fp0107-r3-before/before"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:35:12.225Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":41}

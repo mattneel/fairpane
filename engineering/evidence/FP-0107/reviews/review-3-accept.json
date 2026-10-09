@@ -1,0 +1,48 @@
+{
+  "verdict": "accept",
+  "summary": "I accept revision 3 on everything except criterion 3. No finding blocks it: there are two minor findings and four notes. FP-0107 still needs the ten dispatched runs before the task can be accepted.\n\n**Fixture builders produce the same objects.**\n- tools/git-fixture.mjs computes each tree ID in Git's own way: mode text such as 40000, entries sorted by name bytes with a tree's name ending in '/', and SHA-1 over 'tree <len>\\0'.\n- It feeds the trees to `git mktree -z --batch` with each subtree first and throws unless the printed IDs equal the computed list exactly, in order (line 84). It also throws when `hash-object` returns the wrong number of blob IDs (line 76).\n- `--no-filters` with `--stdin-paths` hashes the same bytes as the base's `hash-object -w --stdin`, and commit-tree runs with the base's arguments.\n- The manifest lookup by blob ID returns the same IDs as `rev-parse <commit>:<path>` for every path that wptManifest and wptTest262Manifest request (all are files). A missing path still fails the fixture.\n- `--initial-branch=main` writes the same HEAD text as `symbolic-ref`.\n- Case 4 (tools/selftest.mjs:1676-1693) checks that R3_BASE_IDS match the IDs the base builders printed. tests-before-r3.log line 842 matches R3_BASE_IDS exactly.\n- Older logs independently confirm the corpusFixture IDs, for example engineering/evidence/FP-0003/gates/2026-10-09T02-32-10-071Z-controller-test-431d9c99.log:136, and the upstream IDs (raw/tests-after-r2.log:621,628).\n- M4 (raw/mutation-r3-M4.diff) changes only the bytes written for a.txt. It fails case 4 and cases 103, 198, and 200 (250 of 254 pass, exit status 1), with the file at cdf29df2 before and after and 9eccb612 during.\n\n**No assertion, case, gate, timeout, or workflow changed.**\n- raw/assertions-r3.log shows that the three test files change only in their builders, imports, the release builder export, and case 4. In release.test.mjs, the stat of 5 insertions and 15 deletions equals the removed `tree` and the old `commit` body.\n- raw/names-r3.log shows the 253 base names in order, then case 4.\n- The controller-test receipts keep gate_sha256 43baf0f8….\n\n**Declarations of process-wide changes stay complete.** The new code changes no process-wide state. writeFixtureTree uses a fresh mkdtemp directory under the current thread's os.tmpdir() and removes it. assertLoose only reads, and case 4 changes no environment variable, working directory, or module hook. No declared withPrivateTemp case builds a fixture.\n\n**The measurements match their logs.**\n- raw/cost-r3.log: a median sum of 155,881 ms and a median total of 61,522 ms; the four costliest medians; and 25 slowest cases from 2,307 to 6,059 ms.\n- Child-process starts: 1,975 before and 1,448 after (-527, -26.7%). Git starts: 1,874 before and 1,346 after.\n- Starts by caller: selftest.mjs 702 to 286, release.test.mjs 176 to 64, and the tools under test 987 to 988. The added tool start is the taskkill in case 219, and raw/probe-process-starts.log:785 shows the same start in an earlier base.\n- Thread time blocked in synchronous starts: 68,496 ms before and 38,935 ms after (-43.2%). Case 4 starts 42 processes, and the after total is 1,490.\n- The CHANGED list equals the union of the README's builder table.\n- Windows profiles: run totals of 50,539, 49,713, and 56,239 ms before and 39,945, 40,548, and 37,177 ms after. The sums of case medians are 127,290 and 90,635 ms, a drop of 36,655 ms (28.8%). WSL: 9,512 ms and a case sum of 22,152 ms.\n- Every Windows profile run, the probes, and Bun exit 0 with all cases passing.\n\n**The binding at c7d1830 holds.**\n- HEAD is c7d1830, and the ignored-inclusive status is the same before and after.\n- repo-check passes. controller-test passes 254 of 254 in 40,487 ms, with case 4 printing the base IDs, and its source digest is unchanged during the run.\n- Bun 1.4.2 passes 254 of 254.\n- Review 2's README and ADR minor findings are fixed.\n\n**For criterion 3, the CI record must show the following:**\n- At least ten `gh workflow run Gates --ref master` dispatches on a head that contains c7d1830, each recorded with its exit status, plus a run listing in the format of runs-57df855.log.\n- Both jobs' receipts for every run, with gate_sha256 43baf0f8…, 254 of 254 cases, and case 4 passing on both the Windows and the Ubuntu runner.\n- Every run passing, with no attempt omitted.\n- Each run's Windows and Linux step time and duration_ms, and the ten slowest cases of each job.\n- A slowest Windows controller-test step of at most 80 s.\n\n[INFERENCE] The 57df855 series reached 104 s, and the local total fell only about 21%, so a single slow hosted run could still exceed the bound.",
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/git-fixture.mjs",
+      "line": 81,
+      "issue": "When any file is a submodule, `--missing` applies to every tree in the one `mktree --batch` call. The base passed it only to the tree that directly held the submodule (the removed fixtureTree at assertions-r3.log:166). So for fixtures with a submodule, which are case 202 and case 4, mktree no longer checks that the blobs at other levels exist and have the right type. README line 324 says the builder does this 'as the base did', which is inaccurate. The exact tree-ID comparison and the `hash-object -w` call in the same function keep the practical risk low.",
+      "recommendation": "Correct README line 324 to state the wider scope and why it is safe. Alternatively, write the trees that hold a submodule in a separate `mktree --missing` call."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0107/README.md",
+      "line": 368,
+      "issue": "The README says the before run used the base builders ('no builder changed'), but tests-before-r3.log records only the blob IDs of the edited files (2f1d729c and 523d897a), not their diff against 9307a36. release.test.mjs at 9307a36 is 9f0d088 (assertions-r3.log:89), so the before run used a modified release.test.mjs, presumably adding the releaseFixtureBuilder export, and nothing recorded shows that only the export changed. Older logs independently confirm the corpusFixture and upstreamFixture IDs. The fixtureCommit IDs (abb78d69, a2bc98fe, 1c3c1720) and the release IDs (de280e9b, 5584fde2) depend on that before run alone.",
+      "recommendation": "Rebuild the before files on 9307a36, confirm the blob IDs 2f1d729c and 523d897a, and record `git diff 9307a36 -- tools/selftest.mjs tools/release.test.mjs` in a new raw log that the README cites."
+    },
+    {
+      "severity": "note",
+      "path": "tools/git-fixture.mjs",
+      "line": 76,
+      "issue": "Git checks every tree ID, but only the number of blob IDs is checked. If hash-object ever filtered or altered content, the trees would stay consistent with the altered blobs and the builder would not notice. Case 4 detects that only for its fixed inputs.",
+      "recommendation": "Optionally compute each blob's SHA-1 ('blob <len>\\0' + bytes) and compare it with hash-object's output, as the builder already does for trees."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0107/raw/integration-binding-r3-binding.log",
+      "line": 2,
+      "issue": "The binding records HEAD, status, and receipts, but nothing records the file list of c7d1830 or the committed blob IDs. So the README's '22 files' (line 422), and the claim that c7d1830 changes no gate, workflow, or protected path, rest only on the unchanged gate_sha256 and the README itself. The integration base 46e7ffb also differs from the worker's base 9307a36.",
+      "recommendation": "Record `git show --name-status --format=%H c7d1830` and `git rev-parse c7d1830:tools/git-fixture.mjs c7d1830:tools/selftest.mjs c7d1830:tools/release.test.mjs` in the binding log."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0107/raw/probe-before-r3.log",
+      "line": 2,
+      "issue": "The README (line 308) says this run used 'the unchanged base', but the log records no HEAD or blob IDs. Only its 253-case count, which has no case 4, supports that.",
+      "recommendation": "Add `git rev-parse HEAD` and `git hash-object` of the test files to future probe logs, as the profile logs already do."
+    },
+    {
+      "severity": "note",
+      "path": "tools/selftest.mjs",
+      "line": 777,
+      "issue": "`git init --initial-branch` requires Git 2.28 or later. The recorded hosts run Git 2.43.0 under WSL, and 2.54 and 2.55 on Windows. The CI Ubuntu runner's Git version is not recorded in FP-0107 evidence.",
+      "recommendation": "The dispatched runs will show whether case 4 and the upstream cases pass on the Ubuntu runner. Mention the minimum Git version in tools/README.md if one becomes a constraint."
+    }
+  ]
+}
