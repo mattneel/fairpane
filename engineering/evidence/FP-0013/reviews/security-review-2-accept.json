@@ -1,0 +1,134 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "4a09ed5",
+    "24b8a35"
+  ],
+  "summary": "Static trust-boundary review of FP-0013 revision 1. I had no shell, so I ran no commands. .git/logs/HEAD shows 4a09ed5 (implementation) and 24b8a35 (integration evidence), followed only by 909104a, 'plan: accept FP-0027'. I infer, without running git, that the reviewed files are unchanged at HEAD.\n\nAll 12 earlier findings are resolved or reduced to documented, accepted residual risk.\n\n**cmap (earlier major finding).** A full validated-offset set now makes parse return InvalidCmap (cmap.zig:124, 156), so each distinct offset is validated at most once and at most 512 are validated. Per-record work is constant: the probe sequence is at most 1024 slots and there are at most 65535 records. One format 4 validation costs at most 98293 reads whatever its size, because segments are disjoint and ascending (line 222) and the u16 length caps segCount at 8189. One format 12 validation costs at most 1 + L/12 reads. With overlapping distinct subtables, the total becomes 512·(1+L/12) reads, which is linear with a factor of about 43, as the README states. Cases 50 and 51 and the mutation log (189/190, case 50 fails) support this.\n\n**Accessors after the bytes change.** src/font contains no `.?` and no `unreachable`. The three remaining `@intCast`s on parsed values are each range-checked first, and the rest in reader.zig and the checksum code convert offsets already proven to lie inside the input. Every read goes through the checked Reader, whose explicit `fits` check stays in ReleaseFast. Slice lengths are fixed at parse, and counts are cached. Index accessors return null. glyphIndex is clamped below numGlyphs. A single-byte sweep test exercises every accessor.\n\n**ZIP reader.** readZip rejects all of these before any inflation:\n- overlapping or misplaced member ranges\n- local and central header mismatches\n- ZIP64 extra fields and flag bit 13\n- symbolic links and reparse points\n- names equal under ASCII case folding\n- a declared total over 1 GiB, or a ratio over 1024\n\nSo inflation work is at most min(1 GiB, 1024 × archive length) per pass. Output paths still come only from FILE_SET_RULES through safePath, so archive names cannot cause a path escape.\n\n**Fetch and verify order.** Fetch checks the size pin, published digest, Git blob, the previous record's size and SHA-256, and the corpora.json listing pin before readZip. Verify and applicability skip parsing on a digest mismatch.\n\n**Network and write phase.** Downloads use manual redirects, at most 10 hops, each on https and an allowlisted host. Bodies stop at the pinned size, the previous size, or 256 MiB. The write phase stages, backs up, swaps, writes the record last, and rolls back on any in-process failure. A test injects a failure at every step.\n\n**Python.** It runs in a staging directory with PYTHONSAFEPATH=1 and no other PYTHON* variable. A probe confirms safe_path and the import location. The installation is checked against the wheel's RECORD, so neither the working directory nor the script directory can shadow fontTools.\n\n**Remaining findings, none blocking:**\n- (minor) font-expectations runs fontTools without a sandbox on the repository fixtures without first checking their SHA-256, although the docs say inputs are pinned.\n- (note) Overlapping format 12 amplification is argued but not regression-tested.\n- (note) The integrity pass re-reads the directory, so its work bound depends on the bytes not changing during parse.\n- (note) Fetch hashes the file on disk and then parses a second read of it.\n- (note) There is no crash or kill recovery for the write phase.\n- (note) Python residuals: bytecode, .pth, sitecustomize, pyvenv.cfg, and the inherited non-PYTHON environment and network.\n- (note) The host allowlist does not authenticate content, and no real-network fetch was recorded in revision 1.\n- (note) Structural overlaps that the parser accepts are unchanged from the earlier review.\n\n**Reachability.** Parser items are latent web-page items: src/root.zig:6 only exports `font`, and no engine code calls parse yet. ZIP, fetch, network, and write-phase items are reachable from corpus-fetch, or from corpus-verify and corpus-applicability for local files. fontTools items are reachable only from the developer commands corpus-derive and font-expectations.\n\nNone of the integrity checks reviewed here is independent enforcement. corpus-verify, the snapshot digests, Font.integrity(), the RECORD check, and the import probe are all local checks. Anyone who can write to the repository, corpora directory, or virtual environment can change both the checker and its inputs. Independent authentication comes only from the published GitHub digests, the Git blob IDs, and, once the integrator applies them, the specs/corpora.json pins (still null in specs/corpora.json:26-56).",
+  "criteria": [
+    {
+      "criterion": "A full cmap validated-offset set makes parse return InvalidCmap, so each distinct subtable offset is validated at most once",
+      "met": true,
+      "evidence": "src/font/cmap.zig:124 makes insert return error.InvalidCmap when count == 512. cmap.zig:155-156 validates only when the offset is absent and inserts first, so no offset is validated twice. The probe in contains() stops at an empty slot, because at least 512 of 1024 slots stay empty."
+    },
+    {
+      "criterion": "Parse work is linear in the input length, including overlapping distinct subtables, with the per-format and total bounds stated",
+      "met": true,
+      "evidence": "Format 4: segments must be strictly ascending and disjoint (cmap.zig:222), so the glyphIdArray loop (cmap.zig:233) reads at most 65536 entries per validation. The sub Reader is bounded by the u16 length, so segCount is at most 8189. Format 12: numGroups is checked against the length before the loop (cmap.zig:267). The README 'Bounded work' section (README.md:195-221) states 65535·C + 512·98293 for format 4, 512 + L/12 when subtables are disjoint, and 512·(1+L/12) when they overlap. Groups also have strictly ascending ends at most 0x10FFFF, so each validation reads at most 0x110000 groups, a cap the README does not mention. The directory and checksum work is linear, because numTables is a u16 and the prefix sums are blocked."
+    },
+    {
+      "criterion": "Regression tests and mutation control for the cmap bound",
+      "met": true,
+      "evidence": "tests/text/bounds_test.zig case 50: 512 distinct offsets parse, a 513th returns InvalidCmap, and the reviewer construction (512 + 4096 records) returns InvalidCmap. Case 51: 65535 records share a 256-segment format 4 subtable, and the test-only counter shows 1 validation. raw/mutation-cmap-r1.log: with mutation-cmap-r1.diff applied, two runs exit 1 with 189/190 and only case 50 failing."
+    },
+    {
+      "criterion": "No accessor reaches illegal behavior when the bytes change after parse, and the immutability rule is documented",
+      "met": true,
+      "evidence": "opentype.zig:192-196 documents that the bytes must stay unchanged and that a loader must copy script-visible memory. A grep finds no `.?` and no `unreachable` in src/font. The remaining `@intCast`s on parsed values follow range checks: cmap.zig:67 after glyph >= num_glyphs, tables.zig:249 after >= 0, and cff.zig:170 after < 0. The reader.zig casts follow fits(). Format 4 and format 12 lookups check start <= code_point before subtracting. Loca checks end < start (opentype.zig glyphHeader). Name, Layout, and Cmap keep the counts from parse. The case 52 sweep (bounds_test.zig, last test) changes every byte of B_TT and B_CFF to four values and calls every accessor."
+    },
+    {
+      "criterion": "Public index accessors return null or an error for an out-of-range index, and the per-call re-parse cost is documented",
+      "met": true,
+      "evidence": "opentype.zig:220-223 tableRecord, cmap.zig subtable(), tables.zig Name.record, and layout.zig scriptTag and featureTag each return null at or past their count. opentype.zig name, post, gsub, and gpos state 'Each call checks the ... table again, in time linear in its length.'"
+    },
+    {
+      "criterion": "Hostile archives are rejected before inflation: overlap, header mismatch, ZIP64 or bit 13, symbolic links, case folding, total and ratio budgets",
+      "met": true,
+      "evidence": "tools/fileset.mjs:151-237: the local versus central comparison of method, flags, CRC-32, and sizes, checkNoZip64Extra on both headers, flag 0x2000, S_IFLNK and FILE_ATTRIBUTE_REPARSE_POINT, an ASCII-folded map, and the ratio check (line 194) and total check (line 197) all run inside the central directory loop. Member ranges are sorted and checked for overlap (lines 218-221) before read() can inflate. Inflation is capped at the declared size (line 232), followed by size and CRC checks. Case 53 has 18 parts, and each asserts that nothing was written."
+    },
+    {
+      "criterion": "Hostile archives cannot cause path escape or writes before validation",
+      "met": true,
+      "evidence": "Extraction targets come from FILE_SET_RULES through checkRepoPath, checkExtractionPath, and safePath (lib.mjs:43-62: no traversal, no symlink components, no escape), never from member names. commitFileSet runs only after every check and every pin comparison (fileset.mjs:686-693). Case 53 asserts that no record, no src directory, and an empty corpora directory remain after each rejected archive."
+    },
+    {
+      "criterion": "Digest-before-parse in corpus-fetch, corpus-verify, and corpus-applicability",
+      "met": true,
+      "evidence": "fetchFileSet (fileset.mjs:617-638) compares the size pin, published digest, previous size and SHA-256, Git blob, and fileSetPinProblems on the source listing before the first readZip (line 653). verifyFileSet only adds a source to sourceBytes when its size and SHA-256 equal the record. loadZips (line 823) skips readZip on a mismatch. The case 54 digest-order test asserts that no 'central directory' error appears for a non-zip with a mismatched digest."
+    },
+    {
+      "criterion": "Manual redirects with a host allowlist and size caps",
+      "met": true,
+      "evidence": "streamDownload (fileset.mjs:461-490) uses redirect: 'manual' (line 466), allows at most 10 hops, and runs checkHop on the first URL and every Location. checkHop requires https:, an allowlisted hostname, no port, and no userinfo. A declared Content-Length over the limit and a streamed byte count over the limit both abort. The limit is the pinned size, else the previous size, else 256 MiB. Case 54 covers an http: hop, another host, a first URL on another host, and an endless body (at most 16 pulls). The tests use a fake httpFetch only."
+    },
+    {
+      "criterion": "The staged write phase restores every previous file, the source directory, and the record on failure, and leaves no staged files",
+      "met": true,
+      "evidence": "commitFileSet (fileset.mjs:707-772) stages <file>.<uuid>.new, renames each old file to .old, swaps the source directory, and renames the record last (line 753). The catch block restores the sources and replaced files, removes created and staged files, and removes the directories it created. The case 54 injection test throws at every onWriteStep label (at least 10) and compares snapshots. This covers in-process failures only."
+    },
+    {
+      "criterion": "fontTools cannot import from the working directory; the installation is verified against RECORD",
+      "met": true,
+      "evidence": "pythonEnvironment (fileset.mjs:950-953) removes /^PYTHON/i and sets PYTHONSAFEPATH=1, and runPython requires an absolute cwd in staging. probeTool (line 1049) requires sys.flags.safe_path True and fontTools.__file__ realpath equal to the verified site-packages. verifyToolInstallation (line 996) checks the wheel SHA-256 before readZip and checks every RECORD file's size and SHA-256. It also walks the package directories for unlisted files, but skips __pycache__ bytecode. raw/font-expectations-r1.log and raw/corpus-derive-r1.log show 350 files verified and exit 0."
+    },
+    {
+      "criterion": "sfntCopyright stops at the first name record and checks header and lengths",
+      "met": true,
+      "evidence": "fileset.mjs:403-433 checks the 12-byte header, the directory bound, the first 'name' record (loop condition !name), the table range, the 6-byte header, the record array, and each string range before reading."
+    },
+    {
+      "criterion": "Documented fontTools containment matches enforcement (no OS sandbox; inputs pinned by Git blob or SHA-256)",
+      "met": false,
+      "evidence": "The lack of a sandbox is documented, as the contract allows (tools/README.md:300, specs/README.md:83). corpus-derive checks the input SHA-256 against the record before running. fontExpectations (fileset.mjs:1149-1152) copies each repository fixture into staging and runs fontTools on it with no SHA-256 comparison against specs/snapshots/opentype-fixtures.json. So the 'pinned inputs' statement is not enforced for that command. See the minor finding."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "tools/fileset.mjs",
+      "line": 1150,
+      "issue": "font-expectations copies each EXPECTATION_FONTS file from the working tree and runs font_expectations.py, which uses fontTools TTFont, on it without a sandbox. It never compares the file with the SHA-256 in specs/snapshots/opentype-fixtures.json. tools/README.md:300 and the runPython comment (fileset.mjs:957) say fontTools runs 'on inputs pinned by Git blob or SHA-256 only'. Case 12 detects a changed font only afterwards, through the expectation file, after fontTools has already parsed it with the developer's full non-PYTHON environment and network. A tampered fixture in an unreviewed worker patch would reach unsandboxed fontTools when the integrator runs the documented check. Reachability: developer command only (font-expectations). An attacker needs write access to repository content.",
+      "recommendation": "Before running Python, check each fixture's size and SHA-256 against its selected or derived entry in the snapshot record, and fail on any mismatch. Do this the same way corpus-derive checks its input. Otherwise, narrow the documentation to say that font-expectations runs on unverified working-tree fixtures."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/cmap.zig",
+      "line": 156,
+      "issue": "The overlap bound is argued but not tested. Up to 512 distinct format 12 subtables may overlap, and each validation can read up to min(1+L/12, 0x110000) groups. That gives about 43 group reads per cmap byte, and at most about 5.7e8 reads for a cmap of 13 MB or more. The README states the L/12 form, but not the absolute 0x110000 cap that strictly ascending ends impose. No case builds overlapping distinct subtables or measures the work. The bound is linear, so the contract is met, but a web font can still buy about 43 reads per byte. Reachability: latent web page, through FP-0015/FP-0058 web-font loading.",
+      "recommendation": "Add a regression case that builds many overlapping distinct format 12 offsets and asserts the validation count or a work budget. Alternatively, charge validation reads to a budget proportional to the cmap length and return InvalidCmap when it runs out."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/opentype.zig",
+      "line": 178,
+      "issue": "checkIntegrity reads the directory records again from the bytes instead of using the records that the directory loop copied and checked. If the caller breaks the immutability rule while parse is running, for example with a SharedArrayBuffer view, the re-read known-table ranges may overlap. Each direct checksum would then cost up to the input length, so parse work is no longer bounded by the non-overlap argument. Reads stay inside the slice, so this is a work bound, not memory safety. Any concurrent write is a data race the parser cannot make defined, so the copy rule at opentype.zig:192-195 is the real control. Reachability: latent web page, only if a future loader violates the documented copy rule.",
+      "recommendation": "Compute known-table checksums from the `known` records saved in the directory loop. Keep the re-read only for unknown tables, which use the bounded prefix-sum path. Make FP-0015/FP-0058 copy BufferSource and SharedArrayBuffer font bytes before parse, as documented."
+    },
+    {
+      "severity": "note",
+      "path": "tools/fileset.mjs",
+      "line": 651,
+      "issue": "Digest-before-parse binds the file path, not the buffer. downloadSource hashes the staged file with fileHash. fetchFileSet then compares digests and later reads the file from disk again (line 651) before readZip and extraction. The git_blob check also reads it separately. A process that can write to <corpora>/<id>.fetch between the comparison and the second read can feed unauthenticated bytes to readZip and into the extracted repository files. verifyFileSet does not have this gap, because it hashes and parses one buffer. Reachability: corpus fetch, by a local writer to the corpora directory only.",
+      "recommendation": "Read each staged source into memory once, compute the SHA-256 and Git blob from that buffer, and pass the same buffer to readZip and extraction."
+    },
+    {
+      "severity": "note",
+      "path": "tools/fileset.mjs",
+      "line": 707,
+      "issue": "The write phase rolls back on exceptions but has no crash recovery. If the process is killed, for example with Ctrl-C, or the machine loses power between steps, the run can leave <file>.<uuid>.new and .old files, a renamed <id>.old source directory, and repository files that disagree with the record. No journal or recovery step restores them. Also, if removing the backups fails after the record is renamed (lines 766-771), the command exits with an error although the new state is committed. corpus-verify detects the inconsistency. Reachability: corpus fetch.",
+      "recommendation": "Write a pending marker that lists the staged and backup paths before the first rename, and have corpus-fetch and corpus-verify refuse to proceed or roll back when it exists. Alternatively, document the manual recovery steps. Report a post-commit cleanup failure as a warning, not a failed fetch."
+    },
+    {
+      "severity": "note",
+      "path": "tools/fileset.mjs",
+      "line": 950,
+      "issue": "Python hardening residuals, all at the integrator-accepted 'local write access' trust level:\n- __pycache__/*.pyc files are not verified. Python validates them by source mtime and size, not by content hash.\n- .pth files and sitecustomize.py in site-packages run at startup and are not inspected.\n- pyvenv.cfg include-system-site-packages is not checked, so optional fontTools imports such as brotli, zopfli, lxml, or unicodedata2 could come from system or user site-packages.\n- The child keeps every non-PYTHON variable, including any tokens, and has unrestricted network access, contrary to the docs/SECURITY.md 'Untrusted tests run without general host credentials or unrestricted network access'.\n\nThe installation check and the probe are local integrity checks, not independent enforcement. Reachability: developer commands only (corpus-derive, font-expectations).",
+      "recommendation": "Run Python with -I and pass the verified site-packages explicitly, or require include-system-site-packages = false. Reject any .pth or sitecustomize file in site-packages that RECORD does not list. Set PYTHONDONTWRITEBYTECODE=1 and delete or ignore __pycache__ before the run. Pass a minimal allowlisted environment such as PATH, SYSTEMROOT, and TEMP. Plan an OS sandbox with no network for these commands."
+    },
+    {
+      "severity": "note",
+      "path": "tools/fileset.mjs",
+      "line": 466,
+      "issue": "The host allowlist limits where requests go, but it does not authenticate content. github.com and raw.githubusercontent.com serve any user's content, so a redirect from a compromised allowlisted origin can still deliver attacker bytes. Authenticity depends entirely on the digest pins, and the specs/corpora.json pins are still null. Also, revision 1 records no real-network corpus-fetch: case 54 uses a fake httpFetch, and the r1 corpus logs cover only verify and ucd-check. So the behavior of `redirect: 'manual'` with Node's or Bun's fetch against GitHub release redirects is unobserved. [INFERENCE] If a runtime returns an opaque redirect (status 0), the download fails closed through `response.ok`. Reachability: corpus fetch.",
+      "recommendation": "Apply the proposed specs/corpora.json pins in the planned protected commit. Record one real corpus-fetch run for each corpus under the new redirect code, or explicitly mark the real-network path as unexercised."
+    },
+    {
+      "severity": "note",
+      "path": "src/font/opentype.zig",
+      "line": 370,
+      "issue": "This is unchanged from the earlier review and outside revision 1 scope. The parser still accepts known tables that overlap the sfnt header or table directory, tags outside 0x20-0x7E, cmap subtables that overlap the encoding records, and CFF INDEXes that overlap the header. None of these is memory-unsafe. Reachability: latent web page.",
+      "recommendation": "Decide during the web-compatibility review whether to reject known tables that intersect [0, 12 + 16·numTables) and non-printable tags."
+    }
+  ],
+  "commands_run": []
+}

@@ -704,7 +704,7 @@ Every case uses `std.testing.allocator`, so a leak fails the case.
 ### Custom properties
 
 39. A root declares `--Brand: Foo  /*c*/ bar(1, {x}) [y] ; --brand: other; --e:; --sp:   ; --case: FoO`.
-    `--Brand` computes to `[ident(Foo) ws ws function(bar)[number(1,integer,none) , ws block({)[ident(x)]] ws block([)[ident(y)]]]`, and its declaration has the original text `Foo  /*c*/ bar(1, {x}) [y]`.
+    `--Brand` computes to `[ident(Foo) ws ws function(bar)[number(1,integer,none) , ws block({)[ident(x)]] ws block([)[ident(y)]]`, and its declaration has the original text `Foo  /*c*/ bar(1, {x}) [y]`.
     `--brand` computes to `[ident(other)]`.
     `--e` and `--sp` compute to empty token lists that are not the guaranteed-invalid value, and `--case` computes to `[ident(FoO)]`.
 40. A root declares `--c: rgb(0 0 255); --m: 7px; --n: 20; --other: 10px; --myvar: --other; --x: 5px; --args: --x, 9px; --args2: --none, 9px`.
@@ -799,3 +799,10 @@ Required reviewer: `fairpane-review`.
 - No HTML document type, quirks mode, or user-agent stylesheet exists in this task.
 - The laboratory, the C ABI, `include`, and `api` stay unchanged.
 - No acceptance threshold, gate, corpus pin, or applicability record changes in this task.
+
+## Integrator amendment 1
+
+On 2026-10-09 the worker `FP0014Css` reported under the stop rules that case 39's expected value for `--Brand` had one closing bracket too many.
+The frozen string opened four item lists, for the whole value, `function(bar)`, `block({)`, and `block([)`, and closed five.
+The dump format and Syntax section 5.5.9 make `[y]` one simple block, so the integrator corrected the expected value to close four lists.
+No other expected value changes.
