@@ -2,13 +2,14 @@
 
 ## Current status
 
-`api/bootstrap.json` describes a tiny experimental capability probe.
+`api/fairpane.schema.json` describes the experimental C ABI in language-neutral data.
+`tools/abi.mjs` generates `include/fairpane.h` and `src/abi_generated.zig` from it, and `abi-check` detects stale output.
+`api/failure-scenarios.json` defines the foreign-runtime failure scenarios that every wrapper must pass.
 ABI revision zero has no stability promise.
-The probe reports no browser capabilities.
-It exists to test compilation, headers, symbol export, and foreign calls.
+The ABI covers the capability probe and the engine and document lifecycle, and it reports no browser capabilities yet.
 
-The complete embedding ABI is not frozen by this bootstrap.
-The lifecycle task replaces the experiment with a reviewed versioned contract.
+The complete embedding ABI is not frozen yet.
+Later tasks extend the schema and keep each extension versioned and reviewed.
 
 ## Public boundary
 
