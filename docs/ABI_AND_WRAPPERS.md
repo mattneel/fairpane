@@ -67,25 +67,32 @@ A NIF crash can affect the entire Erlang VM. [S17]
 A future NIF path requires bounded scheduler work and explicit lifetime tests.
 Node native adapters can use Node-API rather than expose V8 internals. [S18]
 
-## First-party wrapper
+## First-party Rust wrapper
 
-One wrapper language is first-party.
-The project maintains that wrapper with the engine and qualifies it before any other wrapper.
-The browser shell is written in that language, so Fairpane's own application is the wrapper's first and heaviest user.
+Rust is the first-party wrapper language, as ADR 0004 records.
+The project maintains the Rust wrapper with the engine and qualifies it before any other wrapper.
+The browser shell is written in Rust, so Fairpane's own application is the wrapper's first and heaviest user.
+Zig builds the engine, and Rust builds the application on top of it.
 
-The shell reaches the engine only through this wrapper and the public embedding contract.
+The shell reaches the engine only through the Rust wrapper and the public embedding contract.
 It never calls internal Zig interfaces.
 
-The public embedding contract is the versioned C ABI and the process protocol.
+The public embedding contract is the versioned C ABI, the process protocol, and the WebAssembly embedding for Wasm hosts.
 The direct Zig API is not part of that contract, because it sits over internal interfaces.
-If the owner selects Zig, the first-party wrapper binds the C ABI like every other wrapper.
 
 When the shell needs a capability that the contract lacks, the contract gains that capability through the normal review path.
 Other embedders then receive the same capability.
 
-The owner selects the first-party language from a recorded comparison of candidates.
-The comparison weighs C ABI ownership mapping, fit with queued host requests, native window and accessibility reach, safety, toolchain pinning, runtime weight, and longevity.
-It also weighs how well the language represents real embedders.
+The wrapper has two layers.
+A raw crate holds declarations generated from the interface metadata.
+An idiomatic crate maps opaque owners to non-cloneable owner types, borrowed frames to scoped borrows, statuses to `Result`, and thread rules to `Send` and `Sync` bounds.
+The idiomatic crate claims no `Send` or `Sync` bound that the C contract does not grant.
+Its unsafe code stays inside a narrow, separately reviewed perimeter.
+
+The Rust wrapper and the shell embrace the Rust ecosystem.
+They use the current stable release of the best-maintained crate for each responsibility outside the engine.
+No crate parses, styles, lays out, paints, or scripts web content or chrome, and no crate makes a security decision that the engine owns.
+`engineering/dependencies.json` lists the allowed and forbidden responsibilities and the required crate checks.
 
 ## Qualification
 

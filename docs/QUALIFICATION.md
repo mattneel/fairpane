@@ -21,7 +21,7 @@ No file in this archive supplies browser conformance results.
 - Replay workloads exercise complete application interactions and resource boundaries.
 - Fuzz and fault tests exercise hostile input, allocation failure, and containment.
 - Wrapper tests exercise actual foreign runtimes and native lifetimes.
-- Browser shell workflows exercise the first-party wrapper and the public embedding contract.
+- Browser shell workflows exercise the Rust wrapper, the engine-rendered chrome, and the public embedding contract.
 
 WPT includes JavaScript tests, so a static renderer cannot claim their execution. [S19]
 Test262 does not substitute for browser integration. [S08]

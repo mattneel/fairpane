@@ -14,15 +14,16 @@ The documentation book is live at <https://mattneel.github.io/fairpane/>.
 The `Pages` workflow rebuilds and deploys it on every push to `master`.
 
 The browser is the engine's first embedder.
-Its shell is written in the first-party wrapper language and uses only the public embedding contract.
-`engineering/decisions/0004-first-party-wrapper-language.md` proposes a ranked language shortlist and awaits the owner's selection.
+Its shell is written in Rust, the first-party wrapper language, and uses only the public embedding contract.
+Fairpane renders the browser chrome as a trusted document.
+`engineering/decisions/0004-first-party-wrapper-language.md` records the owner's decision and the crate boundary.
 
 ## Next action
 
-1. Record the owner's wrapper-language selection in ADR 0004 and freeze the `FP-0029` contract.
-2. Record the `fairpane-review` verdicts for `FP-0004` and `FP-0028`.
+1. Record the `fairpane-review` acceptance of `FP-0004` and `FP-0028`.
+2. Review and integrate the `FP-0003` worker patch, then obtain `fairpane-review` and `fairpane-spec` verdicts.
 3. Finish `FP-0002` and request its review.
-4. Review and integrate the `FP-0003` worker patch, then obtain `fairpane-review` and `fairpane-spec` verdicts.
+4. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
 
 ```text
 node tools/fairpane.mjs check
@@ -57,7 +58,7 @@ The owner authorized continuous commits and pushes to `master` on `origin`.
 `docs/GIT_OPERATIONS.md` records the Git and GitHub rules.
 The owner requested public documentation as an mdBook site on GitHub Pages, deployed by GitHub Actions.
 The owner made the browser the engine's first embedder, written in a first-party wrapper language.
-The first-party wrapper language remains open.
-Task `FP-0029` needs the owner's selection from a recorded comparison, and `FP-0017` waits on `FP-0029`.
+On October 9, 2026, the owner selected Rust as that language and engine-rendered chrome, as ADR 0004 records.
+The owner allowed pinned, audited crates in the Rust wrapper and shell for responsibilities outside the engine.
 The outbound license remains open.
 The Git history uses the owner's configured identity.

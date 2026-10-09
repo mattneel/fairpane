@@ -3,7 +3,7 @@
 Fairpane is a planned first-party Zig web engine with a minimal native browser.
 The project is a gift to humanity.
 The browser is the engine's first embedder.
-Its shell is written in the first-party wrapper language and uses only the public embedding contract, so the browser dogfoods what every embedder uses.
+Its shell is written in Rust and uses only the public embedding contract, and Fairpane renders the browser chrome itself, so the browser dogfoods what every embedder uses.
 
 ## Current state
 

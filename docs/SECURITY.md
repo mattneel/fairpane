@@ -11,6 +11,22 @@ The headless in-process profile has a different risk envelope.
 Its documentation must not imply that a library creates an operating-system sandbox.
 Input validation and memory safety remain required in both profiles.
 
+## Trusted chrome
+
+The engine renders the browser chrome as a trusted document.
+The chrome document runs under its own engine owner, separate from every page document.
+Process isolation between chrome and page renderers remains the default direction.
+Broker-validated state supplies the displayed origin, permission requests, and download identity.
+A page cannot navigate, script, restyle, overlay, or inject content into the chrome.
+If the chrome renderer fails, the OS window frame keeps its title and close control, and the shell restarts the chrome.
+
+## Rust shell dependencies
+
+The Rust wrapper and the browser shell can use crates for responsibilities outside the engine.
+Each crate is pinned, license-checked, advisory-checked, and reviewed on addition and upgrade.
+No crate parses, styles, lays out, paints, or scripts web content or chrome.
+No crate makes an origin, URL, or permission decision that the engine or broker owns.
+
 ## Engine requirements
 
 - Parsers and decoders enforce checked sizes and arithmetic.

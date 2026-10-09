@@ -14,12 +14,17 @@ The host supplies explicit platform capabilities.
 Adapters declare operating-system calls, system libraries, and security assumptions.
 A callback that secretly delegates shaping or rendering to another engine violates the canonical zero-dependency profile.
 
+The Rust wrapper and the browser shell sit outside the portable engine.
+They can use pinned, audited crates for responsibilities outside the engine, such as windowing, OS input delivery, accessibility bridging, frame presentation, and IPC transport.
+No crate parses, styles, lays out, paints, or scripts web content or chrome, and no crate makes a security decision that the engine owns.
+`engineering/dependencies.json` records the allowed and forbidden crate responsibilities.
+
 ## Components
 
 ```text
-Browser shell in the first-party wrapper language
+Rust browser shell: windows, OS input, accessibility bridge, frame presentation
                   |
-     first-party wrapper -> public C ABI and process protocol
+     Rust wrapper -> public embedding contract (C ABI and process protocol)
                   |
                   v
 Host capabilities and resource broker
@@ -45,10 +50,15 @@ The compositor does not traverse mutable DOM objects.
 ## Application boundary
 
 The browser shell is an ordinary embedder.
-It is written in the first-party wrapper language and calls the engine through that wrapper and the public embedding contract.
+It is written in Rust and calls the engine through the Rust wrapper and the public embedding contract.
 It has no access to internal Zig interfaces.
 A capability that the shell needs becomes part of the public contract, or the shell does not have it.
 The engine never depends on the shell.
+
+The engine renders the browser chrome as a trusted document through the same contract.
+The shell hosts the chrome document and each page document under separate engine owners.
+It routes OS input to the focused document, presents each document's frames, and bridges each accessibility tree to the platform.
+The chrome and page documents never share an authority boundary, and broker-validated state supplies the displayed origin.
 
 ## Execution model
 

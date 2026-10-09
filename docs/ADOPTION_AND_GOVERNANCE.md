@@ -24,8 +24,8 @@ The agent cannot fabricate a governing foundation or promise legal stewardship o
 
 ## Adoption program
 
-The first integrations cover a native C host, the direct Zig API, and the first-party wrapper.
-Fairpane's own browser is the first downstream application of that wrapper.
+The first integrations cover a native C host, the direct Zig API, and the first-party Rust wrapper.
+Fairpane's own browser is the first downstream application of the Rust wrapper.
 TypeScript and Elixir exercise different lifetime and process boundaries.
 Other wrappers join through the same published contract suite.
 A showcase integration needs a real downstream workflow, not a screenshot alone.
@@ -38,8 +38,8 @@ Release notes distinguish supported features from experimental features.
 
 The owner established the public repository and authorized continuous pushes to `master`.
 The license policy and release identities remain open.
-The owner selects the first-party wrapper language from a recorded comparison of candidates.
 Name availability remains provisional.
 Domain registration and trademark work are outside the agent's automatic authority.
-The license, release identity, name, and trademark decisions block a public release, not local implementation or public development.
-The wrapper-language selection blocks task `FP-0029` and every task that depends on it, starting with the browser shell in `FP-0017`.
+These decisions block a public release, not local implementation or public development.
+
+The owner selected Rust as the first-party wrapper language and engine-rendered browser chrome, as ADR 0004 records.

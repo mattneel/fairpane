@@ -744,10 +744,11 @@
     },
     {
       "id": "FP-0017",
-      "title": "Create the first native Windows browser window",
+      "title": "Create the first Rust browser window with engine-rendered chrome",
       "workstream": "browser",
       "depends_on": [
         "FP-0006",
+        "FP-0016",
         "FP-0029"
       ],
       "role": "fairpane-platform",
@@ -777,11 +778,14 @@
         "fairpane-review"
       ],
       "acceptance": [
-        "Create a first-party native window with an address bar and page surface.",
-        "Write the shell in the first-party wrapper language and reach the engine only through that wrapper and the public embedding contract.",
+        "Create a native Windows window from the Rust shell that presents an engine-rendered chrome document and a page surface.",
+        "Write the shell in Rust and reach the engine only through the Rust wrapper and the public embedding contract.",
+        "Render the chrome as a trusted document under its own engine owner, separate from every page document.",
         "Record each capability that the shell needs and the public contract lacks as a contract task, never as a private shortcut.",
-        "Implement keyboard focus, resize, close, and explicit unsupported-page states.",
-        "Keep page content from controlling browser origin identity.",
+        "Implement keyboard focus movement between chrome and page, resize, close, and explicit unsupported states rendered in the chrome document.",
+        "Display origin identity from broker-validated state, never from page-controlled content.",
+        "Keep the OS window frame title and close control available, and restart the chrome when its renderer fails.",
+        "Use crates only for responsibilities that engineering/dependencies.json allows, and pass the required crate checks.",
         "Do not embed a system WebView or external browser engine.",
         "Execute the shell on Windows and record actual results."
       ],
@@ -1048,6 +1052,7 @@
         "bindings",
         "tests",
         "tools",
+        "toolchains/rust.lock.json",
         "build.zig",
         "engineering/decisions"
       ],
@@ -1315,17 +1320,22 @@
     },
     {
       "id": "FP-0029",
-      "title": "Select and qualify the first-party wrapper language",
+      "title": "Build and qualify the first-party Rust wrapper",
       "workstream": "wrappers",
       "depends_on": [
         "FP-0021"
       ],
       "role": "fairpane-bindings",
       "allowed_paths": [
+        "api",
         "bindings",
+        "include",
         "tests",
         "tools",
-        "toolchains/wrapper.lock.json",
+        "toolchains/rust.lock.json",
+        "rust-toolchain.toml",
+        "Cargo.toml",
+        "Cargo.lock",
         "engineering/dependencies.json",
         "build.zig",
         "engineering/decisions"
@@ -1339,7 +1349,7 @@
         "toolchains/zig.lock.json",
         "specs/corpora.json"
       ],
-      "authority": "owner-selects-language-then-routine-local-engineering",
+      "authority": "routine-local-engineering",
       "required_gates": [
         "repo-check",
         "controller-test",
@@ -1350,18 +1360,75 @@
         "fairpane-review"
       ],
       "acceptance": [
-        "Record the owner's language selection and the candidate comparison in an architecture decision record.",
-        "Pin the selected language toolchain to exact versions and verified artifact digests.",
-        "Implement engine and document lifecycle in the selected language over the public C ABI with idiomatic ownership, errors, and cancellation.",
+        "Pin the Rust toolchain to an exact version and verified official artifact digests in toolchains/rust.lock.json, through a reviewed change separate from the wrapper implementation.",
+        "Generate a raw Rust declaration crate from the FP-0021 metadata, and extend that metadata through a reviewed schema change where it falls short.",
+        "Implement an idiomatic Rust crate for engine and document lifecycle with non-cloneable owners, Result statuses, and cancellation.",
+        "Claim Send and Sync bounds only where the C contract grants them, and keep unsafe code inside a narrow, separately reviewed perimeter.",
         "Execute the wrapper against the actual native library on Windows and run the shared foreign-runtime failure scenarios.",
         "Keep generated declarations separate from the idiomatic layer and detect stale generated files.",
-        "Do not call generated source alone qualified support.",
-        "Generate the selected language's raw declarations from the FP-0021 metadata, and extend that metadata through a reviewed schema change where it falls short.",
-        "Declare the selected language's toolchain and shipped runtime in a reviewed change to engineering/dependencies.json, separate from the wrapper implementation."
+        "Pin every crate in a committed Cargo.lock and pass license, advisory, and banned-crate checks.",
+        "Record each crate's responsibility in engineering/dependencies.json through a reviewed change separate from the wrapper implementation.",
+        "Extend the source inventory and gate registry to cover the Rust workspace through separate reviewed policy changes.",
+        "Do not call generated source alone qualified support."
       ],
       "read": [
         "docs/ABI_AND_WRAPPERS.md",
-        "docs/PRODUCT.md"
+        "docs/TOOLCHAIN.md",
+        "engineering/decisions/0004-first-party-wrapper-language.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0030",
+      "title": "Expose editing, IME, focus, and accessibility for engine-rendered chrome",
+      "workstream": "accessibility",
+      "depends_on": [
+        "FP-0015",
+        "FP-0017",
+        "FP-0021"
+      ],
+      "role": "fairpane-text",
+      "allowed_paths": [
+        "src",
+        "api",
+        "include",
+        "bindings",
+        "apps",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Edit the chrome address field through engine text editing, selection, and caret movement.",
+        "Deliver IME composition from the Rust shell to the engine through the public contract.",
+        "Export each document's accessibility tree through the public contract and bridge it to UI Automation on Windows from the Rust shell.",
+        "Route keyboard focus between chrome and page documents without letting a page take focus from the chrome.",
+        "Add each new capability through a reviewed ABI schema change with C and Rust lifecycle tests.",
+        "Record every unimplemented editing, IME, and accessibility behavior for later tasks."
+      ],
+      "read": [
+        "docs/PRODUCT.md",
+        "docs/RENDERING_AND_TEXT.md",
+        "docs/ABI_AND_WRAPPERS.md"
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."

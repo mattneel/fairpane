@@ -36,10 +36,18 @@ Bun is an alternative host, with its own required qualification before CI adopti
 OMP is external development infrastructure.
 External conformance harness dependencies remain isolated from the renderer package.
 
-## First-party wrapper toolchain
+## Rust toolchain
 
-The owner-selected wrapper language uses an exact toolchain pin with verified artifact digests.
-Its upgrades follow the same separate-branch procedure as compiler upgrades.
+Rust is the first-party wrapper language, as ADR 0004 records.
+The Rust wrapper and the browser shell use the current stable Rust release.
+`toolchains/rust.lock.json` records the exact toolchain version and the digests of its official artifacts.
+A `rust-toolchain.toml` file selects that exact version for every Cargo command.
+A Rust toolchain upgrade follows the same separate-branch procedure as a Zig compiler upgrade.
+
+A committed `Cargo.lock` pins every crate.
+Each crate addition or upgrade passes a license check, a security advisory check, and a banned or duplicate crate check.
+Each addition names the responsibility it serves from the allowed list in `engineering/dependencies.json`.
+The project prefers the current stable release of the best-maintained crate for each responsibility.
 
 ## Upgrade procedure
 
