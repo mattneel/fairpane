@@ -3363,7 +3363,8 @@
         "Describe each frame's logical state and roots at every safepoint, and collect at every safepoint under stress mode without a dead resolution.",
         "Report an interrupt or a resource limit as an abrupt outcome distinct from a thrown exception, never as a normal completion.",
         "Keep a context's host_context from giving its holder the runtime or the heap, either by documenting that rule where a host sets it or by requiring an effect to read it.",
-        "Record the bytecode format and the dispatch reference in architecture decision record 0011."
+        "Record the bytecode format and the dispatch reference in architecture decision record 0011.",
+        "Keep the native stack use of every syntax-tree and bytecode traversal from growing with nesting depth, as FP-0082 amendment 1 requires of the parser, and show that the parser's deepest accepted inputs compile and run on a 1 MiB stack in the Debug test build."
       ],
       "read": ["docs/JAVASCRIPT_RUNTIME.md", "engineering/decisions/0008-javascript-values-and-heap.md", "engineering/evidence/FP-0082/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
