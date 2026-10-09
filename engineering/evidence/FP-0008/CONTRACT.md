@@ -286,7 +286,7 @@ Expected sequences map one to one to the dump without spans:
 
 `src/html/entities.json` holds the unedited bytes of <https://html.spec.whatwg.org/entities.json>.
 `src/html/entities.LICENSE` holds the unedited bytes of `LICENSE` from `https://raw.githubusercontent.com/whatwg/html/<commit>/LICENSE`.
-`<commit>` is the `refs/heads/main` commit that `git ls-remote https://github.com/whatwg/html` reports at import time.
+`<commit>` is the frozen commit `efc54f7b70858d9fcf06d1a5871ae215f448c029`, as integrator amendment 1 states.
 That file states the WHATWG copyright, CC BY 4.0, and BSD-3-Clause for portions incorporated into source code.
 `src/html/.gitattributes` contains `entities.json -text` and `entities.LICENSE -text`.
 
@@ -298,12 +298,12 @@ Its `data` object records:
 - `standard_last_updated`, the "Last Updated" date shown by the multipage standard at retrieval.
 
 Its `license` object records `path`, `url`, `commit`, `size`, `sha256`, the `name` `"CC-BY-4.0; BSD-3-Clause for portions incorporated into source code"`, and the `copyright` `"Copyright © WHATWG (Apple, Google, Mozilla, Microsoft)."`.
-Its `derived` object names the generator `src/html/entities_gen.zig` and the build import `html_entities`.
+Its `derived` object names the generator `src/html/entities_gen.zig` and the generated file `src/html/entities_table.zig`.
 
 `src/html/entities_gen.zig` is a first-party build-time program.
-`build.zig` runs it on `entities.json` and adds its output as the anonymous import `html_entities` to three modules: the `fairpane` module, the `fairpane-lab` module, and the `lab` module of `fairpane-lab-check`.
+`zig build entities-generate` runs it on `entities.json` and writes `src/html/entities_table.zig` through the build system's source-update step, and that file is committed.
+The library imports the table by the relative path `entities_table.zig`, as integrator amendment 1 states.
 The output is deterministic and sorted by the UTF-16 code units of the name.
-The generated file is not committed.
 The table's observed contents are 2231 names, of which 2125 end with `;` and 106 do not.
 93 names map to two code points.
 The longest name after `&` is `CounterClockwiseContourIntegral;`, which is 32 code units.
@@ -890,3 +890,15 @@ Required reviewer: `fairpane-review`.
 - The order is unspecified when an end tag has both attributes and a trailing solidus. This contract reports `end-tag-with-attributes` first.
 - Numeric character reference arithmetic is unbounded in the standard. This contract saturates above 0x10FFFF, which gives the same outcome.
 - In the named character reference state, a temporary buffer holds the characters consumed while searching for a match. When nothing matches, this contract treats only `&` as consumed. The observable outcome is identical either way.
+
+## Integrator amendment 1
+
+On 2026-10-09 the worker `FP0008Html` reported that the frozen build import `html_entities` fails `repo-check`.
+The repository's import lint admits only `std`, `builtin`, and `root` as named imports under `src` (`engineering/dependencies.json` and `tools/lib.mjs`), and changing that list is a policy change outside this task.
+The integrator therefore replaces the build import with a committed generated file, as `src/unicode/tables.zig` already is.
+
+- `src/html/entities_gen.zig` generates `src/html/entities_table.zig`, and `zig build entities-generate` writes it into the source tree.
+- The committed file is imported by its relative path, and no build step adds a named import for it.
+- Case 3's test-only `std.json` parse of the embedded `entities.json` must equal the committed table, so a stale table fails the tests.
+- The provenance record's `derived` object names the generated file instead of a build import.
+- `entities.LICENSE` comes from the frozen commit `efc54f7b70858d9fcf06d1a5871ae215f448c029`, which evidence item 3 already names; the behavior text that named the `main` commit at import time contradicted it.
