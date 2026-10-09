@@ -320,12 +320,20 @@
       "notes": []
     },
     "FP-0027": {
-      "status": "active",
-      "owner": "fairpane-core worker FP0027Releases",
-      "evidence": [],
+      "status": "implemented",
+      "owner": "fairpane-core worker FP0027Releases, integrated by root-integrator",
+      "evidence": [
+        "engineering/evidence/FP-0027/README.md",
+        "engineering/evidence/FP-0027/gates/2026-10-09T09-33-31-406Z-repo-check-fea293bf.json",
+        "engineering/evidence/FP-0027/gates/2026-10-09T09-33-31-671Z-controller-test-41678707.json",
+        "engineering/evidence/FP-0027/raw/tests-before.log",
+        "engineering/evidence/FP-0027/raw/reproduce-check.log",
+        "engineering/evidence/FP-0027/raw/provenance.log"
+      ],
       "review": null,
       "notes": [
-        "The frozen contract is engineering/evidence/FP-0027/CONTRACT.md, based on commit 97aa319."
+        "The frozen contract is engineering/evidence/FP-0027/CONTRACT.md, based on commit 97aa319.",
+        "Commit 493edb6 implements it with 167 of 167 controller tests. The real reproduce-check reports different, which FP-0066 addresses. Awaiting fairpane-review."
       ]
     },
     "FP-0028": {

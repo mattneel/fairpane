@@ -45,3 +45,10 @@ Task `FP-0066` owns that fix.
 ## Integration
 
 The integrator applied the patch without conflicts, removed the reproducible tar from the change, applied the root `SECURITY.md` wording that the worker reported, and stated in both security documents that the owner approves the response targets with the reporting channel.
+The integration commit is `493edb6`.
+`raw/integration-binding.log` records `HEAD` `493edb6` and an empty status, including ignored files, for every source root.
+
+- `gates/2026-10-09T09-33-31-406Z-repo-check-fea293bf.json`
+- `gates/2026-10-09T09-33-31-671Z-controller-test-41678707.json`, with 167 of 167 controller tests.
+
+`raw/integration-bun.log` records Bun with 167 of 167 controller tests.
