@@ -70,3 +70,71 @@ Required reviewer: `fairpane-review`.
 ## Non-goals
 
 - No new pipeline stage, corpus runner, or result category exists in this task.
+
+## Revision 1
+
+Base: the commit that freezes this revision, whose parent is `c5f7f2b`.
+Source finding: `engineering/evidence/FP-0054/reviews/review-1-reject.json`.
+The original "Output-path guard" section required a comparison of canonical real paths.
+That requirement contradicts the plan criterion "Compare file identities, not path spellings", and the review rejected the implementation that followed it.
+This revision replaces that section and adds the cases below.
+Every other section stays in force.
+
+### Output-path guard by file identity
+
+`run --transcript` and `minimize --out` refuse an output path that names the input file.
+The equal-spelling check stays as a first test.
+When the output path exists, the guard opens both files and compares their identities.
+A file identity is the pair of a volume or device identifier and a file identifier.
+
+- On Windows, the identity is the `VolumeSerialNumber` and the 128-bit `FileId` of `FILE_ID_INFORMATION`, which `NtQueryInformationFile` returns for the `FileIdInformation` class.
+- On other systems, the identity is the `st_dev` and `st_ino` of `fstat`.
+
+Equal identities produce the existing detail, `command line: the output path names the input file`, with exit status 3.
+An output path that does not exist is not the input file.
+A failure to open or identify either file is a harness error that names that file's subject, with exit status 3.
+A refused or failed command writes nothing.
+Opening follows symbolic links, so a link to the input is refused.
+The guard compares no path strings except in the equal-spelling check.
+
+Windows 8.3 short names get no test, because short-name creation is a volume setting that a test cannot rely on.
+The identity comparison covers them because a short name opens the same file.
+
+### Command-line size bound
+
+Case 1 also runs through the `fairpane-lab` executable, so its wiring is tested.
+
+### Error without a code
+
+A removal error without a `code` gets exactly one attempt, and the recorded error names it.
+
+### Revision 1 test cases
+
+Each build step below works in a directory that it creates fresh for its run.
+A guard regression therefore cannot corrupt a cached copy that a later run reuses.
+Each step copies `tests/lab/case-03-body-mismatch.json` into its directory as `case.json` when it needs an input.
+
+1. Build step: with `link.json` created as a hard link to `case.json`, `fairpane-lab minimize case.json --out link.json` exits with status 3 and the refusal detail, and `case.json` still equals the fixture.
+2. Build step: with the same hard link, `fairpane-lab run case.json --transcript link.json` exits with status 3 and the refusal detail, and `case.json` still equals the fixture.
+3. Build step, Windows hosts only: `fairpane-lab minimize case.json --out CASE.JSON` exits with status 3 and the refusal detail, and `case.json` still equals the fixture.
+   Other hosts do not add this step, and the evidence names the host that ran it.
+4. Build step: with `other.json` a separate byte-identical copy of `case.json`, `fairpane-lab minimize case.json --out other.json` exits with status 0 and result `pass`, and `other.json` becomes a version 2 case whose `derived_from.case_sha256` is the digest of `case.json`.
+5. Build step: a case file of `case_size_limit + 1` bytes, extended without writing data, makes `fairpane-lab run` exit with status 3 and the detail `case file: exceeds the size limit`.
+   The same file makes `fairpane-lab minimize` with `--out` naming a new path exit with status 3 and the same detail, and that path still does not exist afterward.
+   A transcript file of `transcript_size_limit + 1` bytes makes `fairpane-lab replay` exit with status 3 and the detail `transcript file: exceeds the size limit`.
+   The step removes each oversized file afterward.
+6. Controller: an injected removal error without a `code` gets exactly one attempt, and the recorded error names its message.
+
+Cases 1 to 3 must fail before the fix.
+Cases 4 to 6 test behavior that may already hold, so each needs a mutation control that it fails.
+
+- For case 4, the guard refuses every existing output path.
+- For case 5, the `run` command's case-file subject becomes `transcript file`.
+- For case 6, the retry condition at `tools/lib.mjs` becomes `e.code !== undefined && !TRANSIENT_REMOVAL.has(e.code)`.
+
+### Revision 1 evidence
+
+Record `tests-before-r1.log` on the revision base, `mutation-r1.log` with each control and its diff, an uncached `tests-after-r1.log` with `zig build test --summary all`, and `controller-tests-after-r1.log` under `engineering/evidence/FP-0054/raw/`.
+Record the host operating system and `bun --version` in the after logs.
+Correct the README row for the output-path guard, and state the actual worktree base of the original work and of this revision.
+The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs the four gates.

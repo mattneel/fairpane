@@ -1,0 +1,124 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "0dda99b2c94bb5c487f9d24c65384f41e0fb99f4",
+    "6f515b3c0d9565f7a124d7724770d3e7cc1567f2"
+  ],
+  "summary": "Reject because of one major finding. The output-path guard does not compare file identities, which plan criterion 5 requires. It compares canonical path strings. The pinned Zig std says that hard links stay separate paths under this canonicalization. On Windows it builds the name from NtQueryObject, which very likely keeps the caller's letter case and 8.3 short names. In both cases the guard lets `minimize --out` overwrite its own input. The only test, case 5, covers one spelling pair (absolute vs relative) that the old string check already missed, so it cannot detect either gap. The README still marks this criterion as met.\n\nThe other six criteria are met:\n- `readInputFile` moved into `lab.zig`. It returns `FileTooLarge` before any allocation, and a counting allocator records 0 allocations.\n- The outcome precedence and the meaning of the fetch status are documented accurately in `conclude` and `Run.stageStatus`.\n- Transcript version 2 has `action_count`. A transcript with one action removed, or with version 1, is a harness error.\n- Case version 2 with `derived_from` is parsed and written as the contract states, and `minimize` emits it.\n- The retry test is split three ways. It asserts the last error ('busy 3'), one attempt for EACCES, and at least 140 ms between the first and third attempts.\n- `lastResult` asserts that a RESULT line exists, and a test checks that assertion.\n\nEvidence binding is sound:\n- The reflog shows `0dda99b` committed at 09:30:07Z. `integration-binding.log` records HEAD `0dda99b` and an empty status, including ignored files, at 09:30:14Z.\n- All four gate receipts record source digest 0abbab1b… and policy digest b142ba18… both before and after.\n- `integration-tests.log` shows 38/38 steps and 136/136 tests with a fresh cache. The controller gate and Bun each pass 158/158.\n- `6f515b3` changes only `engineering/evidence/FP-0054/**` and `engineering/state.json`. I read both commit diffs from the public mirror.\n- FP-0027 commits that landed later (`493edb6`, `2b766fa`) do not touch `lab.zig`, `lab_main.zig`, `build.zig`, or the FP-0054 tests. They shift `selftest.mjs` lines by +2, so the `selftest.mjs` line numbers below are 2 higher than in `0dda99b`.\n\nOther findings:\n- Minor: case 1 builds the harness error itself instead of running the command line.\n- Minor: the split dropped the old assertion that an error with no code gets exactly one attempt.\n- Minor: `HANDOFF.md` is stale again.\n- Notes on contract base, Bun version, the FP-0007 fixture change, the policy-root change, and the WriteFiles copy.\n\nNo protected path changed. I had no shell, so I ran no commands and no reproduction below was executed.",
+  "criteria": [
+    {
+      "criterion": "Plan 1: a case file one byte above 64 MiB is a harness error that names the size limit, with exit status 3 (contract case 1: no allocation).",
+      "met": true,
+      "evidence": "src/lab.zig:105-119: `readInputFile` checks `length > limit` before `gpa.alloc`. src/lab.zig:2384-2406: `setLength(case_size_limit + 1)`, `expectError(error.FileTooLarge, ...)`, and `counting.allocations == 0` with `FailingAllocator` (whose default `fail_index` is maxInt). It then checks that `fileFailure(\"case file\", FileTooLarge)` renders 'case file: exceeds the size limit' and that the exit status is 3. The before-state is a compile error in tests-before.log run 1. It passes in tests-after (105/105) and integration-tests (136/136). Caveat: the harness-error half is composed in the test, not observed through `fairpane-lab`. See the minor finding."
+    },
+    {
+      "criterion": "Plan 2: document the outcome precedence and the meaning of the fetch stage status.",
+      "met": true,
+      "evidence": "src/lab.zig:1000-1006: the doc comment of `conclude` states harness-error, then timeout, then unsupported, then fail or pass, including timeout over an unimplemented stage. src/lab.zig:1075-1082: the `stageStatus` doc says completed covers a failed document, `failed` means the stage did not finish (timeout or harness error), and this differs from a `document_state` of `failed`. The code agrees: `execute` sets `fetch = .failed` at line 927 and sets `.completed` only when the state is not loading (line 960)."
+    },
+    {
+      "criterion": "Plan 3 / contract case 2: transcript version 2 with action_count; removed actions or version 1 replay as harness-error.",
+      "met": true,
+      "evidence": "Writer: src/lab.zig:1169-1181 writes version 2 and `action_count = records.items.len`. Parser: src/lab.zig:524-560 accepts only version 2 (`header(..., &.{2})`) and fails 'action_count: differs from the number of actions'. Test: src/lab.zig:2435-2465 asserts version 2, action_count 4, and a replay pass. It also asserts harness-error with exit 3 and that exact detail after popping the last action, and 'version: expected 2' for version 1. tests-before run 3 shows this test failing ('expected 2, found 1'). FP-0007 case 10's half-length transcript is still a harness error."
+    },
+    {
+      "criterion": "Plan 4 / contract cases 3-4: version 2 derived cases and their rules; minimize writes one.",
+      "met": true,
+      "evidence": "src/lab.zig:234-243: version 1 rejects any `derived_from`. Version 2 requires `corpus == null`, checked first, and then a required `derived_from` object (lines 422-428) with a 64-hex digest and a corpus value. `minimize` (lines 1639-1640) sets `corpus = null` and `derived_from = {digest(case_bytes), case.corpus}`. `writeCase` (lines 1665-1676) emits version 2. Test case 3 (lines 2467-2495) checks version 2, a null corpus, the digest equal to `hexDigest(bytes)`, a structurally equal corpus, a reparse, and a reproduced `body_sha256` failure. Test case 4 (lines 2497-2511) checks three fixtures, each with a distinct message and exit 3. All three fail in tests-before run 3."
+    },
+    {
+      "criterion": "Plan 5 / contract output-path guard: compare file identities, not path spellings; different spellings of the same file are refused.",
+      "met": false,
+      "evidence": "src/lab_main.zig:146-156 compares `realPathFileAlloc` strings, not identities. The pinned std (.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-windows/lib/std/Io/Threaded.zig:6659) states that 'hardlinks remain separate paths'. The Windows implementation (Threaded.zig:6309-6338 and 6633-6650) derives the path from NtQueryObject's opened name. Build-step case 5 (build.zig:249-269) covers only absolute vs relative spellings with identical case. See the major finding."
+    },
+    {
+      "criterion": "Plan 6 / contract case 6: split retry tests (last error, non-listed code, wait lower bound).",
+      "met": true,
+      "evidence": "tools/selftest.mjs:543-584 (+2 vs 0dda99b): `failingRemoval` records the time of each call. Test 1 injects 'busy 1' and 'busy 2', then asserts error null and 3 calls. Test 2 injects 'busy 1/2/3', asserts 'Capture directory removal failed: busy 3', 3 calls, and `times[2]-times[0] >= 140`. Test 3 injects EACCES and asserts 1 call and the recorded message. The behavior under test is tools/lib.mjs:305-320. All pass in the controller gate log (ok 131-133), controller-tests-after, and Bun. The FP-0028 mutant selector `/busy capture directory is removed on a later attempt/` still matches test 1. No mutation run was performed, and the README tags the kill claim [INFERENCE]."
+    },
+    {
+      "criterion": "Plan 7: assert that a RESULT line exists before a test parses it.",
+      "met": true,
+      "evidence": "tools/selftest.mjs:449-453: `assert.ok(lines.length > 0, ...)` comes before `JSON.parse`. Test at 585-589 expects an AssertionError with the exact message. tests-before run 2 shows 'not ok 134' with a TypeError, and the after logs show ok 134."
+    },
+    {
+      "criterion": "Contract case 5: minimize with --out naming the input through a different spelling exits 3 and leaves the input unchanged.",
+      "met": true,
+      "evidence": "build.zig:249-269: `setCwd` to the WriteFiles dir, an absolute input, and `--out case.json`. The test expects exit 3, the detail 'command line: the output path names the input file', and `check same` (tests/lab/check.zig) to succeed. tests-before run 3 shows the pre-fix failure (exit 0, pass, output written over the copy). integration-tests.log shows both steps succeeded. This holds only for the one spelling pair tested; see the major finding."
+    },
+    {
+      "criterion": "Every FP-0007 case still holds.",
+      "met": true,
+      "evidence": "integration-tests.log shows all FP-0007 case 13 and case 14 build steps succeeded and 136/136 unit tests passed, including FP-0007 cases 1-12. FP-0007 case 1 changed legitimately: case-01-wrong-version.json goes from version 2 to 3 (diff index a58ce42→bfecf4b), and the expected detail is 'version: expected 1 or 2' (src/lab.zig:2028). The old fixture's bytes became fp0054-case-04-v2-missing-derived.json (blob a58ce42). `check.zig minimal` still parses the version 2 minimized case."
+    },
+    {
+      "criterion": "Evidence binds to 0dda99b; before/after logs per contract.",
+      "met": true,
+      "evidence": "Reflog: 0dda99b at 1791538207 (09:30:07Z) and 6f515b3 at 09:31:41Z. integration-binding.log shows HEAD 0dda99b2… at 09:30:14.205Z and an empty `status --porcelain --ignored` over every source root. Gate receipts from 09:30:14.4Z to 09:30:51.7Z all record source 0abbab1b…/166 and policy b142ba18…/17, the same before and after, all with status pass. integration-tests.log uses the fresh cache out/fp0054-integration-cache. tests-before.log has three runs with exit 1, tests-after.log uses the fresh cache out/fp0054-after, and controller-tests-after.log shows 158/158. The contract was frozen in its own commit, 97aa319, before implementation."
+    },
+    {
+      "criterion": "Protected paths unchanged; no gate or threshold weakened.",
+      "met": true,
+      "evidence": "The 0dda99b diff touches only build.zig, engineering/evidence/FP-0054/**, src/lab.zig, src/lab_main.zig, tests/lab/**, and tools/selftest.mjs. None of these is in protected_paths. tools/selftest.mjs is a policy root, so the policy digest moves; see the note."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "src/lab_main.zig",
+      "line": 146,
+      "issue": "`refuseInputAsOutput` compares canonical path strings (lines 149-156), not file identities, so plan criterion 5 ('Compare file identities, not path spellings') is not met. The contract says 'different spellings of the same file are refused', but the README claims the criterion is met on the strength of one absolute-vs-relative test.\n\n(1) Hard links: the pinned std's own QueryObjectName test (Threaded.zig:6659) states that 'hardlinks remain separate paths'. POSIX realpath behaves the same way. Two names of one inode resolve to different strings.\n\n(2) Windows spellings: `dirRealPathFileWindows` (Threaded.zig:6309-6338) gets the name from NtQueryObject (6633-6650). That returns the opened name, not FileNormalizedNameInformation. [INFERENCE] `CASE.JSON` versus `case.json`, or an 8.3 short name, therefore yields different strings on NTFS. The FP-0007 review note that this task answers named 'case variants on Windows' specifically.\n\nIn both cases the guard returns null. `minimize` reads the input, writes the minimized case through `createFile` (which truncates), and destroys the input.\n\nMinimal reproduction [INFERENCE: not executed]:\n1. Run `zig build lab`.\n2. In an empty directory, copy tests/lab/case-03-body-mismatch.json to case.json.\n3. Run `mklink /H alias.json case.json` (or `ln case.json alias.json`).\n4. Run `fairpane-lab minimize case.json --out alias.json`.\n\nExpected: exit 3 with 'command line: the output path names the input file'. Predicted: exit 0 with result pass, and case.json replaced by the 757-byte minimized case (the size in tests-before.log run 3). On Windows, `fairpane-lab minimize case.json --out CASE.JSON` should behave the same way.",
+      "recommendation": "Compare identities. Open both files when the output exists, and compare `File.stat().inode` (IndexNumber on Windows, st_ino on POSIX) together with the volume or device: VolumeSerialNumber via GetFileInformationByHandle, or st_dev. Refuse when they are equal. Refusing on an inode match alone is acceptable, because the error is in the safe direction. Add build-step cases for a hard link, and on Windows for a case-variant spelling. Correct the README row for this criterion."
+    },
+    {
+      "severity": "minor",
+      "path": "src/lab.zig",
+      "line": 2400,
+      "issue": "Case 1's second half builds `Run.initHarnessError(..., fileFailure(\"case file\", error.FileTooLarge))` itself instead of observing it from a real oversized file through the command line. The wiring at src/lab_main.zig:93-94 and 124-125 is therefore untested for this criterion. For example, changing line 94's subject to \"transcript file\", or catching FileTooLarge differently, would leave every test passing [INFERENCE]. The FP-0007 review recommended asserting exit status 3 with the detail 'case file: exceeds the size limit' from the laboratory itself.",
+      "recommendation": "Add a `check.zig sparse <path> <len>` helper, or create the file in a build step. Then run `fairpane-lab run <oversized>` and `minimize <oversized> --out x`, expecting exit 3 and stdout '\"detail\": \"case file: exceeds the size limit\"'."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/selftest.mjs",
+      "line": 562,
+      "issue": "The split removed the old assertion that a removal error without a code gets exactly one attempt (the 'forced plain failure' case with plainCalls === 1 in the pre-0dda99b test). The new EACCES test covers coded non-listed errors only. The remaining no-code test ('A failed capture-directory removal appears in the command record', line 534) does not count calls. A mutant at tools/lib.mjs:316 that retries code-less errors would survive [INFERENCE: not executed]: `!TRANSIENT_REMOVAL.has(e.code)` → `e.code !== undefined && !TRANSIENT_REMOVAL.has(e.code)`. Its recorded error and surviving directories are unchanged.",
+      "recommendation": "Restore a call-count assertion for an error without a code. For example, add `{ message: 'plain' }` with no code to the non-transient test and expect one call."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/HANDOFF.md",
+      "line": 35,
+      "issue": "At HEAD, the handoff still lists FP-0054 under 'Draft and freeze contracts ... and start them' (line 35) and says that FP-0054 'carry review findings' (line 12). state.json says FP-0054 is implemented in 0dda99b and awaits review. Neither 0dda99b nor 6f515b3 updated the handoff. This repeats the FP-0007 review's stale-handoff finding.",
+      "recommendation": "Record in HANDOFF.md that FP-0054 is implemented in 0dda99b with evidence in 6f515b3 and awaits fairpane-review, and give the next action."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0054/CONTRACT.md",
+      "line": 7,
+      "issue": "The contract names base ab2e2ed, but the README says the worker's tree was at f53f465. tests-before and tests-after therefore ran without FP-0011 (105 tests, 20 steps), while integration ran with 136 tests and 38 steps. The README discloses this, and the integration run covers the combined tree.",
+      "recommendation": "State the actual worker base in the contract or the README when it differs from the frozen base."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0054/raw/integration-bun.log",
+      "line": 2,
+      "issue": "Same as the FP-0053 note: the Bun run records no `bun --version`, and no status was recorded after the last raw run. It is tied to 0dda99b only by timing (09:31:04Z, after binding and before 6f515b3 at 09:31:41Z).",
+      "recommendation": "Record `bun --version`, and a status after the final raw run."
+    },
+    {
+      "severity": "note",
+      "path": "build.zig",
+      "line": 250,
+      "issue": "Case 5 runs `minimize` inside a WriteFiles output directory in the Zig cache. If the guard regresses, minimize overwrites the cached `case.json` (as tests-before run 3 shows). A later run that reuses the cached WriteFiles step then compares a corrupted copy. This fails in the safe direction, but it can persist after a fix until the cache is cleared.",
+      "recommendation": "Optionally give the guard step its own fresh copy, for example with a `has_side_effects` copy step."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/policy.json",
+      "line": null,
+      "issue": "tools/selftest.mjs is a policy root, so 0dda99b changes the policy digest (receipts: b142ba18…). The change replaces one retry test with three, hardens `lastResult`, and adds an assertion test. Apart from the dropped no-code call count noted above, it weakens no gate, threshold, or exclusion. FP-0007 case 1's fixture and expected message changed to accommodate version 2. It still tests an invalid version.",
+      "recommendation": "None beyond the minor finding. Recorded for the protected-policy audit."
+    }
+  ],
+  "commands_run": []
+}

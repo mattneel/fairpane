@@ -1,0 +1,162 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "493edb6bcc9d11793108a66ba743656f2b2efaf3",
+    "2b766faddd21748fb605156f72d8456038bbef55"
+  ],
+  "summary": "I am rejecting this because of one major finding. Everything else in FP-0027 holds up. `tools/release.mjs` builds the source archive through hardened `readGit`, with `--no-replace-objects`, no `GIT_*` variables, and pinned autocrlf, eol, and umask. It parses the tar before any write and requires the tar to hold exactly the tree's files, with matching content, size, and executable bit. A tar that does not match fails closed. The manifest lists regular files and symbolic links sorted by path bytes. The provenance output is an unsigned in-toto Statement v1 with a SLSA v1 predicate, and the ADR and READMEs say it is not an attestation. `reproduce-check` extracts the archive into two fresh, differently named trees under `out/reproduce/`, with fresh caches and no inherited `ZIG_*` variables. It compares every installed file, reports `different` with the differing paths and exit status 1, and reports a failed removal. ADR 0009 lists exactly the ten owner decisions, all `open`. The stewardship documents invent no license, identity, contact, domain, key, or maintainer. The root `SECURITY.md` matches the worker's reported wording exactly, apart from the stated owner-approval line. The gate receipts are bound to 493edb6 through `integration-binding.log`, and 167 of 167 controller tests pass under Node and Bun. The policy digest b142ba… is unchanged from the FP-0054 integration gates. The major finding is that the contract requires the real `source-archive`, `provenance`, and `reproduce-check` runs on the implementation commit. All three ran on ba3a352, an earlier commit that contains none of the FP-0027 change and none of the later engine and policy commits. No release record or reproducibility result exists for 493edb6. The remaining findings are minor or notes about standards conformance and wording.",
+  "criteria": [
+    {
+      "criterion": "Plan: Document the owner decisions required for license and publication.",
+      "met": true,
+      "evidence": "engineering/decisions/0009-release-and-stewardship.md lines 110-128: ten rows, all `open`. It states \"The agent makes none of these decisions.\" and that each stays open until an owner record exists. Contract case 7 is test 96 in the controller-test gate log and passes."
+    },
+    {
+      "criterion": "Plan: Define source archives, build provenance, signatures, and reproducibility checks.",
+      "met": true,
+      "evidence": "ADR 0009 has sections for source archives, build type 1, build provenance, the reproducibility check, and release signatures (Ed25519 over the manifest or statement bytes, a separate release trust policy, no key). The implementation is tools/release.mjs, wired in tools/fairpane.mjs lines 176-185."
+    },
+    {
+      "criterion": "Plan: Define private security reporting and maintainer succession requirements.",
+      "met": true,
+      "evidence": "docs/SECURITY.md 'Vulnerability operations' covers channel requirements, severities, coordinated disclosure, and patch release, and leaves the channel as an owner decision. docs/ADOPTION_AND_GOVERNANCE.md 'Succession and archival' requires two maintainers with release authority, a written custodian, and a 7-step archive procedure."
+    },
+    {
+      "criterion": "Plan: Create downstream integration qualification templates.",
+      "met": true,
+      "evidence": "docs/templates/downstream-integration.md has every field the contract names. The example cites only FP-0021 records. I checked the commit 574c224 (revision-1-binding.log), 13 exports and exit 0 (c-abi receipt log), exit 3221226505 (revision-1-mutation-thread.log), the three layout targets, and the scenario order and not-expressible flags in api/failure-scenarios.json."
+    },
+    {
+      "criterion": "Plan: Do not publish or invent legal identities without owner authorization.",
+      "met": true,
+      "evidence": "No LICENSE, contact, domain, key, maintainer, or signature file exists. SECURITY.md line 6 says no contact in the repository is a security contact. Only test fixtures use example.invalid identities (release.test.mjs line 29)."
+    },
+    {
+      "criterion": "Contract case 1: byte-identical tar and manifest; manifest tar digest equals the tar's SHA-256.",
+      "met": true,
+      "evidence": "release.test.mjs case 1 also compares against a direct `git archive` run. It passes (gate log test 90; integration-bun.log test 90)."
+    },
+    {
+      "criterion": "Contract case 2: a changed, added, or removed file, or a changed mode, each changes the manifest; the manifest lists exactly the tree.",
+      "met": true,
+      "evidence": "Case 2 compares each manifest with a hand-computed `expectedFiles`. The fixture checks UTF-8 byte order, a symbolic link, and a pax long path. Passes (test 91)."
+    },
+    {
+      "criterion": "Contract case 3: rejects an abbreviated ID, a ref name, a missing commit, and an output directory inside the repository, with no writes.",
+      "met": true,
+      "evidence": "Case 3 passes (test 92). Rejection happens in sourceArchive (release.mjs lines 189-195) and candidateIdentity before any mkdir or write."
+    },
+    {
+      "criterion": "Contract case 4: provenance subjects, commit, tree, lock digest, and builder ID.",
+      "met": true,
+      "evidence": "Case 4 passes (test 93). The real run is raw/provenance.log, but it is on ba3a352."
+    },
+    {
+      "criterion": "Contract case 5: reproducible for a fixed build; different, with the path and exit status 1, for a clock build.",
+      "met": true,
+      "evidence": "Case 5 passes (test 94). It also checks fresh, separate caches inside each tree and that inherited ZIG_* variables are stripped. Exit status is checked through reproduceExitCode, which the CLI uses directly (fairpane.mjs line 185)."
+    },
+    {
+      "criterion": "Contract case 6: both work trees removed; a forced removal failure appears in the report.",
+      "met": true,
+      "evidence": "Case 6 passes (test 95). removeTrees (release.mjs lines 316-328) records each failure, and the exit status becomes 1."
+    },
+    {
+      "criterion": "Contract case 7: ADR lists exactly ten owner decisions, each `open`.",
+      "met": true,
+      "evidence": "Test 96 passes. I also checked the ADR table by reading it."
+    },
+    {
+      "criterion": "Contract evidence: real reproduce-check, source-archive, and provenance runs on the implementation commit.",
+      "met": false,
+      "evidence": "raw/reproduce-check.log, raw/source-archive.log, and raw/provenance.log all name ba3a352bbc51…. That commit precedes 2bf3b34, 4232b14, 0dda99b, 6f515b3, and 493edb6 (.git/logs/HEAD lines 103-108). README.md line 8 acknowledges this. No run on 493edb6 exists."
+    },
+    {
+      "criterion": "Source archive depends only on the commit; manifest lists exactly the tree.",
+      "met": true,
+      "evidence": "Git is hardened through readGit (attest.mjs lines 139-145) plus `-c` overrides (release.mjs line 24). checkArchive (lines 141-157) requires an exact one-to-one match between tar entries and `ls-tree -r` blobs and symbolic links, so attribute or filter effects fail before any write. One caveat is minor: the git implementation version is an unrecorded input to the tar header bytes."
+    },
+    {
+      "criterion": "Provenance follows in-toto Statement v1 and SLSA Provenance v1 without claiming trust.",
+      "met": true,
+      "evidence": "The output has `_type`, `subject[{name,digest}]`, `predicateType` https://slsa.dev/provenance/v1, `buildDefinition{buildType, externalParameters, internalParameters, resolvedDependencies}`, and `runDetails.builder.id`. The resolved dependencies use gitCommit and gitTree digests. The ADR (lines 64-67), tools/README.md line 239, and the CLI help (fairpane.mjs line 65) all disclaim trust. One deviation is minor: `builder.id` is not an RFC 3986 URI."
+    },
+    {
+      "criterion": "reproduce-check builds twice in fresh trees and reports differences honestly.",
+      "met": true,
+      "evidence": "reproduceCheck (release.mjs lines 335-370) uses mkdtemp, a non-recursive mkdir for each tree, separate cache directories, and a stripped environment. raw/reproduce-check.log shows two exit-0 builds of about 62 s each, `lib/fairpane.lib` differing, `different` with exit 1, and both trees removed."
+    },
+    {
+      "criterion": "Stewardship documents invent nothing and mark owner decisions open.",
+      "met": true,
+      "evidence": "See ADR 0009 lines 110-128. ADOPTION_AND_GOVERNANCE.md says \"No maintainer, custodian, or storage location exists yet.\" docs/SECURITY.md says the channel stays an owner decision and the response targets are proposals."
+    },
+    {
+      "criterion": "Root SECURITY.md matches the worker's report except the owner-approval line.",
+      "met": true,
+      "evidence": "I compared SECURITY.md with agent://FP0027Releases/root_SECURITY_md_wording line by line. They are identical except line 12: \"The owner approves the response targets below together with the reporting channel.\""
+    },
+    {
+      "criterion": "Dropping the reproducible tar from the evidence is acceptable.",
+      "met": true,
+      "evidence": "The manifest (4639 lines, consistent with 771 entries) and source-archive.log record the tar's size (5611520) and SHA-256 (8a75c1…), so a rerun can be checked. The caveats are in the findings: two logs still extract from the removed raw/ path, and git version is an unrecorded input."
+    },
+    {
+      "criterion": "Evidence binds to 493edb6.",
+      "met": false,
+      "evidence": "The gates bind: integration-binding.log shows HEAD 493edb6 with empty status including ignored files at 09:33:31.187Z, just before the repo-check (09:33:31.406Z) and controller-test (09:33:31.671Z) receipts. The real release-record runs do not bind; they name ba3a352."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "engineering/evidence/FP-0027/CONTRACT.md",
+      "line": 78,
+      "issue": "The frozen contract requires a real `reproduce-check` run, and `source-archive` and `provenance` runs, on the implementation commit (lines 78-79). All three ran on ba3a352bbc51…, a commit that predates the FP-0027 patch and four later commits, including the FP-0054 engine and policy changes. README.md line 8 discloses this, but no contract amendment or approval exists. The integrator did not take the worker's suggested rerun on 493edb6. So no source manifest, tar digest, provenance statement, or reproducibility result exists for 493edb6, and engineering/state.json line 336 reads as if the `different` result belongs to 493edb6.",
+      "recommendation": "Run `node tools/fairpane.mjs source-archive 493edb6bcc9d11793108a66ba743656f2b2efaf3 <outside-dir>`, the release build plus `provenance`, and `reproduce-check 493edb6bcc9d…` from a clean checkout. Record the logs and the manifest under raw/. Alternatively, get explicit approval for a contract amendment. Correct the state.json note to name the commit the reproducibility result came from."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/release.mjs",
+      "line": 246,
+      "issue": "SLSA v1 `runDetails.builder.id` and in-toto TypeURI fields must be URIs (RFC 3986). `fairpane-local-unsigned` has no scheme, so the statement does not strictly conform to the predicate it names. The contract mandated this literal, so this is a contract defect as much as an implementation one.",
+      "recommendation": "Through a contract revision, use a URI form that is still untrusted by design, such as an https anchor in ADR 0009 for the unsigned local builder, or a `urn:` identifier. Update case 4."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0009-release-and-stewardship.md",
+      "line": 27,
+      "issue": "\"so the tar depends only on the commit\" overstates the guarantee. The tar header bytes (pax global header, ustar fields, directory entries) come from the local git implementation, and checkArchive does not compare them. Neither the manifest nor the report records the git version. tools/README.md line 230 makes the same claim (\"user configuration cannot change the bytes\"). This matters because the evidence now relies on regenerating the dropped tar.",
+      "recommendation": "State that the tar depends on the commit and the git archive implementation. Record `git --version` in the source-archive report or the manifest, or document the git version the recorded digest was made with."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0027/raw/reproduce-diagnosis.log",
+      "line": 2,
+      "issue": "The README calls the second build a \"second fresh extraction and build at the same path\". The log only shows tar extraction into the existing `out/fp0027-build/a`, with no removal of the earlier tree, `.zig-cache`, `.zig-global-cache`, or `zig-out`. The ~62 s duration suggests a cold build, but the log does not prove freshness. Both this log and release-build.log also extract from `engineering\\evidence\\FP-0027\\raw\\fairpane-ba3a352….tar`, which the integrator removed from the commit, and neither verifies the tar's digest before extracting.",
+      "recommendation": "For the rerun on 493edb6, record the work-directory removal (or use a new directory) and the extracted tar's SHA-256 before the build. Note in the README that the referenced tar must be regenerated with `source-archive`."
+    },
+    {
+      "severity": "note",
+      "path": "tools/release.mjs",
+      "line": 231,
+      "issue": "The provenance statement's `toolchain.platform` and `archive_sha256` come from the host running `provenance`, not from the host that built the artifacts. The statement does not verify the artifacts came from the commit. `checkCompiler` (tools/lib.mjs lines 121-128) identifies the compiler by version string only, not by the archive digest that the statement names. This is acceptable for an unsigned local record, but a protected runner must close the gap.",
+      "recommendation": "State in ADR 0009 that the toolchain fields are asserted from the commit's lock and the recording host, not observed from the build. A protected runner should bind them to the build it performs."
+    },
+    {
+      "severity": "note",
+      "path": "tools/release.mjs",
+      "line": 17,
+      "issue": "`buildType` points at `blob/master/...#build-type-1`, a mutable branch URL. A later ADR edit would change the meaning of existing statements unless the heading is renamed. The `1` in the anchor gives versioning by convention only.",
+      "recommendation": "Document in ADR 0009 that a change to build type 1 creates a new anchor (build type 2) rather than editing the old one, or pin the URI to a commit."
+    },
+    {
+      "severity": "note",
+      "path": "tools/release.mjs",
+      "line": 343,
+      "issue": "The report's `build_command` field shows `--prefix zig-out`, but each build ran with an absolute `<tree>/zig-out` prefix (visible in `builds[].arguments`). The report stays honest because the exact arguments are present, but the top-level field can mislead a reader.",
+      "recommendation": "Name the field as the canonical build-type command, or record the exact per-tree command only."
+    }
+  ],
+  "commands_run": []
+}
