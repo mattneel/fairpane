@@ -927,7 +927,7 @@ Writable paths stay as above.
    A unit test of the shared rule gives each listed reason for one path and null for `test/a/b.js` and `harness/assert.js`.
    FP-0079 case 5 keeps passing unchanged.
 3. Case 18 gains an altered-tree test.
-   It replaces the loose object file of the fixture commit's tree with a valid zlib stream of a different tree under the same object ID, runs `corpus-extract`, and asserts the `inventory.sha256` line and an absent or empty output directory.
+   It replaces the loose object file of the `test/` subtree of the fixture commit's tree with a valid zlib stream of a different tree under the same object ID, runs `corpus-extract`, and asserts the `inventory.sha256` line and an absent or empty output directory; revision amendment 1 replaced the root tree with the subtree.
    A second test edits `tree` in the fixture snapshot record and asserts the `tree` line.
 4. A new parser case: a function `function f(a0, a1, ..., a9999) { "use strict"; }` and a script that begins `"use strict";` and declares `function g(a0, ..., a9999) {}` each parse, and the duplicate check counts at most 20,000 comparisons for each.
    With `a0` added as a last parameter, each reports `syntax-error duplicate_parameter` at that parameter's offset.
@@ -962,3 +962,12 @@ Record each command with `node tools/fairpane.mjs record` under `engineering/evi
 5. The README gains a `## Revision 1` section and corrects review 1's two README findings: the four proposal mismatches are four `noStrict` files, run once each in non-strict mode, and the opening line names amendments 1 and 2.
 
 The integrator records `git diff --stat a3e5cf9 <revision commit> -- AGENTS.md docs/CHARTER.md engineering/qualification.json engineering/policy.json engineering/gates.json toolchains specs` and confirms that it is empty.
+
+### Revision 1 amendments
+
+1. Worker `FP0082Revision1` showed that case 3 as frozen cannot reach the inventory comparison.
+   Git rehashes the root tree object when `git ls-tree -r` reads it, so a replaced root tree makes Git exit with status 128 and `hash mismatch`, which `raw/tests-before-r1.log` records.
+   Git does not rehash the subtrees that it reads during the recursion, so a replaced subtree changes the listing without an error.
+   Case 3 therefore replaces the `test/` subtree, and its assertions stay as frozen.
+   The worker records that probe as `raw/probe-subtree-r1.log`, and the README states both behaviors.
+   M10 must still fail case 3.
