@@ -6,6 +6,7 @@ Fairpane is an effort to build a complete, efficient browser and web engine as a
 The work belongs in the commons. Development happens in the open.
 Completion follows demonstrated behavior, not a calendar, token budget, or convincing demonstration.
 Maintenance and adoption are the intended steady state, not an afterthought.
+Read the [public documentation](https://mattneel.github.io/fairpane/) for design contracts and current status.
 
 ## Repository status
 

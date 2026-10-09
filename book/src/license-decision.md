@@ -1,0 +1,1 @@
+{{#include ../../LICENSE-DECISION.md}}

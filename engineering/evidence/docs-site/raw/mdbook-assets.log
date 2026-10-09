@@ -1,0 +1,11 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","C:/Users/requi/AppData/Local/Temp/fairpane-pages-6bjxefek/mdbook-v0.5.4-x86_64-unknown-linux-musl.tar.gz","C:/Users/requi/AppData/Local/Temp/fairpane-pages-6bjxefek/mdbook-v0.5.4-x86_64-pc-windows-msvc.zip"]
+5222beabd3e37dc5be0d18ff99b79058469354db5c220153a1b92db5ba12be89 *C:/Users/requi/AppData/Local/Temp/fairpane-pages-6bjxefek/mdbook-v0.5.4-x86_64-unknown-linux-musl.tar.gz
+8a6b2421aa522de06d746871d2b8fff9c8d71773467e310a4516d2566e7f2de4 *C:/Users/requi/AppData/Local/Temp/fairpane-pages-6bjxefek/mdbook-v0.5.4-x86_64-pc-windows-msvc.zip
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["C:/Users/requi/AppData/Local/Temp/fairpane-pages-6bjxefek/mdbook-v0.5.4-x86_64-unknown-linux-musl.tar.gz","C:/Users/requi/AppData/Local/Temp/fairpane-pages-6bjxefek/mdbook-v0.5.4-x86_64-pc-windows-msvc.zip"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Program Files\\GitHub CLI\\gh.exe","api","repos/rust-lang/mdBook/releases/latest","--jq",".tag_name, (.assets[] | select(.name | contains(\"x86_64-unknown-linux-musl\") or contains(\"x86_64-pc-windows-msvc\")) | .name + \" \" + .browser_download_url + \" \" + (.digest // \"no-digest\"))"]
+v0.5.4
+mdbook-v0.5.4-x86_64-pc-windows-msvc.zip https://github.com/rust-lang/mdBook/releases/download/v0.5.4/mdbook-v0.5.4-x86_64-pc-windows-msvc.zip sha256:8a6b2421aa522de06d746871d2b8fff9c8d71773467e310a4516d2566e7f2de4
+mdbook-v0.5.4-x86_64-unknown-linux-musl.tar.gz https://github.com/rust-lang/mdBook/releases/download/v0.5.4/mdbook-v0.5.4-x86_64-unknown-linux-musl.tar.gz sha256:5222beabd3e37dc5be0d18ff99b79058469354db5c220153a1b92db5ba12be89
+RESULT {"executable":"C:\\Program Files\\GitHub CLI\\gh.exe","arguments":["api","repos/rust-lang/mdBook/releases/latest","--jq",".tag_name, (.assets[] | select(.name | contains(\"x86_64-unknown-linux-musl\") or contains(\"x86_64-pc-windows-msvc\")) | .name + \" \" + .browser_download_url + \" \" + (.digest // \"no-digest\"))"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":524}

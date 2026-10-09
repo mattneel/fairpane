@@ -1,0 +1,12 @@
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-pages-6bjxefek\\mdbook\\mdbook.exe","build","book"]
+ INFO Book building has started
+ INFO Running the html backend
+ INFO HTML book written to `C:\src\fairpane\book\../out/book`
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-pages-6bjxefek\\mdbook\\mdbook.exe","arguments":["build","book"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":55}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'); const files=fs.readdirSync('out/book').filter(f=>f.endsWith('.html')); let unresolved=0; for (const f of files) if (fs.readFileSync('out/book/'+f,'utf8').includes('{{#include')) { unresolved++; console.log('UNRESOLVED', f); } console.log('html pages:', files.length, 'unresolved includes:', unresolved); const idx=fs.readFileSync('out/book/index.html','utf8'); console.log('index states bootstrap:', idx.includes('Fairpane is a development bootstrap, not a browser release.')); const st=fs.readFileSync('out/book/status.html','utf8'); console.log('status includes handoff:', st.includes('Current handoff')); process.exitCode = unresolved ? 1 : 0;"]
+html pages: 23 unresolved includes: 0
+index states bootstrap: true
+status includes handoff: true
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'); const files=fs.readdirSync('out/book').filter(f=>f.endsWith('.html')); let unresolved=0; for (const f of files) if (fs.readFileSync('out/book/'+f,'utf8').includes('{{#include')) { unresolved++; console.log('UNRESOLVED', f); } console.log('html pages:', files.length, 'unresolved includes:', unresolved); const idx=fs.readFileSync('out/book/index.html','utf8'); console.log('index states bootstrap:', idx.includes('Fairpane is a development bootstrap, not a browser release.')); const st=fs.readFileSync('out/book/status.html','utf8'); console.log('status includes handoff:', st.includes('Current handoff')); process.exitCode = unresolved ? 1 : 0;"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
