@@ -1087,7 +1087,6 @@
         "bindings",
         "tests",
         "tools",
-        "toolchains/rust.lock.json",
         "build.zig",
         "engineering/decisions"
       ],
@@ -1098,6 +1097,7 @@
         "engineering/policy.json",
         "engineering/gates.json",
         "toolchains/zig.lock.json",
+        "toolchains/rust.lock.json",
         "specs/corpora.json"
       ],
       "authority": "routine-local-engineering",
@@ -1370,8 +1370,6 @@
         "include",
         "tests",
         "tools",
-        "toolchains/rust.lock.json",
-        "rust-toolchain.toml",
         "Cargo.toml",
         "Cargo.lock",
         "engineering/dependencies.json",
@@ -1385,6 +1383,8 @@
         "engineering/policy.json",
         "engineering/gates.json",
         "toolchains/zig.lock.json",
+        "toolchains/rust.lock.json",
+        "rust-toolchain.toml",
         "specs/corpora.json"
       ],
       "authority": "routine-local-engineering",
@@ -3445,6 +3445,27 @@
         "Keep the gate's slowest recorded duration at most two thirds of its timeout by reducing build or test time, or through a separate reviewed change to the timeout, without removing or weakening any test."
       ],
       "read": ["engineering/evidence/FP-0014/ci/README.md", "engineering/gates.json", ".github/workflows/gates.yml"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0099",
+      "title": "Close the FP-0067 and FP-0079 review findings",
+      "workstream": "laboratory",
+      "depends_on": ["FP-0052", "FP-0067", "FP-0079"],
+      "role": "fairpane-core",
+      "allowed_paths": ["tools", "tests", ".github", "docs", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Make the workflow checker report a missing job for each job whose gate list it requires, and test a workflow whose linux job is renamed.",
+        "Run the workflow checks in repo-check, or record why only controller-test runs them.",
+        "Strip trailing spaces before the reserved device name comparison in the archive reader, and check each component name of an archive's components file with the archive path rules.",
+        "Start doctor's probes of bun, git, omp, and zig so that no probe runs a program from the repository directory, and test it with a marker program in the working directory."
+      ],
+      "read": ["engineering/evidence/FP-0067/reviews/review-1-reject.json", "engineering/evidence/FP-0079/reviews/security-review-2-accept.json"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
