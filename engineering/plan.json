@@ -2876,7 +2876,7 @@
         "Test named instances and axis values against reference fixtures.",
         "Replace the FP-0120 UnsupportedCff2 report with CFF2 outline decoding, including blend and vsindex, under the FP-0120 interpreter bounds.",
         "Apply gvar deltas to the FP-0119 decoded points, including component offsets and phantom points, under the FP-0119 budgets.",
-        "Implement endchar seac through the TN5176 StandardEncoding and the font's charset once the owner approves those tables, replacing the FP-0120 unsupported error, and otherwise keep cff-seac recorded as a remaining capability obligation."
+        "Implement endchar seac through the TN5176 StandardEncoding and the font's charset, including the predefined ISOAdobe, Expert, and ExpertSubset charsets, replacing the FP-0120 unsupported error; the owner approved those tables on 2026-10-09."
       ],
       "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0120/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
@@ -3858,7 +3858,7 @@
         "Shape runs through a default engine for Latin and the CJK seed scripts, and through an Arabic engine with Joining_Type joining and the specified feature order for right-to-left runs.",
         "Decide normalization and mark reordering from the cited primary sources, and import extracted/DerivedCombiningClass.txt with per-file provenance if that decision needs Canonical_Combining_Class.",
         "Map every glyph to its code-unit cluster, including marks such as U+064B on U+0628 and U+0301 after U+0065.",
-        "Compare the latin-baseline, arabic-greeting, and cjk-greeting seeds on the Noto fixtures with reference fixtures whose source the owner has approved, and freeze no third-party fixture before that approval.",
+        "Compare the latin-baseline, arabic-greeting, and cjk-greeting seeds on the Noto fixtures with first-party expectations derived from the fonts' tables and the cited primary sources, and compare every case of Unicode's text-rendering-tests at a pinned commit that exercises these engines and whose files carry a recorded license that permits redistribution, as the owner approved on 2026-10-09; freeze no other third-party fixture without owner approval.",
         "Report every script outside Latin, Arabic, Devanagari, and the CJK seed scripts, every unapplied feature, and every missing glyph as unsupported, each with an owner task.",
         "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
       ],
@@ -3880,7 +3880,7 @@
       "acceptance": [
         "Identify Devanagari syllables and reorder reph, pre-base matras, and below-base forms as the dev2 script specification states.",
         "Apply the basic and presentation features in their specified stages.",
-        "Compare the devanagari-greeting seed on Noto Sans Devanagari with reference fixtures whose source the owner has approved, including the conjunct U+0938 U+094D U+0924 and the pre-base matra in U+0928 U+093F, and freeze no third-party fixture before that approval.",
+        "Compare the devanagari-greeting seed on Noto Sans Devanagari with first-party expectations derived from the font's tables and the dev2 script specification, including the conjunct U+0938 U+094D U+0924 and the pre-base matra in U+0928 U+093F, and compare every Devanagari case of Unicode's text-rendering-tests at a pinned commit whose files carry a recorded license that permits redistribution, as the owner approved on 2026-10-09; freeze no other third-party fixture without owner approval.",
         "Report every other Indic and Universal Shaping Engine script as unsupported with an owner task.",
         "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
       ],
@@ -3992,7 +3992,7 @@
       "acceptance": [
         "Read Private DICTs, local and global subroutine INDEXes, FDArray, FDSelect, charsets, and FontMatrix values with checked offsets, and cite a primary source or record a decision for the order in which a CID font's FontMatrix values combine.",
         "Interpret every Type 2 operator under the Appendix B limits on the argument stack, subroutine nesting, stem hints, charstring length, and the transient array, with a budget of 2^20 operations and a deterministic random operator seeded per glyph.",
-        "Parse widths and hint operators, including implicit vstem arguments and hintmask byte counts, ignore the flex depth in unhinted outlines, and report endchar seac with a named unsupported error until the owner answers the TN5176 table question.",
+        "Parse widths and hint operators, including implicit vstem arguments and hintmask byte counts, ignore the flex depth in unhinted outlines, and report endchar seac with a named unsupported error, which FP-0059 replaces.",
         "Report every CFF2 font as unsupported, including a font whose only outline table is CFF2, and correct the cff2-and-variations capability text.",
         "Reject malformed charstrings without unbounded work or allocation, record each strictness choice for FP-0058, and check every glyph of the CJK subset against its hmtx advance and the head bounds.",
         "Add at most 10 seconds to the tests/text run step on the development host."

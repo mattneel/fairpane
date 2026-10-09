@@ -1,0 +1,51 @@
+{
+  "verdict": "approve",
+  "summary": "Plan review 6: I approve c53dd35, 252538e, and 4fa8d16. I found no blocker in the seven acceptances of 588b5bc under docs/AGENT_OPERATIONS.md:85-104. There are no blocker, major, or minor findings, only four notes.\n\nHow I checked: I read the four commits on GitHub, plan.json and state.json in the tree, both FP-0052 review records, engineering/evidence/ci/README.md (including 'Extension through 0276268'), runs-2026-10-09-extension.log, and FP-0098/reviews/fix-review-approve.json. The GitHub API shows the fix review was added in 7631ec5, the parent of 588b5bc. I ran nothing; that `node tools/fairpane.mjs check` passes is [INFERENCE].\n\n**c53dd35** closes plan review 5's major: FP-0130 now depends on [\"FP-0071\", \"FP-0117\", \"FP-0100\"], and no cycle forms. It also applies review 5's notes on FP-0058's evidence path and the FP-0126 and FP-0084 state notes, and records review 5.\n\n**252538e** gives FP-0055 a testable criterion (plan.json:2788). It generates every consumer property of DerivedCoreProperties.txt and emoji-data.txt that FP-0108 does not. That gives FP-0095 an owner for ID_Start and ID_Continue, and FP-0093 one for the emoji binary properties. Both already depend on FP-0055, and FP-0055 depends on FP-0108.\n\n**4fa8d16** adds FP-0131 (4232). Its four criteria cover:\n- both reviews' LB1 minor;\n- the spec review's WPT support-clause and URL-name minors;\n- review 1's pin-record-before-lock note.\nEach is concrete and testable, and the dependencies, paths, gates, and reviewers fit. FP-0052's evidence-only findings, the protected-path log and the spec review's diffs, were recorded before acceptance and need no plan task.\n\n**The seven acceptances.** Each task has its required review records. Each task's prerequisites are accepted: FP-0003, FP-0008, FP-0027, FP-0033, FP-0050, FP-0051, and FP-0054. Each lists the ledger in its evidence. Every failed attempt in each window through the last pushed head, 0276268, has one of the rule's dispositions:\n- **Three failures** pass on a second attempt of the same run and head.\n- **The nine zig-test timeouts** are covered by the replacement at 29a9f8e.\n  - The cause attribution is [INFERENCE], tied to the failed step through identical pre-fix blobs.\n  - fix-review-approve.json is a fairpane-review record of fixing commits 9d5638b and 29a9f8e that predates the acceptance.\n  - FP-0098 has ten passing dispatched runs.\n  - The no-weakening audit and the range diffs are recorded, and the only runner change is explained as unable to turn a timeout into a pass.\n- **The 66d71bd repo-check failure** is covered by f5be48f.\n  - The range record shows one line of plan.json and empty protected-path diffs.\n  - The deterministic cause needs only one passing run, 37962198818.\n  - Plan review 4, committed in 75dd48b before the acceptance, is f5be48f's review record.\n\nAll four runs that were in progress at the snapshot concluded success.",
+  "commits": [
+    {
+      "commit": "c53dd35",
+      "verdict": "approve",
+      "notes": "**Review 5's major is closed.** FP-0130 depends on [\"FP-0071\", \"FP-0117\", \"FP-0100\"] (plan.json:4215). Its parsed-document criterion and its 'lang' values now have a parser in the dependency closure. FP-0100 depends only on FP-0008, FP-0009, and FP-0064, so no cycle forms.\n\n**Review 5's notes are applied.**\n- FP-0058 may write engineering/evidence for its strictness record.\n- FP-0126's state note now says FP-0126 itself calls the hook from the in head meta branch, matching its criterion.\n- FP-0084's state note commits its contract to treat FP-0128's frozen list of names as a static unsupported rule. Any other runtime unsupported outcome counts as fail. This resolves review 5's minor without weakening the denominator.\n\nThe commit records review 5 as engineering/evidence/plan/reviews/review-5-reject.json and changes only plan, state, and that record."
+    },
+    {
+      "commit": "252538e",
+      "verdict": "approve",
+      "notes": "Adds FP-0055 criterion 5 (plan.json:2788): 'Generate every consumer property of DerivedCoreProperties.txt and emoji/emoji-data.txt that FP-0108 does not generate, including ID_Start and ID_Continue for FP-0095 and the emoji binary properties for RegExp property escapes.'\n- **Why it is needed.** The FP-0015 split gave FP-0108 the import of both files, but only its Grapheme_Cluster_Break, Indic_Conjunct_Break, and Extended_Pictographic lookups. The other consumer properties had no generator, as the FP-0108 pre-freeze check found.\n- **Owner and order.** FP-0055 already depends on FP-0108, and its consumers FP-0093 and FP-0095 already depend on FP-0055.\n- **Testable.** The consumers are defined by the specs/IMPORT_REQUIREMENTS.md table and ECMA-262's property tables.\n\nThe commit adds an obligation and weakens nothing. It is plan-only."
+    },
+    {
+      "commit": "4fa8d16",
+      "verdict": "approve",
+      "notes": "**FP-0131 (plan.json:4232)** depends on the accepted FP-0052. It reads both review records and the contract, and requires fairpane-review and fairpane-spec.\n\nIts criteria trace to the review records:\n1. LB1's SA resolution in the General_Category row and S37: the minor in both reviews (review-1-accept.json:6-10; spec-review-1-accept.json:6-10).\n2. Narrowing the WPT support-item clause in every copy, with wpt.json regenerated at unchanged counts: spec review minor 2.\n3. 'domain parser ToASCII' and 'domain to Unicode' in the rows and S41: spec review minor 3.\n4. Reading the Git pin record under the fetch lock, or re-reading it and failing on change, with a repin-race test: review 1's note at tools/corpus.mjs:527.\n\nAll four are testable. The writable paths (specs, tools, tests, engineering/decisions for ADR 0003's copy of the rule, and evidence) are sufficient and minimal, and the protected list matches policy.json.\n\nFP-0052's evidence-only findings were handled before acceptance, as the 588b5bc evidence list shows (integration-protected-paths.log, and 212676f recording spec review 1's diffs). They do not need a plan task."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "note",
+      "path": "engineering/evidence/ci/README.md",
+      "line": 395,
+      "issue": "f5be48f's review record is plan review 4. That record's top-level verdict is 'reject', and its approval of f5be48f appears only in its per-commit verdict and summary. docs/AGENT_OPERATIONS.md:94 asks that each fixing commit have 'its own fairpane-review record'. The review does approve f5be48f, and it predates 588b5bc (it was committed in 75dd48b). By contrast, FP-0098's fix review is a record scoped to its commits.",
+      "recommendation": "For future fixing commits, store a separate record scoped to the commit, as engineering/evidence/FP-0098/reviews/fix-review-approve.json does, so the review condition can be checked without reading a plan review's commit list."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/ci/README.md",
+      "line": 378,
+      "issue": "The ledger takes 0276268, the last pushed head, as the pre-acceptance head. Eight local commits sit between 0276268 and 588b5bc, from 252538e to 7631ec5, and had no Gates run when the acceptance was committed. They are plan, evidence, contract, and ledger commits by their subjects. Under the rule's wording ('every pushed head'), only pushed heads count, so the acceptance is allowed. But the first run that contains 588b5bc is still unrecorded.",
+      "recommendation": "Record the run of the first pushed head that contains 588b5bc. If it fails, treat that as a failure on the accepted tasks' heads and give it a disposition under the rule."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/ci/runs-2026-10-09-extension.log",
+      "line": 17,
+      "issue": "Run 37966913763 of 0276268, the head these acceptances rely on, passes. Its Windows controller-test step took 120 s, against the gate's 120000 ms timeout. The next Windows controller-test timeout would block every task whose implementation it contains.",
+      "recommendation": "Prioritize FP-0107. Until it lands, expect controller-test timeouts and record each with the rule's same-head disposition."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/state.json",
+      "line": 703,
+      "issue": "The 588b5bc state notes say 'the Gates ledger through 0276268 gives every failed attempt in its window a disposition'. The nine zig-test dispositions rely on fix-review-approve.json, which itself says FP-0098 'still has review 2's open item' and that FP-0098 is not accepted. That is consistent with the rule's review alternative, but the accepted tasks' notes do not mention it.",
+      "recommendation": "Optionally add to each affected note (FP-0064, FP-0067, FP-0079, FP-0081) that the zig-test replacements rely on the predating fix review, not on FP-0098's acceptance."
+    }
+  ]
+}

@@ -789,7 +789,7 @@
       "owner": null,
       "evidence": [],
       "review": null,
-      "notes": ["Created to own font collections, CFF2, and variations from the FP-0013 capability record."]
+      "notes": ["Created to own font collections, CFF2, and variations from the FP-0013 capability record.", "The owner approved the TN5176 StandardEncoding and predefined charset tables on 2026-10-09 (LICENSE-DECISION.md and engineering/evidence/text/owner-answers-1.log), so criterion 7 implements seac without a fallback."]
     },
     "FP-0060": {
       "status": "planned",
@@ -977,13 +977,13 @@
     "FP-0111": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: OpenType layout common tables and GDEF."] },
     "FP-0112": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: GSUB application with cluster mapping."] },
     "FP-0113": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: GPOS application and mark positioning."] },
-    "FP-0114": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: Latin, CJK, and Arabic shaping. Its reference fixtures wait for the owner's oracle decision."] },
-    "FP-0115": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: Devanagari shaping. Its reference fixtures wait for the owner's oracle decision."] },
+    "FP-0114": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: Latin, CJK, and Arabic shaping.", "On 2026-10-09 the owner chose both reference sources in criterion 4: first-party expectations and the text-rendering-tests files whose licenses permit redistribution (engineering/evidence/text/owner-answers-1.log)."] },
+    "FP-0115": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: Devanagari shaping.", "On 2026-10-09 the owner chose both reference sources in criterion 3: first-party expectations and the text-rendering-tests files whose licenses permit redistribution (engineering/evidence/text/owner-answers-1.log)."] },
     "FP-0116": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: itemization and per-cluster font fallback."] },
     "FP-0117": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: inline layout under explicit available-size constraints. FP-0016 depends on it."] },
     "FP-0118": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created by the FP-0015 split: carets, hit tests, and bidi selection."] },
     "FP-0119": { "status": "active", "owner": "fairpane-text worker FP0119Glyf", "evidence": ["engineering/evidence/FP-0119/CONTRACT.md"], "review": null, "notes": ["Created from the FP-0056 split as its first slice: the bounded outline model and TrueType glyf decoding. FP-0120 and FP-0121 build on its Path type.", "Contract frozen in 507ea53 after the pre-freeze check of agent Check0119; dispatched on that base."] },
-    "FP-0120": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split: the CFF Type 2 charstring interpreter and the honest CFF2 report. Until the owner answers the TN5176 table question, endchar seac returns its named unsupported error."] },
+    "FP-0120": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split: the CFF Type 2 charstring interpreter and the honest CFF2 report. endchar seac returns its named unsupported error, which FP-0059 replaces with the TN5176 tables that the owner approved on 2026-10-09."] },
     "FP-0121": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split: the scalar reference rasterizer, which uses 16 nonzero sub-scanlines per pixel row with exact horizontal span coverage, and its independent first-party oracle."] },
     "FP-0122": { "status": "planned", "owner": null, "evidence": [], "review": null, "notes": ["Created from the FP-0056 split: glyph rendering, comparison of real glyphs with the FP-0121 oracle, and the glyph-rasterization capability update together with the FP-0013 case 49 lists."] },
     "FP-0123": { "status": "active", "owner": "fairpane-core worker FP0123Encoding", "evidence": ["engineering/evidence/FP-0123/CONTRACT.md", "engineering/evidence/FP-0123/raw/encoding-standard-pin.log"], "review": null, "notes": ["Created as the first FP-0065 slice. Commit f90350b admitted the Encoding Standard index files but committed none; this slice imports no index data.", "Contract frozen in 4465aa9 after the pre-freeze check of agent Check0123, with the pin recorded in raw/encoding-standard-pin.log: SHA-256 of encoding.bs and LICENSE at a985b62a, LICENSE identical to src/html/entities.LICENSE, and the published date 21 May 2026; dispatched on that base."] },
