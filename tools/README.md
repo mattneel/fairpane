@@ -57,7 +57,8 @@ A clean checkout of the receipt's source commit can therefore check it.
 The command resolves a bare executable name through `PATH` only and records the absolute path.
 It never searches the working directory for an executable.
 A relative executable path resolves from the repository root.
-The `RESULT` line keeps the exit status, signal, watchdog outcome, and environment overrides.
+The `RESULT` line keeps the working directory, UTC start time, exit status, signal, watchdog outcome, and environment overrides.
+A command that cannot write its log or capture its output returns a failed result instead of an exception.
 The `record` command exits with status 1 when the recorded command fails.
 
 ## Evidence boundary
@@ -81,6 +82,7 @@ A metadata edit alone cannot enable release success.
 ## Gate safety
 
 Child commands receive argument arrays without shell interpolation.
+Each child writes its output to a file in a new private temporary directory, which the controller copies into the log and removes.
 A watchdog terminates a hung process group on POSIX or a process tree on Windows.
 The caller still needs operating-system isolation and resource quotas for hostile inputs.
 The tool does not enforce disk quotas or a network policy.

@@ -293,34 +293,66 @@ function copyFileToDescriptor(file, fd) {
     }
   } finally { fs.closeSync(source); }
 }
-/** Execute without a shell. OS sandboxing and disk quotas remain separate. */
-export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env } = {}) {
+function closeQuietly(fd) { try { fs.closeSync(fd); } catch { /* The descriptor is already unusable. */ } }
+function removeQuietly(dir) { try { fs.rmSync(dir, { recursive: true, force: true }); } catch { /* A surviving descendant can still hold the file. */ } }
+function commandRecord(executable, args, cwd, started) {
+  return { executable, arguments: args, cwd: path.resolve(cwd ?? process.cwd()), started_at: new Date(started).toISOString() };
+}
+/** Append the RESULT line and close the log. A failed write becomes part of the result instead of an exception. */
+function finishRecord(fd, result) {
+  try { fs.writeSync(fd, `RESULT ${JSON.stringify(result)}\n`); }
+  catch (e) { result.error = [result.error, `Log write failed: ${e.message}`].filter(Boolean).join(' '); }
+  finally { closeQuietly(fd); }
+  return result;
+}
+/** Execute without a shell. OS sandboxing and disk quotas remain separate. Never rejects after argument validation. */
+export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, env, copyOutput = copyFileToDescriptor } = {}) {
   invariant(typeof executable === 'string' && Array.isArray(args), 'An executable and argument array are required.');
-  fs.mkdirSync(path.dirname(logPath), { recursive: true });
-  const fd = fs.openSync(logPath, 'a'), started = Date.now();
-  fs.writeSync(fd, `\nCOMMAND ${JSON.stringify([executable, ...args])}\n`);
-  // The child writes to a fresh file, not the append-only log handle.
+  invariant(typeof logPath === 'string' && logPath.length > 0, 'A log path is required.');
+  const started = Date.now(), base = commandRecord(executable, args, cwd, started), errors = [];
+  const result = (code, signal, timedOut) => {
+    const r = { ...base, exit_code: code, signal, timed_out: timedOut, error: errors.length ? errors.join(' ') : null,
+      duration_ms: Date.now() - started };
+    if (env) r.environment_overrides = env;
+    return r;
+  };
+  let fd;
+  try {
+    fs.mkdirSync(path.dirname(logPath), { recursive: true });
+    fd = fs.openSync(logPath, 'a');
+    fs.writeSync(fd, `\nCOMMAND ${JSON.stringify([executable, ...args])}\n`);
+  } catch (e) {
+    if (fd !== undefined) closeQuietly(fd);
+    errors.push(`Log write failed: ${e.message}`);
+    return Promise.resolve(result(null, null, false));
+  }
+  // The child writes to a fresh file in a private directory, not to the append-only log handle.
   // MSYS2 programs on Windows exit with status 1 and no output when given an append-only handle.
-  const capture = path.join(os.tmpdir(), `fairpane-output-${crypto.randomUUID()}.log`);
-  const outFd = fs.openSync(capture, 'wx');
+  let captureDir, capture, outFd;
+  try {
+    captureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fairpane-capture-'));
+    capture = path.join(captureDir, 'output.log');
+    outFd = fs.openSync(capture, 'wx', 0o600);
+  } catch (e) {
+    if (captureDir) removeQuietly(captureDir);
+    errors.push(`Output capture failed: ${e.message}`);
+    return Promise.resolve(finishRecord(fd, result(null, null, false)));
+  }
   return new Promise(resolve => {
-    let child, timer, timedOut = false, processError = null, settled = false;
+    let child, timer, timedOut = false, settled = false;
     const finish = (code, signal) => {
       if (settled) return;
       settled = true; clearTimeout(timer);
-      fs.closeSync(outFd);
-      try { copyFileToDescriptor(capture, fd); }
-      catch (e) { processError ??= `Output capture failed: ${e.message}`; }
-      finally { try { fs.rmSync(capture, { force: true }); } catch { /* A surviving descendant can still hold the file. */ } }
-      const result = { executable, arguments: args, exit_code: code, signal, timed_out: timedOut,
-        error: processError, duration_ms: Date.now() - started };
-      if (env) result.environment_overrides = env;
-      fs.writeSync(fd, `RESULT ${JSON.stringify(result)}\n`); fs.closeSync(fd); resolve(result);
+      closeQuietly(outFd);
+      try { copyOutput(capture, fd); }
+      catch (e) { errors.push(`Output capture failed: ${e.message}`); }
+      removeQuietly(captureDir);
+      resolve(finishRecord(fd, result(code, signal, timedOut)));
     };
     try {
       child = spawn(executable, args, { cwd, stdio: ['ignore', outFd, outFd], shell: false,
         env: env ? { ...process.env, ...env } : process.env, windowsHide: true, detached: process.platform !== 'win32' });
-      child.on('error', error => { processError = error.message; finish(null, null); });
+      child.on('error', error => { errors.push(error.message); finish(null, null); });
       child.on('close', (code, signal) => finish(code, signal));
       timer = setTimeout(() => {
         timedOut = true;
@@ -331,7 +363,7 @@ export function runProcess(executable, args, { cwd, logPath, timeoutMs = 60000, 
           try { process.kill(-child.pid, 'SIGKILL'); } catch { child.kill('SIGKILL'); }
         }
       }, timeoutMs);
-    } catch (e) { processError = e.message; finish(null, null); }
+    } catch (e) { errors.push(e.message); finish(null, null); }
   });
 }
 /** Resolve a command name through PATH only, so a record names the executable that actually ran. */
@@ -356,17 +388,27 @@ export function resolveExecutable(root, name, { pathEnv = process.env.PATH ?? ''
   throw new Error(`The executable is not on PATH: ${name}`);
 }
 /** Run one command without a shell and append its actual output and result to an evidence log. */
-export async function recordCommand(root, logRelative, executable, args, { cwd = root, env, timeoutMs = 600000 } = {}) {
+export async function recordCommand(root, logRelative, executable, args, { cwd = root, env, timeoutMs = 600000, pathEnv } = {}) {
   const logPath = evidencePath(root, logRelative, { mustExist: false });
   let resolved;
-  try { resolved = resolveExecutable(root, executable); }
+  try { resolved = resolveExecutable(root, executable, pathEnv === undefined ? {} : { pathEnv }); }
   catch (e) {
-    fs.mkdirSync(path.dirname(logPath), { recursive: true });
-    const result = { executable, arguments: args, exit_code: null, signal: null, timed_out: false, error: e.message, duration_ms: 0 };
-    fs.appendFileSync(logPath, `\nCOMMAND ${JSON.stringify([executable, ...args])}\nRESULT ${JSON.stringify(result)}\n`);
+    const started = Date.now();
+    const result = { ...commandRecord(executable, args, cwd, started), exit_code: null, signal: null, timed_out: false,
+      error: e.message, duration_ms: 0 };
+    if (env) result.environment_overrides = env;
+    try {
+      fs.mkdirSync(path.dirname(logPath), { recursive: true });
+      fs.appendFileSync(logPath, `\nCOMMAND ${JSON.stringify([executable, ...args])}\nRESULT ${JSON.stringify(result)}\n`);
+    } catch (w) { result.error = `${result.error} Log write failed: ${w.message}`; }
     return result;
   }
   return runProcess(resolved, args, { cwd, logPath, timeoutMs, env });
+}
+/** Environment overrides for a gate's child commands. */
+export function gateEnvironment(root, gate) {
+  // Keep compiler caches inside the repository's ignored build directory, not the user's global cache.
+  return gate.kind === 'zig' || gate.kind === 'c-abi' ? { ZIG_GLOBAL_CACHE_DIR: path.join(root, '.zig-cache', 'global') } : undefined;
 }
 export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
   const gate = readJson(safePath(root, 'engineering/gates.json')).gates.find(g => g.id === id);
@@ -377,7 +419,8 @@ export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
   fs.mkdirSync(path.dirname(logPath), { recursive: true });
   fs.writeFileSync(logPath, `Fairpane local gate: ${id}\nTrust: unsigned-local-integrity-only\n`);
   const commands = [], started = new Date().toISOString();
-  let error = null, zigVersion = null, env;
+  let error = null, zigVersion = null;
+  const env = gateEnvironment(root, gate);
   async function run(exe, argv) {
     const r = await runProcess(exe, argv, { cwd: root, logPath, timeoutMs: gate.timeout_ms, env });
     commands.push(r);
@@ -389,8 +432,6 @@ export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
     else if (gate.kind === 'zig' || gate.kind === 'c-abi') {
       const zig = checkCompiler(root);
       zigVersion = readJson(safePath(root, 'toolchains/zig.lock.json')).version;
-      // Keep compiler caches inside the repository's ignored build directory, not the user's global cache.
-      env = { ZIG_GLOBAL_CACHE_DIR: path.join(root, '.zig-cache', 'global') };
       if (gate.kind === 'zig') await run(zig, gate.args);
       else {
         const buildDir = path.join(root, 'out', 'c-abi-build');

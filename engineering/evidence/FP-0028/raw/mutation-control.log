@@ -1,0 +1,10 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0028/controls/mutants.mjs"]
+KILLED resolution searches the working directory first: not ok 65 - Executable resolution never searches the process working directory
+KILLED record logs the unresolved name: not ok 66 - A bare executable name is logged as its resolved absolute path
+KILLED copy failure is swallowed: not ok 62 - A failed output copy is recorded and its capture directory is removed
+KILLED capture directory is kept: not ok 64 - A completed command leaves no capture directory
+KILLED record omits the working directory: not ok 60 - Command records carry the working directory and start time
+KILLED every gate receives the cache override: not ok 69 - Only Zig and C ABI gates receive the repository-local compiler cache
+mutants: 6, survived: 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0028/controls/mutants.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:30:16.533Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":8919}

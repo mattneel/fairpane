@@ -5,11 +5,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import {
   readJson, writeJson, sha256, fileHash, safePath, collectFiles, hashInputs,
   validateLock, hostPlatform, verifyArchive, validatePlan, readyTasks,
   qualificationProblems, checkRepository, validateReceipt, runProcess, runGate,
-  resolveExecutable, recordCommand, REQUIRED_CAPABILITIES,
+  resolveExecutable, recordCommand, gateEnvironment, REQUIRED_CAPABILITIES,
 } from './lib.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -299,7 +300,7 @@ test('Environment overrides reach the child and its command record', async () =>
   assert.match(fs.readFileSync(logPath, 'utf8'), /child saw override-7f3a/);
   assert.equal(process.env.FAIRPANE_FIXTURE_OVERRIDE, undefined);
 });
-test('Executable resolution follows PATH order and ignores the working directory', () => {
+test('Executable resolution follows PATH order', () => {
   const first = temp(), second = temp(), cwd = temp(), name = 'fixture-tool';
   const make = dir => { const f = put(dir, process.platform === 'win32' ? `${name}.exe` : name, 'fixture'); fs.chmodSync(f, 0o755); return f; };
   const late = make(second); make(cwd);
@@ -319,6 +320,84 @@ test('A recorded command keeps its output, exit status, and resolved executable'
   assert.equal(missing.exit_code, null); assert.match(missing.error, /not on PATH/);
   assert.match(fs.readFileSync(path.join(dir, log), 'utf8'), /fairpane-absent-tool/);
   await assert.rejects(() => recordCommand(dir, 'tools/record.log', process.execPath, ['-e', '']), /outside an allowed directory/);
+});
+async function withPrivateTemp(fn) {
+  const dir = temp(), keys = ['TMPDIR', 'TMP', 'TEMP'], saved = keys.map(k => process.env[k]);
+  for (const k of keys) process.env[k] = dir;
+  try { await fn(dir); }
+  finally { keys.forEach((k, i) => { if (saved[i] === undefined) delete process.env[k]; else process.env[k] = saved[i]; }); }
+  return dir;
+}
+test('Command records carry the working directory and start time', async () => {
+  const dir = temp(), logPath = path.join(dir, 'log');
+  const r = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath });
+  assert.equal(r.exit_code, 0); assert.equal(r.cwd, path.resolve(dir)); assert.ok(!Number.isNaN(Date.parse(r.started_at)));
+  const line = fs.readFileSync(logPath, 'utf8').split('\n').find(l => l.startsWith('RESULT '));
+  const logged = JSON.parse(line.slice('RESULT '.length));
+  assert.equal(logged.cwd, r.cwd); assert.equal(logged.started_at, r.started_at);
+});
+test('An unwritable log yields a failed result instead of an exception', async () => {
+  const dir = temp(); put(dir, 'blocker', 'a regular file');
+  const r = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: path.join(dir, 'blocker', 'nested', 'log') });
+  assert.equal(r.exit_code, null); assert.match(r.error, /Log write failed/);
+});
+test('A failed output copy is recorded and its capture directory is removed', async () => {
+  const dir = temp(), logPath = path.join(dir, 'log');
+  const tmp = await withPrivateTemp(async () => {
+    const r = await runProcess(process.execPath, ['-e', 'console.log("ignored")'], { cwd: dir, logPath,
+      copyOutput: () => { throw new Error('forced copy failure'); } });
+    assert.equal(r.exit_code, 0); assert.match(r.error, /forced copy failure/);
+  });
+  assert.match(fs.readFileSync(logPath, 'utf8'), /^RESULT .*forced copy failure/m);
+  assert.deepEqual(fs.readdirSync(tmp), []);
+});
+test('Standard error output reaches the log', async () => {
+  const dir = temp(), logPath = path.join(dir, 'log');
+  const r = await runProcess(process.execPath, ['-e', 'console.error("to-standard-error")'], { cwd: dir, logPath });
+  assert.equal(r.exit_code, 0); assert.match(fs.readFileSync(logPath, 'utf8'), /to-standard-error/);
+});
+test('A completed command leaves no capture directory', async () => {
+  const dir = temp();
+  const tmp = await withPrivateTemp(async () => {
+    const r = await runProcess(process.execPath, ['-e', 'console.log("captured")'], { cwd: dir, logPath: path.join(dir, 'log') });
+    assert.equal(r.exit_code, 0);
+  });
+  assert.deepEqual(fs.readdirSync(tmp), []);
+  assert.match(fs.readFileSync(path.join(dir, 'log'), 'utf8'), /captured/);
+});
+test('Executable resolution never searches the process working directory', () => {
+  const cwd = temp(), other = temp(), name = 'fixture-cwd-tool', saved = process.cwd();
+  fs.chmodSync(put(cwd, process.platform === 'win32' ? `${name}.exe` : name, 'fixture'), 0o755);
+  process.chdir(cwd);
+  try { assert.throws(() => resolveExecutable(other, name, { pathEnv: '' }), /not on PATH/); }
+  finally { process.chdir(saved); }
+});
+test('A bare executable name is logged as its resolved absolute path', async () => {
+  const dir = gateFixture(), log = 'out/evidence/bare.log';
+  const bare = path.basename(process.execPath, process.platform === 'win32' ? '.exe' : '');
+  const r = await recordCommand(dir, log, bare, ['-e', ''], { pathEnv: path.dirname(process.execPath) });
+  assert.equal(r.exit_code, 0); assert.equal(r.executable, process.execPath);
+  assert.ok(fs.readFileSync(path.join(dir, log), 'utf8').includes(`COMMAND ${JSON.stringify([process.execPath, '-e', ''])}`));
+});
+test('A rejected record path writes nothing', async () => {
+  const dir = gateFixture();
+  await assert.rejects(() => recordCommand(dir, 'tools/rejected.log', process.execPath, ['-e', '']), /outside an allowed directory/);
+  assert.equal(fs.existsSync(path.join(dir, 'tools', 'rejected.log')), false);
+});
+test('The controller rejects malformed run and record arguments', () => {
+  const cli = path.join(root, 'tools/fairpane.mjs');
+  for (const argv of [['run'], ['run', 'repo-check', '--evidence-dir'],
+    ['record', '--env', 'NOT-AN-ASSIGNMENT', 'out/evidence/x.log', process.execPath]]) {
+    const r = spawnSync(process.execPath, [cli, ...argv], { encoding: 'utf8', timeout: 30000, windowsHide: true });
+    assert.equal(r.status, 1, argv.join(' ')); assert.match(r.stderr, /Usage:/, argv.join(' '));
+  }
+});
+test('Only Zig and C ABI gates receive the repository-local compiler cache', () => {
+  const dir = temp(), expected = { ZIG_GLOBAL_CACHE_DIR: path.join(dir, '.zig-cache', 'global') };
+  assert.deepEqual(gateEnvironment(dir, { kind: 'zig' }), expected);
+  assert.deepEqual(gateEnvironment(dir, { kind: 'c-abi' }), expected);
+  assert.equal(gateEnvironment(dir, { kind: 'controller-check' }), undefined);
+  assert.equal(gateEnvironment(dir, { kind: 'controller-test' }), undefined);
 });
 test('The actual bootstrap repository passes its integrity check', () => {
   const r = checkRepository(root); assert.equal(r.result, 'pass'); assert.equal(r.level, 'bootstrap-integrity-only');
