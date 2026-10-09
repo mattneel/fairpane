@@ -46,6 +46,20 @@ A build of type 1 starts from the extracted source archive of one commit.
 It runs `zig build -Doptimize=ReleaseSafe --prefix zig-out` from the archive root with the compiler that the commit's `toolchains/zig.lock.json` names for the host platform.
 The build uses fresh local and global Zig caches, set through `ZIG_LOCAL_CACHE_DIR` and `ZIG_GLOBAL_CACHE_DIR`, and no other inherited `ZIG_*` variable.
 Its outputs are the files installed under `zig-out`.
+
+A provenance statement of build type 1 has these `externalParameters`.
+
+| Field | Value |
+| --- | --- |
+| `source.commit` | The full 40-hex commit ID of the source archive. |
+| `source.tree` | The commit's tree ID. |
+| `command` | `["zig", "build", "-Doptimize=ReleaseSafe", "--prefix", "zig-out"]`, run from the archive root. |
+| `toolchain.zig_version` | The `version` of the commit's `toolchains/zig.lock.json`. |
+| `toolchain.platform` | The lock's platform key for the host that records the statement, such as `x86_64-windows`. |
+| `toolchain.archive_sha256` | The lock's SHA-256 of that platform's compiler archive. |
+
+Its `internalParameters` object is empty.
+
 The URI `https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#build-type-1` names this definition in a provenance statement.
 The meaning of build type 1 never changes.
 A changed build definition gets a new numbered section, such as build type 2, with its own anchor, and an existing statement keeps the anchor that it names.

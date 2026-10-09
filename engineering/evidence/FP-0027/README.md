@@ -32,12 +32,12 @@ The worker did not commit, so every real run below names that commit, not the im
 | `raw/reproduce-check.log` | Exit status 1 with result `different`. Both builds exit with status 0. `include/fairpane.h` matches, and `lib/fairpane.lib` differs between the two work trees. Both work trees were removed. |
 | `raw/release-build.log` | The source tar extracted into `out/fp0027-build/a` and built there with `zig build -Doptimize=ReleaseSafe` and fresh caches, with exit status 0. |
 | `raw/provenance.log` | `provenance` exits with status 0 for that build's `fairpane.lib`, SHA-256 `6682cffca19ad0109ca8303940a4ff98e7aedbab4fbed76f0d45ed0ff3678895`, and `fairpane.h`, with the builder `fairpane-local-unsigned`. |
-| `raw/reproduce-diagnosis.log` | A second fresh extraction and build at the same path `out/fp0027-build/a` produces the same `fairpane.lib` digest, and the library contains the build directory name 8 times. |
+| `raw/reproduce-diagnosis.log` | A second extraction and build in the existing path `out/fp0027-build/a` produces the same `fairpane.lib` digest, and the library contains the build directory name 8 times. The log records no removal of the earlier tree or its caches, so it does not show a fresh build. |
 
 ## Open result
 
 The release build of commit `ba3a352` is not reproducible across build paths.
-Two fresh builds at one path produce identical bytes, and builds at different paths produce different static libraries that embed their build path.
+Two builds at one path, the second in the existing work tree, produce identical bytes, and builds at different paths produce different static libraries that embed their build path.
 `reproduce-check` reports this as `different` by design.
 A fix belongs in the build configuration, such as debug-information path mapping, which is outside this task's writable paths.
 Task `FP-0066` owns that fix.

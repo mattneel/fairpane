@@ -1,0 +1,29 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+3f45a3b0156b129df3ccb8f49e473d9b05959605
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T10:23:39.215Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat"]
+ engineering/decisions/0009-release-and-stewardship.md | 14 ++++++++++++++
+ engineering/evidence/FP-0027/README.md                |  4 ++--
+ tools/README.md                                       |  3 ++-
+ tools/release.test.mjs                                |  3 ++-
+ 4 files changed, 20 insertions(+), 4 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T10:23:39.297Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":44}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/release.test.mjs"]
+TAP version 13
+ok 1 - FP-0027 case 1: two source-archive runs on one commit write byte-identical tar and manifest files, and the manifest names the tar digest
+ok 2 - FP-0027 case 2: a changed file, an added file, a removed file, and a changed mode each change the manifest, which lists exactly the tree files
+ok 3 - FP-0027 case 3: source-archive rejects an abbreviated ID, a ref name, a missing commit, and an output directory inside the repository, and writes nothing
+ok 4 - FP-0027 case 4: provenance subjects equal the artifact digests, and the build definition names the commit, tree, lock digest, and builder
+ok 5 - FP-0027 case 5: reproduce-check reports reproducible for a fixed build, and different with the path and exit status 1 for a clock build
+ok 6 - FP-0027 case 6: reproduce-check removes both work trees, and a forced removal failure appears in the report
+ok 7 - FP-0027 case 7: ADR 0009 lists exactly the ten owner decisions, each with the status open
+ok 8 - FP-0027: source-archive fails before any write when an export attribute makes the tar differ from the tree
+ok 9 - FP-0027: reproduce-check reports a failed build as an error with exit status 1 and still removes both work trees
+1..9
+# tests 9
+# pass 9
+# fail 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/release.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T10:23:39.393Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":7876}

@@ -245,7 +245,7 @@ export const releaseCases = [
     rejects(() => provenanceStatement(dir, id.slice(0, 12), [first]), /full 40-hex commit ID/);
   }],
   ['FP-0027 case 5: reproduce-check reports reproducible for a fixed build, and different with the path and exit status 1 for a clock build', async () => {
-    const { reproduceCheck, reproduceExitCode } = await release();
+    const { reproduceCheck, reproduceExitCode, BUILD_COMMAND } = await release();
     const fixed = buildFixture(FIXED_BUILD), stand = standIn();
     // An inherited ZIG_* variable must not reach the build, because it could select a shared cache or another library.
     const inherited = { ZIG_GLOBAL_CACHE_DIR: process.env.ZIG_GLOBAL_CACHE_DIR, ZIG_LIB_DIR: process.env.ZIG_LIB_DIR };
@@ -260,6 +260,7 @@ export const releaseCases = [
     assert.deepEqual(same.files.map(f => f.path), ['lib/fixed.txt']);
     assert.equal(same.files[0].a, sha256('fixed\n'));
     assert.equal(reproduceExitCode(same), 0);
+    assert.deepEqual(same.build_type_command, [...BUILD_COMMAND], 'The report does not name the canonical command of build type 1.');
     const calls = stand.invocations();
     assert.equal(calls.length, 2, 'The build did not run once in each work tree.');
     assert.notEqual(calls[0].cwd, calls[1].cwd);
