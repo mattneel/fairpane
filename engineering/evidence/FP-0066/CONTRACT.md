@@ -58,7 +58,9 @@ Record each command with `node tools/fairpane.mjs record` under `engineering/evi
 1. `tests-before.log` on the base, with `HEAD`, the staging command, and the blob ID of every staged file.
 2. `mutation.log` and its diffs, with the hash of each changed file before, during, and after.
 3. An uncached `tests-after.log` with `zig build test --summary all`, `controller-tests-after.log`, and `fmt.log`.
-4. `node-linux-install.log` and `zig-linux-install.log` for the WSL tools, with their digest checks.
+4. Amendment 1, before dispatch: the integrator installed both WSL tools.
+   `engineering/evidence/hosts/wsl-ubuntu/node-install.log` records Node v26.7.0 and its `SHASUMS256.txt` check, and `engineering/evidence/FP-0067/raw/linux-baseline.log` records the locked Linux compiler and its lock check.
+   The worker records `linux-tools.log` with each tool's version, run by its path in WSL, and installs nothing.
 
 The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs `repo-check`, `controller-test`, and `zig-test`.
 The integrator then runs `node tools/fairpane.mjs reproduce-check <commit>` for the implementation commit on Windows and on WSL Ubuntu, records both, and requires `reproducible` with exit status 0 from each.

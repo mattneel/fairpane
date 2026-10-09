@@ -1,0 +1,23 @@
+
+COMMAND ["C:\\Windows\\System32\\wsl.exe","-d","Ubuntu","-e","bash","-c","id -un; id -u; uname -srm; cat /etc/os-release | grep PRETTY"]
+autark
+1000
+Linux 7.2.6-locietta-WSL2-xanmod1 x86_64
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+RESULT {"executable":"C:\\Windows\\System32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","id -un; id -u; uname -srm; cat /etc/os-release | grep PRETTY"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:35:15.867Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":83}
+
+COMMAND ["C:\\Windows\\System32\\wsl.exe","-d","Ubuntu","-e","bash","-c","mkdir -p \"$HOME/fairpane-linux/downloads\" && cd \"$HOME/fairpane-linux/downloads\" && curl --proto =https --tlsv1.2 -sSf -o SHASUMS256.txt https://nodejs.org/dist/v26.7.0/SHASUMS256.txt && curl --proto =https --tlsv1.2 -sSf -o node-v26.7.0-linux-x64.tar.gz https://nodejs.org/dist/v26.7.0/node-v26.7.0-linux-x64.tar.gz && ls -l SHASUMS256.txt node-v26.7.0-linux-x64.tar.gz"]
+-rw-r--r-- 1 autark autark     2943 Oct  9 08:35 SHASUMS256.txt
+-rw-r--r-- 1 autark autark 62014253 Oct  9 08:35 node-v26.7.0-linux-x64.tar.gz
+RESULT {"executable":"C:\\Windows\\System32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","mkdir -p \"$HOME/fairpane-linux/downloads\" && cd \"$HOME/fairpane-linux/downloads\" && curl --proto =https --tlsv1.2 -sSf -o SHASUMS256.txt https://nodejs.org/dist/v26.7.0/SHASUMS256.txt && curl --proto =https --tlsv1.2 -sSf -o node-v26.7.0-linux-x64.tar.gz https://nodejs.org/dist/v26.7.0/node-v26.7.0-linux-x64.tar.gz && ls -l SHASUMS256.txt node-v26.7.0-linux-x64.tar.gz"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:35:16.013Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":11763}
+
+COMMAND ["C:\\Windows\\System32\\wsl.exe","-d","Ubuntu","-e","bash","-c","cd \"$HOME/fairpane-linux/downloads\" && grep \"  node-v26.7.0-linux-x64.tar.gz\\$\" SHASUMS256.txt && grep \"  node-v26.7.0-linux-x64.tar.gz\\$\" SHASUMS256.txt | sha256sum -c -"]
+bd6b6c31e377bad9ad579bed72e5bc11f4c879ac9452ad51d30e646ea3d828df  node-v26.7.0-linux-x64.tar.gz
+node-v26.7.0-linux-x64.tar.gz: OK
+RESULT {"executable":"C:\\Windows\\System32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","cd \"$HOME/fairpane-linux/downloads\" && grep \"  node-v26.7.0-linux-x64.tar.gz\\$\" SHASUMS256.txt && grep \"  node-v26.7.0-linux-x64.tar.gz\\$\" SHASUMS256.txt | sha256sum -c -"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:35:27.834Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":89}
+
+COMMAND ["C:\\Windows\\System32\\wsl.exe","-d","Ubuntu","-e","bash","-c","test ! -e \"$HOME/fairpane-linux/node\" && mkdir \"$HOME/fairpane-linux/node\" && tar -xzf \"$HOME/fairpane-linux/downloads/node-v26.7.0-linux-x64.tar.gz\" -C \"$HOME/fairpane-linux/node\" --strip-components=1 && \"$HOME/fairpane-linux/node/bin/node\" --version && \"$HOME/fairpane-linux/node/bin/node\" -p \"process.platform + \\\" \\\" + process.arch\" && command -v node || echo \"node is not on PATH\""]
+v26.7.0
+linux x64
+node is not on PATH
+RESULT {"executable":"C:\\Windows\\System32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","test ! -e \"$HOME/fairpane-linux/node\" && mkdir \"$HOME/fairpane-linux/node\" && tar -xzf \"$HOME/fairpane-linux/downloads/node-v26.7.0-linux-x64.tar.gz\" -C \"$HOME/fairpane-linux/node\" --strip-components=1 && \"$HOME/fairpane-linux/node/bin/node\" --version && \"$HOME/fairpane-linux/node/bin/node\" -p \"process.platform + \\\" \\\" + process.arch\" && command -v node || echo \"node is not on PATH\""],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:35:35.549Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1644}

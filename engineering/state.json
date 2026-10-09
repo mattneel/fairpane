@@ -905,6 +905,27 @@
       "evidence": [],
       "review": null,
       "notes": ["Created from the minor findings and notes in the FP-0013 review-2 and security-review-2 records."]
+    },
+    "FP-0079": {
+      "status": "active",
+      "owner": "fairpane-bindings worker FP0079Rust, integrated by root-integrator",
+      "evidence": ["engineering/evidence/FP-0079/CONTRACT.md"],
+      "review": null,
+      "notes": ["Split from FP-0029 by fairpane-bindings worker FP0029Contract-2, because the lock must land in a reviewed change before the wrapper and policy.json cannot name a root that does not exist yet."]
+    },
+    "FP-0080": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Split from FP-0029. It takes FP-0029 criteria 2 to 5, 17, 18, and 20 word for word, and parts of 14 and 19, and FP-0029 cites its evidence for them."]
+    },
+    "FP-0081": {
+      "status": "planned",
+      "owner": null,
+      "evidence": [],
+      "review": null,
+      "notes": ["Created because the C ABI takes no allocator, so no foreign consumer could induce the allocation-failure scenario that FP-0029 criterion 16 lists."]
     }
   }
 }

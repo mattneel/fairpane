@@ -1352,7 +1352,10 @@
       "title": "Build and qualify the canonical Rust wrapper crates",
       "workstream": "wrappers",
       "depends_on": [
-        "FP-0021"
+        "FP-0021",
+        "FP-0079",
+        "FP-0080",
+        "FP-0081"
       ],
       "role": "fairpane-bindings",
       "allowed_paths": [
@@ -3233,6 +3236,80 @@
         "Add a regression case for overlapping format 12 subtables and correct the description of case 50's third block."
       ],
       "read": ["engineering/evidence/FP-0013/reviews/review-2-accept.json", "engineering/evidence/FP-0013/reviews/security-review-2-accept.json"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0079",
+      "title": "Pin and install the Rust 1.99.0 toolchain",
+      "workstream": "wrappers",
+      "depends_on": [],
+      "role": "fairpane-bindings",
+      "allowed_paths": ["toolchains/rust.lock.json", "rust-toolchain.toml", "tools", "tests/rust", "engineering/dependencies.json", "engineering/decisions", "docs/TOOLCHAIN.md", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Pin stable Rust 1.99.0 with verified official artifact digests in toolchains/rust.lock.json, through a reviewed change separate from the wrapper implementation.",
+        "Name the official source of every digest, and record a GnuPG verification of the signed channel manifest against the Rust signing key.",
+        "Install the locked toolchain under .tools with size and digest checks, without rustup, PATH, or other global changes.",
+        "Name the locked version in rust-toolchain.toml, and check it against the lock in the repository check.",
+        "Execute the installed toolchain on Windows and on Linux, including a thread and a caught panic.",
+        "Protect the lock and the selection file through a separate reviewed policy change."
+      ],
+      "read": ["engineering/evidence/FP-0079/CONTRACT.md", "docs/TOOLCHAIN.md", "engineering/decisions/0004-first-party-wrapper-language.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0080",
+      "title": "Generate fairpane-sys and link it against the native library",
+      "workstream": "wrappers",
+      "depends_on": ["FP-0079"],
+      "role": "fairpane-bindings",
+      "allowed_paths": ["api", "bindings", "include", "src/abi_generated.zig", "tests", "tools", "build.zig", "Cargo.toml", "Cargo.lock", "engineering/dependencies.json", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-test", "c-abi"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Generate fairpane-sys from the FP-0021 metadata.",
+        "Ship the generated declarations with their source schema.",
+        "Keep regeneration a separate development operation.",
+        "Extend the interface metadata through a reviewed schema change where it falls short.",
+        "Keep generated declarations separate from the idiomatic layer.",
+        "Detect stale generated files mechanically.",
+        "Do not call generated source alone qualified support.",
+        "Prove that fairpane-sys resolves no third-party crate in any declared target configuration, including build dependencies.",
+        "Extend the source inventory and gate registry to cover the Rust crates through separate reviewed policy changes.",
+        "Assert in Rust every structure size and member offset from the layout model that the C and Zig checks use, and compile those assertions for a 32-bit target through a reviewed lock change that adds its standard library.",
+        "Link a fairpane-sys test against the actual native library on Windows and Linux.",
+        "Implement the rust-fmt and rust-wrapper gate kinds so that they run only the locked toolchain in an isolated Cargo environment.",
+        "Declare the wrapper's target configurations in engineering/dependencies.json."
+      ],
+      "read": ["engineering/evidence/FP-0079/CONTRACT.md", "docs/ABI_AND_WRAPPERS.md", "engineering/decisions/0004-first-party-wrapper-language.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0081",
+      "title": "Let a host bound engine allocation through the public contract",
+      "workstream": "laboratory",
+      "depends_on": ["FP-0050"],
+      "role": "fairpane-core",
+      "allowed_paths": ["api", "include", "src", "tests", "tools", "build.zig", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test", "c-abi"],
+      "required_reviewers": ["fairpane-review", "fairpane-security"],
+      "acceptance": [
+        "Add an engine allocation budget to fp_engine_options through a reviewed interface metadata change, without any engine call into host code.",
+        "Return FP_STATUS_OUT_OF_MEMORY from every operation whose allocation exceeds the budget, and leave the engine and every handle usable.",
+        "Let a foreign consumer induce the allocation-failure scenario of api/failure-scenarios.json through the budget alone.",
+        "Account every engine allocation against the budget, and test the accounting at the budget boundary."
+      ],
+      "read": ["api/failure-scenarios.json", "api/README.md", "engineering/evidence/FP-0050/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }

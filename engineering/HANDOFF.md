@@ -9,8 +9,8 @@ The owner approved Unicode data, OFL test fonts, and the WHATWG `entities.json` 
 | Task | State | Next step |
 | --- | --- | --- |
 | `FP-0014` CSS syntax and cascade | Review 1 rejected the implementation, because `StyleMap.textStyle` returns the parent's whole style instead of defaulting. Revision 1 of the contract, frozen in `82ba854`, adds cases 49 to 54. | Integrate the patch of worker `FP0014R1` and request review 2. |
-| `FP-0029` Rust wrapper | Worker `FP0029Contract-2` drafts the task split and the first contract. | Freeze the first task, then make its protected toolchain and policy changes in separate `policy:` commits. |
-| `FP-0064` tokenizer states | Worker `FP0064Contract-2` drafts the contract. | Freeze it on the pinned HTML Standard `efc54f7b` and dispatch `fairpane-core`. |
+| `FP-0029` Rust wrapper | Split into `FP-0079` (pin and install Rust), `FP-0080` (generate `fairpane-sys`), and `FP-0081` (engine allocation budget); `FP-0029` keeps its 20 criteria and depends on all three. | Integrate `FP-0079` from worker `FP0079Rust`, then land policy change P1 after its reviews. |
+| `FP-0064` tokenizer states | Contract frozen in `dfa6563`. | Integrate the patch of worker `FP0064States` and request review. |
 | `FP-0012` JavaScript values | Worker `FP0012Contract` drafts the task split and the first contract, from `reference` and the generated tracer, as ADR 0008 decides. | Freeze the first part, add the split plan entries, and dispatch `fairpane-js`. |
 | `FP-0052`, `FP-0066`, `FP-0067`, `FP-0076` | Contracts frozen in `42c5e07`, `3640a79`, `5134610`, and `297f1d3`. | Dispatch `fairpane-core` for each as agent slots free. |
 
@@ -62,6 +62,8 @@ node tools/fairpane.mjs next
   Use `node tools/fairpane.mjs record` with GNU `sha256sum` for recorded checks.
 - WSL Ubuntu on this host runs as the non-root user `autark`, uid 1000.
   The locked `x86_64-linux` compiler is installed under `$HOME/fairpane-linux/tools` there, and `engineering/evidence/FP-0067/raw/linux-baseline.log` records its digest check and a passing suite.
+  Node v26.7.0 is installed at `$HOME/fairpane-linux/node`, outside `PATH`, and `engineering/evidence/hosts/wsl-ubuntu/node-install.log` records its digest check.
+  Copy a tree into a WSL-native directory before a Linux run, because the `/mnt/c` mount does not keep Linux file modes.
 - The compiler installer does not retry a failed download, so a transient network failure fails a `Gates` job; rerun the failed job.
 - The owner's OMP configuration uses approval mode `yolo`.
 
