@@ -264,7 +264,14 @@
         "engineering/evidence/FP-0014/raw/tests-before.log",
         "engineering/evidence/FP-0014/raw/mutation-cascade-origin.log",
         "engineering/evidence/FP-0014/raw/integration-tests.log",
-        "engineering/evidence/FP-0014/raw/named-colors-check.log"
+        "engineering/evidence/FP-0014/raw/named-colors-check.log",
+        "engineering/evidence/FP-0014/gates/2026-10-09T12-53-45-256Z-repo-check-b5c5aeb2.json",
+        "engineering/evidence/FP-0014/gates/2026-10-09T12-53-45-665Z-controller-test-97c8489f.json",
+        "engineering/evidence/FP-0014/gates/2026-10-09T12-54-27-880Z-zig-fmt-511334cc.json",
+        "engineering/evidence/FP-0014/gates/2026-10-09T12-54-28-189Z-zig-test-531423e0.json",
+        "engineering/evidence/FP-0014/raw/integration-binding-r1.log",
+        "engineering/evidence/FP-0014/raw/integration-tests-r1.log",
+        "engineering/evidence/FP-0014/raw/bun-selftest-r1.log"
       ],
       "review": null,
       "notes": [
@@ -272,7 +279,8 @@
         "Tasks FP-0068 to FP-0074 own the obligations that the contract leaves unsupported.",
         "Integrator amendments 1 (43edcec) and 2 (1323095) corrected the case 39 expected dump and replaced the two ZON tables with data-only Zig files.",
         "Commit ef8ad1c implements it with 192 of 192 controller tests and 272 of 272 Zig tests, and the 148 named colors match the pinned Color 4 table.",
-        "fairpane-review rejected ef8ad1c and 639ec81 in reviews/review-1-reject.json because StyleMap.textStyle returns the parent's whole style instead of defaulting. Contract revision 1 also covers ignored at-rule diagnostics, the other Values 5 substitution functions, display and selector classification, bounded selector matching, and the module structure."
+        "fairpane-review rejected ef8ad1c and 639ec81 in reviews/review-1-reject.json because StyleMap.textStyle returns the parent's whole style instead of defaulting. Contract revision 1 also covers ignored at-rule diagnostics, the other Values 5 substitution functions, display and selector classification, bounded selector matching, and the module structure.",
+        "Worker FP0014R1 implemented revision 1. Its files landed in 1409e8b, whose message names only the FP-0012 plan split because git apply --3way had staged them; the README's 'Integration of revision 1' section records that. The binding at ba759f7 passes all four gates, 278 of 278 Zig tests uncached, and 192 of 192 controller tests under Bun 1.4.2."
       ]
     },
     "FP-0015": {

@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "controller-test",
+  "gate_sha256": "43baf0f82e3b5e8ecbf8985681f0a95032043886401b52f736735ca9bf3cdef2",
+  "status": "pass",
+  "started_at": "2026-10-09T12:53:45.667Z",
+  "finished_at": "2026-10-09T12:54:27.755Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "os_release": "10.0.26200",
+    "runtime": "v26.7.0",
+    "bun_version": null,
+    "zig_version": null
+  },
+  "source_before": {
+    "sha256": "42dc534a8df8200d69ba05ee06762fa1844811a7fcfe670a903172611795802d",
+    "file_count": 279
+  },
+  "source_after": {
+    "sha256": "42dc534a8df8200d69ba05ee06762fa1844811a7fcfe670a903172611795802d",
+    "file_count": 279
+  },
+  "policy_before": {
+    "sha256": "7244083c32fa3e016846e5aafdbed9616899a9c617921d3f14d4ba5800f8e700",
+    "file_count": 22
+  },
+  "policy_after": {
+    "sha256": "7244083c32fa3e016846e5aafdbed9616899a9c617921d3f14d4ba5800f8e700",
+    "file_count": 22
+  },
+  "commands": [
+    {
+      "executable": "C:\\nvm4w\\nodejs\\node.exe",
+      "arguments": [
+        "C:\\src\\fairpane\\tools\\selftest.mjs"
+      ],
+      "cwd": "C:\\src\\fairpane",
+      "started_at": "2026-10-09T12:53:45.667Z",
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 42016
+    }
+  ],
+  "error": null,
+  "outputs": [
+    {
+      "path": "engineering/evidence/FP-0014/gates/2026-10-09T12-53-45-665Z-controller-test-97c8489f.log",
+      "size": 45559,
+      "sha256": "2ffa8466e4711751713f3cbd0432053f03144e117d8d51e76f3c1f12e7586167"
+    }
+  ]
+}

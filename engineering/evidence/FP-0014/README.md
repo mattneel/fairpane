@@ -262,3 +262,18 @@ No revision 1 log records the download of those copies.
 
 - Record `HEAD` and a status that includes ignored files for every source root, then run `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` with `--evidence-dir engineering/evidence/FP-0014/gates`, and record `HEAD` and status again.
 - Request review from `fairpane-review`.
+
+### Integration of revision 1
+
+The integrator applied the worker's patch with `git apply --3way`, which also staged it.
+The next commit, `1409e8b`, was meant to hold only the FP-0012 plan split, but it also committed every file of this revision.
+Its message names only the plan split.
+Pushed history stays unchanged, as `docs/GIT_OPERATIONS.md` requires, so `1409e8b` is the revision 1 implementation commit, and this record corrects its message.
+An unrecorded check of that tree passed `zig fmt --check`, 65 of 65 build steps with 278 of 278 tests, and 192 of 192 controller tests before the integrator recorded anything.
+
+The integrator then recorded the binding at `HEAD` `ba759f7`, which differs from `1409e8b` only in `engineering/evidence/FP-0064/CONTRACT.md`.
+
+- `raw/integration-binding-r1.log` records `HEAD` and a status that includes ignored files for every source root, before and after the runs below; both statuses are empty.
+- `gates/2026-10-09T12-53-45-256Z-repo-check-b5c5aeb2.json`, `gates/2026-10-09T12-53-45-665Z-controller-test-97c8489f.json`, `gates/2026-10-09T12-54-27-880Z-zig-fmt-511334cc.json`, and `gates/2026-10-09T12-54-28-189Z-zig-test-531423e0.json` all pass.
+- `raw/integration-tests-r1.log` runs `zig build test --summary all` with the fresh cache `out/fp0014-r1-integration`: 65 of 65 build steps and 278 of 278 tests pass.
+- `raw/bun-selftest-r1.log` records Bun 1.4.2 and `tools/selftest.mjs` with 192 of 192 tests.
