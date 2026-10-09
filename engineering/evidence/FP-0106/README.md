@@ -100,7 +100,7 @@ The M3 and M4 runs report 390 tests in total instead of 397, because the build r
 | Whole `c-abi` gate on the after tree | 102953 ms, of which 81778 ms is the Debug `zig build` with a new work-tree global cache | `raw/c-abi-after.log`, `raw/gates-after/…c7d92f07.log` |
 | Case 5, laboratory wall time | 4257 ms | `raw/case-5-duration.log` |
 | Case 5, build step | 4 s | `raw/tests-after.log` |
-| Time added to the Windows `zig-test` run | About 4.3 s for case 5; cases 3, 4, and 6 are unit tests | the rows above, under the 10 s bound of decision 8 |
+| Time added to the Windows `zig-test` run | About 4.3 s for case 5, an estimate from case 5's step time and its direct run; cases 3, 4, and 6 are unit tests, and no base and after pair of `zig-test` runs measures them | the rows above, under the 10 s bound of decision 8 |
 
 No stop rule fired: the ReleaseSafe build took less than 300 s, case 5 took less than 15 s, case 5's precondition held on every run, case 6 compiled for Linux, and R removed `fp_abi_revision` from the ReleaseSafe library alone.
 
@@ -143,6 +143,7 @@ Commit `63e14ca` applies the worker's `out/fp0106.patch`, blob `cdeb5c30f9df80ef
 ## First CI run
 
 Push run 37990258390 of `a7219f9` is the first `Gates` run that contains `63e14ca`, and it concluded `success` in both jobs.
+`ci/ancestry-63e14ca.log` records that `63e14ca` is an ancestor of `a7219f9` and not of `5859de7`, the head of the push before it.
 `ci/run-37990258390.log` records `gh run view` of that run and `gh run download` of its receipts into `ci/run-37990258390/`.
 The Windows `c-abi` receipt, `ci/run-37990258390/windows-gate-receipts-unsigned-local-integrity-records-not-attestations/2026-10-09T21-01-11-455Z-c-abi-6e5b0546.json`, passes.
 Its ReleaseSafe `zig build` took 4,132 ms, and its second `abi-exports` run exits 0.

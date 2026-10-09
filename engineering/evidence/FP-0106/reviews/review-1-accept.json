@@ -1,0 +1,41 @@
+{
+  "verdict": "accept",
+  "summary": "I found no blocker or major defect in FP-0106 at 63e14ca, as bound in 89c0e8c and 7f6b77d. Criterion 1: after the Debug smoke test, the c-abi gate in tools/lib.mjs:763-767 removes out/c-abi-release, builds ReleaseSafe there, and runs abi-exports on the one static library it finds. Each step is a recorded gate command, so a failure fails the gate. tools/README.md:242 and :291 and build.zig:378 match this behavior. Case 1 passes with 15 exports. Case 2 passes on the base with R and fails on the after tree with R. The receipt error names the ReleaseSafe abi-exports command, that command reports \"missing\": [\"fp_abi_revision\"], and the Debug abi-exports before it exits 0. Criterion 2: find in tools/zig/library_check.zig:133-148 is Horspool over folded bytes with a 256-entry stack table, it never allocates or copies, and reportAbsent takes no allocator. Cases 3 and 4 match the contract word for word, and M5 fails case 4 on C:\\src\\FAIRPANE. Criterion 3: I compared src/lab.zig:164-193 with every arm of the pinned dirOpenFileWtf16 switch (Io/Threaded.zig:5167-5224, max_windows_kernel_bug_retries = 13 at :1571). Every arm maps the same way, including the three ntstatusBug arms, CANCELLED, VIRUS_*, and the shared 13-attempt (1 << attempt) >> 1 backoff. fileIdentity in src/lab_main.zig:180-224 applies each step as decision 4 requires. The pinned waits also use the cancelable parking_sleep.sleep, so io.sleep keeps the same cancelation behavior. The delete-pending helper checks its own STATUS_DELETE_PENDING precondition and requires exit 3, the detail output file: FileBusy, and at least 4000 ms. It passed locally in 4257 ms and in Windows CI. The base failures are case 3 (allocator), case 5 (output file: Unexpected from lab_main.zig:212), and both case 6 tests (the hasDecl guards), with no compile error. M2 to M5 each fail exactly the named cases, every file returns to its original hash, and the R hashes are recorded. Criterion 4: every FP-0066 and FP-0076 step passes on Windows, on WSL Ubuntu, in the integration run (397/397), and in CI run 37990258390 (success). The durations stay well inside decision 8 and the stop rules. All remaining findings are evidence-procedure notes.",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0106/README.md",
+      "line": null,
+      "issue": "No command in the FP-0106 evidence supports the claim that push run 37990258390 at a7219f9 is the first Gates run that contains 63e14ca. Only the shared ledger engineering/evidence/ci/runs-2026-10-09-extension-2.log, whose last push run is at 5859de7, and the repository's push history support it.",
+      "recommendation": "Record `git merge-base --is-ancestor 63e14ca a7219f9`, plus the absence of 63e14ca from the prior pushed head 5859de7, in ci/run-37990258390.log or the README."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0106/README.md",
+      "line": null,
+      "issue": "The 'Time added to the Windows zig-test run' row is inferred from case 5's step time (4 s) and its direct run (4257 ms). It does not compare zig-test durations before and after the change, and it does not measure the added unit tests (cases 3, 4, and 6). The c-abi addition, about 4.9 s, is measured directly.",
+      "recommendation": "Label the zig-test figure as an estimate built from the case 5 step time, or record a base and after zig-test pair on the same cache state."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0106/raw/integration-tests.log",
+      "line": 2,
+      "issue": "The log has no command that deletes out/fp0106-integration before the run. The 'uncached' claim therefore rests on the fresh directory name and the 11 s compile step. The run does fall inside the integration-binding window (20:38:09 to 20:41:14) and starts after the c-abi gate finished.",
+      "recommendation": "In future integrations, record the removal or absence check of the cache directory before the uncached run."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0106/raw/mutation.log",
+      "line": 13,
+      "issue": "The mutated copies under out/fp0106/mutation/ were edited by hand between the recorded copy commands and the recorded `git diff --no-index` commands, for example from 20:21:38 to 20:21:47. case-5-duration-attempt-1.log was also renamed by hand. The README discloses both. The recorded diffs and before, during, and after hashes bind the content.",
+      "recommendation": "No action is needed for acceptance. When practical, apply mutations with a recorded command such as `git apply` of the saved diff."
+    },
+    {
+      "severity": "note",
+      "path": "tools/lib.mjs",
+      "line": 763,
+      "issue": "Only the Windows CI job runs the c-abi gate, so CI checks the ReleaseSafe exports only for the COFF fairpane.lib. A release-only export loss in the ELF or Mach-O libfairpane.a would go unchecked. The FP-0106 criterion does not require more.",
+      "recommendation": "Consider a later task that runs the ReleaseSafe abi-exports check on the Linux job or on a cross-built archive."
+    }
+  ]
+}
