@@ -13,7 +13,7 @@ The runner prints each case's duration, the ten slowest cases, and the total dur
 The `controller-test` gate keeps its arguments and its 120000 ms timeout.
 Each worker thread gets its own copy of the environment from `workerEnvironment`, which on Windows names the search path `PATH` and the system root `SystemRoot`, the spellings that the tools read.
 A worker's copy matches names with regard to letter case, while the main thread's `process.env` on Windows does not, and the hosted Windows runner's search path reaches a worker as `Path` [INFERENCE: the runs of `3e7128c` failed as a local run with that spelling fails].
-The runner does not share the main thread's environment through `SHARE_ENV`: with it, Bun 1.4.2's main-thread `os.tmpdir()` stops following `process.env`, and a declared case that changes `TMP` reaches concurrent workers.
+The runner does not share the main thread's environment through `SHARE_ENV`: with it, an undeclared worker case that changes `TMP` reaches the cases on other workers, and Bun 1.4.2's main-thread `os.tmpdir()` stops following `process.env`.
 
 ## Evidence
 

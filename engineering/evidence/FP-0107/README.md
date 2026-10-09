@@ -234,7 +234,7 @@ The local `controller-test` total is 51,573 ms, against 37,968 ms in `raw/profil
 
 The `Gates` push run 37971989978 and the ten dispatched runs 37972006869 to 37974347550 on `3e7128c` failed the Windows `controller-test` step, while every Linux job passed.
 In run 37972006869, 43 Windows cases failed with "The executable is not on PATH: git" or "No git executable exists on PATH.".
-A worker thread receives a copy of `process.env` whose names match with regard to letter case, and the hosted Windows runner names the search path `Path`; the development host's shell exports `PATH`, which hid the fault.
+A worker thread receives a copy of `process.env` whose names match with regard to letter case, and the development host's shell exports `PATH`, which hid the fault; [INFERENCE] the hosted Windows runner names the search path `Path`, as "Revision 2" explains.
 The integrator implemented revision 1 and its amendment 1, as `CONTRACT.md` records.
 `casePool` now passes each worker the copy that `workerEnvironment` returns, which on Windows names the search path `PATH` and the system root `SystemRoot`.
 
