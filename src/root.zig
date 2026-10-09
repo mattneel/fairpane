@@ -3,6 +3,7 @@
 pub const c_api = @import("c_api.zig");
 pub const css = @import("css/css.zig");
 pub const dom = @import("dom.zig");
+pub const encoding = @import("encoding/root.zig");
 pub const engine = @import("engine.zig");
 pub const font = @import("font/opentype.zig");
 pub const handles = @import("handles.zig");
@@ -21,6 +22,7 @@ test {
     _ = c_api;
     _ = css;
     _ = dom;
+    _ = encoding;
     _ = engine;
     _ = font;
     _ = html;

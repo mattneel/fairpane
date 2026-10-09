@@ -1,0 +1,13 @@
+diff --git a/src/encoding/root.zig b/src/encoding/root.zig
+index c003462..b2844a5 100644
+--- a/src/encoding/root.zig
++++ b/src/encoding/root.zig
+@@ -385,7 +385,7 @@ const Peek = struct {
+ 
+     /// Whether peeking can return: it returns 3 bytes, or fewer only at end-of-queue.
+     fn ready(p: *const Peek, last: bool) bool {
+-        return p.len == 3 or last;
++        return p.len != 0 or last;
+     }
+ 
+     fn held(p: *const Peek) []const u8 {

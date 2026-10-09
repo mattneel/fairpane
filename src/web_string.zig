@@ -5,6 +5,8 @@
 
 const std = @import("std");
 const Allocator = std.mem.Allocator;
+/// The engine's single UTF-8 decoder, which the Encoding Standard defines.
+const utf8 = @import("encoding/utf8.zig");
 
 /// A position in a sequence of UTF-16 code units.
 pub const CodeUnitIndex = enum(usize) { _ };
@@ -62,10 +64,10 @@ pub const WebString = struct {
 
     /// Decodes well-formed UTF-8, or returns `error.InvalidUtf8` at the first decoder error.
     pub fn fromUtf8(gpa: Allocator, bytes: []const u8) (Allocator.Error || error{InvalidUtf8})!WebString {
-        var decoder: Utf8Decoder = .{ .bytes = bytes };
+        var scalars: utf8.Scalars = .{ .bytes = bytes };
         var len: usize = 0;
-        while (decoder.next()) |step| {
-            switch (step) {
+        while (scalars.next()) |item| {
+            switch (item) {
                 .scalar => |scalar| len += utf16Len(scalar),
                 .failure => return error.InvalidUtf8,
             }
@@ -75,10 +77,10 @@ pub const WebString = struct {
 
     /// Decodes with the WHATWG UTF-8 decoder and emits U+FFFD for each decoder error.
     pub fn fromUtf8Lossy(gpa: Allocator, bytes: []const u8) Allocator.Error!WebString {
-        var decoder: Utf8Decoder = .{ .bytes = bytes };
+        var scalars: utf8.Scalars = .{ .bytes = bytes };
         var len: usize = 0;
-        while (decoder.next()) |step| {
-            len += switch (step) {
+        while (scalars.next()) |item| {
+            len += switch (item) {
                 .scalar => |scalar| utf16Len(scalar),
                 .failure => 1,
             };
@@ -158,10 +160,10 @@ pub const WebString = struct {
         if (len == 0) return empty;
         const units = try gpa.alloc(u16, len);
         errdefer gpa.free(units);
-        var decoder: Utf8Decoder = .{ .bytes = bytes };
+        var scalars: utf8.Scalars = .{ .bytes = bytes };
         var written: usize = 0;
-        while (decoder.next()) |step| {
-            const scalar = switch (step) {
+        while (scalars.next()) |item| {
+            const scalar = switch (item) {
                 .scalar => |scalar| scalar,
                 .failure => replacement_character,
             };
@@ -194,13 +196,14 @@ pub fn codeUnitIndexForUtf8Offset(
     offset: Utf8ByteIndex,
 ) error{ InvalidUtf8, NotScalarBoundary, OutOfBounds }!CodeUnitIndex {
     const target = @backingInt(offset);
-    var decoder: Utf8Decoder = .{ .bytes = bytes };
+    var scalars: utf8.Scalars = .{ .bytes = bytes };
     var units: usize = 0;
     var found: ?usize = null;
     while (true) {
-        if (decoder.index == target) found = units;
-        const step = decoder.next() orelse break;
-        switch (step) {
+        // Between items the decoder holds no pending byte, so `index` is a scalar boundary.
+        if (scalars.index == target) found = units;
+        const item = scalars.next() orelse break;
+        switch (item) {
             .scalar => |scalar| units += utf16Len(scalar),
             .failure => return error.InvalidUtf8,
         }
@@ -229,65 +232,6 @@ pub fn utf8OffsetForCodeUnitIndex(
     }
     return @fromBackingInt(@intCast(offset));
 }
-
-/// The WHATWG Encoding UTF-8 decoder.
-/// Each call to `next` starts in the initial state, because the decoder
-/// resets its state after every emitted scalar value and every error.
-const Utf8Decoder = struct {
-    bytes: []const u8,
-    index: usize = 0,
-
-    const Step = union(enum) {
-        scalar: u21,
-        failure: void,
-    };
-
-    fn next(self: *Utf8Decoder) ?Step {
-        if (self.index == self.bytes.len) return null;
-        var bytes_needed: u8 = 0;
-        var bytes_seen: u8 = 0;
-        var code_point: u21 = 0;
-        var lower_boundary: u8 = 0x80;
-        var upper_boundary: u8 = 0xBF;
-        while (true) {
-            // End of input with bytes pending is one error.
-            if (self.index == self.bytes.len) return .failure;
-            const byte = self.bytes[self.index];
-            if (bytes_needed == 0) {
-                self.index += 1;
-                switch (byte) {
-                    0x00...0x7F => return .{ .scalar = byte },
-                    0xC2...0xDF => {
-                        bytes_needed = 1;
-                        code_point = byte & 0x1F;
-                    },
-                    0xE0...0xEF => {
-                        if (byte == 0xE0) lower_boundary = 0xA0;
-                        if (byte == 0xED) upper_boundary = 0x9F;
-                        bytes_needed = 2;
-                        code_point = byte & 0x0F;
-                    },
-                    0xF0...0xF4 => {
-                        if (byte == 0xF0) lower_boundary = 0x90;
-                        if (byte == 0xF4) upper_boundary = 0x8F;
-                        bytes_needed = 3;
-                        code_point = byte & 0x07;
-                    },
-                    else => return .failure,
-                }
-                continue;
-            }
-            // Leave the offending byte unconsumed so the next call restores it to the stream.
-            if (byte < lower_boundary or byte > upper_boundary) return .failure;
-            self.index += 1;
-            lower_boundary = 0x80;
-            upper_boundary = 0xBF;
-            code_point = (code_point << 6) | (byte & 0x3F);
-            bytes_seen += 1;
-            if (bytes_seen == bytes_needed) return .{ .scalar = code_point };
-        }
-    }
-};
 
 /// Iterates code points as ECMAScript `CodePointAt` does.
 /// A high surrogate pairs only with an immediately following low surrogate.
@@ -631,6 +575,14 @@ test "FP-0047 case 5: fromUtf8Lossy replaces each byte after an F5 or C1 lead by
 test "FP-0047 case 6: codeUnitIndexForUtf8Offset reports ill-formed input before an out-of-range offset" {
     try testing.expectError(error.InvalidUtf8, codeUnitIndexForUtf8Offset("a\x80", byteOffset(1)));
     try testing.expectError(error.InvalidUtf8, codeUnitIndexForUtf8Offset("a\x80", byteOffset(5)));
+}
+
+test "FP-0123 case 14: fromUtf8 and fromUtf8Lossy keep a leading U+FEFF, and offsets reject an encoded surrogate" {
+    var strict = try WebString.fromUtf8(testing.allocator, "\xEF\xBB\xBF\x41");
+    defer strict.deinit(testing.allocator);
+    try expectUnits(&.{ 0xFEFF, 0x0041 }, strict);
+    try expectLossyUnits("\xEF\xBB\xBF\x41", &.{ 0xFEFF, 0x0041 });
+    try testing.expectError(error.InvalidUtf8, codeUnitIndexForUtf8Offset("\xED\xA0\x80", byteOffset(0)));
 }
 
 test "code-unit indexes map back to UTF-8 byte offsets" {

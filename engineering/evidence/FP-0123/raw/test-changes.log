@@ -1,0 +1,489 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","987654bc88f55e01c688bc83e610dc6acc6d8230","f69f8a4c39e03bbdea7b775f73d0bc4da5aaac04"]
+ ...230 => f69f8a4c39e03bbdea7b775f73d0bc4da5aaac04 | 75 +++++++++++++---------
+ 1 file changed, 43 insertions(+), 32 deletions(-)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","987654bc88f55e01c688bc83e610dc6acc6d8230","f69f8a4c39e03bbdea7b775f73d0bc4da5aaac04"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:33:29.471Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","987654bc88f55e01c688bc83e610dc6acc6d8230","f69f8a4c39e03bbdea7b775f73d0bc4da5aaac04"]
+diff --git a/987654bc88f55e01c688bc83e610dc6acc6d8230 b/f69f8a4c39e03bbdea7b775f73d0bc4da5aaac04
+index 987654b..f69f8a4 100644
+--- a/987654bc88f55e01c688bc83e610dc6acc6d8230
++++ b/f69f8a4c39e03bbdea7b775f73d0bc4da5aaac04
+@@ -4,8 +4,9 @@
+ //! It creates one document, loads the case's document URL, and answers each issued request
+ //! from the case only, by exact byte equality of the URL.
+ //! When the document loads, the `decode` stage applies BOM sniffing, step 1 of the HTML encoding sniffing algorithm,
+-//! and decodes a body that starts with the UTF-8 byte order mark. The `tokenize` stage then runs `html.Tokenizer`
+-//! on the decoded code units in one chunk, because the engine has no parser hook before task FP-0010.
++//! and decodes a body that starts with a UTF-8, UTF-16BE, or UTF-16LE byte order mark with that encoding's decoder.
++//! The `tokenize` stage then runs `html.Tokenizer` on the decoded code units in one chunk,
++//! because the engine has no parser hook before task FP-0010.
+ //! The engine document itself does not tokenize.
+ //! Its only I/O is `readInputFile`, which `lab_main.zig` calls to read the files named on the command line;
+ //! `lab_main.zig` also writes the documents that this module renders.
+@@ -16,8 +17,8 @@
+ 
+ const std = @import("std");
+ const engine = @import("engine.zig");
++const encoding = @import("encoding/root.zig");
+ const html = @import("html/root.zig");
+-const WebString = @import("web_string.zig").WebString;
+ const Allocator = std.mem.Allocator;
+ const Io = std.Io;
+ const Writer = Io.Writer;
+@@ -190,13 +191,10 @@ pub const FetchExpectation = struct {
+     body_sha256: ?[32]u8,
+ };
+ 
+-/// An encoding that BOM sniffing can select.
+-pub const Encoding = enum { @"UTF-8", @"UTF-16BE", @"UTF-16LE" };
+-
+ pub const Confidence = enum { certain, tentative };
+ 
+ pub const DecodeExpectation = struct {
+-    encoding: Encoding,
++    encoding: encoding.Encoding,
+     confidence: Confidence,
+     /// The SHA-256 of the decoded code units in little-endian order.
+     output_sha256: [32]u8,
+@@ -385,6 +383,14 @@ const Parser = struct {
+         return p.fail(subject, "expected a known name");
+     }
+ 
++    /// Parses an encoding's name, which must match one of the Encoding Standard's names exactly.
++    fn encodingName(p: *Parser, value: Value, subject: []const u8) error{Invalid}!encoding.Encoding {
++        if (value == .string) {
++            if (encoding.fromName(value.string)) |result| return result;
++        }
++        return p.fail(subject, "expected a known name");
++    }
++
+     fn hex(p: *Parser, value: Value, subject: []const u8, comptime digits: usize) error{Invalid}![]const u8 {
+         const message = std.fmt.comptimePrint("expected {d} lowercase hexadecimal digits", .{digits});
+         if (value != .string or value.string.len != digits) return p.fail(subject, message);
+@@ -563,7 +569,7 @@ const Parser = struct {
+             .decode => {
+                 const map = try p.object(value, "expect", &.{ "stage", "encoding", "confidence", "output_sha256" });
+                 return .{ .decode = .{
+-                    .encoding = try p.enumeration(Encoding, try p.field(map, "expect.", "encoding"), "expect.encoding"),
++                    .encoding = try p.encodingName(try p.field(map, "expect.", "encoding"), "expect.encoding"),
+                     .confidence = try p.enumeration(Confidence, try p.field(map, "expect.", "confidence"), "expect.confidence"),
+                     .output_sha256 = try p.digest(try p.field(map, "expect.", "output_sha256"), "expect.output_sha256"),
+                 } };
+@@ -873,7 +879,7 @@ pub const BodySummary = struct {
+ 
+ /// What the `decode` stage recorded when it completed.
+ pub const Decoded = struct {
+-    encoding: Encoding,
++    encoding: encoding.Encoding,
+     confidence: Confidence,
+     /// The length of the byte order mark that BOM sniffing removed.
+     bom_bytes: usize,
+@@ -1086,35 +1092,40 @@ fn execute(gpa: Allocator, arena: Allocator, case: *const Case, execution: *Exec
+     try tokenize(gpa, arena, decoded, execution, failure);
+ }
+ 
+-const utf8_bom = "\xEF\xBB\xBF";
+-
+ /// Runs the `decode` stage on a loaded body: step 1 of the encoding sniffing algorithm, BOM sniffing.
+-/// A UTF-8 byte order mark selects UTF-8 with confidence `certain`, and the stage decodes the remaining bytes
+-/// with the UTF-8 decoder with replacement. Every other body is `unsupported`, because task FP-0065 owns
+-/// the UTF-16 decoders and the encoding sniffing steps after BOM sniffing.
++/// A byte order mark selects its encoding with confidence `certain`, and the stage decodes the bytes after the mark
++/// with that encoding's decoder in "replacement" mode. Every other body is `unsupported`, because task FP-0126 owns
++/// the encoding sniffing steps after BOM sniffing.
+ /// Returns the decoded code units, or null when the stage is unsupported.
+ fn decode(arena: Allocator, body: []const u8, execution: *Execution) Allocator.Error!?[]const u16 {
+     execution.harness_stage = .decode;
+-    if (!std.mem.startsWith(u8, body, utf8_bom)) {
++    const bom = encoding.bomSniff(body[0..@min(body.len, 3)]) orelse {
+         execution.decode = .unsupported;
+-        execution.decode_detail = if (std.mem.startsWith(u8, body, "\xFE\xFF"))
+-            "UTF-16BE byte order mark; the UTF-16BE decoder is not implemented"
+-        else if (std.mem.startsWith(u8, body, "\xFF\xFE"))
+-            "UTF-16LE byte order mark; the UTF-16LE decoder is not implemented"
+-        else
+-            "no byte order mark; encoding sniffing after BOM sniffing is not implemented";
++        execution.decode_detail = "no byte order mark; encoding sniffing after BOM sniffing is not implemented";
+         return null;
+-    }
+-    const output = try WebString.fromUtf8Lossy(arena, body[utf8_bom.len..]);
++    };
++    const rest = body[bom.length..];
++    // UTF-8 writes at most one code unit per byte, and UTF-16 at most one per two bytes, rounded up.
++    // A call needs 2 free units before each step, so with 2 spare units one call always finishes.
++    const capacity = 2 + switch (bom.encoding) {
++        .utf_8 => rest.len,
++        else => rest.len / 2 + rest.len % 2,
++    };
++    const units = try arena.alloc(u16, capacity);
++    // Every encoding that a byte order mark selects has a decoder in this task.
++    var decoder = encoding.Decoder.init(bom.encoding, .replacement) catch unreachable;
++    const result = decoder.decode(rest, units, true);
++    std.debug.assert(result.status == .finished and result.read == rest.len);
++    const output = units[0..result.written];
+     execution.decoded = .{
+-        .encoding = .@"UTF-8",
++        .encoding = bom.encoding,
+         .confidence = .certain,
+-        .bom_bytes = utf8_bom.len,
+-        .code_units = output.units.len,
+-        .output_sha256 = digestOfUnits(output.units),
++        .bom_bytes = bom.length,
++        .code_units = output.len,
++        .output_sha256 = digestOfUnits(output),
+     };
+     execution.decode = .completed;
+-    return output.units;
++    return output;
+ }
+ 
+ /// Returns the SHA-256 of `units` in little-endian order.
+@@ -1198,7 +1209,7 @@ pub const Check = enum { document_state, body_sha256, encoding, confidence, outp
+ pub const Mismatch = union(Check) {
+     document_state: struct { expected: FinalState, observed: engine.DocumentState },
+     body_sha256: struct { expected: ?[32]u8, observed: ?[32]u8 },
+-    encoding: struct { expected: Encoding, observed: Encoding },
++    encoding: struct { expected: encoding.Encoding, observed: encoding.Encoding },
+     confidence: struct { expected: Confidence, observed: Confidence },
+     output_sha256: struct { expected: [32]u8, observed: [32]u8 },
+     token_count: struct { expected: u64, observed: u64 },
+@@ -1454,7 +1465,7 @@ pub const Run = struct {
+     fn writeDecode(run: *const Run, s: *Stringify) Writer.Error!void {
+         const decoded = run.execution.decoded;
+         try s.objectField("encoding");
+-        try s.write(if (decoded) |d| @tagName(d.encoding) else null);
++        try s.write(if (decoded) |d| encoding.name(d.encoding) else null);
+         try s.objectField("confidence");
+         try s.write(if (decoded) |d| @tagName(d.confidence) else null);
+         try s.objectField("bom_bytes");
+@@ -2222,9 +2233,9 @@ fn writeOutcome(s: *Stringify, outcome: Outcome) Writer.Error!void {
+         },
+         .encoding => |values| {
+             try s.objectField("expected");
+-            try s.write(@tagName(values.expected));
++            try s.write(encoding.name(values.expected));
+             try s.objectField("observed");
+-            try s.write(@tagName(values.observed));
++            try s.write(encoding.name(values.observed));
+         },
+         .confidence => |values| {
+             try s.objectField("expected");
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","987654bc88f55e01c688bc83e610dc6acc6d8230","f69f8a4c39e03bbdea7b775f73d0bc4da5aaac04"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:33:29.552Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","ea35bc7f7323e6d9ad0657ea84a1afb80e663780","b78708220ef87ea6e9d775f5e01a3fbdd7da5e32"]
+diff --git a/ea35bc7f7323e6d9ad0657ea84a1afb80e663780 b/b78708220ef87ea6e9d775f5e01a3fbdd7da5e32
+index ea35bc7..b787082 100644
+--- a/ea35bc7f7323e6d9ad0657ea84a1afb80e663780
++++ b/b78708220ef87ea6e9d775f5e01a3fbdd7da5e32
+@@ -5,6 +5,8 @@
+ 
+ const std = @import("std");
+ const Allocator = std.mem.Allocator;
++/// The engine's single UTF-8 decoder, which the Encoding Standard defines.
++const utf8 = @import("encoding/utf8.zig");
+ 
+ /// A position in a sequence of UTF-16 code units.
+ pub const CodeUnitIndex = enum(usize) { _ };
+@@ -62,10 +64,10 @@ pub const WebString = struct {
+ 
+     /// Decodes well-formed UTF-8, or returns `error.InvalidUtf8` at the first decoder error.
+     pub fn fromUtf8(gpa: Allocator, bytes: []const u8) (Allocator.Error || error{InvalidUtf8})!WebString {
+-        var decoder: Utf8Decoder = .{ .bytes = bytes };
++        var scalars: utf8.Scalars = .{ .bytes = bytes };
+         var len: usize = 0;
+-        while (decoder.next()) |step| {
+-            switch (step) {
++        while (scalars.next()) |item| {
++            switch (item) {
+                 .scalar => |scalar| len += utf16Len(scalar),
+                 .failure => return error.InvalidUtf8,
+             }
+@@ -75,10 +77,10 @@ pub const WebString = struct {
+ 
+     /// Decodes with the WHATWG UTF-8 decoder and emits U+FFFD for each decoder error.
+     pub fn fromUtf8Lossy(gpa: Allocator, bytes: []const u8) Allocator.Error!WebString {
+-        var decoder: Utf8Decoder = .{ .bytes = bytes };
++        var scalars: utf8.Scalars = .{ .bytes = bytes };
+         var len: usize = 0;
+-        while (decoder.next()) |step| {
+-            len += switch (step) {
++        while (scalars.next()) |item| {
++            len += switch (item) {
+                 .scalar => |scalar| utf16Len(scalar),
+                 .failure => 1,
+             };
+@@ -158,10 +160,10 @@ pub const WebString = struct {
+         if (len == 0) return empty;
+         const units = try gpa.alloc(u16, len);
+         errdefer gpa.free(units);
+-        var decoder: Utf8Decoder = .{ .bytes = bytes };
++        var scalars: utf8.Scalars = .{ .bytes = bytes };
+         var written: usize = 0;
+-        while (decoder.next()) |step| {
+-            const scalar = switch (step) {
++        while (scalars.next()) |item| {
++            const scalar = switch (item) {
+                 .scalar => |scalar| scalar,
+                 .failure => replacement_character,
+             };
+@@ -194,13 +196,14 @@ pub fn codeUnitIndexForUtf8Offset(
+     offset: Utf8ByteIndex,
+ ) error{ InvalidUtf8, NotScalarBoundary, OutOfBounds }!CodeUnitIndex {
+     const target = @backingInt(offset);
+-    var decoder: Utf8Decoder = .{ .bytes = bytes };
++    var scalars: utf8.Scalars = .{ .bytes = bytes };
+     var units: usize = 0;
+     var found: ?usize = null;
+     while (true) {
+-        if (decoder.index == target) found = units;
+-        const step = decoder.next() orelse break;
+-        switch (step) {
++        // Between items the decoder holds no pending byte, so `index` is a scalar boundary.
++        if (scalars.index == target) found = units;
++        const item = scalars.next() orelse break;
++        switch (item) {
+             .scalar => |scalar| units += utf16Len(scalar),
+             .failure => return error.InvalidUtf8,
+         }
+@@ -230,65 +233,6 @@ pub fn utf8OffsetForCodeUnitIndex(
+     return @fromBackingInt(@intCast(offset));
+ }
+ 
+-/// The WHATWG Encoding UTF-8 decoder.
+-/// Each call to `next` starts in the initial state, because the decoder
+-/// resets its state after every emitted scalar value and every error.
+-const Utf8Decoder = struct {
+-    bytes: []const u8,
+-    index: usize = 0,
+-
+-    const Step = union(enum) {
+-        scalar: u21,
+-        failure: void,
+-    };
+-
+-    fn next(self: *Utf8Decoder) ?Step {
+-        if (self.index == self.bytes.len) return null;
+-        var bytes_needed: u8 = 0;
+-        var bytes_seen: u8 = 0;
+-        var code_point: u21 = 0;
+-        var lower_boundary: u8 = 0x80;
+-        var upper_boundary: u8 = 0xBF;
+-        while (true) {
+-            // End of input with bytes pending is one error.
+-            if (self.index == self.bytes.len) return .failure;
+-            const byte = self.bytes[self.index];
+-            if (bytes_needed == 0) {
+-                self.index += 1;
+-                switch (byte) {
+-                    0x00...0x7F => return .{ .scalar = byte },
+-                    0xC2...0xDF => {
+-                        bytes_needed = 1;
+-                        code_point = byte & 0x1F;
+-                    },
+-                    0xE0...0xEF => {
+-                        if (byte == 0xE0) lower_boundary = 0xA0;
+-                        if (byte == 0xED) upper_boundary = 0x9F;
+-                        bytes_needed = 2;
+-                        code_point = byte & 0x0F;
+-                    },
+-                    0xF0...0xF4 => {
+-                        if (byte == 0xF0) lower_boundary = 0x90;
+-                        if (byte == 0xF4) upper_boundary = 0x8F;
+-                        bytes_needed = 3;
+-                        code_point = byte & 0x07;
+-                    },
+-                    else => return .failure,
+-                }
+-                continue;
+-            }
+-            // Leave the offending byte unconsumed so the next call restores it to the stream.
+-            if (byte < lower_boundary or byte > upper_boundary) return .failure;
+-            self.index += 1;
+-            lower_boundary = 0x80;
+-            upper_boundary = 0xBF;
+-            code_point = (code_point << 6) | (byte & 0x3F);
+-            bytes_seen += 1;
+-            if (bytes_seen == bytes_needed) return .{ .scalar = code_point };
+-        }
+-    }
+-};
+-
+ /// Iterates code points as ECMAScript `CodePointAt` does.
+ /// A high surrogate pairs only with an immediately following low surrogate.
+ /// Every other surrogate yields its own surrogate code point.
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","ea35bc7f7323e6d9ad0657ea84a1afb80e663780","b78708220ef87ea6e9d775f5e01a3fbdd7da5e32"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:33:29.634Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","f4c5f7db3e6c9bd17d838dc45cc1b0fc77ebf130","728b305446cd7dafddf256d36a366a74c0ab3152"]
+diff --git a/f4c5f7db3e6c9bd17d838dc45cc1b0fc77ebf130 b/728b305446cd7dafddf256d36a366a74c0ab3152
+index f4c5f7d..728b305 100644
+--- a/f4c5f7db3e6c9bd17d838dc45cc1b0fc77ebf130
++++ b/728b305446cd7dafddf256d36a366a74c0ab3152
+@@ -383,8 +383,13 @@ fn expectSingleCall(row: Row) !void {
+     try expectDecided(row, &machine);
+ }
+ 
++/// Runs every row in one call and fails after the last row when any row failed, so a failure names every row.
+ fn expectRows(rows: []const Row) !void {
+-    for (rows) |row| try expectSingleCall(row);
++    var failed: usize = 0;
++    for (rows) |row| expectSingleCall(row) catch {
++        failed += 1;
++    };
++    if (failed != 0) return error.TestUnexpectedResult;
+ }
+ 
+ test "FP-0123 case 5: the UTF-8 decoder in replacement mode" {
+@@ -444,57 +449,58 @@ test "FP-0123 case 8: fatal mode stops at the first error and stays malformed" {
+ 
+ test "FP-0123 case 9: the decode hook sniffs a byte order mark, then decodes in replacement mode" {
+     try expectRows(&case_9_rows);
++}
+ 
+-    // G16: the fallback's decoder belongs to FP-0124.
++test "FP-0123 case 9 G16: a fallback whose decoder belongs to FP-0124 is unsupported" {
+     var unsupported: encoding.Decode = .init(.windows_1252);
+     var output: [8]u16 = undefined;
+     try testing.expectError(error.UnsupportedEncoding, unsupported.decode("\x41", &output, true));
+     try testing.expectEqualStrings("FP-0124", encoding.unsupportedOwner(.windows_1252).?);
++}
+ 
+-    // T1: two bytes do not decide the byte order mark before end-of-queue.
+-    {
+-        var d: encoding.Decode = .init(.utf_8);
+-        const first = try d.decode("\xFF\xFE", &output, false);
+-        try testing.expectEqual(@as(usize, 0), first.written);
+-        try testing.expectEqual(@as(usize, 2), first.read);
+-        try testing.expectEqual(Status.input_empty, first.status);
+-        try testing.expectEqual(@as(?Encoding, null), d.encoding());
+-        try testing.expectEqual(@as(?u2, null), d.bomLength());
+-        const second = try d.decode("\x41", &output, false);
+-        try testing.expectEqual(@as(usize, 0), second.written);
+-        try testing.expectEqual(@as(?Encoding, .utf_16le), d.encoding());
+-        try testing.expectEqual(@as(?u2, 2), d.bomLength());
+-        const third = try d.decode("\x00", &output, true);
+-        try testing.expectEqualSlices(u16, &.{0x0041}, output[0..third.written]);
+-        try testing.expectEqual(Status.finished, third.status);
+-    }
++test "FP-0123 case 9 T1: two bytes do not decide the byte order mark before end-of-queue" {
++    var output: [8]u16 = undefined;
++    var d: encoding.Decode = .init(.utf_8);
++    const first = try d.decode("\xFF\xFE", &output, false);
++    try testing.expectEqual(@as(usize, 0), first.written);
++    try testing.expectEqual(@as(usize, 2), first.read);
++    try testing.expectEqual(Status.input_empty, first.status);
++    try testing.expectEqual(@as(?Encoding, null), d.encoding());
++    try testing.expectEqual(@as(?u2, null), d.bomLength());
++    const second = try d.decode("\x41", &output, false);
++    try testing.expectEqual(@as(usize, 0), second.written);
++    try testing.expectEqual(@as(?Encoding, .utf_16le), d.encoding());
++    try testing.expectEqual(@as(?u2, 2), d.bomLength());
++    const third = try d.decode("\x00", &output, true);
++    try testing.expectEqualSlices(u16, &.{0x0041}, output[0..third.written]);
++    try testing.expectEqual(Status.finished, third.status);
++}
+ 
+-    // T2: the byte order mark arrives one byte per call.
+-    {
+-        var d: encoding.Decode = .init(.utf_8);
+-        var written: usize = 0;
+-        for ([_][]const u8{ "\xEF", "\xBB", "\xBF", "\x41" }, 0..) |chunk, index| {
+-            const r = try d.decode(chunk, output[written..], index == 3);
+-            try testing.expectEqual(chunk.len, r.read);
+-            written += r.written;
+-        }
+-        try testing.expectEqual(@as(?Encoding, .utf_8), d.encoding());
+-        try testing.expectEqual(@as(?u2, 3), d.bomLength());
+-        try testing.expectEqualSlices(u16, &.{0x0041}, output[0..written]);
++test "FP-0123 case 9 T2: the byte order mark arrives one byte per call" {
++    var output: [8]u16 = undefined;
++    var d: encoding.Decode = .init(.utf_8);
++    var written: usize = 0;
++    for ([_][]const u8{ "\xEF", "\xBB", "\xBF", "\x41" }, 0..) |chunk, index| {
++        const r = try d.decode(chunk, output[written..], index == 3);
++        try testing.expectEqual(chunk.len, r.read);
++        written += r.written;
+     }
++    try testing.expectEqual(@as(?Encoding, .utf_8), d.encoding());
++    try testing.expectEqual(@as(?u2, 3), d.bomLength());
++    try testing.expectEqualSlices(u16, &.{0x0041}, output[0..written]);
++}
+ 
+-    // T3: end-of-queue decides on the two bytes that peeking returned.
+-    {
+-        var d: encoding.Decode = .init(.utf_8);
+-        const first = try d.decode("\xEF\xBB", &output, false);
+-        try testing.expectEqual(@as(usize, 0), first.written);
+-        try testing.expectEqual(@as(?Encoding, null), d.encoding());
+-        const second = try d.decode("", &output, true);
+-        try testing.expectEqual(@as(?Encoding, .utf_8), d.encoding());
+-        try testing.expectEqual(@as(?u2, 0), d.bomLength());
+-        try testing.expectEqualSlices(u16, &.{E}, output[0..second.written]);
+-        try testing.expectEqual(@as(usize, 1), second.errors);
+-    }
++test "FP-0123 case 9 T3: end-of-queue decides on the two bytes that peeking returned" {
++    var output: [8]u16 = undefined;
++    var d: encoding.Decode = .init(.utf_8);
++    const first = try d.decode("\xEF\xBB", &output, false);
++    try testing.expectEqual(@as(usize, 0), first.written);
++    try testing.expectEqual(@as(?Encoding, null), d.encoding());
++    const second = try d.decode("", &output, true);
++    try testing.expectEqual(@as(?Encoding, .utf_8), d.encoding());
++    try testing.expectEqual(@as(?u2, 0), d.bomLength());
++    try testing.expectEqualSlices(u16, &.{E}, output[0..second.written]);
++    try testing.expectEqual(@as(usize, 1), second.errors);
+ }
+ 
+ test "FP-0123 case 10: the UTF-8 decode hooks" {
+@@ -600,25 +606,34 @@ fn expectSmallOutput(row: Row) !void {
+     try expectDecided(row, &machine);
+ }
+ 
+-fn expectPartitions(rows: []const Row) !void {
++/// Runs every partition of `row` and then the 2-unit output buffer, and stops at the first difference.
++fn expectRowPartitions(row: Row) !void {
++    const partitions: usize = if (row.input.len == 0) 1 else @as(usize, 1) << @intCast(row.input.len - 1);
++    for (0..partitions) |mask| {
++        try expectPartition(row, mask, false);
++        try expectPartition(row, mask, true);
++    }
++    try expectSmallOutput(row);
++}
++
++/// Runs `expectRowPartitions` on every row of at most 13 bytes, and returns whether every row passed.
++fn expectPartitions(rows: []const Row) bool {
++    var failed = false;
+     for (rows) |row| {
+         if (row.input.len > 13) continue;
+-        const partitions: usize = if (row.input.len == 0) 1 else @as(usize, 1) << @intCast(row.input.len - 1);
+-        for (0..partitions) |mask| {
+-            try expectPartition(row, mask, false);
+-            try expectPartition(row, mask, true);
+-        }
+-        try expectSmallOutput(row);
++        expectRowPartitions(row) catch {
++            failed = true;
++        };
+     }
++    return !failed;
+ }
+ 
+ test "FP-0123 case 12: every partition of each row into chunks, and a 2-unit output buffer, give the one-call result" {
+-    try expectPartitions(&case_5_rows);
+-    try expectPartitions(&case_6_rows);
+-    try expectPartitions(&case_7_rows);
+-    try expectPartitions(&case_8_rows);
+-    try expectPartitions(&case_9_rows);
+-    try expectPartitions(&case_10_rows);
++    var passed = true;
++    for ([_][]const Row{ &case_5_rows, &case_6_rows, &case_7_rows, &case_8_rows, &case_9_rows, &case_10_rows }) |rows| {
++        if (!expectPartitions(rows)) passed = false;
++    }
++    try testing.expect(passed);
+ }
+ 
+ fn isScalar(code_point: u21) bool {
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","f4c5f7db3e6c9bd17d838dc45cc1b0fc77ebf130","728b305446cd7dafddf256d36a366a74c0ab3152"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:33:29.718Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":24}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","0b7d2d80aa7344ca47c02d2d0bd2818107d0634b","0b7d2d80aa7344ca47c02d2d0bd2818107d0634b"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","0b7d2d80aa7344ca47c02d2d0bd2818107d0634b","0b7d2d80aa7344ca47c02d2d0bd2818107d0634b"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:33:29.801Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":22}

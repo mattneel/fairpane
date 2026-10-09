@@ -1,0 +1,17 @@
+diff --git a/src/encoding/utf16.zig b/src/encoding/utf16.zig
+index db8d313..a9dff07 100644
+--- a/src/encoding/utf16.zig
++++ b/src/encoding/utf16.zig
+@@ -35,11 +35,7 @@ pub const Handler = struct {
+             // The standard restores the code unit's two bytes in input order and returns an error.
+             // Reading them again sets the leading byte and then forms the same code unit with no leading surrogate,
+             // and that code unit is not a trailing surrogate, so the handler takes those steps here.
+-            if (isLeading(code_unit)) {
+-                h.leading_surrogate = code_unit;
+-                return .failure;
+-            }
+-            return .{ .failure_then_scalar = code_unit };
++            return .failure;
+         }
+         if (isLeading(code_unit)) {
+             h.leading_surrogate = code_unit;

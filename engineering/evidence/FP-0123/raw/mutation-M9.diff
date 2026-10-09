@@ -1,0 +1,13 @@
+diff --git a/src/encoding/root.zig b/src/encoding/root.zig
+index c003462..55df0d3 100644
+--- a/src/encoding/root.zig
++++ b/src/encoding/root.zig
+@@ -323,7 +323,7 @@ pub const Decoder = struct {
+ 
+     /// Applies one error. In "fatal" mode, returns the `malformed` result; otherwise writes U+FFFD.
+     fn fail(d: *Decoder, result: *Result, output: []u16, read: usize) ?Result {
+-        if (d.mode == .fatal) {
++        if (false and d.mode == .fatal) {
+             d.state = .malformed;
+             return .{ .read = read, .written = result.written, .errors = 1, .status = .malformed };
+         }

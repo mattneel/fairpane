@@ -1,0 +1,12 @@
+diff --git a/src/encoding/utf8.zig b/src/encoding/utf8.zig
+index 886db77..6f33e4e 100644
+--- a/src/encoding/utf8.zig
++++ b/src/encoding/utf8.zig
+@@ -36,7 +36,6 @@ pub const Handler = struct {
+                 },
+                 0xE0...0xEF => {
+                     if (b == 0xE0) h.lower_boundary = 0xA0;
+-                    if (b == 0xED) h.upper_boundary = 0x9F;
+                     h.bytes_needed = 2;
+                     h.code_point = b & 0xF;
+                 },

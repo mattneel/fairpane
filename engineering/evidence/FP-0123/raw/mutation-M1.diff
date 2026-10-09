@@ -1,0 +1,13 @@
+diff --git a/src/encoding/utf8.zig b/src/encoding/utf8.zig
+index 886db77..6301afc 100644
+--- a/src/encoding/utf8.zig
++++ b/src/encoding/utf8.zig
+@@ -52,7 +52,7 @@ pub const Handler = struct {
+         }
+         if (b < h.lower_boundary or b > h.upper_boundary) {
+             h.* = .{};
+-            return .failure_restore;
++            return .failure;
+         }
+         h.lower_boundary = 0x80;
+         h.upper_boundary = 0xBF;

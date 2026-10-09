@@ -1,0 +1,27 @@
+diff --git a/src/lab.zig b/src/lab.zig
+index f69f8a4..7bd028b 100644
+--- a/src/lab.zig
++++ b/src/lab.zig
+@@ -1105,6 +1105,7 @@ fn decode(arena: Allocator, body: []const u8, execution: *Execution) Allocator.E
+         return null;
+     };
+     const rest = body[bom.length..];
++    const mapped: encoding.Encoding = if (bom.encoding == .utf_16be) .utf_16le else bom.encoding;
+     // UTF-8 writes at most one code unit per byte, and UTF-16 at most one per two bytes, rounded up.
+     // A call needs 2 free units before each step, so with 2 spare units one call always finishes.
+     const capacity = 2 + switch (bom.encoding) {
+@@ -1113,12 +1114,12 @@ fn decode(arena: Allocator, body: []const u8, execution: *Execution) Allocator.E
+     };
+     const units = try arena.alloc(u16, capacity);
+     // Every encoding that a byte order mark selects has a decoder in this task.
+-    var decoder = encoding.Decoder.init(bom.encoding, .replacement) catch unreachable;
++    var decoder = encoding.Decoder.init(mapped, .replacement) catch unreachable;
+     const result = decoder.decode(rest, units, true);
+     std.debug.assert(result.status == .finished and result.read == rest.len);
+     const output = units[0..result.written];
+     execution.decoded = .{
+-        .encoding = bom.encoding,
++        .encoding = mapped,
+         .confidence = .certain,
+         .bom_bytes = bom.length,
+         .code_units = output.len,

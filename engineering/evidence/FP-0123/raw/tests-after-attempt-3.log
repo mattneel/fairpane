@@ -1,0 +1,73 @@
+
+COMMAND ["C:\\Windows\\System32\\cmd.exe","/d","/c","if exist out\\fp0123-after (rmdir /s /q out\\fp0123-after) else (echo out\\fp0123-after is absent)"]
+out\fp0123-after is absent
+RESULT {"executable":"C:\\Windows\\System32\\cmd.exe","arguments":["/d","/c","if exist out\\fp0123-after (rmdir /s /q out\\fp0123-after) else (echo out\\fp0123-after is absent)"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:30:59.726Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\Windows\\System32\\cmd.exe","/d","/c","ver"]
+
+Microsoft Windows [Version 10.0.26200.9457]
+RESULT {"executable":"C:\\Windows\\System32\\cmd.exe","arguments":["/d","/c","ver"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:30:59.823Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+4465aa94966dc211c0c8a2a63f64a7a2cbdf7dba
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:30:59.941Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--porcelain=v1"]
+M  build.zig
+M  specs/sources.json
+A  src/encoding/labels.zig
+A  src/encoding/root.zig
+A  src/encoding/tests.zig
+A  src/encoding/utf16.zig
+A  src/encoding/utf8.zig
+M  src/lab.zig
+M  src/root.zig
+M  src/web_string.zig
+A  tests/lab/fp0123-decode-bom-only.json
+A  tests/lab/fp0123-decode-name-lowercase.json
+A  tests/lab/fp0123-decode-name-shift-jis.json
+A  tests/lab/fp0123-decode-utf16le.json
+A  tests/lab/fp0123-tokenize-utf16be.json
+A  tests/lab/fp0123-tokenize-utf16le-errors.json
+?? engineering/evidence/FP-0123/raw/fmt-attempt-1.log
+?? engineering/evidence/FP-0123/raw/fmt.log
+?? engineering/evidence/FP-0123/raw/labels-vs-spec.log
+?? engineering/evidence/FP-0123/raw/mutation-M1.diff
+?? engineering/evidence/FP-0123/raw/mutation-M2.diff
+?? engineering/evidence/FP-0123/raw/mutation-M3.diff
+?? engineering/evidence/FP-0123/raw/mutation-M4.diff
+?? engineering/evidence/FP-0123/raw/mutation-M5.diff
+?? engineering/evidence/FP-0123/raw/mutation-M6.diff
+?? engineering/evidence/FP-0123/raw/mutation-M7.diff
+?? engineering/evidence/FP-0123/raw/mutation-M8.diff
+?? engineering/evidence/FP-0123/raw/mutation-M9.diff
+?? engineering/evidence/FP-0123/raw/mutation.log
+?? engineering/evidence/FP-0123/raw/tests-after-attempt-1.log
+?? engineering/evidence/FP-0123/raw/tests-after-attempt-2.log
+?? engineering/evidence/FP-0123/raw/tests-after.log
+?? engineering/evidence/FP-0123/raw/tests-base.log
+?? engineering/evidence/FP-0123/raw/tests-before-lab.log
+?? engineering/evidence/FP-0123/raw/tests-before.log
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--porcelain=v1"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:31:00.033Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":53}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","build.zig","specs/sources.json","src/root.zig","src/web_string.zig","src/lab.zig","src/encoding/root.zig","src/encoding/labels.zig","src/encoding/utf8.zig","src/encoding/utf16.zig","src/encoding/tests.zig","tests/lab/fp0123-decode-utf16le.json","tests/lab/fp0123-tokenize-utf16be.json","tests/lab/fp0123-tokenize-utf16le-errors.json","tests/lab/fp0123-decode-name-shift-jis.json","tests/lab/fp0123-decode-bom-only.json","tests/lab/fp0123-decode-name-lowercase.json"]
+d59edc8a2e5df401b2baa6ce37e102e592f5de85
+7833391c694b662284da53e85ac3154963d2b089
+0b7d2d80aa7344ca47c02d2d0bd2818107d0634b
+b78708220ef87ea6e9d775f5e01a3fbdd7da5e32
+f69f8a4c39e03bbdea7b775f73d0bc4da5aaac04
+c003462293d0579767bffe8e040d099df7ecec24
+4605727ad50f0e8f25f5cb98979fb1ffba823e59
+886db77daa27590d612a699fcd73be694ffe0913
+db8d313f8d0bf4de1e9b50896d15d0d5e34c2cc0
+728b305446cd7dafddf256d36a366a74c0ab3152
+fef2d2deb84955f88c0e6ab36488dfdad86b9e73
+d08ad806bfcbdc05c106bf5357dbf3bfb34872e4
+916b85b938a7107d729e68fccebd773749b17000
+5921fdbf5cca710cc7b9387e25256893c40641ac
+f0bf87ede0e389771b2d39a86be2d318f6903d70
+e2f7958fa28e59a74da54d04d26e8338beb84287
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","build.zig","specs/sources.json","src/root.zig","src/web_string.zig","src/lab.zig","src/encoding/root.zig","src/encoding/labels.zig","src/encoding/utf8.zig","src/encoding/utf16.zig","src/encoding/tests.zig","tests/lab/fp0123-decode-utf16le.json","tests/lab/fp0123-tokenize-utf16be.json","tests/lab/fp0123-tokenize-utf16le-errors.json","tests/lab/fp0123-decode-name-shift-jis.json","tests/lab/fp0123-decode-bom-only.json","tests/lab/fp0123-decode-name-lowercase.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:31:00.152Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29}
+
+COMMAND ["--env","ZIG_GLOBAL_CACHE_DIR=C:\\src\\fairpane\\.zig-cache\\global","C:/src/fairpane/.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-windows/zig.exe","build","test","--summary","all","--cache-dir","out/fp0123-after"]
+RESULT {"executable":"--env","arguments":["ZIG_GLOBAL_CACHE_DIR=C:\\src\\fairpane\\.zig-cache\\global","C:/src/fairpane/.tools/zig/0.18.0-dev.120+9fe22a29b/x86_64-windows/zig.exe","build","test","--summary","all","--cache-dir","out/fp0123-after"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:31:00.263Z","exit_code":null,"signal":null,"timed_out":false,"error":"The executable is not on PATH: --env","duration_ms":0}

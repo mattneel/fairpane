@@ -4,8 +4,9 @@
 //! It creates one document, loads the case's document URL, and answers each issued request
 //! from the case only, by exact byte equality of the URL.
 //! When the document loads, the `decode` stage applies BOM sniffing, step 1 of the HTML encoding sniffing algorithm,
-//! and decodes a body that starts with the UTF-8 byte order mark. The `tokenize` stage then runs `html.Tokenizer`
-//! on the decoded code units in one chunk, because the engine has no parser hook before task FP-0010.
+//! and decodes a body that starts with a UTF-8, UTF-16BE, or UTF-16LE byte order mark with that encoding's decoder.
+//! The `tokenize` stage then runs `html.Tokenizer` on the decoded code units in one chunk,
+//! because the engine has no parser hook before task FP-0010.
 //! The engine document itself does not tokenize.
 //! Its only I/O is `readInputFile`, which `lab_main.zig` calls to read the files named on the command line;
 //! `lab_main.zig` also writes the documents that this module renders.
@@ -16,8 +17,8 @@
 
 const std = @import("std");
 const engine = @import("engine.zig");
+const encoding = @import("encoding/root.zig");
 const html = @import("html/root.zig");
-const WebString = @import("web_string.zig").WebString;
 const Allocator = std.mem.Allocator;
 const Io = std.Io;
 const Writer = Io.Writer;
@@ -190,13 +191,10 @@ pub const FetchExpectation = struct {
     body_sha256: ?[32]u8,
 };
 
-/// An encoding that BOM sniffing can select.
-pub const Encoding = enum { @"UTF-8", @"UTF-16BE", @"UTF-16LE" };
-
 pub const Confidence = enum { certain, tentative };
 
 pub const DecodeExpectation = struct {
-    encoding: Encoding,
+    encoding: encoding.Encoding,
     confidence: Confidence,
     /// The SHA-256 of the decoded code units in little-endian order.
     output_sha256: [32]u8,
@@ -385,6 +383,14 @@ const Parser = struct {
         return p.fail(subject, "expected a known name");
     }
 
+    /// Parses an encoding's name, which must match one of the Encoding Standard's names exactly.
+    fn encodingName(p: *Parser, value: Value, subject: []const u8) error{Invalid}!encoding.Encoding {
+        if (value == .string) {
+            if (encoding.fromName(value.string)) |result| return result;
+        }
+        return p.fail(subject, "expected a known name");
+    }
+
     fn hex(p: *Parser, value: Value, subject: []const u8, comptime digits: usize) error{Invalid}![]const u8 {
         const message = std.fmt.comptimePrint("expected {d} lowercase hexadecimal digits", .{digits});
         if (value != .string or value.string.len != digits) return p.fail(subject, message);
@@ -563,7 +569,7 @@ const Parser = struct {
             .decode => {
                 const map = try p.object(value, "expect", &.{ "stage", "encoding", "confidence", "output_sha256" });
                 return .{ .decode = .{
-                    .encoding = try p.enumeration(Encoding, try p.field(map, "expect.", "encoding"), "expect.encoding"),
+                    .encoding = try p.encodingName(try p.field(map, "expect.", "encoding"), "expect.encoding"),
                     .confidence = try p.enumeration(Confidence, try p.field(map, "expect.", "confidence"), "expect.confidence"),
                     .output_sha256 = try p.digest(try p.field(map, "expect.", "output_sha256"), "expect.output_sha256"),
                 } };
@@ -873,7 +879,7 @@ pub const BodySummary = struct {
 
 /// What the `decode` stage recorded when it completed.
 pub const Decoded = struct {
-    encoding: Encoding,
+    encoding: encoding.Encoding,
     confidence: Confidence,
     /// The length of the byte order mark that BOM sniffing removed.
     bom_bytes: usize,
@@ -1086,35 +1092,40 @@ fn execute(gpa: Allocator, arena: Allocator, case: *const Case, execution: *Exec
     try tokenize(gpa, arena, decoded, execution, failure);
 }
 
-const utf8_bom = "\xEF\xBB\xBF";
-
 /// Runs the `decode` stage on a loaded body: step 1 of the encoding sniffing algorithm, BOM sniffing.
-/// A UTF-8 byte order mark selects UTF-8 with confidence `certain`, and the stage decodes the remaining bytes
-/// with the UTF-8 decoder with replacement. Every other body is `unsupported`, because task FP-0065 owns
-/// the UTF-16 decoders and the encoding sniffing steps after BOM sniffing.
+/// A byte order mark selects its encoding with confidence `certain`, and the stage decodes the bytes after the mark
+/// with that encoding's decoder in "replacement" mode. Every other body is `unsupported`, because task FP-0126 owns
+/// the encoding sniffing steps after BOM sniffing.
 /// Returns the decoded code units, or null when the stage is unsupported.
 fn decode(arena: Allocator, body: []const u8, execution: *Execution) Allocator.Error!?[]const u16 {
     execution.harness_stage = .decode;
-    if (!std.mem.startsWith(u8, body, utf8_bom)) {
+    const bom = encoding.bomSniff(body[0..@min(body.len, 3)]) orelse {
         execution.decode = .unsupported;
-        execution.decode_detail = if (std.mem.startsWith(u8, body, "\xFE\xFF"))
-            "UTF-16BE byte order mark; the UTF-16BE decoder is not implemented"
-        else if (std.mem.startsWith(u8, body, "\xFF\xFE"))
-            "UTF-16LE byte order mark; the UTF-16LE decoder is not implemented"
-        else
-            "no byte order mark; encoding sniffing after BOM sniffing is not implemented";
+        execution.decode_detail = "no byte order mark; encoding sniffing after BOM sniffing is not implemented";
         return null;
-    }
-    const output = try WebString.fromUtf8Lossy(arena, body[utf8_bom.len..]);
+    };
+    const rest = body[bom.length..];
+    // UTF-8 writes at most one code unit per byte, and UTF-16 at most one per two bytes, rounded up.
+    // A call needs 2 free units before each step, so with 2 spare units one call always finishes.
+    const capacity = 2 + switch (bom.encoding) {
+        .utf_8 => rest.len,
+        else => rest.len / 2 + rest.len % 2,
+    };
+    const units = try arena.alloc(u16, capacity);
+    // Every encoding that a byte order mark selects has a decoder in this task.
+    var decoder = encoding.Decoder.init(bom.encoding, .replacement) catch unreachable;
+    const result = decoder.decode(rest, units, true);
+    std.debug.assert(result.status == .finished and result.read == rest.len);
+    const output = units[0..result.written];
     execution.decoded = .{
-        .encoding = .@"UTF-8",
+        .encoding = bom.encoding,
         .confidence = .certain,
-        .bom_bytes = utf8_bom.len,
-        .code_units = output.units.len,
-        .output_sha256 = digestOfUnits(output.units),
+        .bom_bytes = bom.length,
+        .code_units = output.len,
+        .output_sha256 = digestOfUnits(output),
     };
     execution.decode = .completed;
-    return output.units;
+    return output;
 }
 
 /// Returns the SHA-256 of `units` in little-endian order.
@@ -1198,7 +1209,7 @@ pub const Check = enum { document_state, body_sha256, encoding, confidence, outp
 pub const Mismatch = union(Check) {
     document_state: struct { expected: FinalState, observed: engine.DocumentState },
     body_sha256: struct { expected: ?[32]u8, observed: ?[32]u8 },
-    encoding: struct { expected: Encoding, observed: Encoding },
+    encoding: struct { expected: encoding.Encoding, observed: encoding.Encoding },
     confidence: struct { expected: Confidence, observed: Confidence },
     output_sha256: struct { expected: [32]u8, observed: [32]u8 },
     token_count: struct { expected: u64, observed: u64 },
@@ -1454,7 +1465,7 @@ pub const Run = struct {
     fn writeDecode(run: *const Run, s: *Stringify) Writer.Error!void {
         const decoded = run.execution.decoded;
         try s.objectField("encoding");
-        try s.write(if (decoded) |d| @tagName(d.encoding) else null);
+        try s.write(if (decoded) |d| encoding.name(d.encoding) else null);
         try s.objectField("confidence");
         try s.write(if (decoded) |d| @tagName(d.confidence) else null);
         try s.objectField("bom_bytes");
@@ -2222,9 +2233,9 @@ fn writeOutcome(s: *Stringify, outcome: Outcome) Writer.Error!void {
         },
         .encoding => |values| {
             try s.objectField("expected");
-            try s.write(@tagName(values.expected));
+            try s.write(encoding.name(values.expected));
             try s.objectField("observed");
-            try s.write(@tagName(values.observed));
+            try s.write(encoding.name(values.observed));
         },
         .confidence => |values| {
             try s.objectField("expected");
@@ -3051,24 +3062,42 @@ test "FP-0008 case 20: a body with tokenizer parse errors records them in step o
     }
 }
 
-test "FP-0008 case 21: a body without a UTF-8 byte order mark makes decode and tokenize expectations unsupported at decode" {
-    const cases = [_]struct { fixture: []const u8, detail: []const u8 }{
-        .{ .fixture = "fp0008-tokenize-no-bom.json", .detail = "no byte order mark; encoding sniffing after BOM sniffing is not implemented" },
-        .{ .fixture = "fp0008-decode-utf16le-bom.json", .detail = "UTF-16LE byte order mark; the UTF-16LE decoder is not implemented" },
-        .{ .fixture = "fp0008-decode-utf16be-bom.json", .detail = "UTF-16BE byte order mark; the UTF-16BE decoder is not implemented" },
-    };
-    for (cases) |case| {
-        var r = try StageResult.init(case.fixture);
+test "FP-0008 case 21, revised by FP-0123 case 15 Lab-1: a body without a byte order mark is unsupported at decode, and each UTF-16 byte order mark completes decode" {
+    {
+        const detail = "no byte order mark; encoding sniffing after BOM sniffing is not implemented";
+        var r = try StageResult.init("fp0008-tokenize-no-bom.json");
         defer r.deinit();
         try testing.expectEqual(Result.unsupported, r.run.outcome.result);
         try testing.expectEqual(@as(u8, 2), r.run.outcome.result.exitStatus());
         try expectString("unsupported", try member(r.outcome, "result"));
         try expectString("decode", try member(r.outcome, "stage"));
         try testing.expect((try member(r.outcome, "check")) == .null);
-        try expectString(case.detail, try member(r.outcome, "detail"));
+        try expectString(detail, try member(r.outcome, "detail"));
         try expectString("unsupported", try member(r.decode, "status"));
-        try expectString(case.detail, try member(r.decode, "detail"));
+        try expectString(detail, try member(r.decode, "detail"));
         try expectString("not-reached", try member(r.tokenize, "status"));
+    }
+    const cases = [_]struct { fixture: []const u8, encoding: []const u8 }{
+        .{ .fixture = "fp0008-decode-utf16le-bom.json", .encoding = "UTF-16LE" },
+        .{ .fixture = "fp0008-decode-utf16be-bom.json", .encoding = "UTF-16BE" },
+    };
+    for (cases) |case| {
+        var r = try StageResult.init(case.fixture);
+        defer r.deinit();
+        try testing.expectEqual(Result.fail, r.run.outcome.result);
+        try testing.expectEqual(@as(u8, 1), r.run.outcome.result.exitStatus());
+        try expectString("fail", try member(r.outcome, "result"));
+        try expectString("decode", try member(r.outcome, "stage"));
+        try expectString("encoding", try member(r.outcome, "check"));
+        try expectString("UTF-8", try member(r.outcome, "expected"));
+        try expectString(case.encoding, try member(r.outcome, "observed"));
+        try expectString("completed", try member(r.decode, "status"));
+        try expectString(case.encoding, try member(r.decode, "encoding"));
+        try expectString("certain", try member(r.decode, "confidence"));
+        try expectInteger(2, try member(r.decode, "bom_bytes"));
+        try expectInteger(1, try member(r.decode, "code_units"));
+        try expectString(&utf16LeDigest("<"), try member(r.decode, "output_sha256"));
+        try testing.expect((try member(r.decode, "detail")) == .null);
     }
 }
 
@@ -3109,4 +3138,136 @@ test "FP-0008 case 24: the UTF-8 decoder with replacement turns an invalid byte 
     try expectInteger(3, try member(r.decode, "code_units"));
     try expectInteger(2, try member(r.tokenize, "token_count"));
     try expectString(&hexDigest("[\"Character\",\"a\\uFFFDb\",[0,3]]\n[\"EOF\",[3,3]]\n"), try member(r.tokenize, "tokens_sha256"));
+}
+
+test "FP-0123 case 15 Lab-2: a UTF-16LE byte order mark body passes its decode expectation" {
+    var r = try StageResult.init("fp0123-decode-utf16le.json");
+    defer r.deinit();
+    try testing.expectEqual(Result.pass, r.run.outcome.result);
+    try expectString("decode", try member(r.outcome, "stage"));
+    try expectString("completed", try member(r.decode, "status"));
+    try expectString("UTF-16LE", try member(r.decode, "encoding"));
+    try expectString("certain", try member(r.decode, "confidence"));
+    try expectInteger(2, try member(r.decode, "bom_bytes"));
+    try expectInteger(3, try member(r.decode, "code_units"));
+    try expectString(&utf16LeDigest("<p>"), try member(r.decode, "output_sha256"));
+    try testing.expect((try member(r.decode, "detail")) == .null);
+}
+
+/// The token dump of Lab-3.
+const lab_3_tokens =
+    \\["StartTag","p",[],false,[0,3]]
+    \\["EOF",[3,3]]
+    \\
+;
+
+/// The token dump of Lab-4.
+const lab_4_tokens =
+    \\["Character","a\uFFFDb\uD83D\uDCA9",[0,5]]
+    \\["EOF",[5,5]]
+    \\
+;
+
+test "FP-0123 case 15 Lab-3: a UTF-16BE byte order mark body tokenizes and passes" {
+    var r = try StageResult.init("fp0123-tokenize-utf16be.json");
+    defer r.deinit();
+    try testing.expectEqual(Result.pass, r.run.outcome.result);
+    try expectString("tokenize", try member(r.outcome, "stage"));
+    try expectString("completed", try member(r.decode, "status"));
+    try expectString("UTF-16BE", try member(r.decode, "encoding"));
+    try expectInteger(2, try member(r.decode, "bom_bytes"));
+    try expectInteger(3, try member(r.decode, "code_units"));
+    try expectString(&utf16LeDigest("<p>"), try member(r.decode, "output_sha256"));
+    try expectString("completed", try member(r.tokenize, "status"));
+    try expectInteger(2, try member(r.tokenize, "token_count"));
+    try expectString(&hexDigest(lab_3_tokens), try member(r.tokenize, "tokens_sha256"));
+    try testing.expectEqual(@as(usize, 0), (try member(r.tokenize, "errors")).array.items.len);
+}
+
+test "FP-0123 case 15 Lab-4: a lone trailing surrogate becomes U+FFFD, a surrogate pair stays two units, and the case passes" {
+    var r = try StageResult.init("fp0123-tokenize-utf16le-errors.json");
+    defer r.deinit();
+    try testing.expectEqual(Result.pass, r.run.outcome.result);
+    try expectString("completed", try member(r.decode, "status"));
+    try expectString("UTF-16LE", try member(r.decode, "encoding"));
+    try expectInteger(2, try member(r.decode, "bom_bytes"));
+    try expectInteger(5, try member(r.decode, "code_units"));
+    try expectString("completed", try member(r.tokenize, "status"));
+    try expectInteger(2, try member(r.tokenize, "token_count"));
+    try expectString(&hexDigest(lab_4_tokens), try member(r.tokenize, "tokens_sha256"));
+    try testing.expectEqual(@as(usize, 0), (try member(r.tokenize, "errors")).array.items.len);
+}
+
+test "FP-0123 case 15 Lab-5: a decode expectation that names Shift_JIS is valid, and a body without a byte order mark is unsupported" {
+    const detail = "no byte order mark; encoding sniffing after BOM sniffing is not implemented";
+    var r = try StageResult.init("fp0123-decode-name-shift-jis.json");
+    defer r.deinit();
+    try testing.expectEqual(Result.unsupported, r.run.outcome.result);
+    try testing.expectEqual(@as(u8, 2), r.run.outcome.result.exitStatus());
+    try expectString("decode", try member(r.outcome, "stage"));
+    try expectString(detail, try member(r.outcome, "detail"));
+    try expectString("unsupported", try member(r.decode, "status"));
+    try expectString(detail, try member(r.decode, "detail"));
+    try testing.expect((try member(r.decode, "encoding")) == .null);
+}
+
+/// Runs a case under an allocator that may fail, as `runUnderAllocationFailure` does,
+/// and also requires that a passing run completed the `decode` stage.
+fn runDecodedUnderAllocationFailure(gpa: Allocator, bytes: []const u8) !void {
+    var run = runCase(gpa, bytes);
+    defer run.deinit();
+    var buffer: [16 * 1024]u8 = undefined;
+    var out: Writer = .fixed(&buffer);
+    try run.writeResult(&out);
+    switch (run.outcome.result) {
+        .pass => try testing.expectEqual(Status.completed, run.execution.decode),
+        .harness_error => {
+            var text: [64]u8 = undefined;
+            try testing.expectEqualStrings("out of memory", try detailText(&text, run.outcome.detail.?));
+            try testing.expect(std.mem.indexOf(u8, out.buffered(), "\"result\": \"harness-error\"") != null);
+            return error.OutOfMemory;
+        },
+        else => return error.TestUnexpectedResult,
+    }
+}
+
+test "FP-0123 case 15 Lab-6: each induced allocation failure in a UTF-16 run reports harness-error and leaks nothing" {
+    for ([_][]const u8{ "fp0123-tokenize-utf16be.json", "fp0123-tokenize-utf16le-errors.json" }) |name| {
+        const bytes = try readFixture(name);
+        defer testing.allocator.free(bytes);
+        // Fail every remap so that each growth step is an allocation the checker can induce.
+        var no_remap: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+        try testing.checkAllAllocationFailures(no_remap.allocator(), runDecodedUnderAllocationFailure, .{bytes});
+        try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
+    }
+}
+
+test "FP-0123 case 15 Lab-9: a body that is only a UTF-16LE byte order mark decodes to no code units and passes" {
+    var r = try StageResult.init("fp0123-decode-bom-only.json");
+    defer r.deinit();
+    try testing.expectEqual(Result.pass, r.run.outcome.result);
+    try expectString("completed", try member(r.decode, "status"));
+    try expectString("UTF-16LE", try member(r.decode, "encoding"));
+    try expectInteger(2, try member(r.decode, "bom_bytes"));
+    try expectInteger(0, try member(r.decode, "code_units"));
+    try expectString(&utf16LeDigest(""), try member(r.decode, "output_sha256"));
+}
+
+test "FP-0123 case 15 Lab-10: a decode expectation that names an encoding by a label, not its name, is invalid" {
+    const detail = "expect.encoding: expected a known name";
+    var run = try runFixture("fp0123-decode-name-lowercase.json");
+    defer run.deinit();
+    try testing.expectEqual(Result.harness_error, run.outcome.result);
+    try testing.expectEqual(@as(u8, 3), run.outcome.result.exitStatus());
+    var buffer: [256]u8 = undefined;
+    try testing.expectEqualStrings(detail, try detailText(&buffer, run.outcome.detail.?));
+
+    var result_arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer result_arena.deinit();
+    const result = try resultJson(result_arena.allocator(), &run);
+    const outcome = try member(result, "outcome");
+    try expectString("harness-error", try member(outcome, "result"));
+    try expectString(detail, try member(outcome, "detail"));
+    try expectString("not-reached", try member((try member(result, "stages")).array.items[0], "status"));
+    try testing.expectEqual(@as(usize, 0), (try member(result, "events")).array.items.len);
 }

@@ -1,0 +1,13 @@
+diff --git a/src/encoding/root.zig b/src/encoding/root.zig
+index c003462..fcc10bb 100644
+--- a/src/encoding/root.zig
++++ b/src/encoding/root.zig
+@@ -95,7 +95,7 @@ pub fn labels(e: Encoding) []const []const u8 {
+ /// `Unit` is `u8` or `u16`. A unit above 0x7F never matches, because every label is ASCII.
+ pub fn getEncoding(comptime Unit: type, label: []const Unit) ?Encoding {
+     comptime std.debug.assert(Unit == u8 or Unit == u16);
+-    const trimmed = trimAsciiWhitespace(Unit, label);
++    const trimmed = label;
+     for (label_table.table, 0..) |entry, index| {
+         for (entry.labels) |candidate| {
+             if (matchesLabel(Unit, trimmed, candidate)) return @fromBackingInt(@intCast(index));

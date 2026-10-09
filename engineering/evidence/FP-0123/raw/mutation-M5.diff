@@ -1,0 +1,14 @@
+diff --git a/src/encoding/root.zig b/src/encoding/root.zig
+index c003462..dedd9fe 100644
+--- a/src/encoding/root.zig
++++ b/src/encoding/root.zig
+@@ -363,7 +363,8 @@ pub const Decoder = struct {
+         return switch (d.handler) {
+             .utf_8 => |*h| @intFromBool(h.end()),
+             .utf_16 => |*h| h.end(),
+-            .replacement, .x_user_defined => 0,
++            .replacement => |error_returned| @intFromBool(!error_returned),
++            .x_user_defined => 0,
+         };
+     }
+ };

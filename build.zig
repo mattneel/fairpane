@@ -36,6 +36,12 @@ const lab_fixtures = [_][]const u8{
     "fp0008-decode-pass.json",
     "fp0008-decode-wrong-encoding.json",
     "fp0008-tokenize-replacement.json",
+    "fp0123-decode-utf16le.json",
+    "fp0123-tokenize-utf16be.json",
+    "fp0123-tokenize-utf16le-errors.json",
+    "fp0123-decode-name-shift-jis.json",
+    "fp0123-decode-bom-only.json",
+    "fp0123-decode-name-lowercase.json",
 };
 
 /// A compile-failure fixture of FP-0011 and the exit status and standard-error texts that it must produce.
@@ -434,7 +440,7 @@ fn libraryCheck(b: *std.Build, step: *std.Build.Step, check: *std.Build.Step.Com
 }
 
 /// Adds FP-0007 contract cases 13 and 14, FP-0054 contract case 5 and revision 1 cases 1 to 5, FP-0008 contract case 26,
-/// and FP-0076 contract cases 1 to 7, which run the installed `fairpane-lab` executable.
+/// FP-0123 contract case 15 Lab-7, and FP-0076 contract cases 1 to 7, which run the installed `fairpane-lab` executable.
 fn addLabCases(
     b: *std.Build,
     test_step: *std.Build.Step,
@@ -452,6 +458,7 @@ fn addLabCases(
         .{ .name = "FP-0008 case 26: case 18 passes with exit status 0", .args = &.{"run"}, .fixture = "fp0008-tokenize-pass.json", .status = 0 },
         .{ .name = "FP-0008 case 26: the token_count variant of case 19 fails with exit status 1", .args = &.{"run"}, .fixture = "fp0008-tokenize-token-count.json", .status = 1 },
         .{ .name = "FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2", .args = &.{"run"}, .fixture = "fp0008-tokenize-no-bom.json", .status = 2 },
+        .{ .name = "FP-0123 case 15 Lab-7: the UTF-16BE tokenize case of Lab-3 passes with exit status 0", .args = &.{"run"}, .fixture = "fp0123-tokenize-utf16be.json", .status = 0 },
     };
     const results = [_][]const u8{ "pass", "fail", "unsupported", "harness-error", "timeout" };
     for (exits) |case| {

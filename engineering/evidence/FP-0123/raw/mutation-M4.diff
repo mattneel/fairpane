@@ -1,0 +1,17 @@
+diff --git a/src/encoding/utf16.zig b/src/encoding/utf16.zig
+index db8d313..fc6ee24 100644
+--- a/src/encoding/utf16.zig
++++ b/src/encoding/utf16.zig
+@@ -51,10 +51,10 @@ pub const Handler = struct {
+ 
+     /// Processes end-of-queue and returns the number of errors, at most 1.
+     pub fn end(h: *Handler) u2 {
+-        const pending = h.leading_byte != null or h.leading_surrogate != null;
++        const errors: u2 = @as(u2, @intFromBool(h.leading_byte != null)) + @intFromBool(h.leading_surrogate != null);
+         h.leading_byte = null;
+         h.leading_surrogate = null;
+-        return @intFromBool(pending);
++        return errors;
+     }
+ };
+ 

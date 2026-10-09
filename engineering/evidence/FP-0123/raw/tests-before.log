@@ -1,0 +1,445 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+4465aa94966dc211c0c8a2a63f64a7a2cbdf7dba
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:10:10.391Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":50}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","add","--","build.zig","src/root.zig","src/encoding/root.zig","src/encoding/tests.zig","src/web_string.zig","src/lab.zig","tests/lab/fp0123-decode-utf16le.json","tests/lab/fp0123-tokenize-utf16be.json","tests/lab/fp0123-tokenize-utf16le-errors.json","tests/lab/fp0123-decode-name-shift-jis.json","tests/lab/fp0123-decode-bom-only.json","tests/lab/fp0123-decode-name-lowercase.json"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["add","--","build.zig","src/root.zig","src/encoding/root.zig","src/encoding/tests.zig","src/web_string.zig","src/lab.zig","tests/lab/fp0123-decode-utf16le.json","tests/lab/fp0123-tokenize-utf16be.json","tests/lab/fp0123-tokenize-utf16le-errors.json","tests/lab/fp0123-decode-name-shift-jis.json","tests/lab/fp0123-decode-bom-only.json","tests/lab/fp0123-decode-name-lowercase.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:10:10.514Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":69}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--cached","--name-status"]
+M	build.zig
+A	src/encoding/root.zig
+A	src/encoding/tests.zig
+M	src/lab.zig
+M	src/root.zig
+M	src/web_string.zig
+A	tests/lab/fp0123-decode-bom-only.json
+A	tests/lab/fp0123-decode-name-lowercase.json
+A	tests/lab/fp0123-decode-name-shift-jis.json
+A	tests/lab/fp0123-decode-utf16le.json
+A	tests/lab/fp0123-tokenize-utf16be.json
+A	tests/lab/fp0123-tokenize-utf16le-errors.json
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--cached","--name-status"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:10:10.706Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","ls-files","--stage","--","build.zig","src/root.zig","src/encoding","src/web_string.zig","src/lab.zig","tests/lab"]
+100644 d59edc8a2e5df401b2baa6ce37e102e592f5de85 0	build.zig
+100644 5095a1a65cb60d75bd829a6389621a3bfe49ecee 0	src/encoding/root.zig
+100644 f4c5f7db3e6c9bd17d838dc45cc1b0fc77ebf130 0	src/encoding/tests.zig
+100644 987654bc88f55e01c688bc83e610dc6acc6d8230 0	src/lab.zig
+100644 0b7d2d80aa7344ca47c02d2d0bd2818107d0634b 0	src/root.zig
+100644 ea35bc7f7323e6d9ad0657ea84a1afb80e663780 0	src/web_string.zig
+100644 d56b7526731729ea956b18ac0e11daebc8576f60 0	tests/lab/README.md
+100644 34c0ffc0bf36ac3ccbf37a609df42e8cadaab12b 0	tests/lab/case-01-dotdot-path.json
+100644 bcdec14bd8e006a45c0215a7590a33295cad683f 0	tests/lab/case-01-duplicate-field.json
+100644 a3bd47f09b30f8d4e24108fc207e32a3339cd88f 0	tests/lab/case-01-duplicate-resource-url.json
+100644 a57e36ad76d910df00d868187610340099a3d943 0	tests/lab/case-01-invalid-base64.json
+100644 d5a11dacb930fd239e54eb309ed59a7c6cf7480a 0	tests/lab/case-01-missing-environment-field.json
+100644 fd3224c22fbada9075eea0e3382f806ab625795d 0	tests/lab/case-01-unknown-field.json
+100644 1a1f8f7583dd4625e85471c45fa86afb94bf52bc 0	tests/lab/case-01-uppercase-revision.json
+100644 082475ff3375f40ea22f8b18eb440e8d72a9ddda 0	tests/lab/case-01-valid.json
+100644 f54bebe520133026fb5640cdc79f640a5aa4a73b 0	tests/lab/case-01-wrong-format.json
+100644 bfecf4b253fe6a489c0caaed4ae1a5e985dd656a 0	tests/lab/case-01-wrong-version.json
+100644 3c5d999c4bad3ac13cc8f39458f4ec6293b0e296 0	tests/lab/case-01-zero-step-budget.json
+100644 a6d2170d4de393da88a4403c3e407a48ab7bd68d 0	tests/lab/case-02-pass.json
+100644 cd907bf162c4bd2444e075e363ebd4bf18ee4de2 0	tests/lab/case-03-body-mismatch.json
+100644 573928c2a5f7434798051c4c9f6dc377cd5f89c8 0	tests/lab/case-03-state-mismatch.json
+100644 2db452788fa8f2cd71a12df19ea2de52b1c569ad 0	tests/lab/case-04-tree-unsupported.json
+100644 a6d6bb310497c2fe847e41025f4a3ae1d37eb205 0	tests/lab/case-05-null-body.json
+100644 c4281ff1fd90efce507dc0e317f28419fa5127e0 0	tests/lab/case-08-timeout.json
+100644 ae5997bcb62aa7bbc237b23c7258e29df654d695 0	tests/lab/case-14-minimize.json
+100644 e4b5e0f5d478f6af0992de5d267e40b3fe6e0c41 0	tests/lab/check.zig
+100644 466c3170dd5735c612eaa02df25a2fe005e573ae 0	tests/lab/fp0008-decode-pass.json
+100644 44bcd1ac412944f72086b56cd5708f6a101055d1 0	tests/lab/fp0008-decode-utf16be-bom.json
+100644 2669e33a5feb17895984eb4664ea6c27034bce46 0	tests/lab/fp0008-decode-utf16le-bom.json
+100644 51f9f832c715c6a535d518370fd1b9683fd37d31 0	tests/lab/fp0008-decode-wrong-encoding.json
+100644 db4b606917bf4c0479f00b28bfcb3e3db0b8cc29 0	tests/lab/fp0008-tokenize-errors.json
+100644 fab92e2242f710fe3b709ef92fc2e4d9a2447f15 0	tests/lab/fp0008-tokenize-no-bom.json
+100644 dd1c1668a6d53203d677a384e273e41a41db8b8c 0	tests/lab/fp0008-tokenize-null-body.json
+100644 acd1cd1a54706bc3ff6743d06e8936b19cabe442 0	tests/lab/fp0008-tokenize-pass.json
+100644 50d0b3051979bf8a147370ea2a20d3847ddc0ee9 0	tests/lab/fp0008-tokenize-replacement.json
+100644 07c964034385ad342feee2a383ed02267250c65e 0	tests/lab/fp0008-tokenize-token-count.json
+100644 9a8c8e5facbdbfefd8b1d70d7021cec4f6d32864 0	tests/lab/fp0008-tokenize-wrong-errors.json
+100644 389cc90114c246efc9856bac0ac6f21a59e03179 0	tests/lab/fp0008-tokenize-zero-digest.json
+100644 a953137ea45ab058501aedc58e16f4a384dc3285 0	tests/lab/fp0054-case-03-minimize-corpus.json
+100644 397f574a63d93ee01f4ab63f12bcf0d1adbf0378 0	tests/lab/fp0054-case-04-v1-derived.json
+100644 4866cdf9a0144a359b07dc5d73d2126a6377024e 0	tests/lab/fp0054-case-04-v2-corpus.json
+100644 a58ce42f7a81c87f10341a4367ef7fefc208b1fe 0	tests/lab/fp0054-case-04-v2-missing-derived.json
+100644 f0bf87ede0e389771b2d39a86be2d318f6903d70 0	tests/lab/fp0123-decode-bom-only.json
+100644 e2f7958fa28e59a74da54d04d26e8338beb84287 0	tests/lab/fp0123-decode-name-lowercase.json
+100644 5921fdbf5cca710cc7b9387e25256893c40641ac 0	tests/lab/fp0123-decode-name-shift-jis.json
+100644 fef2d2deb84955f88c0e6ab36488dfdad86b9e73 0	tests/lab/fp0123-decode-utf16le.json
+100644 d08ad806bfcbdc05c106bf5357dbf3bfb34872e4 0	tests/lab/fp0123-tokenize-utf16be.json
+100644 916b85b938a7107d729e68fccebd773749b17000 0	tests/lab/fp0123-tokenize-utf16le-errors.json
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["ls-files","--stage","--","build.zig","src/root.zig","src/encoding","src/web_string.zig","src/lab.zig","tests/lab"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:10:10.815Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--porcelain=v1"]
+M  build.zig
+A  src/encoding/root.zig
+A  src/encoding/tests.zig
+M  src/lab.zig
+M  src/root.zig
+M  src/web_string.zig
+A  tests/lab/fp0123-decode-bom-only.json
+A  tests/lab/fp0123-decode-name-lowercase.json
+A  tests/lab/fp0123-decode-name-shift-jis.json
+A  tests/lab/fp0123-decode-utf16le.json
+A  tests/lab/fp0123-tokenize-utf16be.json
+A  tests/lab/fp0123-tokenize-utf16le-errors.json
+?? engineering/evidence/FP-0123/raw/tests-base.log
+?? engineering/evidence/FP-0123/raw/tests-before.log
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--porcelain=v1"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:10:10.939Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":61}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0123-before"]
+test
++- run test
+   +- compile test debug native 2 errors
+src\encoding\tests.zig:9:26: error: root source file struct 'encoding.root' has no member named 'Encoding'
+const Encoding = encoding.Encoding;
+                 ~~~~~~~~^~~~~~~~~
+src\encoding\root.zig:1:1: note: struct declared here
+//! The Encoding Standard: names, labels, decoders, and decode hooks.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    test.FP-0123 case 1: name gives the 40 names in table order, and fromName is exact and case-sensitive: src\encoding\tests.zig:61:34
+    test_0: src\encoding\root.zig:4:17
+    2 reference(s) hidden; use '-freference-trace=4' to see all references
+src\encoding\tests.zig:11:24: error: root source file struct 'encoding.root' has no member named 'Status'
+const Status = encoding.Status;
+               ~~~~~~~~^~~~~~~
+src\encoding\root.zig:1:1: note: struct declared here
+//! The Encoding Standard: names, labels, decoders, and decode hooks.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+error: 2 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0123-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- FP-0123 case 15 Lab-7: the UTF-16BE tokenize case of Lab-3 passes with exit status 0 failure
+error: ========= expected to find in stdout: =========
+       "result": "pass"
+       ========= but stdout does not contain it: =====
+       {
+         "format": "fairpane-lab-result",
+         "version": 1,
+         "case": "eb050889a89e50547e56753296eeaebd1746c2da8cced8f2fec01f6a1f703850",
+         "corpus": null,
+         "inputs": {
+           "document": {
+             "url": "https://example.test/fp0123-utf16be.html",
+             "length": 8,
+             "sha256": "2fdd57e7926aa472cba61940b28a61b3378ce3983c9ed44a8faf9e78420a882a"
+           },
+           "resources": [],
+           "environment": {
+             "time_origin_ms": 0,
+             "random_seed": "0000000000000000000000000000000000000000000000000000000000000000",
+             "viewport": {
+               "width": 1024,
+               "height": 768,
+               "device_pixel_ratio_milli": 1000
+             },
+             "locale": "en-US",
+             "time_zone": "UTC"
+           }
+         },
+         "environment_consumers": {
+           "time_origin_ms": [],
+           "random_seed": [],
+           "viewport": [],
+           "locale": [],
+           "time_zone": []
+         },
+         "stages": [
+           {
+             "stage": "fetch",
+             "status": "completed",
+             "requests": [
+               {
+                 "request": 1,
+                 "url": "https://example.test/fp0123-utf16be.html",
+                 "answer": "response"
+               }
+             ],
+             "document_state": "loaded",
+             "body_length": 8,
+             "body_sha256": "2fdd57e7926aa472cba61940b28a61b3378ce3983c9ed44a8faf9e78420a882a"
+           },
+           {
+             "stage": "decode",
+             "status": "unsupported",
+             "encoding": null,
+             "confidence": null,
+             "bom_bytes": null,
+             "code_units": null,
+             "output_sha256": null,
+             "detail": "UTF-16BE byte order mark; the UTF-16BE decoder is not implemented"
+           },
+           {
+             "stage": "tokenize",
+             "status": "not-reached",
+             "token_count": null,
+             "tokens_sha256": null,
+             "errors": null
+           },
+           {
+             "stage": "tree",
+             "status": "unsupported"
+           },
+           {
+             "stage": "style",
+             "status": "unsupported"
+           },
+           {
+             "stage": "layout",
+             "status": "unsupported"
+           },
+           {
+             "stage": "paint",
+             "status": "unsupported"
+           },
+           {
+             "stage": "script",
+             "status": "unsupported"
+           }
+         ],
+         "events": [
+           {
+             "event": "request_issued",
+             "document": 1,
+             "request": 1,
+             "kind": "resource",
+             "version": 1,
+             "url": "https://example.test/fp0123-utf16be.html"
+           },
+           {
+             "event": "document_state_changed",
+             "document": 1,
+             "request": 1,
+             "kind": "resource",
+             "version": 1,
+             "state": "loading",
+             "reject_reason": null
+           },
+           {
+             "event": "document_state_changed",
+             "document": 1,
+             "request": 1,
+             "kind": "resource",
+             "version": 1,
+             "state": "loaded",
+             "reject_reason": null
+           }
+         ],
+         "steps": 1,
+         "outcome": {
+           "result": "unsupported",
+           "stage": "decode",
+           "check": null,
+           "expected": null,
+           "observed": null,
+           "detail": "UTF-16BE byte order mark; the UTF-16BE decoder is not implemented"
+         }
+       }
+       
+failed command: ".\\zig-out\\bin\\fairpane-lab.exe" run ".\\tests\\lab\\fp0123-tokenize-utf16be.json"
+
+test
++- FP-0082 case 16: a missing path exits with status 3 w
+fairpane-js-parse: tests/js/parse/missing.js: FileNotFound
+failed command: cd . && ".\\zig-out\\bin\\fairpane-js-parse.exe" file tests/js/parse/missing.js
+
+test
++- FP-0082 case 16: invalid-utf8.js exits with status 3 w
+fairpane-js-parse: .\tests\js\parse\invalid-utf8.js: InvalidUtf8
+failed command: ".\\zig-out\\bin\\fairpane-js-parse.exe" file ".\\tests\\js\\parse\\invalid-utf8.js"
+
+test
++- FP-0082 case 17: the census refuses an existing output file and exits with status 3 w
+fairpane-js-parse: census: cannot create .\out\fp0123-before\o\0c925f44918d6f5adba948a0455992d0\existing.jsonl: PathAlreadyExists
+failed command: ".\\zig-out\\bin\\fairpane-js-parse.exe" census ".\\tests\\js\\census\\sound" ".\\out\\fp0123-before\\o\\0c925f44918d6f5adba948a0455992d0\\existing.jsonl"
+
+Build Summary: 97/101 steps succeeded (2 failed); 51/51 tests passed
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 2 errors
++- run test 45 pass (45 total) 359ms MaxRSS:16M
+|  +- compile test debug native success 5s MaxRSS:417M
++- FP-0007 case 13: case 2 passes with exit status 0 success 67ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 4s MaxRSS:361M
++- FP-0007 case 13: case 3 fails with exit status 1 success 60ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 69ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 53ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 65ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 57ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 success 58ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 success 72ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 success 63ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0123 case 15 Lab-7: the UTF-16BE tokenize case of Lab-3 passes with exit status 0 failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 123ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 19ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 28ms
+|  +- compile exe fairpane-lab-check debug native success 4s MaxRSS:353M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 74ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 68ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling success 55ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 case 5: create a fresh directory success 51ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0054 case 5: the refused minimization leaves the input unchanged success 36ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file success 60ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory success 54ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged success 35ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file success 57ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory success 57ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged success 37ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case success 52ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory success 60ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged success 39ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file success 61ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory success 52ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest success 37ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: run, minimize, and replay report files one byte above the size limit success 141ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory success 53ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0076 case 3: minimize writes over an existing out.json whose ACL denies read-data access to Everyone success 66ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0076 case 3: create a fresh directory success 62ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0076 case 3: out.json is a version 2 case derived from the input digest success 57ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0076 case 3: restore read access to out.json success 36ms
+|     +- compile exe fairpane-lab-check debug native (reused)
+|     +- FP-0076 case 3: create a fresh directory (+1 more reused dependencies)
+|     +- FP-0076 case 3: minimize writes over an existing out.json whose ACL denies read-data access to Everyone (+2 more reused dependencies)
++- FP-0076 case 4: minimize reports the output path out|.json, which cannot be identified success 62ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0076 case 4: create a fresh directory success 57ms
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0076 case 4: the directory gains no file success 37ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0076 case 4: minimize reports the output path out|.json, which cannot be identified (+2 more reused dependencies)
++- FP-0076 case 7: the revision 1 case 5 helper reports failing checks and removes both oversized files success 66ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 7: create a fresh directory success 52ms
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- compile exe fairpane-lab-check debug native (reused)
++- FP-0076 case 7: no file remains after the failing run success 41ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 7: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0076 case 7: the revision 1 case 5 helper reports failing checks and removes both oversized files (+3 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 964ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 989ms
++- FP-0011 case 4: allocation_invokes_call.zig success 999ms
++- FP-0011 case 4: leaf_allocates.zig success 881ms
++- FP-0011 case 4: mutation_throws.zig success 902ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 843ms
++- FP-0011 case 4: leaf_positive.zig success 1s
++- FP-0011 case 5: catalog_callback_alone.zig success 851ms
++- FP-0011 case 5: catalog_exception_alone.zig success 898ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 887ms
++- FP-0011 case 5: kernel_wider_context.zig success 898ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 989ms
++- FP-0011 case 8: layout_undescribed_field.zig success 897ms
++- FP-0011 case 8: layout_plain_reference.zig success 885ms
++- FP-0011 case 8: layout_missing_field.zig success 892ms
++- FP-0011 case 20: abi_reference_value.zig success 823ms
++- FP-0011 case 20: abi_nan_box_value.zig success 887ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 807ms
++- FP-0011 case 34: leaf_reaches_heap.zig success 1s
++- FP-0011 case 35: leaf_widens_context.zig success 805ms
++- FP-0011 case 36: binding_missing_kernel.zig success 992ms
++- FP-0011 case 36: binding_stray_kernel.zig success 898ms
++- library-test success
+|  +- run test 6 pass (6 total) 56ms MaxRSS:4M
+|  |  +- compile test debug native success 3s MaxRSS:288M
+|  +- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical success 38ms
+|  |  +- compile exe fairpane-library-check debug native success 3s MaxRSS:281M
+|  |  +- archive fairpane.lib safe success 20ms
+|  |  |  +- compile obj fairpane_zcu safe native success 4s MaxRSS:173M
+|  |  |     +- WriteFile fp0066-tree-a/src success
+|  |  +- archive fairpane.lib safe success 35ms
+|  |     +- compile obj fairpane_zcu safe native success 4s MaxRSS:175M
+|  |        +- WriteFile fp0066-tree-a/src (reused)
+|  +- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory success 68ms
+|  |  +- compile exe fairpane-library-check debug native (reused)
+|  |  +- archive fairpane.lib safe (+1 more reused dependencies)
+|  |  +- WriteFile fp0066-tree-a/src (reused)
+|  +- FP-0066 case 4: the Debug library keeps debug information that names the absolute source directory success 76ms
+|  |  +- compile exe fairpane-library-check debug native (reused)
+|  |  +- archive fairpane.lib debug success 27ms
+|  |     +- compile obj fairpane_zcu debug native success 2s MaxRSS:278M
+|  +- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory success 59ms
+|  |  +- compile exe fairpane-library-check debug native (reused)
+|  |  +- archive fairpane.lib safe (+1 more reused dependencies)
+|  +- FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group success 61ms
+|     +- compile exe fairpane-library-check debug native (reused)
+|     +- archive fairpane.lib safe (+1 more reused dependencies)
++- FP-0082 case 16: valid.js exits with status 0 and prints the T9 dump success 58ms
+|  +- install fairpane-js-parse success
+|     +- compile exe fairpane-js-parse debug native success 4s MaxRSS:346M
+|        +- WriteFile src success
++- FP-0082 case 16: syntax.js exits with status 1 and prints its syntax error success 62ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: unsupported.js exits with status 2 and prints its unsupported outcome success 60ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: invalid-utf8.js exits with status 3 success 62ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: a missing path exits with status 3 success 63ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: no arguments exits with status 3 and writes the usage success 58ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census of the sound fixture exits with status 0 success 66ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census of the unsound fixture exits with status 1 success 65ms
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census refuses an existing output file and exits with status 3 success 63ms
+   +- install fairpane-js-parse (+1 more reused dependencies)
+   +- WriteFile existing.jsonl success
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xa88ba930 test --summary all --cache-dir out/fp0123-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0123-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:10:15.691Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":10606,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

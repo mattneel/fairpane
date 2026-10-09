@@ -1,0 +1,40 @@
+
+COMMAND ["C:\\Windows\\System32\\cmd.exe","/d","/c","type out\\fp0123-labels-check.js"]
+const fs = require('fs');
+const crypto = require('crypto');
+const [specPath, zigPath] = process.argv.slice(2);
+const spec = fs.readFileSync(specPath);
+console.log('encoding.bs sha256 ' + crypto.createHash('sha256').update(spec).digest('hex'));
+const lines = spec.toString('utf8').split('\n');
+const start = lines.findIndex(l => l.startsWith('<h3 id=names-and-labels>'));
+const tableStart = lines.findIndex((l, i) => i > start && l.startsWith('<table>'));
+const tableEnd = lines.findIndex((l, i) => i > tableStart && l.startsWith('</table>'));
+const fromSpec = [];
+for (const line of lines.slice(tableStart, tableEnd)) {
+  const name = line.match(/<a>([^<]+)<\/a>/);
+  if (name && !line.includes('href=')) fromSpec.push({ name: name[1], labels: [] });
+  for (const m of line.matchAll(/"<code>([^<]+)<\/code>"/g)) fromSpec[fromSpec.length - 1].labels.push(m[1]);
+}
+const fromZig = [];
+for (const m of fs.readFileSync(zigPath, 'utf8').matchAll(/\.name = "([^"]+)", \.labels = &\.\{([^}]*)\}/g)) {
+  fromZig.push({ name: m[1], labels: [...m[2].matchAll(/"([^"]+)"/g)].map(x => x[1]) });
+}
+const count = t => t.reduce((n, e) => n + e.labels.length, 0);
+console.log(JSON.stringify({
+  spec_names: fromSpec.length, spec_labels: count(fromSpec),
+  zig_names: fromZig.length, zig_labels: count(fromZig),
+  identical: JSON.stringify(fromSpec) === JSON.stringify(fromZig),
+}));
+process.exitCode = JSON.stringify(fromSpec) === JSON.stringify(fromZig) ? 0 : 1;
+RESULT {"executable":"C:\\Windows\\System32\\cmd.exe","arguments":["/d","/c","type out\\fp0123-labels-check.js"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:19:52.138Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":13}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0123-labels-check.js","C:/src/fairpane/out/fp0123-pin/encoding.bs","src/encoding/labels.zig"]
+encoding.bs sha256 90bd4f43b965186afd34661d5ad0f45d35f9a178da895dcc9f08f610cc031c55
+{"spec_names":40,"spec_labels":228,"zig_names":40,"zig_labels":228,"identical":true}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0123-labels-check.js","C:/src/fairpane/out/fp0123-pin/encoding.bs","src/encoding/labels.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:19:52.210Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":48}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","C:/src/fairpane/out/fp0123-pin/encoding.bs","C:/src/fairpane/out/fp0123-pin/LICENSE","src/html/entities.LICENSE"]
+684c72d8fd1d3578e3772677c73a2ab6aef6d7ee
+f2dcda46deccefd245749202a88a7837e35c6daa
+f2dcda46deccefd245749202a88a7837e35c6daa
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","C:/src/fairpane/out/fp0123-pin/encoding.bs","C:/src/fairpane/out/fp0123-pin/LICENSE","src/html/entities.LICENSE"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t6b5416396\\m","started_at":"2026-10-09T18:19:58.554Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
