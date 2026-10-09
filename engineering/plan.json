@@ -555,7 +555,8 @@
         "Expose explicit generic execution and collection safepoints.",
         "Preserve all remaining language obligations in the task graph.",
         "Add adaptive-dispatch experiments without replacing semantics with constant results.",
-        "Start from the reference representation and the generated tracer that ADR 0008 selects, and repeat its representation and tracer comparisons on an integrated workload before any speed claim, interleaving them within one process and recording the logical processor of each sample."
+        "Start from the reference representation and the generated tracer that ADR 0008 selects, and repeat its representation and tracer comparisons on an integrated workload before any speed claim, interleaving them within one process and recording the logical processor of each sample and the affinity mask of each measurement process.",
+        "Keep a context's host_context from giving its holder the runtime or the heap, either by documenting that rule where a host sets it or by requiring an effect to read it."
       ],
       "read": [
         "docs/JAVASCRIPT_RUNTIME.md",
@@ -2984,7 +2985,7 @@
       "workstream": "laboratory",
       "depends_on": ["FP-0033", "FP-0051"],
       "role": "fairpane-core",
-      "allowed_paths": ["tools", "tests", "engineering/decisions", "engineering/evidence"],
+      "allowed_paths": ["tools", "tests", ".github", "engineering/decisions", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "specs/corpora.json"],
       "authority": "routine-local-engineering",
       "required_gates": ["repo-check", "controller-test"],
@@ -2993,9 +2994,10 @@
         "Check every filter key of the Gates triggers, so a filter cannot narrow which pushes and pull requests run the gates.",
         "Report every corruption fixture of the verifier's case FP-0051 3 in one assertion.",
         "State in tools/README.md that an unreadable object under the candidate's ID is a tool error and that a readable object of another type is unknown-candidate.",
-        "Record the base identity of every red baseline run in the evidence logs."
+        "Record the base identity of every red baseline run in the evidence logs.",
+        "Run the zig-fmt and zig-test gates in the Linux job of the Gates workflow, so that Linux-only code paths execute on every push, and record the first passing run."
       ],
-      "read": ["engineering/evidence/FP-0033/reviews/review-4-accept.json", "engineering/evidence/FP-0051/reviews/review-3-accept.json"],
+      "read": ["engineering/evidence/FP-0033/reviews/review-4-accept.json", "engineering/evidence/FP-0051/reviews/review-3-accept.json", "engineering/evidence/FP-0067/raw/linux-baseline.log"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -3056,7 +3058,9 @@
         "Implement the Selectors 4 pseudo-classes and pseudo-elements, including :is(), :not(), :where(), and :has().",
         "Implement CSS Nesting, nested declarations rules, and @namespace prefixes.",
         "Apply the HTML case rules and quirks-mode matching for HTML documents.",
-        "Bound the matching cost of :has() and report the bound."
+        "Bound the matching cost of :has() and report the bound.",
+        "Reject a selector whose ancestor compounds cannot match in constant time per element on deep trees, for example with an ancestor filter.",
+        "Classify invalid and unsupported selector forms precisely, as the FP-0014 review notes."
       ],
       "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
@@ -3076,7 +3080,8 @@
       "acceptance": [
         "Register every standard property, including shorthands and logical properties, with initial values, inheritance, computed representations, and invalidation effects.",
         "Implement the color, display, font-size, and unit forms that FP-0014 reports as unsupported, and the math functions.",
-        "Implement the Values 5 spread syntax once its specification is stable enough to test, or record why it stays unsupported.",
+        "Implement the Values 5 spread syntax and the other arbitrary substitution functions, if(), inherit(), attr(), ident(), and random-item(), once their specification is stable enough to test, or record why they stay unsupported.",
+        "Classify invalid and unsupported value forms precisely, as the FP-0014 review notes.",
         "Generate the registry and keyword data from pinned specification sources where they exist."
       ],
       "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
