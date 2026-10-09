@@ -91,11 +91,13 @@ The replacing head contains both the task's implementation and the fix, and the 
 
 - The record names the failed gate and step from the failed run's own receipt, log, or job record.
 - It gives evidence that the cause makes that step fail on the failed head's sources, and it marks the attribution [INFERENCE] where the failed run kept no output.
-- The fixing commit is the implementation of a task accepted before this acceptance, or it has its own `fairpane-review` record in `engineering/evidence` that predates this acceptance.
-- The fixing commit's evidence shows that the cause no longer fails the gate, with repeated runs when the cause is intermittent.
-- The fixing commit removes, skips, excludes, or weakens no test, gate, timeout, or threshold.
+- The fixing commits are the implementation and revisions of a task accepted before this acceptance, or each has its own `fairpane-review` record in `engineering/evidence` that predates this acceptance.
+- The fixing task's evidence shows that the cause no longer fails the gate.
+  When the cause is intermittent, that evidence has at least ten concluded runs, or the larger count that the fixing task's contract froze.
+- The fixing commits remove, skip, exclude, or weaken no test, gate, timeout, or threshold.
 - No commit from the failed head to the replacing head changes the failed gate's entry in `engineering/gates.json`, the workflow job that runs it, or the locked toolchain that it uses, or removes, skips, excludes, or weakens a test that the failed step runs.
-  The record includes `git diff --stat` of that range for those paths.
+  The record includes `git diff --stat <failed>..<replacing> -- engineering/gates.json .github/workflows toolchains tools/lib.mjs build.zig` and the same for the test sources of the failed step.
+- The record names each change in that range to the gate runner in `tools/lib.mjs` or to the build steps in `build.zig`, and states why that change cannot make the replacing run pass; otherwise only a passing rerun of the same head is allowed.
 
 If the cause cannot be tied to the failed step, even as an inference, only a passing rerun of the same head is allowed.
 A run that a timeout stops is a failure.
