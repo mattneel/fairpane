@@ -1,0 +1,160 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "24c0c648b9c826184894c3cb2e0061cbdb7e6c61",
+    "cd4f25c1aa8463af1ad4d3007f99998c9e293221"
+  ],
+  "summary": "I am rejecting this task because of one major finding. The workflow itself is correct. Its triggers, contents: read permission, credential-free checkout, pinned runner labels, Node 24.21.0 and the receipt-artifact names all match the contract. The Windows gates (repo-check, controller-test, zig-fmt, zig-test, zig-build, c-abi) and the Linux gates (repo-check, controller-test, cross-windows-x86_64, cross-linux-aarch64, cross-macos-aarch64) appear in the contract's order. I checked all three action SHAs against the GitHub API, and each matches its release tag. GitHub run 37873082602 for 24c0c648 shows both jobs successful, with every gate step successful; I confirmed this independently through the jobs API. The blocking problem is in tools/workflow-check.mjs, which is the only mechanical enforcement of contract checks 2-4. Its parser splits lines only on LF, but YAML parsers in the libyaml family (go-yaml v3, which actionlint uses, and YamlDotNet) also treat NEL (U+0085), LS (U+2028) and PS (U+2029) as line breaks. The checker treats everything after '#' as an unexamined comment. So an invisible LS after a comment can hide a `continue-on-error`, extra permissions, an unpinned `uses`, or a `pull_request_target` trigger, and the checker still reports no problems. That contradicts its claim, in its header and in tools/README.md, that every unreadable construct is rejected. Lesser findings: the secret-expression regex can be bypassed, and the actionlint and worker test evidence is not bound to the integrated tree. I ran no shell commands. My conclusions about the checker's behavior come from tracing the code, not from executing it.",
+  "criteria": [
+    {
+      "criterion": "Plan: Install the locked Zig compiler on a Windows runner through the existing installer, with its size and digest checks.",
+      "met": true,
+      "evidence": ".github/workflows/gates.yml:35-36 runs `node tools/fairpane.mjs install-zig`. On win32, tools/lib.mjs installZig calls scripts/Get-Zig.ps1, which checks the size and SHA-256 at scripts/Get-Zig.ps1:53-54. Windows job 113635331268, step 4 'Install the locked Zig compiler': conclusion success, taking 02:08:01 to 02:10:50."
+    },
+    {
+      "criterion": "Plan: Run check, test, zig-fmt, zig-test, zig-build, and c-abi on a Windows runner.",
+      "met": true,
+      "evidence": "gates.yml:38-54 run the gates repo-check (`fairpane check`), controller-test (selftest), zig-fmt, zig-test, zig-build and c-abi through `fairpane.mjs run`. In the run log and the jobs API, Windows steps 5-10 all have conclusion success."
+    },
+    {
+      "criterion": "Plan: Run the controller tests and the cross-compile gates on a Linux runner.",
+      "met": true,
+      "evidence": "gates.yml:82-95 run repo-check, controller-test and the three cross gates. These are all the cross gates in engineering/gates.json:55-86. Linux job 113635331511, steps 5-9: success."
+    },
+    {
+      "criterion": "Plan: Pin every action to a full commit SHA.",
+      "met": true,
+      "evidence": "gates.yml:26,31,58,70,75,99 pin checkout 3d3c42e5…90b1 # v7.0.1, setup-node 949feb24…15c1 # v7.1.0 and upload-artifact cf430e03…cd9 # v7.0.2. All three match raw/action-tag-refs.log and the live api.github.com git/ref/tags lookups, each a lightweight tag pointing to a commit. The enforcing checker can be bypassed (finding 1), but the workflow itself is fully pinned."
+    },
+    {
+      "criterion": "Plan: Grant each workflow job least-privilege permissions.",
+      "met": true,
+      "evidence": "gates.yml:10-11 grant `permissions: contents: read`. Neither job declares its own permissions."
+    },
+    {
+      "criterion": "Plan: Expose no secret to pull requests.",
+      "met": true,
+      "evidence": "Triggers are push, pull_request and workflow_dispatch (gates.yml:3-8), with no pull_request_target. No step contains a `secrets.` or `github.token` expression, and checkout sets persist-credentials: false (gates.yml:28,72). The checker's secret detection has gaps (finding 2), but it is not one of the contract's exact checks."
+    },
+    {
+      "criterion": "Plan: Upload each gate receipt and log as a workflow artifact without treating it as an attestation.",
+      "met": true,
+      "evidence": "gates.yml:56-62 and 97-103 use `if: ${{ always() }}`, path out/evidence/ (runGate's default evidence directory) and artifact names ending in `-gate-receipts-unsigned-local-integrity-records-not-attestations`. The upload steps succeeded in both jobs."
+    },
+    {
+      "criterion": "Plan: Fail the workflow on any failed, skipped, or timed-out gate.",
+      "met": true,
+      "evidence": "tools/fairpane.mjs:90 sets exit code 0 only when the gate status is 'pass'. No step uses continue-on-error. Each job has timeout-minutes: 90 (gates.yml:23,67), and each gate has its own timeout_ms in engineering/gates.json."
+    },
+    {
+      "criterion": "Contract check 1: actionlint at a pinned version with a verified digest reports no finding.",
+      "met": true,
+      "evidence": "raw/actionlint-download.log records the download of v1.7.12 (tag commit 914e7df2 in action-tag-refs.log). In raw/actionlint-digest.log, certutil's SHA-256 6e7241b5…f6e9 equals the release checksums entry (the first findstr exited 1 on a path separator; the retry exited 0). raw/actionlint.log reports 'Found total 0 errors', exit 0. Caveat: it ran in the worker worktree, and the linted file's digest was not recorded (finding 4)."
+    },
+    {
+      "criterion": "Contract check 2: the controller test fails when any `uses:` reference lacks a full 40-hex SHA.",
+      "met": false,
+      "evidence": "Ordinary forms are rejected (tools/workflow-check.test.mjs FP-0033 2 case). But an unpinned `uses:` on a line hidden after a comment and U+2028/U+0085/U+2029 passes with no problems (finding 1), so the check does not cover 'any' reference."
+    },
+    {
+      "criterion": "Contract check 3: the test fails when any job or the workflow grants a permission other than contents: read.",
+      "met": false,
+      "evidence": "Ordinary forms are rejected (tests at workflow-check.test.mjs FP-0033 3). But `  contents: read # x<U+2028>  id-token: write` parses as read-only in the checker, while libyaml-family parsers read it as an extra permission (finding 1)."
+    },
+    {
+      "criterion": "Contract check 4: the test fails on continue-on-error, persisted checkout credentials, or pull_request_target.",
+      "met": false,
+      "evidence": "Ordinary forms are rejected (workflow-check.test.mjs:118-137). A `continue-on-error: true` or `pull_request_target:` key placed after a comment and LS/NEL/PS is skipped by tokenize (tools/workflow-check.mjs:118,126) or swallowed into a plain-scalar comment (tools/workflow-check.mjs:103-106) (finding 1)."
+    },
+    {
+      "criterion": "Contract check 5: the workflow runs on GitHub for the integration commit, and both jobs succeed, recorded with `gh run view --json`.",
+      "met": true,
+      "evidence": "raw/github-run-37873082602.log records `gh run view 37873082602 --json …`, exit 0: headSha 24c0c648…6c61, event push, conclusion success. 'Windows gates' and 'Linux gates' both report conclusion success, with all 14 and 13 steps successful. The live api.github.com /actions/runs/37873082602/jobs response matches, including runner labels windows-2025 and ubuntu-24.04."
+    },
+    {
+      "criterion": "The gate list and order match the contract.",
+      "met": true,
+      "evidence": "Windows (gates.yml:38-54): repo-check, controller-test, zig-fmt, zig-test, zig-build, c-abi. Linux (gates.yml:82-95): repo-check, controller-test, cross-windows-x86_64, cross-linux-aarch64, cross-macos-aarch64. This is identical to CONTRACT.md and is asserted by the test 'The Gates workflow runs the contract gates in order'. The gates.yml at 24c0c648 on raw.githubusercontent.com is identical to the working tree."
+    },
+    {
+      "criterion": "Every action SHA matches its release tag.",
+      "met": true,
+      "evidence": "Live lookups: actions/checkout refs/tags/v7.0.1 → commit 3d3c42e5aac5ba805825da76410c181273ba90b1; actions/setup-node refs/tags/v7.1.0 → commit 949feb2413d6458794dcd2491c4babbbce0c15c1; actions/upload-artifact refs/tags/v7.0.2 → commit cf430e030ddbb5b0abf93d22962f4752f3646cd9. All are object type commit, matching gates.yml and raw/action-tag-refs.log."
+    },
+    {
+      "criterion": "Protected paths are unchanged.",
+      "met": true,
+      "evidence": "Commit 24c0c648 touches only .github/workflows/gates.yml, engineering/evidence/FP-0033/**, tools/README.md, tools/selftest.mjs, tools/workflow-check.mjs and tools/workflow-check.test.mjs (GitHub commits API). Commit cd4f25c1 touches engineering/evidence/FP-0033/README.md, raw/github-run-37873082602.log and engineering/state.json (the task record). It changes no protected path."
+    }
+  ],
+  "prior_findings": [],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "tools/workflow-check.mjs",
+      "line": 111,
+      "issue": "The parser splits lines only on '\\n' and rejects only a lone '\\r' (line 115). go-yaml v3 (yamlprivateh.go is_break, used by actionlint) and YamlDotNet (CharacterAnalyzer.IsBreak: \"\\r\\n\\x85\\x2028\\x2029\") also treat NEL, LS and PS as line breaks. Full-line comments are skipped without inspection (lines 118, 126), and plain-scalar comments are accepted verbatim (lines 103-106). Any key after a '#' and one of these characters is therefore invisible to the checker, but those parsers read it as a real key. That bypasses checks 2-4 and the secret check, and it contradicts the header claim at line 4 ('no unreadable construct passes unchecked') and tools/README.md:139 ('rejects … every other construct'). Minimal reproduction, traced through the code but not executed: `checkWorkflow(fs.readFileSync('.github/workflows/gates.yml','utf8').replace('        run: node tools/fairpane.mjs run c-abi\\n', '        run: node tools/fairpane.mjs run c-abi\\n        # note\\u2028        continue-on-error: true\\n'))` returns []. The same applies to `  contents: read # x\\u2028  id-token: write` under `permissions:`, to `  push: # x\\u2028  pull_request_target:` under `on:`, and to `\\u0085`. Even the trailing() regex accepts NEL, because JavaScript '.' matches U+0085. [INFERENCE] GitHub's own workflow loader reads these as line breaks too; the runner uses YamlDotNet.",
+      "recommendation": "Before tokenizing, reject U+0085, U+2028 and U+2029 anywhere in the text, along with any other character outside the YAML printable set (C0/C1 controls other than tab/LF/CR, and U+FEFF after position 0), with a line-numbered WorkflowParseError. Add unparseable() cases for each character, both in a full-line comment and in a trailing comment."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/workflow-check.mjs",
+      "line": 207,
+      "issue": "SECRET_EXPRESSION matches only the literal `secrets` or `github.token` before the first `}}`. It misses `${{ github['token'] }}`, `${{ toJSON(github) }}` (the github context includes token), and `${{ format('}}{0}', secrets.X) }}` (the `}}` inside the string literal stops the scan). tools/README.md:142 claims the checker reports 'an expression that reads a secret or the workflow token'.",
+      "recommendation": "Inside each `${{ … }}` region, scanned with awareness of string literals, flag any reference to the `secrets` context, `github.token` and `github['token']`, and any whole-context `toJSON(github)`. Alternatively, narrow the README claim. Add cases for these forms."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0033/README.md",
+      "line": 15,
+      "issue": "The evidence summary cites only the 118/118 integration gate. It does not disclose that the worker's raw/tests-after.log, which ran with the new cases, exited 1 with 2 failures (tests 48 and 49: 'The candidate must be a full 40-hex commit ID.'). It also does not say that raw/tests-before.log is a baseline without the new cases rather than a failing test for the new behavior.",
+      "recommendation": "Add a sentence stating that tests-after.log exited 1 with two pre-existing failures from the worker worktree that are unrelated to FP-0033, and that the integration receipt is authoritative."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0033/raw/actionlint.log",
+      "line": null,
+      "issue": "actionlint ran in the worker worktree (C:\\Users\\requi\\.omp\\wt\\t245a36d6d\\m) before integration. No digest of the linted gates.yml was recorded, so the 'zero findings' result is not bound to blob ccbd330e at 24c0c648. The shellcheck and pyflakes rules were disabled because those tools were absent. The actionlint digest was checked against a checksums file from the same release (transport integrity only).",
+      "recommendation": "For future workflow changes, record the SHA-256 of the linted file, or run actionlint on the integrated tree."
+    },
+    {
+      "severity": "note",
+      "path": ".github/workflows/gates.yml",
+      "line": 15,
+      "issue": "The concurrency behavior (pull requests cancel superseded runs; master runs get a unique run_id group) is correct but untested. No controller case asserts it.",
+      "recommendation": "Optionally assert the concurrency group and the cancel-in-progress expressions in the 'Gates workflow runs the contract gates' case."
+    }
+  ],
+  "commands_run": [
+    {
+      "command": "read https://api.github.com/repos/actions/checkout/git/ref/tags/v7.0.1 (HTTP fetch through the read tool, not a shell)",
+      "exit_status": 0,
+      "observation": "object.type commit, sha 3d3c42e5aac5ba805825da76410c181273ba90b1"
+    },
+    {
+      "command": "read https://api.github.com/repos/actions/setup-node/git/ref/tags/v7.1.0 (HTTP fetch through the read tool)",
+      "exit_status": 0,
+      "observation": "object.type commit, sha 949feb2413d6458794dcd2491c4babbbce0c15c1"
+    },
+    {
+      "command": "read https://api.github.com/repos/actions/upload-artifact/git/ref/tags/v7.0.2 (HTTP fetch through the read tool)",
+      "exit_status": 0,
+      "observation": "object.type commit, sha cf430e030ddbb5b0abf93d22962f4752f3646cd9"
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/actions/runs/37873082602/jobs (HTTP fetch through the read tool)",
+      "exit_status": 0,
+      "observation": "total_count 2. 'Windows gates' (labels windows-2025) and 'Linux gates' (labels ubuntu-24.04) both completed/success, head_sha 24c0c648…6c61, and every step success."
+    },
+    {
+      "command": "read https://raw.githubusercontent.com/mattneel/fairpane/24c0c648…/.github/workflows/gates.yml and https://api.github.com/repos/mattneel/fairpane/commits/{24c0c648,cd4f25c} (HTTP fetch through the read tool)",
+      "exit_status": 0,
+      "observation": "The gates.yml at the integration commit is identical to the working tree. 24c0c648's parent is d185b5e9; the changed files are limited to the allowed paths. cd4f25c1 adds README.md and the run log, and updates engineering/state.json."
+    },
+    {
+      "command": "grep https://raw.githubusercontent.com/go-yaml/yaml/v3/yamlprivateh.go and YamlDotNet CharacterAnalyzer.cs for line-break definitions (read tool)",
+      "exit_status": 0,
+      "observation": "go-yaml is_break includes NEL 0xC2 0x85, LS 0xE2 0x80 0xA8 and PS 0xE2 0x80 0xA9. YamlDotNet IsBreak checks \"\\r\\n\\x85\\x2028\\x2029\"."
+    }
+  ]
+}

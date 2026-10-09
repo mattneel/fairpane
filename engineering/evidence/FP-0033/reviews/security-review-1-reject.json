@@ -1,0 +1,148 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "24c0c64"
+  ],
+  "summary": "I reviewed the working-tree files that commit 24c0c64 adds or changes. I could not run git, so I could not diff the commit itself. The file list in engineering/evidence/FP-0033/raw/integration-binding.log:8-19 ties these files to the commit, and I assume [INFERENCE] they have not changed since. The workflow itself is sound. It has no pull_request_target trigger, reads no secrets, and grants only contents: read at the top level, with no job widening it. Concurrency is keyed on the pull request number, and cancellation applies only to pull requests. Every action is pinned to the commit SHA that the upstream tag API returned. Checkout sets persist-credentials: false. No ${{ }} expression reaches a run step. The uploaded receipts and logs record only arguments, working directories, environment overrides, and child output, so no environment dump or token reaches them. On both runners, the Zig install checks the archive's size and SHA-256 against the lock before it lists or extracts anything. Redirects are refused, and extraction goes through a staging directory with root and traversal checks. I reject for one major finding. The controller-test gate now asserts properties of .github/workflows/gates.yml, but .github is not in policy.source_roots or policy_roots. A gate receipt therefore still validates as current after someone edits the workflow, for example to add pull_request_target. That breaks the AGENTS.md rule to bind evidence to tested inputs. The fix needs a separate protected policy commit. The minor findings are bypasses in the local checker, and missing documentation that pull-request runs use the pull request's own workflow and checker. Both are local integrity checks, not independent enforcement.",
+  "criteria": [
+    {
+      "criterion": "Fork pull requests are safe: no pull_request_target and only an unprivileged trigger",
+      "met": true,
+      "evidence": "The triggers are push to master, pull_request to master, and workflow_dispatch (.github/workflows/gates.yml:3-8). There is no pull_request_target, and no workflow_run consumes these artifacts. For fork pull_request events, GitHub supplies a read-only token and no secrets, and the workflow requests nothing more."
+    },
+    {
+      "criterion": "No secrets and a read-only token",
+      "met": true,
+      "evidence": "The top level sets permissions: contents: read (gates.yml:10-11), and neither job declares permissions. No secrets.* or github.token expression appears in the file. Run steps get no token in their environment because checkout's token input is not re-exported, and persist-credentials is false at gates.yml:28 and :72."
+    },
+    {
+      "criterion": "Concurrency and cancellation",
+      "met": true,
+      "evidence": "The group is gates-pr-<number> for pull_request events and gates-<run_id> otherwise, and cancel-in-progress is true only for pull_request (gates.yml:15-17). Pushes to master and manual dispatches get unique groups, so they never cancel each other. A pull request can only cancel its own earlier runs. The PR number is an integer that GitHub assigns, so the expression cannot be injected."
+    },
+    {
+      "criterion": "Every action is pinned by full SHA with a version comment",
+      "met": true,
+      "evidence": "The pins are checkout@3d3c42e5… # v7.0.1, setup-node@949feb24… # v7.1.0, and upload-artifact@cf430e03… # v7.0.2 (gates.yml:26,31,58 and the Linux job). raw/action-tag-refs.log shows that each tag resolves, as a commit object from the upstream repository's git/ref API, to exactly these SHAs. That rules out a commit taken from a fork network. The checker regex is at tools/workflow-check.mjs:205."
+    },
+    {
+      "criterion": "persist-credentials: false",
+      "met": true,
+      "evidence": "Both checkout steps set it (gates.yml:27-28 and the Linux job). The checker enforces it at workflow-check.mjs:252-255, and tests cover true, quoted 'true', and an omitted value."
+    },
+    {
+      "criterion": "Artifacts do not leak secrets or tokens",
+      "met": true,
+      "evidence": "The artifacts contain only out/evidence/ (gates.yml:61). Command records hold the executable, arguments, cwd, start time, and environment_overrides, which is only ZIG_GLOBAL_CACHE_DIR (tools/lib.mjs:308-310, 348-353, 430-433). Receipts add input hashes and host metadata (lib.mjs:477-484). No code path dumps process.env. The workflow defines no secrets, and run steps carry no token. Any expired-token exposure would need a future expression; see the toJSON(github) finding."
+    },
+    {
+      "criterion": "Zig download integrity on both runners: size and SHA-256 from the lock before extraction",
+      "met": true,
+      "evidence": "On Linux, fetch uses redirect: 'error' (lib.mjs:509), stops writing once the stream passes the locked size, then runs verifyArchive for an exact size and SHA-256 match before the rename (lib.mjs:512-517, 130-133). It re-verifies a cached archive (lib.mjs:505) before tar runs (lib.mjs:523). On Windows, Invoke-WebRequest uses -MaximumRedirection 0 (scripts/Get-Zig.ps1:71). Assert-Archive checks the partial file and the cached archive (Get-Zig.ps1:72, 78) before ZipFile.OpenRead and ExtractToDirectory (Get-Zig.ps1:81, 96). Both installers validate the lock's URL, root, hash format, and size (lib.mjs:92-107, Get-Zig.ps1:8-25). toolchains/zig.lock.json is a protected path."
+    },
+    {
+      "criterion": "Extraction path safety",
+      "met": true,
+      "evidence": "Linux lists the members with tar -tf and requires the archive root, no leading '/', and no '..' component, then extracts into a mkdtemp stage (lib.mjs:521-536). Windows requires the root prefix and rejects '/', ':' (alternate data streams), and '..' (Get-Zig.ps1:82-89). .NET ExtractToDirectory also refuses entries that escape the destination. Destination paths reject symlinks and reparse points (lib.mjs:43-60, Get-Zig.ps1:27-38). Because these checks run after the hash check, they are defense in depth."
+    },
+    {
+      "criterion": "Runner image pinning",
+      "met": true,
+      "evidence": "The jobs use the versioned labels windows-2025 and ubuntu-24.04 (gates.yml:22, :66), and workflow-check.test.mjs:76-84 asserts them. These are pinned labels as the contract requires, not immutable images; see the note."
+    },
+    {
+      "criterion": "No script injection through ${{ }} or untrusted inputs",
+      "met": true,
+      "evidence": "The only expressions are the concurrency group and cancel flag (event_name and the integer PR number) and if: ${{ always() }}. No run step interpolates github.event.*, head_ref, or inputs. Every run line is a fixed node tools/fairpane.mjs command. actionlint 1.7.12, with a verified digest, reported 0 errors (raw/actionlint.log)."
+    },
+    {
+      "criterion": "Workflow evidence is bound to the tested inputs",
+      "met": false,
+      "evidence": "engineering/policy.json:4-33 source_roots and :34-43 policy_roots omit .github. Yet the controller-test cases read .github/workflows/gates.yml (tools/workflow-check.test.mjs:13, 67, 70). A controller-test receipt therefore still passes validateReceipt as current after a workflow edit (lib.mjs:280-286)."
+    },
+    {
+      "criterion": "The checker enforces its stated policy without bypass",
+      "met": false,
+      "evidence": "A tab-separated comment hides pull_request_target in scalar and sequence form (workflow-check.mjs:103, 228). toJSON(github) and github['token'] get past SECRET_EXPRESSION (workflow-check.mjs:207). The checker is asserted clean only for gates.yml (test:67), so any other workflow file is unchecked."
+    },
+    {
+      "criterion": "Local integrity checks are distinguished from independent enforcement",
+      "met": false,
+      "evidence": "The artifact names and FP-0033/README.md:26-29 say the receipts are unsigned. No document states that a pull_request run executes the pull request's own gates.yml, tools/fairpane.mjs, and workflow-check.mjs. A green Gates check on a pull request therefore shows only that the patch's own version of the gates passed."
+    }
+  ],
+  "prior_findings": [],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "engineering/policy.json",
+      "line": 4,
+      "issue": "policy.json's source_roots (lines 4-33) and policy_roots (lines 34-43) omit .github. FP-0033 adds controller-test cases that read .github/workflows/gates.yml and assert its policy, but receipt fingerprints do not cover that file. After someone adds pull_request_target or a secret to gates.yml, an older controller-test receipt still validates as current through lib.mjs:280-286. This is the stale-evidence detection that docs/SECURITY.md says local checks provide, and the AGENTS.md rule to bind evidence to tested source.",
+      "recommendation": "In a separate policy commit with independent approval, add .github to source_roots. Consider policy_roots, plus protected_paths for .github/workflows/gates.yml, so that a task patch cannot weaken the CI gate set alongside its own tests. Then re-run the gates and record fresh FP-0033 receipts."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/workflow-check.mjs",
+      "line": 103,
+      "issue": "A plain-scalar comment is detected only after a space (t.search(/ #/)). For example, `on: pull_request_target<TAB># note` or a `- pull_request_target<TAB># note` sequence item parses as the value 'pull_request_target\\t# note'. The exact-match test at line 228 then misses it, while YAML 1.2 [INFERENCE: and GitHub's parser] treats the tab as a comment separator and reads pull_request_target. Most other checks fail closed on this differential, but the trigger ban does not.",
+      "recommendation": "Treat [ \\t]# as a comment start, or reject a plain scalar that contains a tab. Add a test case for a tab-separated comment on a scalar and on a sequence-item trigger."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/workflow-check.mjs",
+      "line": 207,
+      "issue": "SECRET_EXPRESSION matches only `secrets` or the literal `github.token`. The expressions ${{ toJSON(github) }} and ${{ github['token'] }} both yield the workflow token and pass the check. A run step that writes such a value under out/evidence would put it, unmasked, into the uploaded artifact. Log masking does not apply to artifact files, though the token expires when the job ends.",
+      "recommendation": "Reject toJSON(github), github[...] index access, and bare `github` passed to any function. Alternatively, allowlist the contexts that may appear in expressions (for example github.event_name, github.run_id, and github.event.pull_request.number). Add tests for these forms."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/workflow-check.test.mjs",
+      "line": 67,
+      "issue": "The policy is asserted clean only for gates.yml. A new workflow file under .github/workflows that uses pull_request_target, secrets, or unpinned actions would pass every controller test. Line 115 only asserts that pages.yml has a problem, not that it has no others. pull_request_target is dangerous in any workflow file, not just this one, and the checker also does not reject workflow_run, the other privileged trigger that consumes artifacts.",
+      "recommendation": "Iterate over every file in .github/workflows. Allow only reviewed exceptions, such as pages.yml's deploy job with pages: write and id-token: write, and allow nothing else. Also reject workflow_run unless a reviewed exception covers it."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/workflow-check.test.mjs",
+      "line": 80,
+      "issue": "The test compares the list of run strings, but nothing rejects an if: condition on a gate step or a custom shell: template. Either one can turn a gate into a skipped or exit-0 step while the job still succeeds. The contract says 'Any failed, skipped, or timed-out gate fails its job'. The checker covers only continue-on-error.",
+      "recommendation": "In gates.yml, reject if: and shell: on every step except the upload step's if: always(). Add a test case for each."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0033/README.md",
+      "line": 26,
+      "issue": "The Limits section does not say that pull_request runs execute the pull request's own gates.yml, tools/fairpane.mjs, tools/workflow-check.mjs, and toolchains files. A patch can therefore edit the workflow or the checker and still produce green 'Windows gates' and 'Linux gates' checks. It can also commit a fake .tools/zig/<version>/<platform>/zig, which install-zig accepts after only a version-string check (lib.mjs:496, Get-Zig.ps1:59-62). The workflow therefore enforces nothing independently on pull requests. Receipts also record zig_version from the lock (lib.mjs:459), not from a digest of the binary that ran.",
+      "recommendation": "State in the evidence README and tools/README.md that CI results on pull requests are local integrity records produced by the patch's own controller, not independent enforcement. Have repo-check reject tracked files under .tools/. Consider recording the compiler binary's SHA-256 in gate receipts."
+    },
+    {
+      "severity": "note",
+      "path": ".github/workflows/gates.yml",
+      "line": 22,
+      "issue": "windows-2025 and ubuntu-24.04 are versioned but mutable labels, and GitHub updates these images regularly, including tar, PowerShell, .NET, and the tool cache. Receipts record os_release but not the runner ImageVersion, so later runs on the same commit can execute different host tooling without any trace in the evidence.",
+      "recommendation": "Record the ImageOS and ImageVersion environment values in each receipt's host block, or in a dedicated step's log under out/evidence."
+    },
+    {
+      "severity": "note",
+      "path": ".github/workflows/gates.yml",
+      "line": 31,
+      "issue": "setup-node supplies Node 24.21.0 from the runner tool cache or from GitHub's node-versions release. The workflow does not compare that runtime against a project-held digest. [INFERENCE] setup-node does not verify nodejs.org SHASUMS signatures. The trust rests on the pinned action and GitHub's distribution. No package.json exists, so setup-node's automatic package-manager cache is inactive and creates no cache-poisoning surface.",
+      "recommendation": "Accept this as the action's trust boundary, or record the digest of process.execPath in receipts so a runtime substitution is visible."
+    },
+    {
+      "severity": "note",
+      "path": "scripts/Get-Zig.ps1",
+      "line": 71,
+      "issue": "The Windows download has no streaming size cap. Invoke-WebRequest writes the whole response before Assert-Archive rejects an oversized body, while the Linux path stops at the locked size (lib.mjs:513). The only impact is disk exhaustion before rejection, because nothing is extracted. Separately, the actionlint digest came from the checksum file of the same release (raw/actionlint-digest.log). That is an integrity check, not an authenticity check.",
+      "recommendation": "Optionally stream the download with an HttpClient and a byte limit for parity with Linux. No change is needed for integrity."
+    },
+    {
+      "severity": "note",
+      "path": "tools/lib.mjs",
+      "line": 523,
+      "issue": "The tar -tf inventory checks member names only. It does not check entry types such as symlinks or hard links, and GNU tar's escaped quoting of listed names can differ from the names it extracts. The check runs after the SHA-256 match against the protected lock, so it does not protect the boundary. On ubuntu-24.04, GNU tar's placeholder handling for dangerous symlinks adds further protection.",
+      "recommendation": "If this path is ever reused for archives that are not hash-locked, use tar -tvf to reject link entries, or extract with --no-same-owner and a type allowlist."
+    }
+  ],
+  "commands_run": []
+}

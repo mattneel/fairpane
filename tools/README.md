@@ -134,13 +134,21 @@ The Linux job runs `repo-check`, `controller-test`, and the three cross-compilat
 Each job installs the locked compiler with `install-zig` and uploads `out/evidence` as an artifact, including after a failure.
 Those receipts remain unsigned local integrity records, and a hosted runner is not a protected release runner.
 
+A pull request runs its own copy of the workflow, the checker, and the controller.
+A green check on a pull request therefore enforces nothing independently of that pull request.
+`install-zig` also accepts an existing compiler directory after only a version check, so a pull request that adds one controls the compiler.
+
 `tools/workflow-check.mjs` checks the workflow policy without a YAML package.
+It accepts only printable ASCII text with LF or CRLF line ends, because YAML parsers also break lines at NEL, LS, and PS.
 It parses only block mappings, block sequences, single-line scalars, single-line flow sequences, block scalars, and comments.
 It rejects anchors, aliases, tags, flow mappings, multi-line plain scalars, duplicate keys, and every other construct with a line number.
 It reports a `uses:` reference without a full 40-hex commit SHA and a version comment.
-It reports a workflow or job permission other than `contents: read`, any `continue-on-error`, and a `pull_request_target` trigger.
-It reports a checkout without `persist-credentials: false` and an expression that reads a secret or the workflow token.
-`tools/workflow-check.test.mjs` holds its cases, and `node tools/fairpane.mjs test` runs them.
+It reports a workflow or job permission other than `contents: read`, any `continue-on-error`, and a `pull_request_target` or `workflow_run` trigger.
+It reports a checkout without `persist-credentials: false`.
+It treats every `${{ }}` expression and every `if:` value as an expression.
+An expression may call only `always` and `format`, and it may read only `github.event_name`, `github.run_id`, `github.event.pull_request.number`, and step outputs.
+`gateStepProblems` reports a job condition, a step `shell:`, and any step condition except `${{ always() }}` on an upload step.
+`tools/workflow-check.test.mjs` checks every workflow file against its reviewed problem list, and `node tools/fairpane.mjs test` runs its cases.
 
 To update a pinned action, follow these steps.
 

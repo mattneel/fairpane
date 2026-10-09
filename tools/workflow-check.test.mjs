@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { WorkflowParseError, checkWorkflow, parseWorkflow } from './workflow-check.mjs';
+import { WorkflowParseError, checkWorkflow, gateStepProblems, parseWorkflow } from './workflow-check.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readWorkflow = name => fs.readFileSync(path.join(root, '.github/workflows', name), 'utf8');
@@ -60,15 +60,29 @@ const JOB_PERMISSION = /Job build grants a permission other than contents: read/
 const CONTINUE = /continue-on-error is not accepted/;
 const PERSIST = /Checkout must set persist-credentials: false/;
 const TARGET = /The workflow uses pull_request_target/;
+const EXPRESSION = /not on the allowlist|does not accept|no closing|unterminated string literal/;
+const CHARACTER = /Character U\+[0-9A-F]{4} is not accepted/;
+/** The reviewed problems of each workflow file. A new workflow file needs its own reviewed entry. */
+const REVIEWED = {
+  'gates.yml': [],
+  'pages.yml': ['Line 49: Job deploy grants a permission other than contents: read.'],
+};
 
 export const workflowCases = [
-  ['FP-0033 2-4: The repository Gates workflow passes every workflow policy check', () => {
+  ['FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems', () => {
     assert.deepEqual(checkWorkflow(BASE), []);
-    assert.deepEqual(checkWorkflow(readWorkflow('gates.yml')), []);
+    const names = fs.readdirSync(path.join(root, '.github/workflows')).sort();
+    assert.deepEqual(names, Object.keys(REVIEWED).sort());
+    for (const name of names) assert.deepEqual(checkWorkflow(readWorkflow(name)), REVIEWED[name], name);
   }],
   ['FP-0033: The Gates workflow runs the contract gates in order on pinned runner images', () => {
     const workflow = parseWorkflow(readWorkflow('gates.yml'));
     assert.equal(workflow.entries.get('name').value.value, 'Gates');
+    assert.deepEqual(gateStepProblems(workflow), []);
+    const concurrency = workflow.entries.get('concurrency').value.entries;
+    assert.equal(concurrency.get('group').value.value,
+      "gates-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.run_id }}");
+    assert.equal(concurrency.get('cancel-in-progress').value.value, "${{ github.event_name == 'pull_request' }}");
     const triggers = workflow.entries.get('on').value;
     assert.deepEqual([...triggers.entries.keys()], ['push', 'pull_request', 'workflow_dispatch']);
     for (const event of ['push', 'pull_request']) {
@@ -112,8 +126,6 @@ export const workflowCases = [
     fails(variant(job, `${job}    permissions:\n      pull-requests: write\n`), JOB_PERMISSION);
     fails(variant(job, `${job}    permissions: write-all\n`), JOB_PERMISSION);
     assert.deepEqual(checkWorkflow(variant(job, `${job}    permissions:\n      contents: read\n`)), []);
-    const pages = checkWorkflow(readWorkflow('pages.yml'));
-    assert.ok(pages.some(p => /Job deploy grants a permission other than contents: read/.test(p)), JSON.stringify(pages));
   }],
   ['FP-0033 4: continue-on-error on a step or a job fails', () => {
     fails(variant('        run: node tools/fairpane.mjs run repo-check\n',
@@ -135,11 +147,33 @@ export const workflowCases = [
     fails(variant(on, 'on:\n  - push\n  - pull_request_target\n'), TARGET);
     fails(variant(on, 'on: pull_request_target\n'), TARGET);
   }],
-  ['FP-0033: An expression that reads a secret or the workflow token fails', () => {
+  ['FP-0033 4: A workflow_run trigger fails', () => {
+    fails(variant('  pull_request:\n', '  workflow_run:\n'), /The workflow uses workflow_run/);
+  }],
+  ['FP-0033 8: An expression outside the allowlist fails', () => {
     const run = '        run: node tools/fairpane.mjs run repo-check\n';
-    fails(variant(run, `${run}        env:\n          TOKEN: \${{ secrets.TOKEN }}\n`), /reads a secret/);
-    fails(variant(run, `${run}        env:\n          TOKEN: \${{ github.token }}\n`), /reads a secret/);
-    fails(variant(run, '        run: |\n          echo "${{ secrets[\'TOKEN\'] }}"\n'), /reads a secret/);
+    const env = value => variant(run, `${run}        env:\n          VALUE: ${value}\n`);
+    fails(env('${{ secrets.TOKEN }}'), /reads secrets\.TOKEN/);
+    fails(env('${{ github.token }}'), /reads github\.token/);
+    fails(env("${{ github['token'] }}"), /uses \[/);
+    fails(env('${{ toJSON(github) }}'), /calls toJSON/);
+    fails(env("${{ format('}}{0}', secrets.X) }}"), /reads secrets\.X/);
+    fails(variant(run, '        run: |\n          echo "${{ secrets[\'TOKEN\'] }}"\n'), EXPRESSION);
+    fails(variant(run, `${run}        if: secrets.X != ''\n`), /reads secrets\.X/);
+    fails(env('${{ github.run_id'), /no closing/);
+    fails(env("${{ format('x) }}"), EXPRESSION);
+    assert.deepEqual(checkWorkflow(env("${{ format('{0}-{1}', github.run_id, steps.build.outputs.path) }}")), []);
+  }],
+  ['FP-0033 9: A gate step that can be skipped or rerouted fails', () => {
+    const run = '        run: node tools/fairpane.mjs run repo-check\n';
+    const gates = text => gateStepProblems(parseWorkflow(text));
+    assert.deepEqual(gates(BASE), []);
+    assert.match(gates(variant(run, `${run}        if: always()\n`)).join('\n'), /Only an upload-artifact step may set if:/);
+    assert.match(gates(variant(run, `${run}        shell: bash\n`)).join('\n'), /sets shell:/);
+    assert.match(gates(variant('    runs-on: ubuntu-24.04\n', "    runs-on: ubuntu-24.04\n    if: github.event_name == 'push'\n")).join('\n'), /Job build sets if:/);
+    const upload = condition => `${run}\n      - name: Upload\n        uses: actions/upload-artifact@cf430e0 # v7.0.2\n${condition}`;
+    assert.deepEqual(gates(variant(run, upload('        if: ${{ always() }}\n'))), []);
+    assert.match(gates(variant(run, upload('        if: ${{ success() }}\n'))).join('\n'), /Only an upload-artifact step may set if:/);
   }],
   ['FP-0033: The parser reads the accepted subset and its block scalars exactly', () => {
     const text = variant('        run: node tools/fairpane.mjs run repo-check\n',
@@ -160,7 +194,7 @@ export const workflowCases = [
     unparseable(variant('    runs-on: ubuntu-24.04\n', '    runs-on: *runner\n'), /Unsupported YAML syntax/);
     unparseable(variant('    runs-on: ubuntu-24.04\n', '    runs-on: !!str ubuntu-24.04\n'), /Unsupported YAML syntax/);
     unparseable(variant('permissions:\n  contents: read\n', 'permissions: { contents: read }\n'), /Unsupported YAML syntax/);
-    unparseable(variant('    runs-on: ubuntu-24.04\n', '\truns-on: ubuntu-24.04\n'), /Tabs are not accepted/);
+    unparseable(variant('    runs-on: ubuntu-24.04\n', '\truns-on: ubuntu-24.04\n'), CHARACTER);
     unparseable(variant('    runs-on: ubuntu-24.04\n', '    runs-on: ubuntu-24.04\n    runs-on: windows-2025\n'), /Duplicate key: runs-on/);
     unparseable(variant('      - name: Run a gate\n', '      - name: Run\n          a gate\n'), /Unexpected indentation|Expected a mapping key/);
     unparseable(variant('name: Fixture\n', '---\nname: Fixture\n'), /Expected a mapping key/);
@@ -172,6 +206,13 @@ export const workflowCases = [
     unparseable(variant('    branches: [master]\n', '    branches: [[master]]\n'), /Unsupported flow sequence item/);
     unparseable(variant('name: Fixture\n', 'name: "Fix\\qture"\n'), /Unsupported escape/);
     unparseable('', /The workflow is empty/);
+  }],
+  ['FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse', () => {
+    const hidden = separator => variant('    runs-on: ubuntu-24.04\n', `    runs-on: ubuntu-24.04 # note${separator}    continue-on-error: true\n`);
+    for (const separator of ['\u0085', '\u2028', '\u2029', '\r']) unparseable(hidden(separator), CHARACTER);
+    unparseable(variant('  pull_request:\n', '  pull_request_target:\t# note\n'), CHARACTER);
+    unparseable(variant('name: Fixture\n', 'name: Fixtur\u00e9\n'), CHARACTER);
+    assert.deepEqual(checkWorkflow(`\uFEFF${BASE}`), []);
   }],
 ].map(([name, fn]) => ({ name, fn }));
 

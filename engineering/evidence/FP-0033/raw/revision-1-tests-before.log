@@ -1,0 +1,50 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0033-rev1-before/tools/workflow-check.test.mjs"]
+file:///C:/src/fairpane/out/fp0033-rev1-before/tools/workflow-check.test.mjs:10
+import { WorkflowParseError, checkWorkflow, gateStepProblems, parseWorkflow } from './workflow-check.mjs';
+                                            ^^^^^^^^^^^^^^^^
+SyntaxError: The requested module './workflow-check.mjs' does not provide an export named 'gateStepProblems'
+    at #asyncInstantiate (node:internal/modules/esm/module_job:463:21)
+    at async ModuleJob.run (node:internal/modules/esm/module_job:561:5)
+    at async node:internal/modules/esm/loader:650:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v26.7.0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0033-rev1-before/tools/workflow-check.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:39:21.910Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":39}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0033-rev1-before/tools/workflow-check.test.mjs"]
+TAP version 13
+ok 1 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+ok 2 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+ok 3 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+ok 4 - FP-0033 3: A workflow permission other than contents: read fails
+ok 5 - FP-0033 3: A job permission other than contents: read fails
+ok 6 - FP-0033 4: continue-on-error on a step or a job fails
+ok 7 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+ok 8 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+not ok 9 - FP-0033 4: A workflow_run trigger fails
+  ---
+  message: "Expected /The workflow uses workflow_run/ in []"
+  ...
+not ok 10 - FP-0033 8: An expression outside the allowlist fails
+  ---
+  message: "Expected /reads secrets\\.TOKEN/ in [\"Line 24: An expression reads a secret or the workflow token.\"]"
+  ...
+not ok 11 - FP-0033 9: A gate step that can be skipped or rerouted fails
+  ---
+  message: "The input did not match the regular expression /Only an upload-artifact step may set if:/. Input:\n\n''\n"
+  ...
+ok 12 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+not ok 13 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+  ---
+  message: "The input did not match the regular expression /Character U\\+[0-9A-F]{4} is not accepted/. Input:\n\n'Line 14: Tabs are not accepted in indentation.'\n"
+  ...
+not ok 14 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+  ---
+  message: "Expected a parse error, got success"
+  ...
+1..14
+# tests 14
+# pass 9
+# fail 5
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0033-rev1-before/tools/workflow-check.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:39:32.904Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":53}

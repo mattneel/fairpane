@@ -56,3 +56,37 @@ Required reviewers: `fairpane-review` and `fairpane-security`.
 
 - No secret, signing key, or protected runner exists in this task.
 - Branch protection settings remain an owner action outside the repository.
+
+## Revisions
+
+Revision 1 follows the rejecting reviews `reviews/review-1-reject.json` and `reviews/security-review-1-reject.json`.
+
+### Checker changes
+
+The checker accepts only printable ASCII text with LF or CRLF line ends, after an optional leading byte order mark.
+Any other character, including a tab, a lone carriage return, NEL, LS, and PS, is a parse error with its line number.
+Every `${{ }}` expression and every `if:` value is an expression.
+An expression may call only `always` and `format`, and it may read only `github.event_name`, `github.run_id`, `github.event.pull_request.number`, and `steps.<id>.outputs.<name>`.
+Any other name, index syntax, or unterminated expression or string literal is a problem.
+A `workflow_run` trigger is a problem, as `pull_request_target` already is.
+In the Gates workflow, no step sets `shell:`, and only an `actions/upload-artifact` step sets `if:`, with the exact value `${{ always() }}`.
+
+### Revision checks
+
+6. Every file under `.github/workflows` is checked, and each one's problems equal its reviewed list: none for `gates.yml`, and only the `deploy` job's permissions for `pages.yml`.
+   A workflow file without a reviewed list fails the test.
+7. Fixtures with NEL, LS, PS, a tab before a comment, a lone carriage return, and a non-ASCII letter each fail to parse.
+8. Fixtures that read `secrets.X`, `github.token`, `github['token']`, `toJSON(github)`, `format('}}{0}', secrets.X)`, and a bare `if: secrets.X` each report a problem.
+9. Fixtures with a `workflow_run` trigger, an `if:` on a gate step, a `shell:` on a gate step, and an upload step without `if: ${{ always() }}` each report a problem.
+10. The test asserts the Gates workflow's concurrency group and cancellation expressions.
+11. `actionlint` 1.7.12 runs on the integrated workflow, and the log records the SHA-256 of the linted file.
+
+### Policy change
+
+A separate `policy:` commit adds `.github` to `source_roots` in `engineering/policy.json`, so a gate receipt binds the workflow files that the controller tests read.
+
+### Documentation
+
+`tools/README.md` and the evidence README state that a pull request runs its own workflow, checker, and controller.
+A green check on a pull request therefore enforces nothing independently of that pull request.
+They also state that `install-zig` accepts an existing compiler directory after only a version check.

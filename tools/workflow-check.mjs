@@ -3,10 +3,11 @@
  * The parser reads only the YAML subset that these checks need and rejects any other syntax with a line number,
  * so the controller needs no YAML package and no unreadable construct passes unchecked.
  *
- * Accepted: block mappings with plain keys, block sequences, plain and quoted single-line scalars,
- * single-line flow sequences of scalars, `|` and `>` block scalars, and comments.
- * Rejected: anchors, aliases, tags, flow mappings, complex keys, quoted keys, document markers, directives,
- * multi-line plain or quoted scalars, block scalars as sequence items, duplicate keys, and tab indentation.
+ * Accepted: printable ASCII text with LF or CRLF line ends, block mappings with plain keys, block sequences,
+ * plain and quoted single-line scalars, single-line flow sequences of scalars, `|` and `>` block scalars, and comments.
+ * Rejected: every other character, including tabs and the NEL, LS, and PS line breaks that YAML parsers honor,
+ * anchors, aliases, tags, flow mappings, complex keys, quoted keys, document markers, directives,
+ * multi-line plain or quoted scalars, block scalars as sequence items, and duplicate keys.
  */
 
 export class WorkflowParseError extends Error {
@@ -108,20 +109,25 @@ function inlineValue(text, line) {
 
 /** Flatten the text into dash, entry, and scalar tokens with their columns. Block scalars consume their lines here. */
 function tokenize(text) {
-  const lines = text.replace(/^\uFEFF/, '').split('\n').map(l => (l.endsWith('\r') ? l.slice(0, -1) : l));
+  const normalized = text.replace(/^\uFEFF/, '').replaceAll('\r\n', '\n');
+  // A YAML parser also breaks lines at NEL, LS, and PS, so any character beyond printable ASCII could hide a key from this parser.
+  const outside = /[^\n\x20-\x7E]/.exec(normalized);
+  if (outside) {
+    const line = normalized.slice(0, outside.index).split('\n').length;
+    const code = outside[0].codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+    throw new WorkflowParseError(line, `Character U+${code} is not accepted. A workflow must be printable ASCII with LF or CRLF line ends.`);
+  }
+  const lines = normalized.split('\n');
   const tokens = [];
   for (let i = 0; i < lines.length; i++) {
     const line = i + 1, raw = lines[i];
-    if (raw.includes('\r')) throw new WorkflowParseError(line, 'A lone carriage return is not accepted.');
     const indent = /^ */.exec(raw)[0].length;
     let rest = raw.slice(indent), column = indent, dashed = false;
     if (rest === '' || rest.startsWith('#')) continue;
-    if (rest[0] === '\t') throw new WorkflowParseError(line, 'Tabs are not accepted in indentation.');
     while (rest === '-' || rest.startsWith('- ')) {
       tokens.push({ type: 'dash', indent: column, line });
       const pad = /^ */.exec(rest.slice(1))[0].length;
       column += 1 + pad; rest = rest.slice(1 + pad); dashed = true;
-      if (rest[0] === '\t') throw new WorkflowParseError(line, 'Tabs are not accepted in indentation.');
     }
     if (rest === '' || rest.startsWith('#')) continue;
     const key = KEY.exec(rest);
@@ -204,7 +210,47 @@ export function parseWorkflow(text) {
 
 const PINNED_USES = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_./-]+)?@[0-9a-f]{40}$/;
 const VERSION_COMMENT = /^v\d+(?:\.\d+)*$/;
-const SECRET_EXPRESSION = /\$\{\{(?:(?!\}\}).)*?\b(?:secrets|github\.token)\b/s;
+/** The names that an expression may read: the event fields that the reviewed workflows use, and step outputs. */
+const EXPRESSION_READS = new Set(['github.event_name', 'github.run_id', 'github.event.pull_request.number']);
+const STEP_OUTPUT = /^steps\.[A-Za-z_][A-Za-z0-9_-]*\.outputs\.[A-Za-z_][A-Za-z0-9_-]*$/;
+const EXPRESSION_CALLS = new Set(['always', 'format']);
+const EXPRESSION_LITERALS = new Set(['true', 'false', 'null']);
+
+/**
+ * The bodies of the `${{ }}` expressions in a value, with null for an expression that never closes.
+ * A `}}` inside a single-quoted string literal does not close an expression; a doubled quote toggles the state twice.
+ */
+function expressionBodies(value) {
+  const bodies = [];
+  for (let start = value.indexOf('${{'); start !== -1;) {
+    let end = start + 3, quoted = false;
+    while (end < value.length && (quoted || !value.startsWith('}}', end))) {
+      if (value[end] === "'") quoted = !quoted;
+      end++;
+    }
+    if (end >= value.length) { bodies.push(null); break; }
+    bodies.push(value.slice(start + 3, end));
+    start = value.indexOf('${{', end + 2);
+  }
+  return bodies;
+}
+
+/** Problems in one expression body. Its string literals are removed before its names are checked against the allowlists. */
+function expressionProblems(body) {
+  if (body === null) return ['An expression has no closing }}.'];
+  const parts = body.split("'");
+  if (parts.length % 2 === 0) return ['An expression has an unterminated string literal.'];
+  const code = parts.filter((_, i) => i % 2 === 0).join(' 0 ');
+  const problems = [];
+  const syntax = /[^A-Za-z0-9_.\s()=!<>&|,-]/.exec(code);
+  if (syntax) problems.push(`An expression uses ${syntax[0]}, which the checker does not accept.`);
+  for (const m of code.matchAll(/[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*)*/g)) {
+    const name = m[0], call = /^\s*\(/.test(code.slice(m.index + name.length));
+    const allowed = call ? EXPRESSION_CALLS.has(name) : EXPRESSION_LITERALS.has(name) || EXPRESSION_READS.has(name) || STEP_OUTPUT.test(name);
+    if (!allowed) problems.push(`An expression ${call ? 'calls' : 'reads'} ${name}, which is not on the allowlist.`);
+  }
+  return problems;
+}
 
 function visit(n, fn) {
   fn(n);
@@ -225,7 +271,9 @@ export function workflowProblems(root) {
     const triggers = v.kind === 'scalar' ? [[v.value, v.line]] : v.kind === 'seq' ? v.items.map(i => [i.value, i.line]) :
       v.kind === 'map' ? [...v.entries.values()].map(e => [e.key, e.line]) : [];
     if (triggers.length === 0) add(on.line, 'The workflow declares no trigger.');
-    for (const [name, line] of triggers) if (name === 'pull_request_target') add(line, 'The workflow uses pull_request_target.');
+    for (const [name, line] of triggers) {
+      if (name === 'pull_request_target' || name === 'workflow_run') add(line, `The workflow uses ${name}.`);
+    }
   }
   const permissions = root.entries.get('permissions');
   if (!permissions) add(root.line, 'The workflow does not declare permissions: contents: read.');
@@ -238,11 +286,16 @@ export function workflowProblems(root) {
     if (p && !isReadOnly(p)) add(p.line, `Job ${id} grants a permission other than contents: read.`);
   }
   visit(root, n => {
-    if (n.kind === 'scalar' && n.value !== null && SECRET_EXPRESSION.test(n.value)) add(n.line, 'An expression reads a secret or the workflow token.');
+    if (n.kind === 'scalar') for (const body of expressionBodies(n.value)) for (const p of expressionProblems(body)) add(n.line, p);
     if (n.kind !== 'map') return;
     for (const e of n.entries.values()) {
       if (e.key === 'continue-on-error') add(e.line, 'continue-on-error is not accepted.');
       if (e.key === 'secrets') add(e.line, 'A secrets mapping is not accepted.');
+    }
+    // An if: value is an expression even without ${{ }}.
+    const condition = n.entries.get('if');
+    if (condition?.value.kind === 'scalar' && !condition.value.value.includes('${{')) {
+      for (const p of expressionProblems(condition.value.value)) add(condition.line, p);
     }
     const uses = n.entries.get('uses');
     if (!uses) return;
@@ -254,6 +307,34 @@ export function workflowProblems(root) {
       if (!(persist?.value.kind === 'scalar' && persist.value.value === 'false')) add(uses.line, 'Checkout must set persist-credentials: false.');
     }
   });
+  return problems;
+}
+
+/**
+ * Problems that would let a gate in the Gates workflow pass without running.
+ * No job sets if:, no step sets shell:, and only an actions/upload-artifact step sets if:, to exactly ${{ always() }}.
+ */
+export function gateStepProblems(root) {
+  const problems = [];
+  const add = (line, message) => problems.push(`Line ${line}: ${message}`);
+  const jobs = root.entries.get('jobs');
+  if (jobs?.value.kind !== 'map') return problems;
+  for (const [id, job] of jobs.value.entries) {
+    if (job.value.kind !== 'map') continue;
+    const jobCondition = job.value.entries.get('if');
+    if (jobCondition) add(jobCondition.line, `Job ${id} sets if:.`);
+    const steps = job.value.entries.get('steps');
+    if (steps?.value.kind !== 'seq') { add(job.line, `Job ${id} has no steps sequence.`); continue; }
+    for (const step of steps.value.items) {
+      if (step.kind !== 'map') { add(step.line, `A step of job ${id} is not a mapping.`); continue; }
+      const shell = step.entries.get('shell'), condition = step.entries.get('if');
+      if (shell) add(shell.line, 'A gate workflow step sets shell:.');
+      if (!condition) continue;
+      const uses = step.entries.get('uses')?.value.value ?? '';
+      const upload = uses.split('@')[0].toLowerCase() === 'actions/upload-artifact';
+      if (!upload || condition.value.value !== '${{ always() }}') add(condition.line, 'Only an upload-artifact step may set if:, and only to ${{ always() }}.');
+    }
+  }
   return problems;
 }
 
