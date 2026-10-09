@@ -26,13 +26,26 @@ If the chrome renderer fails, the OS window frame keeps its title and close cont
 The canonical Rust wrapper has no third-party runtime or build dependency.
 The browser shell can use qualified crates for user interface and application services.
 Each shell crate is pinned, license-checked, advisory-checked, source-checked, and reviewed on addition and upgrade.
-No crate lays out, shapes, paints, or scripts web content or chrome.
+No crate parses, styles, lays out, shapes, paints, or scripts web content or chrome.
+No crate implements web-visible network semantics, such as redirect handling, cookies, caching, or CORS.
 No crate makes an origin, URL, or permission decision that the engine or broker owns.
 
 A transport crate serves only as the broker's authorized transport.
 It returns redirect responses unconsumed, so the engine evaluates every redirect.
-It keeps no cookie store and transforms no response.
+The same principle applies to cookie policy and response transformations.
+Application convenience never overrides observable web behavior.
 The engine applies web semantics, and the broker independently authorizes privileged operations.
+
+## Extension containment
+
+The initial security profile runs each untrusted extension in an isolated worker process.
+Its runtime receives only the facilities that the host explicitly exposes.
+The broker derives extension identity from the worker's authenticated connection, never from a request field.
+Rhai and JavaScript adapters call the same broker, and neither adapter implements its own permission policy.
+Extensions reach pages through a permission-checked document interface, never through raw DOM pointers.
+Host operations carry their own deadlines and resource accounting, beyond any interpreter limit.
+The supervising process keeps an independent termination mechanism.
+Installed extensions never receive unlimited resources.
 
 ## Engine requirements
 

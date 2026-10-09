@@ -52,18 +52,29 @@ External browsers can serve as test references only.
 
 Fairpane renders the browser chrome itself.
 The address bar, navigation controls, permission prompts, and download surfaces form a trusted chrome document.
-The shell renders that document through the same public contract as page content.
+Fairpane renders that document, and the shell presents it through the same public contract as page content.
 The engine's text, editing, focus, input, and accessibility therefore serve the chrome before they serve web pages.
 
 GPUI hosts the chrome and page documents in the shell's windows.
-It supplies windows, input and IME delivery, AccessKit accessibility, and frame presentation.
-It does not render the chrome, and a qualification prototype must confirm it before the shell depends on it.
+GPUI supplies windows, input and IME delivery, AccessKit accessibility, and frame presentation.
+GPUI does not render the chrome.
+A qualification prototype must confirm GPUI before the shell depends on it.
 
 The chrome document runs in its own renderer, separate from every page renderer.
 The chrome and page documents never share an authority boundary.
 Broker-validated state supplies the displayed origin and permission decisions.
 A page cannot navigate, script, restyle, or overlay the chrome.
 If the chrome renderer fails, the OS window frame keeps its title and close control, and the shell restarts the chrome.
+
+## Extensions and language support
+
+Extensions add capability without adding permanent chrome.
+An extension chooses its language, not its privileges or access to Fairpane's capabilities.
+Rhai and JavaScript are the first extension languages, with equal capabilities through one extension contract.
+Every officially supported language SDK powers a maintained first-party integration and a useful reference extension.
+Language support is optional, so the default browser remains the address bar and the page.
+The extension implementation follows the first usable browser.
+`docs/EXTENSIONS.md` describes the contract, its parity rules, and its containment.
 
 ## Delivery sequence
 

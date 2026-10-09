@@ -51,6 +51,13 @@ DOMString and USVString conversions have different contracts. [S07]
 The engine keeps conversion boundaries explicit.
 Every exposed text offset names its unit.
 
+## Execution contexts
+
+One engine can host several isolated execution contexts.
+A context shares no global object and no page reference with any document context.
+Extension code runs in such a context through public runtime facilities, never inside a page's context.
+The extension adapter settles each Promise within its context's normal job processing.
+
 ## Execution tiers
 
 The runtime retains a generic execution mode as an independent optimization reference.

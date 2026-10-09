@@ -277,7 +277,9 @@
         "Provide step outcomes without reentrant external mutation.",
         "Exercise destruction with outstanding requests and resource responses.",
         "Do not claim that internal pauses create arbitrary JavaScript task boundaries.",
-        "Issue a fresh owner identity for each engine and each handle table instance, so no two live tables share an owner."
+        "Issue a fresh owner identity for each engine and each handle table instance, so no two live tables share an owner.",
+        "Version each host request type.",
+        "Reject a host request with an unknown version through an explicit error."
       ],
       "read": [
         "docs/ARCHITECTURE.md",
@@ -781,14 +783,19 @@
       ],
       "acceptance": [
         "Create a native Windows window from the Rust shell, hosted in GPUI, that presents an engine-rendered chrome document and a page surface.",
-        "Write the shell in Rust and reach the engine only through the Rust wrapper and the public embedding contract.",
-        "Render the chrome as a trusted document in its own renderer, separate from every page renderer, and never let GPUI render the chrome.",
-        "Run each renderer as a Rust renderer host that calls the wrapper and exchanges only validated messages with the shell.",
+        "Reach the engine from the Rust shell only through the Rust wrapper and the public embedding contract.",
+        "Render the chrome as a trusted document under its own engine owner, separate from every page document.",
+        "Never let GPUI render the chrome.",
         "Record each capability that the shell needs and the public contract lacks as a contract task, never as a private shortcut.",
-        "Implement keyboard focus movement between chrome and page, resize, close, and explicit unsupported states rendered in the chrome document.",
-        "Display origin identity from broker-validated state, never from page-controlled content.",
-        "Keep the OS window frame title and close control available, and restart the chrome when its renderer fails.",
-        "Use crates only in the shell, only for uses that engineering/dependencies.json accepts, and pass the dependency checks on the resolved graph.",
+        "Implement keyboard focus movement between chrome and page.",
+        "Implement window resize and close.",
+        "Render explicit unsupported states in the chrome document.",
+        "Display origin identity only from engine navigation state, never from page-controlled content.",
+        "Keep the OS window frame title and close control available.",
+        "Restart the chrome when its renderer fails.",
+        "Use crates only in the browser application.",
+        "Use each crate only for a use that engineering/dependencies.json accepts.",
+        "Pass the dependency checks on the resolved graph.",
         "Do not embed a system WebView or external browser engine.",
         "Execute the shell on Windows and record actual results."
       ],
@@ -890,7 +897,8 @@
         "Preserve conversion callbacks and root lifetime across native calls.",
         "Exercise tasks, microtasks, events, exceptions, and parser continuation.",
         "Render mutation results through the same layout and paint pipeline.",
-        "Add a real application interaction acceptance trace."
+        "Add a real application interaction acceptance trace.",
+        "Create an isolated execution context that shares no global object and no page reference with any document context."
       ],
       "read": [
         "docs/JAVASCRIPT_RUNTIME.md",
@@ -940,7 +948,12 @@
         "Demonstrate a denied request and a contained renderer failure.",
         "Declare the actual operating-system isolation boundary.",
         "Expose broker decisions to the shell only through the public embedding contract, so every embedder receives the same containment.",
-        "Keep any transport crate from consuming redirects, storing cookies, or transforming responses, and return those responses through the public resource contract."
+        "Keep any transport crate from consuming redirects, storing cookies, or transforming responses.",
+        "Return redirect responses through the public resource contract.",
+        "Run each renderer as a Rust renderer host that calls the wrapper and exchanges only validated messages with the shell.",
+        "Run the trusted chrome document in its own renderer process, separate from every page renderer.",
+        "Display origin identity in the chrome from broker-validated state.",
+        "Derive each requester's identity from its authenticated connection, never from a field inside a request."
       ],
       "read": [
         "docs/SECURITY.md",
@@ -989,7 +1002,8 @@
         "Detect stale generated files mechanically.",
         "Qualify C and Zig lifecycle callers against the actual engine.",
         "Define shared foreign-runtime failure scenarios before more wrappers.",
-        "Keep the metadata language-neutral, with ownership, lifetime, thread, and error semantics expressed as data rather than C or Zig syntax."
+        "Keep the metadata language-neutral, with ownership, lifetime, thread, and error semantics expressed as data rather than C or Zig syntax.",
+        "Give the schema distinct types for Unicode text, lossless web strings, ranged integers, opaque handles, absent versus null fields, and byte buffers."
       ],
       "read": [
         "docs/ABI_AND_WRAPPERS.md"
@@ -1033,7 +1047,8 @@
         "Execute a TypeScript native adapter with explicit disposal and cancellation.",
         "Execute an Elixir supervised-process adapter with crash and restart behavior.",
         "Test teardown with pending native resources.",
-        "Do not call generated bindings alone qualified support."
+        "Do not call generated bindings alone qualified support.",
+        "Publish each SDK slice as the distributable artifact that its later first-party integration consumes."
       ],
       "read": [
         "docs/ABI_AND_WRAPPERS.md"
@@ -1365,12 +1380,23 @@
       ],
       "acceptance": [
         "Pin stable Rust 1.99.0 with verified official artifact digests in toolchains/rust.lock.json, through a reviewed change separate from the wrapper implementation.",
-        "Generate fairpane-sys from the FP-0021 metadata, ship the generated declarations with their source schema, and keep regeneration a separate development operation.",
-        "Implement fairpane with owned engine and document types, explicit destruction, typed Result errors without an error-library dependency, scoped buffer views, typed input and host-request batches, and explicit thread restrictions and cancellation.",
-        "Give the initial Engine type neither Send nor Sync, and keep unsafe code inside a narrow, separately reviewed perimeter.",
+        "Generate fairpane-sys from the FP-0021 metadata.",
+        "Ship the generated declarations with their source schema.",
+        "Keep regeneration a separate development operation.",
+        "Extend the interface metadata through a reviewed schema change where it falls short.",
+        "Implement fairpane with owned, non-cloneable engine and document types and explicit destruction.",
+        "Report errors as typed Result values without an error-library dependency.",
+        "Expose host-request batches, thread restrictions, and cancellation as the public contract defines them.",
+        "Wrap each capability that the public contract exposes when this task runs.",
+        "Record each capability that the wrapper needs and the contract lacks as a contract task.",
+        "Claim Send and Sync bounds only where the C contract grants them.",
+        "Give the initial Engine type neither Send nor Sync.",
+        "Keep unsafe code inside a narrow, separately reviewed perimeter.",
         "Prove that fairpane-sys and fairpane resolve no third-party crate in any declared target configuration, including build dependencies.",
-        "Build and execute a minimal Rust consumer outside any browser workspace against the actual native library on Windows, and run the shared foreign-runtime failure scenarios.",
-        "Keep generated declarations separate from the idiomatic layer and detect stale generated files mechanically.",
+        "Build and execute a minimal Rust consumer outside any browser workspace against the actual native library on Windows.",
+        "Run the shared foreign-runtime failure scenarios through the minimal consumer.",
+        "Keep generated declarations separate from the idiomatic layer.",
+        "Detect stale generated files mechanically.",
         "Extend the source inventory and gate registry to cover the Rust crates through separate reviewed policy changes.",
         "Do not call generated source alone qualified support."
       ],
@@ -1423,15 +1449,20 @@
       "acceptance": [
         "Edit the chrome address field through engine text editing, selection, and caret movement.",
         "Deliver IME composition from the Rust shell to the engine through the public contract.",
-        "Export each document's accessibility tree through the public contract and bridge it to UI Automation on Windows from the Rust shell.",
+        "Export each document's accessibility tree through the public contract.",
+        "Bridge each accessibility tree to UI Automation on Windows through the shell's AccessKit integration.",
         "Route keyboard focus between chrome and page documents without letting a page take focus from the chrome.",
+        "Demonstrate IME composition in the engine-rendered address bar and in an engine-owned page field, hosted in GPUI.",
+        "Demonstrate focus and actions that cross the chrome and page boundary correctly.",
+        "Record whether GPUI qualifies for the text input and accessibility evidence areas of ADR 0004.",
         "Add each new capability through a reviewed ABI schema change with C and Rust lifecycle tests.",
         "Record every unimplemented editing, IME, and accessibility behavior for later tasks."
       ],
       "read": [
         "docs/PRODUCT.md",
         "docs/RENDERING_AND_TEXT.md",
-        "docs/ABI_AND_WRAPPERS.md"
+        "docs/ABI_AND_WRAPPERS.md",
+        "engineering/decisions/0004-first-party-wrapper-language.md"
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
@@ -1489,7 +1520,8 @@
       "workstream": "browser",
       "depends_on": [
         "FP-0016",
-        "FP-0029"
+        "FP-0029",
+        "FP-0035"
       ],
       "role": "fairpane-platform",
       "allowed_paths": [
@@ -1521,14 +1553,17 @@
       ],
       "acceptance": [
         "Display changing engine-produced pixels obtained through the Rust wrapper in a GPUI window.",
-        "Preserve correct viewport geometry and frame resource lifetimes across resize and scale changes.",
-        "Define and test the frame protocol that separates a borrowed CPU view from presentation ownership and its explicit release.",
-        "Deliver keyboard, pointer, and IME composition events from GPUI to the engine through the public contract.",
-        "Keep distinct identity for multiple windows and recover a window after a renderer failure.",
-        "Measure idle CPU use and interaction latency against budgets recorded before the run.",
-        "Use the newest qualified, compatible GPUI and GPUI Kit pairing, and record the exact versions and snapshot.",
+        "Preserve correct viewport geometry across resize and scale changes.",
+        "Preserve surface resource lifetimes across resize and scale changes under the FP-0035 release protocol.",
+        "Deliver keyboard, pointer, and IME composition events from GPUI to the engine through the Rust wrapper.",
+        "Keep distinct identity for multiple windows.",
+        "Recover a window after a renderer failure.",
+        "Meet idle CPU and interaction latency budgets recorded before the run.",
+        "Record the exact GPUI and GPUI Kit versions and snapshot of the newest qualified, compatible pairing.",
         "Prove that the resolved dependency graph contains no GPUI Kit WebView or JavaScript-extension package and no other web or script engine.",
-        "Record whether GPUI qualifies, with the evidence for each area, in an architecture decision record."
+        "Leave the text input and accessibility evidence areas to FP-0030.",
+        "Keep the GPUI selection provisional until FP-0030 qualifies those areas.",
+        "Record the result for each evidence area in an architecture decision record."
       ],
       "read": [
         "engineering/decisions/0004-first-party-wrapper-language.md",
@@ -1571,8 +1606,11 @@
       ],
       "acceptance": [
         "Install the locked Zig compiler on a Windows runner through the existing installer, with its size and digest checks.",
-        "Run check, test, zig-fmt, zig-test, zig-build, and c-abi on Windows, and the controller tests and cross-compile gates on Linux.",
-        "Pin every action to a full commit SHA, grant least-privilege permissions, and expose no secret to pull requests.",
+        "Run check, test, zig-fmt, zig-test, zig-build, and c-abi on a Windows runner.",
+        "Run the controller tests and the cross-compile gates on a Linux runner.",
+        "Pin every action to a full commit SHA.",
+        "Grant each workflow job least-privilege permissions.",
+        "Expose no secret to pull requests.",
         "Upload each gate receipt and log as a workflow artifact without treating it as an attestation.",
         "Fail the workflow on any failed, skipped, or timed-out gate."
       ],
@@ -1626,6 +1664,659 @@
       "read": [
         "docs/ABI_AND_WRAPPERS.md",
         "engineering/decisions/0004-first-party-wrapper-language.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0035",
+      "title": "Expose surfaces and input through the public contract",
+      "workstream": "substrate",
+      "depends_on": [
+        "FP-0016",
+        "FP-0021",
+        "FP-0029"
+      ],
+      "role": "fairpane-bindings",
+      "allowed_paths": [
+        "src",
+        "api",
+        "include",
+        "bindings",
+        "tests",
+        "tools",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Define a versioned surface interface in the ABI schema.",
+        "Identify each surface resource through an opaque handle that exposes no Rust or GPUI object layout.",
+        "Include GPU completion in surface ownership, so a producer cannot reuse a surface while its consumer still uses it.",
+        "Describe the pixel format and color space of each surface explicitly in its metadata.",
+        "Negotiate presentation capabilities between producer and consumer.",
+        "Define the outcome of an unsupported surface import.",
+        "Define the outcome of device loss.",
+        "Export rendered frames through the surface interface, starting with a CPU-memory surface.",
+        "Separate a borrowed CPU view from presentation ownership and its explicit release.",
+        "Accept keyboard, pointer, and IME composition events as typed input batches through the public C ABI.",
+        "Wrap surfaces and input batches in the Rust wrapper with scoped views and typed batches.",
+        "Add each capability through a reviewed ABI schema change with C and Rust lifecycle tests.",
+        "Report each input behavior that the engine does not implement yet as unsupported, never as a successful no-op."
+      ],
+      "read": [
+        "docs/ABI_AND_WRAPPERS.md",
+        "docs/FRONTENDS.md",
+        "engineering/decisions/0004-first-party-wrapper-language.md",
+        "engineering/decisions/0007-frontend-platform.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0036",
+      "title": "Define the extension contract and permission broker",
+      "workstream": "extensions",
+      "depends_on": [
+        "FP-0018",
+        "FP-0019",
+        "FP-0020",
+        "FP-0030"
+      ],
+      "role": "fairpane-platform",
+      "allowed_paths": [
+        "api",
+        "apps",
+        "bindings",
+        "include",
+        "src",
+        "tests",
+        "tools",
+        "build.zig",
+        "engineering/decisions"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review",
+        "fairpane-security"
+      ],
+      "acceptance": [
+        "Publish a versioned extension schema with operations, data types, lifecycle behavior, and error categories.",
+        "Model asynchronous operations as requests, completions, and cancellation.",
+        "Distinguish Unicode text from lossless web strings in the extension schema.",
+        "Give every integer an explicit range, every object identifier an opaque handle, and binary data a byte-buffer type.",
+        "Distinguish absent fields from explicit null values.",
+        "Authorize every request in one permission broker against the extension's identity and current grants.",
+        "Derive extension identity from the worker's authenticated connection, never from a request field.",
+        "Run each untrusted extension in an isolated worker process that receives only explicitly exposed facilities.",
+        "Enforce host-operation deadlines and resource accounting for storage and outstanding requests.",
+        "Terminate a runaway extension worker through an independent supervisor mechanism.",
+        "Expose pages to extensions only through a permission-checked document interface.",
+        "Keep shell-only operations in Rust.",
+        "Route engine operations through the Rust wrapper and the C ABI.",
+        "Define declarative interface contributions, including commands and settings pages, that need no code in another language.",
+        "Keep the permissioned extension API distinct from the engine embedding API."
+      ],
+      "read": [
+        "docs/EXTENSIONS.md",
+        "docs/SECURITY.md",
+        "engineering/decisions/0005-extension-contract.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0037",
+      "title": "Implement the Rhai extension adapter",
+      "workstream": "extensions",
+      "depends_on": [
+        "FP-0036"
+      ],
+      "role": "fairpane-platform",
+      "allowed_paths": [
+        "apps",
+        "tests",
+        "tools",
+        "engineering/decisions",
+        "engineering/dependencies.json"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review",
+        "fairpane-security"
+      ],
+      "acceptance": [
+        "Map every operation in the extension contract into Rhai functions and types.",
+        "Return a request handle from each asynchronous operation.",
+        "Invoke each completion handler later on the runtime's owner thread.",
+        "Expose lossless web strings through a dedicated host type with explicit conversions.",
+        "Never replace a value that a Rhai string cannot represent.",
+        "Set explicit Rhai execution limits in addition to the host-operation deadlines.",
+        "Never block the browser's interface thread or invoke a Rhai callback from a transport thread.",
+        "Ship Rhai support as an optional application component outside the engine and the canonical wrapper.",
+        "Supply API documentation, inspection facilities, and useful source locations for Rhai extensions."
+      ],
+      "read": [
+        "docs/EXTENSIONS.md",
+        "engineering/decisions/0005-extension-contract.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0038",
+      "title": "Implement the JavaScript extension adapter",
+      "workstream": "extensions",
+      "depends_on": [
+        "FP-0036"
+      ],
+      "role": "fairpane-js",
+      "allowed_paths": [
+        "src",
+        "api",
+        "include",
+        "bindings",
+        "apps",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review",
+        "fairpane-security"
+      ],
+      "acceptance": [
+        "Run extension code on Fairpane's own JavaScript runtime through public runtime facilities.",
+        "Run each extension in an execution context that shares nothing with any page context.",
+        "Map every operation in the extension contract into JavaScript host bindings.",
+        "Return a Promise from each asynchronous operation.",
+        "Settle each Promise within the extension context's normal job processing.",
+        "Represent opaque handles as host objects, never as arbitrary JavaScript numbers.",
+        "Never block the browser's interface thread or invoke a callback reentrantly from a transport thread.",
+        "Supply API documentation, inspection facilities, and useful source locations for JavaScript extensions."
+      ],
+      "read": [
+        "docs/EXTENSIONS.md",
+        "docs/JAVASCRIPT_RUNTIME.md",
+        "engineering/decisions/0005-extension-contract.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0039",
+      "title": "Qualify Rhai and JavaScript parity with the workspace extension",
+      "workstream": "extensions",
+      "depends_on": [
+        "FP-0037",
+        "FP-0038"
+      ],
+      "role": "fairpane-platform",
+      "allowed_paths": [
+        "apps",
+        "tests",
+        "tools",
+        "engineering/evidence"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review",
+        "fairpane-adversary"
+      ],
+      "acceptance": [
+        "Write the workspace extension that saves and restores application windows in Rhai and in JavaScript.",
+        "Share one manifest, one permission set, one command, and one persistent data format between both implementations.",
+        "Supply identical initial state and controlled host responses to both implementations.",
+        "Compare externally observable behavior against an independent expected result.",
+        "Show that a denied permission produces no unauthorized operation.",
+        "Show that cancellation during restoration prevents later unauthorized effects and cleans up pending requests.",
+        "Show that shutdown removes registered commands and releases extension-owned resources.",
+        "Cover lossless page strings and numeric boundaries with additional fixtures.",
+        "Compare only the event ordering that the contract guarantees.",
+        "Publish the scenarios as the shared behavioral suite for every language support package."
+      ],
+      "read": [
+        "docs/EXTENSIONS.md",
+        "engineering/decisions/0005-extension-contract.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0040",
+      "title": "Qualify compatibility with existing browser extensions",
+      "workstream": "extensions",
+      "depends_on": [
+        "FP-0036",
+        "FP-0038"
+      ],
+      "role": "fairpane-platform",
+      "allowed_paths": [
+        "src",
+        "api",
+        "include",
+        "bindings",
+        "apps",
+        "tests",
+        "tools",
+        "specs",
+        "build.zig",
+        "engineering/decisions"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-spec",
+        "fairpane-review",
+        "fairpane-security"
+      ],
+      "acceptance": [
+        "Record the targeted browser-extension API surface from primary sources with exact versions.",
+        "Implement that surface on the shared extension contract and permission broker.",
+        "Qualify it separately from Rhai and JavaScript parity.",
+        "Record each unsupported browser-extension API as unsupported."
+      ],
+      "read": [
+        "docs/EXTENSIONS.md",
+        "engineering/decisions/0005-extension-contract.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0041",
+      "title": "Deliver the TypeScript language support package",
+      "workstream": "wrappers",
+      "depends_on": [
+        "FP-0022",
+        "FP-0039",
+        "FP-0043"
+      ],
+      "role": "fairpane-bindings",
+      "allowed_paths": [
+        "bindings",
+        "apps",
+        "tests",
+        "tools",
+        "engineering/dependencies.json"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Build a TypeScript language-support extension against the distributed TypeScript SDK artifact.",
+        "Build a useful TypeScript reference extension that passes the FP-0039 shared behavioral scenarios.",
+        "Build a frontend through the TypeScript SDK, without a hidden JavaScript application underneath it.",
+        "Pass the TypeScript integration's isolation and lifecycle tests.",
+        "Build an independent example against the distributed TypeScript SDK.",
+        "Keep the TypeScript host optional and its runtime dependencies inside that host."
+      ],
+      "read": [
+        "docs/EXTENSIONS.md",
+        "docs/FRONTENDS.md",
+        "engineering/decisions/0006-language-sdk-obligation.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0042",
+      "title": "Deliver the Elixir language support package",
+      "workstream": "wrappers",
+      "depends_on": [
+        "FP-0022",
+        "FP-0039",
+        "FP-0043"
+      ],
+      "role": "fairpane-bindings",
+      "allowed_paths": [
+        "bindings",
+        "apps",
+        "tests",
+        "tools",
+        "engineering/dependencies.json"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Build an Elixir language-support extension against the distributed Elixir SDK artifact.",
+        "Build a useful Elixir reference extension that passes the FP-0039 shared behavioral scenarios.",
+        "Build a frontend through the Elixir SDK, without a hidden JavaScript application underneath it.",
+        "Pass the Elixir integration's isolation and lifecycle tests, including supervised crash and restart.",
+        "Build an independent example against the distributed Elixir SDK.",
+        "Keep the Elixir host optional and its runtime dependencies inside that host."
+      ],
+      "read": [
+        "docs/EXTENSIONS.md",
+        "docs/FRONTENDS.md",
+        "engineering/decisions/0006-language-sdk-obligation.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0043",
+      "title": "Expose the document frontend platform through the public contract",
+      "workstream": "substrate",
+      "depends_on": [
+        "FP-0019",
+        "FP-0021",
+        "FP-0029"
+      ],
+      "role": "fairpane-bindings",
+      "allowed_paths": [
+        "src",
+        "api",
+        "include",
+        "bindings",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Let host-language code create documents and apply document updates through the public contract.",
+        "Deliver DOM events to host-language handlers through the public contract.",
+        "Require no JavaScript application underneath a document frontend.",
+        "Keep layout, text, input, and accessibility behavior inside Fairpane for document frontends.",
+        "Demonstrate a document frontend in C and in Rust against the actual engine.",
+        "Keep the document frontend API distinct from the permissioned extension API.",
+        "Never let an installed language integration allow an arbitrary page to load native code."
+      ],
+      "read": [
+        "docs/FRONTENDS.md",
+        "docs/ABI_AND_WRAPPERS.md",
+        "engineering/decisions/0007-frontend-platform.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0044",
+      "title": "Define the custom graphics frontend contract",
+      "workstream": "substrate",
+      "depends_on": [
+        "FP-0030",
+        "FP-0035"
+      ],
+      "role": "fairpane-bindings",
+      "allowed_paths": [
+        "src",
+        "api",
+        "include",
+        "bindings",
+        "tests",
+        "build.zig"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Let a frontend submit its own GPU surface through the versioned surface interface.",
+        "Require an explicit input contract for each custom graphics frontend.",
+        "Require an explicit accessibility tree for each custom graphics frontend.",
+        "Demonstrate a custom graphics frontend from Rust that receives input and exposes accessibility.",
+        "Require no GPUI dependency from a frontend author."
+      ],
+      "read": [
+        "docs/FRONTENDS.md",
+        "engineering/decisions/0007-frontend-platform.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0045",
+      "title": "Qualify GPU-resident presentation without routine CPU readback",
+      "workstream": "paint-media",
+      "depends_on": [
+        "FP-0032",
+        "FP-0035"
+      ],
+      "role": "fairpane-platform",
+      "allowed_paths": [
+        "src",
+        "api",
+        "include",
+        "bindings",
+        "apps",
+        "tests",
+        "tools",
+        "build.zig",
+        "engineering/decisions",
+        "engineering/dependencies.json"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review",
+        "fairpane-security"
+      ],
+      "acceptance": [
+        "Present engine surfaces without routine CPU readback on each qualified configuration.",
+        "Negotiate a shared surface as the preferred presentation path.",
+        "Keep an explicit copy path where resource sharing does not qualify.",
+        "Report zero-copy only as a measured result for a specific configuration.",
+        "Assume no shared wgpu device across GPUI's platform backends.",
+        "Use wgpu, if at all, only in the shell for presentation."
+      ],
+      "read": [
+        "docs/FRONTENDS.md",
+        "engineering/decisions/0007-frontend-platform.md"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0046",
+      "title": "Establish the validated GPU service boundary",
+      "workstream": "guest-compute",
+      "depends_on": [
+        "FP-0020",
+        "FP-0035"
+      ],
+      "role": "fairpane-core",
+      "allowed_paths": [
+        "src",
+        "api",
+        "include",
+        "tests",
+        "build.zig",
+        "engineering/decisions"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test"
+      ],
+      "required_reviewers": [
+        "fairpane-review",
+        "fairpane-security"
+      ],
+      "acceptance": [
+        "Route GPU requests to a validated GPU service.",
+        "Route rendered surfaces to the compositor and the shell.",
+        "Compose each visible WebGPU canvas texture into the page inside the engine.",
+        "Keep compute-only GPU work out of the shell's presentation path.",
+        "Keep GPU acceleration for ordinary pages and WebGPU support as separate deliverables with separate evidence.",
+        "Obtain a separate owner decision before any third-party library implements engine WebGPU behavior, including behind a callback."
+      ],
+      "read": [
+        "docs/FRONTENDS.md",
+        "docs/SECURITY.md",
+        "engineering/decisions/0007-frontend-platform.md"
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."

@@ -3,9 +3,11 @@
 ## Actual state
 
 Tasks `FP-0001`, `FP-0004`, and `FP-0028` are accepted.
-Task `FP-0003` is implemented and integrated, and it awaits `fairpane-review` and `fairpane-spec` verdicts.
-Its WPT applicability counts are blocked on a pinned Python environment that provides PyYAML 6.0.1.
-Task `FP-0002` is in progress in the root session, with a draft verifier at `out/wip/attest.mjs`.
+Task `FP-0003` is active again after `fairpane-review` and `fairpane-spec` rejected commit `ce34ffc`.
+Contract revision 1 requires an explicit WPT denominator from the wpt.fyi manifest bound to the pinned tree.
+An isolated `fairpane-core` worker, `FP0003Rework`, implements that revision.
+Task `FP-0005` has a worker patch with 38 passing Zig tests that awaits integration and review.
+Task `FP-0002` is active in the root session, with an uncommitted verifier draft and contract revision 1.
 The candidate Zig library contains a capability probe, a lossless UTF-16 view, and checked generational handles.
 No renderer, JavaScript engine, or native browser window exists yet.
 
@@ -17,15 +19,19 @@ The browser is the engine's first embedder.
 The Zig engine owns web behavior, the Rust wrapper owns safe integration, and the Rust shell owns the application.
 The canonical wrapper crates `fairpane-sys` and `fairpane` stay free of third-party dependencies.
 The shell welcomes qualified crates, and GPUI hosts the chrome that Fairpane renders as a trusted document.
-`engineering/decisions/0004-first-party-wrapper-language.md` records the layers, the boundary, and the process arrangement.
+ADR 0004 records the layers, the boundary, and the process arrangement.
+ADR 0005 records one extension contract with Rhai and JavaScript as equal clients.
+ADR 0006 makes every language SDK power a first-party integration and a reference extension.
+ADR 0007 makes the frontend language independent of the renderer and reserves the surface interface.
 
 ## Next action
 
-1. Obtain `fairpane-review` and `fairpane-spec` verdicts on `FP-0003`, then apply the `specs/corpora.json` pins in a separate commit.
-2. Create a task that provisions the pinned Python environment for the WPT manifest.
+1. Obtain an independent review of the policy and plan changes for ADRs 0004 through 0007.
+2. Integrate the `FP-0005` worker patch, run its gates, and request `fairpane-review`.
 3. Finish `FP-0002` and request its review.
-4. Start the ready tasks `FP-0005`, `FP-0006`, `FP-0031`, and `FP-0033`.
-5. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
+4. Integrate the `FP0003Rework` patch, then request both FP-0003 reviewers again.
+5. Start the ready tasks `FP-0006`, `FP-0031`, and `FP-0033`.
+6. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
 
 ```text
 node tools/fairpane.mjs check
@@ -64,5 +70,10 @@ On October 9, 2026, the owner selected Rust as that language, as ADR 0004 record
 The owner then supplied a design memo that limits third-party crates to the browser application.
 The owner selected GPUI to host engine-rendered chrome.
 `engineering/evidence/wrapper-language/` preserves the memo verbatim and the recorded answers.
+The owner's extension memo made Rhai and JavaScript equal clients of one extension contract.
+The owner answered "YES" to two required capability families, `extensions` and `webextensions-compat`.
+The owner's SDK memo made a first-party integration and a reference extension mandatory for every supported language SDK.
+The owner's frontend memo made every SDK expose document and custom graphics frontends over one renderer.
+`engineering/evidence/extensions/` and `engineering/evidence/frontends/` preserve those memos verbatim.
 The outbound license remains open.
 The Git history uses the owner's configured identity.

@@ -61,6 +61,9 @@ The paint scene preserves clipping, transforms, stacking, and retained resources
 Canvas and SVG remain guest-facing features, not automatic consequences of internal graphics code.
 
 Guest WebGL and WebGPU are separate workstreams from internal GPU acceleration.
+GPU requests go to a validated GPU service, and rendered surfaces go to the compositor and the shell.
+The engine composes each visible WebGPU canvas texture into the page.
+`docs/FRONTENDS.md` describes the versioned surface interface and the presentation targets.
 Image and media decoders need bounds, malformed-input tests, and resource limits.
 Media support includes playback behavior and synchronization, not only file decoding.
 Codec patent policy and DRM access require explicit legal and platform decisions.

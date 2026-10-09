@@ -13,6 +13,8 @@
 - [JavaScript runtime](javascript-runtime.md)
 - [Rendering and text](rendering-and-text.md)
 - [ABI and wrappers](abi-and-wrappers.md)
+- [Extensions and language support](extensions.md)
+- [Frontend platform](frontends.md)
 - [Security](security.md)
 - [Qualification](qualification.md)
 - [Roadmap](roadmap.md)

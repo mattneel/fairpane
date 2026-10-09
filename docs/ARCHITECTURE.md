@@ -20,9 +20,11 @@ A callback that secretly delegates shaping or rendering to another engine violat
 | `fairpane-sys` | First-party bindings and Rust toolchain facilities. | Exact declarations of the public C ABI. |
 | `fairpane` | First-party wrapper code, `fairpane-sys`, and the Rust standard library. | Safe, idiomatic Rust ownership and operations. |
 | Rust browser shell | Qualified third-party dependencies are welcome. | User interface and application services. |
+| Optional language hosts | Each host carries its own runtime dependencies. | Extension execution for one language. |
 
 Dependencies belong to the application that needs them and never migrate into the reusable contract.
-No shell dependency lays out, shapes, paints, or scripts web content or chrome, or makes a security decision that the engine or broker owns.
+No shell dependency parses, styles, lays out, shapes, paints, or scripts web content or chrome.
+No shell dependency makes a security decision that the engine or broker owns.
 `engineering/dependencies.json` and ADR 0004 record the acceptable uses and the exclusions.
 
 ## Components
@@ -70,9 +72,24 @@ The C ABI stays a local boundary inside each renderer process, and no native poi
 A direct in-process embedding qualifies a separate deployment profile.
 
 The engine renders the browser chrome as a trusted document, in its own renderer, separate from every page renderer.
+That separate renderer is a project design choice that keeps a compromised page renderer away from the chrome's authority.
 GPUI hosts the chrome document and each page document in the shell's windows.
 The shell routes OS input to the focused document, presents each document's frames, and bridges each accessibility tree to the platform.
 The chrome and page documents never share an authority boundary, and broker-validated state supplies the displayed origin.
+
+## Extension boundary
+
+Extensions reach Fairpane through one extension contract, which `docs/EXTENSIONS.md` describes.
+Each untrusted extension runs in an isolated worker process with a language adapter.
+Every adapter calls the same permission broker, which derives the extension's identity from its authenticated connection.
+Shell-only operations stay in Rust, and engine operations cross the Rust wrapper and the C ABI.
+The permissioned extension API stays distinct from the engine embedding API.
+
+## Frontend boundary
+
+Any qualified language can drive a document frontend or a custom graphics frontend through its SDK, as `docs/FRONTENDS.md` describes.
+GPU requests go to a validated GPU service, and rendered surfaces go to the compositor and the shell.
+Frontends never depend on GPUI, and no public contract exposes GPUI or Rust object layouts.
 
 ## Execution model
 

@@ -92,6 +92,7 @@ The wrapper has two crates.
 - It provides scoped buffer views and retained frames with documented lifetime rules.
 - It accepts typed input and host-request batches.
 - It states thread restrictions and cancellation behavior explicitly.
+- It claims no `Send` or `Sync` bound that the C contract does not grant.
 - The initial `Engine` type implements neither `Send` nor `Sync`, and a later transfer needs a qualified design.
 - Its unsafe code stays inside a narrow, separately reviewed perimeter.
 
@@ -105,9 +106,18 @@ Generated declarations ship with their source schema, and regeneration is a sepa
 The wrapper implements standard-library traits and needs no async runtime.
 Framework-specific integrations, such as GPUI adapters, belong to the applications that use them.
 
-The browser shell, not the wrapper, welcomes qualified third-party crates.
-Shell code never handles raw engine pointers and never imports `fairpane-sys` directly.
-`engineering/dependencies.json` lists the shell's acceptable uses, exclusions, and required checks.
+The browser application, not the wrapper, welcomes qualified third-party crates.
+Ordinary shell code never handles raw engine pointers and never imports `fairpane-sys` directly.
+`engineering/dependencies.json` lists the application's acceptable uses, exclusions, and required checks.
+
+## Language support packages
+
+Every officially supported language SDK powers a maintained first-party Fairpane integration and a useful reference extension, as ADR 0006 records.
+Each language therefore delivers the idiomatic SDK, a language-support extension, and a reference extension.
+Those consumers build against the same distributed SDK and public contracts that everyone else receives.
+The engine embedding API and the permissioned extension API remain distinct.
+An extension never receives unrestricted engine access through its language SDK.
+`docs/EXTENSIONS.md` describes the extension contract and the qualification of each support package.
 
 ## Qualification
 
@@ -116,8 +126,10 @@ It also covers foreign exceptions and callbacks from unexpected threads.
 
 Continuous integration builds three separate consumers.
 A C-only consumer builds against the public header and engine artifact.
-A minimal Rust consumer builds against the distributed wrapper outside the browser workspace, because Cargo unifies features inside a workspace.
+A minimal Rust consumer builds against the distributed wrapper outside the browser workspace.
+Cargo unifies dependency features in defined circumstances, so a workspace build can hide a wrapper defect.
 The browser shell executes its application workflows through the same wrapper.
 The dependency check covers every declared target configuration and every build dependency.
+A language qualifies only after its SDK, its language integration, its reference extension, and an independent example pass their checks.
 Each supported language requires real execution on its declared runtime and targets.
 The phrase "every language" expresses an extensible public contract, not an unsupported list of generated files.
