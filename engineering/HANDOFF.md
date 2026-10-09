@@ -2,19 +2,20 @@
 
 ## Actual state
 
-Tasks `FP-0001` through `FP-0009`, `FP-0011`, `FP-0013`, `FP-0021`, `FP-0027`, `FP-0028`, `FP-0031`, `FP-0033`, `FP-0047`, `FP-0050`, `FP-0051`, `FP-0053`, and `FP-0054` are accepted.
+Tasks `FP-0001` through `FP-0009`, `FP-0011`, `FP-0013`, `FP-0014`, `FP-0021`, `FP-0027`, `FP-0028`, `FP-0031`, `FP-0033`, `FP-0047`, `FP-0050`, `FP-0051`, `FP-0053`, and `FP-0054` are accepted.
 `specs/corpora.json` pins Test262 at `2e0a5676`, WPT at `b60c4b34`, Unicode 18.0.0, and the OpenType fixtures, and `release-check` still fails closed.
-The owner approved Unicode data, OFL test fonts, and the WHATWG `entities.json` in the repository, as `LICENSE-DECISION.md` records.
+The owner approved Unicode data, OFL test fonts, the WHATWG `entities.json`, and the Encoding Standard index files in the repository, as `LICENSE-DECISION.md` records.
 
 | Task | State | Next step |
 | --- | --- | --- |
-| `FP-0014` CSS syntax and cascade | Review 1 rejected the implementation, because `StyleMap.textStyle` returns the parent's whole style instead of defaulting. Revision 1 of the contract, frozen in `82ba854`, adds cases 49 to 54. | Integrate the patch of worker `FP0014R1` and request review 2. |
-| `FP-0029` Rust wrapper | Split into `FP-0079` (pin and install Rust), `FP-0080` (generate `fairpane-sys`), and `FP-0081` (engine allocation budget); `FP-0029` keeps its 20 criteria and depends on all three. | Integrate `FP-0079` from worker `FP0079Rust`, then land policy change P1 after its reviews. |
-| `FP-0064` tokenizer states | Contract frozen in `dfa6563`. | Integrate the patch of worker `FP0064States` and request review. |
-| `FP-0012` JavaScript values | Worker `FP0012Contract` drafts the task split and the first contract, from `reference` and the generated tracer, as ADR 0008 decides. | Freeze the first part, add the split plan entries, and dispatch `fairpane-js`. |
-| `FP-0052`, `FP-0066`, `FP-0067`, `FP-0076` | Contracts frozen in `42c5e07`, `3640a79`, `5134610`, and `297f1d3`. | Dispatch `fairpane-core` for each as agent slots free. |
+| `FP-0064` tokenizer states | Implemented in `cb8427d`; the binding in `b7369a3` passes all four gates and 292 of 292 tests. | Record the verdict of `fairpane-review` worker `FP0064Review`. |
+| `FP-0067` Gates checks and Linux Zig gates | Implemented in `152ed53`; `repo-check` and `controller-test` pass at that head. | Record the first `Gates` run with the change (37936609533) and its Linux receipts under `engineering/evidence/FP-0067/ci/`, then request review. |
+| `FP-0079` Rust toolchain | Implemented in `04342e2`; security review 1 accepts, review 1 rejects the PATH `rustc` probe in `doctor`. Revision 1 frozen in `e6d215c`. | Integrate worker `FP0079R1`, request both reviews, then record `rust-lock-verify`, land policy change P1, and run the gates on the P1 head. |
+| `FP-0081` engine allocation limit | Contract frozen in `d17abb0`, amendment 1 in `e659254`. | Integrate worker `FP0081Budget` and request `fairpane-review` and `fairpane-security`. |
+| `FP-0082` script parser | Contract frozen in `a3e5cf9`. | Integrate worker `FP0082Parser` and request `fairpane-review` and `fairpane-spec`. |
+| `FP-0052`, `FP-0066`, `FP-0076` | Contracts frozen in `42c5e07`, `3640a79`, and `297f1d3`. | Dispatch `fairpane-core` for each as agent slots free. |
 
-Tasks `FP-0064` through `FP-0078` hold the deferred tokenizer states, encoding sniffing, path-independent release builds, the review findings of `FP-0013`, `FP-0033`, `FP-0051`, and `FP-0054`, the CSS obligations, binary notices, and html5lib-tests.
+Tasks `FP-0064` through `FP-0098` hold the tokenizer states, encoding sniffing, release reproducibility, review follow-ups, the CSS obligations, notices, html5lib-tests, the Rust toolchain and wrapper split, the engine allocation limit, the JavaScript parser, VM, runner, and obligation tasks, and the CI timeout margin.
 Tasks `FP-0055` through `FP-0063` own the remaining text obligations.
 The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, the engine and document lifecycle, a DOM node store with attributes, a generated C ABI, the headless laboratory `fairpane-lab`, JavaScript value and heap catalogs, Unicode property lookup, an OpenType parser, a resumable HTML tokenizer, and CSS syntax, selectors, cascade, and computed values.
 No renderer, JavaScript interpreter, tree constructor, or native browser window exists yet.
@@ -34,13 +35,14 @@ ADR 0007 makes the frontend language independent of the renderer and reserves th
 
 ## Next action
 
-1. Integrate each worker patch as it arrives, run the gates with `HEAD` and status records before and after, and request review.
-   Worker patches arrive as `<Name>.patch` in the session directory; apply them with `git apply --3way` on a committed tree.
+1. Integrate each worker patch as it arrives, check `git diff --cached --name-only` before each commit, run the gates with `HEAD` and status records before and after, and request review.
+   Worker patches arrive as `<Name>.patch` in the session directory; `git apply --3way` stages what it applies.
 2. Check the `Gates` run of each pushed head, and record any failure in the affected task's evidence before acceptance.
-3. Record each pending review verdict, and route minor findings to the follow-up tasks.
-4. Dispatch the frozen contracts `FP-0052`, `FP-0066`, `FP-0067`, and `FP-0076`, at most four agents at a time.
-5. Freeze and dispatch `FP-0078` after `FP-0052` is accepted, because both change the snapshot write phase.
-6. Start `FP-0010` tree construction after `FP-0064` is accepted, and `FP-0065` encoding sniffing after its prerequisites.
+3. Record each pending review verdict, and route minor findings to the follow-up tasks in their own `plan:` commits.
+4. Request plan review 3 for `49f2a81`'s successors: `efc3dd3` and any later `plan:` commit.
+5. Dispatch the frozen contracts `FP-0052`, `FP-0066`, and `FP-0076`, at most four agents at a time.
+6. After `FP-0064` is accepted, delegate the `FP-0010` split and first contract to `fairpane-spec`; tree construction has 21 insertion modes plus foreign content at the pin.
+7. Freeze `FP-0078` after `FP-0052`, `FP-0075` after `FP-0066`, `FP-0077` after `FP-0052` and `FP-0064`, and `FP-0098` after `FP-0067`.
 
 ```text
 node tools/fairpane.mjs check
