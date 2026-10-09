@@ -377,21 +377,21 @@
     },
     "FP-0033": {
       "status": "implemented",
-      "owner": "fairpane-core workers FP0033Actions and FP0033Revision2, integrated by root-integrator",
+      "owner": "fairpane-core workers FP0033Actions and FP0033Revision2, and root-integrator",
       "evidence": [
         "engineering/evidence/FP-0033/README.md",
-        "engineering/evidence/FP-0033/gates/2026-10-09T04-29-43-239Z-repo-check-32405546.json",
-        "engineering/evidence/FP-0033/gates/2026-10-09T04-29-43-442Z-controller-test-5ea3d49a.json",
-        "engineering/evidence/FP-0033/raw/revision-2-tests-before.log",
+        "engineering/evidence/FP-0033/gates/2026-10-09T04-41-51-211Z-repo-check-2efd25ed.json",
+        "engineering/evidence/FP-0033/gates/2026-10-09T04-41-51-414Z-controller-test-73c528ab.json",
+        "engineering/evidence/FP-0033/raw/revision-3-tests-before.log",
         "engineering/evidence/FP-0033/raw/revision-1-actionlint.log",
-        "engineering/evidence/FP-0033/raw/github-run-37875841603.log"
+        "engineering/evidence/FP-0033/raw/github-run-37884244035.log"
       ],
-      "review": "engineering/evidence/FP-0033/reviews/review-2-reject.json",
+      "review": "engineering/evidence/FP-0033/reviews/review-3-reject.json",
       "notes": [
         "Created so continuous integration runs the controller and Zig checks that docs/GIT_OPERATIONS.md names for branch protection.",
-        "The frozen contract is engineering/evidence/FP-0033/CONTRACT.md, based on commit 7bc9ace, with revisions 1 and 2.",
-        "GitHub run 37873082602 succeeded for commit 24c0c64 in both jobs, and run 37875841603 for 94c96ed.",
-        "fairpane-security accepted revision 1. fairpane-review rejected it. Commit 98fa147 implements revision 2 with 148 of 148 controller tests. Awaiting both reviews."
+        "The frozen contract is engineering/evidence/FP-0033/CONTRACT.md, based on commit 7bc9ace, with revisions 1, 2, and 3.",
+        "GitHub runs 37873082602 (24c0c64), 37875841603 (94c96ed), and 37884244035 (586b854) succeeded in both jobs.",
+        "fairpane-review rejected revision 2 because actions were bound only by owner and repository. Commit c53c696 implements revision 3 with 149 of 149 controller tests. Awaiting fairpane-review and fairpane-security."
       ]
     },
     "FP-0034": {

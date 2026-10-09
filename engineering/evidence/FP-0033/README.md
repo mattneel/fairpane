@@ -42,6 +42,7 @@ Commit `7bbe196` implements contract revision 1, and policy commit `29f2135` add
 | 11 | `raw/revision-1-actionlint.log` downloads actionlint 1.7.12, matches digest `6e7241b5…f6e9` to the release checksum file, records `HEAD` `29f2135` and the SHA-256 of both workflow files, and reports 0 errors in 2 files. The shellcheck and pyflakes rules were disabled, because those tools are absent. |
 
 `raw/revision-1-binding.log` records `HEAD` `29f2135` and a status whose untracked files lie outside every source root.
+`raw/github-run-37875841603.log` records Gates run 37875841603 for `94c96ed`, the revision 1 evidence commit: both jobs succeeded.
 
 - `gates/2026-10-09T02-41-12-231Z-repo-check-cde06900.json`
 - `gates/2026-10-09T02-41-12-409Z-controller-test-574028d3.json`
@@ -73,6 +74,23 @@ The workflow files are byte-identical to the files that `raw/revision-1-actionli
 - `gates/2026-10-09T04-29-43-442Z-controller-test-5ea3d49a.json`, with 148 of 148 controller tests.
 
 `raw/revision-2-tests-bun.log` records Bun with 148 of 148 controller tests.
+
+`raw/github-run-37884244035.log` records Gates run 37884244035 for `586b854`, the revision 2 evidence commit: the Linux job's 13 steps and the Windows job's 14 steps succeeded.
+
+## Revision 3
+
+`reviews/review-3-reject.json` found that the checkers bound an action only by owner and repository.
+GitHub fetches a commit from any fork of an action's repository, so a forged commit under a plausible version comment passed every check.
+Commit `c53c696` implements contract revision 3: `REVIEWED_ACTIONS` lists the reviewed commit and release tag of each accepted action, from the recorded tag lookups in `raw/action-tag-refs.log` and `../docs-site/raw/action-pins.log`, and `workflowProblems` accepts no other commit.
+
+| Log | Result |
+| --- | --- |
+| `raw/revision-3-tests-before.log` | Records `HEAD` `97aa319`, the base checker blob, the staged copies' blob IDs, and the run of the new tests against the base checker: 19 of 20 pass, and case 17 fails. |
+| `raw/revision-3-binding.log` | `HEAD` `c53c696`, an empty status that includes ignored files for every source root, the commit's file list, and the workflow blob IDs, which are unchanged. |
+| `raw/revision-3-tests-bun.log` | Bun 1.4.2 runs 149 of 149 controller tests. |
+
+- `gates/2026-10-09T04-41-51-211Z-repo-check-2efd25ed.json`
+- `gates/2026-10-09T04-41-51-414Z-controller-test-73c528ab.json`, with 149 of 149 controller tests.
 
 ## Limits
 
