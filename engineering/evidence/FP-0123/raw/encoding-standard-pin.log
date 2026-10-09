@@ -1,0 +1,37 @@
+
+COMMAND ["C:\\Windows\\System32\\curl.exe","-sSfL","-o","out/fp0123-pin/encoding.bs","https://raw.githubusercontent.com/whatwg/encoding/a985b62a9b45c17da3e17a9f0a0b4e30c34c4a8a/encoding.bs"]
+RESULT {"executable":"C:\\Windows\\System32\\curl.exe","arguments":["-sSfL","-o","out/fp0123-pin/encoding.bs","https://raw.githubusercontent.com/whatwg/encoding/a985b62a9b45c17da3e17a9f0a0b4e30c34c4a8a/encoding.bs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:39:48.183Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":238}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","out/fp0123-pin/encoding.bs"]
+684c72d8fd1d3578e3772677c73a2ab6aef6d7ee
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","out/fp0123-pin/encoding.bs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:39:48.477Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","out/fp0123-pin/encoding.bs"]
+90bd4f43b965186afd34661d5ad0f45d35f9a178da895dcc9f08f610cc031c55 *out/fp0123-pin/encoding.bs
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["out/fp0123-pin/encoding.bs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:39:48.564Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Windows\\System32\\curl.exe","-sSfL","-o","out/fp0123-pin/LICENSE","https://raw.githubusercontent.com/whatwg/encoding/a985b62a9b45c17da3e17a9f0a0b4e30c34c4a8a/LICENSE"]
+RESULT {"executable":"C:\\Windows\\System32\\curl.exe","arguments":["-sSfL","-o","out/fp0123-pin/LICENSE","https://raw.githubusercontent.com/whatwg/encoding/a985b62a9b45c17da3e17a9f0a0b4e30c34c4a8a/LICENSE"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:39:48.642Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":144}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","out/fp0123-pin/LICENSE"]
+f2dcda46deccefd245749202a88a7837e35c6daa
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","out/fp0123-pin/LICENSE"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:39:48.848Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","out/fp0123-pin/LICENSE"]
+85dc6f5ccb57a6fe8c33d158f9fc8fc7ee5655a5d3db2cdd131c6a3d0f48a864 *out/fp0123-pin/LICENSE
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["out/fp0123-pin/LICENSE"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:39:48.932Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.EXE","-e","const fs=require(\"fs\");const a=fs.readFileSync(process.argv[1]),b=fs.readFileSync(process.argv[2]);console.log(JSON.stringify({license_bytes:a.length,entities_license_bytes:b.length,byte_identical:a.equals(b)}))","out/fp0123-pin/LICENSE","src/html/entities.LICENSE"]
+{"license_bytes":16315,"entities_license_bytes":16315,"byte_identical":true}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.EXE","arguments":["-e","const fs=require(\"fs\");const a=fs.readFileSync(process.argv[1]),b=fs.readFileSync(process.argv[2]);console.log(JSON.stringify({license_bytes:a.length,entities_license_bytes:b.length,byte_identical:a.equals(b)}))","out/fp0123-pin/LICENSE","src/html/entities.LICENSE"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:39:49.008Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\Windows\\System32\\curl.exe","-sSfL","-o","out/fp0123-pin/published.html","https://encoding.spec.whatwg.org/"]
+RESULT {"executable":"C:\\Windows\\System32\\curl.exe","arguments":["-sSfL","-o","out/fp0123-pin/published.html","https://encoding.spec.whatwg.org/"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:39:49.120Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1047}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.EXE","-e","const t=require(\"fs\").readFileSync(process.argv[1],\"utf8\");const m=t.match(/Last Updated[^0-9]*([0-9]{1,2} [A-Z][a-z]+ [0-9]{4})/);console.log(JSON.stringify({last_updated:m?m[1]:null}))","out/fp0123-pin/published.html"]
+{"last_updated":null}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.EXE","arguments":["-e","const t=require(\"fs\").readFileSync(process.argv[1],\"utf8\");const m=t.match(/Last Updated[^0-9]*([0-9]{1,2} [A-Z][a-z]+ [0-9]{4})/);console.log(JSON.stringify({last_updated:m?m[1]:null}))","out/fp0123-pin/published.html"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:39:50.226Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":42}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.EXE","-e","const t=require(\"fs\").readFileSync(process.argv[1],\"utf8\");const i=t.indexOf(\"Last Updated\");console.log(JSON.stringify({context:i<0?null:t.slice(i,i+160).replace(/\\s+/g,\" \")}))","out/fp0123-pin/published.html"]
+{"context":"Last Updated <time class=\"dt-updated\" datetime=\"2026-05-21\">21 May 2026</time> </p> </hgroup> <div data-fill-with=\"spec-metadata\"> <dl> <dt>Par"}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.EXE","arguments":["-e","const t=require(\"fs\").readFileSync(process.argv[1],\"utf8\");const i=t.indexOf(\"Last Updated\");console.log(JSON.stringify({context:i<0?null:t.slice(i,i+160).replace(/\\s+/g,\" \")}))","out/fp0123-pin/published.html"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T17:39:58.083Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":36}
