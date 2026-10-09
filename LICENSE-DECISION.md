@@ -24,6 +24,11 @@ This document is a decision placeholder, not legal advice or an executed contrib
 Local engineering tasks continue while the decision remains open.
 Agents cannot import third-party source without a compatible, recorded basis.
 Standards data and test corpora retain their own license records.
-The bootstrap includes no font files or external conformance corpora.
+External conformance corpora stay outside the repository as pinned snapshots.
+
+On 2026-10-09, the owner approved third-party data in the public repository.
+Unicode data files under the Unicode License v3 and test fonts under the SIL Open Font License 1.1 may enter it.
+Each such file keeps its license text beside it and a per-file provenance record, as `specs/IMPORT_REQUIREMENTS.md` requires.
+`engineering/evidence/FP-0013/owner-answers.log` records the question and the answer.
 
 See `docs/SOURCES.md` for [S20].
