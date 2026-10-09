@@ -103,7 +103,7 @@ Development compiles and runs used the uncited cache `out/fp0100-cache-dev`; no 
   The comparable step duration is therefore the base run above, which ran on the same host with a fresh local cache.
 - The unit test step grew by 18 s, from 36 s to 54 s.
   The FP-0008 and FP-0064 tests account for about 7.4 s of it, from 15.7 s to 23.1 s.
-  That cost is the tokenizer's one-time reservation of 8194 character records, which each of the many tokenizers in their partition sets makes on its first character.
+  [INFERENCE] That cost is the tokenizer's one-time reservation of 8194 character records, which each of the many tokenizers in their partition sets makes on its first character; no recorded run isolates it, as review 1 notes.
   The 16 new FP-0100 tests account for about 10.3 s, most of it case 12, whose set B parses W3 in 19307 partitions.
 - The warm `zig test` durations include the compiler's cache check, so they are upper bounds on the test time.
 
@@ -111,6 +111,7 @@ Development compiles and runs used the uncited cache `out/fp0100-cache-dev`; no 
 
 - Every case from 1 to 15 has a test whose name begins with `FP-0100 case N`, and all pass in `raw/tests-after.log`.
   Case 2 is in `src/dom.zig`, case 15 in `src/html/tokenizer_test.zig`, case 12 in `src/html/tree_partition_test.zig`, and the others in `src/html/tree_test.zig`.
+  `raw/test-diff-after-review.log`, recorded at review 1's request, holds `git diff bd11c2b f17b396` of the test files: `src/html/tokenizer_test.zig` only gains lines, and the lines that `src/dom.zig` loses are implementation lines and the frozen FP-0009 call-site amendments for the new signatures.
 - Every FP-0008, FP-0009, FP-0014, and FP-0064 test passes in `raw/tests-after.log`, with its expected values unchanged.
 - The tree tests check `dom.expectInvariants` after every case, including each induced allocation failure of case 14.
 - Case 11's counters are nonzero for every one of the 130 branches.
