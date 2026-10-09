@@ -102,11 +102,21 @@
     "required_hosts": [
       "Node 22+ or a qualified Bun runtime",
       "Zig from the lock",
-      "Rust from its lock once task FP-0029 creates it",
+      "Rust from toolchains/rust.lock.json, installed with node tools/fairpane.mjs install-rust",
       "OMP supplied by the owner",
       "Git for isolation"
     ],
     "package_dependencies": [],
+    "verification_tools": [
+      {
+        "name": "GnuPG",
+        "host": "A GnuPG executable supplied by the host, whose exact version each verification records.",
+        "uses": [
+          "Verifying the OpenPGP signature of an official Rust channel manifest against the Rust signing key when a reviewed change creates or updates toolchains/rust.lock.json."
+        ],
+        "boundary": "A review-time tool only. No build, gate, test, installation, or runtime path runs it."
+      }
+    ],
     "import_tools": [
       {
         "name": "fontTools",

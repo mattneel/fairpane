@@ -24,6 +24,7 @@ import { abiCases, removeAbiFixtures } from './abi.test.mjs';
 import { releaseCases, removeReleaseFixtures } from './release.test.mjs';
 import { ucdCases, removeUcdFixtures } from './ucd.test.mjs';
 import { fileSetCases, removeFileSetFixtures } from './fileset.test.mjs';
+import { rustCases, removeRustFixtures } from './rust.test.mjs';
 import { FILE_SET_IDS } from './fileset.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -229,6 +230,7 @@ for (const c of abiCases) test(c.name, c.fn);
 for (const c of releaseCases) test(c.name, c.fn);
 for (const c of ucdCases) test(c.name, c.fn);
 for (const c of fileSetCases) test(c.name, c.fn);
+for (const c of rustCases) test(c.name, c.fn);
 test('15: release-check still exits with status 1', () => {
   const r = spawnSync(process.execPath, [path.join(root, 'tools/fairpane.mjs'), 'release-check'], { cwd: root, encoding: 'utf8', windowsHide: true });
   assert.equal(r.status, 1, r.stderr);
@@ -1121,6 +1123,7 @@ for (const problem of removeAbiFixtures()) { failures++; console.error(`Temporar
 for (const problem of removeReleaseFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
 for (const problem of removeUcdFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
 for (const problem of removeFileSetFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+for (const problem of removeRustFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
 console.log(`1..${cases.length}`);
 console.log(`# tests ${cases.length}\n# pass ${cases.length - failures}\n# fail ${failures}`);
 console.log('# Scope: controller behavior only. No renderer or JavaScript conformance claim.');

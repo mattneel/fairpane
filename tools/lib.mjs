@@ -105,6 +105,75 @@ export function validateLock(lock) {
   }
   return true;
 }
+export const RUST_SIGNING_KEY_FINGERPRINT = '108F66205EAEB0AAA8DD5E1C85AB96E6FA1BE5FE';
+const RUST_HOSTS = Object.freeze({ 'x86_64-windows': 'x86_64-pc-windows-gnu', 'x86_64-linux': 'x86_64-unknown-linux-gnu' });
+const RUST_KEYS = Object.freeze({
+  lock: ['schema_version', 'channel', 'version', 'release_date', 'checked_date', 'rustc_commit_hash', 'manifest', 'platforms'],
+  manifest: ['url', 'sha256', 'signature_url', 'signing_key_url', 'signing_key_fingerprint'],
+  platform: ['host', 'components'],
+  component: ['package', 'url', 'sha256', 'size', 'archive_root'],
+});
+const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const matches = (pattern, value) => typeof value === 'string' && pattern.test(value);
+function isoDate(value) {
+  return matches(/^\d{4}-\d{2}-\d{2}$/, value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`))
+    && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+}
+function rejectUnknownKeys(value, allowed) {
+  if (isRecord(value)) for (const key of Object.keys(value)) invariant(allowed.includes(key), `Unexpected Rust lock key: ${key}`);
+}
+/** Check `toolchains/rust.lock.json`. Unknown keys at any level are reported first, then each field in a fixed order. */
+export function validateRustLock(lock) {
+  rejectUnknownKeys(lock, RUST_KEYS.lock);
+  rejectUnknownKeys(lock?.manifest, RUST_KEYS.manifest);
+  if (isRecord(lock?.platforms)) {
+    for (const platform of Object.values(lock.platforms)) {
+      rejectUnknownKeys(platform, RUST_KEYS.platform);
+      if (Array.isArray(platform?.components)) for (const c of platform.components) rejectUnknownKeys(c, RUST_KEYS.component);
+    }
+  }
+  invariant(lock?.schema_version === 1 && lock.channel === 'stable', 'The Rust lock must select a stable release.');
+  invariant(matches(/^\d+\.\d+\.\d+$/, lock.version), 'The Rust lock needs an exact stable version.');
+  invariant(isoDate(lock.release_date) && isoDate(lock.checked_date), 'The Rust lock needs ISO dates.');
+  invariant(matches(/^[0-9a-f]{40}$/, lock.rustc_commit_hash), 'The Rust lock needs the 40-hex rustc commit.');
+  const m = lock.manifest, manifestUrl = `https://static.rust-lang.org/dist/channel-rust-${lock.version}.toml`;
+  invariant(isRecord(m) && m.url === manifestUrl && m.signature_url === `${manifestUrl}.asc`, 'The Rust lock needs the official channel manifest.');
+  invariant(matches(HASH, m.sha256), 'The Rust lock needs a SHA-256 manifest digest.');
+  invariant(m.signing_key_url === 'https://static.rust-lang.org/rust-key.gpg.ascii' && m.signing_key_fingerprint === RUST_SIGNING_KEY_FINGERPRINT,
+    'The Rust lock must name the Rust signing key.');
+  invariant(isRecord(lock.platforms) && Object.keys(lock.platforms).length > 0, 'The Rust lock has no platforms.');
+  for (const [key, p] of Object.entries(lock.platforms)) {
+    invariant(Object.hasOwn(RUST_HOSTS, key), `Unsupported Rust lock platform: ${key}`);
+    invariant(isRecord(p) && p.host === RUST_HOSTS[key], `Unexpected Rust host for ${key}.`);
+    // The Windows GNU host adds the self-contained MinGW linker in the lock's frozen position, before rustfmt-preview.
+    const expected = ['rustc', 'cargo', 'rust-std', ...(p.host.endsWith('-windows-gnu') ? ['rust-mingw'] : []), 'rustfmt-preview'];
+    invariant(Array.isArray(p.components) && p.components.length === expected.length
+      && p.components.every((c, i) => isRecord(c) && c.package === expected[i]),
+      `The Rust components for ${key} must be exactly ${expected.join(', ')}.`);
+    for (const c of p.components) {
+      const archiveRoot = `${c.package.replace(/-preview$/, '')}-${lock.version}-${p.host}`;
+      invariant(c.url === `https://static.rust-lang.org/dist/${lock.release_date}/${archiveRoot}.tar.gz`, `Unexpected component URL for ${c.package} on ${key}.`);
+      invariant(c.archive_root === archiveRoot, `Unexpected archive root for ${c.package} on ${key}.`);
+      invariant(matches(HASH, c.sha256), `Invalid archive SHA-256 for ${c.package} on ${key}.`);
+      invariant(Number.isSafeInteger(c.size) && c.size > 0, `Invalid archive size for ${c.package} on ${key}.`);
+    }
+  }
+  return true;
+}
+/** The exact `rust-toolchain.toml` text that a lock implies. */
+export function rustToolchainText(lock) {
+  return [
+    '# The repository\'s commands run the toolchain that node tools/fairpane.mjs install-rust installs, never one from PATH.',
+    '# This file names the version in toolchains/rust.lock.json for a developer who uses rustup.',
+    '[toolchain]', `channel = "${lock.version}"`, 'profile = "minimal"', 'components = ["rustfmt"]', '',
+  ].join('\n');
+}
+export function rustToolchainProblems(lock, text) {
+  if (text === rustToolchainText(lock)) return [];
+  const channel = /^channel\s*=\s*"([^"\r\n]*)"\s*$/m.exec(text)?.[1];
+  if (channel !== lock.version) return [`rust-toolchain.toml names ${channel ?? 'no channel'}, but the lock pins ${lock.version}.`];
+  return ['rust-toolchain.toml differs from the text that the lock implies.'];
+}
 export function hostPlatform(platform = process.platform, arch = process.arch) {
   const a = { x64: 'x86_64', arm64: 'aarch64' }[arch];
   const o = { win32: 'windows', linux: 'linux', darwin: 'macos' }[platform];
@@ -126,9 +195,32 @@ export function checkCompiler(root, lock = readJson(safePath(root, 'toolchains/z
   invariant(result.stdout.trim() === lock.version, `Compiler mismatch: expected ${lock.version}, found ${result.stdout.trim()}.`);
   return compiler;
 }
-export function verifyArchive(file, artifact) {
-  invariant(fs.statSync(file).size === artifact.size, 'The compiler archive size does not match the lock.');
-  invariant(fileHash(file) === artifact.sha256, 'The compiler archive SHA-256 does not match the lock.');
+/** Check a downloaded archive against its locked size and SHA-256. `name` names the archive in the messages. */
+export function verifyArchive(file, artifact, name = 'compiler') {
+  invariant(fs.statSync(file).size === artifact.size, `The ${name} archive size does not match the lock.`);
+  invariant(fileHash(file) === artifact.sha256, `The ${name} archive SHA-256 does not match the lock.`);
+  return true;
+}
+/**
+ * Reuse `archive` after a size and SHA-256 check, or download the locked URL into a `.partial` file beside it.
+ * The download refuses redirects, stops when it exceeds the locked size, and is verified before the rename.
+ * `name` names the archive in the check messages, and `title` starts the HTTP failure message.
+ * Both `install-zig` and `install-rust` use it.
+ */
+export async function fetchLockedArchive(archive, artifact, { name, title = name, fetch = globalThis.fetch }) {
+  if (fs.existsSync(archive)) return verifyArchive(archive, artifact, name);
+  const tmp = `${archive}.${crypto.randomUUID()}.partial`; let fd;
+  try {
+    const response = await fetch(artifact.url, { redirect: 'error', signal: AbortSignal.timeout(600000) });
+    invariant(response.ok && response.body, `${title} download failed with HTTP ${response.status}.`);
+    fd = fs.openSync(tmp, 'wx'); let bytes = 0;
+    for await (const chunk of response.body) {
+      bytes += chunk.length; invariant(bytes <= artifact.size, 'The download exceeded the locked archive size.');
+      let offset = 0;
+      while (offset < chunk.length) offset += fs.writeSync(fd, chunk, offset, chunk.length - offset);
+    }
+    fs.closeSync(fd); fd = undefined; verifyArchive(tmp, artifact, name); fs.renameSync(tmp, archive);
+  } finally { if (fd !== undefined) fs.closeSync(fd); if (fs.existsSync(tmp)) fs.unlinkSync(tmp); }
   return true;
 }
 export function validatePlan(plan, state, gateIds, workstreamIds) {
@@ -214,6 +306,10 @@ export function checkRepository(root) {
   validatePlan(plan, state, ids, new Set(workstreams.workstreams.map(w => w.id)));
   const lock = load('toolchains/zig.lock.json'); validateLock(lock);
   invariant(fs.readFileSync(safePath(root, 'toolchains/zig-version.txt'), 'utf8').trim() === lock.version, 'The compiler version files disagree.');
+  // Read the Rust pin without running any Rust executable.
+  const rustLock = load('toolchains/rust.lock.json'); validateRustLock(rustLock);
+  const [toolchainProblem] = rustToolchainProblems(rustLock, fs.readFileSync(safePath(root, 'rust-toolchain.toml'), 'utf8'));
+  invariant(!toolchainProblem, toolchainProblem);
   const profile = load('engineering/qualification.json');
   invariant(profile.schema_version === 1 && Array.isArray(profile.capabilities), 'The qualification capability schema is invalid.');
   for (const id of REQUIRED_CAPABILITIES) {
@@ -515,21 +611,7 @@ export async function installZig(root) {
   }
   const downloads = safePath(root, '.tools/downloads', { mustExist: false }); fs.mkdirSync(downloads, { recursive: true });
   const archive = path.join(downloads, path.basename(new URL(a.url).pathname));
-  if (fs.existsSync(archive)) verifyArchive(archive, a);
-  else {
-    const tmp = `${archive}.${crypto.randomUUID()}.partial`; let fd;
-    try {
-      const response = await fetch(a.url, { redirect: 'error', signal: AbortSignal.timeout(600000) });
-      invariant(response.ok && response.body, `Compiler download failed with HTTP ${response.status}.`);
-      fd = fs.openSync(tmp, 'wx'); let bytes = 0;
-      for await (const chunk of response.body) {
-        bytes += chunk.length; invariant(bytes <= a.size, 'The download exceeded the locked archive size.');
-        let offset = 0;
-        while (offset < chunk.length) offset += fs.writeSync(fd, chunk, offset, chunk.length - offset);
-      }
-      fs.closeSync(fd); fd = undefined; verifyArchive(tmp, a); fs.renameSync(tmp, archive);
-    } finally { if (fd !== undefined) fs.closeSync(fd); if (fs.existsSync(tmp)) fs.unlinkSync(tmp); }
-  }
+  await fetchLockedArchive(archive, a, { name: 'compiler', title: 'Compiler' });
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   const stage = fs.mkdtempSync(path.join(path.dirname(dest), '.extract-'));
   try {

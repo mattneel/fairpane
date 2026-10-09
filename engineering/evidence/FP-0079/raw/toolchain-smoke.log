@@ -1,0 +1,15 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","require('fs').mkdirSync('out/fp0079',{recursive:true});console.log('out/fp0079 ready')"]
+out/fp0079 ready
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","require('fs').mkdirSync('out/fp0079',{recursive:true});console.log('out/fp0079 ready')"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:52:35.500Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","--edition","2024","-C","link-self-contained=yes","-o","out/fp0079/toolchain-smoke.exe","tests/rust/toolchain_smoke.rs"]
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m\\.tools\\rust\\1.99.0\\x86_64-windows\\bin\\rustc.exe","arguments":["--edition","2024","-C","link-self-contained=yes","-o","out/fp0079/toolchain-smoke.exe","tests/rust/toolchain_smoke.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:52:35.592Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":236,"environment_overrides":{"CARGO_HOME":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m\\.tools\\cargo-home"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m\\out\\fp0079\\toolchain-smoke.exe"]
+
+thread 'main' (37644) panicked at tests/rust/toolchain_smoke.rs:6:41:
+fairpane toolchain smoke panic
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+fairpane rust toolchain smoke: thread 42, unwind caught
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m\\out\\fp0079\\toolchain-smoke.exe","arguments":[],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:52:35.879Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":64}

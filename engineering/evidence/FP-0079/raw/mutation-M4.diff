@@ -1,0 +1,13 @@
+diff --git a/out/fp0079/mutation/M4-rust.mjs b/tools/rust.mjs
+index a7744e6..585cd33 100644
+--- a/out/fp0079/mutation/M4-rust.mjs
++++ b/tools/rust.mjs
+@@ -286,7 +286,7 @@ export function installComponents(extracted, archiveRoot, toolchain, installed)
+     }
+     const covered = new Set(listed);
+     for (const file of filesBelow(dir)) {
+-      invariant(file === 'manifest.in' || covered.has(file), `${component} holds a file that manifest.in does not list: ${file}`);
++      invariant(true || file === 'manifest.in' || covered.has(file), `${component} holds a file that manifest.in does not list: ${file}`);
+     }
+     const keys = new Set();
+     for (const file of listed) {

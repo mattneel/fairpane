@@ -5,7 +5,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { readJson, checkRepository, readyTasks, qualificationProblems, fingerprints,
-  validateReceipt, runGate, recordCommand, installZig, compilerPath, checkCompiler, safePath } from './lib.mjs';
+  validateReceipt, runGate, recordCommand, installZig, compilerPath, checkCompiler, safePath, sha256 } from './lib.mjs';
+import { checkRust, installRust, rustcPath, rustLockProblems } from './rust.mjs';
 import { corpusCommand } from './corpus.mjs';
 import { AttestationError, candidateIdentity, candidateRepository, enclosingGitDirectories, isInside, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
 import { abiCheck, abiExports, abiGenerate } from './abi.mjs';
@@ -32,6 +33,8 @@ function help() {
   next                        Print ready task contracts.
   fingerprint                 Hash current source and policy inputs.
   install-zig                 Install the exact locked compiler locally.
+  install-rust                Install the exact locked Rust toolchain locally.
+  rust-lock-verify <manifest> Compare the Rust lock with a channel manifest file.
   run <gate-id> [--evidence-dir <dir>]
                               Execute a gate and write a local receipt.
   record [--cwd <dir>] [--env NAME=VALUE]... <log> <executable> [arguments...]
@@ -86,10 +89,14 @@ try {
     let compiler;
     try { compiler = { available: true, path: checkCompiler(root), version: load('toolchains/zig.lock.json').version }; }
     catch (e) { compiler = { available: false, error: e.message, expected_path: compilerPath(root) }; }
+    let rust;
+    try { rust = { available: true, path: checkRust(root), version: load('toolchains/rust.lock.json').version }; }
+    catch (e) { rust = { available: false, error: e.message, expected_path: rustcPath(root) }; }
     output({ platform: process.platform, architecture: process.arch, os_release: os.release(), os_version: os.version(),
       runtime: process.version, controller_bun: process.versions.bun ?? null, bun: versionOf('bun'),
-      git: versionOf('git'), omp: versionOf(process.platform === 'win32' ? 'omp.exe' : 'omp'), compiler,
+      git: versionOf('git'), omp: versionOf(process.platform === 'win32' ? 'omp.exe' : 'omp'), compiler, rust,
       path_zig: { ...versionOf('zig', ['version']), note: 'Gates never use a compiler from PATH.' },
+      path_rustc: { ...versionOf('rustc', ['-V']), note: 'Gates never use a Rust toolchain from PATH.' },
       git_checkout: fs.existsSync(path.join(root, '.git')),
       note: 'No conformance test ran. On Windows, check an OMP shell shim with omp --version in PowerShell.' });
   } else if (command === 'check') output(checkRepository(root));
@@ -120,7 +127,14 @@ try {
   else if (command === 'ucd-check') {
     const r = ucdCheck(root); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
   } else if (command === 'install-zig') output(await installZig(root));
-  else if (command === 'run') {
+  else if (command === 'install-rust') output(await installRust(root));
+  else if (command === 'rust-lock-verify') {
+    if (args.length !== 1) throw new Error('Usage: rust-lock-verify <repository-relative manifest path>');
+    const bytes = fs.readFileSync(safePath(root, args[0]));
+    const problems = rustLockProblems(load('toolchains/rust.lock.json'), bytes);
+    output({ result: problems.length ? 'fail' : 'pass', manifest_sha256: sha256(bytes), problems });
+    process.exitCode = problems.length ? 1 : 0;
+  } else if (command === 'run') {
     const rest = [...args], at = rest.indexOf('--evidence-dir');
     const evidenceDir = at === -1 ? undefined : rest.splice(at, 2)[1];
     if (rest.length !== 1 || (at !== -1 && !evidenceDir)) throw new Error('Usage: run <gate-id> [--evidence-dir <approved-relative-dir>]');

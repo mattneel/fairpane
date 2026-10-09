@@ -41,7 +41,8 @@ External conformance harness dependencies remain isolated from the renderer pack
 Rust is the first-party wrapper language and the browser-shell language, as ADR 0004 records.
 The initial pin is stable Rust 1.99.0, released on October 1, 2026.
 `toolchains/rust.lock.json` records the exact toolchain version and the digests of its official artifacts.
-A `rust-toolchain.toml` file selects that exact version for every Cargo command.
+`rust-toolchain.toml` names that exact version, so a rustup user's Cargo commands select it.
+The repository's commands run the locked toolchain by path, never a Rust toolchain from `PATH`.
 Rust nightly needs a specific feature and its own qualification case.
 A Rust toolchain upgrade follows the same separate-branch procedure as a Zig compiler upgrade.
 
@@ -50,6 +51,22 @@ The browser application commits its `Cargo.lock` and upgrades crates through rev
 Each application crate addition or upgrade passes license, advisory, source, ban, and duplicate checks across every declared target configuration, including build dependencies.
 The application adopts the newest qualified, compatible stack, not the independently newest version of every package.
 A minimal Rust consumer builds the wrapper outside the browser workspace, so workspace feature unification cannot hide a wrapper defect.
+
+## Rust installation
+
+`node tools/fairpane.mjs install-rust` installs the locked toolchain under `.tools/rust/<version>/<platform>`.
+It downloads each locked component archive from `static.rust-lang.org` and checks its size and SHA-256 before extraction.
+It reads each archive with a first-party gzip and tar reader, which accepts only regular files, directories, and GNU long names inside the archive root.
+It installs exactly the files that each component's `manifest.in` lists.
+It checks the version, commit, and host of the staged `rustc` before it moves the toolchain into place.
+It never runs rustup, changes `PATH`, or writes outside `.tools`.
+On Windows, the locked host is `x86_64-pc-windows-gnu`, as ADR 0010 records.
+
+The lock records the SHA-256 of the official channel manifest, `https://static.rust-lang.org/dist/channel-rust-<version>.toml`.
+Each component digest in the lock equals that component's `hash` value in the manifest.
+The Rust build infrastructure signs the manifest with the Rust signing key, whose primary fingerprint is `108F 6620 5EAE B0AA A8DD 5E1C 85AB 96E6 FA1B E5FE`.
+A lock change records a GnuPG verification of that signature and a `rust-lock-verify` run in its evidence.
+The installer checks the locked digests, not the signature, so it trusts the reviewed lock as `install-zig` trusts the Zig lock.
 
 ## Upgrade procedure
 

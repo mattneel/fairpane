@@ -21,6 +21,8 @@ It does not publish code, change approval settings, or choose an account identit
 | `status` | Reports task and capability state. |
 | `fingerprint` | Hashes declared source and policy inventories. |
 | `install-zig` | Downloads and checks the exact locked compiler in a local directory. |
+| `install-rust` | Downloads and checks the exact locked Rust toolchain components in a local directory. |
+| `rust-lock-verify <manifest>` | Exits with status 1 when a channel manifest file's digest or component entries differ from `toolchains/rust.lock.json`. |
 | `run <gate-id> [--evidence-dir <dir>]` | Executes a gate without a command shell and writes its receipt. |
 | `record [--cwd <dir>] [--env NAME=VALUE]... <log> <executable> [arguments...]` | Runs one command without a shell and appends its output and result to an evidence log. |
 | `evidence-check <path>` | Checks a passed receipt against current inputs and output artifacts. |
@@ -149,6 +151,7 @@ Those receipts remain unsigned local integrity records, and a hosted runner is n
 A pull request runs its own copy of the workflow, the checker, and the controller.
 A green check on a pull request therefore enforces nothing independently of that pull request.
 `install-zig` also accepts an existing compiler directory after only a version check, so a pull request that adds one controls the compiler.
+`install-rust` also accepts an existing toolchain directory after only a version check.
 
 `tools/workflow-check.mjs` checks the workflow policy without a YAML package.
 It accepts only printable ASCII text with LF or CRLF line ends, because YAML parsers also break lines at NEL, LS, and PS.

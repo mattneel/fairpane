@@ -1,0 +1,9 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');const lock=JSON.parse(fs.readFileSync('toolchains/rust.lock.json','utf8'));const targets=['.tools/rust/1.99.0/x86_64-windows',...lock.platforms['x86_64-windows'].components.map(c=>'.tools/downloads/'+c.url.split('/').pop())];for(const t of targets){const existed=fs.existsSync(t);fs.rmSync(t,{recursive:true,force:true});console.log(t+(existed?' removed':' absent'));}"]
+.tools/rust/1.99.0/x86_64-windows absent
+.tools/downloads/rustc-1.99.0-x86_64-pc-windows-gnu.tar.gz absent
+.tools/downloads/cargo-1.99.0-x86_64-pc-windows-gnu.tar.gz absent
+.tools/downloads/rust-std-1.99.0-x86_64-pc-windows-gnu.tar.gz absent
+.tools/downloads/rust-mingw-1.99.0-x86_64-pc-windows-gnu.tar.gz absent
+.tools/downloads/rustfmt-1.99.0-x86_64-pc-windows-gnu.tar.gz absent
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');const lock=JSON.parse(fs.readFileSync('toolchains/rust.lock.json','utf8'));const targets=['.tools/rust/1.99.0/x86_64-windows',...lock.platforms['x86_64-windows'].components.map(c=>'.tools/downloads/'+c.url.split('/').pop())];for(const t of targets){const existed=fs.existsSync(t);fs.rmSync(t,{recursive:true,force:true});console.log(t+(existed?' removed':' absent'));}"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:49:48.271Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}

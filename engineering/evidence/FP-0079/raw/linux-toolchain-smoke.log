@@ -1,0 +1,11 @@
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","-e","bash","-c","cd \"$HOME/fairpane-linux/work/FP-0079\" && mkdir -p out/fp0079 && CARGO_HOME=\"$PWD/.tools/cargo-home\" exec .tools/rust/1.99.0/x86_64-linux/bin/rustc --edition 2024 -o out/fp0079/toolchain-smoke-linux tests/rust/toolchain_smoke.rs"]
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","cd \"$HOME/fairpane-linux/work/FP-0079\" && mkdir -p out/fp0079 && CARGO_HOME=\"$PWD/.tools/cargo-home\" exec .tools/rust/1.99.0/x86_64-linux/bin/rustc --edition 2024 -o out/fp0079/toolchain-smoke-linux tests/rust/toolchain_smoke.rs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:26.234Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":235}
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","-e","bash","-c","cd \"$HOME/fairpane-linux/work/FP-0079\" && exec out/fp0079/toolchain-smoke-linux"]
+
+thread 'main' (22739) panicked at tests/rust/toolchain_smoke.rs:6:41:
+fairpane toolchain smoke panic
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+fairpane rust toolchain smoke: thread 42, unwind caught
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","cd \"$HOME/fairpane-linux/work/FP-0079\" && exec out/fp0079/toolchain-smoke-linux"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:26.529Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":81}

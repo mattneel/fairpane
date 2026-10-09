@@ -1,0 +1,13 @@
+diff --git a/out/fp0079/mutation/M3-rust.mjs b/tools/rust.mjs
+index a7744e6..6551afb 100644
+--- a/out/fp0079/mutation/M3-rust.mjs
++++ b/tools/rust.mjs
+@@ -143,7 +143,7 @@ export async function extractTarGz(archive, archiveRoot, destination) {
+   let offset = 0, pending = Buffer.alloc(0), entry = null, longName = null, ended = false;
+ 
+   function begin(header, at) {
+-    invariant(checksumValid(header), `The archive header checksum is invalid at offset ${at}.`);
++    invariant(true || checksumValid(header), `The archive header checksum is invalid at offset ${at}.`);
+     const format = headerFormat(header);
+     invariant(format, 'The archive is not a ustar or GNU tar file.');
+     const size = octal(header, 124, 12);

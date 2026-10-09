@@ -1,0 +1,100 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0079/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0079/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M1","toolchains/rust.lock.json","\"sha256\": \"3c7bad76bebfda385cc1061c1f0b625b02c212dcca5ea70b7bc6773153e6f15c\"","\"sha256\": \"3c7bad76bebfda385cc1061c1f0b625b02c212dcca5ea70b7bc6773153e6f15d\""]
+M1: mutated toolchains/rust.lock.json; original kept at out/fp0079/mutation/M1-rust.lock.json
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0079/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0079/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M1","toolchains/rust.lock.json","\"sha256\": \"3c7bad76bebfda385cc1061c1f0b625b02c212dcca5ea70b7bc6773153e6f15c\"","\"sha256\": \"3c7bad76bebfda385cc1061c1f0b625b02c212dcca5ea70b7bc6773153e6f15d\""],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:49.728Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0079/raw/mutation-M1.diff","--","out/fp0079/mutation/M1-rust.lock.json","toolchains/rust.lock.json"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0079/raw/mutation-M1.diff","--","out/fp0079/mutation/M1-rust.lock.json","toolchains/rust.lock.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:49.815Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","rust-lock-verify","engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml"]
+{
+  "result": "fail",
+  "manifest_sha256": "ce6dddc886364f8d786514771212cebe9b731ba82d6b859951c6b0ccc516b6a2",
+  "problems": [
+    "The manifest hash of rustc for x86_64-pc-windows-gnu differs from the lock."
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","rust-lock-verify","engineering/evidence/FP-0079/raw/provenance/channel-rust-1.99.0.toml"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:49.882Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":75}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),crypto=require('crypto');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);const h=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');if(h(keep)!==h(f))throw new Error('restore failed');console.log('restored '+f+' sha256 '+h(f));","out/fp0079/mutation/M1-rust.lock.json","toolchains/rust.lock.json"]
+restored toolchains/rust.lock.json sha256 95221244b4d8c2394c2e2b3fc5bf0cf913eddfd8f521f67a4486bf0995543ab7
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),crypto=require('crypto');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);const h=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');if(h(keep)!==h(f))throw new Error('restore failed');console.log('restored '+f+' sha256 '+h(f));","out/fp0079/mutation/M1-rust.lock.json","toolchains/rust.lock.json"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:50.005Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0079/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0079/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M2","rust-toolchain.toml","channel = \"1.99.0\"","channel = \"1.98.1\""]
+M2: mutated rust-toolchain.toml; original kept at out/fp0079/mutation/M2-rust-toolchain.toml
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0079/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0079/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M2","rust-toolchain.toml","channel = \"1.99.0\"","channel = \"1.98.1\""],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:50.087Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0079/raw/mutation-M2.diff","--","out/fp0079/mutation/M2-rust-toolchain.toml","rust-toolchain.toml"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0079/raw/mutation-M2.diff","--","out/fp0079/mutation/M2-rust-toolchain.toml","rust-toolchain.toml"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:50.167Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","check"]
+Fairpane: rust-toolchain.toml names 1.98.1, but the lock pins 1.99.0.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","check"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:50.234Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":49}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),crypto=require('crypto');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);const h=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');if(h(keep)!==h(f))throw new Error('restore failed');console.log('restored '+f+' sha256 '+h(f));","out/fp0079/mutation/M2-rust-toolchain.toml","rust-toolchain.toml"]
+restored rust-toolchain.toml sha256 a9453f290d86e43d088083f397d72e0b1e143a6d3ebf0cec36a311e0917dfc1c
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),crypto=require('crypto');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);const h=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');if(h(keep)!==h(f))throw new Error('restore failed');console.log('restored '+f+' sha256 '+h(f));","out/fp0079/mutation/M2-rust-toolchain.toml","rust-toolchain.toml"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:50.331Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":35}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0079/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0079/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M3","tools/rust.mjs","invariant(checksumValid(header), ","invariant(true || checksumValid(header), "]
+M3: mutated tools/rust.mjs; original kept at out/fp0079/mutation/M3-rust.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0079/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0079/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M3","tools/rust.mjs","invariant(checksumValid(header), ","invariant(true || checksumValid(header), "],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:50.417Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0079/raw/mutation-M3.diff","--","out/fp0079/mutation/M3-rust.mjs","tools/rust.mjs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0079/raw/mutation-M3.diff","--","out/fp0079/mutation/M3-rust.mjs","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:50.502Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+not ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+  ---
+  message: "Missing expected rejection."
+  ...
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+1..10
+# tests 10
+# pass 9
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:50.572Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":875}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),crypto=require('crypto');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);const h=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');if(h(keep)!==h(f))throw new Error('restore failed');console.log('restored '+f+' sha256 '+h(f));","out/fp0079/mutation/M3-rust.mjs","tools/rust.mjs"]
+restored tools/rust.mjs sha256 df10e33352e65175aa7d91605398db06a8d4cf2b6148ab5e901055178c782192
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),crypto=require('crypto');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);const h=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');if(h(keep)!==h(f))throw new Error('restore failed');console.log('restored '+f+' sha256 '+h(f));","out/fp0079/mutation/M3-rust.mjs","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:51.500Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":35}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0079/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0079/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M4","tools/rust.mjs","invariant(file === 'manifest.in' || covered.has(file), ","invariant(true || file === 'manifest.in' || covered.has(file), "]
+M4: mutated tools/rust.mjs; original kept at out/fp0079/mutation/M4-rust.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0079/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0079/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M4","tools/rust.mjs","invariant(file === 'manifest.in' || covered.has(file), ","invariant(true || file === 'manifest.in' || covered.has(file), "],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:51.586Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0079/raw/mutation-M4.diff","--","out/fp0079/mutation/M4-rust.mjs","tools/rust.mjs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0079/raw/mutation-M4.diff","--","out/fp0079/mutation/M4-rust.mjs","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:51.669Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+not ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+  ---
+  message: "Missing expected exception."
+  ...
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+1..10
+# tests 10
+# pass 9
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:51.740Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":770}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),crypto=require('crypto');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);const h=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');if(h(keep)!==h(f))throw new Error('restore failed');console.log('restored '+f+' sha256 '+h(f));","out/fp0079/mutation/M4-rust.mjs","tools/rust.mjs"]
+restored tools/rust.mjs sha256 df10e33352e65175aa7d91605398db06a8d4cf2b6148ab5e901055178c782192
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),crypto=require('crypto');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);const h=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');if(h(keep)!==h(f))throw new Error('restore failed');console.log('restored '+f+' sha256 '+h(f));","out/fp0079/mutation/M4-rust.mjs","tools/rust.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\ta23d1da82\\m","started_at":"2026-10-09T12:55:52.560Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}

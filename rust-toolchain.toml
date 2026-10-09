@@ -1,0 +1,6 @@
+# The repository's commands run the toolchain that node tools/fairpane.mjs install-rust installs, never one from PATH.
+# This file names the version in toolchains/rust.lock.json for a developer who uses rustup.
+[toolchain]
+channel = "1.99.0"
+profile = "minimal"
+components = ["rustfmt"]
