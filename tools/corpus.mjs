@@ -32,10 +32,16 @@ function corpusRule(id) {
   invariant(typeof id === 'string' && Object.hasOwn(CORPUS_RULES, id), `No snapshot rule exists for corpus ${id}. Supported: ${Object.keys(CORPUS_RULES).join(', ')}.`);
   return CORPUS_RULES[id];
 }
-function corpusPolicy(policyFile, id) {
+/**
+ * Corpus upstreams are HTTPS Git URLs. Controller tests pass `allowFileUpstream` to fetch from local `file://` fixture repositories;
+ * no controller command sets it.
+ */
+const upstreamAllowed = (upstream, allowFileUpstream) => typeof upstream === 'string' &&
+  (upstream.startsWith('https://') || (allowFileUpstream === true && upstream.startsWith('file://')));
+function corpusPolicy(policyFile, id, allowFileUpstream = false) {
   const entry = readJson(policyFile).corpora.find(c => c.id === id);
   invariant(entry, `The corpus policy does not list corpus ${id}.`);
-  invariant(typeof entry.upstream === 'string' && entry.upstream.startsWith('https://'), `Corpus ${id} has no HTTPS Git upstream.`);
+  invariant(upstreamAllowed(entry.upstream, allowFileUpstream), `Corpus ${id} has no HTTPS Git upstream.`);
   return entry;
 }
 const recordRelative = id => `specs/snapshots/${id}.json`;
@@ -252,18 +258,28 @@ function walkManifest(manifest, visit) {
     }
   }
 }
-/** Require every manifest path to exist in the pinned tree with the manifest hash as its Git blob ID. */
+/**
+ * Upstream assigns the "test262" type to every ".js" file with a "test262" directory component, not only to the vendored copy.
+ * Only the vendored Test262 copy under third_party/test262/ stays outside WPT discovery; "spec" and "support" items are not tests.
+ */
+const WPT_NOT_TESTS = new Set(['spec', 'support']);
+const WPT_VENDORED_TEST262_DIR = 'third_party/test262/';
+const isVendoredTest262 = (type, file) => type === 'test262' && file.startsWith(WPT_VENDORED_TEST262_DIR);
+const isWptTest = (type, file) => !WPT_NOT_TESTS.has(type) && !isVendoredTest262(type, file);
+/** Require every manifest path to exist in the pinned tree with the manifest hash as its Git blob ID, and require at least one test item. */
 export function bindWptManifest(manifest, entries) {
   const tree = new Map(entries.map(e => [e.path.toString('latin1'), e])), problems = [];
-  let paths = 0;
-  walkManifest(manifest, (_, file, leaf) => {
+  let paths = 0, tests = 0;
+  walkManifest(manifest, (type, file, leaf) => {
     paths++;
+    if (isWptTest(type, file)) tests += leaf.length - 1;
     const e = tree.get(Buffer.from(file, 'utf8').toString('latin1'));
     if (!e) problems.push(`${file}: the pinned tree has no such path`);
     else if (e.type !== 'blob') problems.push(`${file}: the pinned tree entry is a ${e.type}, not a blob`);
     else if (leaf[0] !== e.oid) problems.push(`${file}: the manifest hash ${JSON.stringify(leaf[0])} differs from blob ${e.oid}`);
   });
   invariant(problems.length === 0, `The WPT manifest does not match the pinned tree at ${problems.length} paths:\n- ${problems.slice(0, 20).join('\n- ')}`);
+  invariant(tests > 0, `The WPT manifest has no test items in its ${paths} file entries.`);
   return { paths };
 }
 /** Read a stored manifest and bind it to the pinned tree. */
@@ -276,7 +292,7 @@ function loadWptManifest(file, entries) {
   return { manifest, size: bytes.length, sha256: sha256(bytes) };
 }
 
-export async function buildSnapshotRecord(gitDir, { corpus, upstream, ref, commit, retrieved_at }, { manifestFile } = {}) {
+export async function buildSnapshotRecord(gitDir, { corpus, upstream, ref, commit, retrieved_at }, { manifestFile, allowFileUpstream = false } = {}) {
   const rule = corpusRule(corpus), { tree, commit_date } = await commitObject(gitDir, commit);
   const entries = await listTree(gitDir, commit);
   const record = { schema_version: 1, corpus, upstream, ref, commit, tree, commit_date, retrieved_at,
@@ -286,14 +302,14 @@ export async function buildSnapshotRecord(gitDir, { corpus, upstream, ref, commi
     const m = loadWptManifest(manifestFile, entries);
     record.manifest = { url: wptManifestUrl(commit), size: m.size, sha256: m.sha256 };
   }
-  validateSnapshotRecord(record);
+  validateSnapshotRecord(record, { allowFileUpstream });
   return record;
 }
 
-export function validateSnapshotRecord(r) {
+export function validateSnapshotRecord(r, { allowFileUpstream = false } = {}) {
   invariant(r?.schema_version === 1, 'The snapshot record schema is invalid.');
   invariant(typeof r.corpus === 'string' && /^[a-z0-9][a-z0-9-]*$/.test(r.corpus), 'The snapshot record needs a corpus ID.');
-  invariant(typeof r.upstream === 'string' && r.upstream.startsWith('https://'), 'The snapshot record needs an HTTPS upstream.');
+  invariant(upstreamAllowed(r.upstream, allowFileUpstream), 'The snapshot record needs an HTTPS upstream.');
   invariant(typeof r.ref === 'string' && /^refs\/heads\/[^\s~^:?*[\\]+$/.test(r.ref), 'The snapshot record needs an upstream branch ref.');
   invariant(typeof r.commit === 'string' && OID.test(r.commit), 'The snapshot commit must be 40 lowercase hex digits.');
   invariant(typeof r.tree === 'string' && OID.test(r.tree), 'The snapshot tree must be 40 lowercase hex digits.');
@@ -331,6 +347,7 @@ export function validateApplicability(a) {
     invariant(typeof x.reason === 'string' && x.reason.trim().length > 0, `The exclusion ${x.path} has no reason.`);
   }
   for (const field of ['discovered', 'selected', 'unclassified']) invariant(isCount(a[field]), `Applicability ${field} must be a nonnegative integer.`);
+  invariant(a.discovered > 0, 'Applicability has zero discovered tests, so it has no denominator.');
   invariant(a.selected + a.excluded.length + a.unclassified === a.discovered, 'Applicability counts are inconsistent: selected + excluded + unclassified must equal discovered.');
   invariant(typeof a.breakdown?.by === 'string' && a.breakdown.counts && typeof a.breakdown.counts === 'object', 'Applicability needs a count breakdown.');
   const parts = Object.values(a.breakdown.counts);
@@ -342,6 +359,7 @@ export function validateApplicability(a) {
 // Applicability discovery.
 const TEST_PREFIX = Buffer.from('test/'), JS_SUFFIX = Buffer.from('.js'), FIXTURE_MARK = Buffer.from('_FIXTURE');
 const endsWith = (b, s) => b.length >= s.length && b.subarray(b.length - s.length).equals(s);
+const sortedKeys = object => Object.fromEntries(Object.entries(object).sort(([a], [b]) => Buffer.compare(Buffer.from(a), Buffer.from(b))));
 export function test262Applicability(commit, entries) {
   const counts = {};
   let discovered = 0;
@@ -352,30 +370,54 @@ export function test262Applicability(commit, entries) {
     const key = slash === -1 ? '.' : rest.subarray(0, slash).toString('utf8');
     counts[key] = (counts[key] ?? 0) + 1; discovered++;
   }
-  const sorted = Object.fromEntries(Object.entries(counts).sort(([a], [b]) => Buffer.compare(Buffer.from(a), Buffer.from(b))));
   return { schema_version: 1, corpus: 'test262', commit, status: 'counted',
     discovery: { rule: TEST262_RULE, command: 'node tools/fairpane.mjs corpus-applicability test262' },
     discovered, selected: 0, excluded: [], unclassified: discovered,
-    breakdown: { by: 'top-level directory under test/', counts: sorted } };
+    breakdown: { by: 'top-level directory under test/', counts: sortedKeys(counts) } };
 }
 
-const WPT_NOT_TESTS = new Set(['spec', 'support', 'test262']);
-const WPT_VENDORED_TEST262 = 'third_party/test262/vendored.toml';
+const WPT_VENDORED_TEST262 = `${WPT_VENDORED_TEST262_DIR}vendored.toml`;
+/** What each top-level directory of the vendored Test262 copy holds, as Test262 itself uses it. */
+const WPT_VENDORED_TEST262_CONTENT = Object.freeze({
+  [`${WPT_VENDORED_TEST262_DIR}harness/`]: 'Test262 harness includes, not tests',
+  [`${WPT_VENDORED_TEST262_DIR}test/`]: 'Test262 tests',
+});
 export const WPT_RULE = 'Read the manifest that wpt.fyi publishes for the pinned commit after binding every manifest path and hash to the Git blob IDs of the pinned tree. ' +
   'Count the items of each manifest item type; each file entry contributes its array length minus one, because the first element is the file hash and each other element is one test URL. ' +
-  'Discovered tests are the items of every type except "spec", "support", and "test262". ' +
-  `The record reports "test262" items separately, with the vendored Test262 revision from ${WPT_VENDORED_TEST262}.`;
+  `Discovered tests are the items of every type except "spec" and "support", minus the "test262" items whose path starts with "${WPT_VENDORED_TEST262_DIR}", the vendored Test262 copy. ` +
+  'Upstream assigns the "test262" type to every ".js" file with a "test262" directory component, so "test262" items elsewhere, such as the WPT tests under "infrastructure/test262/", count in discovery. ' +
+  `The record reports the vendored "test262" items separately, counted by their directory under "${WPT_VENDORED_TEST262_DIR}", with the vendored Test262 revision from ${WPT_VENDORED_TEST262}.`;
+/** The vendored-copy directory of a manifest path under third_party/test262/, such as "third_party/test262/test/". */
+function vendoredPrefix(file) {
+  const rest = file.slice(WPT_VENDORED_TEST262_DIR.length), slash = rest.indexOf('/');
+  return slash === -1 ? WPT_VENDORED_TEST262_DIR : `${WPT_VENDORED_TEST262_DIR}${rest.slice(0, slash + 1)}`;
+}
+/** Count manifest items by type, WPT tests by type, and vendored Test262 items by their directory under third_party/test262/. */
 export function wptManifestCounts(manifest) {
-  const items = {};
-  walkManifest(manifest, (type, _, leaf) => { items[type] = (items[type] ?? 0) + leaf.length - 1; });
-  const tests = Object.fromEntries(Object.entries(items).filter(([type]) => !WPT_NOT_TESTS.has(type)));
-  return { item_counts: items, test_counts: tests, discovered: Object.values(tests).reduce((s, n) => s + n, 0) };
+  const items = {}, tests = {}, vendored = {};
+  walkManifest(manifest, (type, file, leaf) => {
+    const n = leaf.length - 1;
+    items[type] = (items[type] ?? 0) + n;
+    if (isWptTest(type, file)) tests[type] = (tests[type] ?? 0) + n;
+    else if (isVendoredTest262(type, file)) { const p = vendoredPrefix(file); vendored[p] = (vendored[p] ?? 0) + n; }
+  });
+  return { item_counts: items, test_counts: tests, discovered: Object.values(tests).reduce((s, n) => s + n, 0), vendored_test262: sortedKeys(vendored) };
 }
 async function vendoredTest262(gitDir, entries) {
   const text = (await regularFile(gitDir, entries, WPT_VENDORED_TEST262)).toString('utf8');
   const source = /^source = "([^"\r\n]+)"\r?$/m.exec(text)?.[1], revision = /^rev = "([0-9a-f]{40})"\r?$/m.exec(text)?.[1];
   invariant(source && revision, `${WPT_VENDORED_TEST262} does not state a source and a 40-hex rev.`);
   return { path: WPT_VENDORED_TEST262, source, revision };
+}
+/** The vendored Test262 items, which stay outside WPT discovery. The vendored revision describes only these items. */
+async function vendoredTest262Report(gitDir, entries, byPrefix) {
+  const prefixes = Object.entries(byPrefix);
+  if (prefixes.length === 0) return {};
+  return { test262: { path: WPT_VENDORED_TEST262_DIR, items: prefixes.reduce((s, [, n]) => s + n, 0),
+    by_prefix: Object.fromEntries(prefixes.map(([p, items]) => [p, { items, content: WPT_VENDORED_TEST262_CONTENT[p] ?? 'Other files of the vendored Test262 copy' }])),
+    vendored: await vendoredTest262(gitDir, entries),
+    reason: `Fairpane runs Test262 from its own pinned test262 corpus, so the vendored copy under ${WPT_VENDORED_TEST262_DIR} stays outside the WPT denominator. ` +
+      'Every other "test262" item is a WPT test and counts in discovery.' } };
 }
 async function wptApplicability(gitDir, record, entries, loaded) {
   const counts = wptManifestCounts(loaded.manifest);
@@ -384,25 +426,24 @@ async function wptApplicability(gitDir, record, entries, loaded) {
     manifest: { url: record.manifest.url, size: loaded.size, sha256: loaded.sha256, version: loaded.manifest.version, item_counts: counts.item_counts },
     discovered: counts.discovered, selected: 0, excluded: [], unclassified: counts.discovered,
     breakdown: { by: 'WPT manifest item type', counts: counts.test_counts },
-    reported_separately: { test262: { items: counts.item_counts.test262 ?? 0, vendored: await vendoredTest262(gitDir, entries),
-      reason: 'Fairpane runs Test262 from its own pinned test262 corpus, so the vendored WPT copy stays outside the WPT denominator.' } } };
+    reported_separately: await vendoredTest262Report(gitDir, entries, counts.vendored_test262) };
 }
 async function discover(id, gitDir, record, entries, manifest) {
   return id === 'test262' ? test262Applicability(record.commit, entries) : wptApplicability(gitDir, record, entries, manifest);
 }
 
 // Controller commands.
-function readRecord(root, id) {
+function readRecord(root, id, allowFileUpstream) {
   const file = recordPath(root, id);
   invariant(fs.existsSync(file), `Missing snapshot record: ${recordRelative(id)}`);
   const record = readJson(file);
-  validateSnapshotRecord(record);
+  validateSnapshotRecord(record, { allowFileUpstream });
   invariant(record.corpus === id, `The snapshot record names corpus ${record.corpus}, not ${id}.`);
   return record;
 }
-async function loadSnapshot(root, id, corporaDir) {
+async function loadSnapshot(root, id, corporaDir, allowFileUpstream) {
   corpusRule(id);
-  const record = readRecord(root, id), gitDir = snapshotGitDir(corporaDir, id);
+  const record = readRecord(root, id, allowFileUpstream), gitDir = snapshotGitDir(corporaDir, id);
   invariant(fs.existsSync(path.join(gitDir, 'HEAD')), `Missing snapshot: ${gitDir}`);
   return { record, gitDir };
 }
@@ -429,23 +470,24 @@ async function resolveHead(upstream) {
 }
 /**
  * Fetch `commit` into a fresh repository beside the snapshot, build and check its record, and only then replace the snapshot.
- * Every fetched object passes `transfer.fsckObjects`, because the new repository starts empty.
+ * The new repository starts empty, so `fetch.fsckObjects` and `transfer.fsckObjects` check every fetched object.
+ * Setting both keeps a `fetch.fsckObjects=false` from user or system configuration from disabling those checks.
  */
-async function replaceSnapshot(root, id, { upstream, ref, commit, corporaDir, check }) {
+async function replaceSnapshot(root, id, { upstream, ref, commit, corporaDir, check, allowFileUpstream }) {
   const target = path.join(corporaDir, id), staging = path.join(corporaDir, `${id}.fetch`), old = path.join(corporaDir, `${id}.old`);
   const gitDir = path.join(staging, 'repository.git');
   fs.rmSync(staging, { recursive: true, force: true, maxRetries: 3 });
   fs.mkdirSync(gitDir, { recursive: true });
   try {
     await gitVisible(null, ['init', '--bare', '--quiet', gitDir], LOCAL_TIMEOUT_MS);
-    await gitVisible(gitDir, ['-c', 'transfer.fsckObjects=true', '-c', 'protocol.version=2', 'fetch', '--depth=1', '--no-tags',
+    await gitVisible(gitDir, ['-c', 'fetch.fsckObjects=true', '-c', 'transfer.fsckObjects=true', '-c', 'protocol.version=2', 'fetch', '--depth=1', '--no-tags',
       '--no-write-fetch-head', upstream, `+${commit}:${ref}`], NETWORK_TIMEOUT_MS);
     const retrieved_at = new Date().toISOString();
     const fetched = (await git(gitDir, ['rev-parse', '--verify', `${ref}^{commit}`])).toString('latin1').trim();
     invariant(fetched === commit, `The fetch produced ${fetched}, not the requested commit ${commit}.`);
     let manifestFile;
     if (corpusRule(id).manifest) await downloadWptManifest(commit, (manifestFile = path.join(staging, 'MANIFEST.json')));
-    const record = await buildSnapshotRecord(gitDir, { corpus: id, upstream, ref, commit, retrieved_at }, { manifestFile });
+    const record = await buildSnapshotRecord(gitDir, { corpus: id, upstream, ref, commit, retrieved_at }, { manifestFile, allowFileUpstream });
     const problems = check(record);
     invariant(problems.length === 0, `The fetched snapshot of ${id} does not match its pin, so the existing snapshot stays:\n- ${problems.join('\n- ')}`);
     fs.rmSync(old, { recursive: true, force: true, maxRetries: 3 });
@@ -461,9 +503,9 @@ async function replaceSnapshot(root, id, { upstream, ref, commit, corporaDir, ch
 }
 
 /** Fetch the pinned commit: the `specs/corpora.json` revision, or else the commit of the existing snapshot record. */
-export async function fetchCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root) } = {}) {
+export async function fetchCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false } = {}) {
   corpusRule(id);
-  const policy = corpusPolicy(policyFile, id), recordFile = recordPath(root, id);
+  const policy = corpusPolicy(policyFile, id, allowFileUpstream), recordFile = recordPath(root, id);
   let pins = policy, pinSource = 'specs/corpora.json';
   if (policy.revision == null) {
     invariant(fs.existsSync(recordFile), `Corpus ${id} has no pinned revision and no snapshot record. Run corpus-repin ${id}.`);
@@ -476,17 +518,17 @@ export async function fetchCorpus(root, id, { corporaDir = corporaRoot(root), po
   console.log(`Pinned commit ${pins.revision} from ${pinSource}.`);
   const { ref } = await resolveHead(policy.upstream);
   const { snapshot, record } = await replaceSnapshot(root, id, { upstream: policy.upstream, ref, commit: pins.revision, corporaDir,
-    check: r => pinProblems(pins, id, r) });
+    check: r => pinProblems(pins, id, r), allowFileUpstream });
   return { result: 'pass', corpus: id, snapshot, pinned_by: pinSource, record: recordRelative(id), ...record };
 }
 
 /** Move a snapshot to the upstream branch head. The new commit needs a protected `specs/corpora.json` change before verification passes. */
-export async function repinCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root) } = {}) {
+export async function repinCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false } = {}) {
   corpusRule(id);
-  const policy = corpusPolicy(policyFile, id);
+  const policy = corpusPolicy(policyFile, id, allowFileUpstream);
   console.log(`Git: ${gitExecutable()} (${(await git(null, ['--version'])).toString('utf8').trim()})`);
   const head = await resolveHead(policy.upstream);
-  const { snapshot, record } = await replaceSnapshot(root, id, { upstream: policy.upstream, ...head, corporaDir, check: () => [] });
+  const { snapshot, record } = await replaceSnapshot(root, id, { upstream: policy.upstream, ...head, corporaDir, check: () => [], allowFileUpstream });
   const pending = pinProblems(policy, id, record);
   return { result: 'pass', corpus: id, snapshot, record: recordRelative(id), ...record, pin_differences: pending,
     note: `Run corpus-applicability ${id}. ` + (pending.length ? 'corpus-verify fails until a protected change to specs/corpora.json records the new pin.' :
@@ -504,9 +546,9 @@ function missingDenominators(root) {
   return missing;
 }
 
-export async function verifyCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root) } = {}) {
-  const { record, gitDir } = await loadSnapshot(root, id, corporaDir);
-  const policy = corpusPolicy(policyFile, id), problems = [];
+export async function verifyCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false } = {}) {
+  const { record, gitDir } = await loadSnapshot(root, id, corporaDir, allowFileUpstream);
+  const policy = corpusPolicy(policyFile, id, allowFileUpstream), problems = [];
   const expect = (field, recorded, actual) => {
     if (recorded !== actual) problems.push(`${field}: recorded ${JSON.stringify(recorded)}, found ${JSON.stringify(actual)}`);
   };
@@ -552,8 +594,8 @@ async function checkApplicability(root, id, gitDir, record, entries, manifest, p
 }
 
 /** Write `specs/applicability/<id>.json` from the local snapshot. No network access and no corpus code are used. */
-export async function classifyCorpus(root, id, { corporaDir = corporaRoot(root) } = {}) {
-  const { record, gitDir } = await loadSnapshot(root, id, corporaDir);
+export async function classifyCorpus(root, id, { corporaDir = corporaRoot(root), allowFileUpstream = false } = {}) {
+  const { record, gitDir } = await loadSnapshot(root, id, corporaDir, allowFileUpstream);
   await commitObject(gitDir, record.commit);
   const entries = await listTree(gitDir, record.commit);
   let manifest = null;

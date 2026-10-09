@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import {
   readJson, writeJson, sha256, fileHash, safePath, collectFiles, hashInputs,
@@ -463,7 +463,8 @@ function fixtureCommit(gitDir, files, parents = []) {
   const tree = fixtureTree(gitDir, files.map(f => ({ parts: splitPath(Buffer.from(f.path)),
     mode: f.submodule ? '160000' : f.mode ?? '100644', type: f.submodule ? 'commit' : 'blob',
     oid: f.submodule ?? fixtureGit(gitDir, ['hash-object', '-w', '--stdin'], Buffer.from(f.text)) })));
-  return fixtureGit(gitDir, ['commit-tree', tree, '-m', 'fixture', ...parents.flatMap(p => ['-p', p])]);
+  return fixtureGit(gitDir, ['-c', 'user.name=Fairpane Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false',
+    'commit-tree', tree, '-m', 'fixture', ...parents.flatMap(p => ['-p', p])]);
 }
 const inventoryLine = (mode, text, p) =>
   Buffer.concat([Buffer.from(`${mode}\t${sha256(Buffer.from(text))}\t${Buffer.byteLength(text)}\t`), Buffer.from(p), Buffer.from('\n')]);
@@ -545,7 +546,7 @@ const wptManifest = oid => ({ items: {
 /** A counted record for the corpus that a fixture does not snapshot, so every applicability record has a denominator. */
 function otherApplicability(dir, id) {
   writeJson(path.join(dir, 'specs/applicability', `${id}.json`), { schema_version: 1, corpus: id, commit: 'a'.repeat(40), status: 'counted',
-    discovery: { rule: 'Fixture rule.' }, discovered: 0, selected: 0, excluded: [], unclassified: 0, breakdown: { by: 'fixture', counts: {} } });
+    discovery: { rule: 'Fixture rule.' }, discovered: 1, selected: 0, excluded: [], unclassified: 1, breakdown: { by: 'fixture', counts: { fixture: 1 } } });
 }
 /** A fixture repository root with a snapshot of corpus `id`, its snapshot record, and its applicability record. */
 async function corpusFixture(id, files, { manifest } = {}) {
@@ -729,6 +730,137 @@ test('Test262 discovery excludes a file named a_FIXTURE_b.js and a file named x_
     { path: 'test/language/x_FIXTURE.js', text: 'x;\n' }, { path: 'test/language/y.js', text: 'y;\n' }]);
   const a = test262Applicability(c, await listTree(g, c));
   assert.equal(a.discovered, 1); assert.deepEqual(a.breakdown.counts, { language: 1 });
+});
+/** WPT fixture files with `test262` items in the vendored copy's tests, its harness includes, and WPT's own `infrastructure/test262/`. */
+const WPT_TEST262_FILES = [...WPT_FILES, { path: 'third_party/test262/harness/assert.js', text: 'assert\n' },
+  { path: 'infrastructure/test262/basic.js', text: 'basic\n' }];
+function wptTest262Manifest(oid) {
+  const m = wptManifest(oid);
+  m.items.test262.third_party.test262.harness = { 'assert.js': [oid('third_party/test262/harness/assert.js'), ['third_party/test262/harness/assert.test262.html', {}]] };
+  m.items.test262.infrastructure = { test262: { 'basic.js': [oid('infrastructure/test262/basic.js'), ['infrastructure/test262/basic.test262.html', {}]] } };
+  return m;
+}
+test('A fixture manifest with test262 items under the vendored tests, the vendored harness, and infrastructure/test262/ counts only the infrastructure item and reports the others by path', async () => {
+  const f = await corpusFixture('wpt', WPT_TEST262_FILES, { manifest: wptTest262Manifest }), a = f.applicability;
+  assert.deepEqual(a.manifest.item_counts, { manual: 1, reftest: 1, spec: 1, support: 1, test262: 4, testharness: 3 });
+  assert.deepEqual(a.breakdown.counts, { manual: 1, reftest: 1, test262: 1, testharness: 3 });
+  assert.equal(a.discovered, 6); assert.equal(a.unclassified, 6); assert.deepEqual(a.excluded, []);
+  assert.deepEqual(a.reported_separately.test262, {
+    path: 'third_party/test262/', items: 3,
+    by_prefix: {
+      'third_party/test262/harness/': { items: 1, content: 'Test262 harness includes, not tests' },
+      'third_party/test262/test/': { items: 2, content: 'Test262 tests' },
+    },
+    vendored: { path: 'third_party/test262/vendored.toml', source: 'https://github.com/tc39/test262', revision: '7ab7fafa0003f73fc85c1b95d88094d33f7eb8bd' },
+    reason: a.reported_separately.test262.reason,
+  });
+  assert.match(a.reported_separately.test262.reason, /third_party\/test262\//);
+  assert.ok(!JSON.stringify(a.reported_separately).includes('infrastructure'), 'The WPT-authored test262 item is not attributed to the vendored copy.');
+  assert.match(a.discovery.rule, /infrastructure\/test262\//);
+  assert.equal((await f.verify()).result, 'pass');
+});
+test('A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation', async () => {
+  const f = await corpusFixture('wpt', WPT_FILES, { manifest: wptManifest });
+  const entries = await listTree(f.g, f.commit), good = readJson(f.manifestFile);
+  // Support, spec, and vendored test262 items are not tests, so a manifest with only those items has no denominator.
+  const notTests = { ...good, items: { spec: good.items.spec, support: good.items.support, test262: good.items.test262 } };
+  for (const m of [{ items: {}, url_base: '/', version: 9 }, notTests])
+    assert.throws(() => corpus.bindWptManifest(m, entries), /The WPT manifest has no test items/);
+  fs.writeFileSync(f.manifestFile, JSON.stringify(notTests));
+  writeJson(f.recordFile, { ...f.record, manifest: { ...f.record.manifest, size: fs.statSync(f.manifestFile).size, sha256: fileHash(f.manifestFile) } });
+  await assert.rejects(f.verify, /manifest: The WPT manifest has no test items/);
+  await assert.rejects(() => classifyCorpus(f.dir, 'wpt', { corporaDir: f.corporaDir }), /The WPT manifest has no test items/);
+  const zero = { schema_version: 1, corpus: 'test262', commit: 'a'.repeat(40), status: 'counted', discovery: { rule: 'Fixture rule.' },
+    discovered: 0, selected: 0, excluded: [], unclassified: 0, breakdown: { by: 'directory', counts: {} } };
+  assert.throws(() => validateApplicability(zero), /zero discovered tests/);
+  const g = bareRepo(), c = fixtureCommit(g, [T262_LICENSE, { path: 'test/harness/only_FIXTURE.js', text: 'x;\n' }]);
+  const noTests = test262Applicability(c, await listTree(g, c));
+  assert.equal(noTests.discovered, 0); assert.throws(() => validateApplicability(noTests), /zero discovered tests/);
+});
+/** Paths and SHA-256 digests of every file under `dir`, sorted. */
+function directoryDigest(dir) {
+  const lines = [];
+  const walk = d => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p); else lines.push(`${path.relative(dir, p)}\t${fileHash(p)}`);
+    }
+  };
+  walk(dir);
+  return lines.sort().join('\n');
+}
+/** A local `file://` Test262 upstream whose HEAD is refs/heads/main, with an empty fixture repository root and corpora root. */
+function upstreamFixture() {
+  const upstream = bareRepo(), url = pathToFileURL(upstream).href, dir = temp(), corporaDir = temp();
+  fixtureGit(upstream, ['symbolic-ref', 'HEAD', 'refs/heads/main']);
+  const first = fixtureCommit(upstream, T262_FILES);
+  fixtureGit(upstream, ['update-ref', 'refs/heads/main', first]);
+  const policy = pins => {
+    const p = readJson(path.join(root, 'specs/corpora.json')), file = path.join(temp(), 'corpora.json');
+    Object.assign(p.corpora.find(c => c.id === 'test262'), { upstream: url }, pins);
+    writeJson(file, p); return file;
+  };
+  const move = () => {
+    const next = fixtureCommit(upstream, [T262_LICENSE, { path: 'test/language/a.js', text: 'moved;\n' }, { path: 'test/language/b.js', text: 'b;\n' }], [first]);
+    fixtureGit(upstream, ['update-ref', 'refs/heads/main', next]); return next;
+  };
+  const options = policyFile => ({ corporaDir, policyFile, allowFileUpstream: true });
+  const recordFile = path.join(dir, 'specs/snapshots/test262.json'), snapshot = snapshotGitDir(corporaDir, 'test262');
+  const classify = () => { otherApplicability(dir, 'wpt'); return classifyCorpus(dir, 'test262', { corporaDir, allowFileUpstream: true }); };
+  return { upstream, url, dir, corporaDir, first, policy, move, options, recordFile, snapshot, classify,
+    fetch: policyFile => corpus.fetchCorpus(dir, 'test262', options(policyFile)),
+    verify: policyFile => verifyCorpus(dir, 'test262', options(policyFile)) };
+}
+test('corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves', async () => {
+  const u = upstreamFixture(), moved = u.move(), policyFile = u.policy({ revision: u.first });
+  assert.notEqual(moved, u.first);
+  const r = await u.fetch(policyFile);
+  assert.equal(r.result, 'pass'); assert.equal(r.pinned_by, 'specs/corpora.json');
+  assert.equal(r.commit, u.first); assert.equal(r.ref, 'refs/heads/main'); assert.equal(r.upstream, u.url);
+  assert.equal(fixtureGit(u.snapshot, ['rev-parse', 'refs/heads/main']), u.first);
+  const has = spawnSync('git', ['--git-dir', u.snapshot, 'cat-file', '-e', `${moved}^{commit}`], { env: fixtureEnv, windowsHide: true });
+  assert.notEqual(has.status, 0, 'The snapshot must not contain the moved branch head.');
+  const record = readJson(u.recordFile);
+  assert.equal(record.commit, u.first); assert.equal(record.tree, fixtureGit(u.upstream, ['rev-parse', `${u.first}^{tree}`]));
+  for (const [k, v] of Object.entries(record)) assert.deepEqual(r[k], v, `The command result and the record differ at ${k}.`);
+  assert.deepEqual(fs.readdirSync(u.corporaDir), ['test262']);
+  await u.classify();
+  assert.equal((await u.verify(policyFile)).result, 'pass');
+  // Without a policy revision, the snapshot record pins the commit, so a refetch still ignores the moved branch.
+  const fallback = await u.fetch(u.policy({}));
+  assert.equal(fallback.pinned_by, 'specs/snapshots/test262.json'); assert.equal(fallback.commit, u.first);
+  assert.equal(fallback.inventory.sha256, record.inventory.sha256);
+});
+test('A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged', async () => {
+  const u = upstreamFixture();
+  await u.fetch(u.policy({ revision: u.first }));
+  const recordBytes = fs.readFileSync(u.recordFile), before = directoryDigest(path.join(u.corporaDir, 'test262'));
+  put(u.corporaDir, 'test262.fetch/stale.txt', 'A stale staging directory from an interrupted fetch.\n');
+  for (const [pins, message] of [[{ inventory_sha256: '0'.repeat(64) }, /pin inventory_sha256: pinned "0{64}"/],
+    [{ license_record: 'specs/snapshots/other.json' }, /pin license_record: pinned "specs\/snapshots\/other\.json"/]]) {
+    await assert.rejects(() => u.fetch(u.policy({ revision: u.first, ...pins })),
+      e => /does not match its pin, so the existing snapshot stays/.test(e.message) && message.test(e.message));
+    assert.deepEqual(fs.readFileSync(u.recordFile), recordBytes);
+    assert.equal(directoryDigest(path.join(u.corporaDir, 'test262')), before);
+    assert.deepEqual(fs.readdirSync(u.corporaDir), ['test262']);
+  }
+});
+test('corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences', async () => {
+  const u = upstreamFixture(), first = await u.fetch(u.policy({ revision: u.first }));
+  const policyFile = u.policy({ revision: u.first, inventory_sha256: first.inventory.sha256, license_record: 'specs/snapshots/test262.json' });
+  const head = u.move();
+  const r = await corpus.repinCorpus(u.dir, 'test262', u.options(policyFile));
+  assert.equal(r.result, 'pass'); assert.equal(r.commit, head); assert.equal(r.ref, 'refs/heads/main');
+  assert.notEqual(r.inventory.sha256, first.inventory.sha256);
+  assert.deepEqual(r.pin_differences, [`pin revision: pinned "${u.first}", snapshot has "${head}"`,
+    `pin inventory_sha256: pinned "${first.inventory.sha256}", snapshot has "${r.inventory.sha256}"`]);
+  assert.match(r.note, /corpus-verify fails until a protected change to specs\/corpora\.json records the new pin/);
+  assert.equal(fixtureGit(u.snapshot, ['rev-parse', 'refs/heads/main']), head);
+  assert.equal(readJson(u.recordFile).commit, head);
+  assert.deepEqual(fs.readdirSync(u.corporaDir), ['test262']);
+  assert.equal((await u.classify()).discovered, 2);
+  await assert.rejects(() => u.verify(policyFile), e => /pin revision: pinned/.test(e.message) && /pin inventory_sha256: pinned/.test(e.message));
+  assert.equal((await u.verify(u.policy({ revision: head, inventory_sha256: r.inventory.sha256 }))).result, 'pass');
 });
 test('The actual bootstrap repository passes its integrity check', () => {
   const r = checkRepository(root); assert.equal(r.result, 'pass'); assert.equal(r.level, 'bootstrap-integrity-only');

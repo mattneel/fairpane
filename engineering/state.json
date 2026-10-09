@@ -44,20 +44,20 @@
     },
     "FP-0003": {
       "status": "implemented",
-      "owner": "fairpane-core workers FP0003Corpora and FP0003Rework, integrated by root-integrator",
+      "owner": "fairpane-core workers FP0003Corpora, FP0003Rework, and FP0003Revision2, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0003/README.md",
-        "engineering/evidence/FP-0003/gates/2026-10-09T01-30-40-258Z-repo-check-77f92948.json",
-        "engineering/evidence/FP-0003/gates/2026-10-09T01-30-40-501Z-controller-test-0964454f.json",
+        "engineering/evidence/FP-0003/gates/2026-10-09T02-05-37-528Z-repo-check-a3a77af6.json",
+        "engineering/evidence/FP-0003/gates/2026-10-09T02-05-37-751Z-controller-test-abfa9710.json",
         "engineering/evidence/FP-0003/raw/corpus-verify.log",
-        "engineering/evidence/FP-0003/raw/corpus-applicability-wpt.log"
+        "engineering/evidence/FP-0003/raw/rev2-corpus-applicability-wpt.log"
       ],
-      "review": "engineering/evidence/FP-0003/reviews/review-1-reject.json",
+      "review": "engineering/evidence/FP-0003/reviews/spec-review-2-reject.json",
       "notes": [
         "fairpane-review and fairpane-spec rejected commit ce34ffc because WPT had no explicit denominator. See engineering/evidence/FP-0003/reviews/.",
-        "Contract revision 1 replaced the manifest tool run with the wpt.fyi manifest bound to the pinned tree and added the review fixes.",
-        "The rework records 76600 discovered WPT tests at b60c4b34, with 53660 vendored test262 items reported separately. Source digest 9aedf581e65e9966043b8c09faf008e88d8a18171df196252012260e75e487d5.",
-        "Awaiting fairpane-review and fairpane-spec on the rework. The specs/corpora.json pins follow their approval in a separate commit."
+        "Contract revision 1 replaced the manifest tool run with the wpt.fyi manifest bound to the pinned tree. fairpane-review accepted that rework in review 2, and fairpane-spec rejected its test262 attribution.",
+        "Contract revision 2 counts the 20 WPT-authored test262 items, so WPT discovery records 76620 tests at b60c4b34. Source digest f1d4684ff245c29a3b55ff91c6420e2c3284fabe9fedf57070839988f97a0f4a.",
+        "Awaiting fairpane-spec, and fairpane-review on revision 2. The specs/corpora.json pins follow both approvals in a separate commit."
       ]
     },
     "FP-0004": {

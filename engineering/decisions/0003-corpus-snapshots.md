@@ -1,7 +1,7 @@
 # ADR 0003: Corpus snapshots
 
-Status: proposed by task FP-0003, revised for contract revision 1.
-Authority: the frozen contract in `engineering/evidence/FP-0003/CONTRACT.md`, including its `## Revision 1` section.
+Status: proposed by task FP-0003, revised for contract revisions 1 and 2.
+Authority: the frozen contract in `engineering/evidence/FP-0003/CONTRACT.md`, including its `## Revision 1` and `## Revision 2` sections.
 The `specs/corpora.json` change below needs approval from `fairpane-review` and `fairpane-spec`.
 The integrator applies it in a separate commit.
 
@@ -26,9 +26,28 @@ Variables such as `GIT_DIR`, `GIT_OBJECT_DIRECTORY`, and `GIT_CONFIG_PARAMETERS`
 Git prompts are disabled, and every Git process has a watchdog that stops its whole process tree.
 
 `corpus-fetch` and `corpus-repin` fetch into a fresh, empty repository.
-`transfer.fsckObjects=true` therefore checks every object that the snapshot uses.
+The fetch sets both `fetch.fsckObjects=true` and `transfer.fsckObjects=true` on its command line.
+Git gives `fetch.fsckObjects` precedence over `transfer.fsckObjects`, so a `fetch.fsckObjects=false` in user or system configuration cannot disable the checks.
 The controller replaces the snapshot only after the record validates and matches its pin.
-A failed fetch removes its staging directory and leaves the existing snapshot unchanged.
+A failed fetch removes its staging directory and leaves the existing snapshot and record unchanged.
+
+#### What the fetch checks
+
+- Git computes the ID of every received object from its content, so no object can arrive under another object's ID.
+- The object checks of `fetch.fsckObjects` reject malformed commits, trees, and tags in the received pack.
+- The local ref must resolve to the requested commit after the fetch.
+- The tree, committer date, license record, inventory, and, for WPT, the manifest binding come from the fetched objects.
+- `corpus-fetch` compares the new record with every pin before it replaces the snapshot.
+
+#### What the fetch cannot check
+
+- The fetch cannot show that the pinned commit is reachable from the recorded upstream branch.
+  A depth-1 fetch by commit ID receives no history, and the server decides which objects it serves by ID.
+  The provenance of a pin therefore rests on the `corpus-repin` evidence: the `git ls-remote` output that named the commit as the branch head, preserved in `engineering/evidence/FP-0003/raw/corpus-fetch-*.log`, and the protected review of `specs/corpora.json`.
+- The controller keeps user and system Git configuration, because network settings such as proxies and certificate stores live there.
+  Per-message severity settings, such as `fetch.fsck.<msg-id>` and `fetch.fsck.skipList`, can therefore still relax individual object checks.
+  They cannot change object IDs, so the commit ID still binds the tree, the committer date, and every blob.
+- The fetch cannot show that the manifest classifies files the way the pinned manifest tool would, as the manifest trust decision below states.
 
 `corpus-verify` runs `git fsck --full --strict --no-dangling` on the snapshot.
 That command rehashes every stored object, so the recorded commit ID binds the tree, the committer date, and every blob.
@@ -67,7 +86,7 @@ The controller enforces no operating-system network policy; it simply opens no c
 2. Run `git ls-remote --symref <upstream> HEAD` and read the branch ref for `HEAD`.
 3. Select the commit: the pin for `corpus-fetch`, or the reported head for `corpus-repin`.
 4. Create a fresh bare repository at `<corpora-root>/<corpus-id>.fetch/repository.git`.
-5. Run `git fetch --depth=1 --no-tags --no-write-fetch-head <upstream> +<commit>:<ref>` with `transfer.fsckObjects=true`.
+5. Run `git fetch --depth=1 --no-tags --no-write-fetch-head <upstream> +<commit>:<ref>` with `fetch.fsckObjects=true` and `transfer.fsckObjects=true`.
 6. Confirm that the local ref resolves to the selected commit.
 7. For WPT, download and bind the manifest as described below.
 8. Derive the tree, committer date, license record, inventory, and manifest fields from the fetched objects and the stored manifest.
@@ -77,6 +96,10 @@ The controller enforces no operating-system network policy; it simply opens no c
 
 Each network operation has a one-hour watchdog.
 Only `wpt` and `test262` have fetch rules, because only they are Git corpora with known license files.
+
+Controller tests 19 through 21 run `corpus-fetch` and `corpus-repin` against local fixture upstreams.
+They pass an `allowFileUpstream` option that accepts a `file://` upstream in a fixture `corpora.json`.
+No controller command sets that option, so the commands accept only HTTPS upstreams.
 
 ### WPT manifest trust decision
 
@@ -93,9 +116,11 @@ Every manifest path must exist in the pinned tree as a blob.
 Every manifest hash must equal the Git blob ID of that path.
 A missing path or a different hash fails `corpus-fetch`, `corpus-applicability`, and `corpus-verify`.
 The manifest version must be 9, the version that the pinned manifest tool writes. [S47]
+A manifest without any test item fails binding, so an empty manifest cannot produce a zero denominator.
 
 This binding does not prove that the item types and test URLs are the ones the pinned tool would compute.
 It does not prove that the manifest lists every test file in the tree.
+A manifest that omits entries but keeps at least one test item still binds; its SHA-256 pin detects the substitution once the pin is in `specs/corpora.json`.
 It proves that every listed file is the pinned file, byte for byte.
 
 An earlier revision ran the pinned manifest tool over a working copy.
@@ -159,10 +184,11 @@ It uses only the local snapshot and the stored manifest.
 | `excluded` | Entries with a `path` and a nonempty `reason` |
 | `breakdown` | Counts by group that sum to `discovered` |
 | `manifest` | WPT only: the URL, size, SHA-256, version, and item count of every type |
-| `reported_separately` | WPT only: `test262` items, the vendored Test262 revision, and the reason |
+| `reported_separately` | WPT only: the vendored `test262` items under `third_party/test262/`, counted by directory, with the vendored Test262 revision and the reason |
 
 A record satisfies `selected + excluded + unclassified = discovered`.
 A record without those counts does not validate, so it has no denominator.
+A record with zero discovered tests does not validate either.
 This task selects and excludes nothing, so every discovered test is unclassified.
 
 Test262 discovery counts blob entries under `test/` that end in `.js`.
@@ -172,19 +198,33 @@ The count is a file count, not an execution-scenario count.
 The later selection task defines scenario expansion from test frontmatter.
 
 WPT discovery reads the bound manifest.
+Binding fails when the manifest has no test item.
 Each manifest file entry contributes its array length minus one, because the first element is the file hash and each further element is one test URL. [S47]
-Discovered WPT tests are the items of every type except `spec`, `support`, and `test262`.
+Discovered WPT tests are the items of every type except `spec` and `support`, minus the `test262` items under `third_party/test262/`.
 The record reports counts for each item type.
 
 These item-type decisions apply.
 
-- `test262` items come from the WPT copy of Test262 under `third_party/test262`.
-  The record reports them separately, with the revision from `third_party/test262/vendored.toml`.
+- Upstream gives the `test262` type to every `.js` file with a `test262` directory component, not only to the vendored copy. [S47]
+  The type therefore does not identify the vendored copy; the path does.
+  The `test262` items under `third_party/test262/` come from the vendored Test262 copy.
+  The record reports them separately, counted by their directory under `third_party/test262/`.
+  Only these items are tied to the revision in `third_party/test262/vendored.toml`.
+  The items under `third_party/test262/harness/` are Test262 harness includes, not tests.
   Fairpane runs Test262 from its own pinned `test262` corpus.
+- Every other `test262` item is a WPT test and counts in discovery.
+  At the pin, these are 20 WPT-authored smoke tests under `infrastructure/test262/`; for example, `basic.js` describes itself as "A basic Test262 smoketest".
 - `conformancechecker` items test HTML validators, not browsers.
   They stay in the discovered count, and the later selection task excludes them with that reason.
 - `manual` items need human interaction.
   They stay in the discovered count, and the later selection task decides how to classify them.
+- `wdspec` items are Python tests of the WebDriver Classic and WebDriver BiDi protocols. [S55]
+  They need a WebDriver remote end and a Python test runner, so the later selection task decides their applicability with the WebDriver work.
+- `aamtest` items are Python tests of the mapping from web content to platform accessibility APIs, built on the `wdspec` infrastructure. [S55]
+  They need a platform accessibility API and its Python bindings, so the later selection task decides their applicability per platform.
+- `visual` items are judged by browser-specific and platform-specific screenshots, not by a reference file. [S55]
+  Upstream says that many browser vendors treat them like manual tests. [S55]
+  The later selection task decides whether they need recorded screenshots or human judgment.
 
 The pinned manifest has no `spec` or `conformancechecker` items, as `specs/applicability/wpt.json` shows.
 
@@ -222,7 +262,7 @@ These values come from `engineering/evidence/FP-0003/raw/corpus-fetch-test262.lo
 | `inventory.total_blob_bytes` | 90245391 | 505155316 |
 | `inventory.sha256` | `4d86002fe32f66581faa24e4843360ecd148ca44d2adacd31ef08f74d7e8acd8` | `0be4a67e0e13f7fb1f9d82324a118dd3851acbcb50752ecb3615eb1391e395ab` |
 | `manifest` | None | 40224677 bytes, SHA-256 `86d55bee991997a4753d0987397883249a0d6fc94e0901ed3efb84cceed53067` |
-| Applicability | 53616 discovered, all unclassified | 76600 discovered, all unclassified; 53660 `test262` items reported separately |
+| Applicability | 53616 discovered, all unclassified | 76620 discovered, all unclassified, including 20 `test262` items under `infrastructure/test262/`; 53640 vendored `test262` items reported separately: 53597 under `third_party/test262/test/` and 43 harness includes under `third_party/test262/harness/` |
 
 ## Proposed `specs/corpora.json` values
 
@@ -261,7 +301,9 @@ The other corpus entries stay unchanged.
 
 The corpora stay outside Git, so the repository holds only records and digests.
 A depth-1 snapshot cannot answer history questions without another fetch.
-`corpus-fetch` can rebuild every recorded field, except `retrieved_at`, from a fresh fetch of the pinned commit.
+`corpus-fetch` is expected to rebuild every recorded field, except `retrieved_at`, from a fresh fetch of the pinned commit.
+The WPT manifest bytes have been downloaded once, so a byte-identical second download is an expectation, not an observation.
+If wpt.fyi serves different bytes for the same commit, the fetch fails the `manifest_sha256` pin and leaves the existing snapshot unchanged.
 The WPT denominator depends on wpt.fyi continuing to serve the manifest for the pinned commit.
 If wpt.fyi stops serving it, the existing snapshot stays valid, but a fresh fetch fails until a repin.
 Local records are integrity records, not signatures.

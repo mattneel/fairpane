@@ -39,12 +39,12 @@ The directory layout below was observed in the Unicode 18.0.0 directory. [S43]
 
 | File | Consumer | Source |
 | --- | --- | --- |
-| `ucd/UnicodeData.txt` | String case mapping; decomposition mappings and canonical combining classes for `String.prototype.normalize` (UAX #15) | [S30], [S35] |
+| `ucd/UnicodeData.txt` | String case mapping; decomposition mappings and canonical combining classes for `String.prototype.normalize` (UAX #15); `Canonical_Combining_Class` Virama for the ContextJ rules of RFC 5892 Appendix A | [S30], [S35], [S49] |
 | `ucd/SpecialCasing.txt` | String case mapping, locale-insensitive entries | [S30] |
 | `ucd/CaseFolding.txt` | Case-insensitive RegExp matching with the `u` or `v` flag | [S30] |
 | `ucd/PropertyAliases.txt` | RegExp property names | [S30] |
 | `ucd/PropertyValueAliases.txt` | RegExp property values and value aliases | [S30] |
-| `ucd/DerivedCoreProperties.txt` | `ID_Start` and `ID_Continue` for identifiers | [S31], [S27] |
+| `ucd/DerivedCoreProperties.txt` | `ID_Start` and `ID_Continue` for identifiers; `Indic_Conjunct_Break` for UAX #29 rule GB9c in extended grapheme clusters | [S31], [S27], [S36] |
 | `ucd/CompositionExclusions.txt` | Composition exclusions for `String.prototype.normalize` (UAX #15) | [S35], [S27] |
 | `ucd/DerivedNormalizationProps.txt` | `Full_Composition_Exclusion` and the Quick_Check properties for `String.prototype.normalize` (UAX #15) | [S35], [S27] |
 | `ucd/auxiliary/GraphemeBreakProperty.txt` | Grapheme cluster boundaries (UAX #29) for `Intl.Segmenter` and text editing | [S36], [S27], [S32] |
@@ -52,14 +52,18 @@ The directory layout below was observed in the Unicode 18.0.0 directory. [S43]
 | `ucd/auxiliary/SentenceBreakProperty.txt` | Sentence boundaries (UAX #29) for `Intl.Segmenter` | [S36], [S27], [S32] |
 | `ucd/emoji/emoji-data.txt` | `Extended_Pictographic` for UAX #29 and UAX #14; emoji binary properties for RegExp property escapes | [S27], [S36], [S37], [S40] |
 | `ucd/LineBreak.txt` | Line breaking classes (UAX #14) | [S37], [S27] |
-| `ucd/EastAsianWidth.txt` | `East_Asian_Width`, which UAX #14 uses to resolve ambiguous classes | [S37], [S27] |
+| `ucd/EastAsianWidth.txt` | `East_Asian_Width`, which UAX #14 uses to resolve class AI and uses directly in rules LB15a, LB15b, LB19, LB19a, LB21a, LB30, and LB30b | [S37], [S27] |
 | `ucd/BidiBrackets.txt` | Paired bracket properties for the Unicode Bidirectional Algorithm (UAX #9) | [S14], [S27] |
 | `ucd/BidiMirroring.txt` | `Bidi_Mirroring_Glyph` for bidirectional mirroring (UAX #9) | [S14], [S27] |
 | `ucd/extracted/DerivedBidiClass.txt` | `Bidi_Class` values, including defaults for unassigned code points (UAX #9) | [S14], [S27] |
 | `ucd/Scripts.txt` | `Script` (UAX #24) and RegExp `Script` property escapes | [S38], [S30] |
 | `ucd/ScriptExtensions.txt` | `Script_Extensions` (UAX #24) and RegExp `Script_Extensions` property escapes | [S38], [S30] |
 | `ucd/VerticalOrientation.txt` | `Vertical_Orientation` (UAX #50) for CSS `text-orientation: mixed` | [S42], [S27] |
-| `idna/IdnaMappingTable.txt` | UTS #46 mapping, which the URL Standard host parser uses through Unicode ToASCII | [S39], [S41] |
+| `idna/IdnaMappingTable.txt` | UTS #46 mapping, which the URL Standard host parser uses through Unicode ToASCII and ToUnicode | [S39], [S41] |
+| `ucd/extracted/DerivedJoiningType.txt` | `Joining_Type` for the ContextJ rules of RFC 5892 Appendix A, which UTS #46 section 4.1 applies when `CheckJoiners` is true, and the URL Standard sets `CheckJoiners` to true for domain to ASCII and domain to Unicode | [S49], [S39], [S41], [S27] |
+| `ucd/extracted/DerivedJoiningType.txt` | `Joining_Type` for cursive joining in shaping, such as Arabic, and for Universal Shaping Engine joining features | [S27], [S50] |
+| `ucd/IndicSyllabicCategory.txt` | `Indic_Syllabic_Category` for Universal Shaping Engine character categories in Indic and other complex scripts | [S50], [S27] |
+| `ucd/IndicPositionalCategory.txt` | `Indic_Positional_Category` for Universal Shaping Engine positional subclasses of marks | [S50], [S27] |
 | `emoji/emoji-sequences.txt` | `Basic_Emoji`, `Emoji_Keycap_Sequence`, `RGI_Emoji_Modifier_Sequence`, `RGI_Emoji_Flag_Sequence`, and `RGI_Emoji_Tag_Sequence` in ECMA-262 Table 67 | [S40], [S30] |
 | `emoji/emoji-zwj-sequences.txt` | `RGI_Emoji_ZWJ_Sequence` in ECMA-262 Table 67; `RGI_Emoji` is the union of the UTS #51 sets | [S40], [S30] |
 | `ucd/BidiTest.txt` and `ucd/BidiCharacterTest.txt` | Unicode Bidirectional Algorithm tests (UAX #9) | [S14], [S43] |
@@ -74,6 +78,15 @@ The emoji sequence files under `emoji/` are not formally part of the UCD, so tha
 UTS #51 documents those files, and the importing task takes them by name from the table above. [S40]
 Since Unicode 17.0, the IDNA files sit in the numbered version directory; earlier versions kept them under `https://www.unicode.org/Public/idna/`. [S39]
 ECMA-402 leaves `Intl.Segmenter` boundaries implementation-dependent and names the UAX #29 default algorithms. [S32]
+
+`Joining_Type` is defined in `ucd/ArabicShaping.txt`, but that file omits many characters whose value derives by rule. [S27]
+UAX #44 says implementations should rely on the explicit listing in `ucd/extracted/DerivedJoiningType.txt` instead. [S27]
+The import therefore takes `Joining_Type` from `DerivedJoiningType.txt`, and takes `ArabicShaping.txt` only if a consumer needs another field of that file.
+The ContextJ rules accept U+200C ZERO WIDTH NON-JOINER and U+200D ZERO WIDTH JOINER after a character whose canonical combining class is Virama. [S49]
+They also accept U+200C in a context that they define with `Joining_Type` values L, D, T, and R. [S49]
+The Universal Shaping Engine classifies characters by `Joining_Type`, `Indic_Syllabic_Category`, `Indic_Positional_Category`, and `General_Category`. [S50]
+For scripts that the UCD category files do not cover, it uses supplementary files from Microsoft's USE repository. [S50]
+Those supplementary files are not Unicode Data Files, so their import records their own license and provenance.
 
 ### License terms
 
@@ -114,10 +127,33 @@ Fairpane selects CLDR as its locale data source, so these requirements apply.
 | UTS #35 likely subtags | `Intl.Locale` text direction and related operations | [S32] |
 | UTS #35 calendar preference, time, and week data | `Intl.Locale` calendars, hour cycles, and week information | [S32] |
 | Locale display strings for dates, numbers, and names | Formatters, with CLDR strings recommended for `DateTimeFormat` | [S32] |
+| `common/uca/FractionalUCA.txt` and `common/collation/root.xml` | The CLDR root collation, the base of `Intl.Collator` CompareStrings | [S32], [S52], [S54] |
+| `common/collation/<language>.xml` | CLDR collation tailorings for the effective locale and collation options of `Intl.Collator` | [S32], [S52], [S54] |
+| `common/supplemental/plurals.xml` | Cardinal plural rules for `Intl.PluralRules` with type `"cardinal"` | [S32], [S53], [S54] |
+| `common/supplemental/ordinals.xml` | Ordinal plural rules for `Intl.PluralRules` with type `"ordinal"` | [S32], [S53], [S54] |
+| `common/supplemental/pluralRanges.xml` | Plural categories of number ranges for `PluralRuleSelectRange` | [S32], [S53], [S54] |
 
 ECMA-402 Table 2 defines the sanctioned single unit identifiers, a subset of the CLDR release 38 unit validity data. [S32]
 The pinned CLDR release supplies unit display data only, and its unit validity data never changes the sanctioned set.
 The importing task maps each UTS #35 data category to exact files in the pinned release.
+The paths in the table above were observed at tag `release-48-2`. [S54]
+
+### Collation source
+
+ECMA-402 recommends that CompareStrings follow UTS #10 with tailorings for the effective locale and collation options. [S32]
+It recommends the tailorings that CLDR provides. [S32]
+CLDR tailorings are rules relative to the CLDR root collation, which is based on the DUCET but is not identical to it. [S52]
+The collation source is therefore the CLDR root collation plus CLDR tailorings from the pinned CLDR release.
+The DUCET in `uca/allkeys.txt` of the UCD version directory is not combined with CLDR tailorings. [S51], [S43]
+`common/collation/root.xml` has a `standard` collation with an empty tailoring, which equals the CLDR root collation. [S52]
+`common/uca/allkeys_CLDR.txt` holds the same root order in DUCET-style weights, and `common/uca/UCA_Rules.txt` approximates it as rules. [S52]
+
+The root collation has its own UCA version.
+At tag `release-48-2`, `common/uca/FractionalUCA.txt` states UCA version 17.0.0, and `common/uca/allkeys_CLDR.txt` states version 17.0.0. [S54]
+The UCD version selection rule above selects Unicode 18.0.0 at the time of writing. [S43]
+Rule 6 of the version selection applies to that difference: the import resolves it before qualification.
+One resolution is a CLDR release whose root collation targets the selected UCD version.
+The import records the UCA version that the root collation files state.
 
 ### License terms
 

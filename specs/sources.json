@@ -223,7 +223,7 @@
       "id": "S27",
       "title": "UAX #44: Unicode Character Database",
       "url": "https://www.unicode.org/reports/tr44/",
-      "purpose": "UCD file layout, versioned and draft directories, release stability, and conformance test files.",
+      "purpose": "UCD file layout, versioned and draft directories, release stability, conformance test files, the definitive Joining_Type listing in DerivedJoiningType.txt, the Indic category files, and the Indic_Conjunct_Break derivation.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
@@ -263,7 +263,7 @@
       "id": "S32",
       "title": "ECMAScript Internationalization API Specification",
       "url": "https://tc39.es/ecma402/",
-      "purpose": "Locale identifiers through UTS #35 and the recommended but optional use of CLDR data.",
+      "purpose": "Locale identifiers through UTS #35, the recommended but optional use of CLDR data, the CompareStrings recommendation of UTS #10 with CLDR tailorings for Intl.Collator, and the CLDR recommendation for Intl.PluralRules.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
@@ -295,7 +295,7 @@
       "id": "S36",
       "title": "UAX #29: Unicode Text Segmentation",
       "url": "https://www.unicode.org/reports/tr29/",
-      "purpose": "Grapheme, word, and sentence boundary rules and their property data files.",
+      "purpose": "Grapheme, word, and sentence boundary rules and their property data files, including Indic_Conjunct_Break in rule GB9c.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
@@ -303,7 +303,7 @@
       "id": "S37",
       "title": "UAX #14: Unicode Line Breaking Algorithm",
       "url": "https://www.unicode.org/reports/tr14/",
-      "purpose": "LineBreak.txt, East_Asian_Width and Extended_Pictographic use, and line breaking rules.",
+      "purpose": "LineBreak.txt, East_Asian_Width use in class AI resolution and in rules LB15a, LB15b, LB19, LB19a, LB21a, LB30, and LB30b, Extended_Pictographic use, and line breaking rules.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
@@ -319,7 +319,7 @@
       "id": "S39",
       "title": "UTS #46: Unicode IDNA Compatibility Processing",
       "url": "https://www.unicode.org/reports/tr46/",
-      "purpose": "IDNA Mapping Table, IdnaTestV2.txt, and the IDNA data location since Unicode 17.0.",
+      "purpose": "IDNA Mapping Table, IdnaTestV2.txt, the IDNA data location since Unicode 17.0, and the section 4.1 validity criterion that applies the RFC 5892 ContextJ rules when CheckJoiners is true.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
@@ -335,7 +335,7 @@
       "id": "S41",
       "title": "URL Standard",
       "url": "https://url.spec.whatwg.org/",
-      "purpose": "Host parsing through Unicode ToASCII from UTS #46.",
+      "purpose": "Host parsing through Unicode ToASCII and ToUnicode from UTS #46, with CheckJoiners set to true.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
@@ -351,7 +351,7 @@
       "id": "S43",
       "title": "Unicode 18.0.0 data directory",
       "url": "https://www.unicode.org/Public/18.0.0/",
-      "purpose": "Observed directory paths of UCD, auxiliary, extracted, emoji, and IDNA data and test files.",
+      "purpose": "Observed directory paths of UCD, auxiliary, extracted, emoji, IDNA, and UCA data and test files.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
@@ -383,7 +383,7 @@
       "id": "S47",
       "title": "WPT manifest tool at the pinned commit",
       "url": "https://github.com/web-platform-tests/wpt/tree/b60c4b349d9d167bf354a40bc0d4cbed15174606/tools/manifest",
-      "purpose": "Manifest version 9, item types in item.py, and the [hash, ...items] leaf format in typedata.py.",
+      "purpose": "Manifest version 9, item types in item.py, the [hash, ...items] leaf format in typedata.py, and SourceFile.name_is_test262 in sourcefile.py, which gives the test262 type to every .js file with a test262 directory component.",
       "local_snapshot": null,
       "snapshot_sha256": null
     },
@@ -392,6 +392,62 @@
       "title": "WPT tree at the pinned commit",
       "url": "https://github.com/web-platform-tests/wpt/tree/b60c4b349d9d167bf354a40bc0d4cbed15174606",
       "purpose": "Third-party fonts under fonts/ and third-party code under tools/third_party/ inside the WPT corpus.",
+      "local_snapshot": null,
+      "snapshot_sha256": null
+    },
+    {
+      "id": "S49",
+      "title": "RFC 5892: The Unicode Code Points and Internationalized Domain Names for Applications (IDNA)",
+      "url": "https://www.rfc-editor.org/rfc/rfc5892",
+      "purpose": "Appendix A ContextJ rules for ZERO WIDTH NON-JOINER and ZERO WIDTH JOINER, which use Canonical_Combining_Class Virama and Joining_Type.",
+      "local_snapshot": null,
+      "snapshot_sha256": null
+    },
+    {
+      "id": "S50",
+      "title": "Creating and supporting OpenType fonts for the Universal Shaping Engine",
+      "url": "https://learn.microsoft.com/en-us/typography/script-development/use",
+      "purpose": "Universal Shaping Engine character categories from Joining_Type, Indic_Syllabic_Category, Indic_Positional_Category, and General_Category, and its supplementary category files.",
+      "local_snapshot": null,
+      "snapshot_sha256": null
+    },
+    {
+      "id": "S51",
+      "title": "UTS #10: Unicode Collation Algorithm",
+      "url": "https://www.unicode.org/reports/tr10/",
+      "purpose": "The DUCET in allkeys.txt in each versioned uca directory.",
+      "local_snapshot": null,
+      "snapshot_sha256": null
+    },
+    {
+      "id": "S52",
+      "title": "UTS #35 Part 5: Collation",
+      "url": "https://www.unicode.org/reports/tr35/tr35-collation.html",
+      "purpose": "The CLDR root collation, its basis in the DUCET, its data files under common/uca/, root.xml, and tailorings relative to the root.",
+      "local_snapshot": null,
+      "snapshot_sha256": null
+    },
+    {
+      "id": "S53",
+      "title": "UTS #35 Part 3: Numbers",
+      "url": "https://www.unicode.org/reports/tr35/tr35-numbers.html",
+      "purpose": "Language plural rules of type cardinal and ordinal, and plural ranges.",
+      "local_snapshot": null,
+      "snapshot_sha256": null
+    },
+    {
+      "id": "S54",
+      "title": "CLDR tree at tag release-48-2",
+      "url": "https://github.com/unicode-org/cldr/tree/release-48-2",
+      "purpose": "Observed paths of plural, ordinal, plural range, collation tailoring, and root collation files, and the UCA version 17.0.0 that the root collation files state.",
+      "local_snapshot": null,
+      "snapshot_sha256": null
+    },
+    {
+      "id": "S55",
+      "title": "WPT test-type documentation at the pinned commit",
+      "url": "https://github.com/web-platform-tests/wpt/tree/b60c4b349d9d167bf354a40bc0d4cbed15174606/docs/writing-tests",
+      "purpose": "Execution needs of wdspec, aamtest, and visual tests in wdspec.md, aamtest.md, and visual.md.",
       "local_snapshot": null,
       "snapshot_sha256": null
     }
