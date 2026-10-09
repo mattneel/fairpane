@@ -18,3 +18,10 @@ The browser shell reaches the engine only through this surface and the first-par
 The surface must therefore carry every capability that the browser needs.
 A future schema generator replaces duplicated declarations after its own qualification.
 This bootstrap does not claim that the header is generated.
+
+## Internal handles
+
+`src/handles.zig` defines internal owner identities and generational handles.
+Internal handles never cross the C ABI or the process protocol directly.
+A later boundary maps handles through explicit, validated conversion to its own identifier type.
+Those boundary identifier types are outside this revision.

@@ -1,0 +1,64 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all"]
+test
++- run test
+   +- compile test debug native 16 errors
+src\handles.zig:9:37: error: use of undeclared identifier 'OwnerId'
+fn testOwners(comptime n: usize) [n]OwnerId {
+                                    ^~~~~~~
+src\handles.zig:19:16: error: use of undeclared identifier 'Table'
+    var table: Table(u64, .{}) = .init(owner);
+               ^~~~~
+src\handles.zig:47:20: error: use of undeclared identifier 'Table'
+    const Values = Table(u64, .{});
+                   ^~~~~
+src\handles.zig:79:16: error: use of undeclared identifier 'Table'
+    var table: Table(u64, .{}) = .init(owner);
+               ^~~~~
+src\handles.zig:104:20: error: use of undeclared identifier 'Table'
+    const Values = Table(u64, .{});
+                   ^~~~~
+src\handles.zig:133:19: error: use of undeclared identifier 'Table'
+    const Small = Table(u32, .{ .Generation = u2 });
+                  ^~~~~
+src\handles.zig:166:18: error: use of undeclared identifier 'Table'
+    const Tiny = Table(u8, .{ .Index = u2, .Generation = u2 });
+                 ^~~~~
+src\handles.zig:206:20: error: use of undeclared identifier 'Table'
+    const Values = Table(u64, .{ .Generation = u1 });
+                   ^~~~~
+src\handles.zig:258:46: error: use of undeclared identifier 'OwnerId'
+fn allocationScenario(gpa: Allocator, owner: OwnerId) !void {
+                                             ^~~~~~~
+src\handles.zig:301:18: error: use of undeclared identifier 'Table'
+    const Tiny = Table(u16, .{ .Index = u2, .Generation = u1 });
+                 ^~~~~
+src\handles.zig:335:17: error: use of undeclared identifier 'OwnerIdSource'
+    var source: OwnerIdSource = .init(max - 1);
+                ^~~~~~~~~~~~~
+src\handles.zig:341:23: error: use of undeclared identifier 'OwnerIdSource'
+fn issueMany(source: *OwnerIdSource, out: *[1000]u64) void {
+                      ^~~~~~~~~~~~~
+src\handles.zig:346:17: error: use of undeclared identifier 'OwnerIdSource'
+    var source: OwnerIdSource = .init(1);
+                ^~~~~~~~~~~~~
+src\handles.zig:370:15: error: use of undeclared identifier 'Table'
+    const A = Table(u32, .{});
+              ^~~~~
+src\handles.zig:396:20: error: use of undeclared identifier 'Table'
+    const Values = Table(u32, .{ .Generation = u2 });
+                   ^~~~~
+src\handles.zig:433:30: error: use of undeclared identifier 'TableConfig'
+fn runModel(comptime config: TableConfig, seed: u64, steps: usize) !void {
+                             ^~~~~~~~~~~
+error: 16 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir .zig-cache --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+test transitive failure
++- run test transitive failure
+   +- compile test debug native 16 errors
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x483173f1 test --summary all
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all"],"exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":520,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}

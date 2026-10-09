@@ -1,0 +1,81 @@
+Fairpane local gate: controller-test
+Trust: unsigned-local-integrity-only
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","C:\\src\\fairpane\\tools\\selftest.mjs"]
+TAP version 13
+ok 1 - A normal relative file resolves within the repository
+ok 2 - Traversal, empty components, and dot components fail
+ok 3 - Absolute paths, backslashes, control bytes, and alternate streams fail
+ok 4 - A missing path needs explicit permission
+ok 5 - A symlink cannot redirect an input inventory
+ok 6 - A dangling directory link is not a new output directory
+ok 7 - An empty input inventory fails
+ok 8 - Input hashes change with content
+ok 9 - Input hashes include relative names
+ok 10 - Input hashes ignore checkout location and input order
+ok 11 - Repeated roots do not duplicate files
+ok 12 - File hashes match the SHA-256 content hash
+ok 13 - Atomic JSON output supports replacement and BOM input
+ok 14 - The supplied compiler lock has a valid structure
+ok 15 - A stable version cannot silently replace Zig master
+ok 16 - A floating compiler version fails
+ok 17 - A substituted compiler source fails
+ok 18 - A substituted artifact URL fails
+ok 19 - An invalid checksum or archive size fails
+ok 20 - A checksum mismatch cannot qualify an archive
+ok 21 - A size mismatch cannot qualify an archive
+ok 22 - Host selection maps supported platform names explicitly
+ok 23 - A valid task graph has one initial ready task
+ok 24 - An accepted prerequisite reveals the next task
+ok 25 - An active task does not become another ready task
+ok 26 - A duplicate task ID fails
+ok 27 - Unknown and duplicate prerequisites fail
+ok 28 - A cycle in the task graph fails
+ok 29 - Empty acceptance criteria and unknown gates fail
+ok 30 - Missing state and unknown workstreams fail
+ok 31 - Acceptance without evidence and review fails
+ok 32 - Acceptance with an unaccepted prerequisite fails
+ok 33 - An empty release profile fails closed
+ok 34 - The full set of capability families cannot disappear
+ok 35 - Qualified metadata alone cannot replace a release verifier
+ok 36 - A successful command records its actual output
+ok 37 - A nonzero child exit remains a failure
+ok 38 - A missing executable produces an error record
+ok 39 - A hung child reaches its watchdog and cannot pass
+ok 40 - Command arguments do not execute through a shell
+ok 41 - A real local gate produces a checkable unsigned receipt
+ok 42 - Changed source makes a previous receipt stale
+ok 43 - Changed evidence output invalidates a receipt
+ok 44 - Changed gate definitions invalidate old receipts
+ok 45 - A local receipt cannot upgrade its own trust label
+ok 46 - A receipt without command records cannot pass
+ok 47 - A receipt without output artifacts cannot pass
+ok 48 - A failed command cannot hide behind a pass label
+ok 49 - A command failure produces a failed gate receipt
+ok 50 - A missing compiler produces a failed gate receipt
+ok 51 - Input changes during execution produce a failed gate receipt
+ok 52 - A removed input still produces a failed gate receipt
+ok 53 - Unknown gates fail before execution
+ok 54 - Evidence paths cannot escape their approved roots
+ok 55 - A gate writes a checkable receipt under an approved evidence directory
+ok 56 - An unapproved evidence directory fails before any gate command runs
+ok 57 - Environment overrides reach the child and its command record
+ok 58 - Executable resolution follows PATH order
+ok 59 - A recorded command keeps its output, exit status, and resolved executable
+ok 60 - Command records carry the working directory and start time
+ok 61 - An unwritable log yields a failed result instead of an exception
+ok 62 - A failed output copy is recorded and its capture directory is removed
+ok 63 - Standard error output reaches the log
+ok 64 - A completed command leaves no capture directory
+ok 65 - Executable resolution never searches the process working directory
+ok 66 - A bare executable name is logged as its resolved absolute path
+ok 67 - A rejected record path writes nothing
+ok 68 - The controller rejects malformed run and record arguments
+ok 69 - Only Zig and C ABI gates receive the repository-local compiler cache
+ok 70 - The actual bootstrap repository passes its integrity check
+1..70
+# tests 70
+# pass 70
+# fail 0
+# Scope: controller behavior only. No renderer or JavaScript conformance claim.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["C:\\src\\fairpane\\tools\\selftest.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T00:33:53.101Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1482}
