@@ -7,7 +7,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 import { spawnSync } from 'node:child_process';
-import { fetchLockedArchive, hostPlatform, invariant, readJson, safePath, sha256, validateRustLock, writeJson } from './lib.mjs';
+import { fetchLockedArchive, hostPlatform, invariant, readJson, relativePathProblem, safePath, sha256, validateRustLock, writeJson } from './lib.mjs';
 
 const LOCK_PATH = 'toolchains/rust.lock.json';
 const UTF8 = new TextDecoder('utf-8', { fatal: true });
@@ -94,23 +94,10 @@ const BLOCK = 512;
 const padding = size => (BLOCK - (size % BLOCK)) % BLOCK;
 const pathRejected = name => new Error(`The archive path is not accepted: ${name}`);
 const LONG_NAME_LIMIT = 4096;
-/**
- * The reserved device names that Microsoft's "Naming Files, Paths, and Namespaces" lists,
- * https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file:
- * CON, PRN, AUX, NUL, COM1 to COM9, COM¹, COM², COM³, LPT1 to LPT9, LPT¹, LPT², and LPT³.
- * The page also reserves each name followed by an extension, such as NUL.txt.
- */
-const RESERVED_DEVICE_NAME = /^(?:CON|PRN|AUX|NUL|COM[1-9\u00b9\u00b2\u00b3]|LPT[1-9\u00b9\u00b2\u00b3])$/i;
 
-/**
- * The archive path rules: relative, forward slashes only, no code unit from U+0000 to U+001F, and no `:`.
- * No component is empty, `.`, or `..`, ends in `.` or a space, or is a reserved Windows device name before its first `.`.
- */
+/** An archive path passes the path rule that corpus extraction shares (`relativePathProblem`). */
 export function acceptedArchivePath(name) {
-  if (name.startsWith('/') || /^[A-Za-z]:/.test(name) || name.includes('\\') || /[\u0000-\u001f]/.test(name)) return false;
-  if (name.includes(':')) return false;
-  return name.split('/').every(part => part !== '' && part !== '.' && part !== '..' && !/[. ]$/.test(part)
-    && !RESERVED_DEVICE_NAME.test(part.split('.')[0]));
+  return relativePathProblem(name) === null;
 }
 function isZeroBlock(block) {
   for (let i = 0; i < block.length; i++) if (block[i] !== 0) return false;

@@ -1,0 +1,13 @@
+diff --git a/tools/corpus.mjs b/tools/corpus.mjs
+index 533a4ec..b42de75 100644
+--- a/tools/corpus.mjs
++++ b/tools/corpus.mjs
+@@ -708,8 +708,6 @@ export async function extractCorpus(root, id, outDir, { corporaDir = corporaRoot
+       const e = entries[index], file = files[index++];
+       fs.mkdirSync(path.dirname(file), { recursive: true });
+       fs.writeFileSync(file, Buffer.concat(chunks), { flag: 'wx' });
+-      const written = blobId(fs.readFileSync(file));
+-      invariant(written === e.oid, `${e.path.toString('utf8')}: the written file hashes to ${written}, not to its tree object ID ${e.oid}.`);
+     },
+   });
+   const lines = entries.map(e => Buffer.concat([Buffer.from(`${e.oid} `), e.path, Buffer.from('\n')]));

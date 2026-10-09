@@ -1,9 +1,10 @@
 //! The FP-0082 tokenizer over UTF-16 code units.
 //!
-//! The lexer reads each code unit as a code point, so a lone surrogate is its own code point, as
-//! ECMA-262 section 11.1 reads source text. Only ASCII code points form identifiers until FP-0095.
-//! A non-ASCII code point outside strings and comments that is not white space or a line terminator
-//! yields an `unsupported non_ascii_identifier` token.
+//! The lexer reads UTF-16 code units, which matches ECMA-262 section 11.1 at every position where
+//! the FP-0082 subset accepts non-ASCII input: a code unit outside strings and comments that is not
+//! ASCII, white space, or a line terminator, including either half of a surrogate pair, yields an
+//! `unsupported non_ascii_identifier` token. FP-0095 pairs surrogates as 11.1.4 requires. Only
+//! ASCII code points form identifiers until FP-0095.
 //!
 //! The lexer always scans `/` and `/=` as punctuators. Under the InputElementRegExp goal the parser
 //! reports those tokens as `unsupported regular_expression` and never asks for a later token, so the
@@ -127,9 +128,11 @@ pub const Tag = enum(u8) {
     }
 };
 
+const Keyword = struct { text: []const u8, tag: Tag };
+
 /// The ReservedWords of 12.7.2 other than `await` and `yield`, which the lexer scans as identifiers.
 /// The `kw_export` entry names its tag first, so that this file does not contain the FP-0011 case 20 needles.
-const keywords = [_]struct { text: []const u8, tag: Tag }{
+const keywords = [_]Keyword{
     .{ .text = "break", .tag = .kw_break },
     .{ .text = "case", .tag = .kw_case },
     .{ .text = "catch", .tag = .kw_catch },
@@ -180,11 +183,27 @@ pub fn eqlAscii(units: []const u16, text: []const u8) bool {
     return true;
 }
 
+/// The longest keyword, `instanceof`.
+const max_keyword_len = 10;
+
+/// The keywords grouped by length and first letter, so that a lookup compares only the
+/// candidates with both. Every keyword starts with a lowercase ASCII letter.
+const keyword_buckets = buckets: {
+    var result: [max_keyword_len + 1][26][]const Keyword = @splat(@splat(&.{}));
+    for (keywords) |keyword| {
+        const bucket = &result[keyword.text.len][keyword.text[0] - 'a'];
+        bucket.* = bucket.* ++ [_]Keyword{keyword};
+    }
+    break :buckets result;
+};
+
 /// Returns the keyword tag of `units`, or null.
 pub fn keywordOf(units: []const u16) ?Tag {
-    if (units.len < 2 or units.len > 10) return null;
-    for (keywords) |keyword| {
-        if (eqlAscii(units, keyword.text)) return keyword.tag;
+    if (units.len < 2 or units.len > max_keyword_len) return null;
+    const first = units[0];
+    if (first < 'a' or first > 'z') return null;
+    for (keyword_buckets[units.len][first - 'a']) |keyword| {
+        if (eqlAscii(units[1..], keyword.text[1..])) return keyword.tag;
     }
     return null;
 }
@@ -232,7 +251,9 @@ pub const Lexer = struct {
     /// No token has been scanned since the start of input or since the last line terminator,
     /// so `-->` begins an HTML-like comment (B.1.1).
     line_start: bool = true,
-    /// Holds decoded strings and identifiers, and digits without separators.
+    /// A NumericLiteralSeparator occurred in the numeric literal being scanned.
+    separator: bool = false,
+    /// Holds decoded strings and identifiers, and the digits of a numeric literal that needs rewriting.
     arena: Allocator,
     scratch: *std.ArrayList(u16),
     scratch_allocator: Allocator,
@@ -512,6 +533,7 @@ pub const Lexer = struct {
                 const next_digit = following != null and digitValue(following.?) != null and digitValue(following.?).? < radix;
                 if (!previous_digit or !next_digit) return false;
                 previous_digit = false;
+                lexer.separator = true;
                 lexer.position += 1;
             } else break;
         }
@@ -523,6 +545,8 @@ pub const Lexer = struct {
         const first = lexer.source[start];
         var bigint = false;
         var legacy = false;
+        var octal_integer = false;
+        lexer.separator = false;
         const following = lexer.at(start + 1);
         if (first == '0' and following != null and isRadixLetter(following.?)) {
             const radix: u8 = switch (following.?) {
@@ -546,6 +570,7 @@ pub const Lexer = struct {
                 lexer.position += 1;
             }
             legacy = true;
+            octal_integer = octal;
             // A NonOctalDecimalIntegerLiteral is a DecimalIntegerLiteral, so a fraction and an exponent may follow.
             if (!octal and !lexer.scanFractionAndExponent()) return lexer.invalidNumber(start);
         } else {
@@ -576,20 +601,21 @@ pub const Lexer = struct {
         const end = lexer.position;
         if (bigint) return .{ .tag = .bigint, .start = start, .end = end };
         const text = lexer.source[start..end];
-        lexer.scratch.clearRetainingCapacity();
-        const octal_integer = legacy and for (text) |unit| {
-            if (unit >= '8' and unit <= '9') break false;
-        } else true;
-        if (octal_integer) {
+        // Only a LegacyOctalIntegerLiteral and a literal with separators need rewritten code units.
+        const digits = if (octal_integer) rewritten: {
             // A LegacyOctalIntegerLiteral is rewritten to the `0o` form.
+            lexer.scratch.clearRetainingCapacity();
             try lexer.scratch.appendSlice(lexer.scratch_allocator, &.{ '0', 'o' });
             try lexer.scratch.appendSlice(lexer.scratch_allocator, text[1..]);
-        } else {
+            break :rewritten lexer.scratch.items;
+        } else if (lexer.separator) rewritten: {
+            lexer.scratch.clearRetainingCapacity();
             for (text) |unit| {
                 if (unit != '_') try lexer.scratch.append(lexer.scratch_allocator, unit);
             }
-        }
-        const value = number.stringToNumber(lexer.scratch.items);
+            break :rewritten lexer.scratch.items;
+        } else text;
+        const value = number.stringToNumber(digits);
         std.debug.assert(!std.math.isNan(value));
         return .{ .tag = .number, .start = start, .end = end, .value = value, .legacy_octal = if (legacy) start else null };
     }

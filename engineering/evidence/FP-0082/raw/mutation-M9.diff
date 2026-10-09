@@ -1,0 +1,12 @@
+diff --git a/tools/lib.mjs b/tools/lib.mjs
+index 921c9cf..4ffeeb1 100644
+--- a/tools/lib.mjs
++++ b/tools/lib.mjs
+@@ -73,7 +73,6 @@ const RESERVED_DEVICE_NAME = /^(?:CON|PRN|AUX|NUL|COM[1-9\u00b9\u00b2\u00b3]|LPT
+  */
+ export function relativePathProblem(name) {
+   if (/[\u0000-\u001f]/.test(name)) return 'a control character';
+-  if (name.includes('\\')) return 'a backslash';
+   if (name.includes(':')) return 'a colon';
+   for (const part of name.split('/')) {
+     if (part === '') return 'an empty path component';

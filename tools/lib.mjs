@@ -58,6 +58,31 @@ export function safePath(root, relative, { mustExist = true } = {}) {
   if (mustExist) invariant(fs.existsSync(cursor), `Missing file or directory: ${relative}`);
   return cursor;
 }
+/**
+ * The reserved device names that Microsoft's "Naming Files, Paths, and Namespaces" lists,
+ * https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file:
+ * CON, PRN, AUX, NUL, COM1 to COM9, COM¹, COM², COM³, LPT1 to LPT9, LPT¹, LPT², and LPT³.
+ * The page also reserves each name followed by an extension, such as NUL.txt.
+ */
+const RESERVED_DEVICE_NAME = /^(?:CON|PRN|AUX|NUL|COM[1-9\u00b9\u00b2\u00b3]|LPT[1-9\u00b9\u00b2\u00b3])$/i;
+/**
+ * The path rule that the archive reader and corpus extraction share for a relative path with `/` separators.
+ * Returns the reason that `name` is rejected, or null. The checks run in this order: a code unit from U+0000
+ * to U+001F, a `\`, a `:`, and then for each component in order: empty, `.` or `..`, ending in `.` or a space,
+ * and a reserved Windows device name before its first `.`, compared without regard to case.
+ */
+export function relativePathProblem(name) {
+  if (/[\u0000-\u001f]/.test(name)) return 'a control character';
+  if (name.includes('\\')) return 'a backslash';
+  if (name.includes(':')) return 'a colon';
+  for (const part of name.split('/')) {
+    if (part === '') return 'an empty path component';
+    if (part === '.' || part === '..') return `a "${part}" path component`;
+    if (/[. ]$/.test(part)) return 'a path component that ends in "." or a space';
+    if (RESERVED_DEVICE_NAME.test(part.split('.')[0])) return 'a reserved Windows device name';
+  }
+  return null;
+}
 export function collectFiles(root, roots) {
   invariant(Array.isArray(roots) && roots.length > 0, 'A nonempty input list is required.');
   const files = new Set();

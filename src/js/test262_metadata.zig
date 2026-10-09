@@ -234,6 +234,10 @@ test "FP-0082 case 15: the metadata reader reads its YAML subset and reports met
 
     try expectMetadataError(arena, frontmatter("flags: [bogus]\n"));
     try expectMetadataError(arena, frontmatter("flags: [raw]\nflags: [module]\n"));
-    try expectMetadataError(arena, frontmatter("negative:\n  phase: compile\n"));
+    // Revision 1 case 5: the type is present, so only the phase check can reject this negative.
+    switch (try read(arena, frontmatter("negative:\n  phase: compile\n  type: SyntaxError\n"))) {
+        .metadata_error => |reason| try testing.expectEqualStrings("a phase outside the known set", reason),
+        .metadata => return error.TestExpectedMetadataError,
+    }
     try expectMetadataError(arena, "// Copyright\nvar a;\n");
 }

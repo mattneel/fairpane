@@ -1,0 +1,21 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+a695d516c071bec27a1ee4288adb53294d0353ec
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te8b8649d0\\m","started_at":"2026-10-09T16:43:50.912Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","engineering/evidence/FP-0082/raw/probe-subtree-r1.mjs"]
+c301984a7815592ddaa07483897fc450c828fb49
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","engineering/evidence/FP-0082/raw/probe-subtree-r1.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te8b8649d0\\m","started_at":"2026-10-09T16:43:50.988Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0082/raw/probe-subtree-r1.mjs"]
+git version: git version 2.54.0.windows.1
+commit 33b370eba819f43d4b229c7517ddcd0dd64b65f1, root tree 516cc6eda15c61cdf20a79580abc091a9c03aa0b, test/ subtree c3757ee84b24596d6bd339e19b8e360958f06913, other test/ subtree b51687aff1603ad42c8912bbcbc2d8af61e9d56f, other root tree a569b7d13be40bc4d1af3855ca15cb4f4790cfaf
+Unaltered: exit status 0
+  100644 blob 31142aabfe70eeeb49cde1ee5f88a67d3d2ce194	test/a.js
+After the object file of the test/ subtree c3757ee84b24596d6bd339e19b8e360958f06913 holds the other test/ subtree: exit status 0
+  100644 blob 31142aabfe70eeeb49cde1ee5f88a67d3d2ce194	test/a.js
+  100644 blob 96d18853ca61e0c78dcb5a32553a0721b88e681b	test/b.js
+After the object file of the root tree 516cc6eda15c61cdf20a79580abc091a9c03aa0b also holds the other root tree: exit status 128
+  stderr: error: hash mismatch 516cc6eda15c61cdf20a79580abc091a9c03aa0b
+  stderr: fatal: not a tree object
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0082/raw/probe-subtree-r1.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te8b8649d0\\m","started_at":"2026-10-09T16:43:51.068Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":381}

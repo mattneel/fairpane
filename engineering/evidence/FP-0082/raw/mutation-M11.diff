@@ -1,0 +1,25 @@
+diff --git a/src/js/parser.zig b/src/js/parser.zig
+index 9268f00..60ea870 100644
+--- a/src/js/parser.zig
++++ b/src/js/parser.zig
+@@ -1301,14 +1301,12 @@ const Parser = struct {
+     /// lookup in a hashed set, so the check is linear in the number of parameters; the set is
+     /// emptied by removing its names, so a later check does not pay for an earlier one's capacity.
+     fn duplicateParameter(p: *Parser, params: []const Name, offsets: []const u32) Allocator.Error!?u32 {
+-        try p.params_seen.ensureTotalCapacity(p.gpa, @intCast(params.len));
+-        var inserted: usize = 0;
+-        defer for (params[0..inserted]) |param| {
+-            _ = p.params_seen.remove(param);
+-        };
+-        for (params, offsets) |param, offset| {
+-            if (p.params_seen.getOrPutAssumeCapacity(param).found_existing) return offset;
+-            inserted += 1;
++        // Mutation control M11: compare every pair of parameters again.
++        _ = p;
++        for (params, offsets, 0..) |param, offset, index| {
++            for (params[0..index]) |earlier| {
++                if ((ParamContext{}).eql(earlier, param)) return offset;
++            }
+         }
+         return null;
+     }

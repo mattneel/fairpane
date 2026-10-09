@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
-import { invariant, readJson, writeJson, sha256, resolveExecutable, treeStopProgram, stopProcessTree } from './lib.mjs';
+import { invariant, readJson, writeJson, sha256, relativePathProblem, resolveExecutable, treeStopProgram, stopProcessTree } from './lib.mjs';
 import { FILE_SET_IDS, FILE_SET_RULES, classifyFileSet, commitSnapshot, deriveFileSet, fetchFileSet, verifyFileSet, withFetchLock } from './fileset.mjs';
 
 const OID = /^[0-9a-f]{40}$/, HASH = /^[0-9a-f]{64}$/;
@@ -582,9 +582,7 @@ export async function verifyCorpus(root, id, { corporaDir = corporaRoot(root), p
   }
   const { record, gitDir } = await loadSnapshot(root, id, corporaDir, allowFileUpstream);
   const policy = corpusPolicy(policyFile, id, allowFileUpstream), problems = [];
-  const expect = (field, recorded, actual) => {
-    if (recorded !== actual) problems.push(`${field}: recorded ${JSON.stringify(recorded)}, found ${JSON.stringify(actual)}`);
-  };
+  const expect = (field, recorded, actual) => expectRecorded(problems, field, recorded, actual);
   expect('upstream', record.upstream, policy.upstream);
   // Every object must hash to its ID, so the recorded commit ID binds the tree, the committer date, and every blob.
   try { await git(gitDir, ['fsck', '--full', '--strict', '--no-dangling', '--no-progress']); } catch (e) { problems.push(`fsck: ${e.message}`); }
@@ -655,28 +653,23 @@ export async function deriveCorpus(root, id, { corporaDir = corporaRoot(root) } 
   return deriveFileSet(root, id, { corporaDir, rule: FILE_SET_RULES[id] });
 }
 
+/** Appends `<field>: recorded <a>, found <b>` to `problems` when the two values differ. */
+function expectRecorded(problems, field, recorded, actual) {
+  if (recorded !== actual) problems.push(`${field}: recorded ${JSON.stringify(recorded)}, found ${JSON.stringify(actual)}`);
+}
+
 // Extraction. FP-0082 and later tasks read an extracted Test262 tree; no corpus code runs.
 const EXTRACT_PREFIXES = [Buffer.from('test/'), Buffer.from('harness/')], EXTRACT_FEATURES = Buffer.from('features.txt');
 const EXTRACT_MODES = new Set(['100644', '100755']);
-/** Returns why a tree path cannot be written under the output directory, or null. */
-export function extractPathProblem(entryPath) {
-  let start = 0;
-  for (let i = 0; i <= entryPath.length; i++) {
-    if (i < entryPath.length && entryPath[i] !== 0x2f) continue;
-    const component = entryPath.subarray(start, i).toString('latin1');
-    if (component === '') return 'an empty path component';
-    if (component === '.' || component === '..') return `a "${component}" path component`;
-    start = i + 1;
-  }
-  return null;
-}
 /** The Git blob object ID of `bytes`. */
 function blobId(bytes) {
   return crypto.createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
 }
 /**
  * Write every blob of the pinned tree whose path starts with "test/" or "harness/", and "features.txt", to `outDir`,
- * which must lie under `<root>/out/` and be absent or empty. Each written file must hash to its tree object ID.
+ * which must lie under `<root>/out/` and be absent or empty. Before anything is written, the commit's tree and the
+ * inventory must equal the snapshot record, and every written path must pass `relativePathProblem` and resolve inside
+ * `outDir`. Each written file must hash to its tree object ID.
  * `EXTRACT.json` records the commit, the tree, the file count, and the SHA-256 of the sorted lines `<oid> <path>\n`.
  */
 export async function extractCorpus(root, id, outDir, { corporaDir = corporaRoot(root), allowFileUpstream = false } = {}) {
@@ -687,15 +680,24 @@ export async function extractCorpus(root, id, outDir, { corporaDir = corporaRoot
     `The output directory must be absent or empty: ${target}`);
   const { record, gitDir } = await loadSnapshot(root, id, corporaDir, allowFileUpstream);
   const { tree } = await commitObject(gitDir, record.commit);
-  const entries = (await listTree(gitDir, record.commit))
+  const listed = await listTree(gitDir, record.commit);
+  // Git does not rehash every object that it reads, so the listing must match the snapshot record, as corpus-verify checks.
+  const problems = [], inventory = await computeInventory(gitDir, listed);
+  expectRecorded(problems, 'tree', record.tree, tree);
+  for (const k of ['entry_count', 'total_blob_bytes', 'sha256']) expectRecorded(problems, `inventory.${k}`, record.inventory[k], inventory[k]);
+  invariant(problems.length === 0, `Corpus ${id} failed extraction checks:\n- ${problems.join('\n- ')}`);
+  const entries = listed
     .filter(e => e.path.equals(EXTRACT_FEATURES) || EXTRACT_PREFIXES.some(p => e.path.subarray(0, p.length).equals(p)))
     .sort((a, b) => Buffer.compare(a.path, b.path));
-  for (const e of entries) {
+  const files = entries.map(e => {
     const shown = e.path.toString('utf8');
     invariant(e.type === 'blob' && EXTRACT_MODES.has(e.mode), `${shown} has mode ${e.mode}, not 100644 or 100755.`);
-    const problem = extractPathProblem(e.path);
+    const problem = relativePathProblem(shown);
     invariant(problem === null, `${shown} has ${problem}.`);
-  }
+    const file = path.resolve(target, ...shown.split('/'));
+    invariant(file.startsWith(`${target}${path.sep}`), `${shown} resolves outside the output directory.`);
+    return file;
+  });
   invariant(entries.some(e => e.path.equals(EXTRACT_FEATURES)), 'The pinned tree has no features.txt.');
   fs.mkdirSync(target, { recursive: true });
   let index = 0, chunks = [];
@@ -703,7 +705,7 @@ export async function extractCorpus(root, id, outDir, { corporaDir = corporaRoot
     start() { chunks = []; },
     data(chunk) { chunks.push(Buffer.from(chunk)); },
     end() {
-      const e = entries[index++], file = path.join(target, ...e.path.toString('utf8').split('/'));
+      const e = entries[index], file = files[index++];
       fs.mkdirSync(path.dirname(file), { recursive: true });
       fs.writeFileSync(file, Buffer.concat(chunks), { flag: 'wx' });
       const written = blobId(fs.readFileSync(file));
@@ -714,7 +716,7 @@ export async function extractCorpus(root, id, outDir, { corporaDir = corporaRoot
   const extract = { schema_version: 1, corpus: id, commit: record.commit, tree, files: entries.length, entries_sha256: sha256(Buffer.concat(lines)) };
   writeJson(path.join(target, 'EXTRACT.json'), extract);
   return { result: 'pass', out: target, ...extract,
-    note: 'Extraction wrote Git blobs whose content hashes to their tree object IDs. No corpus code ran.' };
+    note: 'Extraction checked the tree and inventory against the snapshot record and wrote Git blobs whose content hashes to their tree object IDs. No corpus code ran.' };
 }
 
 export async function corpusCommand(root, command, args) {

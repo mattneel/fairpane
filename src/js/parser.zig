@@ -17,6 +17,7 @@
 //! the node depth against `Options.max_depth`, and the frames count against `max_memory_bytes`.
 
 const std = @import("std");
+const builtin = @import("builtin");
 const testing = std.testing;
 const ast = @import("ast.zig");
 const lexer = @import("lexer.zig");
@@ -185,9 +186,8 @@ pub const Diagnostic = union(enum) {
 pub const Parse = struct {
     arena: std.heap.ArenaAllocator,
     outcome: union(enum) { script: *const ast.Script, diagnostic: Diagnostic },
-    /// Scratch storage of `writeOutcome`, one frame per level of the tree, so that writing a tree
-    /// of any depth uses a constant amount of native stack. One thread at a time writes a Parse.
-    write_stack: []ast.WriteFrame = &.{},
+    /// The number of levels of the script's tree, which is the number of frames that `writeOutcome` needs.
+    height: u32 = 0,
 
     pub fn deinit(parse: *Parse) void {
         parse.arena.deinit();
@@ -195,10 +195,19 @@ pub const Parse = struct {
     }
 };
 
-/// Writes the outcome as one line without a terminator.
-pub fn writeOutcome(parse: *const Parse, writer: *std.Io.Writer) std.Io.Writer.Error!void {
+pub const WriteError = std.Io.Writer.Error || Allocator.Error;
+
+/// Writes the outcome as one line without a terminator. A script is written with a heap stack of
+/// one frame per tree level, so a tree of any depth uses a constant amount of native stack; the
+/// stack comes from the allocator that `parseScript` received and is freed before returning.
+pub fn writeOutcome(parse: *const Parse, writer: *std.Io.Writer) WriteError!void {
     switch (parse.outcome) {
-        .script => |tree| try ast.writeScript(tree, parse.write_stack, writer),
+        .script => |tree| {
+            const gpa = parse.arena.child_allocator;
+            const stack = try gpa.alloc(ast.WriteFrame, parse.height);
+            defer gpa.free(stack);
+            try ast.writeScript(tree, stack, writer);
+        },
         .diagnostic => |diagnostic| try writeDiagnostic(diagnostic, writer),
     }
 }
@@ -249,7 +258,7 @@ pub fn parseScript(gpa: Allocator, source: []const u16, options: Options) error{
         else
             return error.OutOfMemory,
     };
-    parse.write_stack = parser.write_stack;
+    parse.height = parser.tree_height;
     parse.arena.child_allocator = gpa;
     parse.outcome = outcome;
     return parse;
@@ -372,6 +381,19 @@ const NameContext = struct {
 };
 
 const NameSet = std.HashMapUnmanaged(NameKey, void, NameContext, std.hash_map.default_max_load_percentage);
+
+/// The parameter names of one function, for the duplicate-parameter check.
+const ParamContext = struct {
+    pub fn hash(_: ParamContext, name: Name) u64 {
+        return std.hash.Wyhash.hash(0, std.mem.sliceAsBytes(name));
+    }
+    pub fn eql(_: ParamContext, a: Name, b: Name) bool {
+        if (builtin.is_test) Parser.duplicate_comparisons += 1;
+        return std.mem.eql(u16, a, b);
+    }
+};
+
+const ParamSet = std.HashMapUnmanaged(Name, void, ParamContext, std.hash_map.default_max_load_percentage);
 
 const FunctionKind = enum { declaration, expression };
 
@@ -530,7 +552,8 @@ const Parser = struct {
     statements_result: []const *const Statement = &.{},
     expressions_result: []const *const Expression = &.{},
     declarators_result: []const ast.Declarator = &.{},
-    write_stack: []ast.WriteFrame = &.{},
+    /// The height of the finished script's tree.
+    tree_height: u32 = 0,
     expressions: std.ArrayList(*const Expression) = .empty,
     statements: std.ArrayList(*const Statement) = .empty,
     properties: std.ArrayList(ast.Property) = .empty,
@@ -544,6 +567,11 @@ const Parser = struct {
     labels: std.ArrayList(Label) = .empty,
     function_names: NameSet = .empty,
     initialized: std.ArrayList(*const ast.Function) = .empty,
+    params_seen: ParamSet = .empty,
+
+    /// The name comparisons of the duplicate-parameter check on this thread. Only test builds
+    /// compile it, because only `ParamContext.eql` under `builtin.is_test` refers to it.
+    threadlocal var duplicate_comparisons: u64 = 0;
 
     fn deinit(p: *Parser) void {
         p.scratch.deinit(p.gpa);
@@ -562,6 +590,7 @@ const Parser = struct {
         p.labels.deinit(p.gpa);
         p.function_names.deinit(p.gpa);
         p.initialized.deinit(p.gpa);
+        p.params_seen.deinit(p.gpa);
     }
 
     fn scope(p: *Parser) *Scope {
@@ -766,7 +795,7 @@ const Parser = struct {
                     const test_expression = p.expression_result;
                     try p.expect(.r_paren);
                     p.ascend();
-                    // 12.10 rule 3: a semicolon is inserted after the `)` of a do-while statement when needed.
+                    // 12.10.1, rule 1, third condition: a semicolon is inserted after the `)` of a do-while statement when needed.
                     if (p.tok.tag == .semicolon) try p.advance();
                     p.returnStatement(try p.newStatement(l.start, 1 + @max(l.body.height, test_expression.height), .{ .do_while = .{ .body = l.body, .test_expression = test_expression } }));
                 },
@@ -1205,7 +1234,7 @@ const Parser = struct {
             .functions_to_initialize = try p.functionsToInitialize(p.scope()),
             .statements = statements,
         };
-        p.write_stack = try p.arena.alloc(ast.WriteFrame, height);
+        p.tree_height = height;
         return tree;
     }
 
@@ -1248,7 +1277,7 @@ const Parser = struct {
     /// Applies a Use Strict Directive: the body is strict from here on, and the earlier directives,
     /// the function's name, and its parameters are checked as strict code. The first error in source
     /// order is reported.
-    fn becomeStrict(p: *Parser) error{Diagnostic}!void {
+    fn becomeStrict(p: *Parser) Error!void {
         const current = p.scope();
         current.strict = true;
         var first: ?Diagnostic = null;
@@ -1264,8 +1293,24 @@ const Parser = struct {
         for (current.params, current.param_offsets) |param, offset| {
             if (strictBindingProblem(param)) |code| consider(&first, code, offset);
         }
-        if (duplicateParameter(current.params, current.param_offsets)) |offset| consider(&first, .duplicate_parameter, offset);
+        if (try p.duplicateParameter(current.params, current.param_offsets)) |offset| consider(&first, .duplicate_parameter, offset);
         if (first) |diagnostic| return p.fail(diagnostic);
+    }
+
+    /// The offset of the first parameter that repeats an earlier name. Each parameter takes one
+    /// lookup in a hashed set, so the check is linear in the number of parameters; the set is
+    /// emptied by removing its names, so a later check does not pay for an earlier one's capacity.
+    fn duplicateParameter(p: *Parser, params: []const Name, offsets: []const u32) Allocator.Error!?u32 {
+        try p.params_seen.ensureTotalCapacity(p.gpa, @intCast(params.len));
+        var inserted: usize = 0;
+        defer for (params[0..inserted]) |param| {
+            _ = p.params_seen.remove(param);
+        };
+        for (params, offsets) |param, offset| {
+            if (p.params_seen.getOrPutAssumeCapacity(param).found_existing) return offset;
+            inserted += 1;
+        }
+        return null;
     }
 
     /// Copies the VarDeclaredNames of `body` to the tree and forgets them.
@@ -1754,7 +1799,7 @@ const Parser = struct {
         current.param_offsets = try p.arena.dupe(u32, p.param_offsets.items[base..]);
         // 15.2.1: strict FormalParameters have no duplicate names, detected when the list completes.
         if (current.strict) {
-            if (duplicateParameter(current.params, current.param_offsets)) |offset| return p.syntax(.duplicate_parameter, offset);
+            if (try p.duplicateParameter(current.params, current.param_offsets)) |offset| return p.syntax(.duplicate_parameter, offset);
         }
         try p.advance();
     }
@@ -2019,11 +2064,7 @@ const Parser = struct {
         const l = &frame.locals.paren;
         l.start = p.tok.start;
         try p.advance();
-        if (p.tok.tag == .r_paren) {
-            const next = try p.peek();
-            if (next.tag == .arrow) return p.unsupported(.arrow_function, next.start);
-            return p.syntax(.unexpected_token, p.tok.start);
-        }
+        if (p.tok.tag == .r_paren) return p.arrowParametersOnly();
         l.outer = p.pending;
         p.pending = null;
         try p.descend();
@@ -2044,12 +2085,8 @@ const Parser = struct {
         try p.expressions.append(p.gpa, element);
         if (p.tok.tag == .comma) {
             try p.advance();
-            if (p.tok.tag == .r_paren) {
-                // A trailing comma ends only arrow parameters.
-                const next = try p.peek();
-                if (next.tag == .arrow) return p.unsupported(.arrow_function, next.start);
-                return p.syntax(.unexpected_token, p.tok.start);
-            }
+            // A trailing comma ends only arrow parameters.
+            if (p.tok.tag == .r_paren) return p.arrowParametersOnly();
             return p.parenElement(frame);
         }
         if (p.tok.tag != .r_paren) return p.unexpected();
@@ -2065,6 +2102,14 @@ const Parser = struct {
         if (p.pending) |pending| return p.fail(pending);
         p.pending = l.outer;
         p.returnExpression(try p.newExpression(l.start, 1 + inner.height, .{ .paren = inner }));
+    }
+
+    /// At the `)` of `( )` or `( Expression , )`, which the full grammar continues only with `=>`
+    /// (13.2): the error is at the next token, or at the end of the input.
+    fn arrowParametersOnly(p: *Parser) Error!void {
+        try p.advance();
+        if (p.tok.tag == .arrow) return p.unsupported(.arrow_function, p.tok.start);
+        return p.unexpected();
     }
 
     /// One PropertyDefinition, at the depth of the property group, or the end of the ObjectLiteral.
@@ -2272,16 +2317,6 @@ fn isEvalOrArguments(name: Name) bool {
 fn strictBindingProblem(name: Name) ?SyntaxErrorCode {
     if (lexer.isStrictReserved(name)) return .strict_reserved_word;
     if (isEvalOrArguments(name)) return .strict_eval_arguments;
-    return null;
-}
-
-/// The offset of the first parameter that repeats an earlier name.
-fn duplicateParameter(params: []const Name, offsets: []const u32) ?u32 {
-    for (params, 0..) |param, index| {
-        for (params[0..index]) |earlier| {
-            if (std.mem.eql(u16, earlier, param)) return offsets[index];
-        }
-    }
     return null;
 }
 
@@ -2552,7 +2587,11 @@ const e_cases = [_]Case{
     .{ .name = "E93", .source = "if (a)\nelse b", .expected = "syntax-error unexpected_token @7" },
     .{ .name = "E94", .source = "a\n++", .expected = "syntax-error unexpected_end @4" },
     .{ .name = "E95", .source = "function () {}", .expected = "syntax-error unexpected_token @9" },
-    .{ .name = "E96", .source = "()", .expected = "syntax-error unexpected_token @1" },
+    // Revision 1: `( )` and `( Expression , )` continue only with `=>` (13.2), so the error is at the next token.
+    .{ .name = "E96", .source = "()", .expected = "syntax-error unexpected_end @2" },
+    .{ .name = "E96a", .source = "() + 1", .expected = "syntax-error unexpected_token @3" },
+    .{ .name = "E96b", .source = "(a,)", .expected = "syntax-error unexpected_end @4" },
+    .{ .name = "E96c", .source = "(a,) + 1", .expected = "syntax-error unexpected_token @5" },
     .{ .name = "E97", .source = "function f(,) {}", .expected = "syntax-error unexpected_token @11" },
     .{ .name = "E98", .source = "try {}", .expected = "syntax-error unexpected_end @6" },
     .{ .name = "E99", .source = "switch (a) { default: default: }", .expected = "syntax-error unexpected_token @22" },
@@ -3092,7 +3131,11 @@ fn parseAndWrite(gpa: Allocator, source: []const u16) !void {
     var parse = try parseScript(gpa, source, .{});
     defer parse.deinit();
     var discarding: std.Io.Writer.Discarding = .init(&.{});
-    writeOutcome(&parse, &discarding.writer) catch unreachable;
+    // A Discarding writer never fails, so the only possible error is an allocation failure of the write stack.
+    writeOutcome(&parse, &discarding.writer) catch |err| switch (err) {
+        error.WriteFailed => unreachable,
+        error.OutOfMemory => |e| return e,
+    };
 }
 
 test "FP-0082 case 13: every induced allocation failure returns error.OutOfMemory without a leak" {
@@ -3132,6 +3175,36 @@ test "FP-0082 case 14: random sources, prefixes, and deletions yield outcomes wi
             try deleted.appendSlice(gpa, units[0..skip]);
             try deleted.appendSlice(gpa, units[skip + 1 ..]);
             try parseAndWrite(gpa, deleted.items);
+        }
+    };
+}
+
+test "FP-0082 revision 1 case 4: the duplicate-parameter check of 10,000 strict parameters makes at most 20,000 comparisons" {
+    const gpa = testing.allocator;
+    // The first function becomes strict through its own directive, and the second is strict when its parameters are read.
+    const shapes = [_]struct { prefix: []const u8, suffix: []const u8 }{
+        .{ .prefix = "function f(", .suffix = ") { \"use strict\"; }" },
+        .{ .prefix = "\"use strict\"; function g(", .suffix = ") {}" },
+    };
+    for (shapes) |shape| for ([_]bool{ false, true }) |repeat| {
+        var text: std.Io.Writer.Allocating = .init(gpa);
+        defer text.deinit();
+        try text.writer.writeAll(shape.prefix);
+        for (0..10_000) |index| try text.writer.print("{s}a{d}", .{ if (index == 0) "" else ", ", index });
+        const repeat_offset = text.written().len + ", ".len;
+        if (repeat) try text.writer.writeAll(", a0");
+        try text.writer.writeAll(shape.suffix);
+        var source = try web_string.WebString.fromUtf8(gpa, text.written());
+        defer source.deinit(gpa);
+        Parser.duplicate_comparisons = 0;
+        var parse = try parseScript(gpa, source.units, .{});
+        defer parse.deinit();
+        const expected_tag: std.meta.Tag(@FieldType(Parse, "outcome")) = if (repeat) .diagnostic else .script;
+        try testing.expectEqual(expected_tag, std.meta.activeTag(parse.outcome));
+        if (repeat) try testing.expectEqual(Diagnostic{ .syntax_error = .{ .code = .duplicate_parameter, .offset = @intCast(repeat_offset) } }, parse.outcome.diagnostic);
+        if (Parser.duplicate_comparisons > 20_000) {
+            std.debug.print("{s}...{s} with repeat {}: {d} comparisons\n", .{ shape.prefix, shape.suffix, repeat, Parser.duplicate_comparisons });
+            return error.TestTooManyComparisons;
         }
     };
 }

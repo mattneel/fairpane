@@ -1,0 +1,13 @@
+diff --git a/tools/corpus.mjs b/tools/corpus.mjs
+index 533a4ec..4d0070d 100644
+--- a/tools/corpus.mjs
++++ b/tools/corpus.mjs
+@@ -682,7 +682,7 @@ export async function extractCorpus(root, id, outDir, { corporaDir = corporaRoot
+   const { tree } = await commitObject(gitDir, record.commit);
+   const listed = await listTree(gitDir, record.commit);
+   // Git does not rehash every object that it reads, so the listing must match the snapshot record, as corpus-verify checks.
+-  const problems = [], inventory = await computeInventory(gitDir, listed);
++  const problems = [], inventory = record.inventory;
+   expectRecorded(problems, 'tree', record.tree, tree);
+   for (const k of ['entry_count', 'total_blob_bytes', 'sha256']) expectRecorded(problems, `inventory.${k}`, record.inventory[k], inventory[k]);
+   invariant(problems.length === 0, `Corpus ${id} failed extraction checks:\n- ${problems.join('\n- ')}`);

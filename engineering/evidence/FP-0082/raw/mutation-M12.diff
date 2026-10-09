@@ -1,0 +1,14 @@
+diff --git a/src/js/test262_metadata.zig b/src/js/test262_metadata.zig
+index a4a6399..4f793c5 100644
+--- a/src/js/test262_metadata.zig
++++ b/src/js/test262_metadata.zig
+@@ -171,7 +171,8 @@ const Reader = struct {
+         if (try reader.endList()) |reason| return .{ .metadata_error = reason };
+         if (reader.has_negative) {
+             const phase_text = reader.phase orelse return .{ .metadata_error = "a negative without a phase" };
+-            const phase = std.meta.stringToEnum(Phase, phase_text) orelse return .{ .metadata_error = "a phase outside the known set" };
++            // Mutation control M12: an unknown phase reads as `parse`.
++            const phase = std.meta.stringToEnum(Phase, phase_text) orelse .parse;
+             reader.metadata.negative = .{ .phase = phase, .type = reader.negative_type orelse return .{ .metadata_error = "a negative without a type" } };
+         }
+         return .{ .metadata = reader.metadata };

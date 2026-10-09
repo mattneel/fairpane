@@ -1113,11 +1113,11 @@ test('FP-0082 case 18: corpus-extract refuses a non-empty output directory, a di
   await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', absent, options), /does not contain commit/);
   assert.equal(fs.existsSync(absent), false);
 });
-test('FP-0082 case 18: the corpus-extract path check rejects empty, ".", and ".." components, and extraction rejects other modes', async () => {
+test('FP-0082 case 18: the shared path rule rejects empty, ".", and ".." components, and extraction rejects other modes', async () => {
   for (const bad of ['test/../x', 'test//x', 'test/./x', '/test/x', 'test/x/', '..', '.'])
-    assert.equal(corpus.extractPathProblem(Buffer.from(bad)) !== null, true, `${bad} passed the path check.`);
+    assert.equal(lib.relativePathProblem(bad) !== null, true, `${bad} passed the path rule.`);
   for (const good of ['test/x.js', 'harness/a.b.js', 'test/..x/y'])
-    assert.equal(corpus.extractPathProblem(Buffer.from(good)), null, `${good} failed the path check.`);
+    assert.equal(lib.relativePathProblem(good), null, `${good} failed the path rule.`);
   const f = await corpusFixture('test262', [...T262_EXTRACT_FILES, { path: 'test/link.js', text: 'test/language/a.js', mode: '120000' }]);
   await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', path.join(f.dir, 'out', 'x'), { corporaDir: f.corporaDir }),
     /test\/link\.js has mode 120000/);
@@ -1132,10 +1132,70 @@ test('FP-0082 case 18: corpus-extract rejects a stored blob whose content does n
   // Git reads a loose object without rehashing it, so the altered file yields other content under the listed ID.
   const target = objectFile(blob('test/language/a.js'));
   fs.chmodSync(target, 0o644); fs.copyFileSync(objectFile(blob('harness/assert.js')), target);
+  // The snapshot record agrees with the altered objects, so only the blob-hash check can find the alteration.
+  writeJson(f.recordFile, { ...f.record, inventory: await computeInventory(f.g, await listTree(f.g, f.commit)) });
   const out = path.join(f.dir, 'out', 'altered');
   await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', out, { corporaDir: f.corporaDir }),
     /test\/language\/a\.js: the written file hashes to [0-9a-f]{40}, not to its tree object ID/);
   assert.equal(fs.existsSync(path.join(out, 'EXTRACT.json')), false);
+});
+// FP-0082 revision 1, case 2: one shared path rule, with the tree path, the reason, and the path that the write would reach.
+test('FP-0082 case 18: the shared path rule gives each reason, and null for ordinary paths', () => {
+  for (const [bad, reason] of [['test/a\u0000b.js', 'a control character'], ['test\\a.js', 'a backslash'], ['test/a:b.js', 'a colon'],
+    ['test//a.js', 'an empty path component'], ['test/./a.js', 'a "." path component'], ['test/../a.js', 'a ".." path component'],
+    ['test/a./b.js', 'a path component that ends in "." or a space'], ['test/nul.txt', 'a reserved Windows device name']])
+    assert.equal(lib.relativePathProblem(bad), reason, JSON.stringify(bad));
+  for (const good of ['test/a/b.js', 'harness/assert.js']) assert.equal(lib.relativePathProblem(good), null, good);
+});
+const HOSTILE_EXTRACT_PATHS = [
+  ['test/..\\..\\..\\x.js', 'a backslash', '../../x.js'],
+  ['test/a:b.js', 'a colon', 'test/a'],
+  ['test/a\u0001b.js', 'a control character', 'test/a\u0001b.js'],
+  ['test/dir./x.js', 'a path component that ends in "." or a space', 'test/dir/x.js'],
+  ['test/x.js ', 'a path component that ends in "." or a space', 'test/x.js'],
+  ['test/CON.js', 'a reserved Windows device name', 'test/CON.js'],
+  ['test/aux/x.js', 'a reserved Windows device name', 'test/aux/x.js'],
+  ['test/Com1.txt.js', 'a reserved Windows device name', 'test/Com1.txt.js'],
+];
+for (const [entry, reason, reach] of HOSTILE_EXTRACT_PATHS) {
+  test(`FP-0082 case 18: corpus-extract refuses the tree path ${JSON.stringify(entry)}, which has ${reason}, and writes nothing`, async () => {
+    const f = await corpusFixture('test262', [...T262_EXTRACT_FILES, { path: entry, text: 'escape;\n' }]);
+    const out = path.join(f.dir, 'out', 'hostile');
+    await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', out, { corporaDir: f.corporaDir }), { message: `${entry} has ${reason}.` });
+    assert.equal(!fs.existsSync(out) || fs.readdirSync(out).length === 0, true, 'The output directory is not absent or empty.');
+    // A directory listing finds the name without opening it, so a device name is never opened.
+    const target = path.resolve(out, ...reach.split('/')), parent = path.dirname(target);
+    assert.equal(fs.existsSync(parent) && fs.readdirSync(parent).includes(path.basename(target)), false, `${target} exists.`);
+  });
+}
+// FP-0082 revision 1, case 3: the commit's tree and the inventory must match the snapshot record before extraction writes.
+// Git rehashes the root tree of a commit when it reads it, but not a subtree that `git ls-tree -r` reaches, so the fixture
+// alters the commit tree's `test/` subtree, as the integrator decided for revision 1.
+test('FP-0082 case 18: corpus-extract refuses an altered tree object through the inventory and writes nothing', async () => {
+  const f = await corpusFixture('test262', T262_EXTRACT_FILES);
+  const other = fixtureCommit(f.g, [...T262_EXTRACT_FILES, { path: 'test/language/b.js', text: 'b;\n' }]);
+  const objectFile = id => path.join(f.g, 'objects', id.slice(0, 2), id.slice(2));
+  // The loose object file of the `test/` subtree becomes the valid zlib stream of another tree under the same object ID.
+  const target = objectFile(fixtureGit(f.g, ['rev-parse', `${f.commit}:test`]));
+  fs.chmodSync(target, 0o644); fs.copyFileSync(objectFile(fixtureGit(f.g, ['rev-parse', `${other}:test`])), target);
+  const out = path.join(f.dir, 'out', 'altered-tree');
+  await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', out, { corporaDir: f.corporaDir }), e => {
+    assert.match(e.message, /^Corpus test262 failed extraction checks:\n/);
+    assert.match(e.message, new RegExp(`^- inventory\\.sha256: recorded "${f.record.inventory.sha256}", found "[0-9a-f]{64}"$`, 'm'));
+    return true;
+  });
+  assert.equal(!fs.existsSync(out) || fs.readdirSync(out).length === 0, true, 'The output directory is not absent or empty.');
+});
+test('FP-0082 case 18: corpus-extract refuses a snapshot record whose tree differs from the commit and writes nothing', async () => {
+  const f = await corpusFixture('test262', T262_EXTRACT_FILES);
+  writeJson(f.recordFile, { ...f.record, tree: 'f'.repeat(40) });
+  const out = path.join(f.dir, 'out', 'other-tree');
+  await assert.rejects(() => corpus.extractCorpus(f.dir, 'test262', out, { corporaDir: f.corporaDir }), e => {
+    assert.match(e.message, /^Corpus test262 failed extraction checks:\n/);
+    assert.match(e.message, new RegExp(`^- tree: recorded "${'f'.repeat(40)}", found "${f.record.tree}"$`, 'm'));
+    return true;
+  });
+  assert.equal(!fs.existsSync(out) || fs.readdirSync(out).length === 0, true, 'The output directory is not absent or empty.');
 });
 /** Paths and SHA-256 digests of every file under `dir`, sorted. */
 function directoryDigest(dir) {

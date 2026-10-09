@@ -53,7 +53,10 @@ fn parseFile(io: Io, gpa: Allocator, path: []const u8, stdout: *Io.Writer, stder
         return input_status;
     };
     defer parse.deinit();
-    parser.writeOutcome(&parse, stdout) catch return input_status;
+    parser.writeOutcome(&parse, stdout) catch |err| {
+        stderr.print("fairpane-js-parse: {s}: {s}\n", .{ path, @errorName(err) }) catch {};
+        return input_status;
+    };
     stdout.writeByte('\n') catch return input_status;
     return switch (parse.outcome) {
         .script => 0,
