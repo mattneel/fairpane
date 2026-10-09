@@ -2,6 +2,7 @@
 //!
 //! Each command reads only the files named on its command line, opens no network connection,
 //! and writes one JSON document to standard output.
+//! `run --transcript` and `minimize --out` refuse an output path that names the input file.
 //! The exit status is 0 for `pass`, 1 for `fail`, 2 for `unsupported`, 3 for `harness-error`, and 4 for `timeout`.
 //! A usage error exits with status 64 and writes no result.
 
@@ -86,10 +87,11 @@ fn isOption(arg: []const u8) bool {
 fn runCommand(io: Io, gpa: Allocator, case_path: []const u8, transcript_path: ?[]const u8) u8 {
     var run = start: {
         if (transcript_path) |path| {
-            if (std.mem.eql(u8, path, case_path)) break :start lab.Run.initHarnessError(gpa, null, same_file);
+            const refusal = refuseInputAsOutput(io, gpa, .{ .path = case_path, .subject = "case file" }, .{ .path = path, .subject = "transcript file" });
+            if (refusal) |detail| break :start lab.Run.initHarnessError(gpa, null, detail);
         }
-        const bytes = readBounded(io, gpa, case_path, lab.case_size_limit) catch |err| {
-            break :start lab.Run.initHarnessError(gpa, null, fileFailure("case file", err));
+        const bytes = lab.readInputFile(io, gpa, case_path, lab.case_size_limit) catch |err| {
+            break :start lab.Run.initHarnessError(gpa, null, lab.fileFailure("case file", err));
         };
         defer gpa.free(bytes);
         break :start lab.runCase(gpa, bytes);
@@ -97,7 +99,7 @@ fn runCommand(io: Io, gpa: Allocator, case_path: []const u8, transcript_path: ?[
     defer run.deinit();
     if (transcript_path) |path| {
         if (run.hasTranscript()) writeFile(io, path, &run, lab.Run.writeTranscript) catch |err| {
-            run.outcome = .{ .result = .harness_error, .detail = fileFailure("transcript file", err) };
+            run.outcome = .{ .result = .harness_error, .detail = lab.fileFailure("transcript file", err) };
         };
     }
     return writeStdout(io, &run, lab.Run.writeResult, run.outcome.result);
@@ -105,8 +107,8 @@ fn runCommand(io: Io, gpa: Allocator, case_path: []const u8, transcript_path: ?[
 
 fn replayCommand(io: Io, gpa: Allocator, transcript_path: []const u8) u8 {
     var replay = start: {
-        const bytes = readBounded(io, gpa, transcript_path, lab.transcript_size_limit) catch |err| {
-            break :start lab.Replay.initHarnessError(gpa, fileFailure("transcript file", err));
+        const bytes = lab.readInputFile(io, gpa, transcript_path, lab.transcript_size_limit) catch |err| {
+            break :start lab.Replay.initHarnessError(gpa, lab.fileFailure("transcript file", err));
         };
         defer gpa.free(bytes);
         break :start lab.replay(gpa, bytes);
@@ -117,9 +119,10 @@ fn replayCommand(io: Io, gpa: Allocator, transcript_path: []const u8) u8 {
 
 fn minimizeCommand(io: Io, gpa: Allocator, case_path: []const u8, out_path: []const u8) u8 {
     var minimization = start: {
-        if (std.mem.eql(u8, out_path, case_path)) break :start lab.Minimization.initHarnessError(gpa, null, same_file);
-        const bytes = readBounded(io, gpa, case_path, lab.case_size_limit) catch |err| {
-            break :start lab.Minimization.initHarnessError(gpa, null, fileFailure("case file", err));
+        const refusal = refuseInputAsOutput(io, gpa, .{ .path = case_path, .subject = "case file" }, .{ .path = out_path, .subject = "output file" });
+        if (refusal) |detail| break :start lab.Minimization.initHarnessError(gpa, null, detail);
+        const bytes = lab.readInputFile(io, gpa, case_path, lab.case_size_limit) catch |err| {
+            break :start lab.Minimization.initHarnessError(gpa, null, lab.fileFailure("case file", err));
         };
         defer gpa.free(bytes);
         break :start lab.minimize(gpa, bytes);
@@ -128,33 +131,29 @@ fn minimizeCommand(io: Io, gpa: Allocator, case_path: []const u8, out_path: []co
     // A refused minimization writes nothing.
     if (minimization.outcome.result == .pass) {
         writeFile(io, out_path, minimization.output, writeBytes) catch |err| {
-            minimization.outcome = .{ .result = .harness_error, .detail = fileFailure("output file", err) };
+            minimization.outcome = .{ .result = .harness_error, .detail = lab.fileFailure("output file", err) };
         };
     }
     return writeStdout(io, &minimization, lab.Minimization.writeReport, minimization.outcome.result);
 }
 
-/// Reads a whole file of at most `limit` bytes.
-/// A larger file is an error before any byte is read, and the read never passes the length found first.
-fn readBounded(io: Io, gpa: Allocator, path: []const u8, limit: usize) ![]u8 {
-    const file = try Io.Dir.cwd().openFile(io, path, .{});
-    defer file.close(io);
-    const length = try file.length(io);
-    if (length > limit) return error.FileTooLarge;
-    const bytes = try gpa.alloc(u8, @intCast(length));
-    errdefer gpa.free(bytes);
-    if (try file.readPositionalAll(io, bytes, 0) != bytes.len) return error.FileChanged;
-    if (try file.length(io) != length) return error.FileChanged;
-    return bytes;
-}
+/// A file named on the command line and the subject that names it in a harness message.
+const NamedFile = struct { path: []const u8, subject: []const u8 };
 
-fn fileFailure(subject: []const u8, err: anyerror) lab.Detail {
-    return .{ .subject = subject, .message = switch (err) {
-        error.FileTooLarge => "exceeds the size limit",
-        error.FileChanged => "changed while it was read",
-        error.OutOfMemory => "out of memory",
-        else => @errorName(err),
-    } };
+/// Returns the detail of a harness error when `output` names the `input` file or when that cannot be decided, and null otherwise.
+/// Equal spellings name one file. When the output file exists, the canonical real paths of both files decide,
+/// so different spellings of one file are refused. An output file that does not exist is not the input file.
+fn refuseInputAsOutput(io: Io, gpa: Allocator, input: NamedFile, output: NamedFile) ?lab.Detail {
+    if (std.mem.eql(u8, input.path, output.path)) return same_file;
+    const cwd = Io.Dir.cwd();
+    const output_real = cwd.realPathFileAlloc(io, output.path, gpa) catch |err| return switch (err) {
+        error.FileNotFound => null,
+        else => lab.fileFailure(output.subject, err),
+    };
+    defer gpa.free(output_real);
+    const input_real = cwd.realPathFileAlloc(io, input.path, gpa) catch |err| return lab.fileFailure(input.subject, err);
+    defer gpa.free(input_real);
+    return if (std.mem.eql(u8, input_real, output_real)) same_file else null;
 }
 
 fn writeBytes(bytes: []const u8, writer: *Io.Writer) Io.Writer.Error!void {

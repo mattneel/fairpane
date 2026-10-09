@@ -1,8 +1,9 @@
-//! Checks for contract case 14 that the build runs after `fairpane-lab minimize`.
+//! Checks that the build runs after `fairpane-lab minimize`.
 //!
-//! `check minimal <case>` confirms that the minimized case keeps the `fail` outcome on `document_state`,
-//! keeps no resource, and has a 1-minimal document body: removing any single byte changes the outcome.
-//! `check empty <directory>` confirms that a refused minimization wrote nothing into its output directory.
+//! `check minimal <case>` confirms for FP-0007 contract case 14 that the minimized case keeps the `fail` outcome
+//! on `document_state`, keeps no resource, and has a 1-minimal document body: removing any single byte changes the outcome.
+//! `check empty <directory>` confirms for FP-0007 contract case 14 that a refused minimization wrote nothing into its output directory.
+//! `check same <expected> <actual>` confirms for FP-0054 contract case 5 that a refused minimization left its input unchanged.
 
 const std = @import("std");
 const lab = @import("lab");
@@ -12,7 +13,8 @@ pub fn main(init: std.process.Init) !u8 {
     const args = try init.minimal.args.toSlice(init.arena.allocator());
     if (args.len == 3 and std.mem.eql(u8, args[1], "minimal")) return checkMinimal(init.io, init.gpa, args[2]);
     if (args.len == 3 and std.mem.eql(u8, args[1], "empty")) return checkEmpty(init.io, args[2]);
-    std.debug.print("usage: check minimal <case> | check empty <directory>\n", .{});
+    if (args.len == 4 and std.mem.eql(u8, args[1], "same")) return checkSame(init.io, init.gpa, args[2], args[3]);
+    std.debug.print("usage: check minimal <case> | check empty <directory> | check same <expected> <actual>\n", .{});
     return 2;
 }
 
@@ -69,6 +71,18 @@ fn checkEmpty(io: Io, path: []const u8) !u8 {
     var entries = dir.iterate();
     if (try entries.next(io)) |entry| {
         std.debug.print("the refused minimization wrote {s}\n", .{entry.name});
+        return 1;
+    }
+    return 0;
+}
+
+fn checkSame(io: Io, gpa: std.mem.Allocator, expected_path: []const u8, actual_path: []const u8) !u8 {
+    const expected = try Io.Dir.cwd().readFileAlloc(io, expected_path, gpa, .limited(lab.case_size_limit));
+    defer gpa.free(expected);
+    const actual = try Io.Dir.cwd().readFileAlloc(io, actual_path, gpa, .limited(lab.case_size_limit));
+    defer gpa.free(actual);
+    if (!std.mem.eql(u8, expected, actual)) {
+        std.debug.print("{s} changed: {d} bytes, expected {d} bytes\n", .{ actual_path, actual.len, expected.len });
         return 1;
     }
     return 0;

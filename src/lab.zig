@@ -3,8 +3,8 @@
 //! The laboratory runs one case document against a new engine through the Zig API in `engine.zig`.
 //! It creates one document, loads the case's document URL, and answers each issued request
 //! from the case only, by exact byte equality of the URL.
-//! It performs no I/O of its own: `lab_main.zig` reads the files named on the command line
-//! and writes the documents that this module renders.
+//! Its only I/O is `readInputFile`, which `lab_main.zig` calls to read the files named on the command line;
+//! `lab_main.zig` also writes the documents that this module renders.
 //!
 //! Results, transcripts, replay results, and minimized cases are deterministic JSON documents.
 //! They name documents and requests by ordinals in order of first appearance,
@@ -13,7 +13,8 @@
 const std = @import("std");
 const engine = @import("engine.zig");
 const Allocator = std.mem.Allocator;
-const Writer = std.Io.Writer;
+const Io = std.Io;
+const Writer = Io.Writer;
 const Stringify = std.json.Stringify;
 const Value = std.json.Value;
 const ObjectMap = std.json.ObjectMap;
@@ -99,6 +100,34 @@ pub const Detail = struct {
 
 const out_of_memory: Detail = .{ .message = "out of memory" };
 
+// Input files.
+
+/// Reads the whole file at `path`, relative to the current directory, which must hold at most `limit` bytes.
+/// A longer file returns `error.FileTooLarge` before any allocation or read,
+/// and the read never passes the length found first.
+/// The caller frees the result with `gpa`.
+pub fn readInputFile(io: Io, gpa: Allocator, path: []const u8, limit: usize) ![]u8 {
+    const file = try Io.Dir.cwd().openFile(io, path, .{});
+    defer file.close(io);
+    const length = try file.length(io);
+    if (length > limit) return error.FileTooLarge;
+    const bytes = try gpa.alloc(u8, @intCast(length));
+    errdefer gpa.free(bytes);
+    if (try file.readPositionalAll(io, bytes, 0) != bytes.len) return error.FileChanged;
+    if (try file.length(io) != length) return error.FileChanged;
+    return bytes;
+}
+
+/// Describes a failure to read or write `subject`, a file named on the command line.
+pub fn fileFailure(subject: []const u8, err: anyerror) Detail {
+    return .{ .subject = subject, .message = switch (err) {
+        error.FileTooLarge => "exceeds the size limit",
+        error.FileChanged => "changed while it was read",
+        error.OutOfMemory => "out of memory",
+        else => @errorName(err),
+    } };
+}
+
 // Cases.
 
 pub const Corpus = struct {
@@ -106,6 +135,14 @@ pub const Corpus = struct {
     revision: []const u8,
     path: []const u8,
     blob: []const u8,
+};
+
+/// The origin of a derived case, such as a minimized case, whose body no longer matches its original's corpus item.
+pub const DerivedFrom = struct {
+    /// The SHA-256 of the original case file bytes.
+    case_sha256: [32]u8,
+    /// The original case's `corpus` value.
+    corpus: ?Corpus,
 };
 
 pub const Viewport = struct {
@@ -151,7 +188,10 @@ pub const Expectation = union(enum) {
 };
 
 pub const Case = struct {
+    /// The corpus item, which is always null in a version 2 case.
     corpus: ?Corpus,
+    /// The origin of a version 2 case, or null in a version 1 case.
+    derived_from: ?DerivedFrom,
     environment: Environment,
     document: Input,
     resources: []const Input,
@@ -173,14 +213,34 @@ pub const Case = struct {
 pub const ParseError = Allocator.Error || error{Invalid};
 
 /// Parses a case document strictly.
+/// A version 1 case may name a corpus item and has no `derived_from`.
+/// A version 2 case is derived from another case: its `derived_from` names the original, and its `corpus` is null.
 /// Every string and body is allocated with `arena`, so the case does not borrow `bytes`.
 /// An invalid case returns `error.Invalid` and describes its first problem in `diagnostic`.
 pub fn parseCase(arena: Allocator, bytes: []const u8, diagnostic: *Detail) ParseError!Case {
     var p: Parser = .{ .arena = arena, .diagnostic = diagnostic };
     const root = try p.parseJson(bytes, "case");
-    const top = try p.object(root, "case", &.{ "format", "version", "corpus", "environment", "document", "resources", "limits", "expect" });
-    try p.header(top, "fairpane-lab-case");
-    const corpus = try p.corpus(try p.field(top, "", "corpus"));
+    const top = try p.object(root, "case", &.{
+        "format",
+        "version",
+        "corpus",
+        "derived_from",
+        "environment",
+        "document",
+        "resources",
+        "limits",
+        "expect",
+    });
+    const version = try p.header(top, "fairpane-lab-case", &.{ 1, 2 });
+    const corpus = try p.corpus(try p.field(top, "", "corpus"), "corpus");
+    const derived_from: ?DerivedFrom = switch (version) {
+        1 => if (top.contains("derived_from")) return p.fail("derived_from", "not allowed in version 1") else null,
+        2 => derived: {
+            if (corpus != null) return p.fail("corpus", "expected null in version 2");
+            break :derived try p.derivedFrom(try p.field(top, "", "derived_from"));
+        },
+        else => unreachable,
+    };
     const environment = try p.environment(try p.field(top, "", "environment"));
     const document_map = try p.object(try p.field(top, "", "document"), "document", &.{ "url", "body_base64" });
     const document: Input = .{
@@ -193,6 +253,7 @@ pub fn parseCase(arena: Allocator, bytes: []const u8, diagnostic: *Detail) Parse
     const expect = try p.expectation(expect_json);
     return .{
         .corpus = corpus,
+        .derived_from = derived_from,
         .environment = environment,
         .document = document,
         .resources = resources,
@@ -236,13 +297,19 @@ const Parser = struct {
         return map.get(name) orelse return p.fail(prefix ++ name, "missing field");
     }
 
-    fn header(p: *Parser, map: ObjectMap, comptime format: []const u8) error{Invalid}!void {
+    /// Checks the document's `format` and returns its `version`, which must be one of `versions`.
+    fn header(p: *Parser, map: ObjectMap, comptime format: []const u8, comptime versions: []const u8) error{Invalid}!u8 {
         const format_value = try p.field(map, "", "format");
         if (format_value != .string or !std.mem.eql(u8, format_value.string, format)) {
             return p.fail("format", "expected \"" ++ format ++ "\"");
         }
         const version = try p.field(map, "", "version");
-        if (version != .number_string or !std.mem.eql(u8, version.number_string, "1")) return p.fail("version", "expected 1");
+        if (version == .number_string) {
+            inline for (versions) |known| {
+                if (std.mem.eql(u8, version.number_string, std.fmt.comptimePrint("{d}", .{known}))) return known;
+            }
+        }
+        return p.fail("version", comptime versionMessage(versions));
     }
 
     fn string(p: *Parser, value: Value, subject: []const u8) error{Invalid}![]const u8 {
@@ -315,39 +382,49 @@ const Parser = struct {
         }
     }
 
-    fn corpus(p: *Parser, value: Value) error{Invalid}!?Corpus {
+    /// Parses a corpus value at member path `subject`.
+    fn corpus(p: *Parser, value: Value, comptime subject: []const u8) error{Invalid}!?Corpus {
         if (value == .null) return null;
-        const map = try p.object(value, "corpus", &.{ "name", "revision", "path", "blob" });
+        const prefix = subject ++ ".";
+        const map = try p.object(value, subject, &.{ "name", "revision", "path", "blob" });
         return .{
-            .name = try p.corpusName(try p.field(map, "corpus.", "name")),
-            .revision = try p.hex(try p.field(map, "corpus.", "revision"), "corpus.revision", 40),
-            .path = try p.corpusPath(try p.field(map, "corpus.", "path")),
-            .blob = try p.hex(try p.field(map, "corpus.", "blob"), "corpus.blob", 40),
+            .name = try p.corpusName(try p.field(map, prefix, "name"), prefix ++ "name"),
+            .revision = try p.hex(try p.field(map, prefix, "revision"), prefix ++ "revision", 40),
+            .path = try p.corpusPath(try p.field(map, prefix, "path"), prefix ++ "path"),
+            .blob = try p.hex(try p.field(map, prefix, "blob"), prefix ++ "blob", 40),
         };
     }
 
-    fn corpusName(p: *Parser, value: Value) error{Invalid}![]const u8 {
+    fn corpusName(p: *Parser, value: Value, subject: []const u8) error{Invalid}![]const u8 {
         const message = "expected a name that matches [a-z0-9][a-z0-9-]*";
-        if (value != .string or value.string.len == 0 or value.string[0] == '-') return p.fail("corpus.name", message);
+        if (value != .string or value.string.len == 0 or value.string[0] == '-') return p.fail(subject, message);
         for (value.string) |c| switch (c) {
             'a'...'z', '0'...'9', '-' => {},
-            else => return p.fail("corpus.name", message),
+            else => return p.fail(subject, message),
         };
         return value.string;
     }
 
-    fn corpusPath(p: *Parser, value: Value) error{Invalid}![]const u8 {
+    fn corpusPath(p: *Parser, value: Value, subject: []const u8) error{Invalid}![]const u8 {
         const message = "expected a relative POSIX path without empty, \".\", or \"..\" segments";
-        if (value != .string) return p.fail("corpus.path", message);
+        if (value != .string) return p.fail(subject, message);
         var segments = std.mem.splitScalar(u8, value.string, '/');
         while (segments.next()) |segment| {
             if (segment.len == 0 or std.mem.eql(u8, segment, ".") or std.mem.eql(u8, segment, "..") or
                 std.mem.indexOfScalar(u8, segment, 0) != null)
             {
-                return p.fail("corpus.path", message);
+                return p.fail(subject, message);
             }
         }
         return value.string;
+    }
+
+    fn derivedFrom(p: *Parser, value: Value) error{Invalid}!DerivedFrom {
+        const map = try p.object(value, "derived_from", &.{ "case_sha256", "corpus" });
+        return .{
+            .case_sha256 = try p.digest(try p.field(map, "derived_from.", "case_sha256"), "derived_from.case_sha256"),
+            .corpus = try p.corpus(try p.field(map, "derived_from.", "corpus"), "derived_from.corpus"),
+        };
     }
 
     fn environment(p: *Parser, value: Value) error{Invalid}!Environment {
@@ -444,10 +521,20 @@ const Parser = struct {
         return .{ .fetch = .{ .document_state = state.?, .body_sha256 = body_sha256 } };
     }
 
+    /// Parses a version 2 transcript, whose `action_count` must equal the number of its actions,
+    /// so a transcript that lost whole actions is invalid.
     fn transcript(p: *Parser, bytes: []const u8) ParseError!Transcript {
         const root = try p.parseJson(bytes, "transcript");
-        const top = try p.object(root, "transcript", &.{ "format", "version", "case", "engine_options", "actions", "document_states" });
-        try p.header(top, "fairpane-lab-transcript");
+        const top = try p.object(root, "transcript", &.{
+            "format",
+            "version",
+            "case",
+            "engine_options",
+            "action_count",
+            "actions",
+            "document_states",
+        });
+        _ = try p.header(top, "fairpane-lab-transcript", &.{2});
         _ = try p.hex(try p.field(top, "", "case"), "case", 64);
         const options = try p.object(try p.field(top, "", "engine_options"), "engine_options", &.{
             "max_outstanding_requests",
@@ -467,8 +554,10 @@ const Parser = struct {
                 case_size_limit,
             )),
         };
+        const action_count = try p.integer(try p.field(top, "", "action_count"), "action_count", 0, std.math.maxInt(u32));
         const actions_value = try p.field(top, "", "actions");
         if (actions_value != .array) return p.fail("actions", "expected an array");
+        if (action_count != actions_value.array.items.len) return p.fail("action_count", "differs from the number of actions");
         const actions = try p.arena.alloc(TranscriptAction, actions_value.array.items.len);
         for (actions_value.array.items, actions) |item, *action| action.* = try p.transcriptAction(item);
         const states_value = try p.field(top, "", "document_states");
@@ -576,6 +665,15 @@ fn isOneOf(key: []const u8, comptime names: []const []const u8) bool {
         if (std.mem.eql(u8, key, name)) return true;
     }
     return false;
+}
+
+/// Returns "expected 1", "expected 1 or 2", and so on, for the accepted document versions.
+fn versionMessage(comptime versions: []const u8) []const u8 {
+    var message: []const u8 = "expected";
+    for (versions, 0..) |version, index| {
+        message = message ++ (if (index == 0) " " else " or ") ++ std.fmt.comptimePrint("{d}", .{version});
+    }
+    return message;
 }
 
 /// Whether the canonical padded base64 encoding of `bytes` is exactly `text`.
@@ -900,6 +998,12 @@ pub const Signature = struct {
 };
 
 /// Classifies a completed execution against the case's expectation.
+///
+/// The outcomes take precedence in this order: `harness-error`, then `timeout`, then `unsupported`, then `fail` or `pass`.
+/// A harness error, found while parsing or executing the case, ends the run before this function.
+/// A document that is still loading after `max_steps` calls to `Engine.step` is a `timeout`, even when the expectation names an
+/// unimplemented stage. Otherwise an expectation for an unimplemented stage is `unsupported`, and a `fetch` expectation
+/// is `fail` at its first differing check or `pass`.
 fn conclude(case: *const Case, execution: *const Execution) Outcome {
     const state = execution.document_state.?;
     if (state == .loading) return .{
@@ -968,6 +1072,14 @@ pub const Run = struct {
         run.* = undefined;
     }
 
+    /// Returns the status that the result reports for `stage`.
+    ///
+    /// A stage that this task does not implement is `unsupported`.
+    /// The `fetch` status says whether the stage finished, not whether the document loaded:
+    /// `completed` means the document reached `loaded` or `failed`, so a document that failed still has a `completed` fetch;
+    /// `failed` means the stage did not finish, after a `timeout` or a harness error;
+    /// `not-reached` means the case did not run.
+    /// A `fetch` status of `failed` therefore differs from a `document_state` of `failed`.
     pub fn stageStatus(run: *const Run, stage: Stage) Status {
         if (!implemented(stage)) return .unsupported;
         return run.execution.fetch;
@@ -1055,7 +1167,7 @@ pub const Run = struct {
         try s.objectField("format");
         try s.write("fairpane-lab-transcript");
         try s.objectField("version");
-        try s.write(1);
+        try s.write(2);
         try s.objectField("case");
         try writeDigest(&s, run.case_sha256);
         try s.objectField("engine_options");
@@ -1065,6 +1177,8 @@ pub const Run = struct {
         try s.objectField("max_response_body_bytes");
         try s.write(case.limits.max_response_body_bytes);
         try s.endObject();
+        try s.objectField("action_count");
+        try s.write(run.execution.records.items.len);
         try s.objectField("actions");
         try s.beginArray();
         const events = run.execution.events.items;
@@ -1464,6 +1578,8 @@ pub const Minimization = struct {
 /// The predicate holds when a run of a candidate has the original run's result, stage, and check.
 /// The minimizer removes whole resources one at a time while the predicate holds,
 /// and then applies `ddmin` to the document body.
+/// The minimized case is a version 2 case: its `corpus` is null, because its body no longer matches the corpus item,
+/// and its `derived_from` names the SHA-256 of `case_bytes` and the original case's `corpus` value.
 /// A case with any other outcome is a harness error.
 pub fn minimize(gpa: Allocator, case_bytes: []const u8) Minimization {
     var m: Minimization = .{ .arena = .init(gpa), .case_sha256 = digestOf(case_bytes), .outcome = undefined };
@@ -1520,6 +1636,9 @@ fn minimizeOutcome(m: *Minimization, gpa: Allocator, case_bytes: []const u8) All
         m.document_body_length = .{ .before = body.len, .after = reduced.len };
     }
 
+    current.corpus = null;
+    current.derived_from = .{ .case_sha256 = m.case_sha256.?, .corpus = case.corpus };
+
     var out: Writer.Allocating = .init(arena);
     writeCase(&out.writer, &current) catch return error.OutOfMemory;
     m.output = out.written();
@@ -1535,16 +1654,26 @@ fn minimizeOutcome(m: *Minimization, gpa: Allocator, case_bytes: []const u8) All
     return .{ .result = .pass };
 }
 
-/// Writes `case` as a case document. The `expect` object is repeated as parsed.
+/// Writes `case` as a case document: version 2 when it has `derived_from`, otherwise version 1.
+/// The `expect` object is repeated as parsed.
 fn writeCase(writer: *Writer, case: *const Case) Writer.Error!void {
     var s: Stringify = .{ .writer = writer, .options = .{ .whitespace = .indent_2 } };
     try s.beginObject();
     try s.objectField("format");
     try s.write("fairpane-lab-case");
     try s.objectField("version");
-    try s.write(1);
+    try s.write(@as(u8, if (case.derived_from != null) 2 else 1));
     try s.objectField("corpus");
     try writeCorpus(&s, case.corpus);
+    if (case.derived_from) |derived_from| {
+        try s.objectField("derived_from");
+        try s.beginObject();
+        try s.objectField("case_sha256");
+        try writeDigest(&s, derived_from.case_sha256);
+        try s.objectField("corpus");
+        try writeCorpus(&s, derived_from.corpus);
+        try s.endObject();
+    }
     try s.objectField("environment");
     try writeEnvironment(&s, case.environment);
     try s.objectField("document");
@@ -1896,7 +2025,7 @@ test "FP-0007 case 1: a valid case parses, and each invalid fixture reports harn
         .{ .file = "case-01-unknown-field.json", .detail = "environment: unknown field" },
         .{ .file = "case-01-duplicate-field.json", .detail = "case: duplicate field" },
         .{ .file = "case-01-wrong-format.json", .detail = "format: expected \"fairpane-lab-case\"" },
-        .{ .file = "case-01-wrong-version.json", .detail = "version: expected 1" },
+        .{ .file = "case-01-wrong-version.json", .detail = "version: expected 1 or 2" },
         .{ .file = "case-01-invalid-base64.json", .detail = "document.body_base64: expected canonical padded base64" },
         .{ .file = "case-01-uppercase-revision.json", .detail = "corpus.revision: expected 40 lowercase hexadecimal digits" },
         .{ .file = "case-01-dotdot-path.json", .detail = "corpus.path: expected a relative POSIX path without empty, \".\", or \"..\" segments" },
@@ -2249,5 +2378,135 @@ test "FP-0007 case 12: each induced allocation failure in parsing and a complete
         const bytes = try readFixture(name);
         defer testing.allocator.free(bytes);
         try testing.checkAllAllocationFailures(testing.allocator, runUnderAllocationFailure, .{bytes});
+    }
+}
+
+test "FP-0054 case 1: a sparse case file of 64 MiB + 1 bytes fails with FileTooLarge before any allocation" {
+    var tmp = testing.tmpDir(.{});
+    defer tmp.cleanup();
+    const name = "oversized.json";
+    {
+        // Setting the length writes no byte, so the file system may leave the file sparse.
+        const file = try tmp.dir.createFile(testing.io, name, .{});
+        defer file.close(testing.io);
+        try file.setLength(testing.io, case_size_limit + 1);
+    }
+    var path_buffer: [256]u8 = undefined;
+    const path = try std.fmt.bufPrint(&path_buffer, ".zig-cache/tmp/{s}/{s}", .{ &tmp.sub_path, name });
+    var counting: testing.FailingAllocator = .init(testing.allocator, .{});
+    try testing.expectError(error.FileTooLarge, readInputFile(testing.io, counting.allocator(), path, case_size_limit));
+    try testing.expectEqual(@as(usize, 0), counting.allocations);
+
+    // The command line reports the error as a harness error that names the size limit, with exit status 3.
+    var run = Run.initHarnessError(testing.allocator, null, fileFailure("case file", error.FileTooLarge));
+    defer run.deinit();
+    var buffer: [64]u8 = undefined;
+    try testing.expectEqualStrings("case file: exceeds the size limit", try detailText(&buffer, run.outcome.detail.?));
+    try testing.expectEqual(@as(u8, 3), run.outcome.result.exitStatus());
+}
+
+/// Records the transcript of `fixture`, applies `edit` to its parsed JSON, and replays the edited transcript.
+fn replayEdited(fixture: []const u8, comptime edit: fn (*std.json.ObjectMap) anyerror!void) !Replay {
+    var run = try runFixture(fixture);
+    defer run.deinit();
+    var transcript: Writer.Allocating = .init(testing.allocator);
+    defer transcript.deinit();
+    try run.writeTranscript(&transcript.writer);
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+    var root = try std.json.parseFromSliceLeaky(std.json.Value, arena.allocator(), transcript.written(), .{});
+    try testing.expect(root == .object);
+    try edit(&root.object);
+    const edited = try Stringify.valueAlloc(arena.allocator(), root, .{ .whitespace = .indent_2 });
+    return replay(testing.allocator, edited);
+}
+
+fn removeLastAction(top: *std.json.ObjectMap) !void {
+    const actions = top.getPtr("actions") orelse return error.TestUnexpectedResult;
+    try testing.expect(actions.* == .array and actions.array.items.len > 1);
+    _ = actions.array.pop();
+}
+
+fn setVersion1(top: *std.json.ObjectMap) !void {
+    const version = top.getPtr("version") orelse return error.TestUnexpectedResult;
+    version.* = .{ .integer = 1 };
+}
+
+test "FP-0054 case 2: a transcript with a removed action or with version 1 reports harness-error" {
+    {
+        var run = try runFixture("case-02-pass.json");
+        defer run.deinit();
+        var transcript: Writer.Allocating = .init(testing.allocator);
+        defer transcript.deinit();
+        try run.writeTranscript(&transcript.writer);
+        var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+        defer arena.deinit();
+        const recorded = try std.json.parseFromSliceLeaky(std.json.Value, arena.allocator(), transcript.written(), .{});
+        try testing.expectEqual(@as(i64, 2), (try member(recorded, "version")).integer);
+        try testing.expectEqual(@as(i64, 4), (try member(recorded, "action_count")).integer);
+        var replayed = replay(testing.allocator, transcript.written());
+        defer replayed.deinit();
+        try testing.expectEqual(Result.pass, replayed.outcome.result);
+    }
+    var buffer: [128]u8 = undefined;
+    {
+        var replayed = try replayEdited("case-02-pass.json", removeLastAction);
+        defer replayed.deinit();
+        try testing.expectEqual(Result.harness_error, replayed.outcome.result);
+        try testing.expectEqual(@as(u8, 3), replayed.outcome.result.exitStatus());
+        try testing.expectEqualStrings("action_count: differs from the number of actions", try detailText(&buffer, replayed.outcome.detail.?));
+    }
+    {
+        var replayed = try replayEdited("case-02-pass.json", setVersion1);
+        defer replayed.deinit();
+        try testing.expectEqual(Result.harness_error, replayed.outcome.result);
+        try testing.expectEqualStrings("version: expected 2", try detailText(&buffer, replayed.outcome.detail.?));
+    }
+}
+
+test "FP-0054 case 3: minimize writes a version 2 case derived from the original digest and corpus, with a null corpus" {
+    const bytes = try readFixture("fp0054-case-03-minimize-corpus.json");
+    defer testing.allocator.free(bytes);
+    var m = minimize(testing.allocator, bytes);
+    defer m.deinit();
+    try testing.expectEqual(Result.pass, m.outcome.result);
+
+    var arena: std.heap.ArenaAllocator = .init(testing.allocator);
+    defer arena.deinit();
+    const original = try std.json.parseFromSliceLeaky(std.json.Value, arena.allocator(), bytes, .{});
+    const written = try std.json.parseFromSliceLeaky(std.json.Value, arena.allocator(), m.output, .{});
+    try testing.expectEqual(@as(i64, 2), (try member(written, "version")).integer);
+    try testing.expect((try member(written, "corpus")) == .null);
+    const derived_from = try member(written, "derived_from");
+    try expectString(&hexDigest(bytes), try member(derived_from, "case_sha256"));
+    try testing.expect((try member(original, "corpus")) == .object);
+    try testing.expect(jsonEqual(try member(original, "corpus"), try member(derived_from, "corpus")));
+
+    // The written case parses as a derived case and reproduces the original outcome.
+    var diagnostic: Detail = undefined;
+    const case = try parseCase(arena.allocator(), m.output, &diagnostic);
+    try testing.expect(case.corpus == null);
+    try testing.expectEqualStrings(&hexDigest(bytes), &std.fmt.bytesToHex(case.derived_from.?.case_sha256, .lower));
+    try testing.expectEqualStrings("html/syntax/parsing/derived.html", case.derived_from.?.corpus.?.path);
+    var rerun = runCase(testing.allocator, m.output);
+    defer rerun.deinit();
+    try testing.expectEqual(Result.fail, rerun.outcome.result);
+    try testing.expectEqual(Check.body_sha256, std.meta.activeTag(rerun.outcome.mismatch.?));
+}
+
+test "FP-0054 case 4: derived_from in version 1, its absence in version 2, and a version 2 corpus each report harness-error" {
+    const invalid = [_]struct { file: []const u8, detail: []const u8 }{
+        .{ .file = "fp0054-case-04-v1-derived.json", .detail = "derived_from: not allowed in version 1" },
+        .{ .file = "fp0054-case-04-v2-missing-derived.json", .detail = "derived_from: missing field" },
+        .{ .file = "fp0054-case-04-v2-corpus.json", .detail = "corpus: expected null in version 2" },
+    };
+    for (invalid, 0..) |fixture, index| {
+        for (invalid[0..index]) |earlier| try testing.expect(!std.mem.eql(u8, earlier.detail, fixture.detail));
+        var run = try runFixture(fixture.file);
+        defer run.deinit();
+        try testing.expectEqual(Result.harness_error, run.outcome.result);
+        try testing.expectEqual(@as(u8, 3), run.outcome.result.exitStatus());
+        var buffer: [128]u8 = undefined;
+        try testing.expectEqualStrings(fixture.detail, try detailText(&buffer, run.outcome.detail.?));
     }
 }

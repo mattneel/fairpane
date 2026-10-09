@@ -20,6 +20,10 @@ const lab_fixtures = [_][]const u8{
     "case-04-tree-unsupported.json",
     "case-05-null-body.json",
     "case-08-timeout.json",
+    "fp0054-case-03-minimize-corpus.json",
+    "fp0054-case-04-v1-derived.json",
+    "fp0054-case-04-v2-missing-derived.json",
+    "fp0054-case-04-v2-corpus.json",
 };
 
 /// A compile-failure fixture of FP-0011 and the exit status and standard-error texts that it must produce.
@@ -162,7 +166,7 @@ pub fn build(b: *std.Build) void {
     }
 }
 
-/// Adds contract cases 13 and 14, which run the installed `fairpane-lab` executable.
+/// Adds FP-0007 contract cases 13 and 14 and FP-0054 contract case 5, which run the installed `fairpane-lab` executable.
 fn addLabCases(
     b: *std.Build,
     test_step: *std.Build.Step,
@@ -231,6 +235,29 @@ fn addLabCases(
     empty.addDirectoryArg(refused);
     empty.expectExitCode(0);
     test_step.dependOn(&empty.step);
+
+    // The run mutates nothing in `tests/lab`: it names a private copy of a failing case, which minimize would otherwise overwrite.
+    const copies = b.addWriteFiles();
+    const input = copies.addCopyFile(b.path("tests/lab/case-03-body-mismatch.json"), "case.json");
+    const guard = labRun(b, install, lab, "FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling");
+    guard.setCwd(copies.getDirectory());
+    guard.addArg("minimize");
+    // The input is an absolute path and the output is relative to the copy's directory: two spellings of one file.
+    guard.addFileArg2(input, .{ .make_absolute = true });
+    guard.addArgs(&.{ "--out", "case.json" });
+    guard.expectExitCode(3);
+    guard.expectStdOutMatch("\"result\": \"harness-error\"");
+    guard.expectStdOutMatch("\"detail\": \"command line: the output path names the input file\"");
+    test_step.dependOn(&guard.step);
+
+    const unchanged = b.addRunArtifact(check);
+    unchanged.setName("FP-0054 case 5: the refused minimization leaves the input unchanged");
+    unchanged.addArg("same");
+    unchanged.addFileArg(b.path("tests/lab/case-03-body-mismatch.json"));
+    unchanged.addFileArg(input);
+    unchanged.expectExitCode(0);
+    unchanged.step.dependOn(&guard.step);
+    test_step.dependOn(&unchanged.step);
 }
 
 /// Runs the installed laboratory executable after the `lab` installation step.

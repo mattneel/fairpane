@@ -444,7 +444,11 @@ function trackingFs(overrides = {}) {
   const logClosed = logPath => [...opened].some(([fd, file]) => file === logPath && closed.has(fd));
   return { fileSystem, logClosed };
 }
-const lastResult = logPath => JSON.parse(fs.readFileSync(logPath, 'utf8').split('\n').filter(l => l.startsWith('RESULT ')).at(-1).slice(7));
+const lastResult = logPath => {
+  const lines = fs.readFileSync(logPath, 'utf8').split('\n').filter(l => l.startsWith('RESULT '));
+  assert.ok(lines.length > 0, `${logPath} has no RESULT line.`);
+  return JSON.parse(lines.at(-1).slice(7));
+};
 const failOutputOpen = (fileSystem, message) => {
   const open = fileSystem.openSync;
   fileSystem.openSync = (file, ...rest) => { if (path.basename(file) === 'output.log') throw new Error(message); return open(file, ...rest); };
@@ -535,25 +539,51 @@ test('A failed capture-directory removal appears in the command record', async (
   });
   assert.equal(fs.readdirSync(tmp).length, 2, 'Both capture directories survive, as their records state.');
 });
-test('A busy capture directory is removed on a later attempt, and the last failure is recorded', async () => {
-  const dir = temp(), busy = () => Object.assign(new Error('forced busy removal'), { code: 'EBUSY' });
-  const failing = failures => {
-    let calls = 0;
-    return { calls: () => calls, fileSystem: { rmSync: (...args) => { calls++; if (calls <= failures) throw busy(); return fs.rmSync(...args); } } };
+// Each injected removal failure has a distinct message, so a record that names an earlier failure is caught.
+function failingRemoval(failures) {
+  const times = [];
+  const rmSync = (...args) => {
+    times.push(performance.now());
+    const failure = failures[times.length - 1];
+    if (failure) throw Object.assign(new Error(failure.message), { code: failure.code });
+    return fs.rmSync(...args);
   };
-  const recovered = failing(2);
-  const r = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: path.join(dir, 'recovered.log'), fileSystem: recovered.fileSystem });
-  assert.equal(r.error, null); assert.equal(recovered.calls(), 3);
+  return { times, fileSystem: { rmSync } };
+}
+test('FP-0054 case 6: A busy capture directory is removed on a later attempt', async () => {
+  const dir = temp(), logPath = path.join(dir, 'recovered.log');
+  const removal = failingRemoval([{ code: 'EBUSY', message: 'busy 1' }, { code: 'EBUSY', message: 'busy 2' }]);
+  const r = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath, fileSystem: removal.fileSystem });
+  assert.equal(r.error, null); assert.equal(removal.times.length, 3);
+  assert.equal(lastResult(logPath).error, null);
+});
+test('FP-0054 case 6: a capture directory that stays busy records the last failure after waiting between attempts', async () => {
+  const dir = temp(), logPath = path.join(dir, 'stuck.log');
+  const removal = failingRemoval(['busy 1', 'busy 2', 'busy 3'].map(message => ({ code: 'EBUSY', message })));
   const tmp = await withPrivateTemp(async () => {
-    const stuck = failing(Infinity);
-    const s = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: path.join(dir, 'stuck.log'), fileSystem: stuck.fileSystem });
-    assert.equal(s.error, 'Capture directory removal failed: forced busy removal'); assert.equal(stuck.calls(), 3);
-    let plainCalls = 0;
-    const plainFs = { rmSync: () => { plainCalls++; throw new Error('forced plain failure'); } };
-    const p = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath: path.join(dir, 'plain.log'), fileSystem: plainFs });
-    assert.equal(p.error, 'Capture directory removal failed: forced plain failure'); assert.equal(plainCalls, 1);
+    const r = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath, fileSystem: removal.fileSystem });
+    assert.equal(r.error, 'Capture directory removal failed: busy 3'); assert.equal(removal.times.length, 3);
+    assert.equal(lastResult(logPath).error, r.error);
   });
-  assert.equal(fs.readdirSync(tmp).length, 2, 'Both failed capture directories survive, as their records state.');
+  // removeCapture waits 50 and then 100 milliseconds; the bound leaves 10 milliseconds for timer granularity.
+  const elapsed = removal.times[2] - removal.times[0];
+  assert.ok(elapsed >= 140, `The three removal attempts took ${elapsed} ms.`);
+  assert.equal(fs.readdirSync(tmp).length, 1, 'The failed capture directory survives, as its record states.');
+});
+test('FP-0054 case 6: a capture-directory removal error with a non-transient code gets one attempt', async () => {
+  const dir = temp(), logPath = path.join(dir, 'denied.log');
+  const removal = failingRemoval([{ code: 'EACCES', message: 'EACCES: forced access failure' }]);
+  const tmp = await withPrivateTemp(async () => {
+    const r = await runProcess(process.execPath, ['-e', ''], { cwd: dir, logPath, fileSystem: removal.fileSystem });
+    assert.equal(r.error, 'Capture directory removal failed: EACCES: forced access failure'); assert.equal(removal.times.length, 1);
+    assert.equal(lastResult(logPath).error, r.error);
+  });
+  assert.equal(fs.readdirSync(tmp).length, 1, 'The failed capture directory survives, as its record states.');
+});
+test('FP-0054 case 6: lastResult asserts that a RESULT line exists before it parses one', () => {
+  const logPath = path.join(temp(), 'no-result.log');
+  fs.writeFileSync(logPath, '\nCOMMAND ["absent"]\noutput without a result\n');
+  assert.throws(() => lastResult(logPath), { name: 'AssertionError', message: `${logPath} has no RESULT line.` });
 });
 test('started_at in every command record is a canonical UTC ISO 8601 timestamp', async () => {
   const dir = gateFixture(), log = 'out/evidence/times.log', logPath = path.join(dir, log);
