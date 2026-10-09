@@ -86,6 +86,10 @@ The integrator checks the `Gates` run of each pushed head.
 A failed run blocks acceptance of every task whose implementation it contains, and the failure is recorded in that task's evidence with its run ID.
 The integrator accepts a task only after the runs of every pushed head from its implementation commit to the head before the acceptance commit have concluded.
 Each of those runs must pass, or its failure must be recorded with its cause and a passing rerun of the same head.
+When a later commit fixes the recorded cause, a passing run of a later head that contains both the task's implementation and that fix may replace the rerun of the same head.
+The failure record then names the cause's evidence, the fixing commit, and the passing run.
+The fixing commit belongs to an accepted task or is itself reviewed, and it removes or weakens no test, gate, or threshold.
+A run that a timeout stops is a failure, and a cancelled run is recorded with its reason and replaced by a concluded run of the same head.
 `git apply --3way` stages the patch that it applies.
 Before each commit, the integrator checks `git diff --cached --name-only`, so a commit holds only the files that its message names.
 
