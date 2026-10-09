@@ -1,0 +1,26 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/attest.test.mjs"]
+TAP version 13
+ok 1 - 2: A valid envelope signed by a trusted key verifies
+ok 2 - 3: RFC 8032 test vector 1 verifies through the same key decoding path
+ok 3 - 4: A key outside the trust policy fails, whether it names itself or a trusted key
+ok 4 - 5: One changed payload byte fails as bad-signature
+ok 5 - 6: A truncated envelope and a truncated payload each fail
+ok 6 - 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+ok 7 - 8: A payload for another commit or tree fails as stale-candidate
+ok 8 - 9: A payload with another policy digest fails as changed-policy
+ok 9 - 10: Zero discovered and zero selected each fail as zero-denominator
+ok 10 - 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+ok 11 - 12: A runner key that differs from the signature key fails as key-mismatch
+ok 12 - 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+ok 13 - 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+ok 14 - 16: A trusted signature over a noncanonical payload fails as malformed
+ok 15 - FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result
+ok 16 - FP-0051 2: enclosingGitDirectories collects the common directory of every enclosing .git entry
+ok 17 - FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+ok 18 - FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled
+1..18
+# tests 18
+# pass 18
+# fail 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/attest.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:48:04.387Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":3837}

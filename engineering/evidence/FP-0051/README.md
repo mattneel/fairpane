@@ -35,7 +35,8 @@ Case 13 also fails there, because that copy sits in a subdirectory of the reposi
 
 ## Limits
 
-The verifier finds work trees of the candidate through every `.git` entry on its own path, but a layout that Git finds only through `GIT_DIR` or `core.worktree` is not detected.
+The verifier finds work trees of the candidate through every `.git` entry on its own path.
+It does not detect a layout that Git finds only through `GIT_DIR` or `core.worktree`, or a bare Git directory on that path, and a broken `.git` entry on that path is a tool error.
 Path comparison cannot detect a UNC or administrative-share alias of the candidate.
 
 ## Revision 1
@@ -55,3 +56,19 @@ In that run, revision cases 2, 3, and 4 fail, and case 13 fails because the copy
 
 - `gates/2026-10-09T04-27-14-161Z-repo-check-602ded0e.json`
 - `gates/2026-10-09T04-27-14-360Z-controller-test-72b7bc63.json`, with 143 of 143 controller tests.
+
+## Revision 2
+
+`reviews/review-2-reject.json` rejected commit `9b878bc`, because `git cat-file -t` reads only the stored header.
+A corrupt object under the candidate's ID with a tree header therefore failed as `unknown-candidate` instead of a tool error.
+Commit `3373788` peels an existing object to `^{object}`, which parses it and checks its hash, before it names the object's type.
+
+| Log | Result |
+| --- | --- |
+| `raw/revision-2-tests-before.log` | Two runs against the base code. In the second, case FP-0051 3 reports every corruption fixture's outcome in one assertion: the tree-header object returns `unknown-candidate`, and the other two return the base message. |
+| `raw/revision-2-binding.log` | `HEAD` `3373788`, and an empty status, including untracked and ignored files, for every source root. |
+| `raw/revision-2-tests-after.log` | `node tools/attest.test.mjs` passes 18 of 18 cases. |
+| `raw/revision-2-tests-bun.log` | Bun runs 155 of 155 controller tests. |
+
+- `gates/2026-10-09T04-47-39-863Z-repo-check-e9842c89.json`
+- `gates/2026-10-09T04-47-40-096Z-controller-test-2c7a9b46.json`, with 155 of 155 controller tests.

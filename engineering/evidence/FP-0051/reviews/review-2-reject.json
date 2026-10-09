@@ -1,0 +1,123 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "9b878bce4c845cc3f4ae14573d95ce29e1684bfc",
+    "5f807f2c4d19dc8fdb173db91654e459ad70c891"
+  ],
+  "summary": "Rejected because of one major finding. Revision 1 fixes the policy-alias bypass, the nested-repository and commondir gaps, the test oracle, and the evidence-binding gap. The new cat-file probe also fixes both reproductions from review 1. One part of the corruption class remains, and my own review-1 recommendation caused it. `git cat-file -t` reads only the stored object header and checks no hash. If a corrupt object stored under the candidate's commit ID has a tree, blob, or tag header, Git fails the lookup with 'hash mismatch' and exits with status 1. The verifier then reports unknown-candidate ('Object … is a tree, not a commit') instead of a tool error (attest.mjs:202-203). That breaks criterion 2 ('report any other Git failure of the commit lookup as a tool error').\n\nPolicy ancestors: passesInside (attest.mjs:91-99) resolves every existing prefix of path.resolve(policyPath) with realpathSync.native. Any spelling that passes through the candidate root therefore reaches the canonical root and is rejected. This covers macOS /tmp and /var, 8.3 short names, junctions or symbolic links to an ancestor, subst drives, and the \\\\?\\C:\\ and \\\\.\\C:\\ forms. libuv's realpath uses GetFinalPathNameByHandleW(VOLUME_NAME_DOS) and strips the \\\\?\\ prefix [INFERENCE from libuv and Node path.win32 behavior; only the junction or symbolic-link alias is tested]. I found no way for it to reject a legitimate outside policy. A rejection needs some existing prefix of the spelled path to resolve inside the candidate or its Git directory, and such a route always passes through a directory the writer controls. POSIX `..` is collapsed before resolution, and the file read is the checked `resolved` path, so it causes no false rejection. UNC and administrative-share aliases stay undetected, as documented.\n\nCat-file probe: it separates every case I listed. A missing object gives unknown-candidate through -e status 1. A tree gives unknown-candidate through -t. A commit over another commit's object and a `--literally` malformed commit give tool errors. A loose object that is not valid zlib stops Git with status 128, which is a tool error. Packed objects behave the same way. -e consults only the .idx and -t reads only the pack header. A packed hash mismatch or malformed commit exits with status 1 and becomes a tool error. A bad packed zlib stream or a missing delta base makes Git die with 'packed object … is corrupt' (status 128) [INFERENCE from Git source; packed fixtures are not tested]. The exception is the non-commit-header hash mismatch above.\n\nenclosingGitDirectories: it now handles commondir in a .git directory (commonDirectoryOf, lines 160-164). It does not stop at an invalid .git directory, because it collects every entry up to the root. It also finds nested repositories. Case FP-0051 2 tests the commondir and nested cases. The empty .git directory case is not tested, but it uses the same mechanism. The documented limits are accurate for work-tree layouts. Two notes remain. The function does not find a bare-style Git directory on the path whose commondir names the candidate, which Git's discovery finds through is_git_directory. A broken .git entry above the nearest repository also fails closed as an undocumented tool error.\n\nEvidence binding: revision-1-binding.log shows HEAD 9b878bc at 04:27:13.985Z. Its status includes --ignored, covers every source root, and is empty. The gates ran from 04:27:14.163Z to 04:27:37.290Z, and the source digest 65b43fc6… (128 files) is the same before and after. tests-after ran at 04:27:37Z and Bun at 04:27:40Z to about 04:28:03Z. The reflog puts 9b878bc at 04:27:06Z and 5f807f2 at 04:28:30Z. The policy digest bb313e06… matches the FP-0007 receipts at the parent a033de3 and the review-1 receipts, so protected paths are unchanged.\n\nI ran no commands. I read the working tree at a later HEAD. That tools/attest.mjs, tools/attest.test.mjs, and tools/fairpane.mjs equal their 9b878bc versions is [INFERENCE].",
+  "criteria": [
+    {
+      "criterion": "Report a verifier that runs from a linked work tree of the candidate repository as advisory, with a test.",
+      "met": true,
+      "evidence": "fairpane.mjs:135-136 checks enclosingGitDirectories(root).includes(repository.gitDirectory). Case FP-0051 1 (attest.test.mjs:221-232) is 'ok 15' in raw/revision-1-tests-after.log and 'ok 51' in the gate log gates/2026-10-09T04-27-14-360Z-controller-test-72b7bc63.log. The function now collects every .git entry up to the root (attest.mjs:172-186), so a nested repository no longer hides the linked work tree. In raw/revision-1-tests-before.log, case FP-0051 2 fails against the base and returns only the nested .git."
+    },
+    {
+      "criterion": "Reserve unknown-candidate for a missing commit object, and report any other Git failure of the commit lookup as a tool error, with a corrupted-object fixture.",
+      "met": false,
+      "evidence": "Met for the listed cases. A missing object gives -e status 1 and unknown-candidate (attest.mjs:200). A tree ID gives unknown-candidate through -t (line 203). A commit over another commit's object and a `--literally` malformed commit give the tool error at line 204 (test lines 266-273, 'ok 17'). A loose object that is not valid zlib gives status 128 and a tool error (line 206, test line 262). The base reported the mismatch as 'unknown-candidate' (revision-1-tests-before.log, not ok 17). Not met for a hash-mismatched object whose stored header is not 'commit'. See the major finding."
+    },
+    {
+      "criterion": "Reject a trust-policy path whose lexical form or resolved form lies inside the candidate repository or its Git directory, and read the same resolved path that was checked.",
+      "met": true,
+      "evidence": "passesInside (attest.mjs:91-99) resolves every existing prefix of path.resolve(policyPath). A lexical path through the candidate root therefore reaches the canonical root, whatever the spelling. loadTrustPolicy reads `resolved` (lines 109 and 115), the same real path the first loop iteration checks. Case FP-0051 4 (attest.test.mjs:275-288) adds an alias outside the candidate that resolves to its root. The case fails against the base ('Expected rejection unprotected-policy, got success', revision-1-tests-before.log) and passes as 'ok 18' after the change."
+    },
+    {
+      "criterion": "Document that path comparison cannot detect a UNC or administrative-share alias of the candidate.",
+      "met": true,
+      "evidence": "ADR 0002 line 28 and tools/README.md:107."
+    },
+    {
+      "criterion": "Make the outside-repository test independent of whether the temporary directory lies inside a Git work tree.",
+      "met": true,
+      "evidence": "Case 14 (attest.test.mjs:193-197) derives the expected error from `git -C outside rev-parse --show-toplevel` run without GIT_* variables. Git, not the function under test, is now the oracle."
+    },
+    {
+      "criterion": "Revision test cases 6-9 exist and pass.",
+      "met": true,
+      "evidence": "Case 6 is attest.test.mjs:284-286. Case 7 is lines 264-273; it covers only commit-headed corruption, which is all the contract requires. Case 8 is lines 240-252. Case 9 is lines 193-197. All four pass in revision-1-tests-after.log (18 of 18), revision-1-tests-bun.log (143 of 143), and the controller-test gate (143 of 143)."
+    },
+    {
+      "criterion": "Protected paths stay unchanged.",
+      "met": true,
+      "evidence": "Both revision gate receipts show policy digest bb313e06aa16… (17 files) before and after. It matches the FP-0007 receipts at the parent a033de3 (04:23:07Z) and the review-1 receipts. The ADR and tools changes lie in the contract's writable paths."
+    },
+    {
+      "criterion": "Evidence binds to the reviewed commit.",
+      "met": true,
+      "evidence": "raw/revision-1-binding.log shows `rev-parse HEAD` = 9b878bce4c84… at 04:27:13.985Z. It also shows `status --porcelain --untracked-files=all --ignored` over the full source_roots list of engineering/policy.json, with empty output and exit status 0. The repo-check and controller-test receipts (04:27:14.163Z to 04:27:37.290Z) show source digest 65b43fc6… (128 files) before and after. tests-after started at 04:27:37.352Z and Bun at 04:27:40.986Z. In .git/logs/HEAD, 9b878bc is at epoch 1791520026 (04:27:06Z), 5f807f2 at 1791520110 (04:28:30Z), and the next commit, 98fa147, at 04:29:37Z. The receipts themselves still carry no commit ID."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "(major) attest.mjs:96: a lexical policy path compared with canonical locations misses aliases of the candidate root followed by an inner link.",
+      "resolved": true,
+      "evidence": "passesInside (attest.mjs:91-99) replaces the lexical comparison with a real-path check of every existing prefix. Case FP-0051 4 line 286 uses an alias of the candidate root and fails against the base, then passes after the change (revision-1-tests-before.log not ok 18, revision-1-tests-after.log ok 18). Only the link alias is tested. Short names, subst drives, and device paths are covered by analysis only."
+    },
+    {
+      "finding": "(major) attest.mjs:176: status 1 from rev-parse X^{commit} also covers existing commits that fail the hash check or do not parse.",
+      "resolved": false,
+      "evidence": "Both reproductions now give tool errors (attest.mjs:197-204; test lines 266-273). The probe I recommended maps any non-commit stored type to unknown-candidate. A hash-mismatched object with a tree, blob, or tag header therefore still gives unknown-candidate. See the new major finding."
+    },
+    {
+      "finding": "(minor) attest.test.mjs:255: case FP-0051 4 passed only because the host's temporary directory was canonical.",
+      "resolved": true,
+      "evidence": "With the ancestor walk, path.join(candidate.dir, 'link', …) is rejected through the candidate.dir prefix whatever its spelling. The case also adds an explicit alias (line 286). No CI run of 9b878bc is recorded, so the windows-2025 short-name path remains unobserved."
+    },
+    {
+      "finding": "(minor) attest.mjs:153: enclosingGitDirectory ignored commondir in a .git directory, stopped at an invalid .git directory, and was hidden by a nested repository.",
+      "resolved": true,
+      "evidence": "commonDirectoryOf (attest.mjs:160-164) applies commondir to every Git directory. The walk collects every entry to the root (lines 172-186), so neither an invalid nor a nested .git stops it. Tests cover commondir (lines 248-252) and nesting (lines 240-247). GIT_DIR and core.worktree are documented (ADR 0002:48, tools/README.md:109)."
+    },
+    {
+      "finding": "(minor) Evidence README:38-39 claimed that discovery errors only make results advisory.",
+      "resolved": true,
+      "evidence": "The claim is gone. README 'Limits' and ADR 0002:48 now state the GIT_DIR and core.worktree limit instead."
+    },
+    {
+      "finding": "(note) binding.log status omitted --ignored.",
+      "resolved": true,
+      "evidence": "revision-1-binding.log uses --untracked-files=all --ignored over every source root, and the output is empty."
+    },
+    {
+      "finding": "(note) attest.test.mjs:202: the function under test was the oracle for the expected error.",
+      "resolved": true,
+      "evidence": "attest.test.mjs:193-197 probes Git without GIT_* variables."
+    },
+    {
+      "finding": "(note) attest.mjs:155: gitdir and commondir trimming differed from Git, and POSIX `..` semantics were undocumented.",
+      "resolved": true,
+      "evidence": "stripLineEnd (attest.mjs:158) strips only trailing CR and LF in both files, matching read_gitfile_gently and get_common_dir_noenv. The optional documentation of POSIX `..` was not added, but it was optional and is not a bypass."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "tools/attest.mjs",
+      "line": 203,
+      "issue": "`git cat-file -t` returns the type from the stored header and checks no hash. parse_object, which rev-parse reaches through peel_onion, checks the hash for every type. For a blob it uses stream_object_signature, and for other types check_object_signature. So when the object stored under a commit ID is another object with a tree, blob, or tag header, rev-parse prints 'error: hash mismatch <id>' and exits with status 1. cat-file -e then exits with 0 and cat-file -t prints 'tree'. Line 203 reports unknown-candidate with the false message 'Object <id> is a tree, not a commit.' and drops Git's error. This is a Git failure of the commit lookup, so criterion 2 requires a tool error. Most objects in a repository are trees and blobs, so most wrong-object substitutions take this path. Only commit-over-commit, the case review 1 used, reaches the tool error. My review-1 recommendation ('report a non-commit type as unknown-candidate') introduced this gap. Minimal reproduction [INFERENCE from Git source, not executed]: in a fresh fixtureRepository r, run `fs.chmodSync(looseOf(r, r.first), 0o644)`. Then run `fs.copyFileSync(looseOf(r, r.firstTree), looseOf(r, r.first))` and `candidateIdentity(r.dir, r.first)`. The actual result is AttestationError 'unknown-candidate'. The expected result is a tool error that quotes 'hash mismatch'.",
+      "recommendation": "Before mapping an existing object to unknown-candidate, require that Git can parse it with its hash check. For example, run `rev-parse --verify --quiet <id>^{object}`. peel_onion calls parse_object before any type peel. Map status 0 to unknown-candidate and status 1 to a tool error that quotes rev-parse's stderr. That check also makes the -t probe unnecessary. Add the tree-over-commit fixture to case FP-0051 3. A packed-object fixture is optional, for example `git repack -ad` followed by the `--literally` malformed commit."
+    },
+    {
+      "severity": "note",
+      "path": "tools/attest.mjs",
+      "line": 172,
+      "issue": "Git's discovery (setup_git_directory_gently_1) also checks whether each directory on the path is itself a Git directory (is_git_directory). Such a directory needs HEAD plus objects and refs, or a commondir file. A bare-style Git directory V outside the candidate that holds HEAD and a commondir naming the candidate's directory is therefore Git's repository for V/tools, with the candidate's common directory. enclosingGitDirectories looks only for `.git` entries and misses it. Git never creates this layout outside <common>/worktrees, and V is not a work tree. The ADR's 'any work tree' claim (ADR 0002:47-48, tools/README.md:108-109) therefore holds. The limit sentence still names only GIT_DIR and core.worktree.",
+      "recommendation": "Optionally add the bare-directory case to the documented limits, or apply commonDirectoryOf when a directory on the path contains HEAD and commondir."
+    },
+    {
+      "severity": "note",
+      "path": "tools/attest.mjs",
+      "line": 181,
+      "issue": "The walk continues past the nearest valid repository to the file system root. Git stops at the nearest one. A broken `.git` file or an unresolvable gitdir or commondir target above the verifier's own repository therefore makes attest-verify a tool error (lines 163, 181, and 182 throw), where Git would never read the entry. This fails closed and is not a false 'verified'. The ADR and README do not document it.",
+      "recommendation": "Document that a broken `.git` entry anywhere above the verifier is a tool error, or accept it as intended fail-closed behavior in the ADR."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0051/raw/revision-1-tests-before.log",
+      "line": null,
+      "issue": "The log shows `git hash-object` of the staged attest.mjs equal to the base blob 24d3060… at 04:25:49.646Z. It then shows only the file's last lines with the stub, at 04:25:49.707Z. The command that appended the stub is not recorded, and the staged attest.test.mjs is not hashed. The log therefore does not prove that the stub was the only change, or that the tests that ran are the 9b878bc tests. The failing cases match the expected base behavior, so this is consistent [INFERENCE].",
+      "recommendation": "In future baselines, record the append command, the hash-object of the modified copy, and the hash of the test file against the revision blob."
+    }
+  ],
+  "commands_run": []
+}
