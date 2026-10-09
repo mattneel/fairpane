@@ -1,0 +1,13 @@
+diff --git a/out/fp0079/mutation/M6-rust.mjs b/tools/rust.mjs
+index fefbd77..829548d 100644
+--- a/out/fp0079/mutation/M6-rust.mjs
++++ b/tools/rust.mjs
+@@ -108,7 +108,7 @@ const RESERVED_DEVICE_NAME = /^(?:CON|PRN|AUX|NUL|COM[1-9\u00b9\u00b2\u00b3]|LPT
+  */
+ export function acceptedArchivePath(name) {
+   if (name.startsWith('/') || /^[A-Za-z]:/.test(name) || name.includes('\\') || /[\u0000-\u001f]/.test(name)) return false;
+-  if (name.includes(':')) return false;
++  // M6 removes the colon rule.
+   return name.split('/').every(part => part !== '' && part !== '.' && part !== '..' && !/[. ]$/.test(part)
+     && !RESERVED_DEVICE_NAME.test(part.split('.')[0]));
+ }

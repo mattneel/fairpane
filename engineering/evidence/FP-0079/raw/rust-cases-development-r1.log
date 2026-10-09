@@ -1,0 +1,18 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+1..10
+# tests 10
+# pass 10
+# fail 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:36:10.723Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":716}

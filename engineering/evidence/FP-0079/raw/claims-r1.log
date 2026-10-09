@@ -1,0 +1,20 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),crypto=require('crypto');const files=process.argv.slice(1);const bytes=files.map(f=>fs.readFileSync(f));for(const [i,f] of files.entries())console.log(crypto.createHash('sha256').update(bytes[i]).digest('hex')+'  '+f+'  '+bytes[i].length+' bytes');console.log('byte-identical: '+bytes[0].equals(bytes[1]));","engineering/evidence/FP-0079/raw/provenance/rust-key.gpg.ascii","engineering/evidence/FP-0079/raw/provenance/rust-key-keybase.asc"]
+e54b09a439647e006b4831eec9785cbaaf3e07ab371c3a6ee6a68e1bdb9fbc6b  engineering/evidence/FP-0079/raw/provenance/rust-key.gpg.ascii  5326 bytes
+e54b09a439647e006b4831eec9785cbaaf3e07ab371c3a6ee6a68e1bdb9fbc6b  engineering/evidence/FP-0079/raw/provenance/rust-key-keybase.asc  5326 bytes
+byte-identical: true
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),crypto=require('crypto');const files=process.argv.slice(1);const bytes=files.map(f=>fs.readFileSync(f));for(const [i,f] of files.entries())console.log(crypto.createHash('sha256').update(bytes[i]).digest('hex')+'  '+f+'  '+bytes[i].length+' bytes');console.log('byte-identical: '+bytes[0].equals(bytes[1]));","engineering/evidence/FP-0079/raw/provenance/rust-key.gpg.ascii","engineering/evidence/FP-0079/raw/provenance/rust-key-keybase.asc"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:39:16.910Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":51}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');for(const d of process.argv.slice(1))console.log(d+' exists: '+fs.existsSync(d));","C:/Users/requi/.omp/wt/ta23d1da82/m/.tools/cargo-home",".tools/cargo-home"]
+C:/Users/requi/.omp/wt/ta23d1da82/m/.tools/cargo-home exists: false
+.tools/cargo-home exists: false
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');for(const d of process.argv.slice(1))console.log(d+' exists: '+fs.existsSync(d));","C:/Users/requi/.omp/wt/ta23d1da82/m/.tools/cargo-home",".tools/cargo-home"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:39:17.018Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const os=require('os');console.log(JSON.stringify({type:os.type(),release:os.release(),version:os.version(),arch:process.arch,node:process.version}));"]
+{"type":"Windows_NT","release":"10.0.26200","version":"Windows 11 Pro","arch":"x64","node":"v26.7.0"}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const os=require('os');console.log(JSON.stringify({type:os.type(),release:os.release(),version:os.version(),arch:process.arch,node:process.version}));"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:39:17.120Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":38}
+
+COMMAND ["C:\\Windows\\System32\\cmd.exe","/d","/c","ver"]
+
+Microsoft Windows [Version 10.0.26200.9457]
+RESULT {"executable":"C:\\Windows\\System32\\cmd.exe","arguments":["/d","/c","ver"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:39:17.221Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":12}

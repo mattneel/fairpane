@@ -1,0 +1,240 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),path=require('path'),crypto=require('crypto');const home=process.env.USERPROFILE;const toolchains=path.join(home,'.rustup','toolchains');const list=d=>fs.readdirSync(d).sort();const components=t=>{const f=path.join(toolchains,t,'lib','rustlib','components');return fs.existsSync(f)?fs.readFileSync(f,'utf8').split(/\\r?\\n/).filter(Boolean):null;};const names=list(toolchains);console.log(JSON.stringify({rustup_toolchains:names,rustup_toolchain_components:Object.fromEntries(names.map(t=>[t,components(t)])),rustup_settings_sha256:crypto.createHash('sha256').update(fs.readFileSync(path.join(home,'.rustup','settings.toml'))).digest('hex'),cargo_bin:list(path.join(home,'.cargo','bin'))},null,2))"]
+{
+  "rustup_toolchains": [
+    "1.92.0-x86_64-pc-windows-msvc",
+    "1.96.0-x86_64-pc-windows-msvc",
+    "1.97.1-x86_64-pc-windows-msvc",
+    "1.98.1-x86_64-pc-windows-msvc",
+    "1.99-x86_64-pc-windows-msvc",
+    "1.99.0-x86_64-pc-windows-msvc",
+    "grindstone-base",
+    "grindstone-candidate",
+    "nightly-2026-07-20-x86_64-pc-windows-msvc",
+    "stable-x86_64-pc-windows-msvc"
+  ],
+  "rustup_toolchain_components": {
+    "1.92.0-x86_64-pc-windows-msvc": [
+      "cargo-x86_64-pc-windows-msvc",
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "rust-docs-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rust-std-wasm32-unknown-unknown",
+      "rust-src"
+    ],
+    "1.96.0-x86_64-pc-windows-msvc": [
+      "cargo-x86_64-pc-windows-msvc",
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "rust-docs-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rust-std-wasm32-unknown-unknown"
+    ],
+    "1.97.1-x86_64-pc-windows-msvc": [
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc"
+    ],
+    "1.98.1-x86_64-pc-windows-msvc": [
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "clippy-preview-x86_64-pc-windows-msvc"
+    ],
+    "1.99-x86_64-pc-windows-msvc": [
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-docs-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc"
+    ],
+    "1.99.0-x86_64-pc-windows-msvc": [
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-docs-x86_64-pc-windows-msvc",
+      "rust-std-wasm32-unknown-unknown",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc",
+      "rust-analyzer-preview-x86_64-pc-windows-msvc",
+      "rust-src"
+    ],
+    "grindstone-base": null,
+    "grindstone-candidate": null,
+    "nightly-2026-07-20-x86_64-pc-windows-msvc": [
+      "rust-src",
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc"
+    ],
+    "stable-x86_64-pc-windows-msvc": [
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-analyzer-preview-x86_64-pc-windows-msvc",
+      "rust-docs-x86_64-pc-windows-msvc",
+      "rust-src",
+      "llvm-tools-preview-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc"
+    ]
+  },
+  "rustup_settings_sha256": "c03c2fe106cdb668f30a59df54f48072560bf6aa3062a330384adf1f2fb0d33a",
+  "cargo_bin": [
+    "ast-grep.exe",
+    "cargo-about.exe",
+    "cargo-clippy.exe",
+    "cargo-deny.exe",
+    "cargo-fmt.exe",
+    "cargo-miri.exe",
+    "cargo-shear.exe",
+    "cargo.exe",
+    "clippy-driver.exe",
+    "fossil-mcp.exe",
+    "jscpd.exe",
+    "just.exe",
+    "mdbook.exe",
+    "rls.exe",
+    "rust-analyzer.exe",
+    "rust-gdb.exe",
+    "rust-gdbgui.exe",
+    "rust-lldb.exe",
+    "rustc.exe",
+    "rustdoc.exe",
+    "rustfmt.exe",
+    "rustup.exe",
+    "sg.exe",
+    "trunk.exe",
+    "wasm-bindgen-test-runner.exe",
+    "wasm-bindgen.exe",
+    "wasm2es6js.exe"
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),path=require('path'),crypto=require('crypto');const home=process.env.USERPROFILE;const toolchains=path.join(home,'.rustup','toolchains');const list=d=>fs.readdirSync(d).sort();const components=t=>{const f=path.join(toolchains,t,'lib','rustlib','components');return fs.existsSync(f)?fs.readFileSync(f,'utf8').split(/\\r?\\n/).filter(Boolean):null;};const names=list(toolchains);console.log(JSON.stringify({rustup_toolchains:names,rustup_toolchain_components:Object.fromEntries(names.map(t=>[t,components(t)])),rustup_settings_sha256:crypto.createHash('sha256').update(fs.readFileSync(path.join(home,'.rustup','settings.toml'))).digest('hex'),cargo_bin:list(path.join(home,'.cargo','bin'))},null,2))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:38:03.076Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),path=require('path'),crypto=require('crypto');const home=process.env.USERPROFILE;const toolchains=path.join(home,'.rustup','toolchains');const list=d=>fs.readdirSync(d).sort();const components=t=>{const f=path.join(toolchains,t,'lib','rustlib','components');return fs.existsSync(f)?fs.readFileSync(f,'utf8').split(/\\r?\\n/).filter(Boolean):null;};const names=list(toolchains);console.log(JSON.stringify({rustup_toolchains:names,rustup_toolchain_components:Object.fromEntries(names.map(t=>[t,components(t)])),rustup_settings_sha256:crypto.createHash('sha256').update(fs.readFileSync(path.join(home,'.rustup','settings.toml'))).digest('hex'),cargo_bin:list(path.join(home,'.cargo','bin'))},null,2))"]
+{
+  "rustup_toolchains": [
+    "1.92.0-x86_64-pc-windows-msvc",
+    "1.96.0-x86_64-pc-windows-msvc",
+    "1.97.1-x86_64-pc-windows-msvc",
+    "1.98.1-x86_64-pc-windows-msvc",
+    "1.99-x86_64-pc-windows-msvc",
+    "1.99.0-x86_64-pc-windows-msvc",
+    "grindstone-base",
+    "grindstone-candidate",
+    "nightly-2026-07-20-x86_64-pc-windows-msvc",
+    "stable-x86_64-pc-windows-msvc"
+  ],
+  "rustup_toolchain_components": {
+    "1.92.0-x86_64-pc-windows-msvc": [
+      "cargo-x86_64-pc-windows-msvc",
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "rust-docs-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rust-std-wasm32-unknown-unknown",
+      "rust-src"
+    ],
+    "1.96.0-x86_64-pc-windows-msvc": [
+      "cargo-x86_64-pc-windows-msvc",
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "rust-docs-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rust-std-wasm32-unknown-unknown"
+    ],
+    "1.97.1-x86_64-pc-windows-msvc": [
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc"
+    ],
+    "1.98.1-x86_64-pc-windows-msvc": [
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "clippy-preview-x86_64-pc-windows-msvc"
+    ],
+    "1.99-x86_64-pc-windows-msvc": [
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-docs-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc"
+    ],
+    "1.99.0-x86_64-pc-windows-msvc": [
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-docs-x86_64-pc-windows-msvc",
+      "rust-std-wasm32-unknown-unknown",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc",
+      "rust-analyzer-preview-x86_64-pc-windows-msvc",
+      "rust-src"
+    ],
+    "grindstone-base": null,
+    "grindstone-candidate": null,
+    "nightly-2026-07-20-x86_64-pc-windows-msvc": [
+      "rust-src",
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc"
+    ],
+    "stable-x86_64-pc-windows-msvc": [
+      "clippy-preview-x86_64-pc-windows-msvc",
+      "cargo-x86_64-pc-windows-msvc",
+      "rust-analyzer-preview-x86_64-pc-windows-msvc",
+      "rust-docs-x86_64-pc-windows-msvc",
+      "rust-src",
+      "llvm-tools-preview-x86_64-pc-windows-msvc",
+      "rust-std-x86_64-pc-windows-msvc",
+      "rustfmt-preview-x86_64-pc-windows-msvc",
+      "rustc-x86_64-pc-windows-msvc"
+    ]
+  },
+  "rustup_settings_sha256": "c03c2fe106cdb668f30a59df54f48072560bf6aa3062a330384adf1f2fb0d33a",
+  "cargo_bin": [
+    "ast-grep.exe",
+    "cargo-about.exe",
+    "cargo-clippy.exe",
+    "cargo-deny.exe",
+    "cargo-fmt.exe",
+    "cargo-miri.exe",
+    "cargo-shear.exe",
+    "cargo.exe",
+    "clippy-driver.exe",
+    "fossil-mcp.exe",
+    "jscpd.exe",
+    "just.exe",
+    "mdbook.exe",
+    "rls.exe",
+    "rust-analyzer.exe",
+    "rust-gdb.exe",
+    "rust-gdbgui.exe",
+    "rust-lldb.exe",
+    "rustc.exe",
+    "rustdoc.exe",
+    "rustfmt.exe",
+    "rustup.exe",
+    "sg.exe",
+    "trunk.exe",
+    "wasm-bindgen-test-runner.exe",
+    "wasm-bindgen.exe",
+    "wasm2es6js.exe"
+  ]
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),path=require('path'),crypto=require('crypto');const home=process.env.USERPROFILE;const toolchains=path.join(home,'.rustup','toolchains');const list=d=>fs.readdirSync(d).sort();const components=t=>{const f=path.join(toolchains,t,'lib','rustlib','components');return fs.existsSync(f)?fs.readFileSync(f,'utf8').split(/\\r?\\n/).filter(Boolean):null;};const names=list(toolchains);console.log(JSON.stringify({rustup_toolchains:names,rustup_toolchain_components:Object.fromEntries(names.map(t=>[t,components(t)])),rustup_settings_sha256:crypto.createHash('sha256').update(fs.readFileSync(path.join(home,'.rustup','settings.toml'))).digest('hex'),cargo_bin:list(path.join(home,'.cargo','bin'))},null,2))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:38:51.646Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":39}

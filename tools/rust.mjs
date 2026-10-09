@@ -93,11 +93,24 @@ export function rustLockProblems(lock, manifestBytes) {
 const BLOCK = 512;
 const padding = size => (BLOCK - (size % BLOCK)) % BLOCK;
 const pathRejected = name => new Error(`The archive path is not accepted: ${name}`);
+const LONG_NAME_LIMIT = 4096;
+/**
+ * The reserved device names that Microsoft's "Naming Files, Paths, and Namespaces" lists,
+ * https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file:
+ * CON, PRN, AUX, NUL, COM1 to COM9, COM¹, COM², COM³, LPT1 to LPT9, LPT¹, LPT², and LPT³.
+ * The page also reserves each name followed by an extension, such as NUL.txt.
+ */
+const RESERVED_DEVICE_NAME = /^(?:CON|PRN|AUX|NUL|COM[1-9\u00b9\u00b2\u00b3]|LPT[1-9\u00b9\u00b2\u00b3])$/i;
 
-/** The archive path rules: relative, forward slashes only, no NUL, and no empty, `.`, or `..` component. */
+/**
+ * The archive path rules: relative, forward slashes only, no code unit from U+0000 to U+001F, and no `:`.
+ * No component is empty, `.`, or `..`, ends in `.` or a space, or is a reserved Windows device name before its first `.`.
+ */
 export function acceptedArchivePath(name) {
-  if (name.startsWith('/') || /^[A-Za-z]:/.test(name) || name.includes('\\') || name.includes('\0')) return false;
-  return name.split('/').every(part => part !== '' && part !== '.' && part !== '..');
+  if (name.startsWith('/') || /^[A-Za-z]:/.test(name) || name.includes('\\') || /[\u0000-\u001f]/.test(name)) return false;
+  if (name.includes(':')) return false;
+  return name.split('/').every(part => part !== '' && part !== '.' && part !== '..' && !/[. ]$/.test(part)
+    && !RESERVED_DEVICE_NAME.test(part.split('.')[0]));
 }
 function isZeroBlock(block) {
   for (let i = 0; i < block.length; i++) if (block[i] !== 0) return false;
@@ -149,7 +162,10 @@ export async function extractTarGz(archive, archiveRoot, destination) {
     const size = octal(header, 124, 12);
     invariant(size !== null, `The archive entry size is invalid at offset ${at}.`);
     const type = String.fromCharCode(header[156]);
-    if (type === 'L') return { kind: 'long', remaining: size, padding: padding(size), chunks: [] };
+    if (type === 'L') {
+      invariant(size <= LONG_NAME_LIMIT, `The archive long name is longer than ${LONG_NAME_LIMIT} bytes.`);
+      return { kind: 'long', remaining: size, padding: padding(size), chunks: [] };
+    }
     let nameBytes = field(header, 0, 100);
     if (format === 'posix') {
       const prefix = field(header, 345, 155);
@@ -347,14 +363,14 @@ export function rustcPath(root, platform = hostPlatform()) {
   const lock = loadLock(root);
   return toolPath(toolchainDir(root, lock, platform), platform, 'rustc');
 }
-/** Run the four version checks on the toolchain in `dir` and return its `rustc` path. */
+/** Run the four version checks on the toolchain in `dir`, each in the toolchain's `bin` directory, and return its `rustc` path. */
 function verifyToolchain(root, dir, lock, platform, run) {
   const files = TOOLS.map(([name]) => toolPath(dir, platform, name));
   invariant(files.every(file => fs.existsSync(file)), 'The locked Rust toolchain is absent. Run node tools/fairpane.mjs install-rust.');
-  const env = { ...process.env, CARGO_HOME: path.join(root, '.tools', 'cargo-home') };
+  const env = { ...process.env, CARGO_HOME: path.join(root, '.tools', 'cargo-home') }, cwd = path.join(dir, 'bin');
   const outputs = {};
   for (const [i, [name, args]] of TOOLS.entries()) {
-    const r = run(files[i], args, { env, windowsHide: true, timeout: 30000 });
+    const r = run(files[i], args, { cwd, env, windowsHide: true, timeout: 30000 });
     invariant(!r.error && r.status === 0, `The ${name} version check failed: ${r.error?.message ?? (String(r.stderr ?? '').trim() || `exit ${r.status}`)}`);
     outputs[name] = r.stdout;
   }

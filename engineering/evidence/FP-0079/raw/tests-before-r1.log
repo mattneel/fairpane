@@ -1,0 +1,50 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+e6d215c11021036ae0a97ed768578687eb831fe3
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:34:07.082Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--porcelain=v1","--untracked-files=all"]
+ M tools/rust.test.mjs
+?? engineering/evidence/FP-0079/raw/tests-before-r1.log
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--porcelain=v1","--untracked-files=all"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:34:07.155Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","add","--","tools/rust.test.mjs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["add","--","tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:34:07.237Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":25}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--cached","--raw","--abbrev=40"]
+:100644 100644 e47c4859c548febe70e5997741f38c73277226f4 2b70906cc5525140e76243a39f1a8bb27205e3da M	tools/rust.test.mjs
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--cached","--raw","--abbrev=40"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:34:07.312Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/rust.test.mjs","tools/rust.mjs","tools/fairpane.mjs","tools/lib.mjs"]
+2b70906cc5525140e76243a39f1a8bb27205e3da
+a7744e6a91202bafc5b4869f03d5d93014e484eb
+c27f2b3db2df70b7f0b6538d98c756bd7ec5222e
+7a3478ce002cd8072e888648a8f64d5e4ba0c8fb
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/rust.test.mjs","tools/rust.mjs","tools/fairpane.mjs","tools/lib.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:34:07.384Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/rust.test.mjs"]
+TAP version 13
+ok 1 - FP-0079 case 1: the committed Rust lock pins the frozen 1.99.0 artifacts
+ok 2 - FP-0079 case 2: the Rust lock validator rejects every malformed field
+ok 3 - FP-0079 case 3: rust-toolchain.toml names the locked version
+ok 4 - FP-0079 case 4: rust-lock-verify compares the lock with the manifest's signed entries
+not ok 5 - FP-0079 case 5: the archive reader accepts only regular files, directories, and GNU long names inside the root
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   \"an L payload of 4097 bytes: ENOENT: no such file or directory, open 'C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-rust-VvbSS7\\\\rejected-24\\\\fx-1.0.0-x86_64-pc-windows-gnu\\\\nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'\",\n+   'the path \"fx-1.0.0-x86_64-pc-windows-gnu/a:b\": Missing expected rejection.',\n+   `the path \"fx-1.0.0-x86_64-pc-windows-gnu/a\\\\u0001b\": ENOENT: no such file or directory, open 'C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-rust-VvbSS7\\\\rejected-26\\\\fx-1.0.0-x86_64-pc-windows-gnu\\\\a\\x01b'`,\n+   'the path \"fx-1.0.0-x86_64-pc-windows-gnu/CON\": Missing expected rejection.',\n+   'the path \"fx-1.0.0-x86_64-pc-windows-gnu/nul.txt\": Missing expected rejection.',\n+   'the path \"fx-1.0.0-x86_64-pc-windows-gnu/COM1\": Missing expected rejection.',\n+   'the path \"fx-1.0.0-x86_64-pc-windows-gnu/dot.\": Missing expected rejection.',\n+   'the path \"fx-1.0.0-x86_64-pc-windows-gnu/space \": Missing expected rejection.'\n+ ]\n- []\n"
+  ...
+ok 6 - FP-0079 case 6: a component installs exactly what its manifest.in lists
+not ok 7 - FP-0079 case 7: install-rust verifies, stages, checks, and then installs, and leaves nothing behind on failure
+  ---
+  message: "The rustc version check must run in the toolchain's bin directory.\n+ actual - expected\n\n+ undefined\n- 'C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-rust-nPanpV\\\\.tools\\\\rust\\\\1.99.0\\\\.extract-TtYYCN\\\\toolchain\\\\bin'\n"
+  ...
+ok 8 - FP-0079 case 8: the version checks accept only the locked release, commit, and host
+not ok 9 - FP-0079 case 9: the controller documents and exposes the Rust commands
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   marker: true,\n+   path_rustc: true,\n-   marker: false,\n-   path_rustc: false,\n    rust_available: 'boolean'\n  }\n"
+  ...
+ok 10 - FP-0079 case 10: the toolchain documents and declarations record the pin
+1..10
+# tests 10
+# pass 7
+# fail 3
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/rust.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:34:10.989Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":585}

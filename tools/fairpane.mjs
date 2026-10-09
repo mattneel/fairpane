@@ -96,7 +96,6 @@ try {
       runtime: process.version, controller_bun: process.versions.bun ?? null, bun: versionOf('bun'),
       git: versionOf('git'), omp: versionOf(process.platform === 'win32' ? 'omp.exe' : 'omp'), compiler, rust,
       path_zig: { ...versionOf('zig', ['version']), note: 'Gates never use a compiler from PATH.' },
-      path_rustc: { ...versionOf('rustc', ['-V']), note: 'Gates never use a Rust toolchain from PATH.' },
       git_checkout: fs.existsSync(path.join(root, '.git')),
       note: 'No conformance test ran. On Windows, check an OMP shell shim with omp --version in PowerShell.' });
   } else if (command === 'check') output(checkRepository(root));

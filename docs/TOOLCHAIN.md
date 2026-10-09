@@ -43,6 +43,7 @@ The initial pin is stable Rust 1.99.0, released on October 1, 2026.
 `toolchains/rust.lock.json` records the exact toolchain version and the digests of its official artifacts.
 `rust-toolchain.toml` names that exact version, so a rustup user's Cargo commands select it.
 The repository's commands run the locked toolchain by path, never a Rust toolchain from `PATH`.
+`node tools/fairpane.mjs doctor` reports only the locked toolchain, and it starts no Rust tool from `PATH` or the working directory.
 Rust nightly needs a specific feature and its own qualification case.
 A Rust toolchain upgrade follows the same separate-branch procedure as a Zig compiler upgrade.
 
@@ -57,6 +58,8 @@ A minimal Rust consumer builds the wrapper outside the browser workspace, so wor
 `node tools/fairpane.mjs install-rust` installs the locked toolchain under `.tools/rust/<version>/<platform>`.
 It downloads each locked component archive from `static.rust-lang.org` and checks its size and SHA-256 before extraction.
 It reads each archive with a first-party gzip and tar reader, which accepts only regular files, directories, and GNU long names inside the archive root.
+The reader also rejects a path with a control character or `:`, a component that ends in `.` or a space, and a reserved Windows device name.
+It rejects a GNU long name longer than 4096 bytes before it buffers the name.
 It installs exactly the files that each component's `manifest.in` lists.
 It checks the version, commit, and host of the staged `rustc` before it moves the toolchain into place.
 It never runs rustup, changes `PATH`, or writes outside `.tools`.

@@ -1,0 +1,66 @@
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","-e","bash","-c","set -eu; dest=\"$HOME/fairpane-linux/work/FP-0079-r1\"; mkdir -p \"$HOME/fairpane-linux/work\"; mkdir \"$dest\"; cd /mnt/c/Users/requi/.omp/wt/tf9496f813/m; tar --exclude=./.git --exclude=./.tools --exclude=./out -cf - . | tar -xf - -C \"$dest\"; echo \"copied $PWD to $dest\""]
+copied /mnt/c/Users/requi/.omp/wt/tf9496f813/m to /home/autark/fairpane-linux/work/FP-0079-r1
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","set -eu; dest=\"$HOME/fairpane-linux/work/FP-0079-r1\"; mkdir -p \"$HOME/fairpane-linux/work\"; mkdir \"$dest\"; cd /mnt/c/Users/requi/.omp/wt/tf9496f813/m; tar --exclude=./.git --exclude=./.tools --exclude=./out -cf - . | tar -xf - -C \"$dest\"; echo \"copied $PWD to $dest\""],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:41:07.206Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1329}
+
+COMMAND ["C:\\Windows\\system32\\wsl.exe","-d","Ubuntu","-e","bash","-c","set -eu; cd \"$HOME/fairpane-linux/work/FP-0079-r1\"; find tools tests/rust toolchains rust-toolchain.toml -type f | LC_ALL=C sort | while IFS= read -r f; do printf \"%s %s\\n\" \"$(git hash-object --no-filters -- \"$f\")\" \"$f\"; done"]
+4a8264a8da98753c14caafe557f86613bf0765e5 rust-toolchain.toml
+7cd39eddefb6d412a1137417b1a03668f741924b tests/rust/toolchain_smoke.rs
+851ac833642005c76c70335f3fbbbbdc9e7976cb toolchains/omp-baseline.json
+c45f3bc71734d6c1b311eaca8d157de3f683a2fa toolchains/rust.lock.json
+62db5073725090e023bc59800ecded74f0f6665a toolchains/zig-version.txt
+4254844c6470b88df84b15dfaa22e07f3188f0f9 toolchains/zig.lock.json
+db7cfa728d5e5f26e7b18c57540a2141643ec360 tools/README.md
+06269a17aa20edbcc811ac335499531e7c7d83b6 tools/abi.mjs
+42d4767a359f294ff125e06fd0c25b46a69db6c4 tools/abi.test.mjs
+6f9a4ae4a06cef40f0b2951a131fe32cddf89e2d tools/attest.mjs
+e0bb589555fd7fbd3cc960a0b1e0ae4d161649ef tools/attest.test.mjs
+a25457c695d7089c9519693aea2ef12683d7e8f0 tools/capabilities.mjs
+0eb3ae5e27a25f451795b4860e9b4f5a29ec30c8 tools/corpus.mjs
+5ca32d4236cdcb896e1b338d179a89778764412d tools/fairpane.mjs
+bab5d684a45e3b5b2ff69b1e0fa956b533f02ac6 tools/fileset.mjs
+10075c1287b102f90a318404ade343f59ef6db51 tools/fileset.test.mjs
+fe5a90571ac1de23feeeef9b52c846498a9eccd8 tools/fonts/font_expectations.py
+7a3478ce002cd8072e888648a8f64d5e4ba0c8fb tools/lib.mjs
+f2c2ffe7fdd5709460bfca67917a19b818c71de8 tools/mutation-harness.mjs
+97f2e3f2e6697d2bbca933224b6f92bb3cef4725 tools/release.mjs
+90d40ddde3d72c6d86f6172102c4b427bcbcbcef tools/release.test.mjs
+fefbd77431ce6eb8fd72683d323d4d88a4cc6c5c tools/rust.mjs
+2b70906cc5525140e76243a39f1a8bb27205e3da tools/rust.test.mjs
+67c9b5324cdf1ada2bed86bb14e5246647a1443f tools/selftest.mjs
+da7db51019907c8f304965c57f2920c3bf9558fb tools/ucd.mjs
+2ba9a2855b8fa81c4c7346a6f4fb2003236929fe tools/ucd.test.mjs
+9847774a88ee8073383f2254c6d832c78755bc89 tools/workflow-check.mjs
+5a99a972fc13dd7512808c806a41e0eccae34e8e tools/workflow-check.test.mjs
+RESULT {"executable":"C:\\Windows\\system32\\wsl.exe","arguments":["-d","Ubuntu","-e","bash","-c","set -eu; cd \"$HOME/fairpane-linux/work/FP-0079-r1\"; find tools tests/rust toolchains rust-toolchain.toml -type f | LC_ALL=C sort | while IFS= read -r f; do printf \"%s %s\\n\" \"$(git hash-object --no-filters -- \"$f\")\" \"$f\"; done"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:41:08.672Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":163}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),crypto=require('crypto');const out=[];const walk=p=>{const s=fs.statSync(p);if(s.isDirectory())for(const n of fs.readdirSync(p))walk(p+'/'+n);else out.push(p);};['tools','tests/rust','toolchains','rust-toolchain.toml'].forEach(walk);out.sort((a,b)=>Buffer.compare(Buffer.from(a),Buffer.from(b)));for(const f of out){const b=fs.readFileSync(f);console.log(crypto.createHash('sha1').update('blob '+b.length+'\\0').update(b).digest('hex')+' '+f);}"]
+4a8264a8da98753c14caafe557f86613bf0765e5 rust-toolchain.toml
+7cd39eddefb6d412a1137417b1a03668f741924b tests/rust/toolchain_smoke.rs
+851ac833642005c76c70335f3fbbbbdc9e7976cb toolchains/omp-baseline.json
+c45f3bc71734d6c1b311eaca8d157de3f683a2fa toolchains/rust.lock.json
+62db5073725090e023bc59800ecded74f0f6665a toolchains/zig-version.txt
+4254844c6470b88df84b15dfaa22e07f3188f0f9 toolchains/zig.lock.json
+db7cfa728d5e5f26e7b18c57540a2141643ec360 tools/README.md
+06269a17aa20edbcc811ac335499531e7c7d83b6 tools/abi.mjs
+42d4767a359f294ff125e06fd0c25b46a69db6c4 tools/abi.test.mjs
+6f9a4ae4a06cef40f0b2951a131fe32cddf89e2d tools/attest.mjs
+e0bb589555fd7fbd3cc960a0b1e0ae4d161649ef tools/attest.test.mjs
+a25457c695d7089c9519693aea2ef12683d7e8f0 tools/capabilities.mjs
+0eb3ae5e27a25f451795b4860e9b4f5a29ec30c8 tools/corpus.mjs
+5ca32d4236cdcb896e1b338d179a89778764412d tools/fairpane.mjs
+bab5d684a45e3b5b2ff69b1e0fa956b533f02ac6 tools/fileset.mjs
+10075c1287b102f90a318404ade343f59ef6db51 tools/fileset.test.mjs
+fe5a90571ac1de23feeeef9b52c846498a9eccd8 tools/fonts/font_expectations.py
+7a3478ce002cd8072e888648a8f64d5e4ba0c8fb tools/lib.mjs
+f2c2ffe7fdd5709460bfca67917a19b818c71de8 tools/mutation-harness.mjs
+97f2e3f2e6697d2bbca933224b6f92bb3cef4725 tools/release.mjs
+90d40ddde3d72c6d86f6172102c4b427bcbcbcef tools/release.test.mjs
+fefbd77431ce6eb8fd72683d323d4d88a4cc6c5c tools/rust.mjs
+2b70906cc5525140e76243a39f1a8bb27205e3da tools/rust.test.mjs
+67c9b5324cdf1ada2bed86bb14e5246647a1443f tools/selftest.mjs
+da7db51019907c8f304965c57f2920c3bf9558fb tools/ucd.mjs
+2ba9a2855b8fa81c4c7346a6f4fb2003236929fe tools/ucd.test.mjs
+9847774a88ee8073383f2254c6d832c78755bc89 tools/workflow-check.mjs
+5a99a972fc13dd7512808c806a41e0eccae34e8e tools/workflow-check.test.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),crypto=require('crypto');const out=[];const walk=p=>{const s=fs.statSync(p);if(s.isDirectory())for(const n of fs.readdirSync(p))walk(p+'/'+n);else out.push(p);};['tools','tests/rust','toolchains','rust-toolchain.toml'].forEach(walk);out.sort((a,b)=>Buffer.compare(Buffer.from(a),Buffer.from(b)));for(const f of out){const b=fs.readFileSync(f);console.log(crypto.createHash('sha1').update('blob '+b.length+'\\0').update(b).digest('hex')+' '+f);}"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tf9496f813\\m","started_at":"2026-10-09T13:41:08.928Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}
