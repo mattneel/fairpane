@@ -6,7 +6,8 @@ Tasks `FP-0001`, `FP-0004`, `FP-0005`, `FP-0006`, `FP-0028`, and `FP-0047` are a
 Task `FP-0002` implements contract revision 3 in commit `617d2cd` and awaits a third `fairpane-review`; `release-check` still fails closed.
 Task `FP-0003` implements contract revision 2 in commit `d185b5e`, with 76620 discovered WPT tests at `b60c4b34`, and awaits `fairpane-spec` and `fairpane-review`.
 Task `FP-0033` runs the gates in GitHub Actions; run 37873082602 succeeded, and the task awaits `fairpane-review` and `fairpane-security`.
-Task `FP-0031` is integrated in the working tree with 126 of 126 controller tests, and its mutation control is running.
+Task `FP-0031` is implemented in commit `c9c243f` with 126 of 126 controller tests and 13 of 13 mutants killed, and it awaits `fairpane-review`.
+The `FP-0007` laboratory contract is frozen, and its implementation waits for `FP-0003` acceptance.
 Tasks `FP-0009` (DOM node store) and `FP-0021` (interface schema and generator) are active in isolated workers.
 Task `FP-0050` closes the FP-0006 review findings after `FP-0021` lands, because both change the C ABI.
 The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, and the engine and document lifecycle with versioned host requests.
@@ -28,12 +29,12 @@ ADR 0007 makes the frontend language independent of the renderer and reserves th
 ## Next action
 
 1. Record the review verdicts of `FP-0002`, `FP-0003`, and `FP-0033`, and fix any finding.
-2. Commit `FP-0031` after its integration mutation control finishes, then request `fairpane-review`.
+2. Record the `FP-0031` review verdict.
 3. Apply the `specs/corpora.json` pins in a separate commit only after both FP-0003 reviewers accept.
 4. Integrate the `FP-0009` and `FP-0021` worker patches, run their gates, and request reviews.
 5. Start `FP-0050` after `FP-0021` lands.
 6. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
-7. Freeze the `FP-0007` laboratory contract after `FP-0003` is accepted.
+7. Start `FP-0007` from its frozen contract after `FP-0003` is accepted.
 
 ```text
 node tools/fairpane.mjs check
