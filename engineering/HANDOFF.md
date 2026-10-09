@@ -2,28 +2,27 @@
 
 ## Actual state
 
-Tasks `FP-0001` through `FP-0009`, `FP-0011`, `FP-0013`, `FP-0014`, `FP-0021`, `FP-0027`, `FP-0028`, `FP-0031`, `FP-0033`, `FP-0047`, `FP-0050`, `FP-0051`, `FP-0053`, and `FP-0054` are accepted.
+Tasks `FP-0001` through `FP-0009`, `FP-0011`, `FP-0013`, `FP-0014`, `FP-0021`, `FP-0027`, `FP-0028`, `FP-0031`, `FP-0033`, `FP-0047`, `FP-0050` through `FP-0054`, `FP-0064`, `FP-0066`, `FP-0067`, `FP-0076`, `FP-0079`, and `FP-0081` are accepted.
 `specs/corpora.json` pins Test262 at `2e0a5676`, WPT at `b60c4b34`, Unicode 18.0.0, and the OpenType fixtures, and `release-check` still fails closed.
-The owner approved Unicode data, OFL test fonts, the WHATWG `entities.json`, and the Encoding Standard index files in the repository, as `LICENSE-DECISION.md` records.
+The owner approved Unicode data, OFL test fonts, the WHATWG `entities.json`, the Encoding Standard index files, the TN5176 seac tables, and the Unicode text-rendering-tests files whose licenses permit redistribution, as `LICENSE-DECISION.md` records, and extended fontTools to GSUB, GPOS, and GDEF dumps in `engineering/dependencies.json`.
 
 | Task | State | Next step |
 | --- | --- | --- |
-| `FP-0064` tokenizer states | Implemented in `cb8427d`; review 1 accepts; amendment 3 (`b95bef1`) gives the foreign-flag fix to `FP-0104`. | Accept once the CI ledger's `FP-0098` condition clears. |
-| `FP-0066` release builds | Implemented in `81481a3`; `reproduce-check` is reproducible on Windows and WSL Ubuntu; review 1 accepts. | Accept once the ledger condition clears. |
-| `FP-0067` Gates checks | Implemented in `152ed53`; review 2 accepts with acceptance run 37941660067 (`4d11e84`). | Accept once the ledger condition clears. |
-| `FP-0076` guard identity | Implemented in `d56bc5f` with amendment 1; review 1 accepts. | Accept once the ledger condition clears. |
-| `FP-0079` Rust toolchain | Implemented in `04342e2` with revision `d2c1e5b`; both reviews accept; P1 `9fb8d8f` and P2 `2e07f89` protect the lock and `rust-toolchain.toml`. | Bind `repo-check` and `controller-test` on a head with P2, cite P2 in the criterion 6 row, then accept. |
-| `FP-0081` allocation limit | Implemented in `f40a902`; review and security review accept. | Accept once the ledger condition clears. |
-| `FP-0098` zig-test timeout | Implemented in `9d5638b`; ten dispatched runs pass, the slowest at 191 s; review 1 rejects for missing CI phase durations; revision 1 (`e42f789`) sets `ZIG_BUILD_SUMMARY` on both `zig-test` steps. | Integrate worker `FP0098Revision1`, then dispatch ten runs that also serve `FP-0107`, re-review, and accept; that clears the ledger's nine conditional replacements. |
-| `FP-0052` corpus fixes | Implemented in `775d988`; case 2 revised in `8bc2f91`; amendment 2 (`0954a37`) makes the stand-in work under Bun. | Integrate worker `FP0052BunHost`, bind with `corpus-verify` of `test262` and `wpt`, and request `fairpane-review` and `fairpane-spec`. |
-| `FP-0082` script parser | Implemented in `5d41509`; review 1 rejects a Windows path escape and a quadratic check, spec review 1 accepts; revision 1 in `9a68167` passes 322 of 322 Zig tests. | Bind revision 1 and request both reviews. |
-| `FP-0107` controller-test timeout | Contract frozen in `01d7e39`. | Dispatch after the `FP-0052` and `FP-0098` revisions land. |
-| Splits of `FP-0010`, `FP-0015`, `FP-0056`, and `FP-0065` | Plan commits `36782a5`, `66ad8ad`, `c122677`, `42043a7`, and `f719aed` add `FP-0100` to `FP-0105`, `FP-0108` to `FP-0127`. | Record plan review 4; freeze `FP-0108`, `FP-0119`, and `FP-0123` after their pre-freeze checks, and `FP-0100` after `FP-0064` is accepted. |
-| `FP-0083` VM | Agent `FP0083Draft` proposes a compile-and-run slice and a safepoint slice, to become `FP-0128` and `FP-0129`. | Add the plan entries, and freeze the first slice after `FP-0082` is accepted. |
+| `FP-0098` zig-test timeout | Revision 1 in `0276268`; ten dispatched runs on `29a9f8e` passed, the slowest at 191 s. | Record ten dispatched runs on one head together with `FP-0107`, re-review, and accept. |
+| `FP-0107` controller-test timeout | Implemented in `13168dc`. Every Windows run on `3e7128c` failed, because a worker thread reads a case-sensitive copy of the environment and the hosted runner names the search path `Path`. Revision 1 (`d4de685`) names it `PATH` in each worker. | Ten dispatched runs on a head with revision 1, review by `FP0107Review`, and acceptance. |
+| `FP-0082` script parser | Revision 2 in `84ffa53` with amendments 1 (`c28afb0`) and 2 (`f397d8d`); binding at `f397d8d`. | Review 3 by `FP0082Review`, the ledger, and acceptance. |
+| `FP-0108` graphemes | Implemented in `6cf88af`; M7 amendment `7f2a7e7`; binding `1d6508e`. | Review and spec review, then acceptance. |
+| `FP-0119` glyf outlines | Implemented in `077ad63`; binding `246e6de`. | Review and security review, then acceptance. |
+| `FP-0123` encodings | Implemented in `b68eebf`; binding `45f5da1`. | Review and spec review, then acceptance. |
+| `FP-0100` tree construction | Contract frozen in `bd11c2b`; worker `FP0100Tree` implements it. | Integrate, bind, and request review and spec review. |
+| `FP-0080` split | `d945fa7` adds `FP-0132` to `FP-0134`; plan review 8 approves. | Freeze `FP-0132` after its revision and re-check, then seek the P1 lock approval. |
+| Contract drafts | `out/drafts` holds `FP-0099`, `FP-0106`, `FP-0111`, `FP-0127`, `FP-0128`, and `FP-0131` drafts with their checks. | Freeze each after its check; `FP-0127` re-bases after `FP-0100`, and `FP-0128` after `FP-0082` is accepted, with a new ADR number because `FP-0107` took `0011`. |
 
-`engineering/evidence/ci/README.md` records every failed `Gates` attempt since 13:00 UTC and its disposition; it must be extended to each acceptance head, including the failed `repo-check` of `66d71bd`, whose fix `f5be48f` plan review 4 reviews.
-Tasks `FP-0055` through `FP-0063` own the remaining text obligations, and `FP-0099` and `FP-0106` own review follow-ups.
-The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, the engine and document lifecycle, a DOM node store with attributes, a generated C ABI, the headless laboratory `fairpane-lab`, JavaScript value and heap catalogs, a bounded Script parser with a Test262 parse census, Unicode property lookup, an OpenType parser, a resumable HTML tokenizer, and CSS syntax, selectors, cascade, and computed values.
+`engineering/evidence/ci/README.md` records every failed `Gates` attempt through `0276268`.
+The push run and the ten dispatched runs of `3e7128c` failed in Windows `controller-test`, and the ledger must record them, with `FP-0107` revision 1 as the fix, before the next acceptance.
+The pinned build runner reruns a cached step into its old output directory after a lost manifest, so a tool that refuses an existing output must not write there; FP-0082 revision 2 amendment 1 records the census case.
+Tasks `FP-0055` through `FP-0063` own the remaining text obligations, and `FP-0099`, `FP-0106`, and `FP-0131` own review follow-ups.
+The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, the engine and document lifecycle, a DOM node store with attributes, a generated C ABI, the headless laboratory `fairpane-lab`, JavaScript value and heap catalogs, a bounded Script parser with a Test262 parse census, Unicode property lookup with grapheme cluster segmentation, an OpenType parser with TrueType outline decoding, Encoding Standard labels with UTF decoders, a resumable HTML tokenizer, and CSS syntax, selectors, cascade, and computed values.
 No renderer, JavaScript interpreter, tree constructor, or native browser window exists yet.
 
 The repository is public at <https://github.com/mattneel/fairpane>.
@@ -43,10 +42,10 @@ ADR 0007 makes the frontend language independent of the renderer and reserves th
 
 1. Integrate each worker patch from the worker's own `out/*.patch`, check `git diff --cached --name-only` before each commit, run the gates with `HEAD` and status records before and after, and commit locally.
 2. Push only at the push boundaries of `docs/GIT_OPERATIONS.md`, and only after the previous push's `Gates` run concludes.
-3. Record plan review 4, then freeze `FP-0108`, `FP-0119`, and `FP-0123` with the fixes of agents `Check0108`, `Check0119`, and `Check0123`, and dispatch them.
-4. Dispatch `FP-0107` once the `FP-0052` and `FP-0098` revisions land; one set of ten dispatched runs, at most two at a time, serves `FP-0098` and `FP-0107`.
-5. After `FP-0098` is accepted, extend the CI ledger to the acceptance head and accept `FP-0064`, `FP-0066`, `FP-0067`, `FP-0076`, `FP-0079`, and `FP-0081` in `plan:` acceptance commits.
-6. Ask the owner the open questions: the TN5176 tables for `FP-0120`, and the shaping reference fixtures and the fontTools boundary for `FP-0111` to `FP-0115`.
+3. Dispatch the ten runs of `FP-0098` and `FP-0107` with `gh workflow run Gates --ref master` on one head that holds `d4de685`, at most two at a time, and stop at the first run that does not succeed; push nothing until the series ends.
+4. Record the series and the failed runs of `3e7128c` in both tasks' `ci/README.md` and in the ledger, then accept `FP-0098` and `FP-0107` after their reviews.
+5. Accept `FP-0082`, `FP-0108`, `FP-0119`, and `FP-0123` after their reviews, each after the ledger reaches its pre-acceptance head.
+6. Request plan review 9 for `cf67a28` and `9982925` after they are pushed.
 7. Keep `git worktree list` limited to the main checkout; the OMP harness keeps its isolated worker directories outside the repository, so they are not repository worktrees.
 
 ```text
@@ -72,6 +71,9 @@ node tools/fairpane.mjs next
   Node v26.7.0 is installed at `$HOME/fairpane-linux/node`, outside `PATH`, and `engineering/evidence/hosts/wsl-ubuntu/node-install.log` records its digest check.
   Copy a tree into a WSL-native directory before a Linux run, because the `/mnt/c` mount does not keep Linux file modes.
 - The compiler installer does not retry a failed download, so a transient network failure fails a `Gates` job; rerun the failed job.
+- The local shell exports the search path as `PATH`, while the hosted Windows runner names it `Path`; a local pass therefore does not prove that a worker thread reads the search path on the runner.
+- Bun 1.4.2 stops the main thread's `os.tmpdir()` from following `process.env` once a worker starts with `SHARE_ENV`, as `engineering/evidence/FP-0107/raw/r1-share-env-probe.log` shows.
+- The OMP harness runs at most four subagents and queues the rest; a queued agent cannot receive messages until it starts.
 - The owner's OMP configuration uses approval mode `yolo`.
 
 ## Unresolved items
