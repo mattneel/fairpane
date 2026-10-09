@@ -16,7 +16,7 @@ The project does not postpone application usability until every engine feature e
 | Document fidelity | Broad HTML, CSS, text, images, SVG, and incremental behavior. | Frozen relevant manifests without concealed omissions. |
 | Interactive platform | Complete runtime integration, DOM APIs, storage, networking, and application workflows. | Test262, WPT, and app workload evidence. |
 | Hostile-web qualification | Broker, sandbox, resource controls, and failure containment. | Fault injection and independent security review. |
-| Full browser qualification | Broad guest APIs, media, wrappers with their first-party integrations and reference extensions, and declared platform support. | A frozen full-profile matrix with passing evidence. |
+| Full browser qualification | Broad guest APIs, media, wrappers with their first-party integrations and reference extensions, compatibility with existing browser extensions, and declared platform support. | A frozen full-profile matrix with passing evidence. |
 | Stewardship | Sustainable releases and successful independent integrations. | Reproducible releases, operational response, and adoption evidence. |
 
 ## Initial frontier

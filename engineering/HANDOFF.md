@@ -59,9 +59,6 @@ node tools/fairpane.mjs next
   An acceptance-policy change would need separate independent approval.
 - Local receipts are unsigned.
   Task `FP-0002` owns the protected attestation boundary.
-- Two owner questions remain open.
-  The first asks whether compatibility with existing browser extensions enters the release profile; `FP-0040` waits on it.
-  The second asks the owner to confirm the required `extensions` family, which the record derives from the SDK memo.
 
 ## Owner decisions
 
@@ -76,7 +73,7 @@ The owner selected GPUI to host engine-rendered chrome.
 `engineering/evidence/wrapper-language/` preserves the memo verbatim and the recorded answers.
 The owner's extension memo proposed one extension contract, and the owner later withdrew Rhai extensions: "We can just polyglot the whole way down."
 The owner decided that TypeScript extensions run on Fairpane's own JavaScript runtime.
-The owner has not decided whether compatibility with existing browser extensions enters the release profile, so `FP-0040` is blocked.
+The owner made the `extensions` family and compatibility with existing browser extensions release-blocking.
 The owner's SDK memo made a first-party integration and a reference extension mandatory for every supported language SDK.
 The owner's frontend memo made every SDK expose document and custom graphics frontends over one renderer.
 `engineering/evidence/extensions/` and `engineering/evidence/frontends/` preserve those memos and answers verbatim.

@@ -145,8 +145,8 @@ A language qualifies only after these checks pass.
 - An independent example builds against its distributed SDK.
 
 Generated bindings alone never earn a supported label.
-Compatibility with existing browser extensions is a separate qualification target.
-Its release scope awaits an owner decision, so the qualification profile does not include it yet.
+Compatibility with existing browser extensions is a separate required capability family, `webextensions-compat`, as the owner decided.
+Extension-language parity does not establish that compatibility.
 
 ## Sequencing
 
@@ -164,5 +164,5 @@ The baseline still records these requirements before its public interfaces stabi
 `FP-0036` defines the extension contract and broker.
 `FP-0037` builds the Rust extension worker, and `FP-0038` builds the JavaScript adapter.
 `FP-0039` qualifies parity through the shared reference extension.
-`FP-0040` holds the compatibility target until the owner decides its scope.
+`FP-0040` qualifies compatibility with existing browser extensions.
 `FP-0041`, `FP-0042`, and `FP-0049` deliver the TypeScript, Elixir, and C support packages.
