@@ -1,0 +1,13 @@
+diff --git a/out/fp0047-baseline/web_string.zig b/src/web_string.zig
+index 124be09..78bd4da 100644
+--- a/out/fp0047-baseline/web_string.zig
++++ b/src/web_string.zig
+@@ -196,7 +196,7 @@ pub fn codeUnitIndexForUtf8Offset(
+         const step = decoder.next() orelse break;
+         switch (step) {
+             .scalar => |scalar| units += utf16Len(scalar),
+-            .failure => return error.InvalidUtf8,
++            .failure => units += 1,
+         }
+     }
+     if (target > bytes.len) return error.OutOfBounds;

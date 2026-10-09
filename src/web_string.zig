@@ -584,6 +584,46 @@ test "16: every allocating operation survives each induced allocation failure" {
     try testing.checkAllAllocationFailures(testing.allocator, allocationFailureScenario, .{});
 }
 
+test "FP-0047 case 1: fromUtf8 rejects an F0 lead followed by a byte below 0x90" {
+    for ([_][]const u8{ "\xF0\x80\x80\x80", "\xF0\x8F\xBF\xBF" }) |bytes| {
+        try testing.expectError(error.InvalidUtf8, WebString.fromUtf8(testing.allocator, bytes));
+    }
+}
+
+test "FP-0047 case 2: fromUtf8Lossy emits four U+FFFD for an F0 lead followed by a byte below 0x90" {
+    try expectLossyUnits("\xF0\x80\x80\x80", &.{ 0xFFFD, 0xFFFD, 0xFFFD, 0xFFFD });
+    try expectLossyUnits("\xF0\x8F\xBF\xBF", &.{ 0xFFFD, 0xFFFD, 0xFFFD, 0xFFFD });
+}
+
+test "FP-0047 case 3: fromUtf8 decodes the scalars at the E0, ED, and F0 boundaries" {
+    const cases = [_]struct { bytes: []const u8, units: []const u16 }{
+        .{ .bytes = "\xE0\xA0\x80", .units = &.{0x0800} },
+        .{ .bytes = "\xED\x9F\xBF", .units = &.{0xD7FF} },
+        .{ .bytes = "\xF0\x90\x80\x80", .units = &.{ 0xD800, 0xDC00 } },
+    };
+    for (cases) |case| {
+        var string = try WebString.fromUtf8(testing.allocator, case.bytes);
+        defer string.deinit(testing.allocator);
+        try expectUnits(case.units, string);
+    }
+}
+
+test "FP-0047 case 4: fromUtf8 rejects the F5 and C1 lead bytes" {
+    for ([_][]const u8{ "\xF5\x80\x80\x80", "\xC1\xBF" }) |bytes| {
+        try testing.expectError(error.InvalidUtf8, WebString.fromUtf8(testing.allocator, bytes));
+    }
+}
+
+test "FP-0047 case 5: fromUtf8Lossy replaces each byte after an F5 or C1 lead byte" {
+    try expectLossyUnits("\xF5\x80\x80\x80", &.{ 0xFFFD, 0xFFFD, 0xFFFD, 0xFFFD });
+    try expectLossyUnits("\xC1\xBF", &.{ 0xFFFD, 0xFFFD });
+}
+
+test "FP-0047 case 6: codeUnitIndexForUtf8Offset reports ill-formed input before an out-of-range offset" {
+    try testing.expectError(error.InvalidUtf8, codeUnitIndexForUtf8Offset("a\x80", byteOffset(1)));
+    try testing.expectError(error.InvalidUtf8, codeUnitIndexForUtf8Offset("a\x80", byteOffset(5)));
+}
+
 test "code-unit indexes map back to UTF-8 byte offsets" {
     var decoded = try WebString.fromUtf8(testing.allocator, case_14_text);
     defer decoded.deinit(testing.allocator);

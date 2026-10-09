@@ -1,0 +1,12 @@
+diff --git a/out/fp0047-baseline/web_string.zig b/src/web_string.zig
+index 124be09..868b5da 100644
+--- a/out/fp0047-baseline/web_string.zig
++++ b/src/web_string.zig
+@@ -262,7 +262,6 @@ const Utf8Decoder = struct {
+                         code_point = byte & 0x0F;
+                     },
+                     0xF0...0xF4 => {
+-                        if (byte == 0xF0) lower_boundary = 0x90;
+                         if (byte == 0xF4) upper_boundary = 0x8F;
+                         bytes_needed = 3;
+                         code_point = byte & 0x07;

@@ -1,0 +1,134 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0047-mutation-f0-lower-boundary"]
+test
++- run test 61 pass, 2 fail (63 total); 1 leaks
+error: 'web_string.test.FP-0047 case 1: fromUtf8 rejects an F0 lead followed by a byte below 0x90' failed:
+       expected error.InvalidUtf8, found .{ .units = { 0 } }
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:727:46: 0x7ff60fe02895 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:728:70: 0x7ff60fdfc9ad in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdff1e2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:728:70: 0x7ff60fdfc9ad in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdff1e2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdff1e2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:727:46: 0x7ff60fdfc955 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\handles.zig:730:69: 0x7ff60fdfca22 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:634:9: 0x7ff60fde8bdb in expectError__func_875 (test_zcu.obj)
+               return error.TestExpectedError;
+               ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\web_string.zig:588:9: 0x7ff60fde9b0d in test.FP-0047 case 1: fromUtf8 rejects an F0 lead followed by a byte below 0x90 (test_zcu.obj)
+               try testing.expectError(error.InvalidUtf8, WebString.fromUtf8(testing.allocator, bytes));
+               ^
+       [SafeAllocator] (err): leaked [addr: 1550010, len: 2 (0x2) align: 2] allocated at: 
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\web_string.zig:153:36: 0x7ff60fde472f in decodeUtf8 (test_zcu.obj)
+               const units = try gpa.alloc(u16, len);
+                                          ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\web_string.zig:67:26: 0x7ff60fde457d in fromUtf8 (test_zcu.obj)
+               return decodeUtf8(gpa, bytes, len);
+                                ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\web_string.zig:588:70: 0x7ff60fde9aa6 in test.FP-0047 case 1: fromUtf8 rejects an F0 lead followed by a byte below 0x90 (test_zcu.obj)
+               try testing.expectError(error.InvalidUtf8, WebString.fromUtf8(testing.allocator, bytes));
+                                                                            ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:143:68: 0x7ff60fdbb26d in mainServer (test_zcu.obj)
+                       const status: TestResults.Status = if (test_fn.func()) |v| s: {
+                                                                          ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\compiler\test_runner.zig:72:26: 0x7ff60fdbb89b in main (test_zcu.obj)
+               return mainServer(init) catch |err| panic("internal test runner failure: {t}", .{err});
+                                ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:795: 0x7ff60fdb980d in callMain (test_zcu.obj)
+           if (fn_info.param_types[0].? == std.process.Init.Minimal) return wrapMain(root.main(.{
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:576:17: 0x7ff60fdb980d in WinStartup (test_zcu.obj)
+               callMain(std.os.windows.peb().ProcessParameters.CommandLine.slice(), .global),
+                       ^
+       ???:?:?: 0x7ff862a1cd86 in ??? (KERNEL32.DLL)
+       (additional stack frames may have been skipped...)
+error: 'web_string.test.FP-0047 case 2: fromUtf8Lossy emits four U+FFFD for an F0 lead followed by a byte below 0x90' failed:
+       slices differ. first difference occurs at index 0 (0x0)
+       
+       ============ expected this output: =============  len: 4 (0x4)
+       
+       [0]: 65533
+       [1]: 65533
+       [2]: 65533
+       [3]: 65533
+       
+       ============= instead found this: ==============  len: 1 (0x1)
+       
+       [0]: 0
+       
+       ================================================
+       
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:346:5: 0x7ff60fde7bac in expectEqualSlices__func_864 (test_zcu.obj)
+           return error.TestExpectedEqual;
+           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\web_string.zig:371:5: 0x7ff60fde7c80 in expectUnits (test_zcu.obj)
+           try testing.expectEqualSlices(u16, expected, string.view().units);
+           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\web_string.zig:377:5: 0x7ff60fde7dcd in expectLossyUnits (test_zcu.obj)
+           try expectUnits(expected, string);
+           ^
+       C:\Users\requi\.omp\wt\te43a1484d\m\src\web_string.zig:593:5: 0x7ff60fde99ea in test.FP-0047 case 2: fromUtf8Lossy emits four U+FFFD for an F0 lead followed by a byte below 0x90 (test_zcu.obj)
+           try expectLossyUnits("\xF0\x80\x80\x80", &.{ 0xFFFD, 0xFFFD, 0xFFFD, 0xFFFD });
+           ^
+failed command: ".\\out\\fp0047-mutation-f0-lower-boundary\\o\\249f5f6035e88db34abe0226dffd0158\\test.exe" "--cache-dir=.\\out\\fp0047-mutation-f0-lower-boundary" --seed=0xa7681be4 --listen=-
+
+Build Summary: 1/3 steps succeeded (1 failed); 61/63 tests passed (2 failed)
+test transitive failure
++- run test 61 pass, 2 fail (63 total); 1 leaks
+   +- compile test debug native success 2s MaxRSS:359M
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xa7681be4 test --summary all --cache-dir out/fp0047-mutation-f0-lower-boundary
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0047-mutation-f0-lower-boundary"],"cwd":"C:\\Users\\requi\\.omp\\wt\\te43a1484d\\m","started_at":"2026-10-09T01:57:22.016Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":6808,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
