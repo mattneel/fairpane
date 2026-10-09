@@ -2,15 +2,15 @@
 
 ## Actual state
 
-Tasks `FP-0001`, `FP-0004`, `FP-0005`, `FP-0006`, `FP-0028`, and `FP-0047` are accepted.
-Task `FP-0002` implements contract revision 3 in commit `617d2cd` and awaits a third `fairpane-review`; `release-check` still fails closed.
-Task `FP-0003` implements contract revision 2 in commit `d185b5e`, with 76620 discovered WPT tests at `b60c4b34`, and awaits `fairpane-spec` and `fairpane-review`.
-Task `FP-0033` runs the gates in GitHub Actions; run 37873082602 succeeded, and the task awaits `fairpane-review` and `fairpane-security`.
-Task `FP-0031` is implemented in commit `c9c243f` with 126 of 126 controller tests and 13 of 13 mutants killed, and it awaits `fairpane-review`.
-The `FP-0007` laboratory contract is frozen, and its implementation waits for `FP-0003` acceptance.
-Tasks `FP-0009` (DOM node store) and `FP-0021` (interface schema and generator) are active in isolated workers.
-Task `FP-0050` closes the FP-0006 review findings after `FP-0021` lands, because both change the C ABI.
-The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, and the engine and document lifecycle with versioned host requests.
+Tasks `FP-0001` through `FP-0006`, `FP-0009`, `FP-0028`, `FP-0031`, and `FP-0047` are accepted.
+`specs/corpora.json` pins Test262 at `2e0a5676` and WPT at `b60c4b34`, and `release-check` still fails closed.
+Task `FP-0033` implements contract revision 1 in commit `7bbe196` with policy commit `29f2135`, and it awaits `fairpane-review` and `fairpane-security` again.
+Task `FP-0021` generates the C and Zig ABI from `api/fairpane.schema.json` in commit `13372de`, and it awaits `fairpane-review`.
+Task `FP-0051` closes the FP-0002 findings in commit `199b279`, and it awaits `fairpane-review`.
+Task `FP-0007`, the headless laboratory, is active in the isolated worker `FP0007Lab`.
+Contract drafts for `FP-0011` and `FP-0013` are in progress in the workers `FP0011Contract` and `FP0013Contract`.
+Tasks `FP-0052` and `FP-0053` carry the FP-0003 and FP-0031 review findings.
+The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, the engine and document lifecycle with versioned host requests, a DOM node store, and a generated C ABI.
 No renderer, JavaScript engine, or native browser window exists yet.
 
 The repository is public at <https://github.com/mattneel/fairpane>.
@@ -28,13 +28,12 @@ ADR 0007 makes the frontend language independent of the renderer and reserves th
 
 ## Next action
 
-1. Record the review verdicts of `FP-0002`, `FP-0003`, and `FP-0033`, and fix any finding.
-2. Record the `FP-0031` review verdict.
-3. Apply the `specs/corpora.json` pins in a separate commit only after both FP-0003 reviewers accept.
-4. Integrate the `FP-0009` and `FP-0021` worker patches, run their gates, and request reviews.
-5. Start `FP-0050` after `FP-0021` lands.
-6. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
-7. Start `FP-0007` from its frozen contract after `FP-0003` is accepted.
+1. Record the review verdicts of `FP-0021`, `FP-0033`, and `FP-0051`, and fix any finding.
+2. Integrate the `FP-0007` worker patch, run its gates, and request `fairpane-review`.
+3. Review and freeze the `FP-0011` and `FP-0013` contract drafts, then start both tasks.
+4. Start `FP-0050` after the `FP-0021` review, through the schema and the generator.
+5. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
+6. Freeze contracts for `FP-0052`, `FP-0053`, and `FP-0027`, and start them.
 
 ```text
 node tools/fairpane.mjs check
