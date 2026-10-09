@@ -81,6 +81,8 @@ Each checkpoint is committed and pushed as soon as its checks pass.
 `docs/GIT_OPERATIONS.md` defines the complete procedure and history rules.
 The integrator checks the `Gates` run of each pushed head.
 A failed run blocks acceptance of every task whose implementation it contains, and the failure is recorded in that task's evidence with its run ID.
+The integrator accepts a task only after the runs of every pushed head from its implementation commit to the head before the acceptance commit have concluded.
+Each of those runs must pass, or its failure must be recorded with its cause and a passing rerun of the same head.
 `git apply --3way` stages the patch that it applies.
 Before each commit, the integrator checks `git diff --cached --name-only`, so a commit holds only the files that its message names.
 
