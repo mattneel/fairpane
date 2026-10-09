@@ -42,7 +42,16 @@ The worker implemented it in an isolated working tree whose `HEAD` was `f53f465`
 | `raw/tests-after.log` | `exit_code` 0, 20 of 20 steps and 105 of 105 unit tests, with the fresh cache `out/fp0054-after` |
 | `raw/controller-tests-after.log` | `exit_code` 0, 158 of 158 controller tests |
 
-The integrator records `HEAD`, the status, and the gates in `gates/`.
+The integrator applied the patch without conflicts and committed it as `0dda99b`.
+`raw/integration-binding.log` records `HEAD` `0dda99b` and an empty status, including ignored files, for every source root.
+
+- `gates/2026-10-09T09-30-14-403Z-repo-check-36895c39.json`
+- `gates/2026-10-09T09-30-14-629Z-controller-test-3bd5fe05.json`, with 158 of 158 controller tests.
+- `gates/2026-10-09T09-30-38-580Z-zig-fmt-d934cf34.json`
+- `gates/2026-10-09T09-30-38-772Z-zig-test-f29ff3ec.json`
+
+`raw/integration-tests.log` runs `zig build test --summary all` with the fresh cache `out/fp0054-integration-cache`: 38 of 38 build steps and 136 of 136 tests, which include the FP-0011 tests that landed after the worker's base.
+`raw/integration-bun.log` records Bun with 158 of 158 controller tests.
 
 ## Resolved ambiguities
 

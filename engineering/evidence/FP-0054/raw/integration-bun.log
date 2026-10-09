@@ -1,0 +1,232 @@
+
+COMMAND ["C:\\Users\\requi\\AppData\\Local\\Microsoft\\WinGet\\Links\\bun.exe","tools/selftest.mjs"]
+TAP version 13
+ok 1 - A normal relative file resolves within the repository
+ok 2 - Traversal, empty components, and dot components fail
+ok 3 - Absolute paths, backslashes, control bytes, and alternate streams fail
+ok 4 - A missing path needs explicit permission
+ok 5 - A symlink cannot redirect an input inventory
+ok 6 - A dangling directory link is not a new output directory
+ok 7 - An empty input inventory fails
+ok 8 - Input hashes change with content
+ok 9 - Input hashes include relative names
+ok 10 - Input hashes ignore checkout location and input order
+ok 11 - Repeated roots do not duplicate files
+ok 12 - File hashes match the SHA-256 content hash
+ok 13 - Atomic JSON output supports replacement and BOM input
+ok 14 - The supplied compiler lock has a valid structure
+ok 15 - A stable version cannot silently replace Zig master
+ok 16 - A floating compiler version fails
+ok 17 - A substituted compiler source fails
+ok 18 - A substituted artifact URL fails
+ok 19 - An invalid checksum or archive size fails
+ok 20 - A checksum mismatch cannot qualify an archive
+ok 21 - A size mismatch cannot qualify an archive
+ok 22 - Host selection maps supported platform names explicitly
+ok 23 - A valid task graph has one initial ready task
+ok 24 - An accepted prerequisite reveals the next task
+ok 25 - An active task does not become another ready task
+ok 26 - A duplicate task ID fails
+ok 27 - Unknown and duplicate prerequisites fail
+ok 28 - A cycle in the task graph fails
+ok 29 - Empty acceptance criteria and unknown gates fail
+ok 30 - Missing state and unknown workstreams fail
+ok 31 - Acceptance without evidence and review fails
+ok 32 - Acceptance with an unaccepted prerequisite fails
+ok 33 - An empty release profile fails closed
+ok 34 - The full set of capability families cannot disappear
+ok 35 - Qualified metadata alone cannot replace a release verifier
+ok 36 - 1: A forged local receipt passes validateReceipt without gate execution
+ok 37 - 2: A valid envelope signed by a trusted key verifies
+ok 38 - 3: RFC 8032 test vector 1 verifies through the same key decoding path
+ok 39 - 4: A key outside the trust policy fails, whether it names itself or a trusted key
+ok 40 - 5: One changed payload byte fails as bad-signature
+ok 41 - 6: A truncated envelope and a truncated payload each fail
+ok 42 - 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+ok 43 - 8: A payload for another commit or tree fails as stale-candidate
+ok 44 - 9: A payload with another policy digest fails as changed-policy
+ok 45 - 10: Zero discovered and zero selected each fail as zero-denominator
+ok 46 - 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+ok 47 - 12: A runner key that differs from the signature key fails as key-mismatch
+ok 48 - 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+ok 49 - 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+ok 50 - 16: A trusted signature over a noncanonical payload fails as malformed
+ok 51 - FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result
+ok 52 - FP-0051 2: enclosingGitDirectories collects the common directory of every enclosing .git entry
+ok 53 - FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+ok 54 - FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled
+ok 55 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+ok 56 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+ok 57 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+ok 58 - FP-0033 17: An action commit outside the reviewed set fails, even with a full SHA and a version comment
+ok 59 - FP-0033 3: A workflow permission other than contents: read fails
+ok 60 - FP-0033 3: A job permission other than contents: read fails
+ok 61 - FP-0033 4: continue-on-error on a step or a job fails
+ok 62 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+ok 63 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+ok 64 - FP-0033 4: A workflow_run trigger fails
+ok 65 - FP-0033 8: An expression outside the allowlist fails
+ok 66 - FP-0033 9: A gate step that can be skipped or rerouted fails
+ok 67 - FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+ok 68 - FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+ok 69 - FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+ok 70 - FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+ok 71 - FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+ok 72 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+ok 73 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+ok 74 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+ok 75 - FP-0021 case 1: Generating from the committed schema reproduces the committed include/fairpane.h and src/abi_generated.zig byte for byte
+ok 76 - FP-0021 case 2: Changing one byte of either generated file makes abi-check exit with status 1 and name the file
+ok 77 - FP-0021 case 3: Generation is deterministic across two runs and across schema key order
+ok 78 - FP-0021 case 4: The validator rejects an unknown kind, a pointer without ownership or lifetime, an inverted range, a duplicate name, and a structure without struct_size
+ok 79 - FP-0021 case 5: The schema distinguishes text, web_string, bytes, identifier, handle, ranged integer, and optional values, and the generator maps each one to distinct C and Zig declarations
+ok 80 - FP-0021 case 6: The generated Zig declarations assert the size and every field offset of every structure
+ok 81 - FP-0021 case 7: The C smoke test runs every C-expressible failure scenario and names each identifier it covers
+ok 82 - FP-0021 case 8: The Zig scenario test runs every failure scenario through the generated declarations
+ok 83 - FP-0021 case 9: Every failure scenario has an identifier, calls, and expected outcomes, and the validator rejects one without them
+ok 84 - FP-0021 case 10: The validator rejects consumed_on_success on an output parameter, and the generated C and Zig text states the consumption rule for fp_engine_destroy
+ok 85 - FP-0021 case 11: The validator rejects an unknown reference and an unreferenced function name, and the generated header contains no schema-only name outside a C name
+ok 86 - FP-0021 case 12: The generated C static assertions check the size and every member offset of every structure, and the C smoke test compiles them
+ok 87 - FP-0021 case 13: From a foreign thread, the C and Zig scenarios call each owner function with an invalid argument and expect wrong_thread
+ok 88 - FP-0021 revision 1 status sets: abi_generated.zig carries each function status set, and src/c_api.zig checks every export against it
+ok 89 - FP-0021 revision 1 export check: abi-exports fails when a library exports an fp_ symbol that the schema does not declare
+ok 90 - 15: release-check still exits with status 1
+ok 91 - A successful command records its actual output
+ok 92 - A nonzero child exit remains a failure
+ok 93 - A missing executable produces an error record
+ok 94 - A hung child reaches its watchdog and cannot pass
+ok 95 - Command arguments do not execute through a shell
+ok 96 - A real local gate produces a checkable unsigned receipt
+ok 97 - Changed source makes a previous receipt stale
+ok 98 - Changed evidence output invalidates a receipt
+ok 99 - Changed gate definitions invalidate old receipts
+ok 100 - A local receipt cannot upgrade its own trust label
+ok 101 - A receipt without command records cannot pass
+ok 102 - A receipt without output artifacts cannot pass
+ok 103 - A failed command cannot hide behind a pass label
+ok 104 - A command failure produces a failed gate receipt
+ok 105 - A missing compiler produces a failed gate receipt
+ok 106 - Input changes during execution produce a failed gate receipt
+ok 107 - A removed input still produces a failed gate receipt
+ok 108 - Unknown gates fail before execution
+ok 109 - Evidence paths cannot escape their approved roots
+ok 110 - A gate writes a checkable receipt under an approved evidence directory
+ok 111 - An unapproved evidence directory fails before any gate command runs
+ok 112 - Environment overrides reach the child and its command record
+ok 113 - Executable resolution follows PATH order
+ok 114 - A recorded command keeps its output, exit status, and resolved executable
+ok 115 - Command records carry the working directory and start time
+ok 116 - An unwritable log yields a failed result instead of an exception
+ok 117 - A failed output copy is recorded and its capture directory is removed
+ok 118 - Standard error output reaches the log
+ok 119 - A completed command leaves no capture directory
+ok 120 - Executable resolution never searches the process working directory
+ok 121 - A bare executable name is logged as its resolved absolute path
+ok 122 - A rejected record path writes nothing
+ok 123 - The controller rejects malformed run and record arguments
+ok 124 - Only Zig and C ABI gates receive the repository-local compiler cache
+ok 125 - A capture-start failure writes a RESULT line, closes the log, and returns an error result
+ok 126 - A failed RESULT write returns an error result instead of throwing
+ok 127 - A spawn error and a capture error both remain in the result
+ok 128 - runGate writes nothing when its evidence directory fails validation
+ok 129 - A short write to the log produces an error result
+ok 130 - A failed capture-directory removal appears in the command record
+ok 131 - FP-0054 case 6: A busy capture directory is removed on a later attempt
+ok 132 - FP-0054 case 6: a capture directory that stays busy records the last failure after waiting between attempts
+ok 133 - FP-0054 case 6: a capture-directory removal error with a non-transient code gets one attempt
+ok 134 - FP-0054 case 6: lastResult asserts that a RESULT line exists before it parses one
+ok 135 - started_at in every command record is a canonical UTC ISO 8601 timestamp
+ok 136 - The mutation control runs an unmutated baseline first and records each killed test name and message
+ok 137 - The inventory of a fixture commit equals a hand-computed canonical listing digest
+ok 138 - The inventory ignores working-tree files and core.autocrlf
+ok 139 - A changed blob, an added file, a removed file, and a renamed file each change the inventory digest
+ok 140 - Paths with spaces, non-ASCII bytes, and tabs keep their exact bytes through NUL-separated parsing
+ok 141 - A symbolic link entry hashes its target text, and a submodule entry records its commit ID
+ok 142 - corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest
+ok 143 - Applicability validation rejects negative counts, non-integer counts, inconsistent sums, and exclusions without reasons
+ok 144 - Snapshot record validation rejects a non-40-hex commit, a missing license digest, and a missing inventory digest
+ok 145 - Verification fails when the license digest, the commit date, or an applicability count differs from its record
+ok 146 - corpus-verify exits with status 1 through the controller command on an inventory digest mismatch
+ok 147 - A replace ref that substitutes the recorded commit cannot make verification pass
+ok 148 - A tree path that contains a line feed fails the inventory
+ok 149 - WPT counting of a fixture manifest reports per-type counts, excludes support, spec, and test262 from discovery, and reports test262 separately
+Download http://127.0.0.1:51461/api/manifest?sha=4eab98b4627dffd16ff86c9917edc3b4782456fc
+x-wpt-sha 4eab98b4627dffd16ff86c9917edc3b4782456fc, 39 bytes, SHA-256 286b38dc90e1e0bfb32af690dc90614de0e1eb74867910c21913f3079be79789
+Download http://127.0.0.1:51461/api/manifest?sha=4eab98b4627dffd16ff86c9917edc3b4782456fc
+ok 150 - A fixture manifest with a path that the tree lacks, or with a hash that differs from the blob ID, fails binding
+ok 151 - A pinned revision in a fixture corpora.json makes verification fail for a snapshot at another commit, inventory digest, or manifest digest
+ok 152 - Test262 discovery excludes a file named a_FIXTURE_b.js and a file named x_FIXTURE.js
+ok 153 - A fixture manifest with test262 items under the vendored tests, the vendored harness, and infrastructure/test262/ counts only the infrastructure item and reports the others by path
+ok 154 - A manifest without test items fails binding, and an applicability record with zero discovered tests fails validation
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-4p2ym3","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-4g49qd\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-4g49qd\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-4p2ym3","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-4p2ym3
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/snapshots/test262.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-4p2ym3","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-4g49qd\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-4g49qd\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-4p2ym3","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-4p2ym3
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+ok 155 - corpus-fetch against a local fixture upstream fetches the pinned commit after the upstream branch moves
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-umey8K","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-nmc7mh\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-nmc7mh\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-umey8K","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-umey8K
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-umey8K","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-nmc7mh\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-nmc7mh\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-umey8K","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-umey8K
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-umey8K","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-nmc7mh\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-nmc7mh\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-umey8K","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-umey8K
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+ok 156 - A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Pinned commit cc0f937227cc7d5ae867e8000069b258e8a4a91d from specs/corpora.json.
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-9CzvS3","HEAD"]
+ref: refs/heads/main	HEAD
+cc0f937227cc7d5ae867e8000069b258e8a4a91d	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-WFp6U0\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-WFp6U0\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-9CzvS3","+cc0f937227cc7d5ae867e8000069b258e8a4a91d:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-9CzvS3
+ * [new ref]         cc0f937227cc7d5ae867e8000069b258e8a4a91d -> main
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","ls-remote","--symref","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-9CzvS3","HEAD"]
+ref: refs/heads/main	HEAD
+8895bafe72a888c3b313a5445f281a68f01b1822	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","init","--bare","--quiet","C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-WFp6U0\\test262.fetch\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--no-replace-objects","--git-dir=C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-controller-WFp6U0\\test262.fetch\\repository.git","-c","fetch.fsckObjects=true","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-9CzvS3","+8895bafe72a888c3b313a5445f281a68f01b1822:refs/heads/main"]
+From file:///C:/Users/requi/AppData/Local/Temp/fairpane-controller-9CzvS3
+ * [new ref]         8895bafe72a888c3b313a5445f281a68f01b1822 -> main
+ok 157 - corpus-repin against a local fixture upstream moves the snapshot to the new head and reports the pin differences
+ok 158 - The actual bootstrap repository passes its integrity check
+1..158
+# tests 158
+# pass 158
+# fail 0
+# Scope: controller behavior only. No renderer or JavaScript conformance claim.
+RESULT {"executable":"C:\\Users\\requi\\AppData\\Local\\Microsoft\\WinGet\\Links\\bun.exe","arguments":["tools/selftest.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T09:31:04.227Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21892}
