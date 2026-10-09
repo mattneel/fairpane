@@ -103,3 +103,14 @@ The integrator applied the worker's patch and committed it alone as `152ed53`.
 - `raw/bun-selftest.log` records Bun 1.4.2 and `tools/selftest.mjs` with 207 of 207 tests.
 
 The first `Gates` run with the change is run 37936609533 of `152ed53`; `ci/` records it when it concludes.
+
+### Acceptance run
+
+Run 37936609533 of `152ed53` timed out in the Linux `zig-test` gate at 600,004 milliseconds, as `ci/ci-record.log` and `ci/run-37936609533-linux/` record.
+Contract amendment 1 makes the acceptance record the first `Gates` run after `FP-0098` lands whose Linux `zig-test` receipt reports `pass`.
+
+- `ci/acceptance-run.log` records `9d5638b`, FP-0098's implementation commit, then `gh run list` of that commit's runs and `gh run view` of run 37941660067, its push run, which is the first run that contains the fix.
+  The run concludes `success`, with both jobs successful.
+- The same log records the run's artifacts and `gh run download` of `linux-gate-receipts-unsigned-local-integrity-records-not-attestations` into `ci/run-37941660067-linux/`.
+- The Linux receipts report `pass` for `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, and the three cross-compilation gates.
+  The `zig-test` receipt's command took 178,677 milliseconds.
