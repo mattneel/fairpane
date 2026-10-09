@@ -1,0 +1,149 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "9fe40c40233ee16cb50daa6b63e8404ea4a98fd7",
+    "00f85bc5bf87d4a5b8901805c84c244884de7024"
+  ],
+  "summary": "I found no blocker or major defect in FP-0008. I compared src/html/tokenizer.zig against the frozen whatwg/html efc54f7b source, using the local copy out/whatwg-html-source-efc54f7b…, whose SHA-256 raw/html-standard-pin.log records. I read the tokenization introduction and its definitions, the data, tag open, end tag open, and tag name states, the before attribute name state through the bogus comment, markup declaration open, and comment start states, the after DOCTYPE name and public-keyword states, the bogus DOCTYPE state, the CDATA states, the five processing instruction states, every character reference state, the numeric replacement table, the §13.2.3.5 preprocessing text, and part of the §13.2.2 table in order. For the other comment and DOCTYPE states I checked the code against the standard's well-known text, not against the frozen file. Every branch I checked follows the text. That covers EOF behavior, which characters are reconsumed, force-quirks handling, duplicate-attribute removal with the 'current attribute' kept, the historical attribute rule, saturating numeric accumulation, and the 27-row override table with the commented-out 0x0D/0x81/0x8D/0x8F/0x90/0x9D rows. I hand-traced many frozen cases (A5, A12b, A49, R1–R7, S1, S5, N6, P8, P11, P14, P20, B2, B3), and each matches. Chunk independence works as follows. consume() holds a CR or a leading surrogate at the end of the available input. Lookahead states peek raw units without consuming. release() copies only undecided units into carry. The harness overwrites each chunk with 0xAAAA after need_input. The mutation control (.more => {} in the CR branch) was applied to the committed tokenizer: blob 7ee21c8, which the GitHub contents API confirms for 9fe40c4. It failed case 13 on P1 with partition [0,2) [2,8) and 1-minimal input \\r\\n. The entity matcher is allocation-free and correct for a sorted table. Case 3 pins the committed table to a std.json parse of the embedded entities.json, and the regenerate run produced no diff. The lab decode and tokenize stages, the outcome precedence, and FP-0007 case 2/case 25 match the contract. I confirmed FP-0007 cases 4 and 7 are textually unchanged against parent 43edcec. Commit 9fe40c4 touches only src, tests, build.zig, and the FP-0008 evidence. Commit 00f85bc adds evidence and engineering/state.json, which stays at 'implemented' with review null. Neither commit changes a protected path. No shell code is involved. integration-binding.log records HEAD 9fe40c4 and an empty status, including ignored files, before and after the gates. The fresh-cache Zig run passed 218/218 tests, and the controller tests passed 188/188 under both Node and Bun. The remaining findings are minor or notes: case 16 uses a different chunk split than the frozen case, and the evidence has small inaccuracies and claims without a recorded command. I accept the integrator's acceptance of the extra network reads. The contract requires standard_last_updated from the live multipage page, so its 'only items 2 and 3' rule contradicted itself. The other two reads were read-only, public, and recorded, and they were used to resolve the LICENSE-commit contradiction that amendment 1 later fixed.",
+  "criteria": [
+    {
+      "criterion": "Plan: Implement a frozen subset of specified tokenizer states completely.",
+      "met": true,
+      "evidence": "src/html/states.zig defines 84 states. implemented() is true for sections 1, 6–8, 32–68, and 72–84, which is 54 states, and owner() returns FP-0064 for the other 30. src/html/tokenizer.zig step(), markupDeclarationOpen(), afterDoctypeNameKeyword(), namedCharacterReference(), and numericCharacterReferenceEnd() match the frozen source for every branch I compared. Case 11 asserts that every listed branch counter is nonzero. raw/integration-tests.log shows 218/218 tests passing on 9fe40c4."
+    },
+    {
+      "criterion": "Plan: Compare whole-input results with every partition of small adversarial inputs.",
+      "met": true,
+      "evidence": "src/html/partition_test.zig firstMismatch() enumerates every composition (set P, inputs P1–P22) and every 1-, 2-, or 3-chunk partition (set B). tokenizeChunks() drains to need_input and overwrites each chunk with 0xAAAA. Cases 4–10 also run one code unit per chunk (checkCase). raw/mutation-pending-cr.log lines 127–147 show the mutant failing P1 and P21 with minimized reports."
+    },
+    {
+      "criterion": "Plan: Preserve source positions and recovery outcomes.",
+      "met": true,
+      "evidence": "Cases 4–10 and 12 compare exact error line/column/offset values and spans (S1–S6, N6's end-of-file position). Cases 18–24 run through lab.zig decode()/tokenize()/conclude(). I hand-traced S1, S5, R5, N6, and P14 against the contract's position rules and they agree."
+    },
+    {
+      "criterion": "Plan: Record every unimplemented tokenizer state for subsequent tasks.",
+      "met": true,
+      "evidence": "states.owner() returns FP-0064 for 30 states (case 1). The README sections 'Unimplemented states' and 'Unraised error codes' list them. plan.json has FP-0064 (depends on FP-0008), FP-0065, and FP-0077, and FP-0010 depends on FP-0064. markupDeclarationOpen returns UnimplementedState with .cdata_section (case 16)."
+    },
+    {
+      "criterion": "Parse error codes: 52 codes in §13.2.2 order, 49 raised, and the three unraised codes with their owners.",
+      "met": true,
+      "evidence": "The order of errors.zig matches the frozen table in the region I read (missing-whitespace… through unexpected-character-in-unquoted-attribute-value, with non-void-html-element-start-tag-with-trailing-solidus after noncharacter-in-input-stream). raisedByTokenizer() excludes exactly the three codes. Case 4 asserts that every raised code appears in the catalog."
+    },
+    {
+      "criterion": "Input preprocessing: newline normalization, a pending CR across chunks, surrogates, and §13.2.3.5 errors with their position rule.",
+      "met": true,
+      "evidence": "In tokenizer.zig consume(), a CR or a leading surrogate before the end of available input returns null. It reports preprocessingError() at the code point's own position before the state action. isNoncharacter, isControl, and the NULL and ASCII-whitespace exclusions match Infra and §13.2.3.5. N1–N6, P1–P3, and the mutation control give the evidence."
+    },
+    {
+      "criterion": "Character reference states and the numeric replacement table.",
+      "met": true,
+      "evidence": "The character reference, ambiguous ampersand, numeric, hexadecimal start, hexadecimal, decimal, and numeric end states match the frozen text. The overrides table has 27 rows that match the uncommented rows of #table-charref-overrides. Saturation at 0x110000 keeps the outside-range branch. R1–R7, P9, P14, and P16–P18 cover them."
+    },
+    {
+      "criterion": "Named character references: entities.json, the generated table, matching, and counts.",
+      "met": true,
+      "evidence": "entities.zig Matcher keeps a sorted [lo,hi) range and the longest complete name, without allocating. entities_test.zig compares the committed table, name by name and code point by code point, with a std.json parse of the embedded file. It also checks the counts (2231/2125/106/93/32) and the frozen lookups. raw/integration-entities-regenerate.log shows the regeneration with git diff exit status 0."
+    },
+    {
+      "criterion": "Resumable feeding with borrowed chunks and the interface rules.",
+      "met": true,
+      "evidence": "feed, finish, next, and release in tokenizer.zig implement ChunkPending, InputFinished, sticky failure, and need_input only before finish. Lookahead states keep their progress through matcher, matching, and reconsume. Case 15 and case 17 (checkAllAllocationFailures) give the evidence."
+    },
+    {
+      "criterion": "Partition harness reporting and minimization through the generic lab.ddmin.",
+      "met": true,
+      "evidence": "partition_test.zig checkWith(): the failing partition with the fewest chunks, ties to the lowest boundary list, both dumps, and ddmin(u16). Case 14 uses injected predicates. lab.zig ddmin(comptime T) is called as ddmin(u8) by FP-0007 case 11 and the minimizer."
+    },
+    {
+      "criterion": "Laboratory decode and tokenize stages and outcome precedence.",
+      "met": true,
+      "evidence": "lab.zig execute() runs decode() only for a loaded document and tokenize() only after decode completes. BOM sniffing gives the frozen details. conclude() orders timeout, then unsupported, then failed-document fail, then decode unsupported, then check order. Cases 18–24 and the case 26 build steps (exit 0/1/2) pass in raw/integration-tests.log."
+    },
+    {
+      "criterion": "FP-0007 case 2 changes as intended, and cases 4 and 7 are unchanged.",
+      "met": true,
+      "evidence": "lab.zig:2432 asserts fetch completed, decode unsupported with the no-BOM detail, tokenize not-reached, and every other stage unsupported. The case 4 and case 7 test bodies are textually identical to parent 43edcec."
+    },
+    {
+      "criterion": "Provenance and license records.",
+      "met": true,
+      "evidence": "entities.provenance.json records the sizes and digests from raw/entities-digest.log, the frozen-commit LICENSE URL, the name, the copyright, and the derived generator and generated file. .gitattributes marks both files -text. Case 3 verifies the digests against the embedded bytes. LICENSE-DECISION.md lines 34–37 and owner-answers.log record the owner's approval."
+    },
+    {
+      "criterion": "Mutation control.",
+      "met": true,
+      "evidence": "raw/mutation-pending-cr.diff changes the CR .more branch. The mutated file's base blob 7ee21c8 equals the committed tokenizer. raw/mutation-pending-cr.log shows 5 failures, including case 13 P1, and a restoration diff with exit status 0."
+    },
+    {
+      "criterion": "Evidence bound to 9fe40c4.",
+      "met": true,
+      "evidence": "raw/integration-binding.log records HEAD 9fe40c4 and an empty porcelain --ignored status at 10:58:40 and at 11:00:36. The gates (repo-check, controller-test, zig-fmt, zig-test) and the fresh-cache run (65/65 steps, 218/218 tests) and Bun run all fall inside that window, and every gate receipt has the same source fingerprint 84b51262… before and after."
+    },
+    {
+      "criterion": "Exact case 16 as frozen (two chunks `<![CDA` and `TA[x]]>`).",
+      "met": false,
+      "evidence": "tokenizer_test.zig:823 feeds input[0..7] (`<![CDAT`) and input[7..]. Line 837 uses boundary 7 for the flag-false A5 check. The frozen split is at offset 6."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "src/html/tokenizer_test.zig",
+      "line": 823,
+      "issue": "Case 16 splits `<![CDATA[x]]>` at offset 7 (`<![CDAT` | `A[x]]>`), but the frozen case says the chunks are `<![CDA` and `TA[x]]>`, which is offset 6. The flag-false comparison at line 837 also uses {7}. The behavior class is the same (a stall inside the `[CDATA[` lookahead), but this is not the frozen exact case. With the flag true, no other test splits at 6.",
+      "recommendation": "Use input[0..6] and input[6..], and boundary {6}, to match the frozen case. Alternatively, test both 6 and 7."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0008/README.md",
+      "line": 141,
+      "issue": "The stop-rule observation says the 84 <h5> headings equal the frozen list and that the §13.2.2 table has 52 codes in frozen order. No recorded command produced this. The contract's integrator decision makes the same unrecorded count. I checked the PI/CDATA/character-reference section order and part of the error table by hand, and they agree, but the claim has no raw output behind it.",
+      "recommendation": "Record a command, such as an extraction of <h5><dfn> headings and parse-error-* dfns from out/whatwg-html-source-efc54f7b…, under raw/ and cite it."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0008/README.md",
+      "line": 74,
+      "issue": "The tests-before baseline was recorded at 10:45, after the entity fetch at 10:23 and after implementation, from a git-archived base. Run 1 fails only because the files do not compile. Run 2 shows only the case 26 lab steps failing. No FP-0008 tokenizer unit case is observed failing at the base, so the 'failing test first' step of AGENTS.md is shown only weakly.",
+      "recommendation": "State explicitly that the baseline is post hoc. In later tasks, record the failing run before implementing."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0008/CONTRACT.md",
+      "line": 863,
+      "issue": "The frozen authority rule permits network access only for evidence items 2 and 3. The worker also fetched the multipage index, ran git ls-remote, and downloaded a comparison LICENSE. The integrator accepted these after the fact (README.md:191). The multipage fetch was needed to satisfy the contract's own standard_last_updated requirement, so the contract contradicted itself. All three reads were recorded, read-only, and public. I judge the acceptance sound, but the authority text was never amended.",
+      "recommendation": "Record a contract amendment, or a note in the authority section, that names the permitted reads. In future contracts, include every network read the contract itself requires."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0008/README.md",
+      "line": 40,
+      "issue": "The Records table lists `raw/owner-answers.log`. The file is engineering/evidence/FP-0008/owner-answers.log, not under raw/.",
+      "recommendation": "Correct the path."
+    },
+    {
+      "severity": "note",
+      "path": "src/html/entities_table.zig",
+      "line": 1,
+      "issue": "The generated table (BSD-3-Clause for portions in source code) names its generator and input, but not the WHATWG copyright or entities.LICENSE. The notice sits in the same directory, and entities.zig refers to it, so this is defensible for source distribution. A binary release would still need the notice reproduced, under BSD-3 clause 2.",
+      "recommendation": "Have entities_gen.zig emit a header line that names the WHATWG copyright and src/html/entities.LICENSE. Track binary-notice reproduction for the release task."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0008/raw/integration-entities-regenerate.log",
+      "line": null,
+      "issue": "The regeneration (11:00:41) ran after the final binding check (11:00:36) and writes into src. Only `git diff` of the table file was recorded afterward, not a full source-root status.",
+      "recommendation": "Run the regeneration inside the binding window, or repeat the status check after it."
+    },
+    {
+      "severity": "note",
+      "path": "src/html/tokenizer.zig",
+      "line": 404,
+      "issue": "The consumeMatched doc comment says the matched characters are 'ASCII letters'. The function also consumes '-', '[', digits, and ';', which are equally free of preprocessing errors.",
+      "recommendation": "Reword it, for example: 'ASCII characters that a lookahead matched, which preprocessing never reports'."
+    }
+  ],
+  "commands_run": []
+}

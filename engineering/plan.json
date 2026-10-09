@@ -2928,9 +2928,10 @@
         "Implement the RCDATA, RAWTEXT, script data, PLAINTEXT, and CDATA section tokenizer states completely, with every parse error they raise.",
         "Expose the state switches that tree construction makes, without implementing tree construction.",
         "Compare whole-input results with every partition of small adversarial inputs for each new state.",
-        "Record that no tokenizer state remains unimplemented."
+        "Record that no tokenizer state remains unimplemented.",
+        "Split FP-0008 case 16 at offset 6 as its contract freezes, and correct the consumeMatched documentation, as the FP-0008 review records."
       ],
-      "read": ["engineering/evidence/FP-0008/CONTRACT.md"],
+      "read": ["engineering/evidence/FP-0008/CONTRACT.md", "engineering/evidence/FP-0008/reviews/review-1-accept.json"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },

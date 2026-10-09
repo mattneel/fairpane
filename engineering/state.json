@@ -141,7 +141,7 @@
       ]
     },
     "FP-0008": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-core worker FP0008Html, integrated by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0008/README.md",
@@ -152,13 +152,15 @@
         "engineering/evidence/FP-0008/raw/tests-before.log",
         "engineering/evidence/FP-0008/raw/mutation-pending-cr.log",
         "engineering/evidence/FP-0008/raw/integration-tests.log",
-        "engineering/evidence/FP-0008/raw/integration-entities-regenerate.log"
+        "engineering/evidence/FP-0008/raw/integration-entities-regenerate.log",
+        "engineering/evidence/FP-0008/raw/integrator-standard-counts.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0008/reviews/review-1-accept.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0008/CONTRACT.md, drafted by worker FP0008Contract and frozen by the root integrator on the accepted FP-0054 base.",
         "It freezes the HTML Standard at whatwg/html efc54f7b; raw/html-standard-pin.log records the source digest. Integrator amendment 1 (bcbe5a4) replaced the named build import with a committed generated table.",
-        "Commit 9fe40c4 implements it with 188 of 188 controller tests and 218 of 218 Zig tests. Awaiting fairpane-review."
+        "Commit 9fe40c4 implements it with 188 of 188 controller tests and 218 of 218 Zig tests.",
+        "fairpane-review accepted 9fe40c4 and 00f85bc with four minor findings. raw/integrator-standard-counts.log now records the 84 tokenizer states and 52 parse error codes of the pinned source; FP-0064 carries the case 16 split offset and the consumeMatched documentation; the evidence-timing findings are recorded in the review; and FP-0075 covers the notice that binary distributions of the generated entity table need."
       ]
     },
     "FP-0009": {
