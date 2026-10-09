@@ -2,18 +2,19 @@
 
 ## Actual state
 
-Tasks `FP-0001`, `FP-0004`, `FP-0005`, and `FP-0028` are accepted.
-Task `FP-0003` is implemented again after contract revision 1, and it awaits `fairpane-review` and `fairpane-spec` verdicts on the rework.
-The WPT record now has an explicit denominator of 76600 tests at commit `b60c4b34`, from the wpt.fyi manifest bound to the pinned tree.
-Task `FP-0047` closes the minor test gaps that the accepting `FP-0005` review found.
-Task `FP-0006` is implemented with 57 passing Zig tests and the C smoke test, and it awaits `fairpane-review`.
-Task `FP-0002` is implemented in the root session and awaits `fairpane-review`; `release-check` still fails closed.
-The candidate Zig library contains a capability probe, lossless owned web strings, and checked generational handles.
+Tasks `FP-0001`, `FP-0004`, `FP-0005`, `FP-0006`, `FP-0028`, and `FP-0047` are accepted.
+Task `FP-0002` implements contract revision 3 in commit `617d2cd` and awaits a third `fairpane-review`; `release-check` still fails closed.
+Task `FP-0003` implements contract revision 2 in commit `d185b5e`, with 76620 discovered WPT tests at `b60c4b34`, and awaits `fairpane-spec` and `fairpane-review`.
+Task `FP-0033` runs the gates in GitHub Actions; run 37873082602 succeeded, and the task awaits `fairpane-review` and `fairpane-security`.
+Task `FP-0031` is integrated in the working tree with 126 of 126 controller tests, and its mutation control is running.
+Tasks `FP-0009` (DOM node store) and `FP-0021` (interface schema and generator) are active in isolated workers.
+Task `FP-0050` closes the FP-0006 review findings after `FP-0021` lands, because both change the C ABI.
+The candidate Zig library contains a capability probe, lossless owned web strings, checked generational handles, and the engine and document lifecycle with versioned host requests.
 No renderer, JavaScript engine, or native browser window exists yet.
 
 The repository is public at <https://github.com/mattneel/fairpane>.
 The documentation book is live at <https://mattneel.github.io/fairpane/>.
-The `Pages` workflow rebuilds and deploys it on every push to `master`.
+The `Pages` workflow deploys it, and the `Gates` workflow runs the gates on every push to `master`.
 
 The browser is the engine's first embedder.
 The Zig engine owns web behavior, the Rust wrapper owns safe integration, and the Rust shell owns the application.
@@ -26,13 +27,13 @@ ADR 0007 makes the frontend language independent of the renderer and reserves th
 
 ## Next action
 
-1. Request an independent re-review of the decision commits `799dcba`, `ec425ea`, `2069b4d`, and the following docs commit against `engineering/evidence/decisions-2026-10-09/review-1-reject.json`.
-2. Correct the WPT `test262` attribution that `engineering/evidence/FP-0003/reviews/spec-review-2-reject.json` found, then request `fairpane-spec` again; `fairpane-review` already accepted the rework.
+1. Record the review verdicts of `FP-0002`, `FP-0003`, and `FP-0033`, and fix any finding.
+2. Commit `FP-0031` after its integration mutation control finishes, then request `fairpane-review`.
 3. Apply the `specs/corpora.json` pins in a separate commit only after both FP-0003 reviewers accept.
-4. Request `fairpane-review` on `FP-0002`, implemented in commit `e2eaace`.
-5. Record the `fairpane-review` verdict on `FP-0006`.
-6. Start the ready tasks `FP-0031`, `FP-0033`, and `FP-0047`.
-7. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
+4. Integrate the `FP-0009` and `FP-0021` worker patches, run their gates, and request reviews.
+5. Start `FP-0050` after `FP-0021` lands.
+6. Freeze the `FP-0029` Rust wrapper contract after `FP-0021` is accepted.
+7. Freeze the `FP-0007` laboratory contract after `FP-0003` is accepted.
 
 ```text
 node tools/fairpane.mjs check
