@@ -1,0 +1,13 @@
+diff --git a/out/fp0100-tree.fixed.zig b/src/html/tree.zig
+index 6b89be5..bea22a0 100644
+--- a/out/fp0100-tree.fixed.zig
++++ b/src/html/tree.zig
+@@ -1026,7 +1026,7 @@ pub const Parser = struct {
+                 },
+             }
+         }
+-        if (count >= 3) p.removeFormattingAt(earliest);
++        if (false and count >= 3) p.removeFormattingAt(earliest);
+         p.retain(node);
+         p.formatting.appendAssumeCapacity(.{ .element = .{ .node = node, .tag = token.tag, .attributes = attributes } });
+     }

@@ -1,0 +1,465 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","--git-dir=C:\\src\\fairpane\\.tools\\corpora\\wpt\\repository.git","rev-parse","b60c4b349d9d167bf354a40bc0d4cbed15174606:html/syntax/parsing/resources/README.md","b60c4b349d9d167bf354a40bc0d4cbed15174606:html/syntax/parsing/resources/test.js"]
+0f4be3b4f460437e1a1eab95fc98b9807fd177ae
+d993273e77eed7e249fab1dfd68baf15ec401001
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["--git-dir=C:\\src\\fairpane\\.tools\\corpora\\wpt\\repository.git","rev-parse","b60c4b349d9d167bf354a40bc0d4cbed15174606:html/syntax/parsing/resources/README.md","b60c4b349d9d167bf354a40bc0d4cbed15174606:html/syntax/parsing/resources/test.js"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T19:07:49.091Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","--git-dir=C:\\src\\fairpane\\.tools\\corpora\\wpt\\repository.git","cat-file","-p","b60c4b349d9d167bf354a40bc0d4cbed15174606:html/syntax/parsing/resources/README.md"]
+Tree Construction Tests
+=======================
+
+Each file containing tree construction tests consists of any number of
+tests separated by two newlines (LF) and a single newline before the end
+of the file. For instance:
+
+    [TEST]LF
+    LF
+    [TEST]LF
+    LF
+    [TEST]LF
+
+Where [TEST] is the following format:
+
+Each test \*may\* begin with a string "\#description" followed by a
+newline (LF). All subsequent lines until a line that says "\#data" are
+the test description and \*should\* be passed to the test harness to
+supplement the test's name.
+
+Each test must either begin with "\#description" (see above) or begin
+with a string "\#data" followed by a newline (LF). All subsequent lines
+until a line that says "\#errors" are the test data and must be passed
+to the system being tested unchanged, except with the final newline
+(on the last line) removed.
+
+Then there must be a line that says "\#errors". It must be followed by
+one line per parse error that a conformant checker would return. It
+doesn't matter what those lines are, although they can't be
+"\#new-errors", "\#document-fragment", "\#document", "\#script-off",
+"\#script-on", or empty, the only thing that matters is that there be
+the right number of parse errors.
+
+Then there \*may\* be a line that says "\#new-errors", which works like
+the "\#errors" section adding more errors to the expected number of
+errors.
+
+Then there \*may\* be a line that says "\#document-fragment", which must
+be followed by a newline (LF), followed by a string of characters that
+indicates the context element, followed by a newline (LF). If the string
+of characters starts with "svg ", the context element is in the SVG
+namespace and the substring after "svg " is the local name. If the
+string of characters starts with "math ", the context element is in the
+MathML namespace and the substring after "math " is the local name.
+Otherwise, the context element is in the HTML namespace and the string
+is the local name. If this line is present the "\#data" must be parsed
+using the HTML fragment parsing algorithm with the context element as
+context.
+
+Then there \*may\* be a line that says "\#script-off" or
+"\#script-on". If a line that says "\#script-off" is present, the
+parser must set the scripting flag to disabled. If a line that says
+"\#script-on" is present, it must set it to enabled. Otherwise, the
+test should be run in both modes.
+
+Then there must be a line that says "\#document", which must be followed
+by a dump of the tree of the parsed DOM. Each node must be represented
+by a single line. Each line must start with "| ", followed by two spaces
+per parent node that the node has before the root document node.
+
+-   Element nodes must be represented by a "`<`" then the *tag name
+    string* "`>`", and all the attributes must be given, sorted
+    lexicographically by UTF-16 code unit according to their *attribute
+    name string*, on subsequent lines, as if they were children of the
+    element node.
+-   Attribute nodes must have the *attribute name string*, then an "="
+    sign, then the attribute value in double quotes (").
+-   Text nodes must be the string, in double quotes. Newlines aren't
+    escaped.
+-   Comments must be "`<`" then "`!-- `" then the data then "` -->`".
+-   DOCTYPEs must be "`<!DOCTYPE `" then the name then if either of the
+    system id or public id is non-empty a space, public id in
+    double-quotes, another space an the system id in double-quotes, and
+    then in any case "`>`".
+-   Processing instructions must be "`<?`", then the target, then a
+    space, then the data and then "`?>`".
+-   Template contents are represented by the string "content" with the
+    children below it.
+
+The *tag name string* is the local name prefixed by a namespace
+designator. For the HTML namespace, the namespace designator is the
+empty string, i.e. there's no prefix. For the SVG namespace, the
+namespace designator is "svg ". For the MathML namespace, the namespace
+designator is "math ".
+
+The *attribute name string* is the local name prefixed by a namespace
+designator. For no namespace, the namespace designator is the empty
+string, i.e. there's no prefix. For the XLink namespace, the namespace
+designator is "xlink ". For the XML namespace, the namespace designator
+is "xml ". For the XMLNS namespace, the namespace designator is "xmlns
+". Note the difference between "xlink:href" which is an attribute in no
+namespace with the local name "xlink:href" and "xlink href" which is an
+attribute in the xlink namespace with the local name "href".
+
+If there is also a "\#document-fragment" the bit following "\#document"
+must be a representation of the HTML fragment serialization for the
+context element given by "\#document-fragment".
+
+For example:
+
+    #data
+    <p>One<p>Two
+    #errors
+    3: Missing document type declaration
+    #document
+    | <html>
+    |   <head>
+    |   <body>
+    |     <p>
+    |       "One"
+    |     <p>
+    |       "Two"
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["--git-dir=C:\\src\\fairpane\\.tools\\corpora\\wpt\\repository.git","cat-file","-p","b60c4b349d9d167bf354a40bc0d4cbed15174606:html/syntax/parsing/resources/README.md"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T19:07:49.198Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":40}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","--git-dir=C:\\src\\fairpane\\.tools\\corpora\\wpt\\repository.git","cat-file","-p","b60c4b349d9d167bf354a40bc0d4cbed15174606:html/syntax/parsing/resources/test.js"]
+// Runner for html5lib-tests .dat files.
+//
+// Each wrapper page (html5lib_url.html, html5lib_write.html, …) loads this
+// script with `<script src="resources/test.js" data-run-type="…"></script>`
+// and lists each .dat file as `<meta name=variant content="?file=NAME">`.
+// We fetch resources/NAME.dat, parse it, and run each entry: document tests
+// parse via the page's run_type; entries with #document-fragment always parse
+// via innerHTML.
+
+(() => {
+  "use strict";
+
+  const NAMESPACES = {
+    html:   "http://www.w3.org/1999/xhtml",
+    math:   "http://www.w3.org/1998/Math/MathML",
+    mathml: "http://www.w3.org/1998/Math/MathML",
+    svg:    "http://www.w3.org/2000/svg",
+    xlink:  "http://www.w3.org/1999/xlink",
+    xml:    "http://www.w3.org/XML/1998/namespace",
+    xmlns:  "http://www.w3.org/2000/xmlns/",
+  };
+  const PREFIXES = {};
+  for (const prefix of Object.keys(NAMESPACES)) {
+    PREFIXES[NAMESPACES[prefix]] = prefix;
+  }
+  PREFIXES[NAMESPACES.mathml] = "math";
+
+  function serializeTree(root) {
+    root.normalize();
+    const lines = [];
+    // The .dat #document format prefixes each line with "|" + N spaces of
+    // indent, where the document itself has no "|" line, its direct children
+    // get 1 space, their children get 3, then 5, 7, … (i.e. 2*depth - 1).
+    const walk = (node, depth) => {
+      const pad = depth > 0 ? " ".repeat(2 * depth - 1) : "";
+      const innerPad = " ".repeat(2 * depth + 1);
+      switch (node.nodeType) {
+        case Node.DOCUMENT_TYPE_NODE:
+          if (node.name) {
+            if (node.publicId || node.systemId) {
+              lines.push(`|${pad}<!DOCTYPE ${node.name} "${node.publicId ?? ""}" "${node.systemId ?? ""}">`);
+            } else {
+              lines.push(`|${pad}<!DOCTYPE ${node.name}>`);
+            }
+          } else {
+            lines.push(`|${pad}<!DOCTYPE >`);
+          }
+          break;
+        case Node.DOCUMENT_NODE:
+          lines.push("#document");
+          break;
+        case Node.DOCUMENT_FRAGMENT_NODE:
+          lines.push("#document-fragment");
+          break;
+        case Node.COMMENT_NODE:
+          lines.push(`|${pad}<!-- ${node.nodeValue} -->`);
+          break;
+        case Node.PROCESSING_INSTRUCTION_NODE:
+          lines.push(`|${pad}<?${node.target} ${node.data || ""}?>`);
+          break;
+        case Node.TEXT_NODE:
+          lines.push(`|${pad}"${node.nodeValue}"`);
+          break;
+        case Node.ELEMENT_NODE: {
+          if (node.getAttribute("data-skip") !== null) return;
+          const tag = (node.namespaceURI && node.namespaceURI !== NAMESPACES.html)
+            ? `${PREFIXES[node.namespaceURI]} ${node.localName}`
+            : node.localName;
+          lines.push(`|${pad}<${tag}>`);
+          const attrs = [...node.attributes].map(a => [
+            (a.namespaceURI ? PREFIXES[a.namespaceURI] + " " : "") + a.localName,
+            a.value,
+          ]);
+          attrs.sort((a, b) => a[0] === b[0] ? 0 : (a[0] > b[0] ? 1 : -1));
+          for (const [name, value] of attrs) {
+            lines.push(`|${innerPad}${name}="${value}"`);
+          }
+          if (node.namespaceURI === NAMESPACES.html && node.localName === "template") {
+            lines.push(`|${innerPad}content`);
+            for (const child of node.content.childNodes) walk(child, depth + 2);
+          }
+          break;
+        }
+      }
+      for (const child of node.childNodes) walk(child, depth + 1);
+    };
+    walk(root, 0);
+    return lines.join("\n");
+  }
+
+  // Per-flavor runners. Each fills `iframe` with the parser's output, then
+  // serializes and asserts. record() captures input/expected/actual on the
+  // shared map so failure diffs can be rendered after the run.
+  function makeDocRunner(inject) {
+    return ({ iframe, t, id, input, expected, record }) => {
+      record({ id, input, expected, actual: null });
+      iframe.onload = () => t.step(() => {
+        iframe.onload = null;
+        const actual = serializeTree(iframe.contentDocument);
+        record({ id, input, expected, actual });
+        assert_equals(actual, expected);
+        t.done();
+      });
+      inject(iframe, input, t);
+    };
+  }
+
+  const RUNNERS = {
+    url: makeDocRunner((iframe, input, t) => {
+      const blob = new Blob([input], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      iframe.src = url;
+      t.add_cleanup(() => URL.revokeObjectURL(url));
+    }),
+    write: makeDocRunner((iframe, input) => {
+      iframe.contentDocument.open();
+      iframe.contentDocument.write(input);
+      iframe.contentDocument.close();
+    }),
+    write_single: makeDocRunner((iframe, input) => {
+      iframe.contentDocument.open();
+      for (const ch of input) iframe.contentDocument.write(ch);
+      iframe.contentDocument.close();
+    }),
+    innerHTML: ({ iframe, t, id, input, expected, container, record }) => {
+      const parts = container.split(" ");
+      const containerEl = parts.length > 1
+        ? document.createElementNS(NAMESPACES[parts[0]], `${parts[0]}:${parts[1]}`)
+        : document.createElement(container);
+      containerEl.innerHTML = input;
+      const root = (containerEl.namespaceURI === NAMESPACES.html && containerEl.localName === "template")
+        ? containerEl.content : containerEl;
+      let actual = serializeTree(root);
+      record({ id, input, expected, actual, container });
+      // serializeTree emits "#document-fragment"; the .dat expected tree uses
+      // "#document" as its root marker.
+      const lines = actual.split("\n");
+      assert_not_equals(lines[0], "<template>", "template is never the innerHTML context object");
+      lines[0] = "#document";
+      actual = lines.join("\n");
+      assert_equals(actual, expected);
+      t.done();
+    },
+  };
+
+  // .dat format (html5lib-tests):
+  //   #description     appended to the test name
+  //   #data            input HTML
+  //   #errors / #new-errors / #errors-new  parsing errors (ignored here)
+  //   #script-on / #script-off            scripting requirement (we honor #script-off)
+  //   #document-fragment NAME             context element for innerHTML
+  //   #document                           expected serialized tree
+  // This mirrors the upstream html5lib-python TestData parser:
+  // each section accumulates raw lines (with trailing \n), and at every test
+  // boundary the active section gets one extra char clipped (the blank-line
+  // separator) before the per-section trailing-\n normalization runs.
+  function parseDat(text) {
+    if (text.endsWith("\n")) text = text.slice(0, -1);
+    const fileLines = text.split("\n");
+    const cases = [];
+    let data = null;
+    let key = null;
+
+    const isSectionHeading = line => {
+      if (!line.startsWith("#")) return null;
+      const heading = line.slice(1).trim();
+      return heading || null;
+    };
+    const normalise = obj => {
+      const out = {};
+      for (const k of Object.keys(obj)) {
+        out[k] = obj[k].endsWith("\n") ? obj[k].slice(0, -1) : obj[k];
+      }
+      return out;
+    };
+
+    for (let i = 0; i < fileLines.length; i++) {
+      const line = fileLines[i] + (i === fileLines.length - 1 ? "" : "\n");
+      const heading = isSectionHeading(line);
+      if (heading) {
+        if (data && (heading === "description" || (heading === "data" && key !== "description"))) {
+          if (key !== null && data[key].length > 0) {
+            data[key] = data[key].slice(0, -1);
+          }
+          cases.push(normalise(data));
+          data = null;
+        }
+        if (data === null) data = {};
+        key = heading;
+        data[key] = "";
+      } else if (key !== null) {
+        data[key] += line;
+      }
+    }
+    if (data) cases.push(normalise(data));
+
+    return cases.map(c => ({
+      description: c["description"],
+      data: c["data"] ?? "",
+      document: c["document"] ?? "",
+      fragment: c["document-fragment"],
+      scriptOff: "script-off" in c,
+    }));
+  }
+
+  function printDiff({ id, input, expected, actual, container }) {
+    const [expectedText, actualText] = actual
+      ? mark_diffs(expected, actual)
+      : [expected, ""];
+    const tmpl = ["div", { id: "${id}" },
+      ["h2", {}, "${id}"],
+      vars => vars.container != null
+        ? ["div", { class: "container" },
+            ["h3", {}, "innerHTML Container"],
+            ["pre", {}, vars.container]]
+        : null,
+      ["div", { id: "input_${id}" }, ["h3", {}, "Input"],
+        ["pre", {}, ["code", {}, input]]],
+      ["div", { id: "expected_${id}" }, ["h3", {}, "Expected"],
+        ["pre", {}, ["code", {}, expectedText]]],
+      ["div", { id: "actual_${id}" }, ["h3", {}, "Actual"],
+        ["pre", {}, ["code", {}, actualText]]],
+    ];
+    document.body.appendChild(template.render(tmpl, { id, container: container ?? null }));
+  }
+
+  // ----- Entry point -----
+
+  const NUM_IFRAMES = 8;
+  const runType = document.currentScript.dataset.runType;
+  const file = new URLSearchParams(location.search).get("file");
+
+  setup({ explicit_done: true });
+
+  if (!file || !RUNNERS[runType]) {
+    test(() => assert_unreached(`bad config: file=${file}, runType=${runType}`),
+         "html5lib-runner setup");
+    done();
+    return;
+  }
+
+  fetch(`resources/${file}.dat`)
+    .then(r => r.ok ? r.text() : Promise.reject(new Error(`fetch ${file}.dat: ${r.status}`)))
+    .then(text => {
+      const cases = parseDat(text).filter(c => !c.scriptOff);
+      const entries = [];
+      const seenNames = new Set();
+      const records = new Map();          // iframe.id -> latest record for that test
+      const iframeForTest = new Map();    // test.name -> iframe.id
+
+      const escapeForName = s => s.replace(/[\x00-\x1f]/g, ch => {
+        const code = ch.charCodeAt(0);
+        if (code === 0x0a) return "\\n";
+        if (code === 0x0d) return "\\r";
+        if (code === 0x09) return "\\t";
+        return `\\x${code.toString(16).padStart(2, "0")}`;
+      });
+
+      for (const c of cases) {
+        // Fragment tests don't depend on the page's parsing mode (they always
+        // go through innerHTML), so we run them in only one wrapper to avoid
+        // counting the same assertion three times.
+        if (c.fragment !== undefined && runType !== "url") continue;
+        const base = c.fragment !== undefined
+          ? `${escapeForName(c.data)} (innerHTML in ${c.fragment})`
+          : escapeForName(c.data);
+        const name = c.description
+          ? `${base}: ${escapeForName(c.description)}`
+          : base;
+        // Identical (input, fragment-context) pairs would collide as test
+        // names. Upstream html5lib-tests doesn't ship any (after #script-off
+        // is filtered out); if that ever changes we want to know rather than
+        // silently drop one.
+        if (seenNames.has(name)) {
+          throw new Error(`duplicate test in ${file}.dat: ${name}`);
+        }
+        seenNames.add(name);
+        entries.push({
+          t: async_test(name),
+          input: c.data,
+          expected: "#document\n" + c.document,
+          fragment: c.fragment,
+        });
+      }
+
+      // Nothing to run (e.g. fragment-only .dat in a non-url wrapper). The
+      // updater shouldn't list such variants; surface a clear failure if one
+      // ever does end up here so the cause is obvious.
+      if (entries.length === 0) {
+        throw new Error(`${file}.dat has no tests for run_type=${runType}`);
+      }
+
+      const fails = [];
+      let started = 0;
+      let completed = 0;
+
+      add_result_callback(testObj => {
+        completed++;
+        let iframe = document.getElementById(iframeForTest.get(testObj.name));
+        if (testObj.status !== testObj.PASS) {
+          fails.push(records.get(iframe.id));
+          const fresh = document.createElement("iframe");
+          fresh.style.display = "none";
+          fresh.id = iframe.id;
+          document.body.replaceChild(fresh, iframe);
+          iframe = fresh;
+        }
+        if (completed === entries.length) {
+          done();
+        } else if (started < entries.length) {
+          runNext(iframe);
+        }
+      });
+
+      add_completion_callback(() => fails.forEach(printDiff));
+
+      for (let i = 0; i < NUM_IFRAMES; i++) {
+        const iframe = document.createElement("iframe");
+        iframe.id = `iframe_${i}`;
+        iframe.style.display = "none";
+        document.body.appendChild(iframe);
+      }
+
+      const runNext = iframe => {
+        const entry = entries[started++];
+        const runner = entry.fragment !== undefined ? RUNNERS.innerHTML : RUNNERS[runType];
+        iframeForTest.set(entry.t.name, iframe.id);
+        const record = data => records.set(iframe.id, data);
+        step_timeout(() => entry.t.step(() => {
+          runner({ iframe, t: entry.t, id: entry.t.name, input: entry.input, expected: entry.expected, container: entry.fragment, record });
+        }), 0);
+      };
+
+      for (const iframe of document.getElementsByTagName("iframe")) {
+        if (started < entries.length) runNext(iframe);
+      }
+    })
+    .catch(err => {
+      test(() => { throw err; }, `html5lib-runner: load ${file}.dat`);
+      done();
+    });
+})();
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["--git-dir=C:\\src\\fairpane\\.tools\\corpora\\wpt\\repository.git","cat-file","-p","b60c4b349d9d167bf354a40bc0d4cbed15174606:html/syntax/parsing/resources/test.js"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T19:07:49.314Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}

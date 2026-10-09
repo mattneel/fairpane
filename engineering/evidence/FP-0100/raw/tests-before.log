@@ -1,0 +1,876 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+bd11c2b561c78ecd0964c02b83c728caf3bf6f76
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T18:53:05.637Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":40}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--short"]
+ M src/dom.zig
+ M src/html/root.zig
+ M src/html/tokenizer_test.zig
+?? engineering/evidence/FP-0100/raw/
+?? engineering/evidence/ci/dispatch-3e7128c/
+?? src/html/tree_partition_test.zig
+?? src/html/tree_test.zig
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T18:53:05.745Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":71}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","src/dom.zig","src/html/root.zig","src/html/tokenizer_test.zig","src/html/tree_test.zig","src/html/tree_partition_test.zig","src/html/tokenizer.zig"]
+62a2c331612a994f9e8876fd5509bf16d7959910
+074cc3539f52cd3ba7908106a20cf6ed1bb29a0d
+00b4dade631e74c8cc71b1d9371313970bfd18a0
+3b4ee56dc0e3ad18af2a33453e7a6228859dd1fd
+0383f5b22fb9df43a24540421868efee7f9b601a
+b148d4ad2f7fbe109aeeab002d8cd90620cc05e7
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","src/dom.zig","src/html/root.zig","src/html/tokenizer_test.zig","src/html/tree_test.zig","src/html/tree_partition_test.zig","src/html/tokenizer.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T18:53:05.911Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0100-cache-before"]
+test
++- FP-0011 case 4: leaf_allocates.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: allocateString requires effects {allocation}; the context has effects {}
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_allocates.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::sameValue returns error.Throw, but the operation does not have the exception effect
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_undeclared_throw.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 36: binding_stray_kernel.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel stub_kernel belongs to no operation
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/binding_stray_kernel.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_missing_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe describes field ghost, which does not exist
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_missing_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 34: leaf_reaches_heap.zig failure
+error: ========= expected to find in stderr: =========
+       no field or member function named 'allocateString' in 'js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_reaches_heap.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_exception_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadException declares exception without allocation
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_exception_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_callback_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadCallback declares callback without allocation, exception, and heap_mutation
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_callback_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke Number::toString, which has effects {allocation}
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_number_to_string.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 36: binding_missing_kernel.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation StubOperation has no kernel
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/binding_missing_kernel.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: mutation_throws.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: throwTypeError requires effects {allocation, exception}; the context has effects {heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/mutation_throws.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_undescribed_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe does not describe field extra
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_undescribed_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_reference_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_reference_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: allocation_invokes_call.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {allocation} cannot invoke Call, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/allocation_invokes_call.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_tagged_index_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_tagged_index_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_duplicate_id.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: duplicate operation id number_add
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_duplicate_id.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke ToNumber, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_to_number.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_nan_box_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_nan_box_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_positive.zig failure
+src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                            ^~~~~~~~~~~~
+src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+src\html\tree_test.zig:12:23: note: file imported here
+const modes = @import("modes.zig");
+                      ^~~~~~~~~~~
+src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+src\html\tree_test.zig:11:22: note: file imported here
+const tree = @import("tree.zig");
+                     ^~~~~~~~~~
+src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+src\html\tree_test.zig:14:27: note: file imported here
+const tree_dump = @import("tree_dump.zig");
+                          ^~~~~~~~~~~~~~~
+error: process exited with code 1 (expected exited with code 0)
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_positive.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 35: leaf_widens_context.zig failure
+error: ========= expected to find in stderr: =========
+       expected type '*js.runtime.Runtime(.reference)', found '*js.runtime.Runtime(.reference).SealedHeap(@fromBackingInt(0))'
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_widens_context.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_calls_behavior.zig failure
+error: ========= expected to find in stderr: =========
+       expected type
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_calls_behavior.zig -Mfairpane=src/root.zig
+
+test
++- library-test
+   +- FP-0066 case 4: the Debug library keeps debug information that names the absolute source directory
+      +- archive fairpane.lib debug
+         +- compile obj fairpane_zcu debug native 4 errors
+src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                            ^~~~~~~~~~~~
+src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+src\html\tree_test.zig:12:23: note: file imported here
+const modes = @import("modes.zig");
+                      ^~~~~~~~~~~
+src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+src\html\tree_test.zig:11:22: note: file imported here
+const tree = @import("tree.zig");
+                     ^~~~~~~~~~
+src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+src\html\tree_test.zig:14:27: note: file imported here
+const tree_dump = @import("tree_dump.zig");
+                          ^~~~~~~~~~~~~~~
+error: 4 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-strip -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0100-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane_zcu --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- FP-0011 case 5: kernel_wider_context.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::add takes a context with effects {allocation}, but the operation has effects {}
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_wider_context.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_plain_reference.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: field hidden of layout Probe holds a heap reference but is declared plain
+       ========= but stderr does not contain it: =====
+       src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+           try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                                   ^~~~~~~~~~~~
+       src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+       src\html\tree_test.zig:12:23: note: file imported here
+       const modes = @import("modes.zig");
+                             ^~~~~~~~~~~
+       src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+       src\html\tree_test.zig:11:22: note: file imported here
+       const tree = @import("tree.zig");
+                            ^~~~~~~~~~
+       src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+       src\html\tree_test.zig:14:27: note: file imported here
+       const tree_dump = @import("tree_dump.zig");
+                                 ^~~~~~~~~~~~~~~
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_plain_reference.zig -Mfairpane=src/root.zig
+
+test
++- FP-0007 case 14: a refused minimization writes nothing
+   +- compile exe fairpane-lab-check debug native 4 errors
+src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                            ^~~~~~~~~~~~
+src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+src\html\tree_test.zig:12:23: note: file imported here
+const modes = @import("modes.zig");
+                      ^~~~~~~~~~~
+src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+src\html\tree_test.zig:11:22: note: file imported here
+const tree = @import("tree.zig");
+                     ^~~~~~~~~~
+src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+src\html\tree_test.zig:14:27: note: file imported here
+const tree_dump = @import("tree_dump.zig");
+                          ^~~~~~~~~~~~~~~
+error: 4 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-exe -Odebug --dep lab "-Mroot=tests\\lab\\check.zig" -Odebug "-Mlab=src\\lab.zig" --cache-dir "out\\fp0100-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane-lab-check --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body
+   +- install fairpane-lab
+      +- compile exe fairpane-lab debug native 4 errors
+src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                            ^~~~~~~~~~~~
+src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+src\html\tree_test.zig:12:23: note: file imported here
+const modes = @import("modes.zig");
+                      ^~~~~~~~~~~
+src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+src\html\tree_test.zig:11:22: note: file imported here
+const tree = @import("tree.zig");
+                     ^~~~~~~~~~
+src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+src\html\tree_test.zig:14:27: note: file imported here
+const tree_dump = @import("tree_dump.zig");
+                          ^~~~~~~~~~~~~~~
+error: 4 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-exe -Odebug "-Mroot=src\\lab_main.zig" --cache-dir "out\\fp0100-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane-lab --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- run test
+   +- compile test debug native 4 errors
+src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                            ^~~~~~~~~~~~
+src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+src\html\tree_test.zig:12:23: note: file imported here
+const modes = @import("modes.zig");
+                      ^~~~~~~~~~~
+src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+src\html\tree_test.zig:11:22: note: file imported here
+const tree = @import("tree.zig");
+                     ^~~~~~~~~~
+src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+src\html\tree_test.zig:14:27: note: file imported here
+const tree_dump = @import("tree_dump.zig");
+                          ^~~~~~~~~~~~~~~
+error: 4 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0100-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- run test
+   +- compile test debug native 4 errors
+src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                            ^~~~~~~~~~~~
+src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+src\html\tree_test.zig:12:23: note: file imported here
+const modes = @import("modes.zig");
+                      ^~~~~~~~~~~
+src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+src\html\tree_test.zig:11:22: note: file imported here
+const tree = @import("tree.zig");
+                     ^~~~~~~~~~
+src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+src\html\tree_test.zig:14:27: note: file imported here
+const tree_dump = @import("tree_dump.zig");
+                          ^~~~~~~~~~~~~~~
+error: 4 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug --dep fairpane "-Mroot=tests\\text\\root.zig" -Odebug "-Mfairpane=src\\root.zig" --cache-dir "out\\fp0100-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- library-test
+   +- FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group
+      +- archive fairpane.lib safe
+         +- compile obj fairpane_zcu safe native 4 errors
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-a\src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                            ^~~~~~~~~~~~
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-a\src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-a\src\html\tree_test.zig:12:23: note: file imported here
+const modes = @import("modes.zig");
+                      ^~~~~~~~~~~
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-a\src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-a\src\html\tree_test.zig:11:22: note: file imported here
+const tree = @import("tree.zig");
+                     ^~~~~~~~~~
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-a\src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-a\src\html\tree_test.zig:14:27: note: file imported here
+const tree_dump = @import("tree_dump.zig");
+                          ^~~~~~~~~~~~~~~
+error: 4 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fstrip -Osafe "-Mroot=out\\fp0100-cache-before\\o\\325fe68c04df8e9b6821d81013cedc05\\fp0066-tree-a\\src\\root.zig" --cache-dir "out\\fp0100-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane_zcu --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- library-test
+   +- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical
+      +- archive fairpane.lib safe
+         +- compile obj fairpane_zcu safe native 4 errors
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-b\src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                            ^~~~~~~~~~~~
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-b\src\html\modes.zig:1:1: error: unable to load "modes.zig": FileNotFound
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-b\src\html\tree_test.zig:12:23: note: file imported here
+const modes = @import("modes.zig");
+                      ^~~~~~~~~~~
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-b\src\html\tree.zig:1:1: error: unable to load "tree.zig": FileNotFound
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-b\src\html\tree_test.zig:11:22: note: file imported here
+const tree = @import("tree.zig");
+                     ^~~~~~~~~~
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-b\src\html\tree_dump.zig:1:1: error: unable to load "tree_dump.zig": FileNotFound
+out\fp0100-cache-before\o\325fe68c04df8e9b6821d81013cedc05\fp0066-tree-b\src\html\tree_test.zig:14:27: note: file imported here
+const tree_dump = @import("tree_dump.zig");
+                          ^~~~~~~~~~~~~~~
+error: 4 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fstrip -Osafe "-Mroot=out\\fp0100-cache-before\\o\\325fe68c04df8e9b6821d81013cedc05\\fp0066-tree-b\\src\\root.zig" --cache-dir "out\\fp0100-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane_zcu --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- FP-0082 case 16: invalid-utf8.js exits with status 3
+   +- install fairpane-js-parse
+      +- compile exe fairpane-js-parse debug native 1 errors
+out\fp0100-cache-before\o\18894732211cb990415463378f0927fc\src\dom.zig:2387:29: error: use of undeclared identifier 'DocumentMode'
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+                            ^~~~~~~~~~~~
+error: 1 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-exe -Odebug "-Mroot=out\\fp0100-cache-before\\o\\18894732211cb990415463378f0927fc\\fairpane_js_parse.zig" --cache-dir "out\\fp0100-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name fairpane-js-parse --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 6/100 steps succeeded (30 failed); 6/6 tests passed
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 4 errors
++- run test transitive failure
+|  +- compile test debug native 4 errors
++- FP-0007 case 13: case 2 passes with exit status 0 transitive failure
+|  +- install fairpane-lab transitive failure
+|     +- compile exe fairpane-lab debug native 4 errors
++- FP-0007 case 13: case 3 fails with exit status 1 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: case 18 passes with exit status 0 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the token_count variant of case 19 fails with exit status 1 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0008 case 26: the <p> case of case 21 is unsupported with exit status 2 transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal transitive failure
+|  +- compile exe fairpane-lab-check debug native 4 errors
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 case 5: create a fresh directory transitive failure
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 case 5: create a fresh directory (+1 more reused dependencies)
++- FP-0054 case 5: the refused minimization leaves the input unchanged transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 case 5: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 case 5: minimize refuses an --out path that names the input file through another spelling (+3 more reused dependencies)
++- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: create a fresh directory transitive failure
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 1: the refused command leaves the input unchanged transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 1: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 1: minimize refuses an --out path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: create a fresh directory transitive failure
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 2: the refused command leaves the input unchanged transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 2: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 2: run refuses a --transcript path that is a hard link to the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: create a fresh directory transitive failure
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 3: the refused command leaves the input unchanged transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 3: minimize refuses an --out path that names the input file in other letter case (+2 more reused dependencies)
++- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: create a fresh directory transitive failure
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0054 revision 1 case 4: the written case is a version 2 case derived from the input digest transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0054 revision 1 case 4: minimize writes over a separate byte-identical copy of the input file (+2 more reused dependencies)
++- FP-0054 revision 1 case 5: run, minimize, and replay report files one byte above the size limit transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0054 revision 1 case 5: create a fresh directory transitive failure
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0076 case 3: minimize writes over an existing out.json whose ACL denies read-data access to Everyone transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0076 case 3: create a fresh directory transitive failure
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0076 case 3: out.json is a version 2 case derived from the input digest transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 3: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0076 case 3: restore read access to out.json transitive failure
+|     +- compile exe fairpane-lab-check debug native (reused)
+|     +- FP-0076 case 3: create a fresh directory (+1 more reused dependencies)
+|     +- FP-0076 case 3: minimize writes over an existing out.json whose ACL denies read-data access to Everyone (+2 more reused dependencies)
++- FP-0076 case 4: minimize reports the output path out|.json, which cannot be identified transitive failure
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0076 case 4: create a fresh directory transitive failure
+|     +- compile exe fairpane-lab-check debug native (reused)
++- FP-0076 case 4: the directory gains no file transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 4: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0076 case 4: minimize reports the output path out|.json, which cannot be identified (+2 more reused dependencies)
++- FP-0076 case 7: the revision 1 case 5 helper reports failing checks and removes both oversized files transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 7: create a fresh directory transitive failure
+|  |  +- compile exe fairpane-lab-check debug native (reused)
+|  +- compile exe fairpane-lab-check debug native (reused)
++- FP-0076 case 7: no file remains after the failing run transitive failure
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0076 case 7: create a fresh directory (+1 more reused dependencies)
+|  +- FP-0076 case 7: the revision 1 case 5 helper reports failing checks and removes both oversized files (+3 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
++- FP-0011 case 4: allocation_invokes_call.zig failure
++- FP-0011 case 4: leaf_allocates.zig failure
++- FP-0011 case 4: mutation_throws.zig failure
++- FP-0011 case 4: leaf_calls_behavior.zig failure
++- FP-0011 case 4: leaf_positive.zig failure
++- FP-0011 case 5: catalog_callback_alone.zig failure
++- FP-0011 case 5: catalog_exception_alone.zig failure
++- FP-0011 case 5: catalog_duplicate_id.zig failure
++- FP-0011 case 5: kernel_wider_context.zig failure
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
++- FP-0011 case 8: layout_undescribed_field.zig failure
++- FP-0011 case 8: layout_plain_reference.zig failure
++- FP-0011 case 8: layout_missing_field.zig failure
++- FP-0011 case 20: abi_reference_value.zig failure
++- FP-0011 case 20: abi_nan_box_value.zig failure
++- FP-0011 case 20: abi_tagged_index_value.zig failure
++- FP-0011 case 34: leaf_reaches_heap.zig failure
++- FP-0011 case 35: leaf_widens_context.zig failure
++- FP-0011 case 36: binding_missing_kernel.zig failure
++- FP-0011 case 36: binding_stray_kernel.zig failure
++- library-test transitive failure
+|  +- run test 6 pass (6 total) 35ms MaxRSS:4M
+|  |  +- compile test debug native success 2s MaxRSS:289M
+|  +- FP-0066 case 1: ReleaseSafe libraries built in two directories are byte-identical transitive failure
+|  |  +- compile exe fairpane-library-check debug native success 2s MaxRSS:282M
+|  |  +- archive fairpane.lib safe transitive failure
+|  |  |  +- compile obj fairpane_zcu safe native 4 errors
+|  |  |     +- WriteFile fp0066-tree-a/src success
+|  |  +- archive fairpane.lib safe transitive failure
+|  |     +- compile obj fairpane_zcu safe native 4 errors
+|  |        +- WriteFile fp0066-tree-a/src (reused)
+|  +- FP-0066 case 2: the ReleaseSafe library contains neither its build directory nor the compiler installation directory transitive failure
+|  |  +- compile exe fairpane-library-check debug native (reused)
+|  |  +- archive fairpane.lib safe (+1 more reused dependencies)
+|  |  +- WriteFile fp0066-tree-a/src (reused)
+|  +- FP-0066 case 4: the Debug library keeps debug information that names the absolute source directory transitive failure
+|  |  +- compile exe fairpane-library-check debug native (reused)
+|  |  +- archive fairpane.lib debug transitive failure
+|  |     +- compile obj fairpane_zcu debug native 4 errors
+|  +- FP-0066 case 5: the ReleaseSafe library's only member is the object, named without a directory transitive failure
+|  |  +- compile exe fairpane-library-check debug native (reused)
+|  |  +- archive fairpane.lib safe (+1 more reused dependencies)
+|  +- FP-0066: every member header of the ReleaseSafe library has a zero time stamp, owner, and group transitive failure
+|     +- compile exe fairpane-library-check debug native (reused)
+|     +- archive fairpane.lib safe (+1 more reused dependencies)
++- FP-0082 case 16: valid.js exits with status 0 and prints the T9 dump transitive failure
+|  +- install fairpane-js-parse transitive failure
+|     +- compile exe fairpane-js-parse debug native 1 errors
+|        +- WriteFile src success
++- FP-0082 case 16: syntax.js exits with status 1 and prints its syntax error transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: unsupported.js exits with status 2 and prints its unsupported outcome transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: invalid-utf8.js exits with status 3 transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: a missing path exits with status 3 transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 16: no arguments exits with status 3 and writes the usage transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census of the sound fixture exits with status 0 transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census of the unsound fixture exits with status 1 transitive failure
+|  +- install fairpane-js-parse (+1 more reused dependencies)
++- FP-0082 case 17: the census refuses an existing output file and exits with status 3 transitive failure
+   +- install fairpane-js-parse (+1 more reused dependencies)
+   +- WriteFile existing.jsonl success
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x9115b56f test --summary all --cache-dir out/fp0100-cache-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0100-cache-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T18:53:08.760Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":7481,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

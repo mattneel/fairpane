@@ -26,7 +26,7 @@
 //! | Obligation | Current engine behavior | Owner task |
 //! | --- | --- | --- |
 //! | Stylesheet byte decoding and `@charset` sniffing | No API; the entry points take decoded strings | `FP-0069` |
-//! | HTML documents, quirks mode, and HTML case rules for selectors | Every store document is an XML document in no-quirks mode | `FP-0070` |
+//! | HTML documents, quirks mode, and HTML case rules for selectors | The store can hold HTML documents in any mode, and selector matching treats every document with XML rules and no quirks | `FP-0070` |
 //! | Pseudo-classes, pseudo-elements, `:is()`, `:not()`, `:where()`, `:has()`, nesting, `@namespace`, and the column combinator | `unsupported_selector`, `nested_rule_ignored`, `nested_declarations_ignored`, or `ignored_at_rule` | `FP-0070` |
 //! | A constant-time ancestor filter for selector matching in deep trees | Matching walks the ancestors, with an early exit | `FP-0070` |
 //! | Every at-rule | `ignored_at_rule` | `FP-0069` |

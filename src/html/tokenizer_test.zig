@@ -1424,3 +1424,87 @@ test "FP-0064 case 16: with the content driver, each induced allocation failure 
     try testing.checkAllAllocationFailures(no_remap.allocator(), tokenizeContentUnderAllocationFailure, .{testing.allocator});
     try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
 }
+
+/// FP-0100 case 15: the input, its sequence in the FP-0064 notation, and the position of each character code unit.
+const position_input = "<title>a\\r\\nb&#x1F600;<c\\0d</title>";
+/// The sequence in the FP-0064 notation is `S"title"[] C"a\u000Ab\uD83D\uDE00<c" !unexpected-null-character@2:13
+/// C"\uFFFDd" E"title"[] EOF`. `expectedDump` derives an error's offset as its column minus one, which holds only on
+/// line 1, so the expected dump states the error's offset, 22, directly.
+const position_dump =
+    \\["StartTag","title",[],false]
+    \\["Character","a\u000Ab\uD83D\uDE00<c"]
+    \\["error","unexpected-null-character",2,13,22]
+    \\["Character","\uFFFDd"]
+    \\["EndTag","title",[],false]
+    \\["EOF"]
+++ "\n";
+const expected_positions = [_]tokenizer.Position{
+    .{ .offset = @fromBackingInt(7), .line = 1, .column = 8 },
+    .{ .offset = @fromBackingInt(8), .line = 1, .column = 9 },
+    .{ .offset = @fromBackingInt(10), .line = 2, .column = 1 },
+    .{ .offset = @fromBackingInt(11), .line = 2, .column = 2 },
+    .{ .offset = @fromBackingInt(11), .line = 2, .column = 2 },
+    .{ .offset = @fromBackingInt(20), .line = 2, .column = 11 },
+    .{ .offset = @fromBackingInt(21), .line = 2, .column = 12 },
+    .{ .offset = @fromBackingInt(22), .line = 2, .column = 13 },
+    .{ .offset = @fromBackingInt(23), .line = 2, .column = 14 },
+};
+
+/// Tokenizes `input` in the chunks that `boundaries` delimit, as `tokenizeChunks` does with the content driver, and
+/// returns the position of each code unit of each `characters` step that `next` returns, read through
+/// `characterPosition` before the next call of `next`. The caller frees the result with `gpa`.
+fn characterPositions(gpa: Allocator, input: []const u16, boundaries: []const usize) ![]tokenizer.Position {
+    var positions: std.ArrayList(tokenizer.Position) = .empty;
+    errdefer positions.deinit(gpa);
+    var t: Tokenizer = .init(gpa);
+    defer t.deinit();
+    var start: usize = 0;
+    for (0..boundaries.len + 1) |index| {
+        const end = if (index < boundaries.len) boundaries[index] else input.len;
+        const buffer = try gpa.dupe(u16, input[start..end]);
+        defer gpa.free(buffer);
+        try t.feed(buffer);
+        while (true) {
+            const s = (try t.next()) orelse return error.TestUnexpectedResult;
+            if (s == .need_input) break;
+            try appendPositions(gpa, &positions, &t, s);
+            try drive(&t, s);
+        }
+        @memset(buffer, 0xAAAA);
+        start = end;
+    }
+    try t.finish();
+    while (try t.next()) |s| {
+        if (s == .need_input) return error.TestUnexpectedResult;
+        try appendPositions(gpa, &positions, &t, s);
+        try drive(&t, s);
+    }
+    return positions.toOwnedSlice(gpa);
+}
+
+fn appendPositions(gpa: Allocator, positions: *std.ArrayList(tokenizer.Position), t: *const Tokenizer, s: tokenizer.Step) !void {
+    if (s != .token or s.token.kind != .characters) return;
+    for (0..s.token.kind.characters.units.len) |index| try positions.append(gpa, t.characterPosition(index));
+}
+
+fn expectPositions(gpa: Allocator, input: []const u16, boundaries: []const usize) !void {
+    const observed = try characterPositions(gpa, input, boundaries);
+    defer gpa.free(observed);
+    testing.expectEqualSlices(tokenizer.Position, &expected_positions, observed) catch |err| {
+        std.debug.print("FP-0100 case 15: positions differ with boundaries {any}\n", .{boundaries});
+        return err;
+    };
+}
+
+test "FP-0100 case 15: characterPosition gives each character code unit its own source position, whole and in every two-chunk partition" {
+    const gpa = testing.allocator;
+    const input = try decodeInput(gpa, position_input);
+    defer gpa.free(input);
+    try testing.expectEqual(@as(usize, 32), input.len);
+    const observed = try tokenizeChunks(gpa, input, &.{}, dump.plain, .{});
+    defer gpa.free(observed);
+    try testing.expectEqualStrings(position_dump, observed);
+
+    try expectPositions(gpa, input, &.{});
+    for (1..input.len) |boundary| try expectPositions(gpa, input, &.{boundary});
+}

@@ -11,6 +11,8 @@
 //! A chunk boundary never changes the result. The tokenizer holds a CR or a leading surrogate at the end of the available input
 //! until the next unit or `finish`, and its lookahead states keep their progress across calls of `next`.
 //! It keeps only the input that it has not yet decided after it returns `need_input`.
+//! `characterPosition` gives the source position of each code unit of the `characters` step that `next` last returned,
+//! so that tree construction can report a parse error at a character's own position.
 
 const std = @import("std");
 const builtin = @import("builtin");
@@ -81,6 +83,24 @@ const replacement: u21 = 0xFFFD;
 /// The number of pending character code units at which the tokenizer returns them as a step.
 const text_flush_threshold = 4096;
 
+/// How the code units of one `appendText` call map to source positions.
+const Layout = enum {
+    /// Every unit belongs to the one character at the record's position: an input character, which can be a CR LF pair
+    /// or a surrogate pair, or a matched character reference, whose units all have the position of its `&`.
+    shared,
+    /// Each unit is an unconsumed source character of one code unit that is not a line break, re-emitted in source order
+    /// from the record's position, such as a flushed `&#` or the `<`, `/`, and name of a possible end tag.
+    sequential,
+};
+
+/// The source position of the units of one `appendText` call, which start at `index` in `text`.
+const CharacterRecord = struct { index: usize, position: Position, layout: Layout };
+
+/// The number of character records that the tokenizer reserves. Records exist only for the units of the runs that it has
+/// queued but not yet returned, plus the step that `next` last returned. One action queues at most two characters runs,
+/// and a run has at most `text_flush_threshold` + 1 records.
+const character_record_capacity = 2 * (text_flush_threshold + 1);
+
 /// The largest number of steps that one state action queues is 5: an end tag after pending characters,
 /// a preprocessing error, and both end tag errors.
 const queue_capacity = 8;
@@ -89,8 +109,8 @@ const Range = struct { start: usize, end: usize };
 
 const Queued = union(enum) {
     step: Step,
-    /// Characters in `text`, which become a view when the step is returned.
-    characters: struct { range: Range, span: Span },
+    /// Characters in `text`, which become a view when the step is returned. `record` is the index of their first record.
+    characters: struct { range: Range, span: Span, record: usize },
 };
 
 const AttributeRecord = struct { name: Range, value: Range, name_span: Span, value_span: ?Span };
@@ -139,6 +159,14 @@ pub const Tokenizer = struct {
     text_flushed: usize = 0,
     run_start: Position = undefined,
     run_end: Position = undefined,
+    /// One record per `appendText` call, in `text` order. The first call reserves the storage, and no later call allocates.
+    /// `character_records.items[pending_record..]` are the records of the pending characters.
+    character_records: std.ArrayList(CharacterRecord) = .empty,
+    pending_record: usize = 0,
+    /// The index in `text` of the first unit, and the index of the first record, of the `characters` step that `next`
+    /// last returned.
+    returned_characters: usize = 0,
+    returned_record: usize = 0,
 
     /// The `<` that starts the current tag, comment, DOCTYPE, or processing instruction, or a possible end tag in a text state.
     markup_start: Position = undefined,
@@ -189,6 +217,7 @@ pub const Tokenizer = struct {
         const gpa = t.gpa;
         t.carry.deinit(gpa);
         t.text.deinit(gpa);
+        t.character_records.deinit(gpa);
         t.tag_buffer.deinit(gpa);
         t.attributes.deinit(gpa);
         t.attribute_views.deinit(gpa);
@@ -283,10 +312,45 @@ pub const Tokenizer = struct {
         t.queue_len -= 1;
         return switch (item) {
             .step => |s| s,
-            .characters => |c| .{ .token = .{
-                .kind = .{ .characters = .{ .units = t.text.items[c.range.start..c.range.end] } },
-                .span = c.span,
-            } },
+            .characters => |c| characters: {
+                t.returned_characters = c.range.start;
+                t.returned_record = c.record;
+                break :characters .{ .token = .{
+                    .kind = .{ .characters = .{ .units = t.text.items[c.range.start..c.range.end] } },
+                    .span = c.span,
+                } };
+            },
+        };
+    }
+
+    /// Returns the source position of the code unit at `index` of the `characters` step that `next` last returned,
+    /// which must still be the last step that `next` returned. `index` must be less than the step's length.
+    /// Each unit has the position of the character that it belongs to: the character itself, the CR of a CR LF pair,
+    /// or the `&` of a matched character reference. A unit that stands for an unconsumed source character, such as a
+    /// flushed `&#` or the `<`, `/`, and name of a possible end tag, has the position of that source character.
+    /// It allocates nothing, and its binary search takes time logarithmic in the step's length.
+    pub fn characterPosition(t: *const Tokenizer, index: usize) Position {
+        const target = t.returned_characters + index;
+        const records = t.character_records.items;
+        // Each record holds at least one unit, so the step's records are among the `index + 1` from its first one.
+        var low = t.returned_record;
+        var high = @min(records.len, t.returned_record + index + 1);
+        std.debug.assert(low < high and records[low].index <= target);
+        while (high - low > 1) {
+            const middle = low + (high - low) / 2;
+            if (records[middle].index <= target) low = middle else high = middle;
+        }
+        const record = records[low];
+        return switch (record.layout) {
+            .shared => record.position,
+            .sequential => sequential: {
+                const delta = target - record.index;
+                break :sequential .{
+                    .offset = @fromBackingInt(@backingInt(record.position.offset) + delta),
+                    .line = record.position.line,
+                    .column = record.position.column + delta,
+                };
+            },
         };
     }
 
@@ -320,21 +384,36 @@ pub const Tokenizer = struct {
         t.push(.{ .characters = .{
             .range = .{ .start = t.text_flushed, .end = t.text.items.len },
             .span = .{ .start = t.run_start, .end = t.run_end },
+            .record = t.pending_record,
         } });
         t.text_flushed = t.text.items.len;
+        t.pending_record = t.character_records.items.len;
     }
 
-    /// Discards returned characters and keeps pending ones. Every queued step has been returned.
+    /// Discards returned characters and their records, and keeps pending ones. Every queued step has been returned.
     fn compactText(t: *Tokenizer) void {
         const pending = t.text.items.len - t.text_flushed;
         std.mem.copyForwards(u16, t.text.items[0..pending], t.text.items[t.text_flushed..]);
         t.text.shrinkRetainingCapacity(pending);
+        const records = t.character_records.items;
+        const kept = records.len - t.pending_record;
+        std.mem.copyForwards(CharacterRecord, records[0..kept], records[t.pending_record..]);
+        for (records[0..kept]) |*record| record.index -= t.text_flushed;
+        t.character_records.shrinkRetainingCapacity(kept);
+        t.pending_record = 0;
         t.text_flushed = 0;
     }
 
-    fn appendText(t: *Tokenizer, units: []const u16, start: Position, end: Position) Allocator.Error!void {
+    /// Appends the units of character tokens that span `start` to `end`, and records their source positions.
+    fn appendText(t: *Tokenizer, units: []const u16, start: Position, end: Position, layout: Layout) Allocator.Error!void {
+        std.debug.assert(units.len != 0);
+        if (t.character_records.capacity == 0) {
+            try t.character_records.ensureTotalCapacityPrecise(t.gpa, character_record_capacity);
+        }
         if (t.text.items.len == t.text_flushed) t.run_start = start;
+        const index = t.text.items.len;
         try t.text.appendSlice(t.gpa, units);
+        t.character_records.appendAssumeCapacity(.{ .index = index, .position = start, .layout = layout });
         t.run_end = end;
         if (t.text.items.len - t.text_flushed >= text_flush_threshold) t.flushText();
     }
@@ -342,7 +421,7 @@ pub const Tokenizer = struct {
     /// Emits a character token for `code_point` that spans `start` to `end`.
     fn emitCharacter(t: *Tokenizer, code_point: u21, start: Position, end: Position) Allocator.Error!void {
         var units: [2]u16 = undefined;
-        try t.appendText(units[0..encode(code_point, &units)], start, end);
+        try t.appendText(units[0..encode(code_point, &units)], start, end, .shared);
     }
 
     /// Emits the current input character as a character token that spans its own code units.
@@ -640,12 +719,13 @@ pub const Tokenizer = struct {
         } }, t.markup_start, t.cursor());
     }
 
-    /// Flushes code points consumed as a character reference: the temporary buffer.
-    fn flushReference(t: *Tokenizer) Allocator.Error!void {
+    /// Flushes code points consumed as a character reference: the temporary buffer. `layout` is `.shared` for the code
+    /// points of a matched reference and `.sequential` for unconsumed source characters, such as `&#`.
+    fn flushReference(t: *Tokenizer, layout: Layout) Allocator.Error!void {
         if (inAttribute(t.return_state)) return t.appendAttributeValue(t.temp.items);
         // The code points span from the `&` to the next input character that the return state consumes.
         const end = if (t.reconsume) t.current.position else t.cursor();
-        try t.appendText(t.temp.items, t.reference_start, end);
+        try t.appendText(t.temp.items, t.reference_start, end, layout);
     }
 
     fn setTemp(t: *Tokenizer, units: []const u16) Allocator.Error!void {
@@ -1970,7 +2050,7 @@ pub const Tokenizer = struct {
                 },
                 else => {
                     hit(.cdata_section_end, "else");
-                    try t.appendText(&.{ ']', ']' }, t.bracket_start, after(after(t.bracket_start)));
+                    try t.appendText(&.{ ']', ']' }, t.bracket_start, after(after(t.bracket_start)), .sequential);
                     t.reconsumeIn(.cdata_section);
                 },
             },
@@ -2079,7 +2159,7 @@ pub const Tokenizer = struct {
                 else => {
                     hit(.character_reference, "else");
                     t.reconsume = true;
-                    try t.flushReference();
+                    try t.flushReference(.sequential);
                     t.state = t.return_state;
                 },
             },
@@ -2115,7 +2195,7 @@ pub const Tokenizer = struct {
                     hit(.numeric_character_reference, "else");
                     t.raise(.absence_of_digits_in_numeric_character_reference);
                     t.reconsume = true;
-                    try t.flushReference();
+                    try t.flushReference(.sequential);
                     t.state = t.return_state;
                 },
             },
@@ -2128,7 +2208,7 @@ pub const Tokenizer = struct {
                     hit(.hexadecimal_character_reference_start, "else");
                     t.raise(.absence_of_digits_in_numeric_character_reference);
                     t.reconsume = true;
-                    try t.flushReference();
+                    try t.flushReference(.sequential);
                     t.state = t.return_state;
                 },
             },
@@ -2270,8 +2350,8 @@ pub const Tokenizer = struct {
     /// its source character, so together they span from the `<` to the current input character. It reconsumes in `text`.
     fn abandonEndTag(t: *Tokenizer, comptime text: State) Allocator.Error!void {
         const name_start = after(after(t.markup_start));
-        try t.appendText(&.{ '<', '/' }, t.markup_start, name_start);
-        try t.appendText(t.temp.items, name_start, t.current.position);
+        try t.appendText(&.{ '<', '/' }, t.markup_start, name_start, .sequential);
+        try t.appendText(t.temp.items, name_start, t.current.position, .sequential);
         t.reconsumeIn(text);
     }
 
@@ -2459,7 +2539,7 @@ pub const Tokenizer = struct {
             t.matching = false;
             t.reconsume = true;
             try t.setTemp(&.{'&'});
-            try t.flushReference();
+            try t.flushReference(.sequential);
             t.state = .ambiguous_ampersand;
             return true;
         };
@@ -2481,7 +2561,7 @@ pub const Tokenizer = struct {
                 try t.temp.ensureTotalCapacity(t.gpa, length + 1);
                 t.temp.appendAssumeCapacity('&');
                 for (entity.name) |letter| t.temp.appendAssumeCapacity(letter);
-                try t.flushReference();
+                try t.flushReference(.sequential);
                 t.state = t.return_state;
                 return true;
             }
@@ -2499,7 +2579,7 @@ pub const Tokenizer = struct {
             var units: [2]u16 = undefined;
             try t.temp.appendSlice(t.gpa, units[0..encode(code_point, &units)]);
         }
-        try t.flushReference();
+        try t.flushReference(.shared);
         t.state = t.return_state;
         return true;
     }
@@ -2541,7 +2621,7 @@ pub const Tokenizer = struct {
         t.temp.clearRetainingCapacity();
         var units: [2]u16 = undefined;
         try t.temp.appendSlice(t.gpa, units[0..encode(@intCast(code), &units)]);
-        try t.flushReference();
+        try t.flushReference(.shared);
         t.state = t.return_state;
     }
 };

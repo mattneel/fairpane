@@ -1,0 +1,250 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-Odebug","-Mroot=src/root.zig","--cache-dir","out/fp0100-cache-timing","--test-filter","FP-0008","--test-filter","FP-0064"]
+1/46 root.test_0...OK
+2/46 css.css.test_0...OK
+3/46 font.opentype.test_0...OK
+4/46 html.root.test_0...OK
+5/46 lab.test.FP-0007 case 2 and FP-0008 case 25: a matching fetch expectation passes, fetch completes, decode is unsupported without a byte order mark, tokenize is not reached, and every other stage is unsupported...OK
+6/46 lab.test.FP-0008 case 18: a UTF-8 byte order mark body with a matching tokenize expectation passes, and both stages record their results...OK
+7/46 lab.test.FP-0008 case 18: each induced allocation failure in a run that decodes and tokenizes reports harness-error and leaks nothing...OK
+8/46 lab.test.FP-0008 case 19: a tokenize expectation fails at its first differing check with both values...OK
+9/46 lab.test.FP-0008 case 20: a body with tokenizer parse errors records them in step order and passes...OK
+10/46 lab.test.FP-0008 case 21: a body without a UTF-8 byte order mark makes decode and tokenize expectations unsupported at decode...OK
+11/46 lab.test.FP-0008 case 22: a tokenize expectation for a failed document fails on document_state, and neither new stage is reached...OK
+12/46 lab.test.FP-0008 case 23: a decode expectation passes for the case 18 body and fails on encoding when it names UTF-16LE...OK
+13/46 lab.test.FP-0008 case 24: the UTF-8 decoder with replacement turns an invalid byte into U+FFFD...OK
+14/46 js.runtime.test_0...OK
+15/46 html.tokenizer_test.test.FP-0008 case 1 and FP-0064 case 1: State has 84 tags in section order with the frozen headings, and every state has branches...OK
+16/46 html.tokenizer_test.test.FP-0008 case 2 and FP-0064 case 2: ErrorCode has the 52 codes of the parse error table in order, and the tokenizer raises 51...OK
+17/46 html.tokenizer_test.test.FP-0008 case 4: each error catalog input produces exactly its expected sequence, whole and one code unit per chunk...OK
+18/46 html.tokenizer_test.test.FP-0008 case 5: tags and attributes, whole and one code unit per chunk...OK
+19/46 html.tokenizer_test.test.FP-0008 case 6: markup declarations and comments, whole and one code unit per chunk...OK
+20/46 html.tokenizer_test.test.FP-0008 case 7: DOCTYPE, whole and one code unit per chunk...OK
+21/46 html.tokenizer_test.test.FP-0008 case 8: processing instructions, whole and one code unit per chunk...OK
+22/46 html.tokenizer_test.test.FP-0008 case 9: character references, whole and one code unit per chunk...OK
+23/46 html.tokenizer_test.test.FP-0008 case 10: input stream preprocessing, whole and one code unit per chunk, and N6's end-of-file position...OK
+24/46 html.tokenizer_test.test.FP-0064 case 3: each error catalog input produces exactly its expected sequence, and both catalogs name the 51 raised codes...OK
+25/46 html.tokenizer_test.test.FP-0064 case 4: RCDATA, whole and one code unit per chunk...OK
+26/46 html.tokenizer_test.test.FP-0064 case 5: RAWTEXT, whole and one code unit per chunk...OK
+27/46 html.tokenizer_test.test.FP-0064 case 6: script data and its escape states, whole and one code unit per chunk...OK
+28/46 html.tokenizer_test.test.FP-0064 case 7: the script data escaped states, whole and one code unit per chunk...OK
+29/46 html.tokenizer_test.test.FP-0064 case 8: the script data double escape states, whole and one code unit per chunk...OK
+30/46 html.tokenizer_test.test.FP-0064 case 9: PLAINTEXT and CDATA sections, whole and one code unit per chunk...OK
+31/46 html.tokenizer_test.test.FP-0064 case 10: the last start tag name, whole and one code unit per chunk...OK
+32/46 html.tokenizer_test.test.FP-0008 case 11 and FP-0064 case 11: the error catalogs, the state walks, and the CDATA case execute every branch of every state...OK
+33/46 html.tokenizer_test.test.FP-0008 case 12: each input produces exactly its dump with spans and errors...OK
+34/46 html.tokenizer_test.test.FP-0064 case 12: each input produces exactly its dump with spans and errors...OK
+35/46 html.tokenizer_test.test.FP-0008 case 15: interface edges...OK
+36/46 html.tokenizer_test.test.FP-0064 case 14: interface edges of switchTo...OK
+37/46 html.tokenizer_test.test.FP-0008 case 16 and FP-0064 case 15: a foreign adjusted current node makes [CDATA[ a CDATA section, whole and split at offset 6...OK
+38/46 html.tokenizer_test.test.FP-0008 case 17: each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks...OK
+39/46 html.tokenizer_test.test.FP-0064 case 16: with the content driver, each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks...OK
+40/46 html.partition_test.test.FP-0008 case 13: set P compares every composition of each input into nonempty chunks with the whole input...OK
+41/46 html.partition_test.test.FP-0008 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input...OK
+42/46 html.partition_test.test.FP-0064 case 13: set P compares every composition of each input into nonempty chunks with the whole input...OK
+43/46 html.partition_test.test.FP-0064 case 13: each set P input as one chunk executes every one of the 30 new states...OK
+44/46 html.partition_test.test.FP-0064 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input...OK
+45/46 html.partition_test.test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks...OK
+46/46 html.entities_test.test.FP-0008 case 3: the embedded table matches its provenance, its generated form, and the frozen counts and lookups...OK
+All 46 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-Odebug","-Mroot=src/root.zig","--cache-dir","out/fp0100-cache-timing","--test-filter","FP-0008","--test-filter","FP-0064"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T19:13:25.709Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32341,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-Odebug","-Mroot=src/root.zig","--cache-dir","out/fp0100-cache-timing","--test-filter","FP-0008","--test-filter","FP-0064"]
+1/46 root.test_0...OK
+2/46 css.css.test_0...OK
+3/46 font.opentype.test_0...OK
+4/46 html.root.test_0...OK
+5/46 lab.test.FP-0007 case 2 and FP-0008 case 25: a matching fetch expectation passes, fetch completes, decode is unsupported without a byte order mark, tokenize is not reached, and every other stage is unsupported...OK
+6/46 lab.test.FP-0008 case 18: a UTF-8 byte order mark body with a matching tokenize expectation passes, and both stages record their results...OK
+7/46 lab.test.FP-0008 case 18: each induced allocation failure in a run that decodes and tokenizes reports harness-error and leaks nothing...OK
+8/46 lab.test.FP-0008 case 19: a tokenize expectation fails at its first differing check with both values...OK
+9/46 lab.test.FP-0008 case 20: a body with tokenizer parse errors records them in step order and passes...OK
+10/46 lab.test.FP-0008 case 21: a body without a UTF-8 byte order mark makes decode and tokenize expectations unsupported at decode...OK
+11/46 lab.test.FP-0008 case 22: a tokenize expectation for a failed document fails on document_state, and neither new stage is reached...OK
+12/46 lab.test.FP-0008 case 23: a decode expectation passes for the case 18 body and fails on encoding when it names UTF-16LE...OK
+13/46 lab.test.FP-0008 case 24: the UTF-8 decoder with replacement turns an invalid byte into U+FFFD...OK
+14/46 js.runtime.test_0...OK
+15/46 html.tokenizer_test.test.FP-0008 case 1 and FP-0064 case 1: State has 84 tags in section order with the frozen headings, and every state has branches...OK
+16/46 html.tokenizer_test.test.FP-0008 case 2 and FP-0064 case 2: ErrorCode has the 52 codes of the parse error table in order, and the tokenizer raises 51...OK
+17/46 html.tokenizer_test.test.FP-0008 case 4: each error catalog input produces exactly its expected sequence, whole and one code unit per chunk...OK
+18/46 html.tokenizer_test.test.FP-0008 case 5: tags and attributes, whole and one code unit per chunk...OK
+19/46 html.tokenizer_test.test.FP-0008 case 6: markup declarations and comments, whole and one code unit per chunk...OK
+20/46 html.tokenizer_test.test.FP-0008 case 7: DOCTYPE, whole and one code unit per chunk...OK
+21/46 html.tokenizer_test.test.FP-0008 case 8: processing instructions, whole and one code unit per chunk...OK
+22/46 html.tokenizer_test.test.FP-0008 case 9: character references, whole and one code unit per chunk...OK
+23/46 html.tokenizer_test.test.FP-0008 case 10: input stream preprocessing, whole and one code unit per chunk, and N6's end-of-file position...OK
+24/46 html.tokenizer_test.test.FP-0064 case 3: each error catalog input produces exactly its expected sequence, and both catalogs name the 51 raised codes...OK
+25/46 html.tokenizer_test.test.FP-0064 case 4: RCDATA, whole and one code unit per chunk...OK
+26/46 html.tokenizer_test.test.FP-0064 case 5: RAWTEXT, whole and one code unit per chunk...OK
+27/46 html.tokenizer_test.test.FP-0064 case 6: script data and its escape states, whole and one code unit per chunk...OK
+28/46 html.tokenizer_test.test.FP-0064 case 7: the script data escaped states, whole and one code unit per chunk...OK
+29/46 html.tokenizer_test.test.FP-0064 case 8: the script data double escape states, whole and one code unit per chunk...OK
+30/46 html.tokenizer_test.test.FP-0064 case 9: PLAINTEXT and CDATA sections, whole and one code unit per chunk...OK
+31/46 html.tokenizer_test.test.FP-0064 case 10: the last start tag name, whole and one code unit per chunk...OK
+32/46 html.tokenizer_test.test.FP-0008 case 11 and FP-0064 case 11: the error catalogs, the state walks, and the CDATA case execute every branch of every state...OK
+33/46 html.tokenizer_test.test.FP-0008 case 12: each input produces exactly its dump with spans and errors...OK
+34/46 html.tokenizer_test.test.FP-0064 case 12: each input produces exactly its dump with spans and errors...OK
+35/46 html.tokenizer_test.test.FP-0008 case 15: interface edges...OK
+36/46 html.tokenizer_test.test.FP-0064 case 14: interface edges of switchTo...OK
+37/46 html.tokenizer_test.test.FP-0008 case 16 and FP-0064 case 15: a foreign adjusted current node makes [CDATA[ a CDATA section, whole and split at offset 6...OK
+38/46 html.tokenizer_test.test.FP-0008 case 17: each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks...OK
+39/46 html.tokenizer_test.test.FP-0064 case 16: with the content driver, each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks...OK
+40/46 html.partition_test.test.FP-0008 case 13: set P compares every composition of each input into nonempty chunks with the whole input...OK
+41/46 html.partition_test.test.FP-0008 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input...OK
+42/46 html.partition_test.test.FP-0064 case 13: set P compares every composition of each input into nonempty chunks with the whole input...OK
+43/46 html.partition_test.test.FP-0064 case 13: each set P input as one chunk executes every one of the 30 new states...OK
+44/46 html.partition_test.test.FP-0064 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input...OK
+45/46 html.partition_test.test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks...OK
+46/46 html.entities_test.test.FP-0008 case 3: the embedded table matches its provenance, its generated form, and the frozen counts and lookups...OK
+All 46 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-Odebug","-Mroot=src/root.zig","--cache-dir","out/fp0100-cache-timing","--test-filter","FP-0008","--test-filter","FP-0064"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T19:13:58.122Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":23120,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-Odebug","-Mroot=src/root.zig","--cache-dir","../fp0100-cache-timing-base","--test-filter","FP-0008","--test-filter","FP-0064"]
+1/46 root.test_0...OK
+2/46 css.css.test_0...OK
+3/46 font.opentype.test_0...OK
+4/46 html.root.test_0...OK
+5/46 lab.test.FP-0007 case 2 and FP-0008 case 25: a matching fetch expectation passes, fetch completes, decode is unsupported without a byte order mark, tokenize is not reached, and every other stage is unsupported...OK
+6/46 lab.test.FP-0008 case 18: a UTF-8 byte order mark body with a matching tokenize expectation passes, and both stages record their results...OK
+7/46 lab.test.FP-0008 case 18: each induced allocation failure in a run that decodes and tokenizes reports harness-error and leaks nothing...OK
+8/46 lab.test.FP-0008 case 19: a tokenize expectation fails at its first differing check with both values...OK
+9/46 lab.test.FP-0008 case 20: a body with tokenizer parse errors records them in step order and passes...OK
+10/46 lab.test.FP-0008 case 21: a body without a UTF-8 byte order mark makes decode and tokenize expectations unsupported at decode...OK
+11/46 lab.test.FP-0008 case 22: a tokenize expectation for a failed document fails on document_state, and neither new stage is reached...OK
+12/46 lab.test.FP-0008 case 23: a decode expectation passes for the case 18 body and fails on encoding when it names UTF-16LE...OK
+13/46 lab.test.FP-0008 case 24: the UTF-8 decoder with replacement turns an invalid byte into U+FFFD...OK
+14/46 js.runtime.test_0...OK
+15/46 html.tokenizer_test.test.FP-0008 case 1 and FP-0064 case 1: State has 84 tags in section order with the frozen headings, and every state has branches...OK
+16/46 html.tokenizer_test.test.FP-0008 case 2 and FP-0064 case 2: ErrorCode has the 52 codes of the parse error table in order, and the tokenizer raises 51...OK
+17/46 html.tokenizer_test.test.FP-0008 case 4: each error catalog input produces exactly its expected sequence, whole and one code unit per chunk...OK
+18/46 html.tokenizer_test.test.FP-0008 case 5: tags and attributes, whole and one code unit per chunk...OK
+19/46 html.tokenizer_test.test.FP-0008 case 6: markup declarations and comments, whole and one code unit per chunk...OK
+20/46 html.tokenizer_test.test.FP-0008 case 7: DOCTYPE, whole and one code unit per chunk...OK
+21/46 html.tokenizer_test.test.FP-0008 case 8: processing instructions, whole and one code unit per chunk...OK
+22/46 html.tokenizer_test.test.FP-0008 case 9: character references, whole and one code unit per chunk...OK
+23/46 html.tokenizer_test.test.FP-0008 case 10: input stream preprocessing, whole and one code unit per chunk, and N6's end-of-file position...OK
+24/46 html.tokenizer_test.test.FP-0064 case 3: each error catalog input produces exactly its expected sequence, and both catalogs name the 51 raised codes...OK
+25/46 html.tokenizer_test.test.FP-0064 case 4: RCDATA, whole and one code unit per chunk...OK
+26/46 html.tokenizer_test.test.FP-0064 case 5: RAWTEXT, whole and one code unit per chunk...OK
+27/46 html.tokenizer_test.test.FP-0064 case 6: script data and its escape states, whole and one code unit per chunk...OK
+28/46 html.tokenizer_test.test.FP-0064 case 7: the script data escaped states, whole and one code unit per chunk...OK
+29/46 html.tokenizer_test.test.FP-0064 case 8: the script data double escape states, whole and one code unit per chunk...OK
+30/46 html.tokenizer_test.test.FP-0064 case 9: PLAINTEXT and CDATA sections, whole and one code unit per chunk...OK
+31/46 html.tokenizer_test.test.FP-0064 case 10: the last start tag name, whole and one code unit per chunk...OK
+32/46 html.tokenizer_test.test.FP-0008 case 11 and FP-0064 case 11: the error catalogs, the state walks, and the CDATA case execute every branch of every state...OK
+33/46 html.tokenizer_test.test.FP-0008 case 12: each input produces exactly its dump with spans and errors...OK
+34/46 html.tokenizer_test.test.FP-0064 case 12: each input produces exactly its dump with spans and errors...OK
+35/46 html.tokenizer_test.test.FP-0008 case 15: interface edges...OK
+36/46 html.tokenizer_test.test.FP-0064 case 14: interface edges of switchTo...OK
+37/46 html.tokenizer_test.test.FP-0008 case 16 and FP-0064 case 15: a foreign adjusted current node makes [CDATA[ a CDATA section, whole and split at offset 6...OK
+38/46 html.tokenizer_test.test.FP-0008 case 17: each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks...OK
+39/46 html.tokenizer_test.test.FP-0064 case 16: with the content driver, each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks...OK
+40/46 html.partition_test.test.FP-0008 case 13: set P compares every composition of each input into nonempty chunks with the whole input...OK
+41/46 html.partition_test.test.FP-0008 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input...OK
+42/46 html.partition_test.test.FP-0064 case 13: set P compares every composition of each input into nonempty chunks with the whole input...OK
+43/46 html.partition_test.test.FP-0064 case 13: each set P input as one chunk executes every one of the 30 new states...OK
+44/46 html.partition_test.test.FP-0064 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input...OK
+45/46 html.partition_test.test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks...OK
+46/46 html.entities_test.test.FP-0008 case 3: the embedded table matches its provenance, its generated form, and the frozen counts and lookups...OK
+All 46 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-Odebug","-Mroot=src/root.zig","--cache-dir","../fp0100-cache-timing-base","--test-filter","FP-0008","--test-filter","FP-0064"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m\\out\\fp0100-base","started_at":"2026-10-09T19:14:21.342Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21082,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-Odebug","-Mroot=src/root.zig","--cache-dir","../fp0100-cache-timing-base","--test-filter","FP-0008","--test-filter","FP-0064"]
+1/46 root.test_0...OK
+2/46 css.css.test_0...OK
+3/46 font.opentype.test_0...OK
+4/46 html.root.test_0...OK
+5/46 lab.test.FP-0007 case 2 and FP-0008 case 25: a matching fetch expectation passes, fetch completes, decode is unsupported without a byte order mark, tokenize is not reached, and every other stage is unsupported...OK
+6/46 lab.test.FP-0008 case 18: a UTF-8 byte order mark body with a matching tokenize expectation passes, and both stages record their results...OK
+7/46 lab.test.FP-0008 case 18: each induced allocation failure in a run that decodes and tokenizes reports harness-error and leaks nothing...OK
+8/46 lab.test.FP-0008 case 19: a tokenize expectation fails at its first differing check with both values...OK
+9/46 lab.test.FP-0008 case 20: a body with tokenizer parse errors records them in step order and passes...OK
+10/46 lab.test.FP-0008 case 21: a body without a UTF-8 byte order mark makes decode and tokenize expectations unsupported at decode...OK
+11/46 lab.test.FP-0008 case 22: a tokenize expectation for a failed document fails on document_state, and neither new stage is reached...OK
+12/46 lab.test.FP-0008 case 23: a decode expectation passes for the case 18 body and fails on encoding when it names UTF-16LE...OK
+13/46 lab.test.FP-0008 case 24: the UTF-8 decoder with replacement turns an invalid byte into U+FFFD...OK
+14/46 js.runtime.test_0...OK
+15/46 html.tokenizer_test.test.FP-0008 case 1 and FP-0064 case 1: State has 84 tags in section order with the frozen headings, and every state has branches...OK
+16/46 html.tokenizer_test.test.FP-0008 case 2 and FP-0064 case 2: ErrorCode has the 52 codes of the parse error table in order, and the tokenizer raises 51...OK
+17/46 html.tokenizer_test.test.FP-0008 case 4: each error catalog input produces exactly its expected sequence, whole and one code unit per chunk...OK
+18/46 html.tokenizer_test.test.FP-0008 case 5: tags and attributes, whole and one code unit per chunk...OK
+19/46 html.tokenizer_test.test.FP-0008 case 6: markup declarations and comments, whole and one code unit per chunk...OK
+20/46 html.tokenizer_test.test.FP-0008 case 7: DOCTYPE, whole and one code unit per chunk...OK
+21/46 html.tokenizer_test.test.FP-0008 case 8: processing instructions, whole and one code unit per chunk...OK
+22/46 html.tokenizer_test.test.FP-0008 case 9: character references, whole and one code unit per chunk...OK
+23/46 html.tokenizer_test.test.FP-0008 case 10: input stream preprocessing, whole and one code unit per chunk, and N6's end-of-file position...OK
+24/46 html.tokenizer_test.test.FP-0064 case 3: each error catalog input produces exactly its expected sequence, and both catalogs name the 51 raised codes...OK
+25/46 html.tokenizer_test.test.FP-0064 case 4: RCDATA, whole and one code unit per chunk...OK
+26/46 html.tokenizer_test.test.FP-0064 case 5: RAWTEXT, whole and one code unit per chunk...OK
+27/46 html.tokenizer_test.test.FP-0064 case 6: script data and its escape states, whole and one code unit per chunk...OK
+28/46 html.tokenizer_test.test.FP-0064 case 7: the script data escaped states, whole and one code unit per chunk...OK
+29/46 html.tokenizer_test.test.FP-0064 case 8: the script data double escape states, whole and one code unit per chunk...OK
+30/46 html.tokenizer_test.test.FP-0064 case 9: PLAINTEXT and CDATA sections, whole and one code unit per chunk...OK
+31/46 html.tokenizer_test.test.FP-0064 case 10: the last start tag name, whole and one code unit per chunk...OK
+32/46 html.tokenizer_test.test.FP-0008 case 11 and FP-0064 case 11: the error catalogs, the state walks, and the CDATA case execute every branch of every state...OK
+33/46 html.tokenizer_test.test.FP-0008 case 12: each input produces exactly its dump with spans and errors...OK
+34/46 html.tokenizer_test.test.FP-0064 case 12: each input produces exactly its dump with spans and errors...OK
+35/46 html.tokenizer_test.test.FP-0008 case 15: interface edges...OK
+36/46 html.tokenizer_test.test.FP-0064 case 14: interface edges of switchTo...OK
+37/46 html.tokenizer_test.test.FP-0008 case 16 and FP-0064 case 15: a foreign adjusted current node makes [CDATA[ a CDATA section, whole and split at offset 6...OK
+38/46 html.tokenizer_test.test.FP-0008 case 17: each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks...OK
+39/46 html.tokenizer_test.test.FP-0064 case 16: with the content driver, each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks...OK
+40/46 html.partition_test.test.FP-0008 case 13: set P compares every composition of each input into nonempty chunks with the whole input...OK
+41/46 html.partition_test.test.FP-0008 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input...OK
+42/46 html.partition_test.test.FP-0064 case 13: set P compares every composition of each input into nonempty chunks with the whole input...OK
+43/46 html.partition_test.test.FP-0064 case 13: each set P input as one chunk executes every one of the 30 new states...OK
+44/46 html.partition_test.test.FP-0064 case 13: set B compares every partition of each input into one, two, or three chunks with the whole input...OK
+45/46 html.partition_test.test.FP-0008 case 14: the mismatch report names the 1-minimal input and the partition with the fewest chunks...OK
+46/46 html.entities_test.test.FP-0008 case 3: the embedded table matches its provenance, its generated form, and the frozen counts and lookups...OK
+All 46 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-Odebug","-Mroot=src/root.zig","--cache-dir","../fp0100-cache-timing-base","--test-filter","FP-0008","--test-filter","FP-0064"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m\\out\\fp0100-base","started_at":"2026-10-09T19:14:42.573Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15736,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-Odebug","-Mroot=src/root.zig","--cache-dir","out/fp0100-cache-timing","--test-filter","FP-0100"]
+1/21 root.test_0...OK
+2/21 css.css.test_0...OK
+3/21 dom.test.FP-0100 case 2: HTML documents, document modes, doctype identifiers, processing-instruction targets, and appendData...OK
+4/21 font.opentype.test_0...OK
+5/21 html.root.test_0...OK
+6/21 js.runtime.test_0...OK
+7/21 html.tokenizer_test.test.FP-0100 case 15: characterPosition gives each character code unit its own source position, whole and in every two-chunk partition...OK
+8/21 html.tree_test.test.FP-0100 case 1: Mode has 21 tags in the order of the standard, ten are implemented, and the branch table has 130 branches...OK
+9/21 html.tree_test.test.FP-0100 case 3: the tree dump writes every node type, sorts attributes, and rejects other namespaces...OK
+10/21 html.tree_test.test.FP-0100 case 4: each DOCTYPE gives its document mode, doctype, and errors...OK
+11/21 html.tree_test.test.FP-0100 case 5: whole documents...OK
+12/21 html.tree_test.test.FP-0100 case 6: the mode walks...OK
+13/21 html.tree_test.test.FP-0100 case 7: in body and the head modes...OK
+14/21 html.tree_test.test.FP-0100 case 8: formatting elements and the adoption agency algorithm...OK
+15/21 html.tree_test.test.FP-0100 case 9: a script end tag returns a script boundary before any later character, and the next run continues...OK
+16/21 html.tree_test.test.FP-0100 case 10: unsupported features report their owners, repeat on a second run, and keep the tree, and frameset-ok decides a frameset...OK
+17/21 html.tree_test.test.FP-0100 case 11: cases 4 to 10 execute every one of the 130 branches of the ten modes...OK
+18/21 html.tree_test.test.FP-0100 case 13: the parser retains every node that it references, and a sweep frees none of them...OK
+19/21 html.tree_test.test.FP-0100 case 14: each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks...OK
+20/21 html.tree_partition_test.test.FP-0100 case 12: set P compares every composition of each input into nonempty chunks with the whole input...OK
+21/21 html.tree_partition_test.test.FP-0100 case 12: set B compares every partition of each input into one, two, or three chunks with the whole input...OK
+All 21 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-Odebug","-Mroot=src/root.zig","--cache-dir","out/fp0100-cache-timing","--test-filter","FP-0100"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T19:15:03.443Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":12912,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","test","-Odebug","-Mroot=src/root.zig","--cache-dir","out/fp0100-cache-timing","--test-filter","FP-0100"]
+1/21 root.test_0...OK
+2/21 css.css.test_0...OK
+3/21 dom.test.FP-0100 case 2: HTML documents, document modes, doctype identifiers, processing-instruction targets, and appendData...OK
+4/21 font.opentype.test_0...OK
+5/21 html.root.test_0...OK
+6/21 js.runtime.test_0...OK
+7/21 html.tokenizer_test.test.FP-0100 case 15: characterPosition gives each character code unit its own source position, whole and in every two-chunk partition...OK
+8/21 html.tree_test.test.FP-0100 case 1: Mode has 21 tags in the order of the standard, ten are implemented, and the branch table has 130 branches...OK
+9/21 html.tree_test.test.FP-0100 case 3: the tree dump writes every node type, sorts attributes, and rejects other namespaces...OK
+10/21 html.tree_test.test.FP-0100 case 4: each DOCTYPE gives its document mode, doctype, and errors...OK
+11/21 html.tree_test.test.FP-0100 case 5: whole documents...OK
+12/21 html.tree_test.test.FP-0100 case 6: the mode walks...OK
+13/21 html.tree_test.test.FP-0100 case 7: in body and the head modes...OK
+14/21 html.tree_test.test.FP-0100 case 8: formatting elements and the adoption agency algorithm...OK
+15/21 html.tree_test.test.FP-0100 case 9: a script end tag returns a script boundary before any later character, and the next run continues...OK
+16/21 html.tree_test.test.FP-0100 case 10: unsupported features report their owners, repeat on a second run, and keep the tree, and frameset-ok decides a frameset...OK
+17/21 html.tree_test.test.FP-0100 case 11: cases 4 to 10 execute every one of the 130 branches of the ten modes...OK
+18/21 html.tree_test.test.FP-0100 case 13: the parser retains every node that it references, and a sweep frees none of them...OK
+19/21 html.tree_test.test.FP-0100 case 14: each induced allocation failure returns OutOfMemory, every later call returns it again, and nothing leaks...OK
+20/21 html.tree_partition_test.test.FP-0100 case 12: set P compares every composition of each input into nonempty chunks with the whole input...OK
+21/21 html.tree_partition_test.test.FP-0100 case 12: set B compares every partition of each input into one, two, or three chunks with the whole input...OK
+All 21 tests passed.
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["test","-Odebug","-Mroot=src/root.zig","--cache-dir","out/fp0100-cache-timing","--test-filter","FP-0100"],"cwd":"C:\\Users\\requi\\.omp\\wt\\tb779889ef\\m","started_at":"2026-10-09T19:15:16.425Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":10262,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

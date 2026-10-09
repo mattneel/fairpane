@@ -7,8 +7,9 @@
 //! and the column combinator `||` of Selectors 5 are standard constructs outside the subset and report
 //! `unsupported_selector`.
 //!
-//! Every store document is an XML document, so names, IDs, classes, and attribute values compare by identical
-//! code units (section 3.7); the `i` modifier compares attribute values ASCII case-insensitively.
+//! The store can hold HTML documents in any mode, but until `FP-0070` matching treats every document with XML rules and
+//! no quirks, so names, IDs, classes, and attribute values compare by identical code units (section 3.7); the `i` modifier
+//! compares attribute values ASCII case-insensitively.
 //! No default namespace is declared, so `E` and `*|E` match any namespace (section 5.3).
 //!
 //! Matching keeps an explicit stack of open combinators, so no function recurses. It gives up on the whole selector

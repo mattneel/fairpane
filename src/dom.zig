@@ -21,8 +21,13 @@
 //! Setting an attribute copies its strings and reserves list capacity before it changes the store,
 //! so an allocation failure leaves the store unchanged.
 //!
-//! Every document of a store is an XML document in no-quirks mode,
-//! because section 4.5 makes `xml` and `no-quirks` the defaults and the store creates no other kind.
+//! The store holds XML and HTML documents. Section 4.5 makes `xml` and `no-quirks` the defaults:
+//! `createDocument` creates an XML document and `createHtmlDocument` an HTML document, and a document's mode is
+//! no-quirks until `setDocumentMode` changes it.
+//! A doctype keeps its name, public ID, and system ID, and a processing instruction keeps its target.
+//! `appendData` appends to the data of a text, comment, or processing-instruction node as "replace data" does with the
+//! offset at the length and a count of 0. It reserves amortized capacity before it changes the node,
+//! so an allocation failure leaves the store unchanged.
 //!
 //! No shadow root, template contents, attribute node, live range, node iterator, mutation observer, or custom element exists yet.
 //! A host-including inclusive ancestor is therefore an inclusive ancestor.
@@ -62,6 +67,44 @@ pub const Kind = enum {
     text,
     comment,
     processing_instruction,
+};
+
+/// A document's mode (DOM section 4.5).
+pub const DocumentMode = enum { no_quirks, quirks, limited_quirks };
+
+/// A document's type (DOM section 4.5) and mode.
+const Document = struct {
+    html: bool,
+    mode: DocumentMode,
+};
+
+/// A doctype's name, public ID, and system ID (DOM section 4.6).
+const DocumentType = struct {
+    name: WebString,
+    public_id: WebString,
+    system_id: WebString,
+
+    fn deinit(doctype: *DocumentType, gpa: Allocator) void {
+        doctype.name.deinit(gpa);
+        doctype.public_id.deinit(gpa);
+        doctype.system_id.deinit(gpa);
+    }
+};
+
+/// The views of a doctype's identifiers. They stay valid until the doctype is freed.
+pub const DocumentTypeIds = struct {
+    name: View,
+    public_id: View,
+    system_id: View,
+};
+
+/// The data of a character data node. Its capacity can exceed its length, so `appendData` grows it in amortized steps.
+const Data = std.ArrayList(u16);
+
+/// A processing instruction's target and data (DOM section 4.13).
+const ProcessingInstruction = struct {
+    target: WebString,
+    data: Data,
 };
 
 const Element = struct {
@@ -110,13 +153,13 @@ pub const AttributeView = struct {
 
 /// The data that depends on the node type. The store owns every string.
 const Payload = union(Kind) {
-    document,
+    document: Document,
     document_fragment,
-    document_type,
+    document_type: DocumentType,
     element: Element,
-    text: WebString,
-    comment: WebString,
-    processing_instruction: WebString,
+    text: Data,
+    comment: Data,
+    processing_instruction: ProcessingInstruction,
 };
 
 const NodeRecord = struct {
@@ -161,6 +204,10 @@ pub const ReleaseError = LookupError || error{NotRetained};
 /// `NotAnElement` reports a node argument that is not an element.
 pub const AttributeError = LookupError || error{NotAnElement};
 pub const SetAttributeError = AttributeError || error{OutOfMemory};
+/// `NotADocument` reports a node argument that is not a document.
+pub const DocumentError = LookupError || error{NotADocument};
+/// `NotCharacterData` reports a node argument that is not a text, comment, or processing-instruction node.
+pub const AppendDataError = LookupError || error{ OutOfMemory, NotCharacterData };
 
 const ValidityError = error{ HierarchyRequest, NotFound };
 
@@ -187,15 +234,25 @@ fn detachedRecord(payload: Payload, document: NodeHandle) NodeRecord {
 
 fn freePayload(gpa: Allocator, payload: *Payload) void {
     switch (payload.*) {
-        .document, .document_fragment, .document_type => {},
+        .document, .document_fragment => {},
+        .document_type => |*doctype| doctype.deinit(gpa),
         .element => |*element| {
             if (element.namespace) |*namespace| namespace.deinit(gpa);
             element.local_name.deinit(gpa);
             for (element.attributes.items) |*attribute| attribute.deinit(gpa);
             element.attributes.deinit(gpa);
         },
-        .text, .comment, .processing_instruction => |*string| string.deinit(gpa),
+        .text, .comment => |*data| data.deinit(gpa),
+        .processing_instruction => |*instruction| {
+            instruction.target.deinit(gpa);
+            instruction.data.deinit(gpa);
+        },
     }
+}
+
+/// Copies `units` into exactly as much storage as they need.
+fn copyData(gpa: Allocator, units: []const u16) Allocator.Error!Data {
+    return .fromOwnedSlice(try gpa.dupe(u16, units));
 }
 
 fn isRoot(record: *const NodeRecord) bool {
@@ -227,11 +284,35 @@ pub const Store = struct {
         return store.nodes.count();
     }
 
+    /// Creates an XML document in no-quirks mode.
     pub fn createDocument(store: *Store) CreateDocumentError!NodeHandle {
+        return store.createDocumentOfType(false);
+    }
+
+    /// Creates an HTML document in no-quirks mode.
+    pub fn createHtmlDocument(store: *Store) CreateDocumentError!NodeHandle {
+        return store.createDocumentOfType(true);
+    }
+
+    fn createDocumentOfType(store: *Store, html: bool) CreateDocumentError!NodeHandle {
         // A document is its own node document, so its record names the handle that the insertion issues.
-        const node = try store.nodes.insert(store.gpa, detachedRecord(.document, undefined));
+        const payload: Payload = .{ .document = .{ .html = html, .mode = .no_quirks } };
+        const node = try store.nodes.insert(store.gpa, detachedRecord(payload, undefined));
         store.at(node).document = node;
         return node;
+    }
+
+    /// Whether the document's type is "html".
+    pub fn isHtmlDocument(store: *Store, document: NodeHandle) DocumentError!bool {
+        return (try store.documentRecord(document)).html;
+    }
+
+    pub fn documentMode(store: *Store, document: NodeHandle) DocumentError!DocumentMode {
+        return (try store.documentRecord(document)).mode;
+    }
+
+    pub fn setDocumentMode(store: *Store, document: NodeHandle, mode: DocumentMode) DocumentError!void {
+        (try store.documentRecord(document)).mode = mode;
     }
 
     pub fn createDocumentFragment(store: *Store, document: NodeHandle) CreateError!NodeHandle {
@@ -239,9 +320,29 @@ pub const Store = struct {
         return store.nodes.insert(store.gpa, detachedRecord(.document_fragment, document));
     }
 
-    pub fn createDocumentType(store: *Store, document: NodeHandle) CreateError!NodeHandle {
+    /// Copies `name`, `public_id`, and `system_id` exactly.
+    pub fn createDocumentType(store: *Store, document: NodeHandle, name: View, public_id: View, system_id: View) CreateError!NodeHandle {
         try store.requireDocument(document);
-        return store.nodes.insert(store.gpa, detachedRecord(.document_type, document));
+        var name_copy = try WebString.fromCodeUnits(store.gpa, name.units);
+        errdefer name_copy.deinit(store.gpa);
+        var public_copy = try WebString.fromCodeUnits(store.gpa, public_id.units);
+        errdefer public_copy.deinit(store.gpa);
+        var system_copy = try WebString.fromCodeUnits(store.gpa, system_id.units);
+        errdefer system_copy.deinit(store.gpa);
+        const doctype: DocumentType = .{ .name = name_copy, .public_id = public_copy, .system_id = system_copy };
+        return store.nodes.insert(store.gpa, detachedRecord(.{ .document_type = doctype }, document));
+    }
+
+    /// Returns the name, public ID, and system ID of a doctype, or null for another node.
+    pub fn documentTypeIds(store: *Store, node: NodeHandle) LookupError!?DocumentTypeIds {
+        return switch ((try store.nodes.getPtr(node)).payload) {
+            .document_type => |doctype| .{
+                .name = doctype.name.view(),
+                .public_id = doctype.public_id.view(),
+                .system_id = doctype.system_id.view(),
+            },
+            .document, .document_fragment, .element, .text, .comment, .processing_instruction => null,
+        };
     }
 
     /// Copies `namespace` and `local_name` exactly. A null `namespace` means no namespace.
@@ -265,8 +366,38 @@ pub const Store = struct {
         return store.createCharacterData(document, .comment, data);
     }
 
-    pub fn createProcessingInstruction(store: *Store, document: NodeHandle, data: View) CreateError!NodeHandle {
-        return store.createCharacterData(document, .processing_instruction, data);
+    /// Copies `target` and `data` exactly.
+    pub fn createProcessingInstruction(store: *Store, document: NodeHandle, target: View, data: View) CreateError!NodeHandle {
+        try store.requireDocument(document);
+        var target_copy = try WebString.fromCodeUnits(store.gpa, target.units);
+        errdefer target_copy.deinit(store.gpa);
+        var data_copy = try copyData(store.gpa, data.units);
+        errdefer data_copy.deinit(store.gpa);
+        const instruction: ProcessingInstruction = .{ .target = target_copy, .data = data_copy };
+        return store.nodes.insert(store.gpa, detachedRecord(.{ .processing_instruction = instruction }, document));
+    }
+
+    /// Returns the target of a processing instruction, or null for another node.
+    /// The view stays valid until the node is freed.
+    pub fn processingInstructionTarget(store: *Store, node: NodeHandle) LookupError!?View {
+        return switch ((try store.nodes.getPtr(node)).payload) {
+            .processing_instruction => |instruction| instruction.target.view(),
+            .document, .document_fragment, .document_type, .element, .text, .comment => null,
+        };
+    }
+
+    /// "Replace data" with the offset at the data's length, a count of 0, and `data`: appends the code units of `data`
+    /// to a text, comment, or processing-instruction node. It reserves amortized capacity before it changes the node,
+    /// so n appends of total length L allocate O(log L) times, and a failed reservation changes nothing.
+    /// No live range exists yet, so no range changes.
+    pub fn appendData(store: *Store, node: NodeHandle, data: View) AppendDataError!void {
+        const target: *Data = switch ((try store.nodes.getPtr(node)).payload) {
+            .text, .comment => |*own| own,
+            .processing_instruction => |*instruction| &instruction.data,
+            .document, .document_fragment, .document_type, .element => return error.NotCharacterData,
+        };
+        try target.ensureUnusedCapacity(store.gpa, data.units.len);
+        target.appendSliceAssumeCapacity(data.units);
     }
 
     pub fn nodeKind(store: *Store, node: NodeHandle) LookupError!Kind {
@@ -298,10 +429,11 @@ pub const Store = struct {
     }
 
     /// Returns the data of a text, comment, or processing-instruction node, or null for another node.
-    /// The view stays valid until the node is freed.
+    /// The view stays valid until the node is freed or `appendData` changes its data.
     pub fn characterData(store: *Store, node: NodeHandle) LookupError!?View {
         return switch ((try store.nodes.getPtr(node)).payload) {
-            .text, .comment, .processing_instruction => |string| string.view(),
+            .text, .comment => |data| .{ .units = data.items },
+            .processing_instruction => |instruction| .{ .units = instruction.data.items },
             .document, .document_fragment, .document_type, .element => null,
         };
     }
@@ -550,13 +682,20 @@ pub const Store = struct {
         return std.meta.activeTag(store.at(node).payload);
     }
 
-    fn requireDocument(store: *Store, node: NodeHandle) (LookupError || error{NotADocument})!void {
-        if ((try store.nodes.getPtr(node)).payload != .document) return error.NotADocument;
+    fn requireDocument(store: *Store, node: NodeHandle) DocumentError!void {
+        _ = try store.documentRecord(node);
+    }
+
+    fn documentRecord(store: *Store, node: NodeHandle) DocumentError!*Document {
+        return switch ((try store.nodes.getPtr(node)).payload) {
+            .document => |*document| document,
+            .document_fragment, .document_type, .element, .text, .comment, .processing_instruction => error.NotADocument,
+        };
     }
 
     fn createCharacterData(store: *Store, document: NodeHandle, comptime kind: Kind, data: View) CreateError!NodeHandle {
         try store.requireDocument(document);
-        var copy = try WebString.fromCodeUnits(store.gpa, data.units);
+        var copy = try copyData(store.gpa, data.units);
         errdefer copy.deinit(store.gpa);
         return store.nodes.insert(store.gpa, detachedRecord(@unionInit(Payload, @tagName(kind), copy), document));
     }
@@ -910,7 +1049,8 @@ const html_namespace = ascii("http://www.w3.org/1999/xhtml");
 
 /// Test-only validation of every link, node document, and node tree constraint in the store.
 /// Every loop is bounded by the node count, so a cycle fails the check instead of hanging it.
-fn expectInvariants(store: *Store) !void {
+/// It is compiled only in test builds, and tree construction tests call it after every case.
+pub fn expectInvariants(store: *Store) !void {
     comptime assert(builtin.is_test);
     const total = store.nodes.count();
     var visited: usize = 0;
@@ -1039,7 +1179,7 @@ fn newFragment(store: *Store, document: NodeHandle) !NodeHandle {
 }
 
 fn newDoctype(store: *Store, document: NodeHandle) !NodeHandle {
-    const node = try store.createDocumentType(document);
+    const node = try store.createDocumentType(document, ascii(""), ascii(""), ascii(""));
     try expectInvariants(store);
     return node;
 }
@@ -1063,7 +1203,7 @@ fn newComment(store: *Store, document: NodeHandle, comptime text: []const u8) !N
 }
 
 fn newProcessingInstruction(store: *Store, document: NodeHandle, comptime text: []const u8) !NodeHandle {
-    const node = try store.createProcessingInstruction(document, ascii(text));
+    const node = try store.createProcessingInstruction(document, ascii(text), ascii(text));
     try expectInvariants(store);
     return node;
 }
@@ -2057,10 +2197,10 @@ fn allocationScenario(gpa: Allocator) !void {
         try appendChecked(s, html, section.*);
     }
     const fragment = try guarded(s, Store.createDocumentFragment, .{ s, document });
-    try appendChecked(s, fragment, try guarded(s, Store.createProcessingInstruction, .{ s, document, ascii("instruction") }));
+    try appendChecked(s, fragment, try guarded(s, Store.createProcessingInstruction, .{ s, document, ascii("instruction"), ascii("instruction") }));
     try appendChecked(s, fragment, try guarded(s, Store.createText, .{ s, document, ascii("") }));
     try insertChecked(s, html, fragment, sections[1]);
-    const doctype = try guarded(s, Store.createDocumentType, .{ s, other_document });
+    const doctype = try guarded(s, Store.createDocumentType, .{ s, other_document, ascii(""), ascii(""), ascii("") });
 
     try adoptChecked(s, sections[2], other_document);
     try appendChecked(s, other_document, sections[2]);
@@ -2129,11 +2269,11 @@ test "FP-0009 case 12: a handle from another store returns WrongOwner, and a han
         try expectRejected(s, expected, Store.elementName, .{ s, node });
         try expectRejected(s, expected, Store.children, .{ s, node });
         try expectRejected(s, expected, Store.createDocumentFragment, .{ s, node });
-        try expectRejected(s, expected, Store.createDocumentType, .{ s, node });
+        try expectRejected(s, expected, Store.createDocumentType, .{ s, node, ascii(""), ascii(""), ascii("") });
         try expectRejected(s, expected, Store.createElement, .{ s, node, html_namespace, ascii("x") });
         try expectRejected(s, expected, Store.createText, .{ s, node, ascii("x") });
         try expectRejected(s, expected, Store.createComment, .{ s, node, ascii("x") });
-        try expectRejected(s, expected, Store.createProcessingInstruction, .{ s, node, ascii("x") });
+        try expectRejected(s, expected, Store.createProcessingInstruction, .{ s, node, ascii("x"), ascii("x") });
         try expectRejected(s, expected, Store.appendChild, .{ s, node, child });
         try expectRejected(s, expected, Store.appendChild, .{ s, parent, node });
         try expectRejected(s, expected, Store.insertBefore, .{ s, node, child, null });
@@ -2345,5 +2485,104 @@ test "FP-0014 revision 1: classes deduplicate in order, hasClass agrees, and bot
 
     var no_remap: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
     try testing.checkAllAllocationFailures(no_remap.allocator(), classAllocationScenario, .{});
+    try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
+}
+
+fn expectView(expected: []const u8, actual: View) !void {
+    try testing.expectEqual(expected.len, actual.units.len);
+    for (expected, actual.units) |byte, unit| try testing.expectEqual(@as(u16, byte), unit);
+}
+
+/// Creates a doctype and a processing instruction and appends to character data, with every operation guarded.
+fn characterDataScenario(gpa: Allocator) !void {
+    var store = try Store.init(gpa);
+    defer store.deinit();
+    const s = &store;
+    const document = try guarded(s, Store.createHtmlDocument, .{s});
+    const doctype = try guarded(s, Store.createDocumentType, .{ s, document, ascii("html"), ascii("p"), ascii("s") });
+    try appendChecked(s, document, doctype);
+    const instruction = try guarded(s, Store.createProcessingInstruction, .{ s, document, ascii("t"), ascii("x") });
+    try appendChecked(s, document, instruction);
+    const element = try guarded(s, Store.createElement, .{ s, document, html_namespace, ascii("html") });
+    try appendChecked(s, document, element);
+    const text = try guarded(s, Store.createText, .{ s, document, ascii("a") });
+    try appendChecked(s, element, text);
+    for (0..40) |_| try guarded(s, Store.appendData, .{ s, text, ascii("b") });
+    try guarded(s, Store.appendData, .{ s, instruction, ascii("yz") });
+    try expectView("xyz", (try s.characterData(instruction)).?);
+    try expectView("t", (try s.processingInstructionTarget(instruction)).?);
+    try testing.expectEqual(@as(usize, 41), (try s.characterData(text)).?.units.len);
+}
+
+test "FP-0100 case 2: HTML documents, document modes, doctype identifiers, processing-instruction targets, and appendData" {
+    var store = try Store.init(testing.allocator);
+    defer store.deinit();
+    const s = &store;
+
+    // X1.
+    const document = try s.createHtmlDocument();
+    try expectInvariants(s);
+    try testing.expect(try s.isHtmlDocument(document));
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(document));
+    const xml = try newDocument(s);
+    try testing.expect(!try s.isHtmlDocument(xml));
+    try testing.expectEqual(DocumentMode.no_quirks, try s.documentMode(xml));
+    try s.setDocumentMode(document, .quirks);
+    try expectInvariants(s);
+    try testing.expectEqual(DocumentMode.quirks, try s.documentMode(document));
+    try s.setDocumentMode(document, .limited_quirks);
+    try expectInvariants(s);
+    try testing.expectEqual(DocumentMode.limited_quirks, try s.documentMode(document));
+    const element = try newElement(s, document, "div");
+    try expectRejected(s, error.NotADocument, Store.isHtmlDocument, .{ s, element });
+    try expectRejected(s, error.NotADocument, Store.documentMode, .{ s, element });
+    try expectRejected(s, error.NotADocument, Store.setDocumentMode, .{ s, element, .quirks });
+
+    // X2.
+    const doctype = try s.createDocumentType(document, ascii("html"), ascii(""), ascii("x"));
+    try expectInvariants(s);
+    const ids = (try s.documentTypeIds(doctype)).?;
+    try expectView("html", ids.name);
+    try expectView("", ids.public_id);
+    try expectView("x", ids.system_id);
+    try testing.expectEqual(null, try s.documentTypeIds(element));
+
+    // X3.
+    const instruction = try s.createProcessingInstruction(document, ascii("t"), ascii("d"));
+    try expectInvariants(s);
+    try expectView("t", (try s.processingInstructionTarget(instruction)).?);
+    try expectView("d", (try s.characterData(instruction)).?);
+    try testing.expectEqual(null, try s.processingInstructionTarget(element));
+
+    // X4.
+    const text = try newText(s, document, "a");
+    try s.appendData(text, ascii("bc"));
+    try expectInvariants(s);
+    try expectView("abc", (try s.characterData(text)).?);
+    try expectRejected(s, error.NotCharacterData, Store.appendData, .{ s, element, ascii("x") });
+    const comment = try newComment(s, document, "x");
+    try s.appendData(comment, ascii("y"));
+    try expectInvariants(s);
+    try expectView("xy", (try s.characterData(comment)).?);
+    const other_instruction = try s.createProcessingInstruction(document, ascii("t"), ascii("x"));
+    try s.appendData(other_instruction, ascii("y"));
+    try expectInvariants(s);
+    try expectView("xy", (try s.characterData(other_instruction)).?);
+    try expectView("t", (try s.processingInstructionTarget(other_instruction)).?);
+
+    // Every growth step is an allocation, because the counting allocator fails every remap.
+    var counting: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+    var counted = try Store.init(counting.allocator());
+    defer counted.deinit();
+    const counted_document = try counted.createHtmlDocument();
+    const counted_text = try counted.createText(counted_document, ascii(""));
+    const before = counting.allocations;
+    for (0..1000) |_| try counted.appendData(counted_text, ascii("z"));
+    try testing.expect(counting.allocations - before <= 32);
+    try testing.expectEqual(@as(usize, 1000), (try counted.characterData(counted_text)).?.units.len);
+    try expectInvariants(&counted);
+
+    var no_remap: testing.FailingAllocator = .init(testing.allocator, .{ .resize_fail_index = 0 });
+    try testing.checkAllAllocationFailures(no_remap.allocator(), characterDataScenario, .{});
     try testing.expectEqual(no_remap.allocated_bytes, no_remap.freed_bytes);
 }
