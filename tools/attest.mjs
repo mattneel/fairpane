@@ -17,7 +17,9 @@ export class AttestationError extends Error {
   }
 }
 const fail = (code, message) => { throw new AttestationError(code, message); };
-const HEX40 = /^[0-9a-f]{40}$/, HEX64 = /^[0-9a-f]{64}$/;
+const HEX40 = /^[0-9a-f]{40}$/, HEX64 = /^[0-9a-f]{64}$/, KEY_ID = /^[A-Za-z0-9._-]{1,64}$/;
+/** Test a pattern only against a string, because RegExp.prototype.test coerces other values. */
+const matches = (pattern, value) => typeof value === 'string' && pattern.test(value);
 const OUTCOMES = Object.freeze(['pass', 'fail', 'unsupported', 'excluded', 'crash', 'timeout', 'harness_error']);
 const COUNT_FIELDS = Object.freeze(['discovered', 'selected', ...OUTCOMES]);
 const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
@@ -59,28 +61,31 @@ export function verifyBytes(publicKey, bytes, signatureBase64) {
 export function parseTrustPolicy(policy) {
   exactKeys(policy, ['schema', 'version', 'acceptance_policy_sha256', 'keys'], 'The trust policy');
   if (policy.schema !== 'fairpane-trust-policy' || policy.version !== 1) fail('malformed', 'The trust policy schema is unsupported.');
-  if (!HEX64.test(policy.acceptance_policy_sha256)) fail('malformed', 'The trust policy needs a SHA-256 acceptance policy digest.');
+  if (!matches(HEX64, policy.acceptance_policy_sha256)) fail('malformed', 'The trust policy needs a SHA-256 acceptance policy digest.');
   if (!Array.isArray(policy.keys) || policy.keys.length === 0) fail('malformed', 'The trust policy needs at least one key.');
   const keys = new Map();
   for (const entry of policy.keys) {
     exactKeys(entry, ['key_id', 'algorithm', 'public_key'], 'A trust policy key');
-    if (typeof entry.key_id !== 'string' || !/^[A-Za-z0-9._-]{1,64}$/.test(entry.key_id)) fail('malformed', 'A key ID is invalid.');
+    if (!matches(KEY_ID, entry.key_id)) fail('malformed', 'A key ID is invalid.');
     if (entry.algorithm !== 'ed25519') fail('malformed', `Key ${entry.key_id} uses an unsupported algorithm.`);
     if (keys.has(entry.key_id)) fail('malformed', `Key ${entry.key_id} appears twice.`);
     keys.set(entry.key_id, decodePublicKey(entry.public_key));
   }
   return { acceptance_policy_sha256: policy.acceptance_policy_sha256, keys };
 }
+/** Report whether a path resolves inside a directory, after resolving links, case, and short names. */
+export function isInside(target, directory) {
+  const relative = path.relative(fs.realpathSync.native(directory), fs.realpathSync.native(target));
+  return !(path.isAbsolute(relative) || relative === '..' || relative.startsWith(`..${path.sep}`));
+}
 /**
  * Load a trust policy that lies outside the candidate workspace.
  * A workspace writer can edit any file inside the workspace, so such a file cannot be protected input.
+ * This location check is a guard against an obvious mistake, not a security boundary.
  */
 export function loadTrustPolicy(policyPath, workspaceRoot) {
-  const real = fs.realpathSync.native(policyPath), workspace = fs.realpathSync.native(workspaceRoot);
-  const relative = path.relative(workspace, real);
-  const outside = path.isAbsolute(relative) || relative === '..' || relative.startsWith(`..${path.sep}`);
-  if (!outside) fail('unprotected-policy', 'The trust policy must come from outside the candidate workspace.');
-  return parseTrustPolicy(parseJson(fs.readFileSync(real, 'utf8'), 'The trust policy'));
+  if (isInside(policyPath, workspaceRoot)) fail('unprotected-policy', 'The trust policy must come from outside the candidate workspace.');
+  return parseTrustPolicy(parseJson(fs.readFileSync(fs.realpathSync.native(policyPath), 'utf8'), 'The trust policy'));
 }
 /** Read an envelope file as strict UTF-8 text, so ill-formed bytes cannot pass as replacement characters. */
 export function readEnvelope(file) {
@@ -88,16 +93,37 @@ export function readEnvelope(file) {
   try { return new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
   catch { return fail('malformed', 'The envelope file is not well-formed UTF-8.'); }
 }
-/** Resolve an immutable candidate identity from the Git object database, never from the working tree. */
-export function candidateIdentity(repository, commitish) {
-  if (typeof commitish !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$/.test(commitish)) fail('unknown-candidate', 'The candidate name is invalid.');
-  const git = args => spawnSync('git', ['-C', repository, ...args], { encoding: 'utf8', timeout: 30000, windowsHide: true });
-  const commit = git(['rev-parse', '--verify', '--quiet', `${commitish}^{commit}`]);
-  if (commit.error || commit.status !== 0 || !HEX40.test(commit.stdout.trim())) fail('unknown-candidate', `No commit resolves from ${commitish}.`);
-  const id = commit.stdout.trim();
-  const tree = git(['rev-parse', '--verify', '--quiet', `${id}^{tree}`]);
-  if (tree.error || tree.status !== 0 || !HEX40.test(tree.stdout.trim())) fail('unknown-candidate', `Commit ${id} has no readable tree.`);
-  return { commit: id, tree: tree.stdout.trim() };
+/** Find an executable through absolute PATH entries only, never through the working directory. */
+function resolveOnPath(name) {
+  const suffixes = process.platform === 'win32' ? ['.exe'] : [''];
+  for (const dir of (process.env.PATH ?? '').split(path.delimiter)) {
+    if (!dir || !path.isAbsolute(dir)) continue;
+    for (const suffix of suffixes) {
+      const candidate = path.join(dir, name + suffix);
+      try { if (fs.statSync(candidate).isFile()) return candidate; } catch { /* Try the next entry. */ }
+    }
+  }
+  throw new Error(`No ${name} executable exists on PATH.`);
+}
+/** Run Git without replace objects, inherited GIT_* variables, or prompts. A spawn failure or timeout is a tool failure, not a rejection. */
+function readGit(repository, args) {
+  const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !/^GIT_/i.test(name)));
+  const r = spawnSync(resolveOnPath('git'), ['--no-replace-objects', '-C', repository, ...args],
+    { encoding: 'utf8', timeout: 30000, windowsHide: true, env: { ...env, GIT_TERMINAL_PROMPT: '0' } });
+  if (r.error || r.signal) throw new Error(`Git could not read the candidate repository: ${r.error?.message ?? `signal ${r.signal}`}`);
+  return r;
+}
+/**
+ * Resolve an immutable candidate identity from the Git object database, never from the working tree.
+ * The candidate must be a full commit ID, because a ref or an abbreviated ID is a mutable pointer.
+ */
+export function candidateIdentity(repository, commit) {
+  if (!matches(HEX40, commit)) fail('unknown-candidate', 'The candidate must be a full 40-hex commit ID.');
+  const resolved = readGit(repository, ['rev-parse', '--verify', '--quiet', `${commit}^{commit}`]);
+  if (resolved.status !== 0 || resolved.stdout.trim() !== commit) fail('unknown-candidate', `No commit object ${commit} exists in the candidate repository.`);
+  const tree = readGit(repository, ['rev-parse', '--verify', '--quiet', `${commit}^{tree}`]);
+  if (tree.status !== 0 || !matches(HEX40, tree.stdout.trim())) fail('unknown-candidate', `Commit ${commit} has no readable tree.`);
+  return { commit, tree: tree.stdout.trim() };
 }
 function checkCounts(counts) {
   exactKeys(counts, COUNT_FIELDS, 'The counts');
@@ -120,6 +146,7 @@ export function verifyResult(envelopeText, trustPolicy, expectedCandidate) {
   if (typeof envelope.payload !== 'string') fail('malformed', 'The payload must be JSON text.');
   exactKeys(envelope.signature, ['key_id', 'algorithm', 'value'], 'The signature');
   if (envelope.signature.algorithm !== 'ed25519') fail('malformed', 'The signature algorithm is unsupported.');
+  if (!matches(KEY_ID, envelope.signature.key_id)) fail('malformed', 'The signature key ID is invalid.');
   const key = policy.keys.get(envelope.signature.key_id);
   if (!key) fail('untrusted-key', 'The trust policy does not list the signing key.');
   if (!verifyBytes(key, Buffer.from(envelope.payload, 'utf8'), envelope.signature.value)) fail('bad-signature', 'The signature does not match the payload bytes.');
@@ -130,14 +157,16 @@ export function verifyResult(envelopeText, trustPolicy, expectedCandidate) {
   exactKeys(record, ['schema', 'version', 'candidate', 'acceptance_policy_sha256', 'suite', 'counts', 'runner', 'issued_at'], 'The payload');
   if (record.schema !== 'fairpane-result' || record.version !== 1) fail('malformed', 'The payload schema is unsupported.');
   exactKeys(record.candidate, ['commit', 'tree'], 'The candidate');
-  if (!HEX40.test(record.candidate.commit) || !HEX40.test(record.candidate.tree)) fail('malformed', 'The candidate needs full commit and tree IDs.');
-  if (!HEX64.test(record.acceptance_policy_sha256)) fail('malformed', 'The payload needs a SHA-256 policy digest.');
+  if (!matches(HEX40, record.candidate.commit) || !matches(HEX40, record.candidate.tree)) fail('malformed', 'The candidate needs full commit and tree IDs.');
+  if (!matches(HEX64, record.acceptance_policy_sha256)) fail('malformed', 'The payload needs a SHA-256 policy digest.');
   exactKeys(record.suite, ['id', 'manifest_sha256'], 'The suite');
-  if (typeof record.suite.id !== 'string' || !record.suite.id || !HEX64.test(record.suite.manifest_sha256)) fail('malformed', 'The suite identity is invalid.');
+  if (typeof record.suite.id !== 'string' || !record.suite.id || !matches(HEX64, record.suite.manifest_sha256)) fail('malformed', 'The suite identity is invalid.');
   exactKeys(record.runner, ['key_id'], 'The runner');
-  if (typeof record.issued_at !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(record.issued_at) || Number.isNaN(Date.parse(record.issued_at))) {
-    fail('malformed', 'The issue time must be a UTC timestamp.');
-  }
+  if (!matches(KEY_ID, record.runner.key_id)) fail('malformed', 'The runner key ID is invalid.');
+  if (!matches(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/, record.issued_at)) fail('malformed', 'The issue time must be a UTC timestamp.');
+  // A calendar-invalid time, such as February 30, normalizes to another date and fails this comparison.
+  const issued = Date.parse(record.issued_at);
+  if (Number.isNaN(issued) || new Date(issued).toISOString().slice(0, 19) !== record.issued_at.slice(0, 19)) fail('malformed', 'The issue time is not a calendar time.');
   if (record.runner.key_id !== envelope.signature.key_id) fail('key-mismatch', 'The payload names a different runner key than the signature.');
   if (record.candidate.commit !== expectedCandidate?.commit || record.candidate.tree !== expectedCandidate?.tree) {
     fail('stale-candidate', 'The result belongs to a different commit or tree.');

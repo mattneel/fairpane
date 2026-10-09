@@ -28,9 +28,11 @@ It does not publish code, change approval settings, or choose an account identit
 | `corpus-repin <id>` | Moves a corpus snapshot to the upstream branch head and writes its record. |
 | `corpus-applicability <id>` | Counts discovered tests in a local snapshot without network access or corpus code. |
 | `corpus-verify <id>` | Recomputes a local snapshot and compares its records and `specs/corpora.json` pins. |
+| `attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>` | Verifies a signed result against protected trust input and a full commit ID in a candidate repository. |
 | `release-check` | Reports unmet obligations and returns a nonzero status. |
 
 Each command uses this repository, independent of the caller's current directory.
+The exception is `attest-verify`, whose path arguments resolve from the current directory.
 The Windows wrapper uses an installed Node executable, then Bun as a fallback.
 The installer does not replace an existing compiler directory or weaken PowerShell policy.
 
@@ -83,16 +85,21 @@ ADR 0002 records the protected acceptance boundary that replaces it.
 
 ## Verify a signed result
 
-1. Obtain the trust policy from protected storage outside the repository.
-2. Run `node tools/fairpane.mjs attest-verify --trust-policy <path> --candidate <commit> <envelope>`.
-3. Read the verified record, or the rejection code on exit status 1.
+1. Run a verifier copy that the candidate workspace cannot modify.
+2. Obtain the trust policy from protected storage outside the candidate repository.
+3. Run `node tools/fairpane.mjs attest-verify --repository <candidate> --trust-policy <path> --candidate <commit> <envelope>`.
+4. Read the verified record, or the rejection code on exit status 1.
 
 The verifier in `tools/attest.mjs` imports nothing from the local receipt code.
 It accepts only an Ed25519 signature from a key in the trust policy over the exact payload bytes.
 It requires a canonical payload, the expected commit and tree, the trust policy's acceptance-policy digest, and consistent nonzero counts.
 It reads the candidate identity from Git objects, never from the working tree.
-A trust policy inside the repository fails as `unprotected-policy`, because a workspace writer can edit it.
+Its Git calls ignore replace refs and inherited `GIT_*` variables, and they find `git` through `PATH` only.
+The candidate must be a full 40-hex commit ID, because a ref or an abbreviated ID is a mutable pointer.
+A Git failure or timeout is a tool error, distinct from a rejection.
+A trust policy inside the candidate repository fails as `unprotected-policy`, because a workspace writer can edit it.
 That location check is a guard, not a security boundary; operating-system permissions on a separate runner supply the boundary.
+A verifier that runs from inside the candidate repository reports `inside-candidate`, and its result is advisory only.
 `node tools/attest.test.mjs` runs the verifier's own tests without the rest of the controller.
 
 A verified result authenticates one record and is not release qualification.

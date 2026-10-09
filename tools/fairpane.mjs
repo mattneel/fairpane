@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { readJson, checkRepository, readyTasks, qualificationProblems, fingerprints,
   validateReceipt, runGate, recordCommand, installZig, compilerPath, checkCompiler, safePath } from './lib.mjs';
 import { corpusCommand } from './corpus.mjs';
-import { AttestationError, candidateIdentity, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
+import { AttestationError, candidateIdentity, isInside, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command = 'help', ...args] = process.argv.slice(2);
@@ -38,9 +38,11 @@ function help() {
   corpus-repin <id>           Move a snapshot to the upstream branch head and write its record.
   corpus-applicability <id>   Count discovered tests in a local snapshot.
   corpus-verify <id>          Recompute a local snapshot and compare its records and pins.
-  attest-verify --trust-policy <path> --candidate <commit> <envelope>
+  attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>
                               Verify a signed result against protected trust
-                              input outside the repository and a Git commit.
+                              input and a full commit ID in a candidate
+                              repository. Paths resolve from the current
+                              directory.
   release-check               Check release prerequisites and fail closed.
   help                        Print these commands.
 
@@ -108,20 +110,24 @@ try {
   } else if (command.startsWith('corpus-')) {
     const r = await corpusCommand(root, command, args); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
   } else if (command === 'attest-verify') {
-    const usage = 'Usage: attest-verify --trust-policy <path> --candidate <commit> <envelope>';
+    const usage = 'Usage: attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>';
     const options = {}, files = [];
     for (let i = 0; i < args.length; i++) {
-      const flag = { '--trust-policy': 'policy', '--candidate': 'candidate' }[args[i]];
+      const flag = { '--repository': 'repository', '--trust-policy': 'policy', '--candidate': 'candidate' }[args[i]];
       if (!flag) { files.push(args[i]); continue; }
       if (options[flag] !== undefined || args[i + 1] === undefined) throw new Error(usage);
       options[flag] = args[++i];
     }
-    if (!options.policy || !options.candidate || files.length !== 1) throw new Error(usage);
+    if (!options.repository || !options.policy || !options.candidate || files.length !== 1) throw new Error(usage);
     try {
-      const trust = loadTrustPolicy(path.resolve(options.policy), root);
-      const candidate = candidateIdentity(root, options.candidate);
+      const repository = path.resolve(options.repository);
+      const trust = loadTrustPolicy(path.resolve(options.policy), repository);
+      const candidate = candidateIdentity(repository, options.candidate);
+      const advisory = isInside(root, repository);
       output({ ...verifyResult(readEnvelope(path.resolve(files[0])), trust, candidate), candidate,
-        note: 'A verified result authenticates one record. It is not release qualification.' });
+        verifier: advisory ? 'inside-candidate' : 'outside-candidate',
+        note: advisory ? 'The verifier runs from inside the candidate workspace, so this result is advisory only.' :
+          'A verified result authenticates one record. It is not release qualification.' });
     } catch (e) {
       if (!(e instanceof AttestationError)) throw e;
       output({ result: 'rejected', code: e.code, message: e.message });

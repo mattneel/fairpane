@@ -60,6 +60,22 @@ function runGit(dir, args) {
 function controller(args) {
   return spawnSync(process.execPath, [path.join(root, 'tools/fairpane.mjs'), ...args], { cwd: root, encoding: 'utf8', windowsHide: true });
 }
+/** Build a two-commit repository whose commits have different trees. */
+function fixtureRepository() {
+  const dir = temp();
+  runGit(dir, ['init', '-q']);
+  fs.writeFileSync(path.join(dir, 'file.txt'), 'first\n');
+  runGit(dir, ['add', 'file.txt']);
+  runGit(dir, ['commit', '-q', '-m', 'first']);
+  const first = runGit(dir, ['rev-parse', 'HEAD']), firstTree = runGit(dir, ['rev-parse', 'HEAD^{tree}']);
+  fs.writeFileSync(path.join(dir, 'file.txt'), 'second\n');
+  runGit(dir, ['commit', '-q', '-a', '-m', 'second']);
+  return { dir, first, firstTree, second: runGit(dir, ['rev-parse', 'HEAD']), secondTree: runGit(dir, ['rev-parse', 'HEAD^{tree}']) };
+}
+/** Name the outcome of a verification, so one assertion can report every fixture's outcome. */
+function codeOf(fn) {
+  try { fn(); return 'verified'; } catch (e) { return e instanceof AttestationError ? e.code : `error: ${e.message}`; }
+}
 
 export const attestationCases = [
   ['2: A valid envelope signed by a trusted key verifies', () => {
@@ -91,12 +107,16 @@ export const attestationCases = [
     rejects(() => verifyResult(JSON.stringify({ ...envelope, payload: envelope.payload.slice(0, -1) }), trustPolicy(), CANDIDATE), 'bad-signature');
     rejects(() => verifyResult(signText(envelope.payload.slice(0, -1), runner.privateKey), trustPolicy(), CANDIDATE), 'malformed');
   }],
-  ['7: A trusted signature over a payload with a missing or unknown field fails as malformed', () => {
+  ['7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed', () => {
     const { suite: _suite, ...missingSuite } = record();
-    rejects(() => verifyResult(signResult(missingSuite, runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'malformed');
     const { harness_error: _harness, ...missingCount } = record().counts;
-    rejects(() => verifyResult(signResult(record({ counts: missingCount }), runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'malformed');
-    rejects(() => verifyResult(signResult(record({ note: 'unchecked' }), runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'malformed');
+    const payloads = [missingSuite, record({ counts: missingCount }), record({ note: 'unchecked' }),
+      record({ suite: { id: 'x', manifest_sha256: [sha256Hex('fixture manifest')] } }),
+      record({ candidate: { commit: [CANDIDATE.commit], tree: CANDIDATE.tree } }),
+      record({ acceptance_policy_sha256: [POLICY_DIGEST] }), record({ runner: { key_id: 7 } }),
+      record({ issued_at: '2026-02-30T00:00:00.000Z' })];
+    for (const payload of payloads) rejects(() => verifyResult(signResult(payload, runner.privateKey, 'runner-1'), trustPolicy(), CANDIDATE), 'malformed');
+    rejects(() => verifyResult(signResult(record(), runner.privateKey, 7), trustPolicy(), CANDIDATE), 'malformed');
   }],
   ['8: A payload for another commit or tree fails as stale-candidate', () => {
     for (const candidate of [{ commit: '3'.repeat(40), tree: CANDIDATE.tree }, { commit: CANDIDATE.commit, tree: '4'.repeat(40) }]) {
@@ -121,32 +141,45 @@ export const attestationCases = [
     const policy = trustPolicy([['runner-1', runner], ['runner-2', second]]);
     rejects(() => verifyResult(signResult(record({ runner: { key_id: 'runner-2' } }), runner.privateKey, 'runner-1'), policy, CANDIDATE), 'key-mismatch');
   }],
-  ['13: attest-verify rejects a trust policy inside the repository and verifies one outside it', () => {
-    const dir = temp(), envelopeFile = path.join(dir, 'result.json'), outsidePolicy = path.join(dir, 'trust-policy.json');
-    const head = candidateIdentity(root, 'HEAD');
-    fs.writeFileSync(envelopeFile, signResult(record({ candidate: head }), runner.privateKey, 'runner-1'));
+  ['13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it', () => {
+    const candidate = fixtureRepository(), dir = temp();
+    const envelopeFile = path.join(dir, 'result.json'), outsidePolicy = path.join(dir, 'trust-policy.json');
+    const insidePolicy = path.join(candidate.dir, 'trust-policy.json');
+    const identity = { commit: candidate.first, tree: candidate.firstTree };
+    fs.writeFileSync(envelopeFile, signResult(record({ candidate: identity }), runner.privateKey, 'runner-1'));
     fs.writeFileSync(outsidePolicy, JSON.stringify(trustPolicy()));
-    const inside = controller(['attest-verify', '--trust-policy', path.join(root, 'engineering/policy.json'), '--candidate', 'HEAD', envelopeFile]);
+    fs.writeFileSync(insidePolicy, JSON.stringify(trustPolicy()));
+    const verify = (repository, policy, commit) =>
+      controller(['attest-verify', '--repository', repository, '--trust-policy', policy, '--candidate', commit, envelopeFile]);
+    const inside = verify(candidate.dir, insidePolicy, candidate.first);
     assert.equal(inside.status, 1, inside.stderr);
     assert.equal(JSON.parse(inside.stdout).code, 'unprotected-policy');
-    const outside = controller(['attest-verify', '--trust-policy', outsidePolicy, '--candidate', 'HEAD', envelopeFile]);
+    const outside = verify(candidate.dir, outsidePolicy, candidate.first);
     assert.equal(outside.status, 0, outside.stdout + outside.stderr);
     const verified = JSON.parse(outside.stdout);
     assert.equal(verified.result, 'verified');
-    assert.deepEqual(verified.candidate, head);
+    assert.equal(verified.verifier, 'outside-candidate');
+    assert.deepEqual(verified.candidate, identity);
+    const own = runGit(root, ['rev-parse', 'HEAD']), ownTree = runGit(root, ['rev-parse', 'HEAD^{tree}']);
+    fs.writeFileSync(envelopeFile, signResult(record({ candidate: { commit: own, tree: ownTree } }), runner.privateKey, 'runner-1'));
+    const advisory = verify(root, outsidePolicy, own);
+    assert.equal(advisory.status, 0, advisory.stdout + advisory.stderr);
+    assert.equal(JSON.parse(advisory.stdout).verifier, 'inside-candidate');
   }],
-  ['14: Candidate identity comes from Git objects and rejects an unknown commit', () => {
-    const dir = temp();
-    runGit(dir, ['init', '-q']);
-    fs.writeFileSync(path.join(dir, 'file.txt'), 'committed\n');
-    runGit(dir, ['add', 'file.txt']);
-    runGit(dir, ['commit', '-q', '-m', 'fixture']);
-    const expected = { commit: runGit(dir, ['rev-parse', 'HEAD']), tree: runGit(dir, ['rev-parse', 'HEAD^{tree}']) };
-    assert.deepEqual(candidateIdentity(dir, 'HEAD'), expected);
-    assert.deepEqual(candidateIdentity(dir, expected.commit), expected);
-    fs.writeFileSync(path.join(dir, 'file.txt'), 'uncommitted change\n');
-    assert.deepEqual(candidateIdentity(dir, 'HEAD'), expected);
-    for (const name of ['f'.repeat(40), '-h', 'HEAD~1', '']) rejects(() => candidateIdentity(dir, name), 'unknown-candidate');
+  ['14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names', () => {
+    const candidate = fixtureRepository(), other = fixtureRepository();
+    const expected = { commit: candidate.first, tree: candidate.firstTree };
+    assert.deepEqual(candidateIdentity(candidate.dir, candidate.first), expected);
+    fs.writeFileSync(path.join(candidate.dir, 'file.txt'), 'uncommitted change\n');
+    assert.deepEqual(candidateIdentity(candidate.dir, candidate.first), expected);
+    runGit(candidate.dir, ['replace', candidate.first, candidate.second]);
+    assert.equal(runGit(candidate.dir, ['rev-parse', `${candidate.first}^{tree}`]), candidate.secondTree);
+    assert.deepEqual(candidateIdentity(candidate.dir, candidate.first), expected);
+    const inherited = process.env.GIT_DIR;
+    process.env.GIT_DIR = path.join(other.dir, '.git');
+    try { assert.deepEqual(candidateIdentity(candidate.dir, candidate.first), expected); }
+    finally { if (inherited === undefined) delete process.env.GIT_DIR; else process.env.GIT_DIR = inherited; }
+    for (const name of ['f'.repeat(40), candidate.first.slice(0, 12), 'HEAD', '-h', '']) rejects(() => candidateIdentity(candidate.dir, name), 'unknown-candidate');
   }],
   ['16: A trusted signature over a noncanonical payload fails as malformed', () => {
     const canonical = JSON.stringify(record());
@@ -155,9 +188,10 @@ export const attestationCases = [
     assert.equal(Buffer.from(unpaired, 'utf8').equals(Buffer.from(replacement, 'utf8')), true);
     const signedReplacement = JSON.parse(signText(replacement, runner.privateKey));
     assert.equal(verifyResult(JSON.stringify(signedReplacement), trustPolicy(), CANDIDATE).record.suite.id, 'fixture-\uFFFDsuite');
-    rejects(() => verifyResult(JSON.stringify({ ...signedReplacement, payload: unpaired }), trustPolicy(), CANDIDATE), 'malformed');
-    rejects(() => verifyResult(signText(canonical.replace('"version":1,', '"version":1,"version":1,'), runner.privateKey), trustPolicy(), CANDIDATE), 'malformed');
-    rejects(() => verifyResult(signText(JSON.stringify(record(), null, 1), runner.privateKey), trustPolicy(), CANDIDATE), 'malformed');
+    const envelopes = [JSON.stringify({ ...signedReplacement, payload: unpaired }),
+      signText(canonical.replace('"version":1,', '"version":1,"version":1,'), runner.privateKey),
+      signText(JSON.stringify(record(), null, 1), runner.privateKey)];
+    assert.deepEqual(envelopes.map(text => codeOf(() => verifyResult(text, trustPolicy(), CANDIDATE))), ['malformed', 'malformed', 'malformed']);
   }],
 ].map(([name, fn]) => ({ name, fn }));
 

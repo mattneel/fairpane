@@ -52,7 +52,8 @@ The local controller writes unsigned integrity receipts.
 It does not produce trusted external attestations.
 `evidence-check` detects stale source and altered logs, but it cannot prove an honest worker.
 Release evidence therefore consists of signed result records from a protected runner.
-`attest-verify` checks each record against trust input outside the repository and an immutable Git commit, as ADR 0002 records.
+`attest-verify` runs from a verifier copy that the candidate workspace cannot modify, as ADR 0002 records.
+It checks each record against trust input outside the candidate repository and a full commit ID in that repository.
 Independent execution and protected policy remain release requirements.
 
 ## Performance

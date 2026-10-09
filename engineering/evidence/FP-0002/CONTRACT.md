@@ -142,3 +142,18 @@ A JavaScript string can hold an unpaired surrogate, which the UTF-8 conversion r
 Two different payload texts could then share signed bytes and carry different meanings.
 Duplicate keys create the same ambiguity across JSON parsers.
 Revision 1 also names the two controller codes and the standalone test module.
+
+Revision 2 follows the rejecting review `engineering/evidence/FP-0002/reviews/review-1-reject.json`.
+The controller command becomes `attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>`.
+The location guard and the candidate identity use the named candidate repository, not the verifier's own checkout.
+A verifier inside the candidate repository reports `inside-candidate`, and its result is advisory only.
+The candidate must be a full 40-hex commit ID of a commit object.
+Candidate Git calls ignore replace refs and inherited `GIT_*` variables, and they find `git` through `PATH` only.
+A Git spawn failure, signal, or timeout is a tool error, not `unknown-candidate`.
+Every pattern check requires a string, so a mistyped field fails as `malformed`.
+An issue time must be a calendar time, and signature-encoding failures report `malformed`.
+Case 7 adds mistyped and calendar-invalid fixtures.
+Case 13 verifies a fixture candidate repository from the verifier's own location and checks the advisory report.
+Case 14 adds a replace ref, an inherited `GIT_DIR`, an abbreviated ID, and a ref name.
+Case 16 reports the outcome of every noncanonical fixture in one assertion.
+The integrator's update of `docs/QUALIFICATION.md` in commit `e2eaace` lies outside the task's writable paths, and this revision records that exception.

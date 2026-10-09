@@ -1,0 +1,205 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "e2eaace7325a94c4d7fb35ebbd60881e91d77b62"
+  ],
+  "summary": "The Ed25519 verifier, strict base64, SPKI decoding, canonical-payload rule, error codes, the sixteen cases, and fail-closed release-check are correct as read. The recorded logs support the claimed counts: 102/102 on Node and Bun, and 14/14 standalone. The mutation log shows case 16 failing (exit 1) without the canonical check. I reject the task for two major defects. (1) `attest-verify` can only verify the repository that contains the verifier code. A workspace writer can edit that code. The ADR does not apply the forged-receipt argument from case 1 to the verifier itself, so the boundary is incomplete. (2) `candidateIdentity` does not reuse the repository's hardened Git invocation in `tools/corpus.mjs:45-52`. That invocation disables replace objects, strips inherited GIT_* variables, and resolves git through PATH only. Without it, a writer of `.git/refs/replace` can change the tree reported for a fixed commit ID. That breaks the contract's 'immutable candidate identity' requirement, which the repository already tests for corpus verification (`tools/selftest.mjs:644`). I reviewed the working tree at current HEAD. Later commits exist after e2eaace, and I could not run git to confirm that the reviewed files are byte-identical to e2eaace. I ran no commands. All behavioral claims below come from reading code and logs, and items marked [INFERENCE] were not executed.",
+  "criteria": [
+    {
+      "criterion": "AC1: Demonstrate why a writable local checker cannot independently attest its own author.",
+      "met": true,
+      "evidence": "tools/selftest.mjs:207-219 builds a receipt with recomputed fingerprints, asserts validateReceipt(...).result === 'pass', and asserts executed.txt is absent. ADR 0002 lines 8-13 explain the limit. Logged as `ok 36` in the Node gate log and the Bun log. The ADR does not extend the argument to the verifier code (finding 1)."
+    },
+    {
+      "criterion": "AC2: Define a separate protected policy input and immutable candidate source identity.",
+      "met": false,
+      "evidence": "The trust-policy schema and location guard exist (tools/attest.mjs:59-84), and identity comes from `git rev-parse` (tools/attest.mjs:92-101). However, the identity honors replace refs and inherited GIT_* variables, and it resolves bare `git` with a cwd-first search on Windows (finding 2). It is also bound to the verifier's own checkout instead of a designated candidate repository (tools/fairpane.mjs:121-122, finding 1)."
+    },
+    {
+      "criterion": "AC3: Reject forged, stale, truncated, zero-denominator, and changed-policy result records.",
+      "met": true,
+      "evidence": "Cases 4-12 and 16 in tools/attest.test.mjs:64-132. Every case is `ok` in the Node gate log (37-50), raw/controller-test-bun.log, and raw/attest-standalone.log (14/14, exit_code 0)."
+    },
+    {
+      "criterion": "AC4: Implement an independently testable attestation verifier before any release success path.",
+      "met": true,
+      "evidence": "tools/attest.mjs:5-8 imports only node:fs, node:path, node:crypto, and node:child_process. tools/attest.test.mjs:13 imports only ./attest.mjs. raw/attest-standalone.log shows `# tests 14 # pass 14 # fail 0` and RESULT exit_code 0. Case 13 spawns tools/fairpane.mjs, which loads lib.mjs, but only to exercise the CLI."
+    },
+    {
+      "criterion": "AC5: Keep release-check fail-closed until that verifier qualifies.",
+      "met": true,
+      "evidence": "tools/fairpane.mjs:130-132 unconditionally sets result 'not-qualified' and exitCode 1. tools/lib.mjs:195-197 unconditionally appends the protected-runner problem, so no edit to qualification.json can remove it. Case 15 (tools/selftest.mjs:221-227) and selftest 35 cover this. raw/release-check.log shows exit_code 1 with that problem as the last entry."
+    },
+    {
+      "criterion": "Case 1: forged receipt passes validateReceipt",
+      "met": true,
+      "evidence": "tools/selftest.mjs:207-219; gate log `ok 36`."
+    },
+    {
+      "criterion": "Case 2: valid trusted envelope verifies",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:65-70 asserts result 'verified', the key_id, and deepEqual of the record; `ok 37`."
+    },
+    {
+      "criterion": "Case 3: RFC 8032 test vector 1",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:71-77. The public key d75a9801…07511a and the signature e5564300…7a100b over the empty message match RFC 8032 section 7.1 TEST 1, which I read at rfc-editor.org (lines 1083-1092). The key goes through decodePublicKey, the same function parseTrustPolicy uses at tools/attest.mjs:70. A one-byte message 0x72 is checked as false; `ok 38`."
+    },
+    {
+      "criterion": "Case 4: untrusted key",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:78-81 checks an outsider key under its own ID (untrusted-key). It also checks an outsider key that claims 'runner-1' (bad-signature); `ok 39`."
+    },
+    {
+      "criterion": "Case 5: one changed payload byte",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:82-87 changes \"pass\":5 to \"pass\":6 and expects bad-signature; `ok 40`."
+    },
+    {
+      "criterion": "Case 6: truncated envelope and payload",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:88-93 expects malformed for the truncated envelope, bad-signature for the truncated payload, and malformed for a truncated payload signed by a trusted key. This matches the contract text; `ok 41`."
+    },
+    {
+      "criterion": "Case 7: trusted signature over a payload with a missing field",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:94-100 covers a missing suite, a missing harness_error, and an unknown 'note' field, each expected as malformed; `ok 42`."
+    },
+    {
+      "criterion": "Case 8: stale commit or tree",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:101-105 tests a wrong commit and a wrong tree separately; `ok 43`."
+    },
+    {
+      "criterion": "Case 9: changed policy",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:106-109; `ok 44`."
+    },
+    {
+      "criterion": "Case 10: zero discovered and zero selected",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:110-114 tests all zeros, and discovered 5 with selected 0. Zero discovered with nonzero selected is not tested in isolation. By the precedence at tools/attest.mjs:107 it still yields zero-denominator; `ok 45`."
+    },
+    {
+      "criterion": "Case 11: negative, fractional, and mismatched counts",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:115-119 covers negative, fractional, 2**53, a sum mismatch, selected > discovered, and the string '5'; `ok 46`."
+    },
+    {
+      "criterion": "Case 12: key-mismatch",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:120-123; `ok 47`."
+    },
+    {
+      "criterion": "Case 13: attest-verify rejects an in-repository policy",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:124-137 expects exit 1 with code unprotected-policy for engineering/policy.json, and a verified result from a temporary-directory policy. Only a direct in-repository path is tested; there are no symlink, junction, or case-variant fixtures; `ok 48`."
+    },
+    {
+      "criterion": "Case 14: candidate identity from a fixture repository; unknown commit rejected",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:138-151 confirms that the identity is unchanged after an uncommitted edit. It rejects 'f'*40, '-h', 'HEAD~1', and ''. Annotated tags, abbreviated IDs, and replace refs are not tested; `ok 49`."
+    },
+    {
+      "criterion": "Case 15: release-check exits 1",
+      "met": true,
+      "evidence": "tools/selftest.mjs:221-227; `ok 51`; raw/release-check.log exit_code 1."
+    },
+    {
+      "criterion": "Case 16: noncanonical payload",
+      "met": true,
+      "evidence": "tools/attest.test.mjs:152-163 shows that a U+FFFD payload verifies while an unpaired-surrogate payload with identical UTF-8 bytes fails as malformed. Duplicate 'version' and whitespace-indented payloads also fail as malformed; `ok 50`. raw/mutation-canonical.log shows case 16 as `not ok` with 'Expected rejection malformed, got success' and exit_code 1."
+    },
+    {
+      "criterion": "Crypto: SPKI prefix, length, strict base64, signature length, exact bytes",
+      "met": true,
+      "evidence": "tools/attest.mjs:23 uses the prefix 302a300506032b6570032100, which is a correct Ed25519 SPKI header (OID 1.3.101.112, BIT STRING with 33 bytes and 0 unused bits). Line 47 requires 44 bytes and that prefix. Lines 38-43 require the base64 alphabet, at most two trailing '=', length % 4 == 0, and a round-trip equality check that rejects nonzero pad bits. Line 55 requires a 64-byte signature. Line 125 verifies over Buffer.from(payload,'utf8')."
+    },
+    {
+      "criterion": "Canonical rule: no two distinct payload texts with identical signed bytes both verify",
+      "met": true,
+      "evidence": "Two distinct JS strings with equal UTF-8 encodings must differ in lone surrogates, because U+FFFD replacement is the only many-to-one case. A raw lone surrogate is invalid outside a string literal. Inside one, well-formed JSON.stringify re-emits it as a \\uXXXX escape, so the text check at tools/attest.mjs:129 fails. A file-level substitution is blocked by fatal UTF-8 decoding (line 88). The remaining variants are also rejected or harmless. Duplicate keys collapse on parse and do not re-serialize equal. Whitespace, `1.0`, `-0`, `\\u0041`, and `\\/` all re-serialize differently. A `__proto__` key survives as an own property but fails exactKeys as an unknown field. A BOM in the payload fails JSON.parse. Only an escaped spelling such as `\\ud800` can carry a lone surrogate, and its bytes are ASCII, so one byte string still has one meaning."
+    }
+  ],
+  "prior_findings": [],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "tools/fairpane.mjs",
+      "line": 121,
+      "issue": "`attest-verify` uses `root` (the parent of the running script) for both the location guard (line 121) and the candidate repository (line 122). The verifier therefore can only verify the checkout that contains its own code, and a workspace writer can edit that code. Reproduction: in a candidate checkout, replace the body of `verifyResult` in tools/attest.mjs (line 116) with `return { result: 'verified', key_id: 'x', record: {} };`. Then `node tools/fairpane.mjs attest-verify --trust-policy <outside> --candidate HEAD <any-file>` exits 0 and prints 'verified'. Conversely, a protected copy of the tools at C:\\protected\\fairpane resolves `--candidate` against its own repository, not against the candidate's. ADR 0002 (lines 17-18 and 66-72) never states that verification must run from code outside the candidate workspace. This is the same self-attestation flaw that case 1 demonstrates, moved from receipts to the verifier. FP-0027 (engineering/plan.json:1253-1293) does not claim this obligation either.",
+      "recommendation": "Add an explicit candidate-repository input, for example `--repository <path>`, apply the location guard against that repository, and keep the verifier's own location separate. In ADR 0002, state that release verification must execute a verifier copy that the candidate workspace cannot modify. State also that running attest-verify from inside the candidate is advisory only. Add a test that verifies a fixture candidate repository from a different verifier location."
+    },
+    {
+      "severity": "major",
+      "path": "tools/attest.mjs",
+      "line": 94,
+      "issue": "candidateIdentity spawns bare 'git' with `-C repository` and the inherited environment. It does not pass --no-replace-objects, does not strip GIT_* variables (GIT_DIR, GIT_OBJECT_DIRECTORY, GIT_ALTERNATE_OBJECT_DIRECTORIES, GIT_REPLACE_REF_BASE), and does not resolve git through PATH only. tools/corpus.mjs:45-52 does all three, and tools/selftest.mjs:644 tests that a replace ref cannot pass corpus verification. Reproduction [INFERENCE: not executed]: in a fixture repository with commit X, run `git replace X Y` to write refs/replace/X. `candidateIdentity(dir, X)` then returns `{commit: X, tree: tree(Y)}`, because rev-parse keeps the requested OID but reads the replaced commit's content. The 'commit's tree ID' is then not X's tree, which contradicts the contract's 'immutable Git commit' identity. Also, on Windows, libuv searches the current directory before PATH for a bare name. A `git.exe` at the repository root would therefore run when attest-verify is invoked from that directory, as case 13 does (tools/attest.test.mjs:57-59).",
+      "recommendation": "Reuse the established hardening without importing the receipt code: prepend --no-replace-objects, pass an environment with GIT_* removed and GIT_TERMINAL_PROMPT=0, and resolve git to an absolute path through PATH only. Add a case 14 fixture with a replace ref and an inherited GIT_DIR or GIT_OBJECT_DIRECTORY, mirroring tools/selftest.mjs:644-650."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/attest.mjs",
+      "line": 133,
+      "issue": "RegExp.prototype.test coerces non-strings with String(). Arrays therefore pass the HEX40/HEX64 checks, and a trusted signer can produce a 'verified' record that violates the schema. Reproduction: sign JSON.stringify(record({ suite: { id: 'x', manifest_sha256: [sha256Hex('m')] } })) with runner-1. verifyResult returns 'verified' with `record.suite.manifest_sha256` as an array (line 136). With `candidate.commit: ['1'.repeat(40)]`, the record fails as stale-candidate (line 142) instead of malformed. With `acceptance_policy_sha256: [POLICY_DIGEST]`, it fails as changed-policy (line 145). Similarly, a non-string `signature.key_id` yields untrusted-key (line 124), and a non-string `runner.key_id` yields key-mismatch (line 141). The contract assigns missing or invalid fields to malformed.",
+      "recommendation": "Require `typeof === 'string'` before every HEX40/HEX64 or key-ID test, and type-check both key_id fields as malformed. Add fixtures to case 7."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/attest.mjs",
+      "line": 96,
+      "issue": "A missing git executable, a spawn error, or the 30-second timeout is reported as `unknown-candidate`, the same code as a name that does not resolve. AGENTS.md requires keeping failures and timeouts distinct.",
+      "recommendation": "Throw a non-AttestationError, or use a distinct code, when `commit.error`, `tree.error`, or a signal or timeout occurs. Reserve unknown-candidate for a clean nonzero status from rev-parse."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/attest.mjs",
+      "line": 93,
+      "issue": "The name filter blocks option injection, because the first character must be alphanumeric and the revision expression is a single argv element. It also blocks `@{}`, `:path`, `~`, and `^`. Annotated tags peel correctly through `^{commit}`. However, an abbreviated hex ID can be shadowed by a branch or tag of the same name, because git resolves refs before short object names [INFERENCE: not executed]. A workspace writer who creates a branch named `e2eaace` makes `--candidate e2eaace` verify a different commit. The output does name the resolved commit, so a careful reader can see the substitution.",
+      "recommendation": "Require a full 40-hex commit ID for --candidate, or reject a name that matches both a ref and an object prefix. Document that ref names are mutable pointers that are resolved once."
+    },
+    {
+      "severity": "minor",
+      "path": "tools/README.md",
+      "line": 31,
+      "issue": "The command table omits `attest-verify`. Line 33 says each command is independent of the caller's current directory, but attest-verify resolves relative policy and envelope paths, and the bare `git`, from the cwd.",
+      "recommendation": "Add the attest-verify row, and state that its path arguments resolve against the current directory."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0002/raw/mutation-canonical.diff",
+      "line": 1,
+      "issue": "The stored 'diff' is hand-written: its hunk header is `@@ verifyResult @@` with no line ranges, and its `+++` label is annotated, so `git apply` cannot reproduce it. mutation-canonical.log records no source digest, which leaves the mutated tree unbound. Only the first failing sub-assertion of case 16 (the unpaired surrogate) appears. The duplicate-key and whitespace fixtures are not shown to depend on the rule.",
+      "recommendation": "Store a real unified diff, for example output from `git diff`. Record the mutated source fingerprint, or run the mutation through `run controller-test` into a separate evidence directory. Optionally split case 16 so that each fixture reports separately under mutation."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0002/README.md",
+      "line": 28,
+      "issue": "Only the two gate receipts bind source and policy digests (87eaa6b9…, 90a4c701…). The Bun, standalone, release-check, and mutation logs carry only timestamps. The Bun log does not record the Bun version. The timestamps are consistent: the mutation ran at 01:35:16Z, the gates from 01:35:57 to 01:36:11Z, release-check and standalone at 01:36:11Z, and Bun at 01:36:12Z. Commit e2eaace was made at 01:36:56Z according to .git/logs/HEAD:37. The policy digest equals the one in the FP-0003 01:30 receipts, which is consistent with no protected-path change.",
+      "recommendation": "Materialize e2eaace in a separate worktree, as engineering/evidence/decisions-2026-10-09/*-materialize.log does, and rerun the gates there to bind the evidence to the commit. Record `bun --version`."
+    },
+    {
+      "severity": "note",
+      "path": "tools/attest.mjs",
+      "line": 79,
+      "issue": "Location guard [INFERENCE: not executed on this host]. realpathSync.native uses GetFinalPathNameByHandleW, which resolves symlinks, junctions, case, and 8.3 names. path.win32.relative compares case-insensitively. A relative path is resolved by path.resolve. Another drive yields an absolute relative path and counts as outside, and a policy in `.git` is rejected. Remaining bypasses: hard links to in-repository files, UNC or administrative-share paths (\\\\localhost\\C$\\…) that GetFinalPathNameByHandle may not map back to the drive letter, a main checkout's `.git` when the verifier runs from a linked worktree, and any writer-writable directory outside the repository. ADR 0002 lines 27-28 and tools/README.md correctly call this a guard, not a boundary. A BOM-prefixed policy fails as malformed (line 83 uses a plain readFileSync then JSON.parse), while readEnvelope (line 88) silently strips a BOM.",
+      "recommendation": "Optionally add symlink and junction fixtures to case 13. Accept or reject a BOM consistently, matching lib.mjs readJson."
+    },
+    {
+      "severity": "note",
+      "path": "tools/attest.mjs",
+      "line": 138,
+      "issue": "`issued_at` passes the regex and Date.parse, which V8 applies leniently. I believe a calendar-invalid date such as 2026-02-30T00:00:00Z verifies [INFERENCE]. Signature-encoding failures (non-canonical base64, or a length other than 64) are reported as malformed rather than bad-signature. The contract table does not assign them a code.",
+      "recommendation": "Round-trip `issued_at` through `new Date(...).toISOString()` with a normalized fraction, or validate the calendar fields. Document the signature-encoding precedence in the contract table during the next revision."
+    },
+    {
+      "severity": "note",
+      "path": "docs/QUALIFICATION.md",
+      "line": 55,
+      "issue": "This line describes attest-verify, but docs/ is outside FP-0002's allowed_paths. I could not list e2eaace's changed files, so I cannot tell whether this commit or a later docs commit (0c975c9) introduced the line.",
+      "recommendation": "Run `git show --stat e2eaace` to confirm the change set stays within tools, tests, engineering/decisions, and engineering/evidence, plus the state and handoff records."
+    }
+  ],
+  "commands_run": []
+}
