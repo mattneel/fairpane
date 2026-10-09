@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "corpus": "test262",
+  "commit": "2e0a56762801e275a9fdf96dc49d90ba0cddcf63",
+  "status": "counted",
+  "discovery": {
+    "rule": "Count Git tree entries of the pinned commit whose type is blob, whose raw path starts with \"test/\" and ends with \".js\", and whose path does not end with \"_FIXTURE.js\". Group the count by the second path component; a file directly under test/ counts under \".\".",
+    "command": "node tools/fairpane.mjs corpus-applicability test262"
+  },
+  "discovered": 53616,
+  "selected": 0,
+  "excluded": [],
+  "unclassified": 53616,
+  "breakdown": {
+    "by": "top-level directory under test/",
+    "counts": {
+      "annexB": 1086,
+      "built-ins": 23823,
+      "harness": 116,
+      "intl402": 3382,
+      "language": 23726,
+      "staging": 1483
+    }
+  }
+}

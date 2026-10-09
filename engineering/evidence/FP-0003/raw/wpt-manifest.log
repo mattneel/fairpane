@@ -1,0 +1,106 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-applicability","wpt"]
+Write the working copy C:\src\fairpane\.tools\corpora\wpt\checkout from Git objects.
+{"files":164551,"submodule_directories":0}
+Run ["C:\\Users\\requi\\AppData\\Local\\Programs\\Python\\Python313\\python.exe","C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\wpt","--venv","C:\\src\\fairpane\\.tools\\corpora\\wpt\\no-venv","--skip-venv-setup","manifest","--no-download","--rebuild","--path","C:\\src\\fairpane\\.tools\\corpora\\wpt\\MANIFEST.json","--tests-root","C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout","--cache-root","C:\\src\\fairpane\\.tools\\corpora\\wpt\\wptcache"] (Python 3.13.15)
+INFO:manifest:Updating manifest
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "C:\Users\requi\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+                    ~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\requi\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\pool.py", line 48, in mapstar
+    return list(map(*args))
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\manifest\manifest.py", line 61, in compute_manifest_items
+    new_type, manifest_items = source_file.manifest_items()
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\manifest\sourcefile.py", line 1169, in manifest_items
+    if self.test262_test_record is None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\manifest\utils.py", line 70, in __get__
+    rv = obj.__dict__[self.name] = self.func(obj)
+                                   ~~~~~~~~~^^^^^
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\manifest\sourcefile.py", line 497, in test262_test_record
+    return test262.parse(get_logger(), f.read().decode('utf-8'), self.path)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\manifest\test262.py", line 74, in parse
+    _yaml_attr_parser(logger, test_record, attrs, name)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\manifest\test262.py", line 29, in _yaml_attr_parser
+    import yaml
+ModuleNotFoundError: No module named 'yaml'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\wpt\wpt.py", line 234, in main
+    rv = script(*args, **kwargs)
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\manifest\update.py", line 104, in run
+    update_from_cli(**kwargs)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\manifest\update.py", line 53, in update_from_cli
+    manifest.load_and_update(tests_root,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+                             path,
+                             ^^^^^
+    ...<4 lines>...
+                             cache_root=kwargs["cache_root"],
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             parallel=kwargs["parallel"])
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\manifest\manifest.py", line 410, in load_and_update
+    changed = manifest.update(tree, parallel)
+  File "C:\src\fairpane\.tools\corpora\wpt\checkout\tools\manifest\manifest.py", line 231, in update
+    for result in results:
+                  ^^^^^^^
+  File "C:\Users\requi\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\pool.py", line 451, in <genexpr>
+    return (item for chunk in result for item in chunk)
+                              ^^^^^^
+  File "C:\Users\requi\AppData\Local\Programs\Python\Python313\Lib\multiprocessing\pool.py", line 873, in next
+    raise value
+ModuleNotFoundError: No module named 'yaml'
+{
+  "result": "blocked",
+  "record": "specs/applicability/wpt.json",
+  "schema_version": 1,
+  "corpus": "wpt",
+  "commit": "b60c4b349d9d167bf354a40bc0d4cbed15174606",
+  "status": "blocked",
+  "discovery": {
+    "rule": "Run the WPT manifest tool from the pinned commit over a working copy written from the pinned Git objects. Count the items of each manifest item type; each file entry contributes its array length minus one, because the first element is the file hash. Discovered tests are the items of every type except \"spec\" and \"support\".",
+    "command": "node tools/fairpane.mjs corpus-applicability wpt",
+    "tool": {
+      "revision": "b60c4b349d9d167bf354a40bc0d4cbed15174606",
+      "command": [
+        "python",
+        "<checkout>/wpt",
+        "--venv",
+        "<corpora-root>/wpt/no-venv",
+        "--skip-venv-setup",
+        "manifest",
+        "--no-download",
+        "--rebuild",
+        "--path",
+        "<corpora-root>/wpt/MANIFEST.json",
+        "--tests-root",
+        "<checkout>",
+        "--cache-root",
+        "<corpora-root>/wpt/wptcache"
+      ],
+      "python": "Python 3.13.15",
+      "note": "Placeholders name the local snapshot directories. The evidence log keeps the absolute command."
+    }
+  },
+  "blocker": {
+    "reason": "The WPT manifest tool exited with status 70.",
+    "output_tail": "INFO:manifest:Updating manifest\r\nmultiprocessing.pool.RemoteTraceback: \r\n\"\"\"\r\nTraceback (most recent call last):\r\n  File \"C:\\Users\\requi\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\multiprocessing\\pool.py\", line 125, in worker\r\n    result = (True, func(*args, **kwds))\r\n                    ~~~~^^^^^^^^^^^^^^^\r\n  File \"C:\\Users\\requi\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\multiprocessing\\pool.py\", line 48, in mapstar\r\n    return list(map(*args))\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\manifest\\manifest.py\", line 61, in compute_manifest_items\r\n    new_type, manifest_items = source_file.manifest_items()\r\n                               ~~~~~~~~~~~~~~~~~~~~~~~~~~^^\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\manifest\\sourcefile.py\", line 1169, in manifest_items\r\n    if self.test262_test_record is None:\r\n       ^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\manifest\\utils.py\", line 70, in __get__\r\n    rv = obj.__dict__[self.name] = self.func(obj)\r\n                                   ~~~~~~~~~^^^^^\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\manifest\\sourcefile.py\", line 497, in test262_test_record\r\n    return test262.parse(get_logger(), f.read().decode('utf-8'), self.path)\r\n           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\manifest\\test262.py\", line 74, in parse\r\n    _yaml_attr_parser(logger, test_record, attrs, name)\r\n    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\manifest\\test262.py\", line 29, in _yaml_attr_parser\r\n    import yaml\r\nModuleNotFoundError: No module named 'yaml'\r\n\"\"\"\r\n\r\nThe above exception was the direct cause of the following exception:\r\n\r\nTraceback (most recent call last):\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\wpt\\wpt.py\", line 234, in main\r\n    rv = script(*args, **kwargs)\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\manifest\\update.py\", line 104, in run\r\n    update_from_cli(**kwargs)\r\n    ~~~~~~~~~~~~~~~^^^^^^^^^^\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\manifest\\update.py\", line 53, in update_from_cli\r\n    manifest.load_and_update(tests_root,\r\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^\r\n                             path,\r\n                             ^^^^^\r\n    ...<4 lines>...\r\n                             cache_root=kwargs[\"cache_root\"],\r\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n                             parallel=kwargs[\"parallel\"])\r\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\manifest\\manifest.py\", line 410, in load_and_update\r\n    changed = manifest.update(tree, parallel)\r\n  File \"C:\\src\\fairpane\\.tools\\corpora\\wpt\\checkout\\tools\\manifest\\manifest.py\", line 231, in update\r\n    for result in results:\r\n                  ^^^^^^^\r\n  File \"C:\\Users\\requi\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\multiprocessing\\pool.py\", line 451, in <genexpr>\r\n    return (item for chunk in result for item in chunk)\r\n                              ^^^^^^\r\n  File \"C:\\Users\\requi\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\multiprocessing\\pool.py\", line 873, in next\r\n    raise value\r\nModuleNotFoundError: No module named 'yaml'\r\n"
+  },
+  "discovered": null,
+  "selected": null,
+  "excluded": [],
+  "unclassified": null,
+  "breakdown": null
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-applicability","wpt"],"exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":64027,"environment_overrides":{"FAIRPANE_CORPORA_DIR":"C:\\src\\fairpane\\.tools\\corpora"}}

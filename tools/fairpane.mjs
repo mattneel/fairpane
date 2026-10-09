@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { readJson, checkRepository, readyTasks, qualificationProblems, fingerprints,
   validateReceipt, runGate, recordCommand, installZig, compilerPath, checkCompiler, safePath } from './lib.mjs';
+import { corpusCommand } from './corpus.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command = 'help', ...args] = process.argv.slice(2);
@@ -32,6 +33,9 @@ function help() {
                               Run one command without a shell and append its
                               output and exit status to an evidence log.
   evidence-check <path>       Check a receipt against current inputs.
+  corpus-fetch <id>           Pin the upstream branch head and write its snapshot record.
+  corpus-applicability <id>   Count discovered tests in a local snapshot.
+  corpus-verify <id>          Recompute a local snapshot and compare its records.
   release-check               Check release prerequisites and fail closed.
   help                        Print these commands.
 
@@ -96,6 +100,8 @@ try {
   } else if (command === 'evidence-check') {
     if (args.length !== 1) throw new Error('Usage: evidence-check <repository-relative-path>');
     output(validateReceipt(root, args[0]));
+  } else if (command.startsWith('corpus-')) {
+    const r = await corpusCommand(root, command, args); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
   } else if (command === 'release-check') {
     output({ result: 'not-qualified', problems: qualificationProblems(load('engineering/qualification.json')), browser_complete: false });
     process.exitCode = 1;

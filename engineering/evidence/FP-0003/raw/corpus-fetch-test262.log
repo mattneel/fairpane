@@ -1,0 +1,35 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-fetch","test262"]
+Git: C:\Program Files\Git\cmd\git.exe (git version 2.54.0.windows.1)
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","ls-remote","--symref","https://github.com/tc39/test262","HEAD"]
+ref: refs/heads/main	HEAD
+2e0a56762801e275a9fdf96dc49d90ba0cddcf63	HEAD
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","init","--bare","--quiet","C:\\src\\fairpane\\.tools\\corpora\\test262\\repository.git"]
+Run ["C:\\Program Files\\Git\\cmd\\git.exe","--git-dir=C:\\src\\fairpane\\.tools\\corpora\\test262\\repository.git","-c","transfer.fsckObjects=true","-c","protocol.version=2","fetch","--depth=1","--no-tags","--no-write-fetch-head","https://github.com/tc39/test262","+2e0a56762801e275a9fdf96dc49d90ba0cddcf63:refs/heads/main"]
+From https://github.com/tc39/test262
+ * [new ref]           2e0a56762801e275a9fdf96dc49d90ba0cddcf63 -> main
+{
+  "result": "pass",
+  "corpus": "test262",
+  "snapshot": "C:\\src\\fairpane\\.tools\\corpora\\test262\\repository.git",
+  "record": "specs/snapshots/test262.json",
+  "schema_version": 1,
+  "upstream": "https://github.com/tc39/test262",
+  "ref": "refs/heads/main",
+  "commit": "2e0a56762801e275a9fdf96dc49d90ba0cddcf63",
+  "tree": "6a4268a9354a545d41c3b62efebc478ed8c521f4",
+  "commit_date": "2026-10-08T13:50:06+02:00",
+  "retrieved_at": "2026-10-09T00:31:30.626Z",
+  "license": {
+    "path": "LICENSE",
+    "size": 2213,
+    "sha256": "4dd9244dfe8197c75348c4b24ab53d29d3b1cfad143ac76b5a3d8942aa354ce0",
+    "name": "BSD License"
+  },
+  "inventory": {
+    "entry_count": 57013,
+    "total_blob_bytes": 90245391,
+    "sha256": "4d86002fe32f66581faa24e4843360ecd148ca44d2adacd31ef08f74d7e8acd8"
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-fetch","test262"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":10523,"environment_overrides":{"FAIRPANE_CORPORA_DIR":"C:\\src\\fairpane\\.tools\\corpora"}}

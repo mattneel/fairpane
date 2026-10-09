@@ -12,6 +12,10 @@ import {
   qualificationProblems, checkRepository, validateReceipt, runProcess, runGate,
   resolveExecutable, recordCommand, gateEnvironment, REQUIRED_CAPABILITIES,
 } from './lib.mjs';
+import {
+  listTree, computeInventory, buildSnapshotRecord, validateSnapshotRecord, validateApplicability,
+  verifyCorpus, classifyCorpus, snapshotGitDir,
+} from './corpus.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cases = [], temporary = [];
@@ -398,6 +402,150 @@ test('Only Zig and C ABI gates receive the repository-local compiler cache', () 
   assert.deepEqual(gateEnvironment(dir, { kind: 'c-abi' }), expected);
   assert.equal(gateEnvironment(dir, { kind: 'controller-check' }), undefined);
   assert.equal(gateEnvironment(dir, { kind: 'controller-test' }), undefined);
+});
+// Corpus snapshots. Fixtures use Git plumbing with no user or system configuration.
+const gitConfigFile = path.join(temp(), 'empty-gitconfig');
+fs.writeFileSync(gitConfigFile, '');
+const fixtureEnv = { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: gitConfigFile, GIT_TERMINAL_PROMPT: '0',
+  GIT_AUTHOR_NAME: 'Fairpane Fixture', GIT_AUTHOR_EMAIL: 'fixture@example.invalid', GIT_AUTHOR_DATE: '1767323045 +0130',
+  GIT_COMMITTER_NAME: 'Fairpane Fixture', GIT_COMMITTER_EMAIL: 'fixture@example.invalid', GIT_COMMITTER_DATE: '1767323045 +0130' };
+function fixtureGit(cwd, args, input) {
+  const r = spawnSync('git', args, { cwd, input, env: fixtureEnv, windowsHide: true });
+  assert.equal(r.status, 0, `git ${args.join(' ')} failed: ${r.error?.message ?? r.stderr}`);
+  return r.stdout.toString('latin1').trim();
+}
+function bareRepo(dir = temp()) { fs.mkdirSync(dir, { recursive: true }); fixtureGit(dir, ['init', '--bare', '--quiet', '.']); return dir; }
+function splitPath(bytes) {
+  const parts = [];
+  for (let i = 0, start = 0; i <= bytes.length; i++) if (i === bytes.length || bytes[i] === 0x2f) { parts.push(bytes.subarray(start, i)); start = i + 1; }
+  return parts;
+}
+function fixtureTree(gitDir, entries) {
+  const lines = [], dirs = new Map(), nul = Buffer.from([0]);
+  for (const e of entries) {
+    if (e.parts.length === 1) { lines.push(Buffer.concat([Buffer.from(`${e.mode} ${e.type} ${e.oid}\t`), e.parts[0], nul])); continue; }
+    const name = e.parts[0].toString('latin1');
+    if (!dirs.has(name)) dirs.set(name, []);
+    dirs.get(name).push({ ...e, parts: e.parts.slice(1) });
+  }
+  for (const [name, sub] of dirs) lines.push(Buffer.concat([Buffer.from(`040000 tree ${fixtureTree(gitDir, sub)}\t`), Buffer.from(name, 'latin1'), nul]));
+  const missing = entries.some(e => e.parts.length === 1 && e.type === 'commit') ? ['--missing'] : [];
+  return fixtureGit(gitDir, ['mktree', '-z', ...missing], Buffer.concat(lines));
+}
+/** Files: `{ path, text, mode }` for blobs and symbolic links, or `{ path, submodule }` for a submodule commit. */
+function fixtureCommit(gitDir, files, parents = []) {
+  const tree = fixtureTree(gitDir, files.map(f => ({ parts: splitPath(Buffer.from(f.path)),
+    mode: f.submodule ? '160000' : f.mode ?? '100644', type: f.submodule ? 'commit' : 'blob',
+    oid: f.submodule ?? fixtureGit(gitDir, ['hash-object', '-w', '--stdin'], Buffer.from(f.text)) })));
+  return fixtureGit(gitDir, ['commit-tree', tree, '-m', 'fixture', ...parents.flatMap(p => ['-p', p])]);
+}
+const inventoryLine = (mode, text, p) =>
+  Buffer.concat([Buffer.from(`${mode}\t${sha256(Buffer.from(text))}\t${Buffer.byteLength(text)}\t`), Buffer.from(p), Buffer.from('\n')]);
+async function inventoryOf(gitDir, commit) { return computeInventory(gitDir, await listTree(gitDir, commit), { keepLines: true }); }
+
+test('The inventory of a fixture commit equals a hand-computed canonical listing digest', async () => {
+  const g = bareRepo();
+  const c = fixtureCommit(g, [{ path: 'b/run.sh', text: '#!/bin/sh\n', mode: '100755' }, { path: 'b.txt', text: '' }, { path: 'a.txt', text: 'alpha\n' }]);
+  const inv = await inventoryOf(g, c);
+  assert.equal(inv.text.toString('latin1'),
+    '100644\tb6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060\t6\ta.txt\n' +
+    '100644\te3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\t0\tb.txt\n' +
+    '100755\ta8076d3d28d21e02012b20eaf7dbf75409a6277134439025f282e368e3305abf\t10\tb/run.sh\n');
+  // Computed outside the controller with printf and sha256sum.
+  assert.equal(inv.sha256, 'a26efd6729b275058dbac0d0ec198b1b962a94450e80fcc2f59ba81166fd085f');
+  assert.equal(inv.entry_count, 3); assert.equal(inv.total_blob_bytes, 16);
+});
+test('The inventory ignores working-tree files and core.autocrlf', async () => {
+  const dir = temp(), gitDir = path.join(dir, '.git');
+  fixtureGit(dir, ['init', '--quiet', '.']);
+  const c = fixtureCommit(gitDir, [{ path: 'text.txt', text: 'one\ntwo\n' }, { path: 'crlf.txt', text: 'three\r\n' }]);
+  const expected = Buffer.concat([inventoryLine('100644', 'three\r\n', 'crlf.txt'), inventoryLine('100644', 'one\ntwo\n', 'text.txt')]);
+  const before = await inventoryOf(gitDir, c);
+  assert.deepEqual(before.text, expected);
+  fixtureGit(dir, ['config', 'core.autocrlf', 'true']);
+  fixtureGit(dir, ['read-tree', c]); fixtureGit(dir, ['checkout-index', '--all', '--force']);
+  assert.equal(fs.readFileSync(path.join(dir, 'text.txt'), 'latin1'), 'one\r\ntwo\r\n', 'The fixture must exercise conversion.');
+  put(dir, 'crlf.txt', 'edited in the working tree\n'); put(dir, 'untracked.txt', 'untracked\n');
+  assert.deepEqual(await inventoryOf(gitDir, c), before);
+});
+test('A changed blob, an added file, a removed file, and a renamed file each change the inventory digest', async () => {
+  const g = bareRepo(), base = [{ path: 'a.txt', text: 'a\n' }, { path: 'd/b.txt', text: 'b\n' }];
+  const digest = async files => (await inventoryOf(g, fixtureCommit(g, files))).sha256;
+  const original = await digest(base), seen = new Set([original]);
+  assert.equal(await digest([...base].reverse()), original);
+  for (const [change, files] of Object.entries({ changed: [{ path: 'a.txt', text: 'A\n' }, base[1]],
+    added: [...base, { path: 'c.txt', text: 'c\n' }], removed: [base[0]], renamed: [{ path: 'renamed.txt', text: 'a\n' }, base[1]] })) {
+    const d = await digest(files);
+    assert.ok(!seen.has(d), `The ${change} file did not produce a new digest.`); seen.add(d);
+  }
+});
+test('Paths with spaces, non-ASCII bytes, and tabs keep their exact bytes through NUL-separated parsing', async () => {
+  const g = bareRepo(), names = [Buffer.from('dir with space/file name.txt'), Buffer.from('caf\u00e9/na\u00efve.txt'),
+    Buffer.from('\u{1F600}.txt'), Buffer.from('\uFF61.txt'), Buffer.from([0x72, 0x61, 0x77, 0xff, 0xfe, 0x2e, 0x62]), Buffer.from('tab\there.txt')];
+  const c = fixtureCommit(g, names.map((p, i) => ({ path: p, text: `${i}\n` })));
+  const entries = await listTree(g, c);
+  assert.deepEqual(entries.map(e => e.path).sort(Buffer.compare), [...names].sort(Buffer.compare));
+  const inv = await computeInventory(g, entries, { keepLines: true });
+  const byBytes = names.map((p, i) => [p, inventoryLine('100644', `${i}\n`, p)]).sort((a, b) => Buffer.compare(a[0], b[0]));
+  assert.deepEqual(inv.text, Buffer.concat(byBytes.map(x => x[1])));
+  // UTF-16 order puts U+1F600 first; UTF-8 byte order puts U+FF61 first.
+  assert.ok(inv.text.indexOf(Buffer.from('\uFF61.txt')) < inv.text.indexOf(Buffer.from('\u{1F600}.txt')));
+});
+test('A symbolic link entry hashes its target text, and a submodule entry records its commit ID', async () => {
+  const g = bareRepo(), sub = '0123456789abcdef0123456789abcdef01234567';
+  const c = fixtureCommit(g, [{ path: 'link', text: 'target/file.txt', mode: '120000' }, { path: 'vendor/lib', submodule: sub }]);
+  const inv = await inventoryOf(g, c);
+  assert.equal(inv.text.toString('latin1'), `120000\t${sha256('target/file.txt')}\t15\tlink\n160000\t${sub}\t0\tvendor/lib\n`);
+  assert.equal(inv.entry_count, 2); assert.equal(inv.total_blob_bytes, 15);
+});
+test('corpus-verify fails for a missing snapshot, a missing record, a wrong commit, a wrong tree, and a wrong inventory digest', async () => {
+  const dir = temp(), corporaDir = temp(), g = bareRepo(snapshotGitDir(corporaDir, 'test262'));
+  fs.mkdirSync(path.join(dir, 'specs'));
+  fs.copyFileSync(path.join(root, 'specs/corpora.json'), path.join(dir, 'specs/corpora.json'));
+  const license = { path: 'LICENSE', text: 'Fixture ("Software") is being made available under the  "BSD License", included below.\n' };
+  const first = fixtureCommit(g, [license, { path: 'test/language/a.js', text: 'a;\n' }, { path: 'test/harness/h_FIXTURE.js', text: 'h;\n' }]);
+  const second = fixtureCommit(g, [license, { path: 'test/language/a.js', text: 'changed;\n' }], [first]);
+  fixtureGit(g, ['update-ref', 'refs/heads/main', first]);
+  const record = await buildSnapshotRecord(g, { corpus: 'test262', upstream: 'https://github.com/tc39/test262',
+    ref: 'refs/heads/main', commit: first, retrieved_at: '2026-10-08T00:00:00.000Z' });
+  assert.equal(record.commit_date, '2026-01-02T04:34:05+01:30'); assert.equal(record.license.name, 'BSD License');
+  const recordFile = path.join(dir, 'specs/snapshots/test262.json'); writeJson(recordFile, record);
+  assert.equal((await classifyCorpus(dir, 'test262', { corporaDir })).discovered, 1);
+  const verify = (corpora = corporaDir) => verifyCorpus(dir, 'test262', { corporaDir: corpora });
+  assert.equal((await verify()).result, 'pass');
+  await assert.rejects(() => verify(temp()), /Missing snapshot:/);
+  const wrong = [[{ commit: second }, /commit at refs\/heads\/main: recorded/], [{ commit: 'f'.repeat(40) }, /does not contain commit/],
+    [{ tree: fixtureGit(g, ['rev-parse', `${second}^{tree}`]) }, /tree: recorded/],
+    [{ inventory: { ...record.inventory, sha256: '0'.repeat(64) } }, /inventory\.sha256: recorded/]];
+  for (const [change, message] of wrong) {
+    writeJson(recordFile, { ...record, ...change }); await assert.rejects(verify, message);
+  }
+  fs.rmSync(recordFile); await assert.rejects(verify, /Missing snapshot record/);
+  const cli = spawnSync(process.execPath, [path.join(root, 'tools/fairpane.mjs'), 'corpus-verify', 'test262'],
+    { cwd: root, encoding: 'utf8', env: { ...process.env, FAIRPANE_CORPORA_DIR: temp() }, windowsHide: true });
+  assert.equal(cli.status, 1); assert.match(cli.stderr, /Missing snapshot/);
+});
+test('Applicability validation rejects negative counts, non-integer counts, inconsistent sums, and exclusions without reasons', () => {
+  const good = { schema_version: 1, corpus: 'test262', commit: 'a'.repeat(40), status: 'counted', discovery: { rule: 'Fixture rule.' },
+    discovered: 3, selected: 1, excluded: [{ path: 'test/x.js', reason: 'Fixture reason.' }], unclassified: 1,
+    breakdown: { by: 'directory', counts: { a: 2, b: 1 } } };
+  assert.equal(validateApplicability(good), true);
+  for (const [change, message] of [[{ selected: -1, unclassified: 3 }, /nonnegative integer/], [{ unclassified: 0.5 }, /nonnegative integer/],
+    [{ discovered: '3' }, /nonnegative integer/], [{ unclassified: 2 }, /inconsistent/],
+    [{ excluded: [{ path: 'test/x.js', reason: ' ' }] }, /no reason/], [{ excluded: [{ path: 'test/x.js' }] }, /no reason/]])
+    assert.throws(() => validateApplicability({ ...good, ...change }), message);
+});
+test('Snapshot record validation rejects a non-40-hex commit, a missing license digest, and a missing inventory digest', () => {
+  const good = { schema_version: 1, corpus: 'test262', upstream: 'https://github.com/tc39/test262', ref: 'refs/heads/main',
+    commit: 'a'.repeat(40), tree: 'b'.repeat(40), commit_date: '2026-10-08T13:50:06+02:00', retrieved_at: '2026-10-09T00:31:30.626Z',
+    license: { path: 'LICENSE', size: 1, sha256: 'c'.repeat(64), name: 'BSD License' },
+    inventory: { entry_count: 1, total_blob_bytes: 1, sha256: 'd'.repeat(64) } };
+  assert.equal(validateSnapshotRecord(good), true);
+  for (const commit of ['a'.repeat(39), 'a'.repeat(41), 'A'.repeat(40), 'g'.repeat(40), 'HEAD'])
+    assert.throws(() => validateSnapshotRecord({ ...good, commit }), /commit must be 40/);
+  const { sha256: _license, ...license } = good.license, { sha256: _inventory, ...inventory } = good.inventory;
+  assert.throws(() => validateSnapshotRecord({ ...good, license }), /license SHA-256/);
+  assert.throws(() => validateSnapshotRecord({ ...good, inventory }), /inventory SHA-256/);
 });
 test('The actual bootstrap repository passes its integrity check', () => {
   const r = checkRepository(root); assert.equal(r.result, 'pass'); assert.equal(r.level, 'bootstrap-integrity-only');

@@ -4,6 +4,11 @@
 `corpora.json` lists required external corpus families.
 Neither file claims that a complete standards snapshot exists locally.
 
+`snapshots/<corpus>.json` records a pinned corpus revision, its license file, and its canonical inventory.
+`applicability/<corpus>.json` records local test discovery for a pinned corpus.
+`IMPORT_REQUIREMENTS.md` states the rules for later Unicode, CLDR, and font-fixture imports.
+`engineering/decisions/0003-corpus-snapshots.md` defines the record formats.
+
 ## Snapshot procedure
 
 1. Select an exact upstream revision or version.
@@ -16,3 +21,16 @@ Neither file claims that a complete standards snapshot exists locally.
 
 Unknown provenance blocks import, not unrelated first-party implementation.
 The owner controls publication and license policy.
+
+## Corpus commands
+
+Snapshots live under `.tools/corpora/<corpus>/` unless `FAIRPANE_CORPORA_DIR` names another root.
+
+```text
+node tools/fairpane.mjs corpus-fetch <corpus>
+node tools/fairpane.mjs corpus-applicability <corpus>
+node tools/fairpane.mjs corpus-verify <corpus>
+```
+
+`corpus-fetch` is the only command that uses the network.
+`corpus-verify` exits with status 1 on any mismatch, a missing snapshot, or a missing record.
