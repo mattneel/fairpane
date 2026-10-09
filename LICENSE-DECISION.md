@@ -31,4 +31,9 @@ Unicode data files under the Unicode License v3 and test fonts under the SIL Ope
 Each such file keeps its license text beside it and a per-file provenance record, as `specs/IMPORT_REQUIREMENTS.md` requires.
 `engineering/evidence/FP-0013/owner-answers.log` records the question and the answer.
 
+On 2026-10-09, the owner also approved the HTML Standard's named character reference table, `https://html.spec.whatwg.org/entities.json`, and tables generated from it.
+WHATWG publishes the standard under CC BY 4.0 and the portions incorporated into source code under the BSD 3-Clause license.
+The table keeps that license text, its attribution, and a recorded digest beside it.
+`engineering/evidence/FP-0008/owner-answers.log` records the question and the answer.
+
 See `docs/SOURCES.md` for [S20].
