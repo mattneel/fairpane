@@ -813,3 +813,71 @@ On 2026-10-09 the worker `FP0014Css` reported that importing `properties.zon` an
 The repository keeps data tables as Zig source, such as `src/unicode/tables.zig` and `src/html/entities_table.zig`, so the integrator replaces both `.zon` files with data-only `.zig` files instead of changing the lint.
 A data-only file declares the table as `pub const` values and contains no function.
 No other requirement changes.
+
+## Revision 1
+
+Base: the commit that freezes this revision.
+Source finding: `engineering/evidence/FP-0014/reviews/review-1-reject.json`.
+Every section above stays in force except where this revision replaces it.
+Writable paths stay as above.
+
+### Text style by defaulting
+
+`StyleMap.textStyle(text)` returns the style that defaulting gives a text node (Cascade 5 section 1.1).
+Each inherited property, `color`, `font-size`, and every custom property, takes the parent element's computed value.
+Each non-inherited property takes its initial value: `display` is inline flow, with no root blockification, and every margin is 0px.
+
+### Ignored at-rules
+
+An at-rule that a stylesheet ignores reports one `ignored_at_rule` diagnostic with its name.
+Nothing inside its block, at any depth, reports a diagnostic.
+
+### Other arbitrary substitution functions
+
+At the pinned commit, Values 5 also defines `if()`, `inherit()`, `attr()`, `ident()`, and `random-item()` as arbitrary substitution functions (`css-values-5/Overview.bs` lines 1680, 1911, 2194, 2358, and 2741).
+A custom property value that contains any of them, at any depth, becomes invalid at computed-value time with the reason `unsupported_value`, so the property computes to the guaranteed-invalid value.
+That includes a value whose spread syntax sits inside one of them.
+Task `FP-0071` owns these functions with the spread syntax.
+
+### Classification of standard forms
+
+- `display` values that contain `grid-lanes` or `inline-grid-lanes` (`css-grid-3/Overview.bs` line 348 at the pinned commit) report `unsupported_value`.
+- `display` values whose inner type is `math` (MathML Core, <https://w3c.github.io/mathml-core/>, the editor's draft retrieved on 2026-10-09) report `unsupported_value`.
+- The column combinator `||` (`selectors-5/Overview.bs` line 462; `selectors-4/Overview.bs` line 5232 records the move) reports `unsupported_selector`.
+  Case 22 therefore moves `a||b` from the `invalid_selector` inputs to the `unsupported_selector` inputs.
+
+### Selector matching cost
+
+Selector matching gives up on a whole selector for an element as soon as a combinator's left side fails for every candidate that the combinator allows, instead of trying other candidates for the compounds to its right.
+Matching work for one selector and one element is therefore at most proportional to the selector's compound count times the element's depth plus its preceding sibling count.
+An element's class tokens are deduplicated in time proportional to `n log n` for `n` tokens.
+Task `FP-0070` owns a constant-time ancestor filter for deep trees.
+
+### Module structure
+
+`Specificity` and `ApplicableDeclaration` move into a module that imports no DOM and no selector code, so `cascade.zig` no longer imports `selectors.zig`.
+
+### Revision 1 test cases
+
+49. A root `r` declares `display: block; margin-top: 5px; margin-left: 2px; color: rgb(1 2 3); font-size: 20px; --k: v`, and `r` has one text child.
+    `textStyle` of the text child gives `display` inline flow, every margin 0px, `color` 1 2 3, `font-size` 20, and `--k` `[ident(v)]`.
+50. `@media x { b { colour: red } a { b {} } @media y { c { color: blue } } } d { color: red }` keeps only the rule for `d` and reports exactly one diagnostic, `ignored_at_rule` for `media`.
+51. A root declares `--a: attr(data-x); --b: if(else: 2); --c: inherit(--k); --d: ident(a); --e: random-item(--x, a, b); --f: if(...var(--args); else: x); --g: foo(1); --args: 1`.
+    `--a` through `--f` compute to the guaranteed-invalid value, each with a `StyleMap.diagnostics` entry whose reason is `unsupported_value`.
+    `--g` computes to `[function(foo)[number(1,integer,none)]]`.
+52. `display: grid-lanes`, `display: inline-grid-lanes`, `display: block grid-lanes`, `display: math`, `display: block math`, and `display: inline math` each report `unsupported_value`, and `a||b` reports `unsupported_selector`.
+53. A chain of 2000 nested `e` elements under `root`, with the sheet `x e e e { margin-top: 3px } e { margin-top: 1px }`, resolves, and every `e` computes `margin-top` to 1px.
+    A counter of compound-match attempts, compiled only in test builds, stays at most `4 * 2000 * 2001`.
+    An element with 20000 distinct class tokens matches `.c19999`, and a counter of class-token comparisons, compiled only in test builds, stays at most `32 * 20000`.
+54. The palette test also requires a contrast ratio of at least 4.5 to 1 between `ButtonBorder` and `Canvas`.
+
+Cases 49 to 53 must fail before the fix; the evidence states any part that already passes.
+A mutation control that removes the early exit must fail case 53.
+
+### Revision 1 evidence
+
+Record `tests-before-r1.log`, an uncached `tests-after-r1.log`, `controller-tests-after-r1.log`, `fmt-r1.log`, `check-r1.log` with `node tools/fairpane.mjs check`, and `mutation-r1.log` with its diff under `engineering/evidence/FP-0014/raw/`.
+Rerun the cascade mutation control of the original contract on the revised tree, and record the SHA-256 of `src/css/cascade.zig` before, during, and after each control.
+Run every Zig command with `--env ZIG_GLOBAL_CACHE_DIR=C:\src\fairpane\.zig-cache\global`, and keep each failed attempt as its own log.
+The README gains a `## Revision 1` section and states no check that no log records.
+The integrator records `HEAD` and a status that includes ignored files for every source root before and after it runs the four gates.

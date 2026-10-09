@@ -1,0 +1,152 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "ef8ad1c",
+    "639ec81"
+  ],
+  "summary": "I reject FP-0014 because of one major defect. The tokenizer (Syntax 4), the parser (Syntax 5, including the integrator's 5.5.5 correction in `finishBlock`), selectors, the registry, value grammars, the cascade and rollback, `var()` substitution with cycles and the 65536 limit, and the DOM attribute lists all match the pinned sources and the contract on the paths I checked. All 48 cases exist: cases 1–17 and 21–48 in `src/css/tests.zig`, and cases 18–20 in `src/dom.zig`. Integration evidence at `ef8ad1c` shows 272/272 Zig tests and 192/192 controller tests, with HEAD and a clean status recorded before and after the gates. The mutation control failed only case 35. The named-color check passed 148/148.\n\nThe major defect is in `StyleMap.textStyle`. It returns the parent element's whole computed style, but the contract and Cascade 5 §1.1 require a text node's values to come from defaulting: inherited properties inherit, and non-inherited properties take their initial values. As a result, text gets the parent's `display` and margins. Case 34 cannot catch this because its parent `div` already has initial values for those properties.\n\nI also list minor documentation, evidence-binding, algorithmic-complexity, and scope findings. As you asked, I also list where the frozen subset reports a standard form as invalid instead of unsupported, or the reverse.\n\nI ran no shell, git, build, or test commands. Every result I cite comes from the committed logs and receipts.",
+  "criteria": [
+    {
+      "criterion": "Plan criterion 1: Parse a frozen property and selector set with standard recovery.",
+      "met": true,
+      "evidence": "`parser.zig` follows Syntax 5.5.1–5.5.11. `finishBlock` (parser.zig, \"The FP-0014 decision\") appends a nonempty `decls` at `}` or EOF, which corrects the pinned 5.5.5 text (css-syntax-3/Overview.bs lines 2846–2930 return only `rules`). Recovery follows mark/restore in `stepBlock`, plus `consumeBadDeclarationRemnants`. Selector grammar matches Selectors 4 §16 (selectors-4/Overview.bs lines 4487–4525). Cases 1–17, 21–24, 29–33, and 36 exist and are counted in integration-tests.log (227+45 tests passed at `ef8ad1c`)."
+    },
+    {
+      "criterion": "Plan criterion 2: Keep selectors, cascade, and computed values separate.",
+      "met": true,
+      "evidence": "`style.resolve` runs `matchRulesWith`, then `cascade.cascade`, then `compute.computeStyle`. `computeStyle` takes only the cascade result, the parent and root styles, `is_root`, the allocators, and the diagnostics list. Case 47 (tests.zig) checks parameter types and the fields of `ApplicableDeclaration` at compile time, and it runs `cascade` and `computeStyle` without a DOM."
+    },
+    {
+      "criterion": "Plan criterion 3: Describe inheritance and invalidation in the property registry.",
+      "met": true,
+      "evidence": "`properties.zig` holds data-only records with exactly the fields `name`, `spec`, `initial`, `inherited`, `computed`, and `invalidation`. `registry.validate` runs at comptime (registry.zig comptime block). `custom_family` matches the contract table. `ComputedStyle.diff` adds `descendants` for inherited properties. Cases 25–28 cover these."
+    },
+    {
+      "criterion": "Plan criterion 4: Exercise custom-property token preservation and malformed syntax.",
+      "met": true,
+      "evidence": "Case 14 and case 39 (including the amendment 1 dump) cover original text and token preservation. Case 44 covers malformed values, case 42 cycles, case 45 the 65536 limit, case 46 100000-deep nesting, and case 40 spread and fallbacks."
+    },
+    {
+      "criterion": "Tokenizer matches Syntax section 4 at the pinned commit.",
+      "met": true,
+      "evidence": "The non-ASCII ident ranges, escape handling (4.3.7), URL and bad-URL handling (4.3.6, 4.3.15), number parsing (4.3.13) with `floatMax` saturation, and unicode-range (4.3.14) all match the pinned text. Cases 1–6 cover them."
+    },
+    {
+      "criterion": "The 48 exact cases are present and pass at ef8ad1c.",
+      "met": true,
+      "evidence": "Cases 18–20 are at dom.zig:2072, 2120, and 2164. The other cases are in tests.zig. integration-tests.log reports `Build Summary: 65/65 steps succeeded; 272/272 tests passed` (cwd C:\\src\\fairpane), run between the two HEAD=ef8ad1c records in integration-binding.log. Case 34 passes but cannot detect the textStyle defect."
+    },
+    {
+      "criterion": "Style resolution, including textStyle defaulting from the parent element (Cascade 1.1).",
+      "met": false,
+      "evidence": "style.zig:55-58 returns `map.get(parent)`, the parent element's full style, so non-inherited properties are not reset to their initial values. Cascade 5 lines 108–112 say text nodes get all of their computed values by defaulting."
+    },
+    {
+      "criterion": "No runtime recursion; explicit stacks.",
+      "met": true,
+      "evidence": "The parser uses a `Frame` stack and an `open` list. Selectors use a `Matcher.stack`. Resolution uses an explicit element stack in `style.resolve`. Substitution is a resumable `Substitution` driven by `Engine.drive`. `dump` uses `writeTasks` and `ends`. I found no self-calling or mutually recursive runtime function."
+    },
+    {
+      "criterion": "Allocation-failure safety: case 20 for DOM attributes and case 48 for parse and resolve.",
+      "met": true,
+      "evidence": "`setAttribute` (dom.zig:316) copies strings and reserves capacity before mutating, with errdefers. Case 20 uses `guarded`, a deep fingerprint, and `checkAllAllocationFailures` with remap failure. Case 48 checks a store digest and `checkAllAllocationFailures` over `Stylesheet.parse` (every diagnostic kind, asserted with an EnumSet) and `resolve`."
+    },
+    {
+      "criterion": "Mutation control kills case 35.",
+      "met": true,
+      "evidence": "mutation-cascade-origin.diff swaps `.user` and `.author` in the important branch of `originPrecedence`. The log shows `193 pass, 1 fail`, and the only failure is 'FP-0014 case 35', `expected 5, found 4`. The sha256 of cascade.zig is c98a9521… before and after. This ran in the worker tree, not at ef8ad1c."
+    },
+    {
+      "criterion": "Evidence is bound to ef8ad1c, and the named-color check passed.",
+      "met": true,
+      "evidence": "integration-binding.log records HEAD ef8ad1c7… and an empty `status --ignored` before the gates (11:43:15) and after them (11:49:51). All four gate receipts show source fingerprint cce74226… unchanged and status pass. named-colors-check.log records HEAD ef8ad1c, a spec sha256 of 5b0be760…, `specification rows: 148`, `named_colors.zig rows: 148`, and `result: pass`. I confirmed that the script's regex matches the table rows at css-color-4/Overview.bs:1621 and following."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "src/css/style.zig",
+      "line": 58,
+      "issue": "`textStyle` returns the parent element's entire `ComputedStyle`. The contract says it returns a text node's style 'by defaulting from its parent element (Cascade 1.1)'. Cascade 5 (lines 108–112 at the pin) says text nodes get all of their computed values by defaulting, so non-inherited properties must take their initial values. Minimal repro: a document with root `r` and a text child of `r`, plus the sheet `r { display: block; margin-top: 5px }`. `textStyle(text)` returns `display` block flow and `margin_top` 5px, but the expected values are inline flow and 0px. Case 34 (tests.zig:1072) cannot detect this because its parent `div` already has initial values for `display` and margins.",
+      "recommendation": "Build the text style from the parent's inherited properties (`color`, `font-size`, custom properties) and the initial values of non-inherited properties (`display` inline flow with no root blockification, all margins 0px). Add a case where the parent has non-initial `display` and margins."
+    },
+    {
+      "severity": "minor",
+      "path": "src/css/stylesheet.zig",
+      "line": 8,
+      "issue": "The module doc (line 8) and the evidence README (line 86) claim that rules and declarations inside an at-rule's block are dropped with the at-rule 'without their own diagnostics'. That is false. `qualifiedPrelude` returns true in `at_rule_block` (line 137), and the nested style rule's block runs in `qualified_rule_block`, where `declaration` diagnoses (line 187). Repro: `@media x { b { colour: red } }` reports `unknown_property` (colour) before `ignored_at_rule` (media). `@media x { a { b {} } }` reports `nested_rule_ignored`. `@media a { @media b {} }` reports two `ignored_at_rule` diagnostics.",
+      "recommendation": "Correct the module doc and the README. Alternatively, suppress validation inside at-rule blocks, for example by propagating `silent`. Add a case for either behavior."
+    },
+    {
+      "severity": "minor",
+      "path": "src/css/substitution.zig",
+      "line": 26,
+      "issue": "At the pin, Values 5 also defines if(), inherit(), attr(), ident(), and random-item() as arbitrary substitution functions (css-values-5 lines 1671, 1901, 2184, 2347, 2728). Only `var()` is recognized. In a custom property, these functions are neither substituted nor reported, so `--x: attr(data-x)` computes to raw `function(attr)` tokens with no diagnostic. A spread inside them is not reported either: `--s: if(...var(--args); else: x)` substitutes the inner `var()` and keeps the dots. The contract says a value that 'uses the spread syntax inside an arbitrary substitution function' becomes invalid with `unsupported_value`. Standard properties are unaffected, because `parseStandard` reports `unsupported_value` for these functions.",
+      "recommendation": "Treat any non-var arbitrary substitution function in a custom property value as invalid at computed-value time with `unsupported_value`, including when it holds a spread. Otherwise, add this explicitly to the FP-0071 obligations in css.zig and the README."
+    },
+    {
+      "severity": "minor",
+      "path": "src/css/values.zig",
+      "line": 419,
+      "issue": "These standard forms are reported as `invalid_value` instead of `unsupported_value`. (1) `display: grid-lanes` and `display: inline-grid-lanes`, which css-grid-3 defines at the pinned commit (Overview.bs line 346, 'New values: grid-lanes | inline-grid-lanes'). This contradicts the integrator decision that 'Every standard form outside that subset produces the diagnostic unsupported_value'. (2) `display: math`, `block math`, and `inline math` (MathML Core). (3) The column combinator `a||b`, which Selectors 4 moved to Selectors 5 (selectors-4 line 5163). Case 22 (tests.zig:495) freezes it as `invalid_selector`. (4) Every standard property outside the registry (for example `margin` or `background-color`) gets `unknown_property`, the same diagnostic as a typo such as `colour`. Items 2–4 follow the contract text.",
+      "recommendation": "Add `grid-lanes` and `inline-grid-lanes`, and the MathML `math` inner type, to the unsupported display keywords, or record a contract erratum. Record the column combinator and the conflation of non-registry properties with unknown names as FP-0070 and FP-0071 obligations."
+    },
+    {
+      "severity": "note",
+      "path": "src/css/values.zig",
+      "line": 370,
+      "issue": "These cases are the reverse: invalid or non-standard values reported as `unsupported_value` or `unsupported_selector`. `parseStandard` returns unsupported for any function other than var, rgb, and rgba anywhere in the value. That includes non-standard functions (`color: foo(1)`) and values that are invalid anyway (`margin-top: calc(1px) 2px`, `color: red hsl(0 0% 0%)`). `parseDisplay` (line 430) returns unsupported before structure checks, so `display: flex list-item`, `flex flex`, and `foo grid` are unsupported. `parseRgb` (lines 576 and 584) treats any function argument, or `from` with arbitrary trailing content, as unsupported. Selectors report every `:ident`, `::ident`, and function pseudo as unsupported, including nonexistent ones such as `:nonsense`, and every `ns|E` even though an undeclared prefix is invalid per Namespaces. All of this is contract-mandated.",
+      "recommendation": "Record these over-approximations for FP-0070 and FP-0071, so that those tasks classify invalid and unsupported forms precisely."
+    },
+    {
+      "severity": "minor",
+      "path": "src/css/selectors.zig",
+      "line": 471,
+      "issue": "Descendant and subsequent-sibling matching backtracks over every candidate with no failure memoization or early exit, so the worst case is O(N^k) for k such combinators on depth or sibling count N. Example: the selector `x e e e` (no `x` element) against case 46's 100000-deep chain of `e` elements tries on the order of C(100000,3) paths per element. Hostile web content could hang style resolution. `ClassIterator.occursBefore` (dom.zig:815) also makes class lookup O(n²) in the number of class tokens.",
+      "recommendation": "Add the standard early exit: when a descendant combinator's left side fails for every ancestor, stop trying higher ancestors for compounds to its right (Servo's NotMatchedGlobally, or Blink's equivalent). Match classes without the O(n²) dedupe scan."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0014/README.md",
+      "line": 46,
+      "issue": "Line 46 says '`node tools/fairpane.mjs check` passes on the final tree', but no raw log records that run on the worker tree; only the integration gate at ef8ad1c exists. tests-after.log, fmt.log, controller-tests-after.log, and the mutation logs ran in C:\\Users\\requi\\.omp\\wt\\tb5fa5c781\\m before integration. The mutation's cascade.zig digest (c98a9521…) is never shown to equal ef8ad1c's src/css/cascade.zig.",
+      "recommendation": "Cite the ef8ad1c repo-check receipt for that claim, or record the worker-tree run. Record `sha256sum src/css/cascade.zig` at ef8ad1c, or rerun the mutation control there, to bind it to the integrated commit."
+    },
+    {
+      "severity": "note",
+      "path": "src/css/tests.zig",
+      "line": 1728,
+      "issue": "The palette contrast test omits the ButtonBorder border pairing that Color 4 §6.2 lists among the 'system color pairings' (pinned css-color-4 lines 2065–2075). By my calculation, ButtonBorder (118 118 118) against the adjacent Canvas has a ratio of about 4.54:1, so the palette passes. The test still does not assert it.",
+      "recommendation": "Add the Canvas–ButtonBorder pair to the contrast test."
+    },
+    {
+      "severity": "note",
+      "path": "src/css/cascade.zig",
+      "line": 10,
+      "issue": "`cascade.zig` imports `selectors.zig` only for `Specificity`, and `selectors.zig` imports both `cascade.zig` and `stylesheet.zig`. That creates circular module imports across the stages that case 47 keeps separate at the type level.",
+      "recommendation": "Move `Specificity` and `ApplicableDeclaration` into a small shared module with no DOM dependency, so the cascade module does not import the selector matcher."
+    }
+  ],
+  "commands_run": [
+    {
+      "tool": "read",
+      "target": "AGENTS.md; engineering/plan.json:612-660; engineering/evidence/FP-0014/CONTRACT.md (full); engineering/evidence/FP-0014/README.md"
+    },
+    {
+      "tool": "read",
+      "target": "src/css/{css,tokenizer,parser,stylesheet,values,substitution,compute,cascade,registry,properties,selectors,style,dump,named_colors,tests}.zig; src/dom.zig (attribute code, iterators, cases 18-20, fingerprint/guarded); src/root.zig (grep); src/lab.zig (grep)"
+    },
+    {
+      "tool": "read",
+      "target": "engineering/evidence/FP-0014/raw/{integration-binding,integration-tests,tests-before,tests-after,mutation-cascade-origin,named-colors-check}.log, mutation-cascade-origin.diff, named-colors-check.mjs; gates/*.json and the repo-check and zig-test gate logs"
+    },
+    {
+      "tool": "grep",
+      "target": "controller test counts in controller-tests-after.log, controller-tests-after-attempt-1.log, integration-bun.log, fmt.log, and the controller gate log; FP-0014 entries in engineering/state.json and engineering/HANDOFF.md"
+    },
+    {
+      "tool": "read/grep",
+      "target": "Pinned sources at w3c/csswg-drafts 58354dac: css-syntax-3 (5.5 algorithms), css-variables-1 (var() and replace), css-values-5 (Appendix A, free-form productions, list of arbitrary substitution functions), css-values-4 (length units), css-color-4 (rgb grammar, system and deprecated colors, pairings, currentcolor, named table), css-display-4 (grammar, blockification), css-cascade-5 (1.1, revert-rule), selectors-4 (grammar, column combinator note), css-box-4 (margin), css-grid-3 (grid-lanes)"
+    }
+  ]
+}
