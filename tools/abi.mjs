@@ -1,6 +1,6 @@
 /**
- * The public C ABI schema: validation, deterministic generation of the C header and the Zig declarations,
- * the staleness check, and validation of the shared failure scenarios.
+ * The public C ABI schema: validation, deterministic generation of the C header, the Zig declarations, and the
+ * C layout assertions, the staleness check, the library export check, and validation of the shared failure scenarios.
  * The module uses only the Node standard library.
  *
  * Generation reads collections in array order and never iterates object keys,
@@ -12,7 +12,7 @@ import { readJson, safePath } from './lib.mjs';
 
 export const SCHEMA_PATH = 'api/fairpane.schema.json';
 export const SCENARIOS_PATH = 'api/failure-scenarios.json';
-export const GENERATED_FILES = Object.freeze(['include/fairpane.h', 'src/abi_generated.zig']);
+export const GENERATED_FILES = Object.freeze(['include/fairpane.h', 'src/abi_generated.zig', 'tests/c/abi_layout.h']);
 
 export class AbiError extends Error {
   constructor(message) { super(message); this.name = 'AbiError'; }
@@ -24,13 +24,20 @@ const KINDS = new Set(['integer', 'enumeration', 'handle', 'identifier', 'bytes'
 const POINTER_KINDS = new Set(['handle', 'bytes', 'text', 'web_string']);
 /** Pointer kinds that carry a length. */
 const RANGE_KINDS = new Set(['bytes', 'text', 'web_string']);
-const OWNERSHIPS = ['borrowed', 'owned_by_engine', 'transferred_to_caller'];
+/** `consumed_on_success` is valid only for an input handle parameter: a call that returns ok ends the handle. */
+const OWNERSHIPS = ['borrowed', 'owned_by_engine', 'transferred_to_caller', 'consumed_on_success'];
 const NULLABILITIES = ['non_null', 'null_when_empty', 'nullable'];
 const DIRECTIONS = ['in', 'out'];
 const PRESENCES = ['always', 'optional'];
 const INTEGER_BITS = [8, 16, 32, 64];
 const NAME = /^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/;
 const SCENARIO_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+/** A description reference such as `{function:document_get}` or `{enumeration:event_kind.none}`. */
+const REFERENCE = /\{([a-z]+):([a-z0-9_]+(?:\.[a-z0-9_]+)?)\}/g;
+const DIRECTION_WORDS = { in: 'input', out: 'output' };
+const NULLABILITY_WORDS = { non_null: 'non-null', null_when_empty: 'null when empty', nullable: 'nullable' };
+const OWNERSHIP_WORDS = { borrowed: 'borrowed', owned_by_engine: 'owned by the engine', transferred_to_caller: 'transferred to the caller',
+  consumed_on_success: 'consumed on success' };
 /** The situations that the FP-0021 contract requires the failure scenarios to cover. */
 export const SCENARIO_SITUATIONS = Object.freeze(['identifier', 'thread', 'cancellation', 'teardown', 'allocation_failure',
   'invalid_argument', 'bounds', 'foreign_unwind']);
@@ -82,6 +89,7 @@ function index(schema) {
     enumerations: new Map(schema.enumerations.map(e => [e.name, e])),
     handles: new Map(schema.handles.map(h => [h.name, h])),
     identifiers: new Map(schema.identifiers.map(i => [i.name, i])),
+    constants: new Map(schema.constants.map(c => [c.name, c])),
     structures: new Map(schema.structures.map(s => [s.name, s])),
     functions: new Map(schema.functions.map(f => [f.name, f])),
   };
@@ -134,12 +142,19 @@ function validateType(ctx, type, where, { allowStructure = false } = {}) {
   }
 }
 
-/** Validate the pointer facts of a parameter, a field, or a received value. */
-function validatePointer(ctx, holder, where, { kind }) {
+/**
+ * Validate the pointer facts of a parameter, a field, or a received value.
+ * `consumer` names the function when the holder is an input handle parameter, the only holder that a call can consume.
+ */
+function validatePointer(ctx, holder, where, { kind }, consumer = null) {
   check(NULLABILITIES.includes(holder.nullability), `${where}: a pointer needs a nullability of ${NULLABILITIES.join(', ')}.`);
   check(holder.nullability !== 'null_when_empty' || RANGE_KINDS.has(kind), `${where}: only a byte, text, or web string range can be null when empty.`);
   check(OWNERSHIPS.includes(holder.ownership), `${where}: a pointer needs an ownership of ${OWNERSHIPS.join(', ')}.`);
   check(ctx.lifetimes.has(holder.lifetime), `${where}: a pointer needs a lifetime that the schema defines, not "${holder.lifetime}".`);
+  if (holder.ownership === 'consumed_on_success') {
+    check(consumer !== null, `${where}: consumed_on_success applies only to an input handle parameter.`);
+    check(ctx.lifetimes.get(holder.lifetime).ended_by.includes(consumer), `${where}: a consumed handle needs a lifetime that ${consumer} ends.`);
+  }
 }
 
 function validateEnumeration(enumeration, where) {
@@ -159,6 +174,130 @@ function validateEnumeration(enumeration, where) {
   }
 }
 
+/** Every schema description with the location that names it in an error. */
+function descriptionsOf(schema) {
+  const all = [['schema', schema.description]];
+  for (const t of schema.threads) all.push([`threads.${t.name}`, t.description]);
+  for (const l of schema.lifetimes) all.push([`lifetimes.${l.name}`, l.description]);
+  all.push(['statuses', schema.statuses.description], ...schema.statuses.members.map(m => [`statuses.${m.name}`, m.description]));
+  for (const e of schema.enumerations) all.push([`enumerations.${e.name}`, e.description], ...e.members.map(m => [`enumerations.${e.name}.${m.name}`, m.description]));
+  for (const key of ['constants', 'handles', 'identifiers']) for (const item of schema[key]) all.push([`${key}.${item.name}`, item.description]);
+  for (const s of schema.structures) {
+    all.push([s.name, s.description]);
+    for (const f of s.fields) if (f.description !== undefined) all.push([`${s.name}.${f.name}`, f.description]);
+  }
+  for (const fn of schema.functions) {
+    all.push([fn.name, fn.description]);
+    for (const p of fn.parameters) if (p.description !== undefined) all.push([`${fn.name}.${p.name}`, p.description]);
+  }
+  for (const e of schema.events) all.push([`events.${e.kind}`, e.description]);
+  return all;
+}
+
+/** The C and Zig spellings of one description reference, or null when the reference names no schema item. */
+function referenceOf(ctx, kind, target) {
+  const s = ctx.schema, p = ctx.prefix, upper = p.toUpperCase();
+  const [name, member] = target.split('.');
+  // An enumeration reference names the whole value family, or one member when it has a dotted suffix.
+  const enumerationName = (enumeration, m) => m === undefined
+    ? { c: `${upper}_${enumeration.member_prefix.toUpperCase()}_*`, zig: `\`${pascal(enumeration.name)}\`` }
+    : { c: `${upper}_${enumeration.member_prefix.toUpperCase()}_${m.toUpperCase()}`, zig: `\`${pascal(enumeration.name)}.${m}\`` };
+  if (kind === 'enumeration') {
+    const enumeration = ctx.enumerations.get(name);
+    if (!enumeration || (member !== undefined && !enumeration.members.some(m => m.name === member))) return null;
+    return enumerationName(enumeration, member);
+  }
+  if (member !== undefined) return null;
+  switch (kind) {
+    case 'function': return ctx.functions.has(name) ? { c: `${p}_${name}`, zig: `\`functions.${p}_${name}\`` } : null;
+    case 'constant': return ctx.constants.has(name) ? { c: `${upper}_${name.toUpperCase()}`, zig: `\`${name}\`` } : null;
+    case 'status': return s.statuses.members.some(m => m.name === name) ? { c: `${upper}_STATUS_${name.toUpperCase()}`, zig: `\`Status.${name}\`` } : null;
+    case 'event': {
+      const event = s.events.find(e => e.kind === name);
+      if (!event) return null;
+      const kindField = ctx.structures.get(event.structure).fields.find(f => f.name === 'kind');
+      return enumerationName(ctx.enumerations.get(kindField.type.enumeration), name);
+    }
+    case 'size': return ctx.structures.has(name) ? { c: `sizeof(${p}_${name})`, zig: `\`@sizeOf(${pascal(name)})\`` } : null;
+    case 'structure': return ctx.structures.has(name) ? { c: `${p}_${name}`, zig: `\`${pascal(name)}\`` } : null;
+    default: return null;
+  }
+}
+
+/** Resolve every description reference, and reject a function, constant, status, or event name that a description states without one. */
+function validateDescriptions(ctx) {
+  const s = ctx.schema;
+  const bare = new Set([...s.functions.map(fn => fn.name), ...s.constants.map(c => c.name), ...s.statuses.members.map(m => m.name), ...s.events.map(e => e.kind)]);
+  for (const [where, description] of descriptionsOf(s)) {
+    const plain = description.replace(REFERENCE, (whole, kind, target) => {
+      check(referenceOf(ctx, kind, target), `${where}: unknown reference "${whole}".`);
+      return ' ';
+    });
+    check(!/[{}]/.test(plain), `${where}: a brace may appear only in a reference such as {function:document_get}.`);
+    for (const word of plain.match(/[A-Za-z0-9_]+/g) ?? []) check(!bare.has(word), `${where}: the description names "${word}" without a reference.`);
+  }
+}
+
+const capitalize = sentence => sentence[0].toUpperCase() + sentence.slice(1);
+/** The enumeration that a value or an optional value carries, or null. */
+const enumerationOf = type => type.kind === 'enumeration' ? type.enumeration : type.kind === 'optional' && type.value.kind === 'enumeration' ? type.value.enumeration : null;
+
+/** Renders descriptions and the generated facts of each declaration in the names of `language`, either "c" or "zig". */
+function renderer(ctx, language) {
+  const ref = (kind, target) => referenceOf(ctx, kind, target)[language];
+  const render = description => {
+    const rendered = description.replace(REFERENCE, (_, kind, target) => ref(kind, target));
+    check(language !== 'c' || !/\/\*|\*\//.test(rendered), `A rendered C comment cannot contain a comment delimiter: ${rendered}`);
+    return rendered;
+  };
+  const lifetime = name => render(ctx.lifetimes.get(name).description);
+  const pointer = (holder, direction) => {
+    const sentences = [`${DIRECTION_WORDS[direction]}, ${NULLABILITY_WORDS[holder.nullability]}, ${OWNERSHIP_WORDS[holder.ownership]}.`];
+    if (holder.ownership === 'consumed_on_success') {
+      sentences.push(`A call that returns ${ref('status', 'ok')} ends the handle, and a call that returns any other status leaves the handle with the caller.`);
+    }
+    sentences.push(lifetime(holder.lifetime));
+    return sentences.join(' ');
+  };
+  return {
+    render,
+    /** A function's description, thread rule, statuses, and the facts of each parameter that has any. */
+    functionLines(fn) {
+      const lines = [render(fn.description), `Thread: ${render(ctx.threads.get(fn.thread).description)}`];
+      if (fn.statuses.length) lines.push(`Statuses: ${fn.statuses.map(status => ref('status', status)).join(', ')}.`);
+      for (const p of fn.parameters) {
+        const kind = p.type.kind, enumeration = enumerationOf(p.type), facts = [];
+        if (p.direction === 'out' || POINTER_KINDS.has(kind) || kind === 'structure') facts.push(pointer(p, p.direction));
+        else if (enumeration) facts.push(`${DIRECTION_WORDS[p.direction]}, a ${ref('enumeration', enumeration)} value.`);
+        else if (p.description !== undefined) facts.push(`${DIRECTION_WORDS[p.direction]}.`);
+        if (p.description !== undefined) facts.push(render(p.description));
+        if (facts.length) lines.push(`${p.name}: ${facts.join(' ')}`);
+        if (p.receives) {
+          lines.push(`${p.name} receives a ${NULLABILITY_WORDS[p.receives.nullability]} value, ${OWNERSHIP_WORDS[p.receives.ownership]}. ${lifetime(p.receives.lifetime)}`);
+        }
+      }
+      return lines;
+    },
+    /** A field's description, its enumeration, its absence encoding, and its pointer facts. */
+    fieldLines(field) {
+      const lines = field.description === undefined ? [] : [render(field.description)];
+      const enumeration = enumerationOf(field.type);
+      if (enumeration) lines.push(`A ${ref('enumeration', enumeration)} value${field.type.kind === 'optional' ? ', or zero when absent' : ''}.`);
+      else if (field.type.kind === 'optional') lines.push('Zero when absent.');
+      if (POINTER_KINDS.has(field.type.kind)) lines.push(capitalize(pointer(field, field.direction)));
+      return lines;
+    },
+    /** An identifier family's description and the lifetime that ends its identifiers. */
+    identifierLines: family => [render(family.description), lifetime(family.lifetime)],
+  };
+}
+/** A C comment of one or more lines. */
+const cCommentLines = (lines, indent = '') => lines.length === 1
+  ? [`${indent}/* ${lines[0]} */`]
+  : [`${indent}/* ${lines[0]}`, ...lines.slice(1).map(line => `${indent} * ${line}`), `${indent} */`];
+/** Zig doc comment lines. */
+const zigCommentLines = (lines, indent = '') => lines.map(line => `${indent}/// ${line}`);
+
 /** Validate the ABI schema. Throws an AbiError that names the first problem. */
 export function validateSchema(schema) {
   check(isObject(schema), 'The schema must be an object.');
@@ -176,8 +315,8 @@ export function validateSchema(schema) {
   const ctx = index(schema);
   const prefix = schema.prefix, upper = prefix.toUpperCase();
   // Every generated C and Zig name must be unique, so that two schema names cannot collide after mapping.
-  const cNames = new Set([`${upper}_API`, `${upper}_ABI_REVISION`, `${upper}_OPTIONAL`, 'FAIRPANE_H', 'FAIRPANE_SHARED', 'FAIRPANE_BUILD']);
-  const zigNames = new Set(['std', 'abi_revision', 'Optional', 'layout', 'functions']);
+  const cNames = new Set([`${upper}_API`, `${upper}_ABI_REVISION`, `${upper}_OPTIONAL`, 'FAIRPANE_H', 'FAIRPANE_SHARED', 'FAIRPANE_BUILD', 'FAIRPANE_ABI_LAYOUT_H']);
+  const zigNames = new Set(['std', 'abi_revision', 'Optional', 'layout', 'functions', 'statuses']);
   const claim = (set, generated) => { check(!set.has(generated), `duplicate name "${generated}".`); set.add(generated); };
 
   for (const t of schema.threads) { onlyKeys(t, ['name', 'description'], `threads.${t.name}`); text(t.description, `threads.${t.name}`); }
@@ -223,8 +362,9 @@ export function validateSchema(schema) {
   }
   for (const i of schema.identifiers) {
     const where = `identifiers.${i.name}`;
-    onlyKeys(i, ['name', 'description'], where);
+    onlyKeys(i, ['name', 'description', 'lifetime'], where);
     text(i.description, where);
+    check(ctx.lifetimes.has(i.lifetime), `${where}: an identifier family needs a lifetime that the schema defines, not "${i.lifetime}".`);
     claim(cNames, `${prefix}_${i.name}_id`);
     claim(zigNames, `${pascal(i.name)}Id`);
   }
@@ -283,8 +423,9 @@ export function validateSchema(schema) {
       check(DIRECTIONS.includes(p.direction), `${at}: a parameter needs a direction of in or out.`);
       const kind = p.type.kind;
       check(!(RANGE_KINDS.has(kind) && p.direction === 'out'), `${at}: an output byte, text, or web string range is not supported.`);
-      if (p.direction === 'out' || POINTER_KINDS.has(kind) || kind === 'structure') validatePointer(ctx, p, at, p.direction === 'out' ? {} : p.type);
-      else for (const key of ['nullability', 'ownership', 'lifetime']) check(p[key] === undefined, `${at}: only a pointer states ${key}.`);
+      if (p.direction === 'out' || POINTER_KINDS.has(kind) || kind === 'structure') {
+        validatePointer(ctx, p, at, p.direction === 'out' ? {} : p.type, p.direction === 'in' && kind === 'handle' ? fn.name : null);
+      } else for (const key of ['nullability', 'ownership', 'lifetime']) check(p[key] === undefined, `${at}: only a pointer states ${key}.`);
       if (p.direction === 'out' && POINTER_KINDS.has(kind)) {
         check(isObject(p.receives), `${at}: an output pointer value needs the facts of the value it receives.`);
         onlyKeys(p.receives, ['nullability', 'ownership', 'lifetime'], `${at}.receives`);
@@ -336,6 +477,7 @@ export function validateSchema(schema) {
   for (const enumeration of eventEnumerations) {
     for (const member of enumeration.members) check(member.value === 0 || kinds.has(member.name), `events: no event describes ${enumeration.name} member "${member.name}".`);
   }
+  validateDescriptions(ctx);
   return true;
 }
 
@@ -437,7 +579,7 @@ const cReturn = (ctx, fn) => fn.returns === 'status' ? cInteger(ctx.schema.statu
 const zigReturn = (ctx, fn) => fn.returns === 'status' ? zigInteger(ctx.schema.statuses.underlying) : zigType(ctx, fn.returns);
 
 function generateHeader(ctx) {
-  const s = ctx.schema, p = ctx.prefix, upper = p.toUpperCase();
+  const s = ctx.schema, p = ctx.prefix, upper = p.toUpperCase(), c = renderer(ctx, 'c');
   const out = [
     `/* Generated by tools/abi.mjs from ${SCHEMA_PATH}. Do not edit.`,
     ' * Run node tools/fairpane.mjs abi-generate after a schema change.',
@@ -462,7 +604,7 @@ function generateHeader(ctx) {
     'extern "C" {',
     '#endif',
     '',
-    `/* ${s.description} */`,
+    `/* ${c.render(s.description)} */`,
     `#define ${upper}_ABI_REVISION UINT32_C(${s.abi_revision})`,
     '',
     '/* A value that may be absent. Zero encodes absence, and the value itself is never zero. */',
@@ -470,19 +612,20 @@ function generateHeader(ctx) {
     '',
   ];
   const enumeration = (description, members, macroPrefix, underlying) => {
-    out.push(`/* ${description} */`);
-    for (const m of members) out.push(`/* ${m.description} */`, `#define ${macroPrefix}_${m.name.toUpperCase()} ${cLiteral(m.value, underlying)}`);
+    out.push(`/* ${c.render(description)} */`);
+    for (const m of members) out.push(`/* ${c.render(m.description)} */`, `#define ${macroPrefix}_${m.name.toUpperCase()} ${cLiteral(m.value, underlying)}`);
     out.push('');
   };
   enumeration(s.statuses.description, s.statuses.members, `${upper}_STATUS`, s.statuses.underlying);
   for (const e of s.enumerations) enumeration(e.description, e.members, `${upper}_${e.member_prefix.toUpperCase()}`, e.underlying);
-  for (const c of s.constants) out.push(`/* ${c.description} */`, `#define ${upper}_${c.name.toUpperCase()} ${cLiteral(c.value, c.type)}`, '');
-  for (const h of s.handles) out.push(`/* ${h.description} */`, `typedef struct ${p}_${h.name} ${p}_${h.name};`, '');
-  for (const i of s.identifiers) out.push(`/* ${i.description} */`, `typedef uint64_t ${p}_${i.name}_id;`, '');
+  for (const k of s.constants) out.push(`/* ${c.render(k.description)} */`, `#define ${upper}_${k.name.toUpperCase()} ${cLiteral(k.value, k.type)}`, '');
+  for (const h of s.handles) out.push(`/* ${c.render(h.description)} */`, `typedef struct ${p}_${h.name} ${p}_${h.name};`, '');
+  for (const i of s.identifiers) out.push(...cCommentLines(c.identifierLines(i)), `typedef uint64_t ${p}_${i.name}_id;`, '');
   for (const st of s.structures) {
-    out.push(`/* ${st.description} */`, `typedef struct ${p}_${st.name} {`);
+    out.push(`/* ${c.render(st.description)} */`, `typedef struct ${p}_${st.name} {`);
     for (const f of st.fields) {
-      if (f.description) out.push(`    /* ${f.description} */`);
+      const lines = c.fieldLines(f);
+      if (lines.length) out.push(...cCommentLines(lines, '    '));
       out.push(`    ${cDeclaration(cType(ctx, f.type), f.name)};`);
       if (RANGE_KINDS.has(f.type.kind)) out.push(`    size_t ${f.name}_len;`);
     }
@@ -490,18 +633,18 @@ function generateHeader(ctx) {
   }
   for (const fn of s.functions) {
     const parameters = fn.parameters.flatMap(param => cParameters(ctx, param));
-    out.push(`/* ${fn.description} */`, `${upper}_API ${cReturn(ctx, fn)} ${p}_${fn.name}(${parameters.length ? parameters.join(', ') : 'void'});`, '');
+    out.push(...cCommentLines(c.functionLines(fn)), `${upper}_API ${cReturn(ctx, fn)} ${p}_${fn.name}(${parameters.length ? parameters.join(', ') : 'void'});`, '');
   }
   out.push('#ifdef __cplusplus', '}', '#endif', '#endif', '');
   return out.join('\n');
 }
 
 function generateZig(ctx) {
-  const s = ctx.schema, p = ctx.prefix;
+  const s = ctx.schema, p = ctx.prefix, z = renderer(ctx, 'zig');
   const out = [
     `//! Generated by tools/abi.mjs from ${SCHEMA_PATH}. Do not edit.`,
     '//! Run `node tools/fairpane.mjs abi-generate` after a schema change.',
-    `//! ${s.description}`,
+    `//! ${z.render(s.description)}`,
     '',
     'const std = @import("std");',
     '',
@@ -509,15 +652,15 @@ function generateZig(ctx) {
     '',
   ];
   const enumeration = (description, typeName, members, underlying) => {
-    out.push(`/// ${description}`, `pub const ${typeName} = enum(${zigInteger(underlying)}) {`);
-    for (const m of members) out.push(`    /// ${m.description}`, `    ${m.name} = ${literal(m.value, underlying)},`);
+    out.push(`/// ${z.render(description)}`, `pub const ${typeName} = enum(${zigInteger(underlying)}) {`);
+    for (const m of members) out.push(`    /// ${z.render(m.description)}`, `    ${m.name} = ${literal(m.value, underlying)},`);
     out.push('};', '');
   };
   enumeration(s.statuses.description, 'Status', s.statuses.members, s.statuses.underlying);
   for (const e of s.enumerations) enumeration(e.description, pascal(e.name), e.members, e.underlying);
-  for (const c of s.constants) out.push(`/// ${c.description}`, `pub const ${c.name}: ${zigInteger(c.type)} = ${literal(c.value, c.type)};`, '');
-  for (const h of s.handles) out.push(`/// ${h.description}`, `pub const ${pascal(h.name)} = opaque {};`, '');
-  for (const i of s.identifiers) out.push(`/// ${i.description}`, `pub const ${pascal(i.name)}Id = enum(u64) { _ };`, '');
+  for (const c of s.constants) out.push(`/// ${z.render(c.description)}`, `pub const ${c.name}: ${zigInteger(c.type)} = ${literal(c.value, c.type)};`, '');
+  for (const h of s.handles) out.push(`/// ${z.render(h.description)}`, `pub const ${pascal(h.name)} = opaque {};`, '');
+  for (const i of s.identifiers) out.push(...zigCommentLines(z.identifierLines(i)), `pub const ${pascal(i.name)}Id = enum(u64) { _ };`, '');
   out.push(
     '/// A value that may be absent. Zero encodes absence, and the value itself is never zero.',
     'pub fn Optional(comptime T: type) type {',
@@ -548,9 +691,9 @@ function generateZig(ctx) {
     '',
   );
   for (const st of s.structures) {
-    out.push(`/// ${st.description}`, `pub const ${pascal(st.name)} = extern struct {`);
+    out.push(`/// ${z.render(st.description)}`, `pub const ${pascal(st.name)} = extern struct {`);
     for (const f of st.fields) {
-      if (f.description) out.push(`    /// ${f.description}`);
+      out.push(...zigCommentLines(z.fieldLines(f), '    '));
       out.push(`    ${f.name}: ${zigType(ctx, f.type)},`);
       if (RANGE_KINDS.has(f.type.kind)) out.push(`    ${f.name}_len: usize,`);
     }
@@ -559,7 +702,13 @@ function generateZig(ctx) {
   out.push('/// The C function types, by symbol name.', 'pub const functions = struct {');
   for (const fn of s.functions) {
     const parameters = fn.parameters.flatMap(param => zigParameters(ctx, param));
-    out.push(`    /// ${fn.description}`, `    pub const ${p}_${fn.name} = fn (${parameters.join(', ')}) callconv(.c) ${zigReturn(ctx, fn)};`);
+    out.push(...zigCommentLines(z.functionLines(fn), '    '), `    pub const ${p}_${fn.name} = fn (${parameters.join(', ')}) callconv(.c) ${zigReturn(ctx, fn)};`);
+  }
+  out.push('};', '');
+  out.push('/// The statuses that each function can return, by symbol name.', 'pub const statuses = struct {');
+  for (const fn of s.functions) {
+    const list = fn.statuses.map(status => `.${status}`).join(', ');
+    out.push(`    pub const ${p}_${fn.name}: []const Status = &.{${list ? ` ${list} ` : ''}};`);
   }
   out.push('};', '');
   out.push(
@@ -584,11 +733,43 @@ function generateZig(ctx) {
   return out.join('\n');
 }
 
+/** C11 static assertions of the size and every member offset that the schema implies for each structure. */
+function generateLayout(ctx) {
+  const s = ctx.schema, p = ctx.prefix;
+  const out = [
+    `/* Generated by tools/abi.mjs from ${SCHEMA_PATH}. Do not edit.`,
+    ' * Run node tools/fairpane.mjs abi-generate after a schema change.',
+    ' * The size and every member offset that the schema implies for each structure, as C11 static assertions.',
+    ' * Include this file after fairpane.h in a C11 translation unit.',
+    ' */',
+    '#ifndef FAIRPANE_ABI_LAYOUT_H',
+    '#define FAIRPANE_ABI_LAYOUT_H',
+    '',
+    '#include <stddef.h>',
+    '#include "fairpane.h"',
+    '',
+    '_Static_assert(sizeof(void *) == 8 || sizeof(void *) == 4, "The schema implies layouts for 32-bit and 64-bit pointers only.");',
+    '_Static_assert(sizeof(size_t) == sizeof(void *), "The schema implies a range length as wide as a pointer.");',
+    '',
+  ];
+  const expression = (wide, narrow) => wide === narrow ? `${wide}` : `(sizeof(void *) == 8 ? ${wide} : ${narrow})`;
+  for (const st of s.structures) {
+    const c = `${p}_${st.name}`, wide = layoutOf(ctx, st, 8), narrow = layoutOf(ctx, st, 4);
+    out.push(`_Static_assert(sizeof(${c}) == ${expression(wide.size, narrow.size)}, "${c} differs from the size that the schema implies.");`);
+    for (const [i, member] of wide.offsets.entries()) {
+      out.push(`_Static_assert(offsetof(${c}, ${member.name}) == ${expression(member.offset, narrow.offsets[i].offset)}, "${c}.${member.name} differs from the offset that the schema implies.");`);
+    }
+    out.push('');
+  }
+  out.push('#endif', '');
+  return out.join('\n');
+}
+
 /** Validate the schema and generate every output file. The result maps each path in GENERATED_FILES to its text. */
 export function generate(schema) {
   validateSchema(schema);
   const ctx = index(schema);
-  return { [GENERATED_FILES[0]]: generateHeader(ctx), [GENERATED_FILES[1]]: generateZig(ctx) };
+  return { [GENERATED_FILES[0]]: generateHeader(ctx), [GENERATED_FILES[1]]: generateZig(ctx), [GENERATED_FILES[2]]: generateLayout(ctx) };
 }
 
 /** Validate the failure scenarios against the schema. Throws an AbiError that names the first problem. */
@@ -674,4 +855,79 @@ export function abiCheck(root) {
   return differences.length
     ? { result: 'stale', schema: SCHEMA_PATH, differences, instruction: 'Run node tools/fairpane.mjs abi-generate and review the change.' }
     : { result: 'pass', schema: SCHEMA_PATH, files: [...GENERATED_FILES] };
+}
+
+/**
+ * The symbol names in the symbol table of a static library, which an ar archive holds as its first member.
+ * That member is `/` in the System V and GNU layouts and in the first linker member of a COFF library,
+ * `/SYM64/` in the 64-bit GNU layout, and `__.SYMDEF` or `__.SYMDEF_64`, optionally sorted, in the BSD layout.
+ */
+export function archiveSymbols(bytes) {
+  check(bytes.length >= 68 && bytes.subarray(0, 8).toString('latin1') === '!<arch>\n', 'The library is not an ar archive.');
+  const header = bytes.subarray(8, 68).toString('latin1');
+  check(header.slice(58, 60) === '`\n', 'The archive has a malformed member header.');
+  const size = Number(header.slice(48, 58).trim());
+  check(Number.isSafeInteger(size) && size >= 0 && 68 + size <= bytes.length, 'The archive symbol table is truncated.');
+  let name = header.slice(0, 16).trimEnd(), data = bytes.subarray(68, 68 + size);
+  const extended = /^#1\/(\d+)$/.exec(name);
+  if (extended) {
+    const length = Number(extended[1]);
+    check(length <= data.length, 'The archive has a truncated member name.');
+    name = data.subarray(0, length).toString('latin1').replace(/\0+$/, '');
+    data = data.subarray(length);
+  }
+  const read = (offset, width, little) => {
+    check(offset + width <= data.length, 'The archive symbol table is truncated.');
+    if (width === 4) return little ? data.readUInt32LE(offset) : data.readUInt32BE(offset);
+    return Number(little ? data.readBigUInt64LE(offset) : data.readBigUInt64BE(offset));
+  };
+  const cString = (table, offset) => {
+    const end = table.indexOf(0, offset);
+    check(offset < table.length && end >= 0, 'The archive symbol table has an unterminated name.');
+    return table.subarray(offset, end).toString('latin1');
+  };
+  const names = [];
+  if (name === '/' || name === '/SYM64/') {
+    // A big-endian count, one member offset per symbol, then the names in order.
+    const width = name === '/' ? 4 : 8, count = read(0, width, false);
+    let offset = width * (count + 1);
+    check(offset <= data.length, 'The archive symbol table is truncated.');
+    for (let i = 0; i < count; i++) {
+      const symbol = cString(data, offset);
+      names.push(symbol);
+      offset += symbol.length + 1;
+    }
+    return names;
+  }
+  if (/^__\.SYMDEF(?:_64)?(?: SORTED)?$/.test(name)) {
+    // The byte size of the ranlib entries, the entries as string and member offsets, the string table size, then the strings.
+    const width = name.startsWith('__.SYMDEF_64') ? 8 : 4, entries = read(0, width, true), stringSize = read(width + entries, width, true);
+    const start = 2 * width + entries;
+    check(start + stringSize <= data.length, 'The archive symbol table is truncated.');
+    const strings = data.subarray(start, start + stringSize);
+    for (let at = width; at < width + entries; at += 2 * width) names.push(cString(strings, read(at, width, true)));
+    return names;
+  }
+  throw new AbiError(`The archive has no symbol table as its first member; it starts with "${name}".`);
+}
+
+/** The prefixed symbols that a library exports beyond the schema's functions, and the schema functions that it lacks. */
+export function exportProblems(schema, symbols) {
+  const prefix = `${schema.prefix}_`;
+  const declared = new Set(schema.functions.map(fn => `${prefix}${fn.name}`));
+  // Darwin and 32-bit Windows prepend an underscore to every C symbol.
+  const exported = new Set(symbols.map(symbol => symbol.startsWith(`_${prefix}`) ? symbol.slice(1) : symbol).filter(symbol => symbol.startsWith(prefix)));
+  return {
+    unexpected: [...exported].filter(symbol => !declared.has(symbol)).sort(),
+    missing: [...declared].filter(symbol => !exported.has(symbol)).sort(),
+  };
+}
+
+/** Compare the prefixed symbols of a static library at the repository path `library` with the schema's functions. */
+export function abiExports(root, library) {
+  const schema = loadAbi(root);
+  const { unexpected, missing } = exportProblems(schema, archiveSymbols(fs.readFileSync(safePath(root, library))));
+  return unexpected.length || missing.length
+    ? { result: 'fail', schema: SCHEMA_PATH, library, unexpected, missing }
+    : { result: 'pass', schema: SCHEMA_PATH, library, exports: schema.functions.length };
 }

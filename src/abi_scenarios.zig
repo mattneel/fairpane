@@ -235,12 +235,13 @@ test "Scenario retired-identifier: a destroyed document and an ended request ret
     try testing.expectEqual(abi.DocumentState.loaded, try state(engine, document));
 }
 
-/// Calls every function from a thread that does not own the engine.
+/// Calls every function from a thread that does not own the engine, with valid and then invalid arguments.
 const ForeignThread = struct {
     engine: *abi.Engine,
     document: abi.DocumentId,
     request: abi.RequestId,
     statuses: [10]u32 = @splat(ok),
+    invalid_statuses: [14]u32 = @splat(ok),
     revision: u32 = 99,
     capabilities_status: u32 = 99,
     document_out: abi.DocumentId = @fromBackingInt(77),
@@ -252,9 +253,29 @@ const ForeignThread = struct {
     fn run(calls: *ForeignThread) void {
         const engine = calls.engine;
         const answer = response(calls.request, "foreign");
+        var short_answer = response(calls.request, "short");
+        short_answer.struct_size = @sizeOf(abi.Response) - 1;
         var capabilities: abi.Capabilities = undefined;
         calls.revision = fp_abi_revision();
         calls.capabilities_status = fp_query_capabilities(&capabilities, @sizeOf(abi.Capabilities));
+        // The thread check precedes every other argument check, so an invalid argument also returns FP_STATUS_WRONG_THREAD.
+        // fp_engine_destroy has no argument other than the engine, so only its valid call below covers it.
+        calls.invalid_statuses = .{
+            fp_document_create(engine, null),
+            fp_document_destroy(engine, @fromBackingInt(0)),
+            fp_document_get(engine, calls.document, null, @sizeOf(abi.DocumentInfo)),
+            fp_document_get(engine, calls.document, &calls.info, @sizeOf(abi.DocumentInfo) - 1),
+            fp_document_load(engine, calls.document, null, 0, &calls.request_out),
+            fp_document_load(engine, calls.document, "u", 1, null),
+            fp_request_respond(engine, null),
+            fp_request_respond(engine, &short_answer),
+            fp_request_reject(engine, calls.request, 0),
+            fp_request_cancel(engine, @fromBackingInt(0)),
+            fp_engine_step(engine, 8, null, @sizeOf(abi.StepOutcome)),
+            fp_engine_step(engine, 8, &calls.outcome, @sizeOf(abi.StepOutcome) - 1),
+            fp_engine_next_event(engine, null, @sizeOf(abi.Event)),
+            fp_engine_next_event(engine, &calls.event, 0),
+        };
         calls.statuses = .{
             fp_document_create(engine, &calls.document_out),
             fp_document_destroy(engine, calls.document),
@@ -270,7 +291,7 @@ const ForeignThread = struct {
     }
 };
 
-test "Scenario wrong-thread: every owner-thread function returns FP_STATUS_WRONG_THREAD from another thread and changes nothing" {
+test "Scenario wrong-thread: every owner-thread function returns FP_STATUS_WRONG_THREAD from another thread, even with an invalid argument, and changes nothing" {
     const engine = try createEngine(default_options);
     defer destroyEngine(engine);
     const document = try createDocument(engine);
@@ -285,6 +306,7 @@ test "Scenario wrong-thread: every owner-thread function returns FP_STATUS_WRONG
     thread.join();
 
     for (calls.statuses) |status| try testing.expectEqual(wrong_thread, status);
+    for (calls.invalid_statuses) |status| try testing.expectEqual(wrong_thread, status);
     try testing.expectEqual(abi.abi_revision, calls.revision);
     try testing.expectEqual(ok, calls.capabilities_status);
     try testing.expectEqual(77, @backingInt(calls.document_out));

@@ -1,0 +1,69 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const c=require(\"crypto\"),f=require(\"fs\");console.log(\"sha256 src/c_api.zig \"+c.createHash(\"sha256\").update(f.readFileSync(\"src/c_api.zig\")).digest(\"hex\"))"]
+sha256 src/c_api.zig abad0ad734e6fb8b3acd8db86df9e4ab484828ae8800e1d1533bc141929e58b9
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const c=require(\"crypto\"),f=require(\"fs\");console.log(\"sha256 src/c_api.zig \"+c.createHash(\"sha256\").update(f.readFileSync(\"src/c_api.zig\")).digest(\"hex\"))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:39:40.685Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const f=require(\"fs\");const t=f.readFileSync(\"src/c_api.zig\",\"utf8\");const line=\"    try resolved.checkThread();\\n\";if(t.split(line).length!==2)process.exit(2);f.mkdirSync(\"out/scratch\",{recursive:true});f.writeFileSync(\"out/scratch/c_api.zig.orig\",t);f.writeFileSync(\"src/c_api.zig\",t.replace(line,\"\"));console.log(\"Removed the thread check from enter in src/c_api.zig and saved the original as out/scratch/c_api.zig.orig.\")"]
+Removed the thread check from enter in src/c_api.zig and saved the original as out/scratch/c_api.zig.orig.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const f=require(\"fs\");const t=f.readFileSync(\"src/c_api.zig\",\"utf8\");const line=\"    try resolved.checkThread();\\n\";if(t.split(line).length!==2)process.exit(2);f.mkdirSync(\"out/scratch\",{recursive:true});f.writeFileSync(\"out/scratch/c_api.zig.orig\",t);f.writeFileSync(\"src/c_api.zig\",t.replace(line,\"\"));console.log(\"Removed the thread check from enter in src/c_api.zig and saved the original as out/scratch/c_api.zig.orig.\")"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:39:40.768Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--","out/scratch/c_api.zig.orig","src/c_api.zig"]
+diff --git a/out/scratch/c_api.zig.orig b/src/c_api.zig
+index 4fa0c0e..8c83fe3 100644
+--- a/out/scratch/c_api.zig.orig
++++ b/src/c_api.zig
+@@ -96,7 +96,6 @@ fn nativeEngine(handle: *abi.Engine) *native.Engine {
+ /// Resolves the engine argument and checks the calling thread before any other argument.
+ fn enter(handle: ?*abi.Engine) error{ InvalidArgument, WrongThread }!*native.Engine {
+     const resolved = nativeEngine(handle orelse return error.InvalidArgument);
+-    try resolved.checkThread();
+     return resolved;
+ }
+ 
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--","out/scratch/c_api.zig.orig","src/c_api.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:39:44.089Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0021/raw/revision-1-mutation-thread.diff","--","out/scratch/c_api.zig.orig","src/c_api.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0021/raw/revision-1-mutation-thread.diff","--","out/scratch/c_api.zig.orig","src/c_api.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:39:44.161Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/zig-cache-fp0021-r1-mutant"]
+test
++- run test 88 pass, 1 fail (89 total)
+error: 'abi_scenarios.test.Scenario wrong-thread: every owner-thread function returns FP_STATUS_WRONG_THREAD from another thread, even with an invalid argument, and changes nothing' failed:
+       expected 7, found 1
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:93:17: 0x7ff6256141e3 in expectEqualInner__func_944 (test_zcu.obj)
+                       return error.TestExpectedEqual;
+                       ^
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:57: 0x7ff6256e4d87 in expectEqual (test_zcu.obj)
+           return expectEqualInner(T, expected, actual);
+       
+       C:\Users\requi\.omp\wt\t1d55b558a\m\src\abi_scenarios.zig:309:43: 0x7ff6256e4dbf in test.Scenario wrong-thread: every owner-thread function returns FP_STATUS_WRONG_THREAD from another thread, even with an invalid argument, and changes nothing (test_zcu.obj)
+           for (calls.invalid_statuses) |status| try testing.expectEqual(wrong_thread, status);
+                                                 ^
+failed command: ".\\out\\zig-cache-fp0021-r1-mutant\\o\\485c2b324035472a48997d27678dbb6f\\test.exe" "--cache-dir=.\\out\\zig-cache-fp0021-r1-mutant" --seed=0xea0134d0 --listen=-
+
+Build Summary: 1/3 steps succeeded (1 failed); 88/89 tests passed (1 failed)
+test transitive failure
++- run test 88 pass, 1 fail (89 total)
+   +- compile test debug native success 2s MaxRSS:403M
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xea0134d0 test --summary all --cache-dir out/zig-cache-fp0021-r1-mutant
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/zig-cache-fp0021-r1-mutant"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:39:49.591Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":5690,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","out/c-abi-build-mutant"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","out/c-abi-build-mutant"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:39:55.331Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1478,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","out/c-abi-build-mutant/lib/fairpane.lib","-o","out/c-abi-smoke-mutant.exe"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","out/c-abi-build-mutant/lib/fairpane.lib","-o","out/c-abi-smoke-mutant.exe"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:39:56.876Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":99,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m\\out\\c-abi-smoke-mutant.exe"]
+Assertion failed: calls.invalid_statuses[index] == FP_STATUS_WRONG_THREAD, file tests/c/abi_smoke.c, line 398
+RESULT {"executable":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m\\out\\c-abi-smoke-mutant.exe","arguments":[],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:39:57.035Z","exit_code":3221226505,"signal":null,"timed_out":false,"error":null,"duration_ms":208}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const f=require(\"fs\");f.writeFileSync(\"src/c_api.zig\",f.readFileSync(\"out/scratch/c_api.zig.orig\"));console.log(\"Restored src/c_api.zig from out/scratch/c_api.zig.orig.\")"]
+Restored src/c_api.zig from out/scratch/c_api.zig.orig.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const f=require(\"fs\");f.writeFileSync(\"src/c_api.zig\",f.readFileSync(\"out/scratch/c_api.zig.orig\"));console.log(\"Restored src/c_api.zig from out/scratch/c_api.zig.orig.\")"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:06.574Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const c=require(\"crypto\"),f=require(\"fs\");console.log(\"sha256 src/c_api.zig \"+c.createHash(\"sha256\").update(f.readFileSync(\"src/c_api.zig\")).digest(\"hex\"))"]
+sha256 src/c_api.zig abad0ad734e6fb8b3acd8db86df9e4ab484828ae8800e1d1533bc141929e58b9
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const c=require(\"crypto\"),f=require(\"fs\");console.log(\"sha256 src/c_api.zig \"+c.createHash(\"sha256\").update(f.readFileSync(\"src/c_api.zig\")).digest(\"hex\"))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:06.667Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":35}

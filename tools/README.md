@@ -29,8 +29,9 @@ It does not publish code, change approval settings, or choose an account identit
 | `corpus-applicability <id>` | Counts discovered tests in a local snapshot without network access or corpus code. |
 | `corpus-verify <id>` | Recomputes a local snapshot and compares its records and `specs/corpora.json` pins. |
 | `attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>` | Verifies a signed result against protected trust input and a full commit ID in a candidate repository. |
-| `abi-generate` | Validates the ABI schema and failure scenarios, then writes `include/fairpane.h` and `src/abi_generated.zig`. |
+| `abi-generate` | Validates the ABI schema and failure scenarios, then writes `include/fairpane.h`, `src/abi_generated.zig`, and `tests/c/abi_layout.h`. |
 | `abi-check` | Regenerates the ABI files in memory and exits with status 1 when a committed file differs. |
+| `abi-exports <library>` | Exits with status 1 when a static library exports an `fp_` symbol that the ABI schema does not declare, or lacks one that it declares. |
 | `release-check` | Reports unmet obligations and returns a nonzero status. |
 
 Each command uses this repository, independent of the caller's current directory.
@@ -190,7 +191,7 @@ The checker binds each action to a reviewed commit because GitHub also fetches a
 
 ## Generate the ABI declarations
 
-`tools/abi.mjs` reads `api/fairpane.schema.json` and generates `include/fairpane.h` and `src/abi_generated.zig`.
+`tools/abi.mjs` reads `api/fairpane.schema.json` and generates `include/fairpane.h`, `src/abi_generated.zig`, and `tests/c/abi_layout.h`.
 It validates the schema and `api/failure-scenarios.json` before it writes or compares any file.
 Generation reads only arrays for ordered collections, so the output never depends on object key order.
 `api/README.md` describes the schema, the value kinds, and the failure scenarios.
@@ -203,6 +204,9 @@ Generation reads only arrays for ordered collections, so the output never depend
 `abi-check` compares the committed files byte for byte and names each stale file with its first differing line.
 `tools/abi.test.mjs` holds the FP-0021 cases, and `node tools/fairpane.mjs test` runs them.
 `node tools/abi.test.mjs` runs those cases without the rest of the controller.
+
+`abi-exports` reads the archive symbol table of a static library in the GNU, System V, COFF, or BSD layout.
+The `c-abi` gate runs it on the library that it builds, before it compiles the C smoke test.
 
 ## Extend the controller
 

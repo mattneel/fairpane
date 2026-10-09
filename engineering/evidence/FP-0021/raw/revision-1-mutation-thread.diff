@@ -1,0 +1,12 @@
+diff --git a/out/scratch/c_api.zig.orig b/src/c_api.zig
+index 4fa0c0e..8c83fe3 100644
+--- a/out/scratch/c_api.zig.orig
++++ b/src/c_api.zig
+@@ -96,7 +96,6 @@ fn nativeEngine(handle: *abi.Engine) *native.Engine {
+ /// Resolves the engine argument and checks the calling thread before any other argument.
+ fn enter(handle: ?*abi.Engine) error{ InvalidArgument, WrongThread }!*native.Engine {
+     const resolved = nativeEngine(handle orelse return error.InvalidArgument);
+-    try resolved.checkThread();
+     return resolved;
+ }
+ 

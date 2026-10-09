@@ -27,7 +27,7 @@ extern "C" {
 /* A value that may be absent. Zero encodes absence, and the value itself is never zero. */
 #define FP_OPTIONAL(type) type
 
-/* Status codes. Every function except abi_revision returns one. */
+/* Status codes. Every function except fp_abi_revision returns one. */
 /* The call succeeded. */
 #define FP_STATUS_OK UINT32_C(0)
 /* A null required pointer, a short structure or output size, or an unknown enumeration value. */
@@ -82,13 +82,17 @@ extern "C" {
 /* An engine. It belongs to the thread that created it. */
 typedef struct fp_engine fp_engine;
 
-/* A document identifier. It is nonzero, unique within the process, and never reused. */
+/* A document identifier. It is nonzero, unique within the process, and never reused.
+ * Ends when fp_document_destroy destroys the document or fp_engine_destroy destroys its engine.
+ */
 typedef uint64_t fp_document_id;
 
-/* A request identifier. It is nonzero, unique within the process, and never reused. Document and request identifiers come from one sequence, so they never coincide. */
+/* A request identifier. It is nonzero, unique within the process, and never reused. Document and request identifiers come from one sequence, so they never coincide.
+ * Ends when the request ends. A step ends a request when it applies the request's response, rejection, or cancellation. The engine ends a request when a new load, a document destruction, or an engine destruction cancels it.
+ */
 typedef uint64_t fp_request_id;
 
-/* Output of query_capabilities. */
+/* Output of fp_query_capabilities. */
 typedef struct fp_capabilities {
     uint32_t struct_size;
     uint32_t abi_revision;
@@ -96,7 +100,7 @@ typedef struct fp_capabilities {
     uint64_t feature_bits;
 } fp_capabilities;
 
-/* Input. struct_size must be at least the declared structure size. */
+/* Input. struct_size must be at least sizeof(fp_engine_options). */
 typedef struct fp_engine_options {
     uint32_t struct_size;
     /* The maximum number of requests that are outstanding at once. */
@@ -105,27 +109,32 @@ typedef struct fp_engine_options {
     uint64_t max_response_body_bytes;
 } fp_engine_options;
 
-/* Output of document_get. */
+/* Output of fp_document_get. */
 typedef struct fp_document_info {
     uint32_t struct_size;
+    /* A FP_DOCUMENT_* value. */
     uint32_t state;
-    /* The loaded body, or null when body_len is zero. The bytes stay readable until the document's next load or its destruction. */
+    /* The loaded body, or null when body_len is zero.
+     * Output, null when empty, owned by the engine. Ends when fp_document_load loads the document again, when fp_document_destroy destroys the document, or when fp_engine_destroy destroys its engine.
+     */
     const uint8_t *body;
     size_t body_len;
 } fp_document_info;
 
-/* Input. struct_size must be at least the declared structure size. */
+/* Input. struct_size must be at least sizeof(fp_response). */
 typedef struct fp_response {
     uint32_t struct_size;
     /* Must equal the request version. */
     uint32_t version;
     fp_request_id request_id;
-    /* Borrowed for the call only. May be null when body_len is zero. */
+    /* The response body. It may be null when body_len is zero, and the engine copies it during the call.
+     * Input, null when empty, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+     */
     const uint8_t *body;
     size_t body_len;
 } fp_response;
 
-/* Output of engine_step. */
+/* Output of fp_engine_step. */
 typedef struct fp_step_outcome {
     uint32_t struct_size;
     /* One when queued input remains, otherwise zero. */
@@ -134,64 +143,136 @@ typedef struct fp_step_outcome {
     uint64_t applied;
     /* The number of events that are ready to drain. */
     uint64_t events_ready;
-    /* Always the deadline_none constant. */
+    /* Always FP_DEADLINE_NONE. */
     uint64_t next_deadline;
 } fp_step_outcome;
 
-/* Output of engine_next_event. Fields that do not apply to the kind are zero or null. */
+/* Output of fp_engine_next_event. Fields that do not apply to the kind are zero or null. */
 typedef struct fp_event {
     uint32_t struct_size;
+    /* A FP_EVENT_* value. */
     uint32_t kind;
+    /* Zero when absent. */
     FP_OPTIONAL(fp_document_id) document_id;
+    /* Zero when absent. */
     FP_OPTIONAL(fp_request_id) request_id;
+    /* A FP_REQUEST_* value, or zero when absent. */
     FP_OPTIONAL(uint32_t) request_kind;
+    /* Zero when absent. */
     FP_OPTIONAL(uint32_t) request_version;
-    /* The new state for a document_state_changed event. */
+    /* The new state for a FP_EVENT_DOCUMENT_STATE_CHANGED event.
+     * A FP_DOCUMENT_* value, or zero when absent.
+     */
     FP_OPTIONAL(uint32_t) document_state;
-    /* The rejection reason when an applied rejection failed the document. */
+    /* The rejection reason when an applied rejection failed the document.
+     * A FP_REJECT_* value, or zero when absent.
+     */
     FP_OPTIONAL(uint32_t) reject_reason;
-    /* For a request_issued event, the request URL while the request is live, otherwise null. The bytes stay readable until the request ends. */
+    /* For a FP_EVENT_REQUEST_ISSUED event, the request URL while the request is live, otherwise null.
+     * Output, nullable, owned by the engine. Ends when the request ends. A step ends a request when it applies the request's response, rejection, or cancellation. The engine ends a request when a new load, a document destruction, or an engine destruction cancels it.
+     */
     const uint8_t *url;
     size_t url_len;
 } fp_event;
 
-/* Returns the ABI revision. */
+/* Returns the ABI revision.
+ * Thread: Any thread may call the function.
+ */
 FP_API uint32_t fp_abi_revision(void);
 
-/* On success, this function initializes the declared capability structure. The feature mask is zero in the bootstrap. On an invalid size or a null output, no output bytes change. */
+/* On success, this function initializes the declared capability structure. The feature mask is zero in the bootstrap. On an invalid size or a null output, no output bytes change.
+ * Thread: Any thread may call the function.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT.
+ * out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ */
 FP_API uint32_t fp_query_capabilities(fp_capabilities *out, size_t out_size);
 
-/* Creates an engine on the calling thread and stores it in the output. */
+/* Creates an engine on the calling thread and stores it in the output.
+ * Thread: The calling thread becomes the owner of the engine that the call creates.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_LIMIT_EXCEEDED, FP_STATUS_OUT_OF_MEMORY.
+ * options: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * out_engine: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * out_engine receives a non-null value, transferred to the caller. Ends when fp_engine_destroy destroys the engine.
+ */
 FP_API uint32_t fp_engine_create(const fp_engine_options *options, fp_engine **out_engine);
 
-/* Releases the engine and everything it owns, including outstanding requests, queued answers, undrained events, and every borrowed URL and body. */
+/* Releases the engine and everything it owns, including outstanding requests, queued answers, undrained events, and every borrowed URL and body.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD.
+ * engine: input, non-null, consumed on success. A call that returns FP_STATUS_OK ends the handle, and a call that returns any other status leaves the handle with the caller. Ends when fp_engine_destroy destroys the engine.
+ */
 FP_API uint32_t fp_engine_destroy(fp_engine *engine);
 
-/* Creates an empty document and stores its identifier in the output. */
+/* Creates an empty document and stores its identifier in the output.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_LIMIT_EXCEEDED, FP_STATUS_OUT_OF_MEMORY.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * out_document: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ */
 FP_API uint32_t fp_document_create(fp_engine *engine, fp_document_id *out_document);
 
-/* Releases the document. An outstanding request is cancelled and announced, and its queued answer is discarded. */
+/* Releases the document. An outstanding request is cancelled and announced, and its queued answer is discarded.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_UNKNOWN_ID, FP_STATUS_OUT_OF_MEMORY.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ */
 FP_API uint32_t fp_document_destroy(fp_engine *engine, fp_document_id document);
 
-/* Initializes the declared document information structure with the document state and body. */
+/* Initializes the declared document information structure with the document state and body.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_UNKNOWN_ID.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ */
 FP_API uint32_t fp_document_get(fp_engine *engine, fp_document_id document, fp_document_info *out, size_t out_size);
 
-/* Issues a version 1 resource request for a copy of url and stores its identifier in the output. The url buffer is borrowed for the call only and must not be null. A load while the document is loading cancels the earlier request. */
+/* Issues a FP_REQUEST_RESOURCE request with version FP_RESOURCE_REQUEST_VERSION for a copy of url and stores its identifier in the output. The url buffer is borrowed for the call only and must not be null. A load while the document is loading cancels the earlier request.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_UNKNOWN_ID, FP_STATUS_LIMIT_EXCEEDED, FP_STATUS_OUT_OF_MEMORY.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * url: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * out_request: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ */
 FP_API uint32_t fp_document_load(fp_engine *engine, fp_document_id document, const uint8_t *url, size_t url_len, fp_request_id *out_request);
 
-/* Queues a response. The engine copies the body during the call. */
+/* Queues a response. The engine copies the body during the call.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_UNKNOWN_ID, FP_STATUS_INVALID_STATE, FP_STATUS_UNSUPPORTED_VERSION, FP_STATUS_LIMIT_EXCEEDED, FP_STATUS_OUT_OF_MEMORY.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * response: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ */
 FP_API uint32_t fp_request_respond(fp_engine *engine, const fp_response *response);
 
-/* Queues a rejection with a reject_reason value. */
+/* Queues a rejection with a FP_REJECT_* value.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_UNKNOWN_ID, FP_STATUS_INVALID_STATE, FP_STATUS_OUT_OF_MEMORY.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * reason: input, a FP_REJECT_* value.
+ */
 FP_API uint32_t fp_request_reject(fp_engine *engine, fp_request_id request, uint32_t reason);
 
-/* Queues the host's withdrawal of a request. */
+/* Queues the host's withdrawal of a request.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_UNKNOWN_ID, FP_STATUS_INVALID_STATE, FP_STATUS_OUT_OF_MEMORY.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ */
 FP_API uint32_t fp_request_cancel(fp_engine *engine, fp_request_id request);
 
-/* Applies up to budget queued answers in arrival order. The budget is an engine scheduling boundary only. It creates no JavaScript task boundary. */
+/* Applies up to budget queued answers in arrival order. The budget is an engine scheduling boundary only. It creates no JavaScript task boundary.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD, FP_STATUS_OUT_OF_MEMORY.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * budget: input. The maximum number of queued inputs to apply.
+ * out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ */
 FP_API uint32_t fp_engine_step(fp_engine *engine, uint32_t budget, fp_step_outcome *out, size_t out_size);
 
-/* Removes the oldest event and initializes the declared event structure with it. When no event is ready, the kind is none. */
+/* Removes the oldest event and initializes the declared event structure with it. When no event is ready, the kind is FP_EVENT_NONE.
+ * Thread: Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns FP_STATUS_WRONG_THREAD.
+ * Statuses: FP_STATUS_OK, FP_STATUS_INVALID_ARGUMENT, FP_STATUS_WRONG_THREAD.
+ * engine: input, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ * out: output, non-null, borrowed. Ends when the call returns. The engine keeps no reference to the storage afterward.
+ */
 FP_API uint32_t fp_engine_next_event(fp_engine *engine, fp_event *out, size_t out_size);
 
 #ifdef __cplusplus

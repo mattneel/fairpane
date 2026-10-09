@@ -77,11 +77,22 @@
         { "function": "fp_engine_step", "arguments": "the engine from another thread", "status": "wrong_thread" },
         { "function": "fp_engine_next_event", "arguments": "the engine from another thread", "status": "wrong_thread" },
         { "function": "fp_engine_destroy", "arguments": "the engine from another thread", "status": "wrong_thread" },
+        { "function": "fp_document_create", "arguments": "the engine and a null output from another thread", "status": "wrong_thread" },
+        { "function": "fp_document_destroy", "arguments": "the engine and document zero from another thread", "status": "wrong_thread" },
+        { "function": "fp_document_get", "arguments": "the engine, a live document, and a null output, then an output size one byte short, from another thread", "status": "wrong_thread" },
+        { "function": "fp_document_load", "arguments": "the engine, a live document, and a null URL, then a null output, from another thread", "status": "wrong_thread" },
+        { "function": "fp_request_respond", "arguments": "the engine and a null response, then a response whose struct_size is one byte short, from another thread", "status": "wrong_thread" },
+        { "function": "fp_request_reject", "arguments": "the engine, a live request, and the unknown reason zero from another thread", "status": "wrong_thread" },
+        { "function": "fp_request_cancel", "arguments": "the engine and request zero from another thread", "status": "wrong_thread" },
+        { "function": "fp_engine_step", "arguments": "the engine and a null output, then an output size one byte short, from another thread", "status": "wrong_thread" },
+        { "function": "fp_engine_next_event", "arguments": "the engine and a null output, then a zero output size, from another thread", "status": "wrong_thread" },
         { "function": "fp_query_capabilities", "arguments": "writable output from another thread", "status": "ok" }
       ],
       "effects": [
         "No engine, document, request, queued input, or event changes.",
         "No output byte changes.",
+        "A call with an invalid argument also returns wrong_thread, so the thread check precedes every other argument check.",
+        "fp_engine_destroy takes no argument other than the engine, so only its call with a valid engine applies.",
         "fp_query_capabilities follows the any-thread rule and succeeds, and fp_abi_revision returns the revision from any thread."
       ]
     },

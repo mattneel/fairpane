@@ -1,5 +1,6 @@
 //! The public C ABI. It maps opaque 64-bit identifiers to the native engine and never exposes internal handles.
 //! `abi_generated.zig` declares every ABI type and C function type from `api/fairpane.schema.json`.
+//! Each export returns through `finish`, which checks at compile time that every status it can return is in its generated status set.
 
 const std = @import("std");
 const builtin = @import("builtin");
@@ -51,10 +52,10 @@ fn convert(comptime T: type, value: anytype) T {
 /// The allocator behind every engine that `fp_engine_create` creates.
 const process_allocator: Allocator = if (builtin.single_threaded) std.heap.page_allocator else std.heap.smp_allocator;
 
-const Failure = native.Error || error{InvalidArgument};
-
-fn statusOf(err: Failure) u32 {
-    const status: abi.Status = switch (err) {
+/// The status that represents an error of an export.
+/// An error without a status fails compilation, so a new native error cannot surface silently.
+fn statusOf(comptime err: anyerror) abi.Status {
+    return switch (err) {
         error.InvalidArgument => .invalid_argument,
         error.WrongThread => .wrong_thread,
         error.UnknownId => .unknown_id,
@@ -62,8 +63,30 @@ fn statusOf(err: Failure) u32 {
         error.UnsupportedVersion => .unsupported_version,
         error.LimitExceeded, error.IdentifiersExhausted => .limit_exceeded,
         error.OutOfMemory => .out_of_memory,
+        else => @compileError("No status represents error." ++ @errorName(err) ++ "."),
     };
-    return @backingInt(status);
+}
+
+/// Checks at compile time that the schema's status set for the export `symbol` contains `status`.
+fn expectAllowed(comptime symbol: []const u8, comptime status: abi.Status) void {
+    for (@field(abi.statuses, symbol)) |allowed| {
+        if (allowed == status) return;
+    }
+    @compileError(symbol ++ " can return " ++ @tagName(status) ++ ", which its schema status set lacks.");
+}
+
+/// Converts the result of the export `symbol` to its status.
+/// Success and every error in the result's error set must map into the schema's status set for `symbol` at compile time.
+fn finish(comptime symbol: []const u8, result: anytype) u32 {
+    comptime expectAllowed(symbol, .ok);
+    result catch |err| switch (err) {
+        inline else => |known| {
+            const status = comptime statusOf(known);
+            comptime expectAllowed(symbol, status);
+            return @backingInt(status);
+        },
+    };
+    return ok;
 }
 
 fn nativeEngine(handle: *abi.Engine) *native.Engine {
@@ -71,7 +94,7 @@ fn nativeEngine(handle: *abi.Engine) *native.Engine {
 }
 
 /// Resolves the engine argument and checks the calling thread before any other argument.
-fn enter(handle: ?*abi.Engine) Failure!*native.Engine {
+fn enter(handle: ?*abi.Engine) error{ InvalidArgument, WrongThread }!*native.Engine {
     const resolved = nativeEngine(handle orelse return error.InvalidArgument);
     try resolved.checkThread();
     return resolved;
@@ -80,16 +103,19 @@ fn enter(handle: ?*abi.Engine) Failure!*native.Engine {
 /// `fp_engine_create` with an explicit allocator.
 /// Zig tests use it to inject allocation failure and to detect leaked engine storage.
 pub fn createEngine(gpa: Allocator, options: ?*const abi.EngineOptions, out_engine: ?*?*abi.Engine) u32 {
-    const input = options orelse return invalid_argument;
-    const out = out_engine orelse return invalid_argument;
-    if (input.struct_size < @sizeOf(abi.EngineOptions)) return invalid_argument;
-    const created = native.Engine.create(gpa, .{
+    return finish("fp_engine_create", engineCreate(gpa, options, out_engine));
+}
+
+fn engineCreate(gpa: Allocator, options: ?*const abi.EngineOptions, out_engine: ?*?*abi.Engine) !void {
+    const input = options orelse return error.InvalidArgument;
+    const out = out_engine orelse return error.InvalidArgument;
+    if (input.struct_size < @sizeOf(abi.EngineOptions)) return error.InvalidArgument;
+    const created = try native.Engine.create(gpa, .{
         .max_outstanding_requests = input.max_outstanding_requests,
         // A bound beyond the address space admits every body that the host can present.
         .max_response_body_bytes = std.math.cast(usize, input.max_response_body_bytes) orelse std.math.maxInt(usize),
-    }) catch |err| return statusOf(err);
+    });
     out.* = @ptrCast(created);
-    return ok;
 }
 
 fn eventToC(event: ?native.Event) abi.Event {
@@ -138,14 +164,17 @@ export fn fp_abi_revision() callconv(.c) u32 {
 }
 
 export fn fp_query_capabilities(out: ?*abi.Capabilities, out_size: usize) callconv(.c) u32 {
-    const result = out orelse return invalid_argument;
-    if (out_size < @sizeOf(abi.Capabilities)) return invalid_argument;
+    return finish("fp_query_capabilities", queryCapabilities(out, out_size));
+}
+
+fn queryCapabilities(out: ?*abi.Capabilities, out_size: usize) !void {
+    const result = out orelse return error.InvalidArgument;
+    if (out_size < @sizeOf(abi.Capabilities)) return error.InvalidArgument;
     result.* = .{
         .struct_size = @sizeOf(abi.Capabilities),
         .abi_revision = abi_revision,
         .feature_bits = 0,
     };
-    return ok;
 }
 
 export fn fp_engine_create(options: ?*const abi.EngineOptions, out_engine: ?*?*abi.Engine) callconv(.c) u32 {
@@ -153,80 +182,107 @@ export fn fp_engine_create(options: ?*const abi.EngineOptions, out_engine: ?*?*a
 }
 
 export fn fp_engine_destroy(handle: ?*abi.Engine) callconv(.c) u32 {
-    const engine = enter(handle) catch |err| return statusOf(err);
-    engine.destroy() catch |err| return statusOf(err);
-    return ok;
+    return finish("fp_engine_destroy", engineDestroy(handle));
+}
+
+fn engineDestroy(handle: ?*abi.Engine) !void {
+    const engine = try enter(handle);
+    try engine.destroy();
 }
 
 export fn fp_document_create(handle: ?*abi.Engine, out_document: ?*abi.DocumentId) callconv(.c) u32 {
-    const engine = enter(handle) catch |err| return statusOf(err);
-    const out = out_document orelse return invalid_argument;
-    const id = engine.createDocument() catch |err| return statusOf(err);
-    out.* = convert(abi.DocumentId, id);
-    return ok;
+    return finish("fp_document_create", documentCreate(handle, out_document));
+}
+
+fn documentCreate(handle: ?*abi.Engine, out_document: ?*abi.DocumentId) !void {
+    const engine = try enter(handle);
+    const out = out_document orelse return error.InvalidArgument;
+    out.* = convert(abi.DocumentId, try engine.createDocument());
 }
 
 export fn fp_document_destroy(handle: ?*abi.Engine, document: abi.DocumentId) callconv(.c) u32 {
-    const engine = enter(handle) catch |err| return statusOf(err);
-    engine.destroyDocument(convert(native.DocumentId, document)) catch |err| return statusOf(err);
-    return ok;
+    return finish("fp_document_destroy", documentDestroy(handle, document));
+}
+
+fn documentDestroy(handle: ?*abi.Engine, document: abi.DocumentId) !void {
+    const engine = try enter(handle);
+    try engine.destroyDocument(convert(native.DocumentId, document));
 }
 
 export fn fp_document_get(handle: ?*abi.Engine, document: abi.DocumentId, out: ?*abi.DocumentInfo, out_size: usize) callconv(.c) u32 {
-    const engine = enter(handle) catch |err| return statusOf(err);
-    const result = out orelse return invalid_argument;
-    if (out_size < @sizeOf(abi.DocumentInfo)) return invalid_argument;
-    const view = engine.document(convert(native.DocumentId, document)) catch |err| return statusOf(err);
+    return finish("fp_document_get", documentGet(handle, document, out, out_size));
+}
+
+fn documentGet(handle: ?*abi.Engine, document: abi.DocumentId, out: ?*abi.DocumentInfo, out_size: usize) !void {
+    const engine = try enter(handle);
+    const result = out orelse return error.InvalidArgument;
+    if (out_size < @sizeOf(abi.DocumentInfo)) return error.InvalidArgument;
+    const view = try engine.document(convert(native.DocumentId, document));
     result.* = .{
         .struct_size = @sizeOf(abi.DocumentInfo),
         .state = @backingInt(view.state),
         .body = if (view.body.len == 0) null else view.body.ptr,
         .body_len = view.body.len,
     };
-    return ok;
 }
 
 export fn fp_document_load(handle: ?*abi.Engine, document: abi.DocumentId, url: ?[*]const u8, url_len: usize, out_request: ?*abi.RequestId) callconv(.c) u32 {
-    const engine = enter(handle) catch |err| return statusOf(err);
-    const bytes = url orelse return invalid_argument;
-    const out = out_request orelse return invalid_argument;
-    const request = engine.load(convert(native.DocumentId, document), bytes[0..url_len]) catch |err| return statusOf(err);
+    return finish("fp_document_load", documentLoad(handle, document, url, url_len, out_request));
+}
+
+fn documentLoad(handle: ?*abi.Engine, document: abi.DocumentId, url: ?[*]const u8, url_len: usize, out_request: ?*abi.RequestId) !void {
+    const engine = try enter(handle);
+    const bytes = url orelse return error.InvalidArgument;
+    const out = out_request orelse return error.InvalidArgument;
+    const request = try engine.load(convert(native.DocumentId, document), bytes[0..url_len]);
     out.* = convert(abi.RequestId, request);
-    return ok;
 }
 
 export fn fp_request_respond(handle: ?*abi.Engine, response: ?*const abi.Response) callconv(.c) u32 {
-    const engine = enter(handle) catch |err| return statusOf(err);
-    const input = response orelse return invalid_argument;
-    if (input.struct_size < @sizeOf(abi.Response)) return invalid_argument;
+    return finish("fp_request_respond", requestRespond(handle, response));
+}
+
+fn requestRespond(handle: ?*abi.Engine, response: ?*const abi.Response) !void {
+    const engine = try enter(handle);
+    const input = response orelse return error.InvalidArgument;
+    if (input.struct_size < @sizeOf(abi.Response)) return error.InvalidArgument;
     const body: []const u8 = if (input.body) |bytes|
         bytes[0..input.body_len]
     else if (input.body_len == 0)
         &.{}
     else
-        return invalid_argument;
-    engine.respond(convert(native.RequestId, input.request_id), input.version, body) catch |err| return statusOf(err);
-    return ok;
+        return error.InvalidArgument;
+    try engine.respond(convert(native.RequestId, input.request_id), input.version, body);
 }
 
 export fn fp_request_reject(handle: ?*abi.Engine, request: abi.RequestId, reason: u32) callconv(.c) u32 {
-    const engine = enter(handle) catch |err| return statusOf(err);
-    const known_reason = std.enums.fromInt(native.RejectReason, reason) orelse return invalid_argument;
-    engine.reject(convert(native.RequestId, request), known_reason) catch |err| return statusOf(err);
-    return ok;
+    return finish("fp_request_reject", requestReject(handle, request, reason));
+}
+
+fn requestReject(handle: ?*abi.Engine, request: abi.RequestId, reason: u32) !void {
+    const engine = try enter(handle);
+    const known_reason = std.enums.fromInt(native.RejectReason, reason) orelse return error.InvalidArgument;
+    try engine.reject(convert(native.RequestId, request), known_reason);
 }
 
 export fn fp_request_cancel(handle: ?*abi.Engine, request: abi.RequestId) callconv(.c) u32 {
-    const engine = enter(handle) catch |err| return statusOf(err);
-    engine.cancel(convert(native.RequestId, request)) catch |err| return statusOf(err);
-    return ok;
+    return finish("fp_request_cancel", requestCancel(handle, request));
+}
+
+fn requestCancel(handle: ?*abi.Engine, request: abi.RequestId) !void {
+    const engine = try enter(handle);
+    try engine.cancel(convert(native.RequestId, request));
 }
 
 export fn fp_engine_step(handle: ?*abi.Engine, budget: u32, out: ?*abi.StepOutcome, out_size: usize) callconv(.c) u32 {
-    const engine = enter(handle) catch |err| return statusOf(err);
-    const result = out orelse return invalid_argument;
-    if (out_size < @sizeOf(abi.StepOutcome)) return invalid_argument;
-    const outcome = engine.step(budget) catch |err| return statusOf(err);
+    return finish("fp_engine_step", engineStep(handle, budget, out, out_size));
+}
+
+fn engineStep(handle: ?*abi.Engine, budget: u32, out: ?*abi.StepOutcome, out_size: usize) !void {
+    const engine = try enter(handle);
+    const result = out orelse return error.InvalidArgument;
+    if (out_size < @sizeOf(abi.StepOutcome)) return error.InvalidArgument;
+    const outcome = try engine.step(budget);
     result.* = .{
         .struct_size = @sizeOf(abi.StepOutcome),
         .work_remaining = @intFromBool(outcome.work_remaining),
@@ -236,16 +292,17 @@ export fn fp_engine_step(handle: ?*abi.Engine, budget: u32, out: ?*abi.StepOutco
             .none => abi.deadline_none,
         },
     };
-    return ok;
 }
 
 export fn fp_engine_next_event(handle: ?*abi.Engine, out: ?*abi.Event, out_size: usize) callconv(.c) u32 {
-    const engine = enter(handle) catch |err| return statusOf(err);
-    const result = out orelse return invalid_argument;
-    if (out_size < @sizeOf(abi.Event)) return invalid_argument;
-    const event = engine.nextEvent() catch |err| return statusOf(err);
-    result.* = eventToC(event);
-    return ok;
+    return finish("fp_engine_next_event", engineNextEvent(handle, out, out_size));
+}
+
+fn engineNextEvent(handle: ?*abi.Engine, out: ?*abi.Event, out_size: usize) !void {
+    const engine = try enter(handle);
+    const result = out orelse return error.InvalidArgument;
+    if (out_size < @sizeOf(abi.Event)) return error.InvalidArgument;
+    result.* = eventToC(try engine.nextEvent());
 }
 
 test "the bootstrap reports no browser features" {

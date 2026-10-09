@@ -19,20 +19,8 @@
 #  error "The smoke test checks every call with assert."
 #endif
 
-_Static_assert(sizeof(uint32_t) == 4, "A 32-bit uint32_t is required");
-_Static_assert(offsetof(fp_capabilities, abi_revision) == 4, "Unexpected revision offset");
-_Static_assert(offsetof(fp_capabilities, feature_bits) == 8, "Unexpected feature offset");
-_Static_assert(sizeof(fp_capabilities) == 16, "Unexpected capability structure size");
-_Static_assert(sizeof(fp_engine_options) == 16, "Unexpected engine option structure size");
-_Static_assert(offsetof(fp_engine_options, max_response_body_bytes) == 8, "Unexpected body bound offset");
-_Static_assert(sizeof(fp_step_outcome) == 32, "Unexpected step outcome structure size");
-_Static_assert(offsetof(fp_step_outcome, next_deadline) == 24, "Unexpected deadline offset");
-_Static_assert(offsetof(fp_response, request_id) == 8, "Unexpected response request offset");
-_Static_assert(offsetof(fp_response, body) == 16, "Unexpected response body offset");
-_Static_assert(offsetof(fp_document_info, body) == 8, "Unexpected document body offset");
-_Static_assert(offsetof(fp_event, request_id) == 16, "Unexpected event request offset");
-_Static_assert(offsetof(fp_event, reject_reason) == 36, "Unexpected event reason offset");
-_Static_assert(offsetof(fp_event, url) == 40, "Unexpected event URL offset");
+/* The generated static assertions check the size and every member offset of every structure. */
+#include "abi_layout.h"
 
 static void check_capabilities(void) {
     fp_capabilities result = {19, 23, 42};
@@ -311,12 +299,13 @@ static void scenario_retired_identifier(void) {
     destroy_engine(engine);
 }
 
-/* Every function called from a thread that does not own the engine. */
+/* Every function called from a thread that does not own the engine, with valid and then invalid arguments. */
 struct foreign_calls {
     fp_engine *engine;
     fp_document_id document;
     fp_request_id request;
     uint32_t statuses[10];
+    uint32_t invalid_statuses[14];
     uint32_t revision;
     uint32_t capabilities_status;
     fp_document_id document_out;
@@ -329,9 +318,27 @@ struct foreign_calls {
 static void run_foreign_calls(struct foreign_calls *calls) {
     fp_engine *engine = calls->engine;
     fp_response answer = response(calls->request, "foreign");
+    fp_response short_answer = response(calls->request, "short");
+    short_answer.struct_size = sizeof(fp_response) - 1;
     fp_capabilities capabilities;
     calls->revision = fp_abi_revision();
     calls->capabilities_status = fp_query_capabilities(&capabilities, sizeof(capabilities));
+    /* The thread check precedes every other argument check, so an invalid argument also returns FP_STATUS_WRONG_THREAD.
+     * fp_engine_destroy has no argument other than the engine, so only its valid call below covers it. */
+    calls->invalid_statuses[0] = fp_document_create(engine, NULL);
+    calls->invalid_statuses[1] = fp_document_destroy(engine, 0);
+    calls->invalid_statuses[2] = fp_document_get(engine, calls->document, NULL, sizeof(calls->info));
+    calls->invalid_statuses[3] = fp_document_get(engine, calls->document, &calls->info, sizeof(calls->info) - 1);
+    calls->invalid_statuses[4] = fp_document_load(engine, calls->document, NULL, 0, &calls->request_out);
+    calls->invalid_statuses[5] = fp_document_load(engine, calls->document, (const uint8_t *)"u", 1, NULL);
+    calls->invalid_statuses[6] = fp_request_respond(engine, NULL);
+    calls->invalid_statuses[7] = fp_request_respond(engine, &short_answer);
+    calls->invalid_statuses[8] = fp_request_reject(engine, calls->request, 0);
+    calls->invalid_statuses[9] = fp_request_cancel(engine, 0);
+    calls->invalid_statuses[10] = fp_engine_step(engine, 8, NULL, sizeof(calls->outcome));
+    calls->invalid_statuses[11] = fp_engine_step(engine, 8, &calls->outcome, sizeof(calls->outcome) - 1);
+    calls->invalid_statuses[12] = fp_engine_next_event(engine, NULL, sizeof(calls->event));
+    calls->invalid_statuses[13] = fp_engine_next_event(engine, &calls->event, 0);
     calls->statuses[0] = fp_document_create(engine, &calls->document_out);
     calls->statuses[1] = fp_document_destroy(engine, calls->document);
     calls->statuses[2] = fp_document_get(engine, calls->document, &calls->info, sizeof(calls->info));
@@ -369,7 +376,8 @@ static void run_on_other_thread(struct foreign_calls *calls) {
 }
 #endif
 
-/* Scenario wrong-thread: every owner-thread function returns FP_STATUS_WRONG_THREAD from another thread. */
+/* Scenario wrong-thread: every owner-thread function returns FP_STATUS_WRONG_THREAD from another thread,
+ * even with an invalid argument, and writes no output. */
 static void scenario_wrong_thread(void) {
     fp_engine *engine = create_engine(4, 16);
     fp_document_id document = create_document(engine);
@@ -385,6 +393,9 @@ static void scenario_wrong_thread(void) {
 
     for (size_t index = 0; index < sizeof(calls.statuses) / sizeof(calls.statuses[0]); index += 1) {
         assert(calls.statuses[index] == FP_STATUS_WRONG_THREAD);
+    }
+    for (size_t index = 0; index < sizeof(calls.invalid_statuses) / sizeof(calls.invalid_statuses[0]); index += 1) {
+        assert(calls.invalid_statuses[index] == FP_STATUS_WRONG_THREAD);
     }
     assert(calls.revision == FP_ABI_REVISION && calls.capabilities_status == FP_STATUS_OK);
     assert(calls.document_out == 77 && calls.request_out == 78);

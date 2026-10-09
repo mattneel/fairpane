@@ -475,6 +475,8 @@ export async function runGate(root, id, { evidenceDir = 'out/evidence' } = {}) {
         await run(zig, ['build', '--prefix', buildDir]);
         const libs = ['fairpane.lib', 'libfairpane.a', 'fairpane.a'].map(f => path.join(buildDir, 'lib', f)).filter(f => fs.existsSync(f));
         invariant(libs.length === 1, 'The C smoke test needs exactly one candidate static library.');
+        // The library must export exactly the functions that the ABI schema declares.
+        await run(process.execPath, [path.join(root, 'tools/fairpane.mjs'), 'abi-exports', path.relative(root, libs[0]).split(path.sep).join('/')]);
         const exe = path.join(root, 'out', process.platform === 'win32' ? 'c-abi-smoke.exe' : 'c-abi-smoke');
         await run(zig, ['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', 'tests/c/abi_smoke.c', '-Iinclude', libs[0], '-o', exe]);
         await run(exe, []);

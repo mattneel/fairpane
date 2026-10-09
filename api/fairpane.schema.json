@@ -17,7 +17,7 @@
     },
     {
       "name": "owner",
-      "description": "Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns wrong_thread."
+      "description": "Only the thread that created the engine may call the function. The engine checks the calling thread before any other argument, and a call from another thread returns {status:wrong_thread}."
     }
   ],
   "lifetimes": [
@@ -33,17 +33,22 @@
     },
     {
       "name": "next_load_or_destroy",
-      "description": "Ends at the document's next load, the document's destruction, or the engine's destruction.",
+      "description": "Ends when {function:document_load} loads the document again, when {function:document_destroy} destroys the document, or when {function:engine_destroy} destroys its engine.",
       "ended_by": ["document_load", "document_destroy", "engine_destroy"]
     },
     {
+      "name": "document_destroy",
+      "description": "Ends when {function:document_destroy} destroys the document or {function:engine_destroy} destroys its engine.",
+      "ended_by": ["document_destroy", "engine_destroy"]
+    },
+    {
       "name": "engine_destroy",
-      "description": "Ends when the engine is destroyed.",
+      "description": "Ends when {function:engine_destroy} destroys the engine.",
       "ended_by": ["engine_destroy"]
     }
   ],
   "statuses": {
-    "description": "Status codes. Every function except abi_revision returns one.",
+    "description": "Status codes. Every function except {function:abi_revision} returns one.",
     "underlying": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] },
     "members": [
       { "name": "ok", "value": 0, "description": "The call succeeded." },
@@ -124,17 +129,19 @@
   "identifiers": [
     {
       "name": "document",
-      "description": "A document identifier. It is nonzero, unique within the process, and never reused."
+      "description": "A document identifier. It is nonzero, unique within the process, and never reused.",
+      "lifetime": "document_destroy"
     },
     {
       "name": "request",
-      "description": "A request identifier. It is nonzero, unique within the process, and never reused. Document and request identifiers come from one sequence, so they never coincide."
+      "description": "A request identifier. It is nonzero, unique within the process, and never reused. Document and request identifiers come from one sequence, so they never coincide.",
+      "lifetime": "request_end"
     }
   ],
   "structures": [
     {
       "name": "capabilities",
-      "description": "Output of query_capabilities.",
+      "description": "Output of {function:query_capabilities}.",
       "fields": [
         { "name": "struct_size", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
         { "name": "abi_revision", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
@@ -143,7 +150,7 @@
     },
     {
       "name": "engine_options",
-      "description": "Input. struct_size must be at least the declared structure size.",
+      "description": "Input. struct_size must be at least {size:engine_options}.",
       "fields": [
         { "name": "struct_size", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
         { "name": "max_outstanding_requests", "description": "The maximum number of requests that are outstanding at once.", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
@@ -152,13 +159,13 @@
     },
     {
       "name": "document_info",
-      "description": "Output of document_get.",
+      "description": "Output of {function:document_get}.",
       "fields": [
         { "name": "struct_size", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
         { "name": "state", "type": { "kind": "enumeration", "enumeration": "document_state" } },
         {
           "name": "body",
-          "description": "The loaded body, or null when body_len is zero. The bytes stay readable until the document's next load or its destruction.",
+          "description": "The loaded body, or null when body_len is zero.",
           "type": { "kind": "bytes" },
           "direction": "out",
           "nullability": "null_when_empty",
@@ -169,14 +176,14 @@
     },
     {
       "name": "response",
-      "description": "Input. struct_size must be at least the declared structure size.",
+      "description": "Input. struct_size must be at least {size:response}.",
       "fields": [
         { "name": "struct_size", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
         { "name": "version", "description": "Must equal the request version.", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
         { "name": "request_id", "type": { "kind": "identifier", "family": "request" } },
         {
           "name": "body",
-          "description": "Borrowed for the call only. May be null when body_len is zero.",
+          "description": "The response body. It may be null when body_len is zero, and the engine copies it during the call.",
           "type": { "kind": "bytes" },
           "direction": "in",
           "nullability": "null_when_empty",
@@ -187,18 +194,18 @@
     },
     {
       "name": "step_outcome",
-      "description": "Output of engine_step.",
+      "description": "Output of {function:engine_step}.",
       "fields": [
         { "name": "struct_size", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
         { "name": "work_remaining", "description": "One when queued input remains, otherwise zero.", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 1] } },
         { "name": "applied", "description": "The number of queued inputs that the step applied.", "type": { "kind": "integer", "bits": 64, "signed": false, "range": [0, "18446744073709551615"] } },
         { "name": "events_ready", "description": "The number of events that are ready to drain.", "type": { "kind": "integer", "bits": 64, "signed": false, "range": [0, "18446744073709551615"] } },
-        { "name": "next_deadline", "description": "Always the deadline_none constant.", "type": { "kind": "integer", "bits": 64, "signed": false, "range": [0, "18446744073709551615"] } }
+        { "name": "next_deadline", "description": "Always {constant:deadline_none}.", "type": { "kind": "integer", "bits": 64, "signed": false, "range": [0, "18446744073709551615"] } }
       ]
     },
     {
       "name": "event",
-      "description": "Output of engine_next_event. Fields that do not apply to the kind are zero or null.",
+      "description": "Output of {function:engine_next_event}. Fields that do not apply to the kind are zero or null.",
       "fields": [
         { "name": "struct_size", "type": { "kind": "integer", "bits": 32, "signed": false, "range": [0, 4294967295] } },
         { "name": "kind", "type": { "kind": "enumeration", "enumeration": "event_kind" } },
@@ -206,11 +213,11 @@
         { "name": "request_id", "type": { "kind": "optional", "absent": "zero", "value": { "kind": "identifier", "family": "request" } } },
         { "name": "request_kind", "type": { "kind": "optional", "absent": "zero", "value": { "kind": "enumeration", "enumeration": "request_kind" } } },
         { "name": "request_version", "type": { "kind": "optional", "absent": "zero", "value": { "kind": "integer", "bits": 32, "signed": false, "range": [1, 4294967295] } } },
-        { "name": "document_state", "description": "The new state for a document_state_changed event.", "type": { "kind": "optional", "absent": "zero", "value": { "kind": "enumeration", "enumeration": "document_state" } } },
+        { "name": "document_state", "description": "The new state for a {event:document_state_changed} event.", "type": { "kind": "optional", "absent": "zero", "value": { "kind": "enumeration", "enumeration": "document_state" } } },
         { "name": "reject_reason", "description": "The rejection reason when an applied rejection failed the document.", "type": { "kind": "optional", "absent": "zero", "value": { "kind": "enumeration", "enumeration": "reject_reason" } } },
         {
           "name": "url",
-          "description": "For a request_issued event, the request URL while the request is live, otherwise null. The bytes stay readable until the request ends.",
+          "description": "For a {event:request_issued} event, the request URL while the request is live, otherwise null.",
           "type": { "kind": "bytes" },
           "direction": "out",
           "nullability": "nullable",
@@ -265,7 +272,7 @@
       "returns": "status",
       "statuses": ["ok", "invalid_argument", "wrong_thread"],
       "parameters": [
-        { "name": "engine", "type": { "kind": "handle", "handle": "engine" }, "direction": "in", "nullability": "non_null", "ownership": "borrowed", "lifetime": "call" }
+        { "name": "engine", "type": { "kind": "handle", "handle": "engine" }, "direction": "in", "nullability": "non_null", "ownership": "consumed_on_success", "lifetime": "engine_destroy" }
       ]
     },
     {
@@ -304,7 +311,7 @@
     },
     {
       "name": "document_load",
-      "description": "Issues a version 1 resource request for a copy of url and stores its identifier in the output. The url buffer is borrowed for the call only and must not be null. A load while the document is loading cancels the earlier request.",
+      "description": "Issues a {enumeration:request_kind.resource} request with version {constant:resource_request_version} for a copy of url and stores its identifier in the output. The url buffer is borrowed for the call only and must not be null. A load while the document is loading cancels the earlier request.",
       "thread": "owner",
       "returns": "status",
       "statuses": ["ok", "invalid_argument", "wrong_thread", "unknown_id", "limit_exceeded", "out_of_memory"],
@@ -328,7 +335,7 @@
     },
     {
       "name": "request_reject",
-      "description": "Queues a rejection with a reject_reason value.",
+      "description": "Queues a rejection with a {enumeration:reject_reason} value.",
       "thread": "owner",
       "returns": "status",
       "statuses": ["ok", "invalid_argument", "wrong_thread", "unknown_id", "invalid_state", "out_of_memory"],
@@ -363,7 +370,7 @@
     },
     {
       "name": "engine_next_event",
-      "description": "Removes the oldest event and initializes the declared event structure with it. When no event is ready, the kind is none.",
+      "description": "Removes the oldest event and initializes the declared event structure with it. When no event is ready, the kind is {enumeration:event_kind.none}.",
       "thread": "owner",
       "returns": "status",
       "statuses": ["ok", "invalid_argument", "wrong_thread"],

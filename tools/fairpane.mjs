@@ -8,7 +8,7 @@ import { readJson, checkRepository, readyTasks, qualificationProblems, fingerpri
   validateReceipt, runGate, recordCommand, installZig, compilerPath, checkCompiler, safePath } from './lib.mjs';
 import { corpusCommand } from './corpus.mjs';
 import { AttestationError, candidateIdentity, candidateRepository, enclosingGitDirectories, isInside, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
-import { abiCheck, abiGenerate } from './abi.mjs';
+import { abiCheck, abiExports, abiGenerate } from './abi.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command = 'help', ...args] = process.argv.slice(2);
@@ -45,9 +45,13 @@ function help() {
                               repository. Paths resolve from the current
                               directory.
   abi-generate                Validate the ABI schema and failure scenarios, then
-                              write include/fairpane.h and src/abi_generated.zig.
+                              write include/fairpane.h, src/abi_generated.zig,
+                              and tests/c/abi_layout.h.
   abi-check                   Regenerate the ABI files in memory and exit with
                               status 1 when a committed file differs.
+  abi-exports <library>       Exit with status 1 when a static library exports
+                              an fp_ symbol that the schema does not declare or
+                              lacks one that it declares.
   release-check               Check release prerequisites and fail closed.
   help                        Print these commands.
 
@@ -87,6 +91,9 @@ try {
   else if (command === 'abi-generate') output(abiGenerate(root));
   else if (command === 'abi-check') {
     const r = abiCheck(root); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
+  } else if (command === 'abi-exports') {
+    if (args.length !== 1) throw new Error('Usage: abi-exports <repository-relative static library path>');
+    const r = abiExports(root, args[0]); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
   } else if (command === 'install-zig') output(await installZig(root));
   else if (command === 'run') {
     const rest = [...args], at = rest.indexOf('--evidence-dir');

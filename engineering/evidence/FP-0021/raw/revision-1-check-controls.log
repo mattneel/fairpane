@@ -1,0 +1,67 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const c=require(\"crypto\"),f=require(\"fs\");for(const p of [\"src/abi_generated.zig\",\"src/c_api.zig\"])console.log(\"sha256 \"+p+\" \"+c.createHash(\"sha256\").update(f.readFileSync(p)).digest(\"hex\"))"]
+sha256 src/abi_generated.zig 1c236487df3db81f4f59c354a9fd44e95cc3cb30d81b771febaf052b7335e839
+sha256 src/c_api.zig abad0ad734e6fb8b3acd8db86df9e4ab484828ae8800e1d1533bc141929e58b9
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const c=require(\"crypto\"),f=require(\"fs\");for(const p of [\"src/abi_generated.zig\",\"src/c_api.zig\"])console.log(\"sha256 \"+p+\" \"+c.createHash(\"sha256\").update(f.readFileSync(p)).digest(\"hex\"))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:18.162Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const f=require(\"fs\");const p=\"src/abi_generated.zig\",t=f.readFileSync(p,\"utf8\");const from=\"pub const fp_document_create: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .limit_exceeded, .out_of_memory };\";if(t.split(from).length!==2)process.exit(2);f.writeFileSync(\"out/scratch/abi_generated.zig.orig\",t);f.writeFileSync(p,t.replace(from,from.replace(\", .out_of_memory\",\"\")));console.log(\"Removed out_of_memory from the fp_document_create status set in src/abi_generated.zig.\")"]
+Removed out_of_memory from the fp_document_create status set in src/abi_generated.zig.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const f=require(\"fs\");const p=\"src/abi_generated.zig\",t=f.readFileSync(p,\"utf8\");const from=\"pub const fp_document_create: []const Status = &.{ .ok, .invalid_argument, .wrong_thread, .limit_exceeded, .out_of_memory };\";if(t.split(from).length!==2)process.exit(2);f.writeFileSync(\"out/scratch/abi_generated.zig.orig\",t);f.writeFileSync(p,t.replace(from,from.replace(\", .out_of_memory\",\"\")));console.log(\"Removed out_of_memory from the fp_document_create status set in src/abi_generated.zig.\")"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:18.244Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/zig-cache-fp0021-r1-status-mutant"]
+test
++- run test
+   +- compile test debug native 1 errors
+src\c_api.zig:75:5: error: fp_document_create can return out_of_memory, which its schema status set lacks.
+    @compileError(symbol ++ " can return " ++ @tagName(status) ++ ", which its schema status set lacks.");
+    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src\c_api.zig:85:35: note: called at comptime here
+            comptime expectAllowed(symbol, status);
+                     ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~
+referenced by:
+    fp_document_create: src\c_api.zig:194:18
+    test.FP-0006 case 1: the C API creates and destroys an engine and a document, and a destroyed document is unknown: src\c_api.zig:360:51
+    2 reference(s) hidden; use '-freference-trace=4' to see all references
+error: 1 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\zig-cache-fp0021-r1-status-mutant" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+test transitive failure
++- run test transitive failure
+   +- compile test debug native 1 errors
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xda5405c4 test --summary all --cache-dir out/zig-cache-fp0021-r1-status-mutant
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/zig-cache-fp0021-r1-status-mutant"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:18.334Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3614,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const f=require(\"fs\");f.writeFileSync(\"src/abi_generated.zig\",f.readFileSync(\"out/scratch/abi_generated.zig.orig\"));console.log(\"Restored src/abi_generated.zig.\")"]
+Restored src/abi_generated.zig.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const f=require(\"fs\");f.writeFileSync(\"src/abi_generated.zig\",f.readFileSync(\"out/scratch/abi_generated.zig.orig\"));console.log(\"Restored src/abi_generated.zig.\")"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:22.001Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const f=require(\"fs\");const p=\"src/c_api.zig\",t=f.readFileSync(p,\"utf8\");f.writeFileSync(\"out/scratch/c_api.zig.orig2\",t);f.writeFileSync(p,t+\"\\nexport fn fp_unexpected() callconv(.c) u32 {\\n    return 0;\\n}\\n\");console.log(\"Appended an fp_unexpected export that the schema does not declare to src/c_api.zig.\")"]
+Appended an fp_unexpected export that the schema does not declare to src/c_api.zig.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const f=require(\"fs\");const p=\"src/c_api.zig\",t=f.readFileSync(p,\"utf8\");f.writeFileSync(\"out/scratch/c_api.zig.orig2\",t);f.writeFileSync(p,t+\"\\nexport fn fp_unexpected() callconv(.c) u32 {\\n    return 0;\\n}\\n\");console.log(\"Appended an fp_unexpected export that the schema does not declare to src/c_api.zig.\")"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:22.084Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","out/c-abi-build-export-mutant"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","out/c-abi-build-export-mutant"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:22.169Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":1437,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","abi-exports","out/c-abi-build-export-mutant/lib/fairpane.lib"]
+{
+  "result": "fail",
+  "schema": "api/fairpane.schema.json",
+  "library": "out/c-abi-build-export-mutant/lib/fairpane.lib",
+  "unexpected": [
+    "fp_unexpected"
+  ],
+  "missing": []
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","abi-exports","out/c-abi-build-export-mutant/lib/fairpane.lib"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:23.655Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":45}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const f=require(\"fs\");f.writeFileSync(\"src/c_api.zig\",f.readFileSync(\"out/scratch/c_api.zig.orig2\"));console.log(\"Restored src/c_api.zig.\")"]
+Restored src/c_api.zig.
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const f=require(\"fs\");f.writeFileSync(\"src/c_api.zig\",f.readFileSync(\"out/scratch/c_api.zig.orig2\"));console.log(\"Restored src/c_api.zig.\")"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:23.757Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const c=require(\"crypto\"),f=require(\"fs\");for(const p of [\"src/abi_generated.zig\",\"src/c_api.zig\"])console.log(\"sha256 \"+p+\" \"+c.createHash(\"sha256\").update(f.readFileSync(p)).digest(\"hex\"))"]
+sha256 src/abi_generated.zig 1c236487df3db81f4f59c354a9fd44e95cc3cb30d81b771febaf052b7335e839
+sha256 src/c_api.zig abad0ad734e6fb8b3acd8db86df9e4ab484828ae8800e1d1533bc141929e58b9
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const c=require(\"crypto\"),f=require(\"fs\");for(const p of [\"src/abi_generated.zig\",\"src/c_api.zig\"])console.log(\"sha256 \"+p+\" \"+c.createHash(\"sha256\").update(f.readFileSync(p)).digest(\"hex\"))"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d55b558a\\m","started_at":"2026-10-09T04:40:23.841Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":40}

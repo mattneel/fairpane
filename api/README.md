@@ -58,22 +58,62 @@ An output parameter that receives a pointer states the facts of that pointer in 
 | --- | --- |
 | Direction | `in` or `out`. |
 | Nullability | `non_null`, `null_when_empty`, or `nullable`. An input range that is `null_when_empty` may be null only when its length is zero. An output range that is `null_when_empty` is null exactly when its length is zero. |
-| Ownership | `borrowed`, `owned_by_engine`, or `transferred_to_caller`. |
-| Lifetime | A lifetime that the schema defines: `call`, `request_end`, `next_load_or_destroy`, or `engine_destroy`. Each lifetime lists the functions that end it. |
+| Ownership | `borrowed`, `owned_by_engine`, `transferred_to_caller`, or `consumed_on_success`. |
+| Lifetime | A lifetime that the schema defines: `call`, `request_end`, `next_load_or_destroy`, `document_destroy`, or `engine_destroy`. Each lifetime lists the functions that end it. |
+
+`consumed_on_success` applies only to an input handle parameter.
+A call that returns `FP_STATUS_OK` takes that handle and ends its lifetime.
+A call that returns any other status leaves the handle with the caller.
+The validator rejects `consumed_on_success` anywhere else, and it requires that the handle's lifetime lists the consuming function.
+The `engine` parameter of `fp_engine_destroy` is `consumed_on_success`.
+
+Each identifier family names the lifetime that ends its identifiers.
+A document identifier lives until `document_destroy`, which `fp_document_destroy` and `fp_engine_destroy` end.
+A request identifier lives until `request_end`.
 
 Each function states its thread rule and every status it can return.
 The thread rules are `any`, `becomes_owner`, and `owner`.
 Each event lists the event structure fields that it carries and whether each one is always present or optional.
 
+### Description references
+
+A description names another schema item only through a reference, so each generator can write that item's name in its own language.
+
+| Reference | C rendering | Zig rendering |
+| --- | --- | --- |
+| `{function:document_get}` | `fp_document_get` | `` `functions.fp_document_get` `` |
+| `{constant:deadline_none}` | `FP_DEADLINE_NONE` | `` `deadline_none` `` |
+| `{status:ok}` | `FP_STATUS_OK` | `` `Status.ok` `` |
+| `{event:request_issued}` | `FP_EVENT_REQUEST_ISSUED` | `` `EventKind.request_issued` `` |
+| `{enumeration:reject_reason}` | `FP_REJECT_*` | `` `RejectReason` `` |
+| `{enumeration:event_kind.none}` | `FP_EVENT_NONE` | `` `EventKind.none` `` |
+| `{size:engine_options}` | `sizeof(fp_engine_options)` | `` `@sizeOf(EngineOptions)` `` |
+| `{structure:engine_options}` | `fp_engine_options` | `` `EngineOptions` `` |
+
+The validator rejects a reference to an item that does not exist.
+It also rejects a description that names a function, constant, status, or event without a reference.
+Each generated declaration also states its thread rule, its statuses, and the direction, nullability, ownership, and lifetime of each pointer.
+The generated comments therefore use only C names in the header and only Zig names in the Zig file.
+
+### Layout and status checks
+
 The schema implies a C layout with natural alignment for every member.
 A pointer and a target-sized length follow each other for a range.
 The generated Zig file checks at compile time that every structure has the implied size and field offsets on 32-bit and 64-bit targets.
+The generated `tests/c/abi_layout.h` checks the same size and member offsets with C11 `_Static_assert`, and the C smoke test includes it.
+The C compiler therefore checks the layout model against its own target ABI, including 32-bit x86 Linux, whose System V ABI aligns `uint64_t` members inside structures to four bytes.
 `src/c_api.zig` checks at compile time that each exported function has its generated function type.
 It also checks that the native enumerations match the schema enumerations.
+`src/abi_generated.zig` declares the status set of each function in `statuses`.
+Each export in `src/c_api.zig` returns through `finish`, which maps success and every error of the export's error set to a status at compile time.
+A status outside the function's status set, or an error without a status, fails compilation.
+`node tools/fairpane.mjs abi-exports <library>` reads the symbol table of a static library.
+It exits with status 1 when the library exports an `fp_` symbol that the schema does not declare or lacks one that the schema declares.
+The `c-abi` gate runs it on the library that it builds.
 
 ## Generator and staleness check
 
-`tools/abi.mjs` validates the schema and then generates `include/fairpane.h` and `src/abi_generated.zig`.
+`tools/abi.mjs` validates the schema and then generates `include/fairpane.h`, `src/abi_generated.zig`, and `tests/c/abi_layout.h`.
 It uses no package dependencies.
 The same schema always produces byte-identical files, regardless of object key order.
 Each generated file starts with a comment that names the schema and states that the file is generated.
@@ -116,6 +156,15 @@ C has no allocator argument in this ABI and no exceptions, so the allocation and
 `src/abi_scenarios.zig` runs every scenario through the generated declarations against the exported C symbols of the actual engine.
 Its test names start with `Scenario <id>:`.
 The controller tests check that both sources name exactly the scenarios that they must run.
+
+From a foreign thread, the C and Zig wrong-thread scenarios call each owner function with valid arguments and again with an invalid argument.
+Each call returns `FP_STATUS_WRONG_THREAD` and writes no output, so the thread check precedes every other argument check.
+`fp_engine_destroy` takes no argument other than the engine, so only its call with a valid engine applies.
+
+The C and Zig foreign-unwind scenarios only establish that the boundary has no unwinding channel.
+Every C function returns a plain status, and the engine never calls host code, so neither run can raise a foreign exception or panic inside a C frame.
+They do not qualify unwinding safety.
+Each later wrapper must inject a real panic or exception in its host code, such as a Rust panic under `panic=unwind` or a C++ exception, and show that it never crosses the C ABI.
 
 ## Conventions
 
@@ -164,6 +213,7 @@ A body bound beyond the address space admits every body that the host can presen
 `fp_engine_destroy` releases the engine and everything it owns.
 That includes documents, outstanding requests, queued answers, undrained events, URLs, and bodies.
 The engine pointer is invalid after a successful call.
+A call that returns any other status leaves the engine valid and with the caller.
 
 ## Identifiers
 
