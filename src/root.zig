@@ -4,6 +4,7 @@ pub const c_api = @import("c_api.zig");
 pub const dom = @import("dom.zig");
 pub const engine = @import("engine.zig");
 pub const handles = @import("handles.zig");
+pub const js = @import("js/runtime.zig");
 pub const web_string = @import("web_string.zig");
 
 comptime {
@@ -18,5 +19,6 @@ test {
     // The laboratory drives the engine but is not part of the library's API.
     _ = @import("lab.zig");
     _ = handles;
+    _ = js;
     _ = web_string;
 }

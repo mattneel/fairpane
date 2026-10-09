@@ -1,0 +1,12 @@
+diff --git a/out/fp0011-mutation/runtime.zig b/src/js/runtime.zig
+index b7126cd..85b2941 100644
+--- a/out/fp0011-mutation/runtime.zig
++++ b/src/js/runtime.zig
+@@ -765,7 +765,6 @@ pub fn Runtime(comptime r: Representation) type {
+                 var scope = try ctx.openScope();
+                 defer scope.close();
+                 const left_primitive = try ctx.invoke(.to_primitive, .{ left, null });
+-                _ = try scope.push(left_primitive);
+                 const right_primitive = try ctx.invoke(.to_primitive, .{ right, null });
+                 _ = try scope.push(right_primitive);
+                 if (ctx.typeOf(left_primitive) == .string or ctx.typeOf(right_primitive) == .string) {

@@ -1,0 +1,108 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/js/runtime.zig"]
+79d0355fb0b8b5ade0bcf1958c601fddec94bc07ad7711c072d26477b30d6225 *src/js/runtime.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/js/runtime.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m","started_at":"2026-10-09T05:00:40.099Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":57}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cp.exe","src/js/runtime.zig","out/fp0011-mutation/runtime.zig"]
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cp.exe","arguments":["src/js/runtime.zig","out/fp0011-mutation/runtime.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m","started_at":"2026-10-09T05:00:40.214Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0011-cache-mutation"]
+test
++- run test 119 pass, 1 fail (120 total)
+error: 'js.runtime.test.FP-0011 case 11: every scenario gives the same results under collection stress and quarantine' failed:
+       scenario AD19 under reference: dead_resolutions 4
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:727:46: 0x7ff757220e45 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:728:70: 0x7ff75721bd3d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721e032 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:728:70: 0x7ff75721bd3d in expectation (test_zcu.obj)
+                   if (handle.generation == 0 or handle.index >= model.len) return error.InvalidHandle;
+                                                                            ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721e032 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721e032 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:727:46: 0x7ff75721bce5 in expectation (test_zcu.obj)
+                   if (handle.owner != model.owner) return error.WrongOwner;
+                                                    ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\handles.zig:730:69: 0x7ff75721bdb2 in expectation (test_zcu.obj)
+                   if (!slot.live or slot.generation != handle.generation) return error.StaleHandle;
+                                                                           ^
+       C:\Users\requi\.omp\wt\t1d8c598d4\m\src\js\runtime.zig:1736:17: 0x7ff757210660 in test.FP-0011 case 11: every scenario gives the same results under collection stress and quarantine (test_zcu.obj)
+                       return error.TestUnexpectedDeadResolution;
+                       ^
+failed command: ".\\out\\fp0011-cache-mutation\\o\\477931e070dcbef29f6fe9e5379fe1ef\\test.exe" "--cache-dir=.\\out\\fp0011-cache-mutation" --seed=0xab399c2a --listen=-
+
+Build Summary: 19/21 steps succeeded (1 failed); 119/120 tests passed (1 failed)
+test transitive failure
++- run test 119 pass, 1 fail (120 total)
+|  +- compile test debug native success 5s MaxRSS:587M
++- FP-0011 case 4: leaf_invokes_to_number.zig success 528ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 538ms
++- FP-0011 case 4: allocation_invokes_call.zig success 567ms
++- FP-0011 case 4: leaf_allocates.zig success 533ms
++- FP-0011 case 4: mutation_throws.zig success 524ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 543ms
++- FP-0011 case 4: leaf_positive.zig success 566ms
++- FP-0011 case 5: catalog_callback_alone.zig success 531ms
++- FP-0011 case 5: catalog_exception_alone.zig success 498ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 513ms
++- FP-0011 case 5: kernel_wider_context.zig success 504ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 504ms
++- FP-0011 case 8: layout_undescribed_field.zig success 506ms
++- FP-0011 case 8: layout_plain_reference.zig success 522ms
++- FP-0011 case 8: layout_missing_field.zig success 526ms
++- FP-0011 case 20: abi_reference_value.zig success 479ms
++- FP-0011 case 20: abi_nan_box_value.zig success 525ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 524ms
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xab399c2a test --summary all --cache-dir out/fp0011-cache-mutation
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0011-cache-mutation"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m","started_at":"2026-10-09T05:00:51.103Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":14048,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","src/js/runtime.zig"]
+79d0355fb0b8b5ade0bcf1958c601fddec94bc07ad7711c072d26477b30d6225 *src/js/runtime.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["src/js/runtime.zig"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m","started_at":"2026-10-09T05:01:08.898Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":15}

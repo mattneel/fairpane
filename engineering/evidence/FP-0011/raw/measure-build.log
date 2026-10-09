@@ -1,0 +1,15 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","measure","-Doptimize=ReleaseFast","--summary","all"]
+Build Summary: 8/8 steps succeeded
+measure success
++- install fairpane-js-measure-reference success
+|  +- compile exe fairpane-js-measure-reference fast native success 10s MaxRSS:320M
+|     +- WriteFile src success
++- install fairpane-js-measure-nan_box success
+|  +- compile exe fairpane-js-measure-nan_box fast native success 10s MaxRSS:312M
+|     +- WriteFile src (reused)
++- install fairpane-js-measure-tagged_index success
+   +- compile exe fairpane-js-measure-tagged_index fast native success 10s MaxRSS:313M
+      +- WriteFile src (reused)
+
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","measure","-Doptimize=ReleaseFast","--summary","all"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m","started_at":"2026-10-09T05:02:47.242Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":10440,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}

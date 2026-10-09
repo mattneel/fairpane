@@ -1,0 +1,125 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\cat.exe","out/fp0011-summary.js"]
+const fs = require('fs');
+const reps = ['reference', 'nan_box', 'tagged_index'];
+const runs = ['run1', 'run2'];
+const workloads = ['add-small-int', 'add-fraction', 'get-prototype-chain', 'number-to-string', 'object-churn', 'mark-generated', 'mark-manual'];
+const data = {};
+for (const r of reps) for (const run of runs) {
+  const lines = fs.readFileSync(`engineering/evidence/FP-0011/raw/measure-${r}-${run}.log`, 'utf8').split(/\r?\n/).filter(l => l.startsWith('{'));
+  const header = JSON.parse(lines[0]);
+  const samples = lines.slice(1).map(l => JSON.parse(l));
+  const result = JSON.parse(fs.readFileSync(`engineering/evidence/FP-0011/raw/measure-${r}-${run}.log`, 'utf8').split(/\r?\n/).find(l => l.startsWith('RESULT ')).slice(7));
+  data[`${r}/${run}`] = { header, samples, exit: result.exit_code };
+}
+const stats = {};
+for (const key of Object.keys(data)) {
+  const d = data[key];
+  console.log(`HEADER ${key} exit=${d.exit} ${JSON.stringify(d.header)}`);
+  for (const w of workloads) {
+    const measured = d.samples.filter(s => s.workload === w && !s.warmup);
+    const ns = measured.map(s => s.ns).sort((a, b) => a - b);
+    const checksums = [...new Set(d.samples.filter(s => s.workload === w).map(s => JSON.stringify(s.checksum)))];
+    const peak = [...new Set(measured.map(s => s.peak_live_bytes))];
+    const cells = [...new Set(measured.map(s => s.cells_allocated))];
+    const collections = [...new Set(measured.map(s => s.collections))];
+    stats[`${key}/${w}`] = { min: ns[0], median: ns[5], max: ns[10] };
+    console.log(`STATS ${key} ${w} n=${ns.length} min=${ns[0]} median=${ns[5]} max=${ns[10]} checksums=${checksums.join(',')} peak_live_bytes=${peak.join(',')} cells_allocated=${cells.join(',')} collections=${collections.join(',')}`);
+  }
+}
+function compare(a, b, w) {
+  const verdicts = runs.map(run => {
+    const x = stats[`${a}/${run}/${w}`], y = stats[`${b}/${run}/${w}`];
+    if (x.max < y.min) return 'faster';
+    if (y.max < x.min) return 'slower';
+    return 'overlap';
+  });
+  return verdicts[0] === verdicts[1] && verdicts[0] !== 'overlap' ? verdicts[0] : `not separable (${verdicts.join('/')})`;
+}
+const six = workloads.slice(0, 6);
+for (const [a, b] of [['nan_box', 'reference'], ['tagged_index', 'reference'], ['nan_box', 'tagged_index']]) {
+  for (const w of six) console.log(`PAIR ${a} vs ${b} ${w}: ${a} ${compare(a, b, w)}`);
+}
+for (const r of reps) {
+  const verdicts = runs.map(run => {
+    const g = stats[`${r}/${run}/mark-generated`], m = stats[`${r}/${run}/mark-manual`];
+    if (g.max < m.min) return 'faster';
+    if (m.max < g.min) return 'slower';
+    return 'overlap';
+  });
+  const v = verdicts[0] === verdicts[1] && verdicts[0] !== 'overlap' ? verdicts[0] : `not separable (${verdicts.join('/')})`;
+  console.log(`TRACER ${r} mark-generated vs mark-manual: generated ${v}`);
+}
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\cat.exe","arguments":["out/fp0011-summary.js"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m","started_at":"2026-10-09T05:04:03.719Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0011-summary.js"]
+HEADER reference/run1 exit=0 {"format":"fairpane-js-measure","version":1,"representation":"reference","value_size_bytes":16,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047552,"clock":"awake","allocator":"smp_allocator"}
+STATS reference/run1 add-small-int n=11 min=17379500 median=17458000 max=17689100 checksums="1000000" peak_live_bytes=3974 cells_allocated=27 collections=0
+STATS reference/run1 add-fraction n=11 min=17447000 median=17474800 max=17508500 checksums="500000" peak_live_bytes=3972 cells_allocated=27 collections=0
+STATS reference/run1 get-prototype-chain n=11 min=24548900 median=24596300 max=24845800 checksums="7000000" peak_live_bytes=5398 cells_allocated=36 collections=0
+STATS reference/run1 number-to-string n=11 min=6244900 median=6307800 max=6525000 checksums=788890 peak_live_bytes=13444028 cells_allocated=100026 collections=0
+STATS reference/run1 object-churn n=11 min=13307500 median=19908800 max=26053400 checksums=6250 peak_live_bytes=27923892 cells_allocated=100026 collections=1
+STATS reference/run1 mark-generated n=11 min=5336200 median=6236000 max=6670800 checksums=100000 peak_live_bytes=51695844 cells_allocated=100026 collections=1
+STATS reference/run1 mark-manual n=11 min=6480900 median=7480400 max=9440100 checksums=100000 peak_live_bytes=51695844 cells_allocated=100026 collections=1
+HEADER reference/run2 exit=0 {"format":"fairpane-js-measure","version":1,"representation":"reference","value_size_bytes":16,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047552,"clock":"awake","allocator":"smp_allocator"}
+STATS reference/run2 add-small-int n=11 min=17403500 median=17475500 max=17505100 checksums="1000000" peak_live_bytes=3974 cells_allocated=27 collections=0
+STATS reference/run2 add-fraction n=11 min=17429900 median=17461500 max=17534100 checksums="500000" peak_live_bytes=3972 cells_allocated=27 collections=0
+STATS reference/run2 get-prototype-chain n=11 min=24535900 median=24692300 max=24810300 checksums="7000000" peak_live_bytes=5398 cells_allocated=36 collections=0
+STATS reference/run2 number-to-string n=11 min=6235700 median=6310800 max=6485100 checksums=788890 peak_live_bytes=13444028 cells_allocated=100026 collections=0
+STATS reference/run2 object-churn n=11 min=12834700 median=19865200 max=25583900 checksums=6250 peak_live_bytes=27923892 cells_allocated=100026 collections=1
+STATS reference/run2 mark-generated n=11 min=5598900 median=6513500 max=6855200 checksums=100000 peak_live_bytes=51695844 cells_allocated=100026 collections=1
+STATS reference/run2 mark-manual n=11 min=1811700 median=2237700 max=7752900 checksums=100000 peak_live_bytes=51695844 cells_allocated=100026 collections=1
+HEADER nan_box/run1 exit=0 {"format":"fairpane-js-measure","version":1,"representation":"nan_box","value_size_bytes":8,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047040,"clock":"awake","allocator":"smp_allocator"}
+STATS nan_box/run1 add-small-int n=11 min=12083400 median=12142200 max=12247300 checksums="1000000" peak_live_bytes=3710 cells_allocated=27 collections=0
+STATS nan_box/run1 add-fraction n=11 min=12128000 median=12147800 max=12190100 checksums="500000" peak_live_bytes=3708 cells_allocated=27 collections=0
+STATS nan_box/run1 get-prototype-chain n=11 min=23085800 median=23177200 max=23217100 checksums="7000000" peak_live_bytes=5062 cells_allocated=36 collections=0
+STATS nan_box/run1 number-to-string n=11 min=4766100 median=4825400 max=5235800 checksums=788890 peak_live_bytes=12659612 cells_allocated=100026 collections=0
+STATS nan_box/run1 object-churn n=11 min=13785300 median=17373300 max=24862700 checksums=6250 peak_live_bytes=27058908 cells_allocated=100026 collections=1
+STATS nan_box/run1 mark-generated n=11 min=10120300 median=11320700 max=13294500 checksums=100000 peak_live_bytes=26895828 cells_allocated=100026 collections=1
+STATS nan_box/run1 mark-manual n=11 min=10709800 median=12249700 max=14064200 checksums=100000 peak_live_bytes=26895828 cells_allocated=100026 collections=1
+HEADER nan_box/run2 exit=0 {"format":"fairpane-js-measure","version":1,"representation":"nan_box","value_size_bytes":8,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047040,"clock":"awake","allocator":"smp_allocator"}
+STATS nan_box/run2 add-small-int n=11 min=12194700 median=12238300 max=12300700 checksums="1000000" peak_live_bytes=3710 cells_allocated=27 collections=0
+STATS nan_box/run2 add-fraction n=11 min=12217700 median=12287100 max=12419400 checksums="500000" peak_live_bytes=3708 cells_allocated=27 collections=0
+STATS nan_box/run2 get-prototype-chain n=11 min=23207300 median=23253400 max=23604200 checksums="7000000" peak_live_bytes=5062 cells_allocated=36 collections=0
+STATS nan_box/run2 number-to-string n=11 min=4812600 median=4867600 max=4994700 checksums=788890 peak_live_bytes=12659612 cells_allocated=100026 collections=0
+STATS nan_box/run2 object-churn n=11 min=13585200 median=18830300 max=28887800 checksums=6250 peak_live_bytes=27058908 cells_allocated=100026 collections=1
+STATS nan_box/run2 mark-generated n=11 min=2649700 median=14118400 max=15733500 checksums=100000 peak_live_bytes=26895828 cells_allocated=100026 collections=1
+STATS nan_box/run2 mark-manual n=11 min=2532600 median=2872600 max=3393500 checksums=100000 peak_live_bytes=26895828 cells_allocated=100026 collections=1
+HEADER tagged_index/run1 exit=0 {"format":"fairpane-js-measure","version":1,"representation":"tagged_index","value_size_bytes":4,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047552,"clock":"awake","allocator":"smp_allocator"}
+STATS tagged_index/run1 add-small-int n=11 min=28218500 median=28307300 max=28614800 checksums="1000000" peak_live_bytes=3646 cells_allocated=27 collections=0
+STATS tagged_index/run1 add-fraction n=11 min=37815800 median=38300300 max=38762900 checksums="500000" peak_live_bytes=56287048 cells_allocated=500028 collections=0
+STATS tagged_index/run1 get-prototype-chain n=11 min=22041300 median=22912400 max=23512000 checksums="7000000" peak_live_bytes=4978 cells_allocated=36 collections=0
+STATS tagged_index/run1 number-to-string n=11 min=6759400 median=6780300 max=8657400 checksums=788890 peak_live_bytes=23006956 cells_allocated=200026 collections=0
+STATS tagged_index/run1 object-churn n=11 min=28679000 median=39453700 max=49401800 checksums=6250 peak_live_bytes=70279372 cells_allocated=500026 collections=1
+STATS tagged_index/run1 mark-generated n=11 min=9574300 median=10184800 max=10365400 checksums=100000 peak_live_bytes=70191848 cells_allocated=500026 collections=1
+STATS tagged_index/run1 mark-manual n=11 min=9440500 median=9957800 max=10685700 checksums=100000 peak_live_bytes=70191848 cells_allocated=500026 collections=1
+HEADER tagged_index/run2 exit=0 {"format":"fairpane-js-measure","version":1,"representation":"tagged_index","value_size_bytes":4,"zig_version":"0.18.0-dev.120+9fe22a29b","target":"x86_64-windows-gnu","cpu_model":"znver5","optimize":"fast","logical_cpus":32,"executable_bytes":1047552,"clock":"awake","allocator":"smp_allocator"}
+STATS tagged_index/run2 add-small-int n=11 min=28552500 median=28961100 max=29303600 checksums="1000000" peak_live_bytes=3646 cells_allocated=27 collections=0
+STATS tagged_index/run2 add-fraction n=11 min=38205700 median=38744400 max=39319200 checksums="500000" peak_live_bytes=56287048 cells_allocated=500028 collections=0
+STATS tagged_index/run2 get-prototype-chain n=11 min=22245900 median=23161700 max=24146200 checksums="7000000" peak_live_bytes=4978 cells_allocated=36 collections=0
+STATS tagged_index/run2 number-to-string n=11 min=7213100 median=8989200 max=9532300 checksums=788890 peak_live_bytes=23006956 cells_allocated=200026 collections=0
+STATS tagged_index/run2 object-churn n=11 min=28634500 median=41360100 max=51157900 checksums=6250 peak_live_bytes=70279372 cells_allocated=500026 collections=1
+STATS tagged_index/run2 mark-generated n=11 min=10262700 median=15232400 max=31166200 checksums=100000 peak_live_bytes=70191848 cells_allocated=500026 collections=1
+STATS tagged_index/run2 mark-manual n=11 min=10314700 median=15317300 max=25389100 checksums=100000 peak_live_bytes=70191848 cells_allocated=500026 collections=1
+PAIR nan_box vs reference add-small-int: nan_box faster
+PAIR nan_box vs reference add-fraction: nan_box faster
+PAIR nan_box vs reference get-prototype-chain: nan_box faster
+PAIR nan_box vs reference number-to-string: nan_box faster
+PAIR nan_box vs reference object-churn: nan_box not separable (overlap/overlap)
+PAIR nan_box vs reference mark-generated: nan_box not separable (slower/overlap)
+PAIR tagged_index vs reference add-small-int: tagged_index slower
+PAIR tagged_index vs reference add-fraction: tagged_index slower
+PAIR tagged_index vs reference get-prototype-chain: tagged_index faster
+PAIR tagged_index vs reference number-to-string: tagged_index slower
+PAIR tagged_index vs reference object-churn: tagged_index slower
+PAIR tagged_index vs reference mark-generated: tagged_index slower
+PAIR nan_box vs tagged_index add-small-int: nan_box faster
+PAIR nan_box vs tagged_index add-fraction: nan_box faster
+PAIR nan_box vs tagged_index get-prototype-chain: nan_box not separable (overlap/overlap)
+PAIR nan_box vs tagged_index number-to-string: nan_box faster
+PAIR nan_box vs tagged_index object-churn: nan_box not separable (faster/overlap)
+PAIR nan_box vs tagged_index mark-generated: nan_box not separable (overlap/overlap)
+TRACER reference mark-generated vs mark-manual: generated not separable (overlap/overlap)
+TRACER nan_box mark-generated vs mark-manual: generated not separable (overlap/overlap)
+TRACER tagged_index mark-generated vs mark-manual: generated not separable (overlap/overlap)
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0011-summary.js"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m","started_at":"2026-10-09T05:04:03.789Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}

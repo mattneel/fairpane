@@ -1,0 +1,2802 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0011-cache-before"]
+test
++- FP-0011 case 5: catalog_duplicate_id.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: duplicate operation id number_add
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_duplicate_id.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: kernel_wider_context.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::add takes a context with effects {allocation}, but the operation has effects {}
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_wider_context.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_allocates.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: allocateString requires effects {allocation}; the context has effects {}
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_allocates.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_positive.zig failure
+src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+        var checked = [_]u64{0} ** operations.catalog.len;
+                                ^
+error: process exited with code 1 (expected exited with code 0)
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_positive.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_reference_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_reference_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_tagged_index_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_tagged_index_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_undescribed_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe does not describe field extra
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_undescribed_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_callback_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadCallback declares callback without allocation, exception, and heap_mutation
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_callback_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: allocation_invokes_call.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {allocation} cannot invoke Call, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/allocation_invokes_call.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_plain_reference.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: field hidden of layout Probe holds a heap reference but is declared plain
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_plain_reference.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_missing_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe describes field ghost, which does not exist
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_missing_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke Number::toString, which has effects {allocation}
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_number_to_string.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke ToNumber, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_to_number.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_exception_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadException declares exception without allocation
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_exception_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_nan_box_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_nan_box_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_calls_behavior.zig failure
+error: ========= expected to find in stderr: =========
+       expected type
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_calls_behavior.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: mutation_throws.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: throwTypeError requires effects {allocation, exception}; the context has effects {heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/mutation_throws.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::sameValue returns error.Throw, but the operation does not have the exception effect
+       ========= but stderr does not contain it: =====
+       src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+               var checked = [_]u64{0} ** operations.catalog.len;
+                                       ^
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_undeclared_throw.zig -Mfairpane=src/root.zig
+
+test
++- run test
+   +- compile test debug native 1 errors
+src\js\runtime.zig:912:33: error: binary operator '*' has whitespace on one side, but not the other
+        var checked = [_]u64{0} ** operations.catalog.len;
+                                ^
+error: 1 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0011-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 0/21 steps succeeded (19 failed)
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 1 errors
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
++- FP-0011 case 4: allocation_invokes_call.zig failure
++- FP-0011 case 4: leaf_allocates.zig failure
++- FP-0011 case 4: mutation_throws.zig failure
++- FP-0011 case 4: leaf_calls_behavior.zig failure
++- FP-0011 case 4: leaf_positive.zig failure
++- FP-0011 case 5: catalog_callback_alone.zig failure
++- FP-0011 case 5: catalog_exception_alone.zig failure
++- FP-0011 case 5: catalog_duplicate_id.zig failure
++- FP-0011 case 5: kernel_wider_context.zig failure
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
++- FP-0011 case 8: layout_undescribed_field.zig failure
++- FP-0011 case 8: layout_plain_reference.zig failure
++- FP-0011 case 8: layout_missing_field.zig failure
++- FP-0011 case 20: abi_reference_value.zig failure
++- FP-0011 case 20: abi_nan_box_value.zig failure
++- FP-0011 case 20: abi_tagged_index_value.zig failure
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xa0a84dcd test --summary all --cache-dir out/fp0011-cache-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0011-cache-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m","started_at":"2026-10-09T04:42:54.931Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3448,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0011-cache-before2"]
+test
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::sameValue returns error.Throw, but the operation does not have the exception effect
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\kernel_undeclared_throw.zig:4:14: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Rt = js.Runtime(.reference);
+                  ~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           comptime: tests\compile_fail\kernel_undeclared_throw.zig:14:9
+           root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+           3 reference(s) hidden; use '-freference-trace=5' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_undeclared_throw.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_nan_box_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\abi_nan_box_value.zig:3:34: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Rt = @import("fairpane").js.Runtime(.nan_box);
+                  ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           Value: tests\compile_fail\abi_nan_box_value.zig:4:15
+           fairpane_probe_takes_value: tests\compile_fail\abi_nan_box_value.zig:6:45
+           4 reference(s) hidden; use '-freference-trace=6' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_nan_box_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_duplicate_id.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: duplicate operation id number_add
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\catalog_duplicate_id.zig:3:42: error: root source file struct 'js.runtime' has no member named 'operations'
+       const operations = @import("fairpane").js.operations;
+                          ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           comptime: tests\compile_fail\catalog_duplicate_id.zig:6:5
+           root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+           3 reference(s) hidden; use '-freference-trace=5' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_duplicate_id.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_positive.zig failure
+src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+    try writeCatalog(&output.writer);
+        ^~~~~~~~~~~~
+src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+        const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                            ^~~
+src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+        try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                       ^~~
+src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+    var buffer: [max_string_units]u16 = undefined;
+                 ^~~~~~~~~~~~~~~~
+src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+        try expectNumberBits(v.result, stringToNumber(v.input));
+                                       ^~~~~~~~~~~~~~
+src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+    try writeTable(&output.writer);
+        ^~~~~~~~~~
+src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+    comptime validate(catalog);
+             ^~~~~~~~
+src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+        for (table, catalog) |bound, entry| {
+                    ^~~~~~~
+src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+            thrown: ?CellRef = null,
+                     ^~~~~~~
+src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+        fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                  ^~~~~~~~~~~
+src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+        fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                ^~~~~~~
+src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+        fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                  ^~~~~~~
+src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+        fn unitsString(h: *H, units: []const u16) !CellRef {
+                              ^~~~~
+src\js\runtime.zig:202:9: note: declared here
+        fn units(h: *H, v: Value) []const u16 {
+        ^~
+src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+        fn bigint(h: *H, value: i128) !CellRef {
+                                       ^~~~~~~
+src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+        fn symbol(h: *H) !CellRef {
+                          ^~~~~~~
+src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+        fn object(h: *H) !CellRef {
+                          ^~~~~~~
+src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+        fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                         ^~~~~~~
+src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+        fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                            ^~~~~~~
+src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+        fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                          ^~~~~~~
+src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+        fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                 ^~~~~~~
+src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+        fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                     ^~~~~~~
+src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+        fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                       ^~~~~~~
+src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+            try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                    ^~~~~~~~~~~~
+src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+            try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                    ^~~~~~~~~~~~
+src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                    try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                            ^~~~~
+src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+            const surrogate_keys = [_]CellRef{
+                                      ^~~~~~~
+src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+            const hints = [_]?PreferredType{ null, .string, .number };
+                              ^~~~~~~~~~~~~
+src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+            const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                             ^~~~~~~
+src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                    try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                            ^~~~~~~~~~~~
+src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+        fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                        ^~~~~~~
+src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+            const symbol = Rt.cellValue(try h.symbol());
+                  ^~~~~~
+src\js\runtime.zig:160:9: note: declared here
+        fn symbol(h: *H) !CellRef {
+        ^~
+src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+        const H = Harness(Runtime(r));
+                          ^~~~~~~
+src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+        const Rt = Runtime(r);
+                   ^~~~~~~
+src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+        const Rt = Runtime(r);
+                   ^~~~~~~
+src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+fn expectRoundTrips(comptime r: Representation) !void {
+                                ^~~~~~~~~~~~~~
+src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+    inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                   ^~~~~~~~~~~~~~
+tests\compile_fail\leaf_positive.zig:5:14: error: root source file struct 'js.runtime' has no member named 'Runtime'
+const Rt = js.Runtime(.reference);
+           ~~^~~~~~~~
+src\js\runtime.zig:1:1: note: struct declared here
+//! The JavaScript runtime, instantiated once per value representation.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    probe: tests\compile_fail\leaf_positive.zig:7:16
+    comptime: tests\compile_fail\leaf_positive.zig:18:10
+    4 reference(s) hidden; use '-freference-trace=6' to see all references
+error: process exited with code 1 (expected exited with code 0)
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_positive.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: allocation_invokes_call.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {allocation} cannot invoke Call, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\allocation_invokes_call.zig:4:14: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Rt = js.Runtime(.reference);
+                  ~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           probe: tests\compile_fail\allocation_invokes_call.zig:6:16
+           comptime: tests\compile_fail\allocation_invokes_call.zig:12:10
+           4 reference(s) hidden; use '-freference-trace=6' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/allocation_invokes_call.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: kernel_wider_context.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: kernel for Number::add takes a context with effects {allocation}, but the operation has effects {}
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\kernel_wider_context.zig:4:14: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Rt = js.Runtime(.reference);
+                  ~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           comptime: tests\compile_fail\kernel_wider_context.zig:14:9
+           root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+           3 reference(s) hidden; use '-freference-trace=5' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/kernel_wider_context.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_reference_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\abi_reference_value.zig:3:37: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Value = @import("fairpane").js.Runtime(.reference).Value;
+                     ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           fairpane_probe_takes_value: tests\compile_fail\abi_reference_value.zig:5:45
+           root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+           3 reference(s) hidden; use '-freference-trace=5' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_reference_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_allocates.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: allocateString requires effects {allocation}; the context has effects {}
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\leaf_allocates.zig:4:14: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Rt = js.Runtime(.reference);
+                  ~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           probe: tests\compile_fail\leaf_allocates.zig:6:16
+           comptime: tests\compile_fail\leaf_allocates.zig:11:10
+           4 reference(s) hidden; use '-freference-trace=6' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_allocates.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_calls_behavior.zig failure
+error: ========= expected to find in stderr: =========
+       expected type
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\leaf_calls_behavior.zig:4:14: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Rt = js.Runtime(.reference);
+                  ~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           probe: tests\compile_fail\leaf_calls_behavior.zig:6:16
+           comptime: tests\compile_fail\leaf_calls_behavior.zig:12:10
+           4 reference(s) hidden; use '-freference-trace=6' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_calls_behavior.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_plain_reference.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: field hidden of layout Probe holds a heap reference but is declared plain
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\layout_plain_reference.zig:10:8: error: root source file struct 'js.runtime' has no member named 'heap_catalog'
+           js.heap_catalog.checkLayout("Probe", Probe, &.{.{ .name = "hidden", .descriptor = .plain }});
+              ^~~~~~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+           comptime: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:20:9
+           2 reference(s) hidden; use '-freference-trace=4' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_plain_reference.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 20: abi_tagged_index_value.zig failure
+error: ========= expected to find in stderr: =========
+       error: parameter of type
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\abi_tagged_index_value.zig:3:34: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Rt = @import("fairpane").js.Runtime(.tagged_index);
+                  ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           Value: tests\compile_fail\abi_tagged_index_value.zig:4:15
+           fairpane_probe_takes_value: tests\compile_fail\abi_tagged_index_value.zig:6:45
+           4 reference(s) hidden; use '-freference-trace=6' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/abi_tagged_index_value.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_exception_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadException declares exception without allocation
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\catalog_exception_alone.zig:3:42: error: root source file struct 'js.runtime' has no member named 'operations'
+       const operations = @import("fairpane").js.operations;
+                          ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           comptime: tests\compile_fail\catalog_exception_alone.zig:6:5
+           root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+           3 reference(s) hidden; use '-freference-trace=5' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_exception_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: mutation_throws.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: throwTypeError requires effects {allocation, exception}; the context has effects {heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\mutation_throws.zig:4:14: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Rt = js.Runtime(.reference);
+                  ~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           probe: tests\compile_fail\mutation_throws.zig:6:16
+           comptime: tests\compile_fail\mutation_throws.zig:11:10
+           4 reference(s) hidden; use '-freference-trace=6' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/mutation_throws.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke Number::toString, which has effects {allocation}
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\leaf_invokes_number_to_string.zig:4:14: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Rt = js.Runtime(.reference);
+                  ~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           probe: tests\compile_fail\leaf_invokes_number_to_string.zig:6:16
+           comptime: tests\compile_fail\leaf_invokes_number_to_string.zig:11:10
+           4 reference(s) hidden; use '-freference-trace=6' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_number_to_string.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 5: catalog_callback_alone.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: operation BadCallback declares callback without allocation, exception, and heap_mutation
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\catalog_callback_alone.zig:3:42: error: root source file struct 'js.runtime' has no member named 'operations'
+       const operations = @import("fairpane").js.operations;
+                          ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           comptime: tests\compile_fail\catalog_callback_alone.zig:6:5
+           root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+           3 reference(s) hidden; use '-freference-trace=5' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/catalog_callback_alone.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_undescribed_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe does not describe field extra
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\layout_undescribed_field.zig:3:44: error: root source file struct 'js.runtime' has no member named 'heap_catalog'
+       const heap_catalog = @import("fairpane").js.heap_catalog;
+                            ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           comptime: tests\compile_fail\layout_undescribed_field.zig:11:5
+           root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+           3 reference(s) hidden; use '-freference-trace=5' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_undescribed_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 8: layout_missing_field.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: layout Probe describes field ghost, which does not exist
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\layout_missing_field.zig:3:44: error: root source file struct 'js.runtime' has no member named 'heap_catalog'
+       const heap_catalog = @import("fairpane").js.heap_catalog;
+                            ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           comptime: tests\compile_fail\layout_missing_field.zig:10:5
+           root: C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\start.zig:13:22
+           3 reference(s) hidden; use '-freference-trace=5' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/layout_missing_field.zig -Mfairpane=src/root.zig
+
+test
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
+error: ========= expected to find in stderr: =========
+       fairpane-js: a context with effects {} cannot invoke ToNumber, which has effects {callback, allocation, exception, heap_mutation}
+       ========= but stderr does not contain it: =====
+       src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+           try writeCatalog(&output.writer);
+               ^~~~~~~~~~~~
+       src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+               const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                                   ^~~
+       src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+               try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                              ^~~
+       src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+           var buffer: [max_string_units]u16 = undefined;
+                        ^~~~~~~~~~~~~~~~
+       src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+               try expectNumberBits(v.result, stringToNumber(v.input));
+                                              ^~~~~~~~~~~~~~
+       src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+           try writeTable(&output.writer);
+               ^~~~~~~~~~
+       src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+           comptime validate(catalog);
+                    ^~~~~~~~
+       src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+               for (table, catalog) |bound, entry| {
+                           ^~~~~~~
+       src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+                   thrown: ?CellRef = null,
+                            ^~~~~~~
+       src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+               fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                         ^~~~~~~~~~~
+       src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+               fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                       ^~~~~~~
+       src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+               fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                         ^~~~~~~
+       src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+               fn unitsString(h: *H, units: []const u16) !CellRef {
+                                     ^~~~~
+       src\js\runtime.zig:202:9: note: declared here
+               fn units(h: *H, v: Value) []const u16 {
+               ^~
+       src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+               fn bigint(h: *H, value: i128) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+               fn symbol(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+               fn object(h: *H) !CellRef {
+                                 ^~~~~~~
+       src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+               fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                                ^~~~~~~
+       src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+               fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                                   ^~~~~~~
+       src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+               fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                                 ^~~~~~~
+       src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+               fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                        ^~~~~~~
+       src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+               fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                            ^~~~~~~
+       src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+               fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                              ^~~~~~~
+       src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+                   try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                           ^~~~~~~~~~~~
+       src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                           try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                                   ^~~~~
+       src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+                   const surrogate_keys = [_]CellRef{
+                                             ^~~~~~~
+       src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+                   const hints = [_]?PreferredType{ null, .string, .number };
+                                     ^~~~~~~~~~~~~
+       src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+                   const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                                    ^~~~~~~
+       src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                           try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                                   ^~~~~~~~~~~~
+       src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+               fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                               ^~~~~~~
+       src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+                   const symbol = Rt.cellValue(try h.symbol());
+                         ^~~~~~
+       src\js\runtime.zig:160:9: note: declared here
+               fn symbol(h: *H) !CellRef {
+               ^~
+       src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+               const H = Harness(Runtime(r));
+                                 ^~~~~~~
+       src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+               const Rt = Runtime(r);
+                          ^~~~~~~
+       src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+       fn expectRoundTrips(comptime r: Representation) !void {
+                                       ^~~~~~~~~~~~~~
+       src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+           inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                          ^~~~~~~~~~~~~~
+       tests\compile_fail\leaf_invokes_to_number.zig:4:14: error: root source file struct 'js.runtime' has no member named 'Runtime'
+       const Rt = js.Runtime(.reference);
+                  ~~^~~~~~~~
+       src\js\runtime.zig:1:1: note: struct declared here
+       //! The JavaScript runtime, instantiated once per value representation.
+       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       referenced by:
+           probe: tests\compile_fail\leaf_invokes_to_number.zig:6:16
+           comptime: tests\compile_fail\leaf_invokes_to_number.zig:11:10
+           4 reference(s) hidden; use '-freference-trace=6' to see all references
+       
+failed command: cd . && "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" build-obj -fno-emit-bin --dep fairpane -Mroot=tests/compile_fail/leaf_invokes_to_number.zig -Mfairpane=src/root.zig
+
+test
++- run test
+   +- compile test debug native 44 errors
+src\js\heap_catalog.zig:25:9: error: use of undeclared identifier 'writeCatalog'
+    try writeCatalog(&output.writer);
+        ^~~~~~~~~~~~
+src\js\measure.zig:22:29: error: use of undeclared identifier 'run'
+        const outcome = try run(r, testing.io, &output.writer, .{ .divisor = 1000, .executable_bytes = 0 });
+                            ^~~
+src\js\number.zig:24:40: error: use of undeclared identifier 'add'
+        try expectNumberBits(v.result, add(@bitCast(v.x), @bitCast(v.y)));
+                                       ^~~
+src\js\number.zig:51:18: error: use of undeclared identifier 'max_string_units'
+    var buffer: [max_string_units]u16 = undefined;
+                 ^~~~~~~~~~~~~~~~
+src\js\number.zig:100:40: error: use of undeclared identifier 'stringToNumber'
+        try expectNumberBits(v.result, stringToNumber(v.input));
+                                       ^~~~~~~~~~~~~~
+src\js\operations.zig:36:9: error: use of undeclared identifier 'writeTable'
+    try writeTable(&output.writer);
+        ^~~~~~~~~~
+src\js\operations.zig:49:14: error: use of undeclared identifier 'validate'
+    comptime validate(catalog);
+             ^~~~~~~~
+src\js\operations.zig:70:21: error: use of undeclared identifier 'catalog'
+        for (table, catalog) |bound, entry| {
+                    ^~~~~~~
+src\js\runtime.zig:59:22: error: use of undeclared identifier 'CellRef'
+            thrown: ?CellRef = null,
+                     ^~~~~~~
+src\js\runtime.zig:97:35: error: use of undeclared identifier 'OperationId'
+        fn op(h: *H, comptime id: OperationId, args: anytype) anyerror!Rt.Result(id) {
+                                  ^~~~~~~~~~~
+src\js\runtime.zig:133:33: error: use of undeclared identifier 'CellRef'
+        fn keepCell(h: *H, ref: CellRef) !CellRef {
+                                ^~~~~~~
+src\js\runtime.zig:142:51: error: use of undeclared identifier 'CellRef'
+        fn str(h: *H, comptime text: []const u8) !CellRef {
+                                                  ^~~~~~~
+src\js\runtime.zig:146:31: error: function parameter shadows declaration of 'units'
+        fn unitsString(h: *H, units: []const u16) !CellRef {
+                              ^~~~~
+src\js\runtime.zig:202:9: note: declared here
+        fn units(h: *H, v: Value) []const u16 {
+        ^~
+src\js\runtime.zig:154:40: error: use of undeclared identifier 'CellRef'
+        fn bigint(h: *H, value: i128) !CellRef {
+                                       ^~~~~~~
+src\js\runtime.zig:160:27: error: use of undeclared identifier 'CellRef'
+        fn symbol(h: *H) !CellRef {
+                          ^~~~~~~
+src\js\runtime.zig:164:27: error: use of undeclared identifier 'CellRef'
+        fn object(h: *H) !CellRef {
+                          ^~~~~~~
+src\js\runtime.zig:168:42: error: use of undeclared identifier 'CellRef'
+        fn objectWith(h: *H, prototype: ?CellRef) !CellRef {
+                                         ^~~~~~~
+src\js\runtime.zig:172:77: error: use of undeclared identifier 'CellRef'
+        fn function(h: *H, name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                                                            ^~~~~~~
+src\js\runtime.zig:180:43: error: use of undeclared identifier 'CellRef'
+        fn recordOf(h: *H, function_cell: CellRef) *Record {
+                                          ^~~~~~~
+src\js\runtime.zig:188:34: error: use of undeclared identifier 'CellRef'
+        fn define(h: *H, target: CellRef, key: CellRef, descriptor: Rt.PropertyDescriptor) !bool {
+                                 ^~~~~~~
+src\js\runtime.zig:192:38: error: use of undeclared identifier 'CellRef'
+        fn defineData(h: *H, target: CellRef, key: CellRef, v: Value) !void {
+                                     ^~~~~~~
+src\js\runtime.zig:196:40: error: use of undeclared identifier 'CellRef'
+        fn defineMethod(h: *H, target: CellRef, comptime name: []const u8, mode: Mode, host_data: Value) !CellRef {
+                                       ^~~~~~~
+src\js\runtime.zig:207:37: error: use of undeclared identifier 'LanguageType'
+            try testing.expectEqual(LanguageType.string, h.c.typeOf(v));
+                                    ^~~~~~~~~~~~
+src\js\runtime.zig:212:37: error: use of undeclared identifier 'LanguageType'
+            try testing.expectEqual(LanguageType.number, h.c.typeOf(v));
+                                    ^~~~~~~~~~~~
+src\js\runtime.zig:340:45: error: use of undeclared identifier 'Class'
+                    try testing.expectEqual(Class.cell, Rt.V.classify(v));
+                                            ^~~~~
+src\js\runtime.zig:388:39: error: use of undeclared identifier 'CellRef'
+            const surrogate_keys = [_]CellRef{
+                                      ^~~~~~~
+src\js\runtime.zig:600:31: error: use of undeclared identifier 'PreferredType'
+            const hints = [_]?PreferredType{ null, .string, .number };
+                              ^~~~~~~~~~~~~
+src\js\runtime.zig:699:30: error: use of undeclared identifier 'CellRef'
+            const cells = [_]CellRef{ intrinsics.undefined_string, intrinsics.null_string, intrinsics.true_string, intrinsics.false_string };
+                             ^~~~~~~
+src\js\runtime.zig:753:45: error: use of undeclared identifier 'LanguageType'
+                    try testing.expectEqual(LanguageType.bigint, h.c.typeOf(sum));
+                                            ^~~~~~~~~~~~
+src\js\runtime.zig:802:41: error: use of undeclared identifier 'CellRef'
+        fn functionNamed(h: *H, holder: CellRef, comptime name: []const u8) !CellRef {
+                                        ^~~~~~~
+src\js\runtime.zig:816:19: error: local constant shadows declaration of 'symbol'
+            const symbol = Rt.cellValue(try h.symbol());
+                  ^~~~~~
+src\js\runtime.zig:160:9: note: declared here
+        fn symbol(h: *H) !CellRef {
+        ^~
+src\js\runtime.zig:903:27: error: use of undeclared identifier 'Runtime'
+        const H = Harness(Runtime(r));
+                          ^~~~~~~
+src\js\runtime.zig:910:20: error: use of undeclared identifier 'Runtime'
+        const Rt = Runtime(r);
+                   ^~~~~~~
+src\js\runtime.zig:935:20: error: use of undeclared identifier 'Runtime'
+        const Rt = Runtime(r);
+                   ^~~~~~~
+src\js\value.zig:7:33: error: use of undeclared identifier 'Representation'
+fn expectRoundTrips(comptime r: Representation) !void {
+                                ^~~~~~~~~~~~~~
+src\js\value.zig:28:20: error: use of undeclared identifier 'Representation'
+    inline for (.{ Representation.reference, Representation.nan_box, Representation.tagged_index }) |r| {
+                   ^~~~~~~~~~~~~~
+src\js\heap.zig:150:27: error: root source file struct 'js.runtime' has no member named 'Runtime'
+        const Rt = runtime.Runtime(r);
+                   ~~~~~~~^~~~~~~~
+src\js\runtime.zig:1:1: note: struct declared here
+//! The JavaScript runtime, instantiated once per value representation.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+referenced by:
+    test_2: src\js\runtime.zig:1000:17
+    js: src\root.zig:7:24
+    1 reference(s) hidden; use '-freference-trace=3' to see all references
+src\js\heap.zig:208:27: error: root source file struct 'js.runtime' has no member named 'Runtime'
+        const Rt = runtime.Runtime(r);
+                   ~~~~~~~^~~~~~~~
+src\js\runtime.zig:1:1: note: struct declared here
+//! The JavaScript runtime, instantiated once per value representation.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src\js\heap.zig:276:27: error: root source file struct 'js.runtime' has no member named 'Runtime'
+        const Rt = runtime.Runtime(r);
+                   ~~~~~~~^~~~~~~~
+src\js\runtime.zig:1:1: note: struct declared here
+//! The JavaScript runtime, instantiated once per value representation.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src\js\heap.zig:292:27: error: root source file struct 'js.runtime' has no member named 'Runtime'
+        const Rt = runtime.Runtime(r);
+                   ~~~~~~~^~~~~~~~
+src\js\runtime.zig:1:1: note: struct declared here
+//! The JavaScript runtime, instantiated once per value representation.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src\js\heap.zig:388:103: error: root source file struct 'js.runtime' has no member named 'Runtime'
+        try testing.checkAllAllocationFailures(testing.allocator, allocationFailureScenario, .{runtime.Runtime(r)});
+                                                                                               ~~~~~~~^~~~~~~~
+src\js\runtime.zig:1:1: note: struct declared here
+//! The JavaScript runtime, instantiated once per value representation.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src\js\heap.zig:394:27: error: root source file struct 'js.runtime' has no member named 'Runtime'
+        const Rt = runtime.Runtime(r);
+                   ~~~~~~~^~~~~~~~
+src\js\runtime.zig:1:1: note: struct declared here
+//! The JavaScript runtime, instantiated once per value representation.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src\js\heap.zig:423:27: error: root source file struct 'js.runtime' has no member named 'Runtime'
+        const Rt = runtime.Runtime(r);
+                   ~~~~~~~^~~~~~~~
+src\js\runtime.zig:1:1: note: struct declared here
+//! The JavaScript runtime, instantiated once per value representation.
+^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src\js\value.zig:72:20: error: failed opening "value_reference.zig": FileNotFound
+        @embedFile("value_reference.zig"),
+                   ^~~~~~~~~~~~~~~~~~~~~
+error: 44 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0011-cache-before2" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 0/21 steps succeeded (19 failed)
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 44 errors
++- FP-0011 case 4: leaf_invokes_to_number.zig failure
++- FP-0011 case 4: leaf_invokes_number_to_string.zig failure
++- FP-0011 case 4: allocation_invokes_call.zig failure
++- FP-0011 case 4: leaf_allocates.zig failure
++- FP-0011 case 4: mutation_throws.zig failure
++- FP-0011 case 4: leaf_calls_behavior.zig failure
++- FP-0011 case 4: leaf_positive.zig failure
++- FP-0011 case 5: catalog_callback_alone.zig failure
++- FP-0011 case 5: catalog_exception_alone.zig failure
++- FP-0011 case 5: catalog_duplicate_id.zig failure
++- FP-0011 case 5: kernel_wider_context.zig failure
++- FP-0011 case 5: kernel_undeclared_throw.zig failure
++- FP-0011 case 8: layout_undescribed_field.zig failure
++- FP-0011 case 8: layout_plain_reference.zig failure
++- FP-0011 case 8: layout_missing_field.zig failure
++- FP-0011 case 20: abi_reference_value.zig failure
++- FP-0011 case 20: abi_nan_box_value.zig failure
++- FP-0011 case 20: abi_tagged_index_value.zig failure
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xdaffa8f test --summary all --cache-dir out/fp0011-cache-before2
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0011-cache-before2"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m","started_at":"2026-10-09T04:43:32.526Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":4608,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}

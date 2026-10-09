@@ -1,0 +1,26 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0011-cache-after"]
+Build Summary: 21/21 steps succeeded; 120/120 tests passed
+test success
++- run test 120 pass (120 total) 4s MaxRSS:8M
+|  +- compile test debug native success 4s MaxRSS:587M
++- FP-0011 case 4: leaf_invokes_to_number.zig success 345ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 356ms
++- FP-0011 case 4: allocation_invokes_call.zig success 323ms
++- FP-0011 case 4: leaf_allocates.zig success 313ms
++- FP-0011 case 4: mutation_throws.zig success 305ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 302ms
++- FP-0011 case 4: leaf_positive.zig success 332ms
++- FP-0011 case 5: catalog_callback_alone.zig success 266ms
++- FP-0011 case 5: catalog_exception_alone.zig success 270ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 314ms
++- FP-0011 case 5: kernel_wider_context.zig success 258ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 319ms
++- FP-0011 case 8: layout_undescribed_field.zig success 288ms
++- FP-0011 case 8: layout_plain_reference.zig success 306ms
++- FP-0011 case 8: layout_missing_field.zig success 318ms
++- FP-0011 case 20: abi_reference_value.zig success 297ms
++- FP-0011 case 20: abi_nan_box_value.zig success 255ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 268ms
+
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0011-cache-after"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t1d8c598d4\\m","started_at":"2026-10-09T05:02:10.626Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":12376,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:/src/fairpane/.zig-cache/global"}}
