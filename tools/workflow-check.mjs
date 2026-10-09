@@ -214,6 +214,19 @@ export function parseWorkflow(text) {
 
 const PINNED_USES = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_./-]+)?@[0-9a-f]{40}$/;
 const VERSION_COMMENT = /^v\d+(?:\.\d+)*$/;
+/**
+ * The reviewed commit of each accepted action, with its release tag.
+ * GitHub also fetches a commit from any fork of the action's repository, so a full SHA alone does not identify reviewed code.
+ * Each SHA was resolved through the release tag's git ref in the action's own repository, as
+ * engineering/evidence/FP-0033/raw/action-tag-refs.log and engineering/evidence/docs-site/raw/action-pins.log record.
+ */
+const REVIEWED_ACTIONS = new Map([
+  ['actions/checkout', { sha: '3d3c42e5aac5ba805825da76410c181273ba90b1', version: 'v7.0.1' }],
+  ['actions/setup-node', { sha: '949feb2413d6458794dcd2491c4babbbce0c15c1', version: 'v7.1.0' }],
+  ['actions/upload-artifact', { sha: 'cf430e030ddbb5b0abf93d22962f4752f3646cd9', version: 'v7.0.2' }],
+  ['actions/upload-pages-artifact', { sha: 'fc324d3547104276b827a68afc52ff2a11cc49c9', version: 'v5.0.0' }],
+  ['actions/deploy-pages', { sha: '368f82528645a54fb793d4d04e342629a3f51346', version: 'v5.0.1' }],
+]);
 /** The names that an expression may read: the event fields that the reviewed workflows use, and step outputs. */
 const EXPRESSION_READS = new Set(['github.event_name', 'github.run_id', 'github.event.pull_request.number']);
 const STEP_OUTPUT = /^steps\.[A-Za-z_][A-Za-z0-9_-]*\.outputs\.[A-Za-z_][A-Za-z0-9_-]*$/;
@@ -316,6 +329,12 @@ export function workflowProblems(root) {
     const ref = uses.value.kind === 'scalar' ? uses.value.value : null;
     if (ref === null || !PINNED_USES.test(ref)) add(uses.line, `uses ${ref ?? '(not a scalar)'} is not pinned to a full 40-hex commit SHA.`);
     else if (!VERSION_COMMENT.test(uses.value.comment ?? '')) add(uses.line, `uses ${ref} has no version comment such as # v1.2.3.`);
+    else {
+      const [action, sha] = ref.split('@'), reviewed = REVIEWED_ACTIONS.get(action.toLowerCase());
+      if (!reviewed || sha !== reviewed.sha || uses.value.comment !== reviewed.version) {
+        add(uses.line, `uses ${ref} # ${uses.value.comment} is not a reviewed action commit.`);
+      }
+    }
     if (ref !== null && ref.split('@')[0].toLowerCase() === 'actions/checkout') {
       const w = n.entries.get('with'), persist = w?.value.kind === 'map' ? w.value.entries.get('persist-credentials') : undefined;
       if (!(persist?.value.kind === 'scalar' && persist.value.value === 'false')) add(uses.line, 'Checkout must set persist-credentials: false.');
@@ -343,8 +362,9 @@ const series = items => items.length < 3 ? items.join(' and ') : `${items.slice(
  * The workflow may set only name, on, permissions, concurrency, and jobs, and a job only name, runs-on, timeout-minutes, and steps.
  * A run step may set only name and run, and it runs `node tools/fairpane.mjs install-zig` or `node tools/fairpane.mjs run <gate>`.
  * An action step may set only name, uses, and with, and it uses an accepted action with only that action's accepted inputs.
+ * workflowProblems binds each action to its reviewed commit, so a commit from a fork of the action's repository fails.
  * An actions/upload-artifact step must also set if: to exactly ${{ always() }}, and no other step may set if:.
- * So no default, environment, working directory, container, condition, or other action can change what a gate step runs.
+ * So no default, environment, working directory, container, condition, or unreviewed action code can change what a gate step runs.
  * The step order, the runner labels, and the gate list are fixed by the gates.yml test, not by this function.
  */
 export function gateWorkflowProblems(root) {

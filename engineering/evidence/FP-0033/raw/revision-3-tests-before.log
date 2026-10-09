@@ -1,0 +1,42 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD","HEAD:tools/workflow-check.mjs"]
+97aa319feb7a2fad698a40ef5acbdd63bea3b53e
+48c7cbf1237a1aade2dcf8d1daae2ce0f6e010f4
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD","HEAD:tools/workflow-check.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:41:27.673Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","out/fp0033-rev3-before/tools/workflow-check.mjs","out/fp0033-rev3-before/tools/workflow-check.test.mjs","tools/workflow-check.test.mjs"]
+48c7cbf1237a1aade2dcf8d1daae2ce0f6e010f4
+5a99a972fc13dd7512808c806a41e0eccae34e8e
+5a99a972fc13dd7512808c806a41e0eccae34e8e
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","out/fp0033-rev3-before/tools/workflow-check.mjs","out/fp0033-rev3-before/tools/workflow-check.test.mjs","tools/workflow-check.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:41:27.743Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0033-rev3-before/tools/workflow-check.test.mjs"]
+TAP version 13
+ok 1 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+ok 2 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+ok 3 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+not ok 4 - FP-0033 17: An action commit outside the reviewed set fails, even with a full SHA and a version comment
+  ---
+  message: "Expected /is not a reviewed action commit/ in []"
+  ...
+ok 5 - FP-0033 3: A workflow permission other than contents: read fails
+ok 6 - FP-0033 3: A job permission other than contents: read fails
+ok 7 - FP-0033 4: continue-on-error on a step or a job fails
+ok 8 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+ok 9 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+ok 10 - FP-0033 4: A workflow_run trigger fails
+ok 11 - FP-0033 8: An expression outside the allowlist fails
+ok 12 - FP-0033 9: A gate step that can be skipped or rerouted fails
+ok 13 - FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+ok 14 - FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+ok 15 - FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+ok 16 - FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+ok 17 - FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+ok 18 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+ok 19 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+ok 20 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+1..20
+# tests 20
+# pass 19
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0033-rev3-before/tools/workflow-check.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T04:41:27.813Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":48}

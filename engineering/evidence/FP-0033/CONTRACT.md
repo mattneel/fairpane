@@ -116,3 +116,12 @@ A block scalar whose leading blank lines hold more spaces than its first content
 16. The block scalar fixture of review 2 fails to parse.
 
 The revision evidence records `git show --stat` of each revision commit, `git hash-object` of each workflow file, and the commands that stage the red baseline.
+
+Revision 3 follows `reviews/review-3-reject.json`.
+GitHub fetches `owner/repo@<sha>` for a commit in any fork of the repository, so a full SHA alone does not identify reviewed action code.
+`workflowProblems` accepts only the reviewed commit and release tag of each accepted action, in every workflow.
+`REVIEWED_ACTIONS` in `tools/workflow-check.mjs` lists them, and each SHA comes from a recorded release-tag lookup in the action's own repository.
+
+17. Fixtures with another full SHA for an accepted action, the reviewed SHA under another version comment, and the reviewed SHA under another owner each report a problem, and owner and repository case does not matter.
+
+The revision evidence records the GitHub run of the revision 2 evidence commit and of the revision 3 commit.

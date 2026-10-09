@@ -1,0 +1,159 @@
+{
+  "verdict": "reject",
+  "reviewed_commits": [
+    "98fa147490758a263c9a2427e244b519f7cafd8f",
+    "586b85498514188d65f0274fd4857ee15a59dc1b"
+  ],
+  "summary": "I reject revision 2 because of one major finding. Every finding from review 2 is resolved, though the run log from review 2's minor finding is still not cited. The denylist is gone. gateWorkflowProblems now checks every workflow, job and step key against allowlists, and it checks each action's inputs too (workflow-check.mjs:350-399). The Gates test now pins the step sequence, including action names (workflow-check.test.mjs:99-101). I traced review 2's reproduction, `defaults.run.shell: 'true {0}'`. It now reports 'The Gates workflow sets defaults:'. The same holds for env at every level, working-directory, container, an extra action, a checkout ref, any other run command, an upload without if:, and step `id`, `shell` or `timeout-minutes`. I found no YAML form, expression, trigger or key that gets past the checker. Revision checks 12-16 hold. The evidence binds to 98fa147. The binding log records HEAD 98fa147 and an empty status for every source root, including ignored files, one second before the receipts. The checker and test blobs at 98fa147 (48c7cbf, dc421bf, read from the GitHub API) match the worker's tests-after log. No later commit touches tools/workflow-check.mjs. The blocking problem is action identity. gateWorkflowProblems and the sequence test look only at the part of `uses:` before '@'. workflowProblems requires only some 40-hex SHA. GitHub fetches an action at any commit in the repository's fork network (the 'impostor commit' behavior that Chainguard published in 2023). So replacing the setup-node or checkout SHA with a commit pushed to a fork, under a plausible '# v7.x' comment, makes both checkers report nothing and keeps every controller test passing. That action can then write a `node` shim to GITHUB_PATH, or write NODE_OPTIONS or BASH_ENV to GITHUB_ENV. Every later gate step would then exit 0 without running its gate. This contradicts the claim at workflow-check.mjs:347 and tools/README.md:173 that no 'other action can change what a gate step runs'. A minor gap remains for check 5. There is no `gh run view` record for the revision 2 integration. When I checked, Gates run 37884244035 for 586b854 had the Linux job succeeded and the Windows job still running. I ran no shell commands. My conclusions about checker behavior come from tracing the code, not from executing it.",
+  "criteria": [
+    {
+      "criterion": "Review 2 major: the Gates workflow is checked against key allowlists, not a denylist",
+      "met": true,
+      "evidence": "Allowlists cover workflow keys (workflow-check.mjs:354), job keys (:361), action-step keys and inputs (:369-382), run-step keys (:390) and the run command (:393). An upload step must set if: ${{ always() }} (:384-386). By tracing: defaults, env, working-directory, container, strategy, services, needs, outputs, id, shell, timeout-minutes and continue-on-error at any level each produce a problem."
+    },
+    {
+      "criterion": "Check 12: defaults.run.shell (workflow and job), env at each level, step working-directory, job container, extra action step, checkout ref, another run command, and upload without if: each report a problem from gateWorkflowProblems",
+      "met": true,
+      "evidence": "workflow-check.test.mjs:179-212 asserts each case. It also covers env on the checkout step, a setup-node `cache` input, and three other commands. The red baseline (raw/revision-2-tests-before.log) fails case 12 at the first defaults assertion. raw/revision-2-tests-after.log and the controller-test receipt pass it."
+    },
+    {
+      "criterion": "Check 13: ${{ steps.x.outputs.y }} inside run: reports a problem",
+      "met": true,
+      "evidence": "workflow-check.mjs:308 covers every workflow. workflow-check.test.mjs:213-219 tests both an inline value and a block scalar, and it checks that the same expression under env: is accepted. Red in the baseline, green after."
+    },
+    {
+      "criterion": "Check 14: issue_comment and schedule triggers report problems",
+      "met": true,
+      "evidence": "ACCEPTED_TRIGGERS allowlist at workflow-check.mjs:286. workflow-check.test.mjs:220-228 tests mapping, flow-list and scalar forms. Red in the baseline, green after."
+    },
+    {
+      "criterion": "Check 15: widening the pages.yml deploy job changes its problem text so the reviewed list fails",
+      "met": true,
+      "evidence": "The grants() text is embedded in the problem. workflow-check.test.mjs:229-242 asserts the exact text for write-all and for an added contents: write. REVIEWED['pages.yml'] (test:73) now names pages: write and id-token: write. pages.yml:49 is the deploy permissions line."
+    },
+    {
+      "criterion": "Check 16: review 2's block scalar fixture fails to parse",
+      "met": true,
+      "evidence": "workflow-check.mjs:150-155 tracks the widest leading blank line and throws at :152. workflow-check.test.mjs:243-249 expects 'Line 23: …' (counted against BASE: line 23 is the 12-space blank line). It also checks that 10-space, 3-space and empty blank lines still parse as '\\necho hi'."
+    },
+    {
+      "criterion": "Revision evidence records git show --stat of each revision commit, git hash-object of each workflow file, and the red-baseline staging commands",
+      "met": true,
+      "evidence": "raw/revision-2-binding.log: `git show --stat` of 7bbe196, 29f2135 and 98fa147, and hash-object plus rev-parse HEAD: for gates.yml (ccbd330) and pages.yml (a70741a), which are equal. raw/revision-2-tests-before.log records the `node -e` staging command, the stub content, and the staged blob IDs. Its staged test blob dc421bf equals the committed test file."
+    },
+    {
+      "criterion": "Evidence binds to 98fa147",
+      "met": true,
+      "evidence": "The binding log records HEAD 98fa147 at 04:29:42.830Z and an empty `git status --porcelain --untracked-files=all --ignored` over every source root. The repo-check (04:29:43.240Z) and controller-test (04:29:43.443Z) receipts follow, with source digest cb122777… before and after, and 148/148. Bun 148/148 ran at 04:30:05 in C:\\src\\fairpane. The GitHub commit API gives blobs 48c7cbf (checker) and dc421bf (test) at 98fa147, which match revision-2-tests-after.log. The commits API for tools/workflow-check.mjs lists 98fa147 as the latest commit."
+    },
+    {
+      "criterion": "No Gates step can exit 0 without running its gate while gateWorkflowProblems and workflowProblems report nothing",
+      "met": false,
+      "evidence": "Changing an accepted action's 40-hex SHA to a fork-network (impostor) commit passes both checkers and the sequence test, because workflow-check.mjs:370 and workflow-check.test.mjs:99 drop everything after '@'. See the major finding. I found no other route through keys, inputs, expressions, environment-file writes or YAML forms."
+    },
+    {
+      "criterion": "Contract check 5 for the revised integration",
+      "met": false,
+      "evidence": "The repository records no GitHub run for 98fa147 or 586b854. The API lists no run for 98fa147. Gates run 37884244035 for 586b854 showed 'Linux gates' successful (steps 1-10). 'Windows gates' had passed steps 1-7 and was running zig-test (step 8) when I observed it."
+    },
+    {
+      "criterion": "Protected paths unchanged",
+      "met": true,
+      "evidence": "98fa147 touches the FP-0033 README, two raw logs, tools/README.md, tools/workflow-check.mjs and tools/workflow-check.test.mjs. 586b854 touches FP-0033 evidence and engineering/state.json. engineering/state.json is not in policy.json protected_paths (:46-54)."
+    }
+  ],
+  "prior_findings": [
+    {
+      "finding": "major: gateStepProblems checked only job if:, step shell: and step if:. defaults.run.shell, working-directory, env and extra uses: steps were unchecked, and the doc comment and case name overstated coverage (workflow-check.mjs:314)",
+      "resolved": true,
+      "evidence": "Replaced by gateWorkflowProblems with root, job, step, action and input allowlists (workflow-check.mjs:325-399). Every vector from the finding has a fixture in case 12 (test:191-211). An extra accepted action step is caught by the sequence test, which now includes action names (test:99-101). The pinned commit is still unbound, which I report as a new major finding."
+    },
+    {
+      "finding": "minor: no recorded `gh run view` for the revision 1 integration run 37875841603",
+      "resolved": false,
+      "evidence": "raw/github-run-37875841603.log exists (added in 101ba28): exit 0, headSha 94c96ed, conclusion success, both jobs successful. The FP-0033 README still cites only run 37873082602 (README.md:16), and the Revision 1 table does not cite the new log. The record exists, so only a note about the citation remains."
+    },
+    {
+      "finding": "note: an upload-artifact step without if: reported nothing",
+      "resolved": true,
+      "evidence": "workflow-check.mjs:385 reports a missing if:, and :386 requires the exact '${{ always() }}'. Case 12 asserts the missing-if: case (test:211)."
+    },
+    {
+      "finding": "note: a block scalar with an over-indented leading blank line was accepted by the checker but rejected by libyaml",
+      "resolved": true,
+      "evidence": "workflow-check.mjs:152 throws. Case 16 asserts both the error with its line number and the accepted forms."
+    },
+    {
+      "finding": "note: the revision 1 red baseline did not record its staging commands",
+      "resolved": true,
+      "evidence": "raw/revision-2-tests-before.log records HEAD acd7a5a, the old checker blob ef953b17, the full `node -e` staging command with the stub text, and the blob IDs of every staged file."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "major",
+      "path": "tools/workflow-check.mjs",
+      "line": 370,
+      "issue": "Action identity is bound only by owner/repo, never by commit. gateWorkflowProblems computes `uses.value.value.split('@')[0]` (line 370). The Gates sequence test also compares only `field(s,'uses')?.split('@')[0]` (workflow-check.test.mjs:99). workflowProblems requires only some 40-hex SHA and some version comment (lines 317-318). GitHub fetches `owner/repo@<sha>` for any commit in the repository's fork network (Chainguard, 'What the fork? Imposter commits in GitHub Actions and CI/CD', 2023). Reproduction, traced and not executed: push to a fork of actions/setup-node a commit whose action writes `$RUNNER_TEMP/shim` to GITHUB_PATH, where shim/node(.cmd) exits 0. Alternatively, it writes `NODE_OPTIONS=--require=…` or `BASH_ENV=…` to GITHUB_ENV. In gates.yml, replace `actions/setup-node@949feb24…` with `actions/setup-node@<fork-sha> # v7.1.1`. Both checkers then report nothing: the SHA is 40-hex, the comment matches VERSION_COMMENT, the action is accepted, and the input is node-version. Case 1 and the Gates sequence test still pass. On GitHub, every later `node tools/fairpane.mjs run <gate>` step resolves `node` to the shim and exits 0 without running its gate. The same applies to the checkout SHA. This contradicts the doc comment at workflow-check.mjs:347 and tools/README.md:173 ('No … other action can therefore change what a gate step runs'). It also contradicts contract revision 2's 'The only accepted actions are actions/checkout …, actions/setup-node …, actions/upload-artifact'. Review 2 recommended matching the full sequence 'uses and all'. The revision matches only the action names.",
+      "recommendation": "Bind each accepted Gates action to its reviewed commit. For example, make GATE_ACTIONS map the full `owner/repo@sha` (or name to an allowed SHA list) and report any other ref. Alternatively, have the Gates test assert the exact `uses` strings, as REVIEWED does for problem lists. Then add a step to the pin-update procedure (tools/README.md:179-185) that edits the reviewed SHA together with the workflow, and add a fixture that changes only the SHA and must report a problem. Otherwise, narrow workflow-check.mjs:347, tools/README.md:173 and the contract wording to say that the code an accepted action runs depends on the pinned SHA being reviewed by hand against the release tag."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0033/README.md",
+      "line": 49,
+      "issue": "Revision 2 changes the controller-test gate that both CI jobs run, but its evidence records no GitHub run (contract check 5: run for the integration commit, recorded with `gh run view --json`). The 98fa147 draft promised 'the GitHub run', and 586b854 removed that sentence. The API lists no run for 98fa147. Run 37884244035 for 586b854 was in progress when I observed it: Linux succeeded, and Windows was at zig-test.",
+      "recommendation": "After run 37884244035 completes, record `gh run view 37884244035 --json databaseId,headSha,event,status,conclusion,jobs` with `node tools/fairpane.mjs record` under raw/. Cite it in the Revision 2 section."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0033/README.md",
+      "line": 16,
+      "issue": "raw/github-run-37875841603.log, the revision 1 CI run for 94c96ed, exists but no README section cites it. Review 2 recommended citing it in the Revision 1 table.",
+      "recommendation": "Add the log to the Revision 1 table as the check 5 evidence for 94c96ed."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0033/raw/revision-2-tests-before.log",
+      "line": null,
+      "issue": "Each case stops at its first failing assertion. So the baseline shows case 12 red only for the workflow-level defaults fixture. It does not show the remaining 14 fixtures (job defaults, env, working-directory, container, checkout ref, commands, upload without if) failing against the old checker. By tracing ef953b17's gateStepProblems, most of them would also have reported nothing, so the red baseline is valid but coarse.",
+      "recommendation": "For future baselines of multi-fixture cases, record a per-fixture result, or split such cases so each fixture's red state is observable."
+    }
+  ],
+  "commands_run": [
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/commits/98fa147490758a263c9a2427e244b519f7cafd8f (HTTP fetch through the read tool, not a shell)",
+      "exit_status": 0,
+      "observation": "Parent 5f807f2. It touches the FP-0033 README, revision-2-tests-after.log, revision-2-tests-before.log, tools/README.md, tools/workflow-check.mjs (blob 48c7cbf) and tools/workflow-check.test.mjs (blob dc421bf). Those blob IDs equal the worker's hash-object output."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/commits/586b85498514188d65f0274fd4857ee15a59dc1b (read tool)",
+      "exit_status": 0,
+      "observation": "Parent 98fa147. It touches the FP-0033 README, two receipts with their logs, revision-2-binding.log, revision-2-tests-bun.log and engineering/state.json. No protected path is touched."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/actions/runs?head_sha=98fa147… and ?head_sha=586b854… (read tool)",
+      "exit_status": 0,
+      "observation": "No run for 98fa147. For 586b854, Pages run 37884244047 succeeded, and Gates run 37884244035 (push) was in_progress."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/actions/runs/37884244035/jobs (read tool)",
+      "exit_status": 0,
+      "observation": "'Linux gates' (ubuntu-24.04) completed successfully with all 5 gates and the upload. 'Windows gates' (windows-2025) had steps 1-7 successful and zig-test in progress."
+    },
+    {
+      "command": "read https://api.github.com/repos/mattneel/fairpane/commits?path=tools/workflow-check.mjs and ?path=engineering/evidence/FP-0033/raw/github-run-37875841603.log (read tool)",
+      "exit_status": 0,
+      "observation": "98fa147 is the latest commit to touch the checker. The revision 1 run log was added in 101ba28."
+    },
+    {
+      "command": "read https://www.chainguard.dev/unchained/what-the-fork-imposter-commits-in-github-actions-and-ci-cd (read tool)",
+      "exit_status": 0,
+      "observation": "Documents that GitHub Actions fetches `owner/repo@sha` for a commit that belongs only to a fork, with no warning, and treats it as the parent repository's action."
+    },
+    {
+      "command": "read .git/logs/HEAD (read tool)",
+      "exit_status": 0,
+      "observation": "The sequence 5f807f2 → 98fa147 → 586b854 → dcfb0fd (policy: format-check Zig files under tests) appears. The worker base acd7a5a is the earlier 'plan: record reviews…' commit."
+    }
+  ]
+}

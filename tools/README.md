@@ -180,9 +180,13 @@ To update a pinned action, follow these steps.
 1. Look up the release tag through `https://api.github.com/repos/<owner>/<repo>/releases/latest`.
 2. Resolve the tag to its commit through `https://api.github.com/repos/<owner>/<repo>/git/ref/tags/<tag>`.
 3. Dereference an annotated tag object through `git/tags/<sha>` until the object type is `commit`.
-4. Replace the SHA and the version comment in every workflow that uses the action.
-5. Run `actionlint` at a pinned release with a verified digest.
-6. Run `node tools/fairpane.mjs test`.
+4. Record the lookups with `node tools/fairpane.mjs record` under the task's evidence directory.
+5. Replace the SHA and the version tag in `REVIEWED_ACTIONS` in `tools/workflow-check.mjs`, because the checker accepts only reviewed action commits.
+6. Replace the SHA and the version comment in every workflow that uses the action.
+7. Run `actionlint` at a pinned release with a verified digest.
+8. Run `node tools/fairpane.mjs test`.
+
+The checker binds each action to a reviewed commit because GitHub also fetches a commit from any fork of the action's repository.
 
 ## Generate the ABI declarations
 

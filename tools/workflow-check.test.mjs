@@ -114,6 +114,15 @@ export const workflowCases = [
     fails(variant('        run: node tools/fairpane.mjs run repo-check\n', '        uses: docker://alpine:3\n'), NOT_PINNED);
     fails(variant(`actions/checkout@${CHECKOUT_SHA} # v7.0.1`, `actions/checkout@${CHECKOUT_SHA}`), /has no version comment/);
   }],
+  ['FP-0033 17: An action commit outside the reviewed set fails, even with a full SHA and a version comment', () => {
+    const reviewed = /is not a reviewed action commit/;
+    const pin = `actions/checkout@${CHECKOUT_SHA} # v7.0.1`;
+    // A commit pushed to a fork of the action's repository has a full SHA that GitHub also fetches.
+    fails(variant(pin, `actions/checkout@${'a'.repeat(40)} # v7.0.1`), reviewed);
+    fails(variant(pin, `actions/checkout@${CHECKOUT_SHA} # v7.0.2`), reviewed);
+    fails(variant(pin, `someone/checkout@${CHECKOUT_SHA} # v7.0.1`), reviewed);
+    assert.deepEqual(checkWorkflow(variant(pin, `Actions/Checkout@${CHECKOUT_SHA} # v7.0.1`)), []);
+  }],
   ['FP-0033 3: A workflow permission other than contents: read fails', () => {
     fails(variant('permissions:\n  contents: read\n', 'permissions:\n  contents: write\n'), WORKFLOW_PERMISSION);
     fails(variant('permissions:\n  contents: read\n', 'permissions:\n  contents: read\n  id-token: write\n'), WORKFLOW_PERMISSION);
@@ -183,8 +192,9 @@ export const workflowCases = [
       const problems = gates(text);
       assert.ok(problems.some(p => pattern.test(p)), `Expected ${pattern} in ${JSON.stringify(problems)}`);
     };
-    const setup = `      - name: Set up Node\n        uses: actions/setup-node@${'b'.repeat(40)} # v7.1.0\n        with:\n          node-version: 24.21.0\n\n`;
-    const upload = condition => `${run}\n      - name: Upload\n${condition}        uses: actions/upload-artifact@${'c'.repeat(40)} # v7.0.2\n` +
+    const setup = '      - name: Set up Node\n        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0\n' +
+      '        with:\n          node-version: 24.21.0\n\n';
+    const upload = condition => `${run}\n      - name: Upload\n${condition}        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2\n` +
       '        with:\n          name: receipts\n          path: out/evidence/\n          if-no-files-found: error\n';
     const accepted = variant(run, upload('        if: ${{ always() }}\n')).replace('      - name: Run a gate\n', `${setup}      - name: Run a gate\n`);
     assert.deepEqual(gates(accepted), []);
