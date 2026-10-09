@@ -29,17 +29,18 @@
       "owner": "root-integrator",
       "evidence": [
         "engineering/evidence/FP-0002/README.md",
-        "engineering/evidence/FP-0002/gates/2026-10-09T01-58-00-035Z-repo-check-2a910fe0.json",
-        "engineering/evidence/FP-0002/gates/2026-10-09T01-58-00-226Z-controller-test-f88b9b11.json",
-        "engineering/evidence/FP-0002/raw/revision-2-release-check.log",
-        "engineering/evidence/FP-0002/raw/revision-2-attest-standalone.log",
+        "engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-099Z-repo-check-8287c88c.json",
+        "engineering/evidence/FP-0002/gates/2026-10-09T02-12-59-289Z-controller-test-a135c7e3.json",
+        "engineering/evidence/FP-0002/raw/revision-3-release-check.log",
+        "engineering/evidence/FP-0002/raw/revision-3-attest-standalone.log",
         "engineering/evidence/FP-0002/raw/mutation-canonical-2.log"
       ],
-      "review": "engineering/evidence/FP-0002/reviews/review-1-reject.json",
+      "review": "engineering/evidence/FP-0002/reviews/review-2-reject.json",
       "notes": [
-        "The frozen contract is engineering/evidence/FP-0002/CONTRACT.md, including revisions 1 and 2.",
+        "The frozen contract is engineering/evidence/FP-0002/CONTRACT.md, including revisions 1, 2, and 3.",
         "Review 1 rejected commit e2eaace for the verifier's own location and unhardened candidate Git calls.",
-        "Commit 9e9a0bf implements revision 2 with source digest 3f673fd7598a670284882bf8efc263ff7ffec565e00af1e92ab6a73a13b12c0a. Awaiting fairpane-review."
+        "Review 2 rejected commit 9e9a0bf because a subdirectory path split the guard from the repository that Git used.",
+        "Commit 617d2cd implements revision 3 with source digest 0f7e082d17ef228f5a2340e490421618f6b78da55d75cbd66531c9c61db334f0. Awaiting fairpane-review."
       ]
     },
     "FP-0003": {

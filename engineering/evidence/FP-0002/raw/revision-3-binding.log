@@ -1,0 +1,15 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","add","--detach","out/gate-617d2cd","617d2cd"]
+Preparing worktree (detached HEAD 617d2cd)
+HEAD is now at 617d2cd FP-0002: anchor candidate checks on the Git top-level directory
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","add","--detach","out/gate-617d2cd","617d2cd"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:12:58.683Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":139}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/gate-617d2cd","rev-parse","HEAD"]
+617d2cd87095c8b7efec614fe69fc03fff92bbf3
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/gate-617d2cd","rev-parse","HEAD"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:12:58.884Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":27}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","-C","out/gate-617d2cd","status","--porcelain","--untracked-files=all","--ignored"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["-C","out/gate-617d2cd","status","--porcelain","--untracked-files=all","--ignored"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:12:58.976Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","worktree","remove","--force","out/gate-617d2cd"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["worktree","remove","--force","out/gate-617d2cd"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:13:55.321Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":62}

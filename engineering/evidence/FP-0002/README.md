@@ -3,18 +3,19 @@
 ## Scope
 
 Task `FP-0002` designs and tests the protected qualification boundary.
-The frozen contract is `engineering/evidence/FP-0002/CONTRACT.md`, including revision 1.
+The frozen contract is `engineering/evidence/FP-0002/CONTRACT.md`, including revisions 1, 2, and 3.
 The root integrator implemented it in `tools/attest.mjs`, `tools/attest.test.mjs`, the `attest-verify` controller command, and ADR 0002.
+The current implementation is commit `617d2cd`, and the section "Revision 3 records" holds its evidence.
 
 ## Acceptance criteria
 
 | Criterion | Evidence |
 | --- | --- |
 | Demonstrate why a writable local checker cannot attest its own author. | Controller case 1 forges a passing receipt that `validateReceipt` accepts without gate execution. |
-| Define a separate protected policy input and immutable candidate source identity. | ADR 0002, `loadTrustPolicy`, and `candidateIdentity`, with cases 13 and 14. |
+| Define a separate protected policy input and immutable candidate source identity. | ADR 0002, `candidateRepository`, `loadTrustPolicy`, and `candidateIdentity`, with cases 13 and 14. |
 | Reject forged, stale, truncated, zero-denominator, and changed-policy result records. | Cases 4 through 12 and 16. |
-| Implement an independently testable verifier before any release success path. | `tools/attest.mjs` imports nothing from the receipt code, and `raw/attest-standalone.log` runs its fourteen cases alone. |
-| Keep release-check fail-closed until that verifier qualifies. | Case 15 and `raw/release-check.log`, which exits with status 1. |
+| Implement an independently testable verifier before any release success path. | `tools/attest.mjs` imports nothing from the receipt code, and `raw/revision-3-attest-standalone.log` runs its fourteen cases alone. |
+| Keep release-check fail-closed until that verifier qualifies. | Case 15 and `raw/revision-3-release-check.log`, which exits with status 1. |
 
 ## Records
 
@@ -55,3 +56,21 @@ The gates ran with source digest `3f673fd7598a670284882bf8efc263ff7ffec565e00af1
 | `raw/revision-2-controller-test-bun.log` | Bun 1.4.2, then exit status 0 with 102 of 102 controller tests passing. |
 | `raw/mutation-canonical-2.log` | Against `HEAD` `9e9a0bf`, without the canonical payload rule, case 16 reports `verified` for all three noncanonical fixtures and fails. |
 | `raw/mutation-canonical-2.diff` | The exact `git diff` of that mutation. |
+
+## Revision 3 records
+
+Review 2 rejected commit `9e9a0bf`, and commit `617d2cd` implements contract revision 3.
+`raw/revision-3-binding.log` records a fresh `git worktree add` of `617d2cd`, its `HEAD`, and a status with untracked and ignored files, before the gates ran there.
+The gate receipts were copied from that work tree, and `evidence-check` reports them current against the main checkout.
+The gates ran with source digest `0f7e082d17ef228f5a2340e490421618f6b78da55d75cbd66531c9c61db334f0`.
+
+- `gates/2026-10-09T02-12-59-099Z-repo-check-8287c88c.json`
+- `gates/2026-10-09T02-12-59-289Z-controller-test-a135c7e3.json`, with 118 of 118 controller tests passing on Node.
+
+| Log | Result |
+| --- | --- |
+| `raw/revision-3-release-check.log` | Exit status 1, with the problem that no protected runner, trust policy, or signed result set exists. |
+| `raw/revision-3-attest-standalone.log` | Exit status 0, with 14 of 14 verifier cases passing. |
+| `raw/revision-3-controller-test-bun.log` | Bun 1.4.2, then exit status 0 with 118 of 118 controller tests passing. |
+
+The canonical payload rule did not change in revision 3, so `raw/mutation-canonical-2.log` remains its mutation control.
