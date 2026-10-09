@@ -1,0 +1,52 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0011-integration-cache"]
+Build Summary: 35/35 steps succeeded; 132/132 tests passed
+test success
++- run test 132 pass (132 total) 4s MaxRSS:10M
+|  +- compile test debug native success 5s MaxRSS:626M
++- FP-0007 case 13: case 2 passes with exit status 0 success 37ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:332M
++- FP-0007 case 13: case 3 fails with exit status 1 success 35ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 33ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 66ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 5ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 10ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:313M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 33ms
+|  +- compile exe fairpane-lab-check debug native (reused)
+|  +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
++- FP-0011 case 4: leaf_invokes_to_number.zig success 346ms
++- FP-0011 case 4: leaf_invokes_number_to_string.zig success 334ms
++- FP-0011 case 4: allocation_invokes_call.zig success 324ms
++- FP-0011 case 4: leaf_allocates.zig success 321ms
++- FP-0011 case 4: mutation_throws.zig success 284ms
++- FP-0011 case 4: leaf_calls_behavior.zig success 310ms
++- FP-0011 case 4: leaf_positive.zig success 375ms
++- FP-0011 case 5: catalog_callback_alone.zig success 329ms
++- FP-0011 case 5: catalog_exception_alone.zig success 327ms
++- FP-0011 case 5: catalog_duplicate_id.zig success 330ms
++- FP-0011 case 5: kernel_wider_context.zig success 308ms
++- FP-0011 case 5: kernel_undeclared_throw.zig success 291ms
++- FP-0011 case 8: layout_undescribed_field.zig success 297ms
++- FP-0011 case 8: layout_plain_reference.zig success 324ms
++- FP-0011 case 8: layout_missing_field.zig success 290ms
++- FP-0011 case 20: abi_reference_value.zig success 306ms
++- FP-0011 case 20: abi_nan_box_value.zig success 300ms
++- FP-0011 case 20: abi_tagged_index_value.zig success 324ms
+
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0011-integration-cache"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T05:08:03.345Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":12772}
