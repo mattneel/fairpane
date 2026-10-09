@@ -1,0 +1,169 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD","HEAD^{tree}"]
+97c01b9d6f58ce0c9108dcc9206c19de626f8b79
+06c905b4beb79c226b59a408cd9aff0ba03efb6b
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD","HEAD^{tree}"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":17}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","05d2d42","HEAD","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains/zig.lock.json","toolchains/zig-version.txt","specs/corpora.json"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","05d2d42","HEAD","--","AGENTS.md","docs/CHARTER.md","engineering/qualification.json","engineering/policy.json","engineering/gates.json","toolchains/zig.lock.json","toolchains/zig-version.txt","specs/corpora.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--name-status","05d2d42","HEAD"]
+A	.github/workflows/pages.yml
+M	.omp/RULES.md
+M	CONTRIBUTING.md
+M	README.md
+M	START_HERE.md
+A	book/book.toml
+A	book/src/SUMMARY.md
+A	book/src/abi-and-wrappers.md
+A	book/src/adoption-and-governance.md
+A	book/src/agent-operations.md
+A	book/src/architecture.md
+A	book/src/build-from-source.md
+A	book/src/charter.md
+A	book/src/contributing.md
+A	book/src/git-operations.md
+A	book/src/index.md
+A	book/src/javascript-runtime.md
+A	book/src/license-decision.md
+A	book/src/product.md
+A	book/src/qualification.md
+A	book/src/rendering-and-text.md
+A	book/src/roadmap.md
+A	book/src/security-reporting.md
+A	book/src/security.md
+A	book/src/sources.md
+A	book/src/status.md
+A	book/src/toolchain.md
+M	docs/ADOPTION_AND_GOVERNANCE.md
+M	docs/AGENT_OPERATIONS.md
+A	docs/GIT_OPERATIONS.md
+M	docs/SECURITY.md
+M	engineering/HANDOFF.md
+M	engineering/evidence/FP-0001/README.md
+M	engineering/evidence/FP-0001/SHA256SUMS
+M	engineering/evidence/FP-0001/probes/INDEX.md
+A	engineering/evidence/FP-0001/raw/bootstrap-manifest-recheck.log
+A	engineering/evidence/FP-0001/raw/bootstrap-preparation-copy.log
+A	engineering/evidence/FP-0001/raw/head-05d2d42-verification.log
+A	engineering/evidence/FP-0001/raw/probe-attribution.log
+A	engineering/evidence/FP-0001/raw/sha256sums-check.log
+A	engineering/evidence/FP-0001/reviews/review-2-reject.json
+A	engineering/evidence/FP-0002/CONTRACT.md
+A	engineering/evidence/FP-0003/CONTRACT.md
+A	engineering/evidence/FP-0004/CONTRACT.md
+A	engineering/evidence/FP-0028/CONTRACT.md
+A	engineering/evidence/bootstrap-preparation/2026-10-08T23-09-34-005Z-repo-check-d8d2c96e.json
+A	engineering/evidence/bootstrap-preparation/2026-10-08T23-09-34-005Z-repo-check-d8d2c96e.log
+A	engineering/evidence/bootstrap-preparation/2026-10-08T23-09-34-107Z-controller-test-69c613b5.json
+A	engineering/evidence/bootstrap-preparation/2026-10-08T23-09-34-107Z-controller-test-69c613b5.log
+A	engineering/evidence/bootstrap-preparation/2026-10-08T23-11-23-342Z-zig-test-b9dff59e.json
+A	engineering/evidence/bootstrap-preparation/2026-10-08T23-11-23-342Z-zig-test-b9dff59e.log
+A	engineering/evidence/docs-site/raw/action-pins.log
+A	engineering/evidence/docs-site/raw/actionlint.log
+A	engineering/evidence/docs-site/raw/live-site.log
+A	engineering/evidence/docs-site/raw/local-build.log
+A	engineering/evidence/docs-site/raw/mdbook-assets.log
+M	engineering/plan.json
+M	engineering/state.json
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--name-status","05d2d42","HEAD"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--name-only","4370e31","4ca37a2"]
+engineering/evidence/FP-0001/README.md
+engineering/evidence/FP-0001/SHA256SUMS
+engineering/evidence/FP-0001/probes/INDEX.md
+engineering/evidence/FP-0001/raw/bootstrap-manifest-recheck.log
+engineering/evidence/FP-0001/raw/bootstrap-preparation-copy.log
+engineering/evidence/FP-0001/raw/head-05d2d42-verification.log
+engineering/evidence/FP-0001/raw/probe-attribution.log
+engineering/evidence/FP-0001/raw/sha256sums-check.log
+engineering/evidence/FP-0001/reviews/review-2-reject.json
+engineering/evidence/bootstrap-preparation/2026-10-08T23-09-34-005Z-repo-check-d8d2c96e.json
+engineering/evidence/bootstrap-preparation/2026-10-08T23-09-34-005Z-repo-check-d8d2c96e.log
+engineering/evidence/bootstrap-preparation/2026-10-08T23-09-34-107Z-controller-test-69c613b5.json
+engineering/evidence/bootstrap-preparation/2026-10-08T23-09-34-107Z-controller-test-69c613b5.log
+engineering/evidence/bootstrap-preparation/2026-10-08T23-11-23-342Z-zig-test-b9dff59e.json
+engineering/evidence/bootstrap-preparation/2026-10-08T23-11-23-342Z-zig-test-b9dff59e.log
+engineering/state.json
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--name-only","4370e31","4ca37a2"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-15-799Z-repo-check-eae9021c.json"]
+{
+  "result": "pass",
+  "gate": "repo-check",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-15-799Z-repo-check-eae9021c.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":55}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-15-942Z-controller-test-87d291dd.json"]
+{
+  "result": "pass",
+  "gate": "controller-test",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-15-942Z-controller-test-87d291dd.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":56}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-201Z-zig-fmt-2e7ea782.json"]
+{
+  "result": "pass",
+  "gate": "zig-fmt",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-201Z-zig-fmt-2e7ea782.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":56}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-325Z-zig-test-4722b6af.json"]
+{
+  "result": "pass",
+  "gate": "zig-test",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-325Z-zig-test-4722b6af.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":56}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-514Z-zig-build-0f3baa42.json"]
+{
+  "result": "pass",
+  "gate": "zig-build",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-514Z-zig-build-0f3baa42.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":57}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-681Z-c-abi-33ec2e49.json"]
+{
+  "result": "pass",
+  "gate": "c-abi",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-681Z-c-abi-33ec2e49.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":57}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-945Z-cross-windows-x86_64-d0467cd5.json"]
+{
+  "result": "pass",
+  "gate": "cross-windows-x86_64",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-945Z-cross-windows-x86_64-d0467cd5.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":58}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-18-117Z-cross-linux-aarch64-ffaf1920.json"]
+{
+  "result": "pass",
+  "gate": "cross-linux-aarch64",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-18-117Z-cross-linux-aarch64-ffaf1920.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":56}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-18-281Z-cross-macos-aarch64-3a9306e7.json"]
+{
+  "result": "pass",
+  "gate": "cross-macos-aarch64",
+  "trust": "unsigned-local-integrity-only",
+  "current_source": true
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","evidence-check","engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-18-281Z-cross-macos-aarch64-3a9306e7.json"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":56}

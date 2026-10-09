@@ -1,0 +1,121 @@
+{
+  "verdict": "accept",
+  "summary": "I recommend accept for FP-0001, implementation commit 05d2d42. Evidence commit 4ca37a2 closes both items that blocked review 2. First, raw/sha256sums-check.log records GNU coreutils 8.32 `sha256sum -c SHA256SUMS` exiting 0 twice: once with 90/90 entries OK against the prior file and once with 95/95 OK against the regenerated one. The digests of the 7 CRLF files are byte-identical in both versions, and the README now retracts the wrong FAILED claim (README:28-29). Second, raw/head-05d2d42-verification.log runs in a detached 05d2d42 worktree. That worktree reports commit 05d2d42 and tree b8bd08d0…, fingerprint f2d2e0e6…/76 and ec150588…/12, and all 9 gate receipts pass evidence-check with current_source true. The same log shows an empty protected-path `--stat` against 89109be, a name-status list of allowed paths only, and two amend diffs that touch nothing outside the evidence directory. The minor findings are resolved as well: the 89109be file count is confirmed at 81, the 6 ignored archive files are preserved and digest-matched, the full manifest recheck is recorded, the probe attribution is extracted from the session transcript, and the README wording is corrected. The controller hardening items moved to FP-0028 with explicit acceptance criteria. None of them can make a failed command or gate report a pass. All 7 criteria are supported by committed raw evidence. One thing remains for the integrator: master has moved past 05d2d42 with changes in source roots (docs/GIT_OPERATIONS.md, engineering/plan.json). So current-source evidence-check fails at the tip, and AGENT_OPERATIONS.md:41 requires the affected gates to be re-run on the integration head.",
+  "review2_items": [
+    {
+      "finding": "major README:27 (the 05d2d42 revision). SHA256SUMS FAILED claim and unrecorded Node check.",
+      "status": "resolved",
+      "evidence": "raw/sha256sums-check.log runs `sha256sum --version` (GNU coreutils 8.32, absolute path C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe) with exit 0. The first `-c` run lists exactly the 90 prior entries, all OK, with exit 0. The second run lists 95 entries, all OK, with exit 0: the earlier 90 plus raw/bootstrap-manifest-recheck.log, raw/bootstrap-preparation-copy.log, raw/head-05d2d42-verification.log, raw/probe-attribution.log and reviews/review-2-reject.json. In the current SHA256SUMS, the 7 CRLF entries are unchanged: 91bb06db…, 43d9f2e8…, b967627e…, a4e24965…, 138f8bba…, cfec5116… and 79db6506…. Only probes/INDEX.md changed digest (1fd0464e→a349f62a), because that file was edited. README:20 excludes raw/sha256sums-check.log from SHA256SUMS, which is necessary because a file cannot list its own checker. README:28-29 retracts the earlier claim."
+    },
+    {
+      "finding": "minor README:122. No record covered the reviewed head or the amends.",
+      "status": "resolved",
+      "evidence": "raw/head-05d2d42-verification.log runs `worktree add --detach out/wt-05d2d42 05d2d42` and `rev-parse` (05d2d4200b8f…, tree b8bd08d0…). The fingerprint is f2d2e0e6…/76 and ec150588…/12. evidence-check passes on all 9 receipts in that worktree with exit 0. `git diff --stat 89109be 05d2d42 -- <protected paths + zig-version.txt>` is empty with exit 0. The name-status list for 89109be..05d2d42 contains only allowed paths. 93de2e3→727ef5e changed only the README, SHA256SUMS and raw/clean-checkout-evidence-check.log, and 727ef5e→05d2d42 changed only the README. The worktree was then removed. README:133-140 now describes both amends."
+    },
+    {
+      "finding": "minor README:68. 89109be is not the full archive, and the copy was unrecorded.",
+      "status": "resolved",
+      "evidence": "raw/bootstrap-manifest-recheck.log shows `git ls-files --error-unmatch out/evidence` exiting 1 (untracked), the 6 preserved files copied and digest-matched (0 mismatches), all 86 manifest entries OK under `sha256sum -c BOOTSTRAP_MANIFEST.sha256` with exit 0, and `git ls-tree -r --name-only 89109be` listing 81 paths (80 manifest files plus BOOTSTRAP_MANIFEST.sha256). raw/bootstrap-preparation-copy.log preserves the 6 files under engineering/evidence/bootstrap-preparation/, all OK. README:53-58 states the limits honestly."
+    },
+    {
+      "finding": "minor probes/INDEX.md:5. Probe attribution was prose.",
+      "status": "resolved",
+      "evidence": "raw/probe-attribution.log extracts from the session transcript the 12 spawn requests (name and agent type) and the 12 result headers (agent, completed, duration). These match the INDEX.md table row for row. The transcript itself is outside the repository; it is user session data, which docs/GIT_OPERATIONS.md:39 forbids committing."
+    },
+    {
+      "finding": "minor README:118. The cache deletion was prose.",
+      "status": "resolved by disclosure",
+      "evidence": "README:127-128 now says the deletion is unrecorded, and cites the 4407 ms against 64 ms timing and the fresh-cache zig-test-summary.log."
+    },
+    {
+      "finding": "minor/notes in tools/lib.mjs and tools/selftest.mjs. Record cwd and timestamps, capture failure paths, temporary-file mode, test gaps.",
+      "status": "deferred to FP-0028 (accepted deferral)",
+      "evidence": "engineering/plan.json:1258-1300 defines FP-0028, which depends on FP-0001, with six acceptance criteria. They cover cwd and UTC start time, complete failure records and descriptor release, no crash on log-write failure, owner-only capture files, and each test gap I named. README:247-251 discloses the deferral. None of these items allows a failed command or gate to report a pass, so none affects an FP-0001 criterion."
+    }
+  ],
+  "review1_findings": "All review-1 findings stay resolved as described in reviews/review-2-reject.json. The two residuals that review 2 left open (probe attribution and the head amends) are now resolved, see above.",
+  "acceptance_criteria": [
+    {
+      "id": 1,
+      "status": "supported",
+      "evidence": "raw/host-versions.log and raw/doctor.log record every tool with its absolute path and exit 0, and the receipt host blocks match."
+    },
+    {
+      "id": 2,
+      "status": "supported",
+      "evidence": "raw/compiler-archive.log shows the sha256sum, size and lock entry equal, plus the install receipt and `zig version`. install-zig-attempt1.log (exit 1) and install-zig-attempt2.log (exit 0) are both preserved, and the GNU check now confirms their digests. raw/global-cache-isolation.log scanned 364229 entries with 0 changed after the 23:49:01.709Z marker. Get-Zig.ps1 confines writes to .tools."
+    },
+    {
+      "id": 3,
+      "status": "supported",
+      "evidence": "The zig-build and zig-test receipts both exit 0 with the pinned compiler named by absolute path. raw/zig-test-summary.log reports 7/7. build.zig:5-8 enforces the version guard. The receipts are current at 05d2d42 per raw/head-05d2d42-verification.log."
+    },
+    {
+      "id": 4,
+      "status": "supported",
+      "evidence": "The c-abi receipt records exits 0, 0 and 0, including running out\\c-abi-smoke.exe on win32/x64. The negative control shows the assertions are active."
+    },
+    {
+      "id": 5,
+      "status": "supported",
+      "evidence": "raw/omp.log, raw/omp-prompt-expansion*.log, the 12 probes in probes/, and raw/probe-attribution.log."
+    },
+    {
+      "id": 6,
+      "status": "supported",
+      "evidence": "Failures are preserved: install attempt 1, Get-FileHash, fmt before repair, the MSYS2 manifest record, the zig-test preparation receipt, and superseded runs 1 and 2. raw/git.log shows the owner's configured identity and no remote at implementation time. raw/bootstrap-manifest-recheck.log shows 89109be holds the archive's 81 tracked files without changes."
+    },
+    {
+      "id": 7,
+      "status": "supported",
+      "evidence": "raw/head-05d2d42-verification.log shows an empty protected-path diff for 89109be..05d2d42, allowed paths only, and a policy digest of ec150588… whose only policy-root change is toolchains/omp-baseline.json (an allowed path). gate_sha256 for repo-check, controller-test and zig-test equals the preparation values."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "file": "engineering/state.json",
+      "line": 19,
+      "title": "The receipts are bound to 05d2d42, but master has later source-root changes",
+      "reasoning": ".git/logs/HEAD shows 641920b (docs/GIT_OPERATIONS.md), c1d2ad8, 4370e31 and 97c01b9 (engineering/plan.json), plus the docs and Pages commits, landing after 05d2d42. docs and engineering/plan.json are in policy.json source_roots, so `evidence-check` (current=true) on the gates/ receipts at master tip 97c01b9 will report 'stale source'. This does not affect the acceptance of 05d2d42, which state.json:19 correctly names. However, AGENT_OPERATIONS.md:41 requires re-running the affected gates on the integration head, and GIT_OPERATIONS.md:38 requires check and test to pass at every master commit. I have no record covering either for 641920b..97c01b9.",
+      "reproduction": "At master tip: node tools/fairpane.mjs fingerprint (expect a source digest other than f2d2e0e6…). Then node tools/fairpane.mjs evidence-check engineering/evidence/FP-0001/gates/2026-10-08T23-49-21-267Z-zig-test-6726867a.json (expect 'The receipt refers to stale source.')."
+    },
+    {
+      "severity": "note",
+      "file": "engineering/evidence/FP-0001/raw/sha256sums-check.log",
+      "line": 12,
+      "title": "The new records still omit the working directory",
+      "reasoning": "The cwd for the `sha256sum -c` runs (engineering/evidence/FP-0001) and for the manifest recheck (the worktree) can only be inferred from the relative names in the output. FP-0028 criterion 1 covers this. The inference is unambiguous: the base-content files report OK against base digests, and the evidence paths resolve."
+    },
+    {
+      "severity": "note",
+      "file": "engineering/evidence/FP-0001/probes/INDEX.md",
+      "line": 7,
+      "title": "The probe contract is still prose",
+      "reasoning": "'Each probe received a contract that allowed only its result tool' is not shown by raw/probe-attribution.log, which extracts names, agent types and headers only. The grant evidence does not depend on this sentence."
+    },
+    {
+      "severity": "note",
+      "file": "docs/GIT_OPERATIONS.md",
+      "line": 65,
+      "title": "The 93de2e3 amend predates the new rule against amending",
+      "reasoning": "README:139-140 discloses that the amend dropped a commit ID that the evidence had already recorded. The new rule prevents a repeat, and raw/head-05d2d42-verification.log closes the evidentiary gap."
+    }
+  ],
+  "readme_claim_checks": {
+    "sha256sums": "95 entries, all OK under GNU sha256sum (exit 0). This equals the 97 files in the directory minus README.md, SHA256SUMS and raw/sha256sums-check.log. Matches README:20.",
+    "base_commit": "81 tracked paths in ls-tree, 86 manifest OK lines and 6 ignored files preserved. Matches README:53-61.",
+    "head_verification": "Fingerprint, nine evidence-checks, protected diff and both amend diffs. Matches README:133-138.",
+    "probe_table": "Matches raw/probe-attribution.log on job, agent type, status and duration for all 12 rows.",
+    "earlier_counts": "Unchanged and still correct: 7/7, 60/60 on Node and Bun, 364229 entries with 0 changed, and the 9-receipt gate table."
+  },
+  "protected_policy_changes": "None in 89109be..05d2d42 (raw/head-05d2d42-verification.log). I did not verify commits after 05d2d42; they lie outside the FP-0001 scope (see checks).",
+  "unmet_criteria": [],
+  "blocking_items": [],
+  "checks_for_main_agent": [
+    "git diff --name-only 4370e31 4ca37a2 (confirm that 4ca37a2 touches only engineering/evidence/**, plus state.json and HANDOFF.md if present)",
+    "git diff --stat 05d2d42 97c01b9 -- AGENTS.md docs/CHARTER.md engineering/qualification.json engineering/policy.json engineering/gates.json toolchains/zig.lock.json toolchains/zig-version.txt specs/corpora.json (expect empty)",
+    "At master tip: node tools/fairpane.mjs check and node tools/fairpane.mjs test, then re-run the affected gates on the integration head per docs/AGENT_OPERATIONS.md:41 and record them separately from the FP-0001 evidence, which is bound to 05d2d42",
+    "When recording acceptance, cite reviews/review-3-accept.json and commit 05d2d42 in engineering/state.json"
+  ]
+}

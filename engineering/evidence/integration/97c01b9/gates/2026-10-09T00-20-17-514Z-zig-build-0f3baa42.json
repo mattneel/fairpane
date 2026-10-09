@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "kind": "fairpane-local-gate",
+  "trust": "unsigned-local-integrity-only",
+  "gate_id": "zig-build",
+  "gate_sha256": "2d5d47a7e010a425bc39a3ca6f74cd08269605831c0eb7a58cc51983df495cca",
+  "status": "pass",
+  "started_at": "2026-10-09T00:20:17.515Z",
+  "finished_at": "2026-10-09T00:20:17.614Z",
+  "host": {
+    "platform": "win32",
+    "architecture": "x64",
+    "os_release": "10.0.26200",
+    "runtime": "v26.7.0",
+    "bun_version": null,
+    "zig_version": "0.18.0-dev.120+9fe22a29b"
+  },
+  "source_before": {
+    "sha256": "b1dff907acc7392d1163c0a3f64556e5afd343261672e8e58db6fb40b13553ed",
+    "file_count": 77
+  },
+  "source_after": {
+    "sha256": "b1dff907acc7392d1163c0a3f64556e5afd343261672e8e58db6fb40b13553ed",
+    "file_count": 77
+  },
+  "policy_before": {
+    "sha256": "ec1505889dbe8cc3aef2fa1e6a9d9da2afd5a7f847fcbe23e1559761d35f3e91",
+    "file_count": 12
+  },
+  "policy_after": {
+    "sha256": "ec1505889dbe8cc3aef2fa1e6a9d9da2afd5a7f847fcbe23e1559761d35f3e91",
+    "file_count": 12
+  },
+  "commands": [
+    {
+      "executable": "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 61,
+      "environment_overrides": {
+        "ZIG_GLOBAL_CACHE_DIR": "C:\\src\\fairpane\\.zig-cache\\global"
+      }
+    }
+  ],
+  "error": null,
+  "outputs": [
+    {
+      "path": "engineering/evidence/integration/97c01b9/gates/2026-10-09T00-20-17-514Z-zig-build-0f3baa42.log",
+      "size": 464,
+      "sha256": "5d2d60fc8f2dd70588134d8a327e0ec909d261ab92cf6167fb9217de130e0fd8"
+    }
+  ]
+}

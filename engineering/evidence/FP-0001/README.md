@@ -211,6 +211,8 @@ The review found no code defect.
 It required durable raw evidence for criteria 1, 5, 6, and 7.
 `reviews/review-2-reject.json` rejected commit `05d2d42`.
 It found every criterion supported but blocked acceptance on two evidence gaps.
+`reviews/review-3-accept.json` accepted commit `05d2d42` after evidence commit `4ca37a2`, with no unmet criterion.
+`engineering/evidence/integration/97c01b9/` reruns every gate on the later integration head.
 
 | Review finding | Resolution |
 | --- | --- |

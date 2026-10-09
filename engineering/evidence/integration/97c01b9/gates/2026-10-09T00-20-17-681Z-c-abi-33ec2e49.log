@@ -1,0 +1,11 @@
+Fairpane local gate: c-abi
+Trust: unsigned-local-integrity-only
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","--prefix","C:\\src\\fairpane\\out\\c-abi-build"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","--prefix","C:\\src\\fairpane\\out\\c-abi-build"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":59,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\src\\fairpane\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\src\\fairpane\\out\\c-abi-smoke.exe"]
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["cc","-std=c11","-Wall","-Wextra","-Werror","tests/c/abi_smoke.c","-Iinclude","C:\\src\\fairpane\\out\\c-abi-build\\lib\\fairpane.lib","-o","C:\\src\\fairpane\\out\\c-abi-smoke.exe"],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":80,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\out\\c-abi-smoke.exe"]
+RESULT {"executable":"C:\\src\\fairpane\\out\\c-abi-smoke.exe","arguments":[],"exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
