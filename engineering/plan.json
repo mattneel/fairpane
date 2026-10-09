@@ -4227,6 +4227,27 @@
       "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0014/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0131",
+      "title": "Close the FP-0052 review findings",
+      "workstream": "laboratory",
+      "depends_on": ["FP-0052"],
+      "role": "fairpane-core",
+      "allowed_paths": ["specs", "tools", "tests", "engineering/decisions", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Add UAX #14 rule LB1, which resolves SA to CM for General_Category Mn and Mc and to AL otherwise, to the General_Category consumer row of specs/IMPORT_REQUIREMENTS.md and to the S37 purpose.",
+        "Narrow the WPT discovery rule's support-item clause to files that reach the test262 rule but fail its _FIXTURE.js or frontmatter condition, in every copy of the rule, and regenerate specs/applicability/wpt.json with unchanged counts.",
+        "Use the URL Standard's current algorithm names, domain parser ToASCII and domain to Unicode, in the import table rows and in S41.",
+        "Read a Git corpus's pin record under its fetch lock, or re-read it under the lock and fail when it changed, and test a repin that finishes between the first read and the lock."
+      ],
+      "read": ["engineering/evidence/FP-0052/reviews/review-1-accept.json", "engineering/evidence/FP-0052/reviews/spec-review-1-accept.json", "engineering/evidence/FP-0052/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
   ]
 }
