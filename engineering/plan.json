@@ -3648,9 +3648,11 @@
         "Count every scenario exactly once as pass, fail, unsupported, crash, or timeout, name the feature of each unsupported scenario, and never count an unsupported scenario as a pass.",
         "Map only the scripting-enabled scenario of each entry to its html5lib_url.html, html5lib_write.html, or html5lib_write_single.html subtest, and report noscript01.dat, #script-off entries, and the disabled scenarios of unflagged entries as html5lib-only.",
         "Compare each dump with the #document section without normalization, and record for each scenario whether merging adjacent text nodes alone would change its result.",
-        "Record each scenario's tree-construction parse error count beside its #errors and #new-errors line count without changing its result."
+        "Record each scenario's tree-construction parse error count beside its #errors and #new-errors line count without changing its result.",
+        "Grow the tokenizer's character position records with its input instead of reserving 8194 records on its first characters step, and record the peak allocation of a one-character document before and after.",
+        "Drive a characters run longer than 4096 units, fed in chunks, while reading each character's position, and check the record bound that the tokenizer's debug assertion guards."
       ],
-      "read": ["engineering/evidence/FP-0100/CONTRACT.md", "engineering/decisions/0003-corpus-snapshots.md", "tools/corpus.mjs"],
+      "read": ["engineering/evidence/FP-0100/CONTRACT.md", "engineering/decisions/0003-corpus-snapshots.md", "tools/corpus.mjs", "engineering/evidence/FP-0100/reviews/review-1-accept.json", "engineering/evidence/FP-0100/reviews/spec-review-1-accept.json"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -4099,15 +4101,16 @@
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
       "authority": "routine-local-engineering",
       "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
-      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec", "fairpane-security"],
       "acceptance": [
         "Flatten quadratic and cubic curves with a recorded tolerance, and resolve the nonzero winding rule on 16 sub-scanlines per pixel row, with exact horizontal coverage of each sub-scanline's nonzero spans.",
         "Report each pixel's coverage as the mean over its 16 sub-scanlines, scaled to 0 to 255 with a recorded rounding rule, so that overlapping contours of one winding cover their union.",
         "Compare masks with a separately written first-party oracle under a per-pixel tolerance derived before the run, and with hand-computed masks.",
         "Bound mask size, segment count, and work, reject non-finite paths, and keep native stack use constant.",
-        "Add at most 10 seconds to the tests/text run step on the development host."
+        "Add at most 10 seconds to the tests/text run step on the development host.",
+        "Build each glyf outline from the values that the decoder's first pass validated, so that a change to the font bytes during a decode cannot make it slice out of bounds, and reject a hand-built TrueTypeGlyph whose fields break the path invariants instead of slicing out of bounds."
       ],
-      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md"],
+      "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0119/CONTRACT.md", "engineering/evidence/FP-0119/reviews/security-review-1-accept.json"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -4427,6 +4430,26 @@
         "Keep the parser's per-body cost bounds of FP-0082 revision 2."
       ],
       "read": ["engineering/evidence/FP-0082/CONTRACT.md"],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0136",
+      "title": "Attribute the URL Standard's UTS #46 entry points to their callers",
+      "workstream": "laboratory",
+      "depends_on": ["FP-0131"],
+      "role": "fairpane-core",
+      "allowed_paths": ["specs", "tools", "tests", "engineering/evidence"],
+      "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
+      "authority": "routine-local-engineering",
+      "required_gates": ["repo-check", "controller-test"],
+      "required_reviewers": ["fairpane-review", "fairpane-spec"],
+      "acceptance": [
+        "Attribute domain parser ToASCII to URL host parsing and domain to Unicode to URL rendering, as the pinned URL Standard calls them, in S41 of specs/sources.json and in the CheckBidi, CheckJoiners, and IdnaMappingTable.txt rows of specs/IMPORT_REQUIREMENTS.md.",
+        "Cite the URL Standard by a commit snapshot whose retrieved bytes have a recorded SHA-256, and record the section and line of each cited algorithm in those bytes.",
+        "Pin each corrected text in a controller case that fails on the current texts."
+      ],
+      "read": ["engineering/evidence/FP-0131/reviews/spec-review-1-accept.json", "engineering/evidence/FP-0131/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     }
