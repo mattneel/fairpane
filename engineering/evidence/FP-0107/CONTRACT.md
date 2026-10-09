@@ -93,3 +93,41 @@ Required reviewer: `fairpane-review`.
 - No change to the gate's arguments, its timeout, or any other gate.
 - No new CI job, runner, action, or cache.
 - No change to which tests run or to what any test asserts.
+
+## Revision 1
+
+Base: the commit that freezes this revision.
+Source: the `Gates` push run 37971989978 and the ten dispatched runs 37972006869 to 37974347550 on `3e7128c`.
+In each, the Windows `controller-test` step failed 43 cases with "The executable is not on PATH: git" or "No git executable exists on PATH.", and the Linux job passed.
+Every section above stays in force except where this revision replaces it.
+
+### Revision 1 integrator decisions
+
+- A worker thread receives a plain copy of `process.env`, whose names are case-sensitive, while the main thread's `process.env` reads the Windows environment without regard to case.
+  The hosted Windows runner names the search path `Path`, so every case that reads `process.env.PATH` on a worker thread finds nothing.
+  The development host's shell exports the name in upper case, which hid the fault from every local run.
+- `casePool` starts each worker with the `worker_threads` option `env: SHARE_ENV`, so a case on a worker thread reads and writes the main thread's environment, as it did under the sequential runner.
+  A case that changes `process.env` must still declare `processWide`, and the runner still runs it alone.
+- No tool and no case body changes.
+
+### Revision 1 exact test cases
+
+3. Controller, every host: the case writes a probe module that registers one case, which reports `process.env.PATH`, and runs it through `casePool` on one worker thread, in a child process whose environment names the search path `Path` instead of `PATH`.
+   The child prints the main thread's and the worker's values of `process.env.PATH`, which must be equal.
+   On Windows, the main thread's value must also be present.
+
+Case 3 must fail on Windows before the change.
+On a host with case-sensitive names, both values are absent, so case 3 passes there before and after the change.
+
+### Revision 1 mutation controls
+
+- M3: `casePool` starts its workers without the `env` option; case 3 must fail on Windows.
+
+### Revision 1 evidence
+
+1. `r1-repro-before.log`: the base suite on Windows with the search path named `Path`, which must fail the cases that start `git` on worker threads, as the CI runs did.
+2. `tests-before-r1.log`: the suite with case 3 and without the fix, in which case 3 fails on Windows.
+3. `tests-after-r1.log` with `node tools/fairpane.mjs test`, and `r1-repro-after.log`, the suite with the search path named `Path`, which must pass.
+4. `bun-selftest-r1.log`: Bun runs the suite.
+5. `mutation-r1.log` and its diff for M3, with the hash of `tools/test-runner.mjs` before, during, and after.
+6. The ten dispatched runs of criterion 3 repeat on a head that contains this revision, and `ci/README.md` also records the failed series on `3e7128c`.
