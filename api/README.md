@@ -14,5 +14,7 @@ The success result initializes the declared structure only.
 Bytes beyond that structure remain the caller's property.
 
 The first ABI expansion requires lifecycle, ownership, and cancellation tests.
+The browser shell reaches the engine only through this surface and the first-party wrapper.
+The surface must therefore carry every capability that the browser needs.
 A future schema generator replaces duplicated declarations after its own qualification.
 This bootstrap does not claim that the header is generated.

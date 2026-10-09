@@ -21,6 +21,7 @@ No file in this archive supplies browser conformance results.
 - Replay workloads exercise complete application interactions and resource boundaries.
 - Fuzz and fault tests exercise hostile input, allocation failure, and containment.
 - Wrapper tests exercise actual foreign runtimes and native lifetimes.
+- Browser shell workflows exercise the first-party wrapper and the public embedding contract.
 
 WPT includes JavaScript tests, so a static renderer cannot claim their execution. [S19]
 Test262 does not substitute for browser integration. [S08]
@@ -77,4 +78,5 @@ A success status without actual execution is a failure.
 A test that asserts a constant instead of the requested behavior is a failure.
 A hardcoded fixture screenshot is not renderer qualification.
 A wrapper around another engine violates the first-party profile even when compatibility results improve.
+A browser shell that calls internal engine interfaces does not qualify the embedding contract.
 Bootstrap success never implies completion of a higher stage.

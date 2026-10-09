@@ -747,12 +747,14 @@
       "title": "Create the first native Windows browser window",
       "workstream": "browser",
       "depends_on": [
-        "FP-0006"
+        "FP-0006",
+        "FP-0029"
       ],
       "role": "fairpane-platform",
       "allowed_paths": [
-        "ports",
         "apps",
+        "bindings",
+        "ports",
         "tests",
         "build.zig"
       ],
@@ -776,6 +778,8 @@
       ],
       "acceptance": [
         "Create a first-party native window with an address bar and page surface.",
+        "Write the shell in the first-party wrapper language and reach the engine only through that wrapper and the public C ABI.",
+        "Record every capability gap that the shell meets in the public contract as a contract task, never as a private shortcut.",
         "Implement keyboard focus, resize, close, and explicit unsupported-page states.",
         "Keep page content from controlling browser origin identity.",
         "Do not embed a system WebView or external browser engine.",
@@ -783,6 +787,7 @@
       ],
       "read": [
         "docs/PRODUCT.md",
+        "docs/ABI_AND_WRAPPERS.md",
         "docs/SECURITY.md"
       ],
       "contract_state": "bootstrap-seed",
@@ -798,8 +803,11 @@
       ],
       "role": "fairpane-platform",
       "allowed_paths": [
-        "ports",
+        "api",
         "apps",
+        "bindings",
+        "include",
+        "ports",
         "src",
         "tests",
         "build.zig"
@@ -823,13 +831,14 @@
         "fairpane-review"
       ],
       "acceptance": [
-        "Present actual engine frames in the native page surface.",
+        "Present actual engine frames in the native page surface through the public embedding contract.",
         "Load the multilingual fixture through the resource contract.",
         "Exercise scrolling, resize, selection, and keyboard input where supported.",
         "Keep unavailable behavior visible rather than simulated."
       ],
       "read": [
-        "docs/PRODUCT.md"
+        "docs/PRODUCT.md",
+        "docs/ABI_AND_WRAPPERS.md"
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
@@ -969,7 +978,8 @@
         "Generate raw declarations from ownership-aware interface metadata.",
         "Detect stale generated files mechanically.",
         "Qualify C and Zig lifecycle callers against the actual engine.",
-        "Define shared foreign-runtime failure scenarios before more wrappers."
+        "Define shared foreign-runtime failure scenarios before more wrappers.",
+        "Make the metadata sufficient to generate raw declarations for the first-party wrapper language."
       ],
       "read": [
         "docs/ABI_AND_WRAPPERS.md"
@@ -1295,6 +1305,56 @@
       "read": [
         "tools/README.md",
         "engineering/evidence/FP-0001/reviews/review-2-reject.json"
+      ],
+      "contract_state": "bootstrap-seed",
+      "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
+    },
+    {
+      "id": "FP-0029",
+      "title": "Select and qualify the first-party wrapper language",
+      "workstream": "wrappers",
+      "depends_on": [
+        "FP-0021"
+      ],
+      "role": "fairpane-bindings",
+      "allowed_paths": [
+        "bindings",
+        "tests",
+        "tools",
+        "toolchains",
+        "build.zig",
+        "engineering/decisions"
+      ],
+      "protected_paths": [
+        "AGENTS.md",
+        "docs/CHARTER.md",
+        "engineering/qualification.json",
+        "engineering/policy.json",
+        "engineering/gates.json",
+        "toolchains/zig.lock.json",
+        "specs/corpora.json"
+      ],
+      "authority": "owner-selects-language-then-routine-local-engineering",
+      "required_gates": [
+        "repo-check",
+        "controller-test",
+        "zig-test",
+        "c-abi"
+      ],
+      "required_reviewers": [
+        "fairpane-review"
+      ],
+      "acceptance": [
+        "Record the owner's language selection and the candidate comparison in an architecture decision record.",
+        "Pin the selected language toolchain to exact versions and verified artifact digests.",
+        "Implement engine and document lifecycle in the selected language over the public C ABI with idiomatic ownership, errors, and cancellation.",
+        "Execute the wrapper against the actual native library on Windows and run the shared foreign-runtime failure scenarios.",
+        "Keep generated declarations separate from the idiomatic layer and detect stale generated files.",
+        "Do not call generated source alone qualified support."
+      ],
+      "read": [
+        "docs/ABI_AND_WRAPPERS.md",
+        "docs/PRODUCT.md"
       ],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."

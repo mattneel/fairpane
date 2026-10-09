@@ -17,6 +17,11 @@ A callback that secretly delegates shaping or rendering to another engine violat
 ## Components
 
 ```text
+Browser shell in the first-party wrapper language
+                  |
+     first-party wrapper -> public C ABI and process protocol
+                  |
+                  v
 Host capabilities and resource broker
                   |
                   v
@@ -36,6 +41,14 @@ Computed style -> box structure -> layout fragments
 The accessibility tree follows document semantics and explicit geometry references.
 Hit tests and selection share the same geometric decisions as paint.
 The compositor does not traverse mutable DOM objects.
+
+## Application boundary
+
+The browser shell is an ordinary embedder.
+It is written in the first-party wrapper language and calls the engine through that wrapper and the public C ABI.
+It has no access to internal Zig interfaces.
+A capability that the shell needs becomes part of the public contract, or the shell does not have it.
+The engine never depends on the shell.
 
 ## Execution model
 

@@ -34,7 +34,18 @@ The browser preserves the real origin across redirects and external navigation.
 Application identity never grants a page additional privileges by itself.
 Cross-origin navigation and permission changes remain visible.
 
-The initial shell uses the same first-party engine as the library.
+## The browser as first embedder
+
+The browser is the engine's first embedder, not a privileged special case.
+Its shell is written in the first-party wrapper language.
+It reaches the engine only through the public embedding contract that every other application uses.
+
+This rule makes the browser dogfood the contract.
+A capability that the browser needs and the contract lacks is a contract defect, not a reason for a private shortcut.
+Every embedder can therefore build an application with the same reach as Fairpane's own browser.
+The owner selects the first-party wrapper language from a recorded comparison of candidates.
+
+The shell uses the same first-party engine as the library.
 It cannot use Electron, CEF, WebView2, WKWebView, or a system renderer to pass a product milestone.
 External browsers can serve as test references only.
 
@@ -48,6 +59,7 @@ Mobile ports require their own lifecycle and policy work.
 An early window can display unsupported content honestly.
 A browser milestone cannot pass through a hardcoded screenshot or static mock.
 Each vertical slice connects actual parsing, layout, paint, and host presentation as those components arrive.
+Each slice reaches the shell through the first-party wrapper, so contract gaps appear as soon as the browser needs a capability.
 
 ## Non-goals
 

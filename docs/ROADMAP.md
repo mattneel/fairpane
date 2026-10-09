@@ -5,12 +5,13 @@
 Stages describe evidence, not dates.
 Security and script architecture begin during foundation work.
 The browser shell appears during the first vertical slice.
+It is written in the first-party wrapper language on the public embedding contract from its first line.
 The project does not postpone application usability until every engine feature exists.
 
 | Stage | Deliverable | Exit evidence |
 | --- | --- | --- |
-| Foundation | Reproducible build, host lifecycle, C boundary, and evidence laboratory. | Actual target execution, lifetime tests, and trustworthy result capture. |
-| Vertical slice | Multilingual document output in a native window with early script integration. | Real parser-to-frame execution and app input traces. |
+| Foundation | Reproducible build, host lifecycle, C boundary, first-party wrapper, and evidence laboratory. | Actual target execution, lifetime tests, wrapper execution, and trustworthy result capture. |
+| Vertical slice | Multilingual document output in a native shell window, driven through the first-party wrapper, with early script integration. | Real parser-to-frame execution through the public contract and app input traces. |
 | Document fidelity | Broad HTML, CSS, text, images, SVG, and incremental behavior. | Frozen relevant manifests without concealed omissions. |
 | Interactive platform | Complete runtime integration, DOM APIs, storage, networking, and application workflows. | Test262, WPT, and app workload evidence. |
 | Hostile-web qualification | Broker, sandbox, resource controls, and failure containment. | Fault injection and independent security review. |

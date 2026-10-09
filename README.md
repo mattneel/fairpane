@@ -37,7 +37,9 @@ The archive has no enclosing directory.
 - Zig master, with an exact compiler pin and isolated upgrades.
 - A first-party Zig-native JavaScript runtime with full observable JavaScript semantics.
 - A C ABI at the embedding boundary, with qualified idiomatic wrappers across languages.
+- One first-party wrapper language, maintained with the engine.
 - A native browser with minimal chrome, an address bar, and the page.
+- A browser shell written in the first-party wrapper language on the public embedding contract, so Fairpane's own browser dogfoods what every embedder uses.
 - Open development, reproducible evidence, and maintainable public infrastructure.
 
 The browser treats web applications as applications.

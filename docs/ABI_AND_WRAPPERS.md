@@ -67,9 +67,25 @@ A NIF crash can affect the entire Erlang VM. [S17]
 A future NIF path requires bounded scheduler work and explicit lifetime tests.
 Node native adapters can use Node-API rather than expose V8 internals. [S18]
 
+## First-party wrapper
+
+One wrapper language is first-party.
+The project maintains that wrapper with the engine and qualifies it before any other wrapper.
+The browser shell is written in that language, so Fairpane's own application is the wrapper's first and heaviest user.
+
+The shell reaches the engine only through this wrapper and the public C ABI.
+It never calls internal Zig interfaces.
+When the shell needs a capability that the contract lacks, the contract gains that capability through the normal review path.
+Other embedders then receive the same capability.
+
+The owner selects the first-party language from a recorded comparison of candidates.
+The comparison weighs C ABI ownership mapping, fit with queued host requests, native window and accessibility reach, safety, toolchain pinning, runtime weight, and longevity.
+It also weighs how well the language represents real embedders.
+
 ## Qualification
 
 The wrapper suite covers cancellation, stale handles, teardown, and allocation failure.
 It also covers foreign exceptions and callbacks from unexpected threads.
+The first-party wrapper also runs the browser shell's own workflows as qualification scenarios.
 Each supported language requires real execution on its declared runtime and targets.
 The phrase "every language" expresses an extensible public contract, not an unsupported list of generated files.
