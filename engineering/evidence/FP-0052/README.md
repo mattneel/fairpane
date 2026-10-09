@@ -38,7 +38,7 @@ The worker did not commit or push.
 | Criterion | Evidence |
 | --- | --- |
 | Case 1: the resolver returns `C:\Windows\System32\taskkill.exe` and names `SystemRoot` for an unset, empty, or relative value. | Fails in `raw/tests-before.log` ("lib.windowsSystemProgram is not a function"); passes in `raw/controller-tests-after.log` and `raw/linux-controller-tests.log`. |
-| Case 2: a `taskkill.exe` in the working directory does not keep `runProcess` from returning `timed_out: true` within 15 seconds. | Passes in `raw/tests-before.log` on Windows, so it does not fail before the change; see "Contract defect in case 2". Passes in `raw/controller-tests-after.log` and `raw/linux-controller-tests.log`. |
+| Case 2: a `taskkill.exe` in the working directory does not keep `runProcess` from returning `timed_out: true` within 15 seconds. | Passes in `raw/tests-before.log` on Windows, so it does not fail before the change; see "Contract defect in case 2". Passes in `raw/controller-tests-after.log` and `raw/linux-controller-tests.log`. The case that amendment 1 revises fails in `raw/tests-before-a1.log` and passes in `raw/controller-tests-after-a1.log`; see "Amendment 1". |
 | Case 3: a Git corpus repin that fails at each of the four write steps changes nothing. | Fails in `raw/tests-before.log` ("Missing expected rejection: stage the record"); passes after on both hosts. The case also requires that an uninjected repin runs exactly those four steps. |
 | Case 4: a failed removal of `<id>.old` after the record is replaced fails with "could not remove the old copies", and the new record and snapshot stay. | Fails in `raw/tests-before.log`, where the raw "injected removal failure" escaped before the record was written; passes after on both hosts. The case replaces `fs.rmSync` only for `<corpora>/test262.old` while it exists. |
 | Case 5: with `test262.lock` present, a fetch fails with the lock error and changes nothing. | Fails in `raw/tests-before.log` ("Missing expected rejection."); passes after on both hosts. |
@@ -47,7 +47,7 @@ The worker did not commit or push.
 | Case 8: `corpus-applicability wpt` regenerates the record, and the diff changes only the rule text. | `raw/applicability.log` (exit 0, `FAIRPANE_CORPORA_DIR=C:\src\fairpane\.tools\corpora`, no fetch) and `raw/applicability-diff.log` (one line changed: `discovery.rule`). |
 | Mutation: skip the restore of the old snapshot directory. | `raw/mutation-1.diff`; cases FP-0052 3 and FP-0013 54 fail, 218 of 220 pass. |
 | Mutation: remove the lock check. | `raw/mutation-2.diff` opens the lock with `w` instead of `wx`; FP-0052 case 5 and both parts of case 6 fail, 217 of 220 pass. |
-| Mutation: start `taskkill.exe` by bare name. | `raw/mutation-3.diff`; the extra FP-0052 `SystemRoot` case fails, 219 of 220 pass. Case 2 passes under this mutation, as it does on the base. |
+| Mutation: start `taskkill.exe` by bare name. | `raw/mutation-3.diff`; the extra FP-0052 `SystemRoot` case fails, 219 of 220 pass. Case 2 passes under this mutation, as it does on the base. The revised case 2 fails under the same mutation in `raw/mutation-a1.log`; see "Amendment 1". |
 | Mutation: remove the `check(record)` invariant from the Git corpus fetch. | `raw/mutation-4.diff`; the existing case "A fetched snapshot whose record differs from its pin leaves the existing snapshot and record unchanged" fails, 219 of 220 pass. |
 | `node tools/fairpane.mjs test` and `check` pass. | `raw/controller-tests-after.log` (exit 0, 220 of 220) and `raw/check.log` (exit 0). |
 
@@ -116,9 +116,71 @@ No log was deleted or overwritten.
 
 Each "before" and "after" blob equals the final file in `raw/controller-tests-after.log`.
 
+## Amendment 1
+
+Contract amendment 1, frozen at `7861102`, replaces the Windows stand-in of case 2.
+The worker revised case 2 in an isolated working tree whose `HEAD` was `7861102755784a4dddfc18fff9c8b5cb84c2961d`.
+The host was Windows 10.0.26200 on x64 with Node v26.7.0.
+
+### Revised case 2
+
+- On Windows, `taskkill.exe` in the case's directory is a hard link to `process.execPath`, or a copy of it when `fs.linkSync` fails.
+- The case writes `preload.cjs` in its directory.
+  The preload does nothing unless the lowercase base name of `process.execPath` is `taskkill.exe`.
+  Then it writes the marker `taskkill.ran` in the case's directory and calls `process.exit(0)`, which runs before Node loads its script argument.
+- Inside its `try` block, the case sets `NODE_OPTIONS` to `--require` and the JSON-quoted path of the preload.
+  Node's `NODE_OPTIONS` parser removes the backslash escapes inside double quotes, so the quoted Windows path reaches `--require` unchanged.
+  The `finally` block restores the previous value, or deletes the variable when it was unset.
+- Before it starts `runProcess`, the case runs the stand-in by its full path with `/PID 1 /T /F`, asserts exit status 0 and the marker, and removes the marker.
+- The case then asserts that `runProcess` returns `timed_out: true` within 15 seconds and that no marker exists.
+- The `finally` block also stops the sleeping command through its process ID file, as the frozen case did.
+- The case prints the TAP comment `# FP-0052 case 2 took <ms> ms.`, so each log records its duration.
+- Other hosts keep the frozen case: a `#!/bin/sh` script that exits with status 0, and no preload or marker.
+  This revision did not run on Linux.
+
+### Amendment 1 records
+
+| Log | RESULT |
+| --- | --- |
+| `raw/tests-before-a1.log` | Red baseline: case 2 fails on the base watchdog. See "Amendment 1 red baseline". |
+| `raw/mutation-a1.log` and `raw/mutation-a1.diff` | The bare-name control: `node tools/selftest.mjs` exits with status 1, 222 of 224 pass, and case 2 fails with "runProcess did not return within 15 seconds, so the watchdog did not stop its command." after 15065 ms. The `SystemRoot` case also fails ("134 !== null"). See "Amendment 1 mutation hashes". |
+| `raw/controller-tests-after-a1.log` | `git rev-parse HEAD` (0) prints `7861102755784a4dddfc18fff9c8b5cb84c2961d`. `node tools/fairpane.mjs test` exits with status 0, 224 of 224 pass, and case 2 prints "took 2401 ms" and passes. `git hash-object` (0) prints `tools/lib.mjs` `b037dcc632eab9b3c60f83f8d2d28554e7001dfc` and `tools/selftest.mjs` `572d5ae9d4e8b99ce7ab559ff4ac0ee6f44c9129`, and `node --version` (0) prints `v26.7.0`. |
+
+### Amendment 1 red baseline
+
+The base before `775d988` is `44b083c8f5fc367bb9843bd588bd7ba886d6857a`; only a state commit separates it from the `f31eb22` base of `raw/tests-before.log`.
+`raw/tests-before-a1.log` stages the test files on that base in a scratch clone, as `raw/tests-before.log` did in its working tree, and runs these commands in order.
+
+1. `git rev-parse HEAD 775d988^`, `exit_code` 0: `7861102755784a4dddfc18fff9c8b5cb84c2961d` and `44b083c8f5fc367bb9843bd588bd7ba886d6857a`.
+2. The scratch command `git clone --shared --no-checkout --quiet . out/fp0052-a1-base`, `exit_code` 0.
+3. `git -C out/fp0052-a1-base checkout --quiet --detach 44b083c8f5fc367bb9843bd588bd7ba886d6857a`, `exit_code` 0.
+4. `git -C out/fp0052-a1-base checkout 775d988 -- tools/selftest.mjs tools/fileset.test.mjs`, `exit_code` 0.
+   This takes the FP-0052 test files of `775d988`, which `raw/baseline-test-diff.log` shows differ from the staged files of `raw/tests-before.log` only in two comments.
+   The worker then replaced case 2 in the scratch `tools/selftest.mjs` with the revised case; no command records that edit, and step 10 shows its result.
+5. The staging command `git -C out/fp0052-a1-base add -- tools/selftest.mjs tools/fileset.test.mjs`, `exit_code` 0.
+6. `git -C out/fp0052-a1-base rev-parse HEAD`, `exit_code` 0: `44b083c8f5fc367bb9843bd588bd7ba886d6857a`.
+7. `git -C out/fp0052-a1-base status --short`, `exit_code` 0: only the two staged test files are modified.
+8. `git -C out/fp0052-a1-base ls-files --stage`, `exit_code` 0: `tools/lib.mjs` `ef00cf6d3dfae846f97f99a9b9950d2b98a8f043`, `tools/corpus.mjs` `0eb3ae5e27a25f451795b4860e9b4f5a29ec30c8`, and `tools/fileset.mjs` `bab5d684a45e3b5b2ff69b1e0fa956b533f02ac6`, the same base blobs as `raw/tests-before.log`; the staged `tools/selftest.mjs` is `18e44ba3d6671632de44fecaac5995a99a072d1e`, and the staged `tools/fileset.test.mjs` is `04cc975ae2d07c8a99e6407e1e7fb07b1e863c0d`.
+9. `git -C out/fp0052-a1-base diff --cached --stat`, `exit_code` 0, and `git -C out/fp0052-a1-base grep -n -e taskkill -- tools/lib.mjs`, `exit_code` 0, which shows that the base watchdog runs `spawnSync('taskkill.exe', …)` at `tools/lib.mjs:530`.
+10. `git diff --no-index --stat` and `git diff --no-index` of the staged `tools/selftest.mjs` against the revised `tools/selftest.mjs`, `exit_code` 1 each because the files differ.
+    The only hunk adds the FP-0082 case 18 block that `7861102` has and `775d988` lacks, so the staged case 2 equals the revised case 2.
+11. `node tools/fairpane.mjs test` with `--cwd out/fp0052-a1-base`, `exit_code` 1, with 212 of 220 passing.
+    Case 2 fails with "runProcess did not return within 15 seconds, so the watchdog did not stop its command." after 15052 ms, so the stand-in's direct check passed first.
+    The other seven failures are the ones that `raw/tests-before.log` records: cases 1, 3, 4, 5, both parts of 6, and the `SystemRoot` case.
+
+### Amendment 1 mutation hashes
+
+| Control | File | Before | During | After |
+| --- | --- | --- | --- | --- |
+| Bare name | `tools/lib.mjs` | `b037dcc632eab9b3c60f83f8d2d28554e7001dfc` | `0f4ec2b61b1221a17ffc4f4798d5c14ecf4cf486` | `b037dcc632eab9b3c60f83f8d2d28554e7001dfc` |
+
+The mutation keeps the original at `out/fp0052-a1/mutation/lib.mjs`, and the restoration compares the bytes.
+The "before" and "after" blobs equal `tools/lib.mjs` in `raw/controller-tests-after-a1.log`.
+
 ## Open items
 
-- Case 2 needs a contract amendment; see "Contract defect in case 2".
+- Amendment 1 resolves the case 2 defect on Windows; see "Amendment 1".
+  The revised case has not run on Linux.
 - The integrator records `HEAD` and a status that includes ignored files for every source root before and after `repo-check` and `controller-test`.
 - The integrator runs and records `corpus-verify test262` and `corpus-verify wpt` at the integration commit.
 - The contract says that the plan criterion names all three system programs; `engineering/plan.json` is outside this task's writable paths.

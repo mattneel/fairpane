@@ -1230,24 +1230,43 @@ test('FP-0052 case 1: the system-directory resolver returns the System32 path an
 });
 test('FP-0052 case 2: a taskkill.exe in the working directory does not stop the watchdog from stopping a command', async () => {
   const dir = temp(), saved = process.cwd(), fake = path.join(dir, 'taskkill.exe'), pidFile = path.join(dir, 'child.pid');
-  // The contract fixes this program. On Windows, the copy of whoami.exe exits with status 1 for taskkill's arguments,
-  // so the watchdog's direct-child fallback also stops the command; engineering/evidence/FP-0052/README.md records that defect.
-  if (process.platform === 'win32') fs.copyFileSync(path.join(process.env.SystemRoot, 'System32', 'whoami.exe'), fake);
-  else { fs.writeFileSync(fake, '#!/bin/sh\nexit 0\n'); fs.chmodSync(fake, 0o755); }
+  const windows = process.platform === 'win32', preload = path.join(dir, 'preload.cjs'), marker = path.join(dir, 'taskkill.ran');
+  const savedOptions = process.env.NODE_OPTIONS, started = Date.now();
+  if (windows) {
+    // Contract amendment 1: the stand-in must exit with status 0 for taskkill's arguments, or the watchdog's direct-child
+    // fallback hides a watchdog that runs it. It is the running Node executable under the name taskkill.exe, and the
+    // preload makes it write the marker and exit with status 0 before Node reads its script argument.
+    try { fs.linkSync(process.execPath, fake); } catch { fs.copyFileSync(process.execPath, fake); }
+    fs.writeFileSync(preload, `if (require('node:path').basename(process.execPath).toLowerCase() === 'taskkill.exe') {\n`
+      + `  require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'ran');\n  process.exit(0);\n}\n`);
+  } else { fs.writeFileSync(fake, '#!/bin/sh\nexit 0\n'); fs.chmodSync(fake, 0o755); }
   const script = `require('node:fs').writeFileSync(${JSON.stringify(pidFile)}, String(process.pid)); setTimeout(() => {}, 60000);`;
   let timer;
-  process.chdir(dir);
   try {
+    if (windows) {
+      process.env.NODE_OPTIONS = `--require ${JSON.stringify(preload)}`;
+      const direct = spawnSync(fake, ['/PID', '1', '/T', '/F'], { encoding: 'utf8', windowsHide: true, timeout: 10000 });
+      assert.equal(direct.status, 0, `The stand-in taskkill.exe did not exit with status 0: ${direct.error?.message ?? direct.stderr}`);
+      assert.ok(fs.existsSync(marker), 'The stand-in taskkill.exe exited without running its preload.');
+      fs.rmSync(marker);
+    }
+    process.chdir(dir);
     const run = runProcess(process.execPath, ['-e', script], { cwd: dir, logPath: path.join(dir, 'log'), timeoutMs: 1000 });
     const limit = new Promise(resolve => { timer = setTimeout(() => resolve(null), 15000); });
     const r = await Promise.race([run, limit]);
     assert.ok(r, 'runProcess did not return within 15 seconds, so the watchdog did not stop its command.');
     assert.equal(r.timed_out, true);
+    if (windows) assert.equal(fs.existsSync(marker), false, 'The watchdog ran the taskkill.exe in the working directory.');
   } finally {
     clearTimeout(timer);
     process.chdir(saved);
+    if (windows) {
+      if (savedOptions === undefined) delete process.env.NODE_OPTIONS;
+      else process.env.NODE_OPTIONS = savedOptions;
+    }
     // A command that the watchdog failed to stop must not outlive the test.
     if (fs.existsSync(pidFile)) try { process.kill(Number(fs.readFileSync(pidFile, 'utf8')), 'SIGKILL'); } catch { /* It has ended. */ }
+    console.log(`# FP-0052 case 2 took ${Date.now() - started} ms.`);
   }
 });
 test('FP-0052: a SystemRoot that cannot locate taskkill.exe fails runProcess on Windows before its command starts', async () => {
