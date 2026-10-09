@@ -1,0 +1,111 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/workflow-check.mjs"]
+d997513bee16f1f7a2cd3051ce0d34c18f9158c9
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/workflow-check.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:19.930Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0067/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0067/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M1","tools/workflow-check.mjs","for (const e of filters.values()) {","for (const e of [].values()) {"]
+M1: mutated tools/workflow-check.mjs; original kept at out/fp0067/mutation/M1-workflow-check.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0067/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0067/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M1","tools/workflow-check.mjs","for (const e of filters.values()) {","for (const e of [].values()) {"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:19.999Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":34}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/workflow-check.mjs"]
+41525d9eac83e129b214e9f9be3f851cafbb7961
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/workflow-check.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:20.086Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0067/raw/mutation-M1.diff","--","out/fp0067/mutation/M1-workflow-check.mjs","tools/workflow-check.mjs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0067/raw/mutation-M1.diff","--","out/fp0067/mutation/M1-workflow-check.mjs","tools/workflow-check.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:20.151Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/workflow-check.test.mjs"]
+TAP version 13
+ok 1 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+ok 2 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+ok 3 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+ok 4 - FP-0033 17: An action commit outside the reviewed set fails, even with a full SHA and a version comment
+ok 5 - FP-0033 3: A workflow permission other than contents: read fails
+ok 6 - FP-0033 3: A job permission other than contents: read fails
+ok 7 - FP-0033 4: continue-on-error on a step or a job fails
+ok 8 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+ok 9 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+ok 10 - FP-0033 4: A workflow_run trigger fails
+ok 11 - FP-0033 8: An expression outside the allowlist fails
+ok 12 - FP-0033 9: A gate step that can be skipped or rerouted fails
+ok 13 - FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+ok 14 - FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+ok 15 - FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+ok 16 - FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+ok 17 - FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+ok 18 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+ok 19 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+ok 20 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+ok 21 - FP-0067 1: The committed Gates workflow has no trigger, upload, or Linux-gate problem
+not ok 22 - FP-0067 2: A Gates trigger filter key other than branches is one problem that names the trigger and the key
+  ---
+  message: "Expected exactly one problem matching /^Line \\d+: Trigger pull_request sets types:\\./ in []\n\n0 !== 1\n"
+  ...
+ok 23 - FP-0067 3: Gates branches other than [master] and a workflow_dispatch value are each one problem
+ok 24 - FP-0067 4: A Gates upload path other than out/evidence/ or an if-no-files-found other than error is one problem
+ok 25 - FP-0067 5: A Linux job that omits zig-test or runs it after the cross builds is a problem
+1..25
+# tests 25
+# pass 24
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/workflow-check.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:20.220Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":57}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);if(!fs.readFileSync(keep).equals(fs.readFileSync(f)))throw new Error('restore failed');console.log('restored '+f+' from '+keep);","out/fp0067/mutation/M1-workflow-check.mjs","tools/workflow-check.mjs"]
+restored tools/workflow-check.mjs from out/fp0067/mutation/M1-workflow-check.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);if(!fs.readFileSync(keep).equals(fs.readFileSync(f)))throw new Error('restore failed');console.log('restored '+f+' from '+keep);","out/fp0067/mutation/M1-workflow-check.mjs","tools/workflow-check.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:20.333Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/workflow-check.mjs"]
+d997513bee16f1f7a2cd3051ce0d34c18f9158c9
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/workflow-check.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:20.426Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/attest.test.mjs"]
+0608e2f364a029d3652c456fcc7e187e5735ebe2
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/attest.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:41.954Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0067/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0067/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M2","tools/attest.test.mjs","const lookup = /^error: Git could not look up","const lookup = /^error: mutated pattern, Git could not look up"]
+M2: mutated tools/attest.test.mjs; original kept at out/fp0067/mutation/M2-attest.test.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),path=require('path');const [id,f,from,to]=process.argv.slice(1);const t=fs.readFileSync(f,'utf8');const n=t.split(from).length-1;if(n!==1)throw new Error('expected one occurrence, found '+n);const keep='out/fp0067/mutation/'+id+'-'+path.basename(f);fs.mkdirSync('out/fp0067/mutation',{recursive:true});fs.copyFileSync(f,keep,fs.constants.COPYFILE_EXCL);fs.writeFileSync(f,t.replace(from,to));console.log(id+': mutated '+f+'; original kept at '+keep);","M2","tools/attest.test.mjs","const lookup = /^error: Git could not look up","const lookup = /^error: mutated pattern, Git could not look up"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:42.023Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/attest.test.mjs"]
+bdd5e4c203981cc6884d5f26bebf905234124068
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/attest.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:42.107Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--no-index","--output=engineering/evidence/FP-0067/raw/mutation-M2.diff","--","out/fp0067/mutation/M2-attest.test.mjs","tools/attest.test.mjs"]
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--no-index","--output=engineering/evidence/FP-0067/raw/mutation-M2.diff","--","out/fp0067/mutation/M2-attest.test.mjs","tools/attest.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:42.176Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/attest.test.mjs"]
+TAP version 13
+ok 1 - 2: A valid envelope signed by a trusted key verifies
+ok 2 - 3: RFC 8032 test vector 1 verifies through the same key decoding path
+ok 3 - 4: A key outside the trust policy fails, whether it names itself or a trusted key
+ok 4 - 5: One changed payload byte fails as bad-signature
+ok 5 - 6: A truncated envelope and a truncated payload each fail
+ok 6 - 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+ok 7 - 8: A payload for another commit or tree fails as stale-candidate
+ok 8 - 9: A payload with another policy digest fails as changed-policy
+ok 9 - 10: Zero discovered and zero selected each fail as zero-denominator
+ok 10 - 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+ok 11 - 12: A runner key that differs from the signature key fails as key-mismatch
+ok 12 - 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+ok 13 - 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+ok 14 - 16: A trusted signature over a noncanonical payload fails as malformed
+ok 15 - FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result
+ok 16 - FP-0051 2: enclosingGitDirectories collects the common directory of every enclosing .git entry
+not ok 17 - FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+  ---
+  message: "[\"error: Git could not look up the candidate commit: error: inflate: data stream error (incorrect header check)\\nerror: unable to unpack 56a8499fb30e81da580d698665b3b080e0c19763 header\\nerror: inflate: data stream error (incorrect header check)\\nerror: unable to unpack 56a8499fb30e81da580d698665b3b080e0c19763 header\\nfatal: loose object 56a8499fb30e81da580d698665b3b080e0c19763 (stored in .git/objects/56/a8499fb30e81da580d698665b3b080e0c19763) is corrupt\",\"error: Object eab674390ba1afb8983122d9c48a64faed233e99 exists, but Git cannot read it: error: hash mismatch eab674390ba1afb8983122d9c48a64faed233e99\",\"error: Object eab674390ba1afb8983122d9c48a64faed233e99 exists, but Git cannot read it: error: hash mismatch eab674390ba1afb8983122d9c48a64faed233e99\",\"error: Object fcd4989c0b35a94fc0ab7a3c52a38a4edcf9b41a exists, but Git cannot read it: error: bogus commit object fcd4989c0b35a94fc0ab7a3c52a38a4edcf9b41a\"]\n+ actual - expected\n\n  [\n+   false,\n    true,\n    true,\n    true,\n-   true\n  ]\n"
+  ...
+ok 18 - FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled
+1..18
+# tests 18
+# pass 17
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/attest.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:42.248Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":3806}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);if(!fs.readFileSync(keep).equals(fs.readFileSync(f)))throw new Error('restore failed');console.log('restored '+f+' from '+keep);","out/fp0067/mutation/M2-attest.test.mjs","tools/attest.test.mjs"]
+restored tools/attest.test.mjs from out/fp0067/mutation/M2-attest.test.mjs
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs');const [keep,f]=process.argv.slice(1);fs.copyFileSync(keep,f);if(!fs.readFileSync(keep).equals(fs.readFileSync(f)))throw new Error('restore failed');console.log('restored '+f+' from '+keep);","out/fp0067/mutation/M2-attest.test.mjs","tools/attest.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:46.106Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":33}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/attest.test.mjs"]
+0608e2f364a029d3652c456fcc7e187e5735ebe2
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/attest.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:46.190Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}

@@ -1,0 +1,13 @@
+diff --git a/out/fp0067/mutation/M1-workflow-check.mjs b/tools/workflow-check.mjs
+index d997513..41525d9 100644
+--- a/out/fp0067/mutation/M1-workflow-check.mjs
++++ b/tools/workflow-check.mjs
+@@ -393,7 +393,7 @@ export function gateWorkflowProblems(root) {
+   const required = `branches: [${GATE_BRANCHES.join(', ')}]`;
+   for (const name of GATE_FILTERED_TRIGGERS) {
+     const trigger = triggers.get(name), filters = trigger?.value.kind === 'map' ? trigger.value.entries : new Map();
+-    for (const e of filters.values()) {
++    for (const e of [].values()) {
+       if (e.key !== 'branches') add(e.line, `Trigger ${name} sets ${e.key}:. A Gates trigger may set only ${required}.`);
+     }
+     const branches = filters.get('branches');

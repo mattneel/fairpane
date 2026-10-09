@@ -355,17 +355,32 @@ const GATE_ACTIONS = new Map([
 ]);
 const UPLOAD_CONDITION = '${{ always() }}';
 const CONDITION_PROBLEM = `Only an upload-artifact step may set if:, and only to ${UPLOAD_CONDITION}.`;
+/** The exact values of the upload-artifact inputs that decide what a Gates run uploads and whether a missing upload fails it. */
+const UPLOAD_INPUTS = new Map([['path', 'out/evidence/'], ['if-no-files-found', 'error']]);
+/** The filtered triggers of the Gates workflow. Each may set only branches, and only to exactly these branches. */
+const GATE_FILTERED_TRIGGERS = ['push', 'pull_request'];
+const GATE_BRANCHES = ['master'];
+/** The exact gate list of each job that this function fixes, in order. */
+const JOB_GATES = new Map([
+  ['linux', ['repo-check', 'controller-test', 'zig-fmt', 'zig-test', 'cross-windows-x86_64', 'cross-linux-aarch64', 'cross-macos-aarch64']],
+]);
+const GATE_RUN = /^node tools\/fairpane\.mjs run ([a-z0-9][a-z0-9_-]*)$/;
 const series = items => items.length < 3 ? items.join(' and ') : `${items.slice(0, -1).join(', ')}, and ${items.at(-1)}`;
+const flow = n => n.kind === 'seq' ? `[${n.items.map(word).join(', ')}]` : word(n);
 
 /**
  * Problems in the Gates workflow outside its allowlists.
  * The workflow may set only name, on, permissions, concurrency, and jobs, and a job only name, runs-on, timeout-minutes, and steps.
+ * The push and pull_request triggers must each set exactly branches: [master] and nothing else, and workflow_dispatch must have no value.
+ * So no filter can narrow the pushes and pull requests that run the gates.
  * A run step may set only name and run, and it runs `node tools/fairpane.mjs install-zig` or `node tools/fairpane.mjs run <gate>`.
  * An action step may set only name, uses, and with, and it uses an accepted action with only that action's accepted inputs.
  * workflowProblems binds each action to its reviewed commit, so a commit from a fork of the action's repository fails.
- * An actions/upload-artifact step must also set if: to exactly ${{ always() }}, and no other step may set if:.
+ * An actions/upload-artifact step must also set if: to exactly ${{ always() }}, path: out/evidence/, and if-no-files-found: error.
+ * No other step may set if:.
  * So no default, environment, working directory, container, condition, or unreviewed action code can change what a gate step runs.
- * The step order, the runner labels, and the gate list are fixed by the gates.yml test, not by this function.
+ * The linux job must run exactly the gates that JOB_GATES lists, in that order.
+ * The other step order, the runner labels, and the Windows gate list are fixed by the gates.yml test, not by this function.
  */
 export function gateWorkflowProblems(root) {
   const problems = [];
@@ -373,6 +388,24 @@ export function gateWorkflowProblems(root) {
   for (const e of root.entries.values()) {
     if (!GATE_WORKFLOW_KEYS.includes(e.key)) add(e.line, `The Gates workflow sets ${e.key}:. It may set only ${series(GATE_WORKFLOW_KEYS)}.`);
   }
+  const on = root.entries.get('on');
+  const triggers = on?.value.kind === 'map' ? on.value.entries : new Map();
+  const required = `branches: [${GATE_BRANCHES.join(', ')}]`;
+  for (const name of GATE_FILTERED_TRIGGERS) {
+    const trigger = triggers.get(name), filters = trigger?.value.kind === 'map' ? trigger.value.entries : new Map();
+    for (const e of filters.values()) {
+      if (e.key !== 'branches') add(e.line, `Trigger ${name} sets ${e.key}:. A Gates trigger may set only ${required}.`);
+    }
+    const branches = filters.get('branches');
+    if (!branches) add(trigger?.line ?? on?.line ?? root.line, `Trigger ${name} does not set ${required}.`);
+    else if (branches.value.kind !== 'seq' || branches.value.items.length !== GATE_BRANCHES.length ||
+      branches.value.items.some((item, i) => item.kind !== 'scalar' || item.value !== GATE_BRANCHES[i])) {
+      add(branches.line, `Trigger ${name} sets branches: to ${flow(branches.value)}. It must set ${required}.`);
+    }
+  }
+  const dispatch = triggers.get('workflow_dispatch');
+  if (dispatch?.value.kind === 'map') for (const e of dispatch.value.entries.values()) add(e.line, `Trigger workflow_dispatch sets ${e.key}:. It may set nothing.`);
+  else if (dispatch && dispatch.value.kind !== 'null') add(dispatch.line, `Trigger workflow_dispatch is set to ${flow(dispatch.value)}. It may set nothing.`);
   const jobs = root.entries.get('jobs');
   if (jobs?.value.kind !== 'map') { add(jobs?.line ?? root.line, 'The Gates workflow has no jobs mapping.'); return problems; }
   for (const [id, job] of jobs.value.entries) {
@@ -404,6 +437,12 @@ export function gateWorkflowProblems(root) {
         const condition = step.entries.get('if');
         if (!condition) add(uses.line, `An upload-artifact step of job ${id} must set if: ${UPLOAD_CONDITION}.`);
         else if (condition.value.kind !== 'scalar' || condition.value.value !== UPLOAD_CONDITION) add(condition.line, CONDITION_PROBLEM);
+        const given = w?.value.kind === 'map' ? w.value.entries : new Map();
+        for (const [input, value] of UPLOAD_INPUTS) {
+          const e = given.get(input);
+          if (!e) add(uses.line, `The ${action} step of job ${id} does not set ${input}. It must set ${input}: ${value}.`);
+          else if (e.value.kind !== 'scalar' || e.value.value !== value) add(e.line, `The ${action} step of job ${id} sets ${input} to ${flow(e.value)}. It must set ${input}: ${value}.`);
+        }
       } else if (run) {
         for (const e of step.entries.values()) {
           if (e.key === 'if') add(e.line, CONDITION_PROBLEM);
@@ -414,6 +453,16 @@ export function gateWorkflowProblems(root) {
           add(run.line, `Job ${id} runs ${command === null ? '(not a scalar)' : JSON.stringify(command)}, which is not node tools/fairpane.mjs install-zig or node tools/fairpane.mjs run <gate>.`);
         }
       } else add(step.line, `A step of job ${id} sets neither run nor uses.`);
+    }
+    const gates = JOB_GATES.get(id);
+    if (!gates) continue;
+    const ran = steps.value.items.flatMap(step => {
+      const run = step.kind === 'map' ? step.entries.get('run')?.value : undefined;
+      const match = run?.kind === 'scalar' ? GATE_RUN.exec(run.value) : null;
+      return match ? [match[1]] : [];
+    });
+    if (ran.join('\n') !== gates.join('\n')) {
+      add(steps.line, `Job ${id} runs the gates ${ran.length ? series(ran) : '(none)'}. It must run ${series(gates)}, in that order.`);
     }
   }
   return problems;

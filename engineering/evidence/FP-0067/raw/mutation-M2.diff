@@ -1,0 +1,13 @@
+diff --git a/out/fp0067/mutation/M2-attest.test.mjs b/tools/attest.test.mjs
+index 0608e2f..bdd5e4c 100644
+--- a/out/fp0067/mutation/M2-attest.test.mjs
++++ b/tools/attest.test.mjs
+@@ -263,7 +263,7 @@ export const attestationCases = [
+     rejects(() => candidateIdentity(candidate.dir, candidate.secondTree), 'unknown-candidate');
+     // Each object below exists under the candidate's ID but has an invalid zlib stream, fails Git's hash check, or does not parse.
+     // One assertion reports every fixture's outcome, so no fixture's result hides another's.
+-    const lookup = /^error: Git could not look up the candidate commit/;
++    const lookup = /^error: mutated pattern, Git could not look up the candidate commit/;
+     const unreadable = /^error: Object \w+ exists, but Git cannot read it/;
+     const mismatch = fixtureRepository(), treeHeader = fixtureRepository();
+     fs.chmodSync(looseOf(mismatch, mismatch.first), 0o644);

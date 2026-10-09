@@ -259,11 +259,11 @@ export const attestationCases = [
     const looseOf = (repo, id) => path.join(repo.dir, '.git', 'objects', id.slice(0, 2), id.slice(2));
     fs.chmodSync(looseOf(candidate, candidate.first), 0o644);
     fs.writeFileSync(looseOf(candidate, candidate.first), 'not a zlib stream');
-    assert.match(codeOf(() => candidateIdentity(candidate.dir, candidate.first)), /^error: Git could not look up the candidate commit/);
     rejects(() => candidateIdentity(candidate.dir, 'f'.repeat(40)), 'unknown-candidate');
     rejects(() => candidateIdentity(candidate.dir, candidate.secondTree), 'unknown-candidate');
-    // Each object below exists under the candidate's ID but fails Git's hash check or does not parse.
+    // Each object below exists under the candidate's ID but has an invalid zlib stream, fails Git's hash check, or does not parse.
     // One assertion reports every fixture's outcome, so no fixture's result hides another's.
+    const lookup = /^error: Git could not look up the candidate commit/;
     const unreadable = /^error: Object \w+ exists, but Git cannot read it/;
     const mismatch = fixtureRepository(), treeHeader = fixtureRepository();
     fs.chmodSync(looseOf(mismatch, mismatch.first), 0o644);
@@ -273,9 +273,10 @@ export const attestationCases = [
     const bogus = spawnSync('git', ['-C', candidate.dir, 'hash-object', '-t', 'commit', '--literally', '-w', '--stdin'],
       { input: 'not a commit\n', encoding: 'utf8', windowsHide: true });
     assert.equal(bogus.status, 0, bogus.stderr);
-    const outcomes = [[mismatch.dir, mismatch.first], [treeHeader.dir, treeHeader.first], [candidate.dir, bogus.stdout.trim()]]
-      .map(([dir, id]) => codeOf(() => candidateIdentity(dir, id)));
-    assert.deepEqual(outcomes.map(outcome => unreadable.test(outcome)), [true, true, true], JSON.stringify(outcomes));
+    const fixtures = [[candidate.dir, candidate.first, lookup], [mismatch.dir, mismatch.first, unreadable],
+      [treeHeader.dir, treeHeader.first, unreadable], [candidate.dir, bogus.stdout.trim(), unreadable]];
+    const outcomes = fixtures.map(([dir, id]) => codeOf(() => candidateIdentity(dir, id)));
+    assert.deepEqual(outcomes.map((outcome, i) => fixtures[i][2].test(outcome)), [true, true, true, true], JSON.stringify(outcomes));
   }],
   ['FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled', () => {
     const candidate = fixtureRepository(), outside = temp();

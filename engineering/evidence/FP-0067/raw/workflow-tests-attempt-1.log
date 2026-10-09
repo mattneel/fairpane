@@ -1,0 +1,33 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/workflow-check.test.mjs"]
+TAP version 13
+ok 1 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+ok 2 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+ok 3 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+ok 4 - FP-0033 17: An action commit outside the reviewed set fails, even with a full SHA and a version comment
+ok 5 - FP-0033 3: A workflow permission other than contents: read fails
+ok 6 - FP-0033 3: A job permission other than contents: read fails
+ok 7 - FP-0033 4: continue-on-error on a step or a job fails
+ok 8 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+ok 9 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+ok 10 - FP-0033 4: A workflow_run trigger fails
+ok 11 - FP-0033 8: An expression outside the allowlist fails
+ok 12 - FP-0033 9: A gate step that can be skipped or rerouted fails
+ok 13 - FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+ok 14 - FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+ok 15 - FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+ok 16 - FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+ok 17 - FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+ok 18 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+ok 19 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+ok 20 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+ok 21 - FP-0067 1: The committed Gates workflow has no trigger, upload, or Linux-gate problem
+ok 22 - FP-0067 2: A Gates trigger filter key other than branches is one problem that names the trigger and the key
+ok 23 - FP-0067 3: Gates branches other than [master] and a workflow_dispatch value are each one problem
+ok 24 - FP-0067 4: A Gates upload path other than out/evidence/ or an if-no-files-found other than error is one problem
+ok 25 - FP-0067 5: A Linux job that omits zig-test or runs it after the cross builds is a problem
+1..25
+# tests 25
+# pass 25
+# fail 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/workflow-check.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:17:02.892Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":50}

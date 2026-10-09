@@ -109,7 +109,8 @@ It reads the candidate identity from Git objects, never from the working tree.
 Its Git calls ignore replace refs and inherited `GIT_*` variables, and they find `git` through `PATH` only.
 The `--repository` path must be the top-level directory of a Git work tree, because Git searches parent directories from any other path.
 The candidate must be a full 40-hex commit ID of a commit object, because a ref, a tag, or an abbreviated ID is a mutable pointer.
-An unreadable repository, a commit object that exists but cannot be read, an unreadable tree, a Git spawn failure, a signal, or a timeout is a tool error, distinct from a rejection.
+A candidate ID under which no object exists, or under which a readable object of another type exists, is `unknown-candidate`, as ADR 0002 states.
+An unreadable repository, an object under the candidate's ID that exists but cannot be read, an unreadable tree, a Git spawn failure, a signal, or a timeout is a tool error, distinct from a rejection.
 A protected runner whose account does not own the candidate checkout lists that path in `safe.directory` in its own Git configuration.
 A trust policy fails as `unprotected-policy` when its path, or any directory on the way to it, resolves inside the candidate repository or its Git directory, because a workspace writer can edit it.
 That location check is a guard, not a security boundary; operating-system permissions on a separate runner supply the boundary.
@@ -144,7 +145,7 @@ A protected runner supplies the separate release boundary.
 
 `.github/workflows/gates.yml` runs the gates on pushes to `master`, on pull requests that target `master`, and on manual dispatch.
 The Windows job runs `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, `zig-build`, and `c-abi`.
-The Linux job runs `repo-check`, `controller-test`, and the three cross-compilation gates.
+The Linux job runs `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, and the three cross-compilation gates.
 Each job installs the locked compiler with `install-zig` and uploads `out/evidence` as an artifact, including after a failure.
 Those receipts remain unsigned local integrity records, and a hosted runner is not a protected release runner.
 
@@ -174,15 +175,19 @@ It also rejects a block scalar whose leading blank line has more spaces than its
 `gateWorkflowProblems` checks the Gates workflow against allowlists.
 
 - The workflow may set only `name`, `on`, `permissions`, `concurrency`, and `jobs`.
+- The `push` and `pull_request` triggers must each set exactly `branches: [master]` and no other key, such as `types`, `paths`, `paths-ignore`, `tags`, or `branches-ignore`.
+  `workflow_dispatch` must have no value.
+  No trigger filter can therefore narrow the runs, and each problem names the trigger and the key.
 - A job may set only `name`, `runs-on`, `timeout-minutes`, and `steps`.
 - A run step may set only `name` and `run`.
   Its command must be `node tools/fairpane.mjs install-zig` or `node tools/fairpane.mjs run <gate>`.
 - An action step may set only `name`, `uses`, and `with`.
-  An `actions/upload-artifact` step must also set `if: ${{ always() }}`, and no other step may set `if:`.
+  An `actions/upload-artifact` step must also set `if: ${{ always() }}`, `path: out/evidence/`, and `if-no-files-found: error`, and no other step may set `if:`.
 - The only accepted actions are `actions/checkout` with the input `persist-credentials`, `actions/setup-node` with `node-version`, and `actions/upload-artifact` with `name`, `path`, and `if-no-files-found`.
+- The `linux` job must run exactly `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, `cross-windows-x86_64`, `cross-linux-aarch64`, and `cross-macos-aarch64`, in that order.
 
 No default shell, environment variable, working directory, container, or other action can therefore change what a gate step runs.
-`tools/workflow-check.test.mjs` fixes the Gates step order, runner labels, gate list, and concurrency expressions.
+`tools/workflow-check.test.mjs` fixes the Gates step order, runner labels, Windows gate list, and concurrency expressions, and it checks the Linux gate list too.
 It also checks every workflow file against its reviewed problem list, and `node tools/fairpane.mjs test` runs its cases.
 The `pages.yml` list names the deploy job's `pages: write` and `id-token: write` grants, so any other grant fails it.
 

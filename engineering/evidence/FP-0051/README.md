@@ -65,7 +65,7 @@ Commit `3373788` peels an existing object to `^{object}`, which parses it and ch
 
 | Log | Result |
 | --- | --- |
-| `raw/revision-2-tests-before.log` | Two runs against the base code. In the second, case FP-0051 3 reports every corruption fixture's outcome in one assertion: the tree-header object returns `unknown-candidate`, and the other two return the base message. |
+| `raw/revision-2-tests-before.log` | Three runs against the base code, at 04:46:07Z, 04:46:21Z, and 04:46:32Z. Runs 1 and 2 fail case FP-0051 3 only because its pattern expects the new `Object …` wording, while the base code prints `Commit …`. Run 3 reports every corruption fixture's outcome in one assertion. Only run 3 shows the base defect: the tree-header object returns `unknown-candidate`, and the other two return the base message. |
 | `raw/revision-2-binding.log` | `HEAD` `3373788`, and an empty status, including untracked and ignored files, for every source root. |
 | `raw/revision-2-tests-after.log` | `node tools/attest.test.mjs` passes 18 of 18 cases. |
 | `raw/revision-2-tests-bun.log` | Bun runs 155 of 155 controller tests. |

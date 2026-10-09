@@ -1,0 +1,112 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD","HEAD:tools/workflow-check.mjs","HEAD:tools/workflow-check.test.mjs","HEAD:.github/workflows/gates.yml","HEAD:.github/workflows/pages.yml","HEAD:tools/attest.mjs","HEAD:tools/attest.test.mjs"]
+ed95bc5edef54fb020797a53cf525803602a23d3
+9847774a88ee8073383f2254c6d832c78755bc89
+5a99a972fc13dd7512808c806a41e0eccae34e8e
+ccbd330eb01756973b71fc9464cec7a2043d0a00
+a70741af57639e29f6646c5d0308959f39991843
+6f9a4ae4a06cef40f0b2951a131fe32cddf89e2d
+e0bb589555fd7fbd3cc960a0b1e0ae4d161649ef
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD","HEAD:tools/workflow-check.mjs","HEAD:tools/workflow-check.test.mjs","HEAD:.github/workflows/gates.yml","HEAD:.github/workflows/pages.yml","HEAD:tools/attest.mjs","HEAD:tools/attest.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:16:00.788Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","status","--short"]
+ M tools/attest.test.mjs
+ M tools/workflow-check.test.mjs
+?? engineering/evidence/FP-0067/raw/tests-before.log
+?? engineering/evidence/FP-0079/reviews/
+?? engineering/evidence/FP-0082/
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["status","--short"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:16:00.866Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":26}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs = require('node:fs'); const d = 'out/fp0067-before'; fs.rmSync(d, { recursive: true, force: true }); fs.mkdirSync(d + '/tools', { recursive: true }); fs.cpSync('.github/workflows', d + '/.github/workflows', { recursive: true }); for (const f of ['workflow-check.mjs', 'workflow-check.test.mjs']) fs.copyFileSync('tools/' + f, d + '/tools/' + f); console.log('Staged base tools/workflow-check.mjs, base .github/workflows, and the new tools/workflow-check.test.mjs in ' + d);"]
+Staged base tools/workflow-check.mjs, base .github/workflows, and the new tools/workflow-check.test.mjs in out/fp0067-before
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs = require('node:fs'); const d = 'out/fp0067-before'; fs.rmSync(d, { recursive: true, force: true }); fs.mkdirSync(d + '/tools', { recursive: true }); fs.cpSync('.github/workflows', d + '/.github/workflows', { recursive: true }); for (const f of ['workflow-check.mjs', 'workflow-check.test.mjs']) fs.copyFileSync('tools/' + f, d + '/tools/' + f); console.log('Staged base tools/workflow-check.mjs, base .github/workflows, and the new tools/workflow-check.test.mjs in ' + d);"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:16:05.857Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","hash-object","tools/workflow-check.mjs","tools/workflow-check.test.mjs",".github/workflows/gates.yml",".github/workflows/pages.yml","out/fp0067-before/tools/workflow-check.mjs","out/fp0067-before/tools/workflow-check.test.mjs","out/fp0067-before/.github/workflows/gates.yml","out/fp0067-before/.github/workflows/pages.yml","tools/attest.mjs","tools/attest.test.mjs"]
+9847774a88ee8073383f2254c6d832c78755bc89
+c67790960de3b7539facd8de5fd731f83564442f
+ccbd330eb01756973b71fc9464cec7a2043d0a00
+a70741af57639e29f6646c5d0308959f39991843
+9847774a88ee8073383f2254c6d832c78755bc89
+c67790960de3b7539facd8de5fd731f83564442f
+ccbd330eb01756973b71fc9464cec7a2043d0a00
+a70741af57639e29f6646c5d0308959f39991843
+6f9a4ae4a06cef40f0b2951a131fe32cddf89e2d
+0608e2f364a029d3652c456fcc7e187e5735ebe2
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["hash-object","tools/workflow-check.mjs","tools/workflow-check.test.mjs",".github/workflows/gates.yml",".github/workflows/pages.yml","out/fp0067-before/tools/workflow-check.mjs","out/fp0067-before/tools/workflow-check.test.mjs","out/fp0067-before/.github/workflows/gates.yml","out/fp0067-before/.github/workflows/pages.yml","tools/attest.mjs","tools/attest.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:16:05.942Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":20}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0067-before/tools/workflow-check.test.mjs"]
+TAP version 13
+ok 1 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+not ok 2 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  [\n    [\n      'actions/checkout',\n      null\n    ],\n...\n      null,\n-     'node tools/fairpane.mjs run zig-fmt'\n-   ],\n-   [\n-     null,\n-     'node tools/fairpane.mjs run zig-test'\n-   ],\n-   [\n-     null,\n      'node tools/fairpane.mjs run cross-windows-x86_64'\n    ],\n    [\n      null,\n      'node tools/fairpane.mjs run cross-linux-aarch64'\n"
+  ...
+ok 3 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+ok 4 - FP-0033 17: An action commit outside the reviewed set fails, even with a full SHA and a version comment
+ok 5 - FP-0033 3: A workflow permission other than contents: read fails
+ok 6 - FP-0033 3: A job permission other than contents: read fails
+ok 7 - FP-0033 4: continue-on-error on a step or a job fails
+ok 8 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+ok 9 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+ok 10 - FP-0033 4: A workflow_run trigger fails
+ok 11 - FP-0033 8: An expression outside the allowlist fails
+ok 12 - FP-0033 9: A gate step that can be skipped or rerouted fails
+ok 13 - FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+ok 14 - FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+ok 15 - FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+ok 16 - FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+ok 17 - FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+ok 18 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+ok 19 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+ok 20 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+not ok 21 - FP-0067 1: The committed Gates workflow has no trigger, upload, or Linux-gate problem
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n    'node tools/fairpane.mjs run repo-check',\n    'node tools/fairpane.mjs run controller-test',\n-   'node tools/fairpane.mjs run zig-fmt',\n-   'node tools/fairpane.mjs run zig-test',\n    'node tools/fairpane.mjs run cross-windows-x86_64',\n    'node tools/fairpane.mjs run cross-linux-aarch64',\n    'node tools/fairpane.mjs run cross-macos-aarch64'\n  ]\n"
+  ...
+not ok 22 - FP-0067 2: A Gates trigger filter key other than branches is one problem that names the trigger and the key
+  ---
+  message: "Expected exactly one problem matching /^Line \\d+: Trigger pull_request sets types:\\./ in []\n\n0 !== 1\n"
+  ...
+not ok 23 - FP-0067 3: Gates branches other than [master] and a workflow_dispatch value are each one problem
+  ---
+  message: "Expected exactly one problem matching /^Line \\d+: Trigger push sets branches: to \\[master, dev\\]\\./ in []\n\n0 !== 1\n"
+  ...
+not ok 24 - FP-0067 4: A Gates upload path other than out/evidence/ or an if-no-files-found other than error is one problem
+  ---
+  message: "Expected exactly one problem matching /^Line \\d+: The actions\\/upload-artifact step of job windows sets path to \"out\\/\"\\./ in []\n\n0 !== 1\n"
+  ...
+not ok 25 - FP-0067 5: A Linux job that omits zig-test or runs it after the cross builds is a problem
+  ---
+  message: "The Linux job of gates.yml lacks:       - name: Run gate zig-test\n        run: node tools/fairpane.mjs run zig-test\n\n"
+  ...
+1..25
+# tests 25
+# pass 19
+# fail 6
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0067-before/tools/workflow-check.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:16:11.276Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":55}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/attest.test.mjs"]
+TAP version 13
+ok 1 - 2: A valid envelope signed by a trusted key verifies
+ok 2 - 3: RFC 8032 test vector 1 verifies through the same key decoding path
+ok 3 - 4: A key outside the trust policy fails, whether it names itself or a trusted key
+ok 4 - 5: One changed payload byte fails as bad-signature
+ok 5 - 6: A truncated envelope and a truncated payload each fail
+ok 6 - 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+ok 7 - 8: A payload for another commit or tree fails as stale-candidate
+ok 8 - 9: A payload with another policy digest fails as changed-policy
+ok 9 - 10: Zero discovered and zero selected each fail as zero-denominator
+ok 10 - 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+ok 11 - 12: A runner key that differs from the signature key fails as key-mismatch
+ok 12 - 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+ok 13 - 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+ok 14 - 16: A trusted signature over a noncanonical payload fails as malformed
+ok 15 - FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result
+ok 16 - FP-0051 2: enclosingGitDirectories collects the common directory of every enclosing .git entry
+ok 17 - FP-0051 3: An unreadable commit object is a tool error, and a missing or non-commit object is unknown-candidate
+ok 18 - FP-0051 4: A policy path that passes through the candidate fails, however its root is spelled
+1..18
+# tests 18
+# pass 18
+# fail 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/attest.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td8cf3dc9c\\m","started_at":"2026-10-09T13:16:11.386Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":3935}

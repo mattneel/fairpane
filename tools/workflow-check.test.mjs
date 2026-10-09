@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Workflow policy checker tests for FP-0033.
+ * Workflow policy checker tests for FP-0033 and FP-0067.
  * Run standalone with `node tools/workflow-check.test.mjs`, or through `node tools/fairpane.mjs test`.
  */
 import assert from 'node:assert/strict';
@@ -67,6 +67,27 @@ const REVIEWED = {
   'gates.yml': [],
   'pages.yml': ['Line 49: Job deploy grants a permission other than contents: read (pages: write, id-token: write).'],
 };
+/** The committed Gates workflow with LF line ends. Each FP-0067 fixture changes exactly one part of it. */
+const GATES = readWorkflow('gates.yml').replaceAll('\r\n', '\n');
+const LINUX_JOB = '  linux:\n';
+function gatesVariant(from, to) {
+  assert.ok(GATES.includes(from), `gates.yml lacks: ${from}`);
+  return GATES.replace(from, to);
+}
+/** A change inside the Linux job only, because the Windows job repeats several of its steps. */
+function linuxVariant(from, to) {
+  const parts = GATES.split(LINUX_JOB);
+  assert.equal(parts.length, 2, `gates.yml has ${parts.length - 1} Linux jobs.`);
+  assert.ok(parts[1].includes(from), `The Linux job of gates.yml lacks: ${from}`);
+  return parts[0] + LINUX_JOB + parts[1].replace(from, to);
+}
+/** Assert that both checkers together report exactly one problem, and that it matches the pattern. */
+function onlyProblem(text, pattern) {
+  const problems = [...checkWorkflow(text), ...gateWorkflowProblems(parseWorkflow(text))];
+  assert.equal(problems.length, 1, `Expected exactly one problem matching ${pattern} in ${JSON.stringify(problems)}`);
+  assert.match(problems[0], pattern);
+}
+const LINUX_GATES = ['repo-check', 'controller-test', 'zig-fmt', 'zig-test', 'cross-windows-x86_64', 'cross-linux-aarch64', 'cross-macos-aarch64'];
 
 export const workflowCases = [
   ['FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems', () => {
@@ -90,7 +111,7 @@ export const workflowCases = [
     }
     const expected = {
       windows: ['windows-2025', ['repo-check', 'controller-test', 'zig-fmt', 'zig-test', 'zig-build', 'c-abi']],
-      linux: ['ubuntu-24.04', ['repo-check', 'controller-test', 'cross-windows-x86_64', 'cross-linux-aarch64', 'cross-macos-aarch64']],
+      linux: ['ubuntu-24.04', LINUX_GATES],
     };
     const jobs = workflow.entries.get('jobs').value.entries;
     assert.deepEqual([...jobs.keys()], Object.keys(expected));
@@ -181,7 +202,8 @@ export const workflowCases = [
     assert.match(gates(variant(run, `${run}        if: always()\n`)).join('\n'), /Only an upload-artifact step may set if:/);
     assert.match(gates(variant(run, `${run}        shell: bash\n`)).join('\n'), /sets shell:/);
     assert.match(gates(variant('    runs-on: ubuntu-24.04\n', "    runs-on: ubuntu-24.04\n    if: github.event_name == 'push'\n")).join('\n'), /Job build sets if:/);
-    const upload = condition => `${run}\n      - name: Upload\n        uses: actions/upload-artifact@cf430e0 # v7.0.2\n${condition}`;
+    const upload = condition => `${run}\n      - name: Upload\n        uses: actions/upload-artifact@cf430e0 # v7.0.2\n${condition}` +
+      '        with:\n          name: receipts\n          path: out/evidence/\n          if-no-files-found: error\n';
     assert.deepEqual(gates(variant(run, upload('        if: ${{ always() }}\n'))), []);
     assert.match(gates(variant(run, upload('        if: ${{ success() }}\n'))).join('\n'), /Only an upload-artifact step may set if:/);
   }],
@@ -296,6 +318,50 @@ export const workflowCases = [
     unparseable(variant('  pull_request:\n', '  pull_request_target:\t# note\n'), CHARACTER);
     unparseable(variant('name: Fixture\n', 'name: Fixtur\u00e9\n'), CHARACTER);
     assert.deepEqual(checkWorkflow(`\uFEFF${BASE}`), []);
+  }],
+  ['FP-0067 1: The committed Gates workflow has no trigger, upload, or Linux-gate problem', () => {
+    const workflow = parseWorkflow(GATES);
+    assert.deepEqual(gateWorkflowProblems(workflow), []);
+    const triggers = workflow.entries.get('on').value.entries;
+    for (const event of ['push', 'pull_request']) {
+      const filters = triggers.get(event).value.entries;
+      assert.deepEqual([...filters.keys()], ['branches'], event);
+      assert.deepEqual(filters.get('branches').value.items.map(i => i.value), ['master'], event);
+    }
+    assert.equal(triggers.get('workflow_dispatch').value.kind, 'null');
+    for (const job of ['windows', 'linux']) {
+      const inputs = steps(workflow, job).at(-1).entries.get('with').value.entries;
+      assert.equal(inputs.get('path').value.value, 'out/evidence/', job);
+      assert.equal(inputs.get('if-no-files-found').value.value, 'error', job);
+    }
+    const linux = steps(workflow, 'linux').map(s => field(s, 'run')).filter(run => run?.startsWith('node tools/fairpane.mjs run '));
+    assert.deepEqual(linux, LINUX_GATES.map(g => `node tools/fairpane.mjs run ${g}`));
+  }],
+  ['FP-0067 2: A Gates trigger filter key other than branches is one problem that names the trigger and the key', () => {
+    const push = '  push:\n    branches: [master]\n', pullRequest = '  pull_request:\n    branches: [master]\n';
+    onlyProblem(gatesVariant(pullRequest, `${pullRequest}    types: [closed]\n`), /^Line \d+: Trigger pull_request sets types:\./);
+    onlyProblem(gatesVariant(push, `${push}    paths-ignore: ['**']\n`), /^Line \d+: Trigger push sets paths-ignore:\./);
+    onlyProblem(gatesVariant(push, `${push}    tags: ['v*']\n`), /^Line \d+: Trigger push sets tags:\./);
+    onlyProblem(gatesVariant(pullRequest, `${pullRequest}    branches-ignore: [dev]\n`), /^Line \d+: Trigger pull_request sets branches-ignore:\./);
+  }],
+  ['FP-0067 3: Gates branches other than [master] and a workflow_dispatch value are each one problem', () => {
+    onlyProblem(gatesVariant('  push:\n    branches: [master]\n', '  push:\n    branches: [master, dev]\n'),
+      /^Line \d+: Trigger push sets branches: to \[master, dev\]\./);
+    onlyProblem(gatesVariant('  workflow_dispatch:\n', '  workflow_dispatch:\n    inputs:\n      reason:\n        description: Why\n'),
+      /^Line \d+: Trigger workflow_dispatch sets inputs:\./);
+  }],
+  ['FP-0067 4: A Gates upload path other than out/evidence/ or an if-no-files-found other than error is one problem', () => {
+    onlyProblem(gatesVariant('          path: out/evidence/\n', '          path: out/\n'),
+      /^Line \d+: The actions\/upload-artifact step of job windows sets path to "out\/"\./);
+    onlyProblem(gatesVariant('          if-no-files-found: error\n', '          if-no-files-found: warn\n'),
+      /^Line \d+: The actions\/upload-artifact step of job windows sets if-no-files-found to warn\./);
+  }],
+  ['FP-0067 5: A Linux job that omits zig-test or runs it after the cross builds is a problem', () => {
+    const zigTest = '      - name: Run gate zig-test\n        run: node tools/fairpane.mjs run zig-test\n\n';
+    const lastCross = '      - name: Run gate cross-macos-aarch64\n        run: node tools/fairpane.mjs run cross-macos-aarch64\n\n';
+    const order = /^Line \d+: Job linux runs the gates .*\. It must run repo-check, controller-test, zig-fmt, zig-test, cross-windows-x86_64, cross-linux-aarch64, and cross-macos-aarch64, in that order\.$/;
+    onlyProblem(linuxVariant(zigTest, ''), order);
+    onlyProblem(linuxVariant(zigTest, '').replace(lastCross, `${lastCross}${zigTest}`), order);
   }],
 ].map(([name, fn]) => ({ name, fn }));
 

@@ -85,6 +85,12 @@ jobs:
       - name: Run gate controller-test
         run: node tools/fairpane.mjs run controller-test
 
+      - name: Run gate zig-fmt
+        run: node tools/fairpane.mjs run zig-fmt
+
+      - name: Run gate zig-test
+        run: node tools/fairpane.mjs run zig-test
+
       - name: Run gate cross-windows-x86_64
         run: node tools/fairpane.mjs run cross-windows-x86_64
 
