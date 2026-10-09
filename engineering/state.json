@@ -236,12 +236,22 @@
       "notes": []
     },
     "FP-0021": {
-      "status": "active",
-      "owner": "fairpane-bindings worker FP0021Schema",
-      "evidence": [],
+      "status": "implemented",
+      "owner": "fairpane-bindings worker FP0021Schema, integrated by root-integrator",
+      "evidence": [
+        "engineering/evidence/FP-0021/README.md",
+        "engineering/evidence/FP-0021/gates/2026-10-09T02-46-05-308Z-repo-check-1114babe.json",
+        "engineering/evidence/FP-0021/gates/2026-10-09T02-46-05-488Z-controller-test-54b193bf.json",
+        "engineering/evidence/FP-0021/gates/2026-10-09T02-46-26-215Z-zig-fmt-77677748.json",
+        "engineering/evidence/FP-0021/gates/2026-10-09T02-46-26-362Z-zig-test-3f72cd3e.json",
+        "engineering/evidence/FP-0021/gates/2026-10-09T02-46-29-740Z-c-abi-ce4fe73c.json",
+        "engineering/evidence/FP-0021/raw/integration-zig-tests.log",
+        "engineering/evidence/FP-0021/raw/mutation-stale.log"
+      ],
       "review": null,
       "notes": [
-        "The frozen contract is engineering/evidence/FP-0021/CONTRACT.md, based on commit 24c0c64."
+        "The frozen contract is engineering/evidence/FP-0021/CONTRACT.md, based on commit 24c0c64.",
+        "Commit 13372de implements it with 138 of 138 controller tests and 89 of 89 Zig tests. Awaiting fairpane-review."
       ]
     },
     "FP-0022": {
