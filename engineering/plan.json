@@ -3069,13 +3069,13 @@
         "Implement CSS Nesting, nested declarations rules, and @namespace prefixes.",
         "Apply the HTML case rules and quirks-mode matching for HTML documents.",
         "Bound the matching cost of :has() and report the bound.",
-        "Reject a selector whose ancestor compounds cannot match in constant time per element on deep trees, for example with an ancestor filter.",
-        "Classify invalid and unsupported selector forms precisely, as the FP-0014 review notes.",
+        "Before walking an element's ancestors, rule out in constant time per element a selector whose ancestor compounds require a type, ID, class, or attribute name that no ancestor has, for example with an ancestor Bloom filter, and report the share of selectors ruled out and the remaining ancestor walk on the FP-0014 case 46 and case 53 deep trees.",
+        "Classify invalid and unsupported selector forms precisely, as FP-0014 review 1 notes.",
         "Add matching cases that reach every restart path of the selector matcher, including x > a b against x>a>a>b and y>a>x>a>b, a + b c, a ~ b c with the match at an ancestor's sibling, and a > b ~ c under a parent that is not an element, and assert exact match sets.",
         "Bound the matching work of a selector that has a next-sibling or subsequent-sibling combinator to the left of a descendant combinator, for example with memoized failures, and report the bound.",
         "Remove the import cycle between src/css/stylesheet.zig and src/css/selectors.zig, or record why it stays."
       ],
-      "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
+      "read": ["engineering/evidence/FP-0014/CONTRACT.md", "engineering/evidence/FP-0014/reviews/review-1-reject.json", "engineering/evidence/FP-0014/reviews/review-2-accept.json"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -3094,10 +3094,10 @@
         "Register every standard property, including shorthands and logical properties, with initial values, inheritance, computed representations, and invalidation effects.",
         "Implement the color, display, font-size, and unit forms that FP-0014 reports as unsupported, and the math functions.",
         "Implement the Values 5 spread syntax and the other arbitrary substitution functions, if(), inherit(), attr(), ident(), and random-item(), once their specification is stable enough to test, or record why they stay unsupported.",
-        "Classify invalid and unsupported value forms precisely, as the FP-0014 review notes.",
+        "Classify invalid and unsupported value forms precisely, as FP-0014 review 1 notes.",
         "Generate the registry and keyword data from pinned specification sources where they exist."
       ],
-      "read": ["engineering/evidence/FP-0014/CONTRACT.md"],
+      "read": ["engineering/evidence/FP-0014/CONTRACT.md", "engineering/evidence/FP-0014/reviews/review-1-reject.json"],
       "contract_state": "bootstrap-seed",
       "expansion_rule": "Freeze exact test cases and target commands before implementation. Preserve every criterion."
     },
@@ -3441,7 +3441,7 @@
       "acceptance": [
         "Record the duration of the zig-test gate and of its compile and run phases on the Windows and Linux CI jobs over at least ten runs.",
         "Keep the output of a zig-test run that the gate stops at its timeout, so that the receipt shows which step was running.",
-        "Show whether the timeout of run 37931192952 was runner slowness or a hang, and fix any hang that the records reveal.",
+        "Rerun the zig-test gate on the Windows CI runner at least ten times with criterion 2's output capture, report each step's duration, fix any hang that a run shows, and state the cause of the run 37931192952 timeout only as [INFERENCE] unless a record decides it.",
         "Keep the gate's slowest recorded duration at most two thirds of its timeout by reducing build or test time, or through a separate reviewed change to the timeout, without removing or weakening any test."
       ],
       "read": ["engineering/evidence/FP-0014/ci/README.md", "engineering/gates.json", ".github/workflows/gates.yml"],
