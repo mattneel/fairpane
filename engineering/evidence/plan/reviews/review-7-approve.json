@@ -1,0 +1,53 @@
+{
+  "verdict": "approve",
+  "summary": "Plan review 7: I approve 4410cc2 and 07aa602. Every changed criterion follows the owner's recorded answers, weakens nothing, and stays testable. seac and both shaping oracles each have a named owner. There is no blocker or major finding, but two minor routing gaps remain around the text-rendering-tests import, which is the policy question you asked about.\n\nHow I checked: I read both commits on GitHub and the current FP-0059, FP-0078, FP-0114, FP-0115, and FP-0120 entries, specs/corpora.json, and engineering/policy.json. I ran nothing.\n\n**What the owner answered.** engineering/evidence/text/owner-answers-1.log records three answers from 17:49:14Z:\n- `tn5176: Approve`: the tables are imported and FP-0059 implements seac.\n- `shaping_fixtures: Both`: first-party expectations now, plus text-rendering-tests files where their licenses allow.\n- `fonttools: Extend`: GSUB, GPOS, and GDEF dumps become expectation files.\n\n**What the commits change.**\n- **4410cc2** records the three answers in LICENSE-DECISION.md:43-46 and adds the fontTools use in engineering/dependencies.json. The fontTools boundary is unchanged: it stays an import-time tool only, never runs in a build, gate, test, or runtime path, and never writes shaping output.\n- **07aa602:**\n  - It removes FP-0059 criterion 7's fallback, so seac becomes an unconditional obligation, a strict strengthening.\n  - FP-0120 criterion 3 now names FP-0059 as the task that replaces its seac error, so seac has an owner end to end.\n  - FP-0114 criterion 4 and FP-0115 criterion 3 now require both oracles the owner chose, instead of waiting for an owner decision. They still bar any other third-party fixture without approval.\n  - It records plan review 6.\n\n**What else the new sources need.** The fontTools extension needs no protected change, because the wheel and its boundary are already pinned. Importing text-rendering-tests does: either a new corpus entry or a new opentype-fixtures inventory in the protected specs/corpora.json. No criterion says which task lands that separate protected change. FP-0115 also cannot import Devanagari cases itself, because its writable paths exclude specs and tools.",
+  "commits": [
+    {
+      "commit": "4410cc2",
+      "verdict": "approve",
+      "notes": "**LICENSE-DECISION.md:43-46.** It admits the TN5176 Standard Encoding table and the Expert and ExpertSubset charsets as data with source, retrieval date, and digest. It names the two shaping oracles: first-party expectations, and text-rendering-tests files whose recorded license permits redistribution. This matches the recorded answers and the question text, which named 'the Standard Encoding table and the Expert charsets'.\n\n**engineering/dependencies.json (fontTools).** It adds the use 'Writing dumps of GSUB, GPOS, and GDEF subtable data as expectation files … it never writes shaping output'. The 'import-time tool only' boundary is unchanged, so no gate, test, or runtime path gains a Python dependency, as the 'Extend' option described. No new wheel or toolchain is pinned.\n\n**Evidence.** The answer log is a `record` run of a script that extracts the ask call and its result from the integrator's session transcript. That transcript is outside the repository, so the log is the only committed evidence of the answers, as with FP-0065's owner answers.\n\nThe commit is a separate policy commit, as AGENTS.md:62 requires, and touches no protected path."
+    },
+    {
+      "commit": "07aa602",
+      "verdict": "approve",
+      "notes": "**FP-0059 criterion 7 (plan.json:2879).** It now reads 'Implement endchar seac through the TN5176 StandardEncoding and the font's charset, including the predefined ISOAdobe, Expert, and ExpertSubset charsets, replacing the FP-0120 unsupported error'. The fallback 'otherwise keep cff-seac recorded' is gone, so the obligation is unconditional. FP-0059 reaches FP-0120 through FP-0056, may write src, tools, and specs for the data import, and stays testable with synthetic CFF fonts.\n\n**FP-0120 criterion 3 (3995).** It reports seac as unsupported 'which FP-0059 replaces'. The owner condition is gone, and the FP-0120 state note names the approval.\n\n**FP-0114 criterion 4 (3861).** It requires two comparisons, without the earlier wait for an owner decision:\n- the three seeds against first-party expectations from the fonts' tables and the cited sources;\n- every redistributable text-rendering-tests case at a pinned commit that exercises its engines.\n\n**FP-0115 criterion 3 (3883).** It does the same for the Devanagari seed, keeping the conjunct and pre-base matra cases, and for every redistributable Devanagari case.\n\nBoth keep 'freeze no other third-party fixture without owner approval', so neither weakens a gate, exclusion, or threshold. The FP-0059, FP-0114, FP-0115, and FP-0120 state notes cite the answer log.\n\nThe commit also records plan review 6 as engineering/evidence/plan/reviews/review-6-approve.json, and changes only plan, state, and that record."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3861,
+      "issue": "FP-0114 criterion 4 compares cases of Unicode's text-rendering-tests 'at a pinned commit'. That repository is not in specs/corpora.json. The only font corpus there is opentype-fixtures, a file set pinned at revision 'fixtures-1' with a fixed inventory_sha256 (specs/corpora.json:47-54). Pinning text-rendering-tests, or adding its fonts and expectation files to the opentype-fixtures inventory, changes specs/corpora.json, which policy.json protects and FP-0114 lists as protected.\n\nThe criterion does not say that the pin, its license record, and its inventory land through a separate reviewed protected change. FP-0077 criterion 1, for the html5lib-tests corpus, says exactly that.",
+      "recommendation": "In a plan commit, extend FP-0114 criterion 4 with: 'pin text-rendering-tests with a license record and per-file inventory, applying the pin through a separate protected change'. Add a specs/sources.json entry and an IMPORT_REQUIREMENTS row, which FP-0114's specs path already allows."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 3883,
+      "issue": "FP-0115 criterion 3 compares 'every Devanagari case of Unicode's text-rendering-tests at a pinned commit'. FP-0114 criterion 4 imports only the cases 'that exercise these engines', which are Latin, CJK, and Arabic, so FP-0114 need not import the Devanagari cases. FP-0115's allowed_paths are src, tests, build.zig, and engineering/evidence, without specs or tools, so FP-0115 cannot record the import provenance or extend the corpus inventory itself. As written, nothing guarantees the Devanagari cases arrive.",
+      "recommendation": "Choose one of two fixes:\n- Make FP-0114's import cover every redistributable case of the pinned commit, with Devanagari cases left to FP-0115.\n- Give FP-0115 the specs and tools paths and its own separate protected inventory change.\n\nState the choice in FP-0114's or FP-0115's criterion."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3861,
+      "issue": "FP-0114 criterion 4 and FP-0115 criterion 3 say 'compare' but not what result acceptance needs. text-rendering-tests expectations are SVG renderings that place glyphs by ID and position. A worker could compare and report mismatches without passing them.",
+      "recommendation": "When freezing the FP-0114 and FP-0115 contracts:\n- require the first-party seed comparisons to pass;\n- for text-rendering-tests, freeze how glyph IDs and positions are taken from the SVG;\n- report pass, fail, and unsupported counts separately, naming every failing case;\n- state whether any case outside a frozen unsupported rule may fail."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/dependencies.json",
+      "line": 132,
+      "issue": "The new fontTools use, GSUB, GPOS, and GDEF dumps, would run Python at import time, like the existing font-expectations command. FP-0078 criterion 2 (plan.json:3282) requires every Python child process of corpus-derive and font-expectations to be bound to the hardened invocation in a test, but it names only those two commands. The layout slices FP-0111, FP-0112, and FP-0113 have no tools path, so a dump generator would land in FP-0114, which has tools, or in a new command outside FP-0078's list.",
+      "recommendation": "In the contract of whichever task adds the dump, route it through font-expectations' hardened invocation, or extend FP-0078 criterion 2 to name the new command. If FP-0111 to FP-0113 are meant to use the dumps, give the generating task the tools path and make them depend on it."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 2879,
+      "issue": "FP-0059 criterion 7 names the predefined ISOAdobe charset beside Expert and ExpertSubset. The approval in LICENSE-DECISION.md:43 and the owner question cover 'the Standard Encoding table and the Expert and ExpertSubset charsets'; ISOAdobe is not listed. ISOAdobe is the identity map from glyph IDs 0-228 to SIDs 0-228, which the CFF specification states as a rule, so no table needs importing. A worker might still import an ISOAdobe table under the approval.",
+      "recommendation": "In FP-0059's contract, record that ISOAdobe is implemented from the specification's identity rule, and that only the Standard Encoding, Expert, and ExpertSubset tables are imported under the 2026-10-09 approval."
+    }
+  ]
+}

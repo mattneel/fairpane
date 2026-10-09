@@ -3783,7 +3783,7 @@
       "workstream": "text",
       "depends_on": ["FP-0013"],
       "role": "fairpane-text",
-      "allowed_paths": ["src", "tests", "build.zig", "engineering/evidence"],
+      "allowed_paths": ["src", "tests", "tools", "build.zig", "engineering/evidence"],
       "protected_paths": ["AGENTS.md", "docs/CHARTER.md", "engineering/qualification.json", "engineering/policy.json", "engineering/gates.json", "toolchains/zig.lock.json", "toolchains/rust.lock.json", "rust-toolchain.toml", "specs/corpora.json"],
       "authority": "routine-local-engineering",
       "required_gates": ["repo-check", "controller-test", "zig-fmt", "zig-test"],
@@ -3793,7 +3793,8 @@
         "Select the lookups for a script tag, a language tag, and a feature set, with DFLT and default LangSys fallback as the OpenType common table formats chapter specifies.",
         "Parse GDEF glyph classes, mark attachment classes, mark glyph sets, and ligature caret lists.",
         "Report FeatureVariations, unknown lookup types and formats, and Device and VariationIndex data as unsupported, never as empty results.",
-        "Reject malformed subtables without a panic, unbounded allocation, or native recursion, tested with synthetic fonts from the first-party builder."
+        "Reject malformed subtables without a panic, unbounded allocation, or native recursion, tested with synthetic fonts from the first-party builder.",
+        "Check each fixture font's parsed GDEF classes and its GSUB and GPOS script, feature, and lookup lists, including each lookup's type, flags, subtable formats, and coverage, against dumps that tools/fonts/font_expectations.py writes with fontTools under the font-expectations command's hardened invocation, as the owner approved on 2026-10-09."
       ],
       "read": ["docs/RENDERING_AND_TEXT.md", "engineering/evidence/FP-0013/CONTRACT.md"],
       "contract_state": "bootstrap-seed",
@@ -3858,7 +3859,7 @@
         "Shape runs through a default engine for Latin and the CJK seed scripts, and through an Arabic engine with Joining_Type joining and the specified feature order for right-to-left runs.",
         "Decide normalization and mark reordering from the cited primary sources, and import extracted/DerivedCombiningClass.txt with per-file provenance if that decision needs Canonical_Combining_Class.",
         "Map every glyph to its code-unit cluster, including marks such as U+064B on U+0628 and U+0301 after U+0065.",
-        "Compare the latin-baseline, arabic-greeting, and cjk-greeting seeds on the Noto fixtures with first-party expectations derived from the fonts' tables and the cited primary sources, and compare every case of Unicode's text-rendering-tests at a pinned commit that exercises these engines and whose files carry a recorded license that permits redistribution, as the owner approved on 2026-10-09; freeze no other third-party fixture without owner approval.",
+        "Compare the latin-baseline, arabic-greeting, and cjk-greeting seeds on the Noto fixtures with first-party expectations derived from the fonts' tables and the cited primary sources. Pin Unicode's text-rendering-tests at a commit with a license record and a per-file inventory, import every case whose files carry a recorded license that permits redistribution, apply the pin through a separate protected change, and compare every imported case that exercises these engines, as the owner approved on 2026-10-09; freeze no other third-party fixture without owner approval.",
         "Report every script outside Latin, Arabic, Devanagari, and the CJK seed scripts, every unapplied feature, and every missing glyph as unsupported, each with an owner task.",
         "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
       ],
@@ -3880,7 +3881,7 @@
       "acceptance": [
         "Identify Devanagari syllables and reorder reph, pre-base matras, and below-base forms as the dev2 script specification states.",
         "Apply the basic and presentation features in their specified stages.",
-        "Compare the devanagari-greeting seed on Noto Sans Devanagari with first-party expectations derived from the font's tables and the dev2 script specification, including the conjunct U+0938 U+094D U+0924 and the pre-base matra in U+0928 U+093F, and compare every Devanagari case of Unicode's text-rendering-tests at a pinned commit whose files carry a recorded license that permits redistribution, as the owner approved on 2026-10-09; freeze no other third-party fixture without owner approval.",
+        "Compare the devanagari-greeting seed on Noto Sans Devanagari with first-party expectations derived from the font's tables and the dev2 script specification, including the conjunct U+0938 U+094D U+0924 and the pre-base matra in U+0928 U+093F, and compare every Devanagari case that FP-0114 imports from Unicode's text-rendering-tests, as the owner approved on 2026-10-09; freeze no other third-party fixture without owner approval.",
         "Report every other Indic and Universal Shaping Engine script as unsupported with an owner task.",
         "Update the capability record and the FP-0013 cases that pin it for the behavior this task implements."
       ],
