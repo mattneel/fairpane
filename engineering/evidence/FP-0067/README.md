@@ -107,6 +107,7 @@ The first `Gates` run with the change is run 37936609533 of `152ed53`; `ci/` rec
 ### Acceptance run
 
 Run 37936609533 of `152ed53` timed out in the Linux `zig-test` gate at 600,004 milliseconds, as `ci/ci-record.log` and `ci/run-37936609533-linux/` record.
+`ci/ci-record.log` viewed the run while it was still in progress; `ci/ci-record-final.log` records its final view, which concludes `failure` with the `zig-test` step failed in both jobs.
 Contract amendment 1 makes the acceptance record the first `Gates` run after `FP-0098` lands whose Linux `zig-test` receipt reports `pass`.
 
 - `ci/acceptance-run.log` records `9d5638b`, FP-0098's implementation commit, then `gh run list` of that commit's runs and `gh run view` of run 37941660067, its push run, which is the first run that contains the fix.
@@ -114,3 +115,16 @@ Contract amendment 1 makes the acceptance record the first `Gates` run after `FP
 - The same log records the run's artifacts and `gh run download` of `linux-gate-receipts-unsigned-local-integrity-records-not-attestations` into `ci/run-37941660067-linux/`.
 - The Linux receipts report `pass` for `repo-check`, `controller-test`, `zig-fmt`, `zig-test`, and the three cross-compilation gates.
   The `zig-test` receipt's command took 178,677 milliseconds.
+
+## Review findings
+
+Review 1 (`reviews/review-1-reject.json`) rejected for one blocker and recorded one minor finding and four notes; review 2 (`reviews/review-2-accept.json`) accepts.
+
+- Blocker, no recorded passing Linux `zig-test`: closed by "Acceptance run" above, under contract amendment 1.
+- Minor, the workflow checker applies the Linux gate rule only to a job named `linux`: FP-0099's first criterion owns it.
+- Note, a missing `workflow_dispatch` trigger is not a checker problem: review 1 found the reading defensible, and no change is made.
+  Review 2 adds that the rationale in "Resolved ambiguities" should cite FP-0033 cases 9 and 12, through `gates(BASE)`, rather than case 14.
+- Note, `repo-check` does not run the workflow checks: FP-0099's second criterion owns it.
+- Note, the red baseline of case 5 fails on a fixture precondition, and no mutation control targets the Linux gate order check: the integrator proposes a mutation control for that check in FP-0099 through a reviewed plan change.
+- Note, the Windows and Node v26.7.0 claim in "Scope" for the worker's tree has no log in `raw/`: only the integrator's receipts record those values, so the claim about the worker's tree is [INFERENCE].
+- Review 2's note on amendment wording: a later amendment of this kind says "the first `Gates` run that contains <commit>" and requires that run to pass.

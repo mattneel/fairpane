@@ -1,0 +1,34 @@
+{
+  "verdict": "accept",
+  "summary": "Accepted. Review 1's only blocker is closed by the record in 4d11e84, and no blocker or major finding remains. I checked each point you asked about against the GitHub API and the committed files.\n\n1. Run 37941660067 is the first Gates run that contains FP-0098's implementation.\n- FP-0098's code is all in 9d5638b: src/dom.zig, tools/lib.mjs, tools/selftest.mjs, tools/zig/test_profile_runner.zig, and tools/README.md. The rest of that commit is FP-0098 evidence.\n- The API list of Gates runs created from 13:20Z to 14:20Z shows that the runs before it (runs 98-108) are on ancestors of 9d5638b. The newest of those is run 108 at 14:04:10Z on e84e578, the parent of 9d5638b.\n- Run 109 (37941660067) is a push run on 9d5638b, created at 14:05:58Z, and gh run list shows it is the only Gates run for that commit.\n- Every later run (110 onward, on 29a9f8e and its descendants) was created after it.\n- The amendment's choice of run therefore matches the first run that contains the fix; no later passing run was picked over a failing one.\n\n2. Its Linux zig-test passed under the same Linux job configuration as 152ed53.\n- ci/acceptance-run.log records gh run view with conclusion success and both jobs successful. All 12 Linux steps succeeded.\n- The downloaded receipt 2026-10-09T14-06-32-473Z-zig-test-edde727e.json reports status pass for `zig build test` with the locked Zig 0.18.0-dev.120+9fe22a29b on linux x64. It exited 0, did not time out, and took 178677 ms.\n- The other six Linux receipts also report pass: repo-check, controller-test, zig-fmt, and the three cross builds.\n- The zig-test gate_sha256 is 277b10a2… in both the acceptance receipt and the timed-out receipt from run 37936609533 (600004 ms, SIGKILL). The gate definition, including its arguments, is therefore unchanged.\n- The repo-check and controller-test gate hashes, 83889f6c… and 43baf0f8…, match the integration receipts at 152ed53.\n- The API's commit history for .github/workflows/gates.yml as of 9d5638b names 152ed53 as the latest commit to touch it. The Linux job's steps and order are exactly those of 152ed53.\n- FP-0098's README states that engineering/gates.json keeps the 600000 ms timeout and that no test left the suite: 292 tests before, 293 after. That claim belongs to FP-0098's own review; I did not verify it, so it is [INFERENCE] here.\n- 152ed53 is an ancestor of 9d5638b in the reflog, so the run contains this task's change.\n\n3. Contract amendment 1 (937a06b) weakens no threshold or denominator. It replaces the timed-out first run with the first passing run after FP-0098, under the same gate definition and workflow.\n\n4. The evidence commit is clean. 4d11e84 touches only engineering/evidence/FP-0067: README.md, ci/acceptance-run.log, and the ci/run-37941660067-linux receipts. ci/ci-record.log and ci/run-37936609533-linux record the original run's timeout.\n\nStatus of review 1's other findings:\n- Minor finding (the linux job ID rule): moved to FP-0099, whose first acceptance item is 'Make the workflow checker report a missing job for each job whose gate list it requires, and test a workflow whose linux job is renamed' (engineering/plan.json:3464). It is not closed within FP-0067.\n- Note that repo-check does not run the workflow checks: also moved to FP-0099 (plan.json:3465).\n- Three notes remain open and unrouted: the workflow_dispatch rationale, the red-baseline mechanism for case 5, and the host and Node claim with no log. All are non-blocking.\n- Contrary to amendment 1's wording, the README does not discuss any of review 1's findings.\n\nFor this re-review I ran no commands. I read the repository files and GitHub API responses through the read tool. Unverified statements are marked [INFERENCE].",
+  "findings": [
+    {
+      "severity": "note",
+      "path": "engineering/plan.json",
+      "line": 3464,
+      "issue": "Review 1's minor finding is moved, not fixed: the workflow checker still ignores a renamed or missing linux job (tools/workflow-check.mjs:457-458). Review 1's note that repo-check does not run the workflow checks is moved the same way (plan.json:3465). Both are now FP-0099 acceptance items, so they are tracked but not closed within FP-0067.",
+      "recommendation": "Close them in FP-0099 as planned. No FP-0067 change is needed."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0067/README.md",
+      "line": 72,
+      "issue": "Three of review 1's notes are neither fixed nor moved to another task. (1) The workflow_dispatch rationale still cites FP-0033 14, which uses checkWorkflow; the real constraint is FP-0033 9 and 12 through gates(BASE). (2) The red baseline for case 5 fails on a fixture precondition, and no mutation control targets JOB_GATES. (3) README line 8's Windows and Node v26.7.0 claim for the worker's tree has no log in raw/. Amendment 1 says review 1's findings are handled in the README record, but the README never mentions review 1.",
+      "recommendation": "Optionally add one README line that lists the review 1 notes and their disposition, or fold them into FP-0099."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0067/CONTRACT.md",
+      "line": null,
+      "issue": "Amendment 1 defines the acceptance record as 'the first Gates run after FP-0098 lands whose Linux zig-test receipt reports pass'. Read literally, that wording would let a later passing run be chosen over an earlier failing one. Here it makes no difference: run 37941660067 is the first Gates run of any kind on a commit that contains 9d5638b, as the API run list shows (runs 98-108 are on ancestors, and 110 onward come later).",
+      "recommendation": "In future amendments, say 'the first Gates run that contains <commit>', and require that run to pass."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0067/ci/ci-record.log",
+      "line": 3,
+      "issue": "The gh run view of run 37936609533 was taken at 13:36:31Z, while the run was still in progress (run conclusion empty, Windows job in_progress). The record therefore does not show the run's final conclusion. The Linux zig-test receipt in ci/run-37936609533-linux does show the timeout: status fail, timed_out true, 600004 ms, SIGKILL. The README's statement about the timeout is supported.",
+      "recommendation": "None required. Optionally record a final gh run view of 37936609533."
+    }
+  ]
+}
