@@ -1,0 +1,1515 @@
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","C:\\src\\fairpane\\out\\whatwg-html-source-efc54f7b70858d9fcf06d1a5871ae215f448c029"]
+\8184f8d730b5a3c47bbf657c01c3021149774c9efb8e59a2183bf6857704f70b *C:\\src\\fairpane\\out\\whatwg-html-source-efc54f7b70858d9fcf06d1a5871ae215f448c029
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["C:\\src\\fairpane\\out\\whatwg-html-source-efc54f7b70858d9fcf06d1a5871ae215f448c029"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:36:36.041Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":29}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\awk.exe","(NR>=78624 && NR<=78678) || (NR>=146325 && NR<=146431) {print NR\": \"$0}","C:\\src\\fairpane\\out\\whatwg-html-source-efc54f7b70858d9fcf06d1a5871ae215f448c029"]
+78624:   <div algorithm>
+78625:   <p>A string <var>name</var> is a <dfn export>valid custom element name</dfn> if all of the
+78626:   following are true:</p>
+78627: 
+78628:   <ul>
+78629:    <li>
+78630:     <p><var>name</var> is a <span>valid element local name</span>;</p>
+78631: 
+78632:     <p class="note">This ensures the custom element can be created with <code
+78633:     data-x="dom-Document-createElement">createElement()</code>.</p>
+78634:    </li>
+78635: 
+78636:    <li>
+78637:     <p><var>name</var>'s 0th <span>code point</span> is an <span>ASCII lower alpha</span>;</p>
+78638: 
+78639:     <p class="note">This ensures the HTML parser will treat the name as a tag name instead of as
+78640:     text.</p>
+78641:    </li>
+78642: 
+78643:    <li>
+78644:     <p><var>name</var> does not contain any <span data-x="ASCII upper alpha">ASCII upper
+78645:     alphas</span>;</p>
+78646: 
+78647:     <p class="note">This ensures the user agent can always treat HTML elements
+78648:     ASCII-case-insensitively.</p>
+78649:    </li>
+78650: 
+78651:    <li>
+78652:     <p><var>name</var> contains a U+002D (-); and</p>
+78653: 
+78654:     <p class="note">This is used for namespacing and to ensure forward compatibility (since no
+78655:     elements will be added to HTML, SVG, or MathML with hyphen-containing local names going
+78656:     forward).</p>
+78657:    </li>
+78658: 
+78659:    <li>
+78660:     <p><var>name</var> is not one of the following:</p>
+78661: 
+78662:     <ul class="brief">
+78663:      <li>"<code data-x="">annotation-xml</code>"</li>
+78664:      <li>"<code data-x="">color-profile</code>"</li>
+78665:      <li>"<code data-x="">font-face</code>"</li>
+78666:      <li>"<code data-x="">font-face-src</code>"</li>
+78667:      <li>"<code data-x="">font-face-uri</code>"</li>
+78668:      <li>"<code data-x="">font-face-format</code>"</li>
+78669:      <li>"<code data-x="">font-face-name</code>"</li>
+78670:      <li>"<code data-x="">missing-glyph</code>"</li>
+78671:     </ul>
+78672: 
+78673:     <p class="note">The list of names above is the summary of all hyphen-containing element names
+78674:     from the <span data-x="other applicable specifications">applicable specifications</span>, namely
+78675:     <cite>SVG 2</cite> and <cite>MathML</cite>. <ref>SVG</ref> <ref>MATHML</ref></p>
+78676:    </li>
+78677:   </ul>
+78678:   </div>
+146325:    <dt>A start tag whose tag name is "template"</dt>
+146326:    <dd>
+146327:     <p>Run these steps:</p>
+146328: 
+146329:     <ol>
+146330:      <li><p>Let <var>templateStartTag</var> be the start tag.</p></li>
+146331: 
+146332:      <li><p>Insert a <span data-x="concept-parser-marker">marker</span> at the end of the <span>list
+146333:      of active formatting elements</span>.</p></li>
+146334: 
+146335:      <li><p>Set the <span>frameset-ok flag</span> to "not ok".</p></li>
+146336: 
+146337:      <li><p>Switch the <span>insertion mode</span> to "<span data-x="insertion mode: in template">in
+146338:      template</span>".</p></li>
+146339: 
+146340:      <li><p>Push "<span data-x="insertion mode: in template">in template</span>" onto the
+146341:      <span>stack of template insertion modes</span> so that it is the new <span>current template
+146342:      insertion mode</span>.</p></li>
+146343: 
+146344:      <li><p>Let <var>adjustedInsertionLocation</var> be the <span>appropriate place for
+146345:      inserting a node</span>.</p></li>
+146346: 
+146347:      <li>
+146348:       <p>If <var>templateStartTag</var>'s <code
+146349:       data-x="attr-template-shadowrootmode">shadowrootmode</code> is not in the <span
+146350:       data-x="attr-shadowrootmode-none-state">None</span> state:</p>
+146351: 
+146352:       <ol>
+146353:        <li><p>If the parser's <span>allow declarative shadow roots</span> is false, or
+146354:        the <span>adjusted current node</span> is the topmost element in the <span>stack of open
+146355:        elements</span>, then <span>insert an HTML element</span> for the token and return.</p></li>
+146356: 
+146357:        <li><p>Let <var>declarativeShadowHostElement</var> be the <span>adjusted current
+146358:        node</span>.</p></li>
+146359: 
+146360:        <li><p>Let <var>template</var> be the result of <span>insert a foreign element</span> for
+146361:        <var>templateStartTag</var>, with <span>HTML namespace</span> and true.</p></li>
+146362: 
+146363:        <li><p>Let <var>mode</var> be <var>templateStartTag</var>'s <code
+146364:        data-x="attr-template-shadowrootmode">shadowrootmode</code> attribute's value.</p></li>
+146365: 
+146366:        <li><p>Let <var>delegatesFocus</var> be true if <var>templateStartTag</var> has a <code
+146367:        data-x="attr-template-shadowrootdelegatesfocus">shadowrootdelegatesfocus</code> attribute;
+146368:        otherwise false.</p></li>
+146369: 
+146370:        <li><p>Let <var>serializable</var> be true if <var>templateStartTag</var> has a <code
+146371:        data-x="attr-template-shadowrootserializable">shadowrootserializable</code> attribute;
+146372:        otherwise false.</p></li>
+146373: 
+146374:        <li><p>Let <var>slotAssignment</var> be "<code data-x="">named</code>".</p></li>
+146375: 
+146376:        <li><p>If <var>templateStartTag</var>'s <code
+146377:        data-x="attr-template-shadowrootslotassignment">shadowrootslotassignment</code> attribute is
+146378:        in the <span data-x="attr-shadowrootslotassignment-manual-state">Manual</span> state, then
+146379:        set <var>slotAssignment</var> to "<code data-x="">manual</code>".</p></li>
+146380: 
+146381:        <li><p>Let <var>clonable</var> be true if <var>templateStartTag</var> has a <code
+146382:        data-x="attr-template-shadowrootclonable">shadowrootclonable</code> attribute; otherwise
+146383:        false.</p></li>
+146384: 
+146385:        <li><p>If <var>declarativeShadowHostElement</var> is a <span>shadow host</span>, then
+146386:        <span>insert an element at the adjusted insertion location</span> with
+146387:        <var>template</var> and <var>adjustedInsertionLocation</var>.</p></li>
+146388: 
+146389:        <li>
+146390:         <p>Otherwise:</p>
+146391: 
+146392:         <ol>
+146393:          <li><p>Let <var>registry</var> be null if <var>templateStartTag</var> has a <code
+146394:          data-x="attr-template-shadowrootcustomelementregistry">shadowrootcustomelementregistry</code>
+146395:          attribute; otherwise <var>declarativeShadowHostElement</var>'s <span>node document</span>'s
+146396:          <span data-x="element-custom-element-registry">custom element registry</span>.</p></li>
+146397: 
+146398:          <li>
+146399:           <p><span data-x="concept-attach-a-shadow-root">Attach a shadow root</span> with
+146400:           <var>declarativeShadowHostElement</var>, <var>mode</var>, <var>delegatesFocus</var>,
+146401:           <var>serializable</var>, <var>slotAssignment</var>, <var>clonable</var>, and
+146402:           <var>registry</var>.</p>
+146403: 
+146404:           <p>If an exception is thrown, then catch it and:</p>
+146405: 
+146406:           <ol>
+146407:            <li><p><span>Insert an element at the adjusted insertion location</span> with
+146408:            <var>template</var> and <var>adjustedInsertionLocation</var>.</p></li>
+146409: 
+146410:            <li><p>The user agent may report an error to the developer console.</p></li>
+146411: 
+146412:            <li><p>Return.</p></li>
+146413:           </ol>
+146414:          </li>
+146415: 
+146416:          <li><p>Let <var>shadow</var> be <var>declarativeShadowHostElement</var>'s <span
+146417:          data-x="concept-element-shadow-root">shadow root</span>.</p></li>
+146418: 
+146419:          <li><p>Set <var>shadow</var>'s <span>available to element internals</span> to
+146420:          true.</p></li>
+146421: 
+146422:          <li><p>Set <var>shadow</var>'s <span
+146423:          data-x="concept-shadow-root-declarative">declarative</span> to true.</p></li>
+146424: 
+146425:          <li><p>Set <var>template</var>'s <span>template contents</span> to
+146426:          <var>shadow</var>.</p></li>
+146427: 
+146428:          <li><p>If <var>templateStartTag</var> has a <code
+146429:          data-x="attr-template-shadowrootcustomelementregistry">shadowrootcustomelementregistry</code>
+146430:          attribute, then set <var>shadow</var>'s <span>keep custom element registry null</span> to
+146431:          true.</p></li>
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\awk.exe","arguments":["(NR>=78624 && NR<=78678) || (NR>=146325 && NR<=146431) {print NR\": \"$0}","C:\\src\\fairpane\\out\\whatwg-html-source-efc54f7b70858d9fcf06d1a5871ae215f448c029"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:36:36.125Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":31}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","C:\\src\\fairpane\\out\\whatwg-dom-bs-3071e5f269448350fdea79bb284eedaf17bc431e"]
+\1550b0f067278aac80c53d603495d1050ab04856d0ce8b9ad10eb23f98b9a847 *C:\\src\\fairpane\\out\\whatwg-dom-bs-3071e5f269448350fdea79bb284eedaf17bc431e
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["C:\\src\\fairpane\\out\\whatwg-dom-bs-3071e5f269448350fdea79bb284eedaf17bc431e"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:36:36.210Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\awk.exe","(NR>=197&&NR<=228)||(NR>=2346&&NR<=2481)||(NR>=2695&&NR<=2832)||(NR>=2880&&NR<=3048)||(NR>=3175&&NR<=3249)||(NR>=3252&&NR<=3376)||(NR>=6167&&NR<=6319)||(NR>=6631&&NR<=6834)||(NR>=6966&&NR<=7020)||(NR>=7172&&NR<=7237)||(NR>=7854&&NR<=8039) {print NR\": \"$0}","C:\\src\\fairpane\\out\\whatwg-dom-bs-3071e5f269448350fdea79bb284eedaf17bc431e"]
+197: 
+198: <div algorithm>
+199: <p>A [=string=] is a <dfn>valid attribute local name</dfn> if its [=string/length=] is at least 1
+200: and it does not contain [=ASCII whitespace=], U+0000 NULL, U+002F (/), U+003D (=), or U+003E (>).
+201: </div>
+202: 
+203: <div algorithm>
+204: <p>A [=string=] |name| is a <dfn>valid element local name</dfn> if the following steps return true:
+205: 
+206: <ol>
+207:  <li><p>If |name|'s [=string/length=] is 0, then return false.
+208: 
+209:  <li>
+210:   <p>If |name|'s 0th [=code point=] is an [=ASCII alpha=]:
+211: 
+212:   <ol>
+213:    <li><p>If |name| contains [=ASCII whitespace=], U+0000 NULL, U+002F (/), or U+003E (>), then
+214:    return false.
+215: 
+216:    <li><p>Return true.
+217:   </ol>
+218: 
+219:  <li><p>If |name|'s 0th [=code point=] is not U+003A (:), U+005F (_), or in the range U+0080
+220:  to U+10FFFF, inclusive, then return false.
+221: 
+222:  <li><p>If |name|'s subsequent [=code points=], if any, are not [=ASCII alphas=], [=ASCII digits=],
+223:  U+002D (-), U+002E (.), U+003A (:), U+005F (_), or in the range U+0080 to U+10FFFF, inclusive, then
+224:  return false.
+225: 
+226:  <li><p>Return true.
+227: </ol>
+228: </div>
+2346:       {{Element}}: <code>body</code>
+2347:       <ul>
+2348:        <li class=t3>{{Text}}: <span>Why yes.⏎</span>
+2349:       </ul>
+2350: 
+2351:     </ul>
+2352: 
+2353:   </ul>
+2354: 
+2355: </ul>
+2356: 
+2357: <!--
+2358: https://software.hixie.ch/utilities/js/live-dom-viewer/?%3C!DOCTYPE%20html%3E%0D%0A%3Chtml%20class%3De%3E%0D%0A%20%3Chead%3E%3Ctitle%3EAliens%3F%3C%2Ftitle%3E%3C%2Fhead%3E%0D%0A%20%3Cbody%3EWhy%20yes.%3C%2Fbody%3E%0D%0A%3C%2Fhtml%3E
+2359: -->
+2360: 
+2361: <p>Note that, due to the magic that is <a lt="html parser">HTML parsing</a>, not all
+2362: <a>ASCII whitespace</a> were turned into {{Text}} <a for=/>nodes</a>, but the general concept is
+2363: clear. Markup goes in, a <a>tree</a> of <a for=/>nodes</a> comes out.
+2364: <!-- You /can/ explain that! harharhar -->
+2365: 
+2366: <p class=note>The most excellent
+2367: <a href="https://software.hixie.ch/utilities/js/live-dom-viewer/">Live DOM Viewer</a>
+2368: can be used to explore this matter in more detail.
+2369: 
+2370: 
+2371: <h3 id=node-trees>Node tree</h3>
+2372: 
+2373: <p><dfn export id=concept-node>Nodes</dfn> are objects that <a>implement</a> {{Node}}.
+2374: <a for=/>Nodes</a> <a>participate</a> in a <a>tree</a>, which is known as the
+2375: <dfn export id=concept-node-tree>node tree</dfn>.
+2376: 
+2377: <div class=note>
+2378:  <p>In practice you deal with more specific objects.
+2379: 
+2380:  <p>Objects that <a>implement</a> {{Node}} also implement an inherited interface: {{Document}},
+2381:  {{DocumentType}}, {{DocumentFragment}}, {{Element}}, {{CharacterData}}, or {{Attr}}.
+2382: 
+2383:  <p>Objects that implement {{DocumentFragment}} sometimes implement {{ShadowRoot}}.
+2384: 
+2385:  <p>Objects that implement {{Element}} also typically implement an inherited interface, such as
+2386:  {{HTMLAnchorElement}}.
+2387: 
+2388:  <p>Objects that implement {{CharacterData}} also implement an inherited interface: {{Text}},
+2389:  {{ProcessingInstruction}}, or {{Comment}}.
+2390: 
+2391:  <p>Objects that implement {{Text}} sometimes implement {{CDATASection}}.
+2392: 
+2393:  <p>Thus, every [=/node=]'s [=primary interface=] is one of: {{Document}}, {{DocumentType}},
+2394:  {{DocumentFragment}}, {{ShadowRoot}}, {{Element}} or an inherited interface of {{Element}},
+2395:  {{Attr}}, {{Text}}, {{CDATASection}}, {{ProcessingInstruction}}, or {{Comment}}.
+2396: </div>
+2397: 
+2398: <p>For brevity, this specification refers to an object that <a>implements</a> {{Node}} and an
+2399: inherited interface <code><var>NodeInterface</var></code>, as a
+2400: <code><var>NodeInterface</var></code> <a for=/>node</a>.
+2401: 
+2402: <p>A <a>node tree</a> is constrained as follows, expressed as a relationship between a
+2403: <a for=/>node</a> and its potential <a for=tree>children</a>:
+2404: 
+2405: <dl>
+2406:  <dt>{{Document}}
+2407:  <dd>
+2408:   <p>In <a>tree order</a>:
+2409:   <ol>
+2410:    <li><p>Zero or more {{ProcessingInstruction}} or {{Comment}} <a for=/>nodes</a>.
+2411:    <li><p>Optionally one {{DocumentType}} <a for=/>node</a>.
+2412:    <li><p>Zero or more {{ProcessingInstruction}} or {{Comment}} <a for=/>nodes</a>.
+2413:    <li><p>Optionally one {{Element}} <a for=/>node</a>.
+2414:    <li><p>Zero or more {{ProcessingInstruction}} or {{Comment}} <a for=/>nodes</a>.
+2415:   </ol>
+2416: 
+2417:  <dt>{{DocumentFragment}}
+2418:  <dt>{{Element}}
+2419:  <dd><p>Zero or more {{Element}} or {{CharacterData}} <a for=/>nodes</a>.
+2420: 
+2421:  <dt>{{DocumentType}}
+2422:  <dt>{{CharacterData}}
+2423:  <dt>{{Attr}}
+2424:  <dd><p>No <a for=tree>children</a>.
+2425: </dl>
+2426: 
+2427: <p class=note>{{Attr}} <a for=/>nodes</a> <a>participate</a> in a <a>tree</a> for historical
+2428: reasons; they never have a (non-null) <a for=tree>parent</a> or any <a for=tree>children</a> and are
+2429: therefore alone in a <a>tree</a>.
+2430: 
+2431: <p>To determine the <dfn export id=concept-node-length for=Node>length</dfn> of a <a for=/>node</a>
+2432: <var>node</var>, run these steps:
+2433: 
+2434: <ol>
+2435:  <li><p>If <var>node</var> is a {{DocumentType}} or {{Attr}} <a for=/>node</a>, then return 0.
+2436: 
+2437:  <li><p>If <var>node</var> is a {{CharacterData}} <a for=/>node</a>, then return <var>node</var>'s
+2438:  <a for=CharacterData>data</a>'s <a for=string>length</a>.
+2439: 
+2440:  <li><p>Return the number of <var>node</var>'s <a for=tree>children</a>.
+2441: </ol>
+2442: 
+2443: <p>A <a for=/>node</a> is considered <dfn export id=concept-node-empty for=Node>empty</dfn> if its
+2444: <a for=Node>length</a> is 0.
+2445: 
+2446: 
+2447: <h4 id=document-trees>Document tree</h4>
+2448: 
+2449: <p>A <dfn export id=concept-document-tree>document tree</dfn> is a <a>node tree</a> whose
+2450: <a for=tree>root</a> is a <a for=/>document</a>.
+2451: 
+2452: <p>The <dfn export>document element</dfn> of a <a for=/>document</a> is the <a for=/>element</a>
+2453: whose <a for=tree>parent</a> is that <a for=/>document</a>, if it exists; otherwise null.
+2454: 
+2455: <p class=note>Per the <a>node tree</a> constraints, there can be only one such
+2456: <a for=/>element</a>.
+2457: 
+2458: <p>A <a for=/>node</a> is <dfn export>in a document tree</dfn> if its <a for=tree>root</a> is a
+2459: <a for=/>document</a>.
+2460: 
+2461: <p>A <a for=/>node</a> is <dfn export>in a document</dfn> if it is <a>in a document tree</a>.
+2462: <span class=note>The term <a>in a document</a> is no longer supposed to be used. It indicates that
+2463: the standard using it has not been updated to account for <a>shadow trees</a>.</span>
+2464: 
+2465: 
+2466: <h4 id=shadow-trees>Shadow tree</h4>
+2467: 
+2468: <p>A <dfn export id=concept-shadow-tree>shadow tree</dfn> is a <a>node tree</a> whose
+2469: <a for=tree>root</a> is a <a for=/>shadow root</a>.
+2470: 
+2471: <p>A <a for=/>shadow root</a> is always attached to another <a>node tree</a> through its
+2472: <a for=DocumentFragment>host</a>. A <a>shadow tree</a> is therefore never alone. The
+2473: <a>node tree</a> of a <a for=/>shadow root</a>'s <a for=DocumentFragment>host</a> is sometimes
+2474: referred to as the <dfn export id=concept-light-tree>light tree</dfn>.
+2475: 
+2476: <p class=note>A <a>shadow tree</a>'s corresponding <a>light tree</a> can be a <a>shadow tree</a>
+2477: itself.
+2478: 
+2479: <p id=in-a-shadow-including-document>A <a for=/>node</a> is <dfn export>connected</dfn> if its
+2480: <a>shadow-including root</a> is a <a for=/>document</a>.
+2481: 
+2695: 
+2696: <div algorithm>
+2697: <p>To <dfn>assign a slot</dfn>, given a <a>slottable</a> <var>slottable</var>:
+2698: 
+2699: <ol>
+2700:  <li><p>Let <var>slot</var> be the result of <a>finding a slot</a> with <var>slottable</var>.
+2701: 
+2702:  <li><p>If <var>slot</var> is non-null, then run <a>assign slottables</a> for <var>slot</var>.
+2703: </ol>
+2704: </div>
+2705: 
+2706: <h5 id=signaling-slot-change>Signaling slot change</h5>
+2707: 
+2708: <p>Each <a>similar-origin window agent</a> has <dfn noexport id=signal-slot-list>signal slots</dfn>
+2709: (a <a for=/>set</a> of <a>slots</a>), which is initially empty. [[!HTML]]
+2710: 
+2711: <div algorithm>
+2712: <p>To <dfn>signal a slot change</dfn>, for a <a>slot</a> <var>slot</var>:
+2713: 
+2714: <ol>
+2715:  <li><p><a for=set>Append</a> <var>slot</var> to <var>slot</var>'s <a>relevant agent</a>'s
+2716:  <a>signal slots</a>.
+2717: 
+2718:  <li><p><a>Queue a mutation observer microtask</a>.
+2719: </ol>
+2720: </div>
+2721: 
+2722: 
+2723: <h4 id=mutation-algorithms>Mutation algorithms</h4>
+2724: 
+2725: <div algorithm>
+2726: <p>To <dfn id=concept-node-ensure-pre-insertion-validity>ensure pre-insert validity</dfn> given a
+2727: <a for=/>node</a> <var>node</var>, a <a for=/>node</a> <var>parent</var>, null or a
+2728: <a for=/>node</a> <var>child</var>, and a <a for=/>list</a> of <a for=/>nodes</a>
+2729: <var>childrenToExclude</var>:
+2730: 
+2731: <ol>
+2732:  <li><p>If <var>parent</var> is not a {{Document}}, {{DocumentFragment}}, or {{Element}}
+2733:  <a for=/>node</a>, then <a>throw</a> a "{{HierarchyRequestError!!exception}}" {{DOMException}}.
+2734: 
+2735:  <li><p>If <var>node</var> is a <a>host-including inclusive ancestor</a> of <var>parent</var>, then
+2736:  <a>throw</a> a "{{HierarchyRequestError!!exception}}" {{DOMException}}.
+2737: 
+2738:  <li><p>If <var>child</var> is non-null and its <a for=tree>parent</a> is not <var>parent</var>,
+2739:  then <a>throw</a> a "{{NotFoundError!!exception}}" {{DOMException}}.
+2740: 
+2741:  <li><p>If <var>node</var> is not a {{DocumentFragment}}, {{DocumentType}}, {{Element}}, or
+2742:  {{CharacterData}} <a for=/>node</a>, then <a>throw</a> a
+2743:  "{{HierarchyRequestError!!exception}}" {{DOMException}}.
+2744: 
+2745:  <li>
+2746:   <p>If <var>parent</var> is not a <a for=/>document</a>:
+2747: 
+2748:   <ol>
+2749:    <li><p>If <var>node</var> is a <a>doctype</a>, then <a>throw</a> a
+2750:    "{{HierarchyRequestError!!exception}}" {{DOMException}}.
+2751: 
+2752:    <li><p>Return.
+2753:   </ol>
+2754: 
+2755:  <li><p>If <var>node</var> is a {{Text}} <a for=/>node</a>, then <a>throw</a> a
+2756:  "{{HierarchyRequestError!!exception}}" {{DOMException}}.
+2757: 
+2758:  <li><p>If <var>node</var> is a {{CharacterData}} <a for=/>node</a>, then return.
+2759: 
+2760:  <li>
+2761:   <p>If <var>node</var> is a {{DocumentFragment}} <a for=/>node</a>:
+2762: 
+2763:   <ol>
+2764:    <li><p>If <var>node</var> has more than one <a for=/>element</a> <a for=tree>child</a> or has a
+2765:    {{Text}} <a for=/>node</a> <a for=tree>child</a>, then <a>throw</a> a
+2766:    "{{HierarchyRequestError!!exception}}" {{DOMException}}.
+2767: 
+2768:    <li><p>If <var>node</var> has no <a for=/>element</a> <a for=tree>child</a>, then return.
+2769:   </ol>
+2770: 
+2771:  <li>
+2772:   <p>If <var>node</var> is a {{DocumentFragment}} or {{Element}} <a for=/>node</a>:
+2773: 
+2774:   <ol>
+2775:    <li>
+2776:     <p>If any of the following are true:
+2777: 
+2778:     <ul>
+2779:      <li><p><var>parent</var> has an <a for=/>element</a> <a for=tree>child</a> that
+2780:      <var>childrenToExclude</var> does not <a for=list>contain</a>;
+2781: 
+2782:      <li><p><var>child</var> is non-null and a <a>doctype</a> is <a>following</a> <var>child</var>;
+2783:      or
+2784: 
+2785:      <li><p><var>child</var> is a <a>doctype</a> that <var>childrenToExclude</var> does not
+2786:      <a for=list>contain</a>,
+2787:     </ul>
+2788: 
+2789:     <p>then <a>throw</a> a "{{HierarchyRequestError!!exception}}" {{DOMException}}.
+2790: 
+2791:    <li><p>Return.
+2792:   </ol>
+2793: 
+2794:  <li><p><a for=/>Assert</a>: <var>node</var> is a <a>doctype</a>.
+2795: 
+2796:  <li>
+2797:   <p>If any of the following are true:
+2798: 
+2799:   <ul>
+2800:    <li><p><var>parent</var> has a <a>doctype</a> <a for=tree>child</a> that
+2801:    <var>childrenToExclude</var> does not <a for=list>contain</a>;
+2802: 
+2803:    <li><p><var>child</var> is non-null and an <a for=/>element</a> is <a>preceding</a>
+2804:    <var>child</var>; or
+2805: 
+2806:    <li><p><var>child</var> is null and <var>parent</var> has an <a for=/>element</a>
+2807:    <a for=tree>child</a> that <var>childrenToExclude</var> does not <a for=list>contain</a>,
+2808:   </ul>
+2809: 
+2810:   <p>then <a>throw</a> a "{{HierarchyRequestError!!exception}}" {{DOMException}}.
+2811: </ol>
+2812: </div>
+2813: 
+2814: <div algorithm>
+2815: <p>To <dfn export id=concept-node-pre-insert>pre-insert</dfn> a <a for=/>node</a> <var>node</var>
+2816: into a <a for=/>node</a> <var>parent</var> before null or <a for=/>node</a> <var>child</var>:
+2817: 
+2818: <ol>
+2819:  <li><p><a>Ensure pre-insert validity</a> given <var>node</var>, <var>parent</var>,
+2820:  <var>child</var>, and « ».
+2821: 
+2822:  <li><p>Let <var>referenceChild</var> be <var>child</var>.
+2823: 
+2824:  <li><p>If <var>referenceChild</var> is <var>node</var>, then set <var>referenceChild</var> to
+2825:  <var>node</var>'s <a for=tree>next sibling</a>.
+2826: 
+2827:  <li><p><a for=/>Insert</a> <var>node</var> into <var>parent</var> before <var>referenceChild</var>.
+2828: 
+2829:  <li><p>Return <var>node</var>.
+2830:  <!-- Technically this is post-insert. -->
+2831: </ol>
+2832: </div>
+2880:   </li>
+2881:  </ol>
+2882: </div>
+2883: 
+2884: <!-- See https://github.com/whatwg/dom/issues/34#issuecomment-125571750 for why we might need to
+2885:      adjust this further based on the requirements of the script element. There might be other ways
+2886:      to define that though as Olli suggests, so leaving that out for now. -->
+2887: 
+2888: <div algorithm>
+2889: <p><a lt="Other applicable specifications">Specifications</a> may also define
+2890: <dfn export id=concept-node-post-connection-ext>post-connection steps</dfn> for all or some
+2891: <a for=/>nodes</a>. The algorithm is passed <var ignore>connectedNode</var>, as indicated in the
+2892: <a for=/>insert</a> algorithm below.
+2893: 
+2894: <p class=note>The purpose of the <a>post-connection steps</a> is to provide an opportunity for
+2895: <a for=/>nodes</a> to perform any connection-related operations that modify the <a>node tree</a>
+2896: that <var ignore>connectedNode</var> <a>participates</a> in, create <a for=/>browsing contexts</a>,
+2897: or otherwise execute JavaScript. These steps allow a batch of <a>nodes</a> to be
+2898: <a for=/>inserted</a> <em>atomically</em> with respect to script, with all major side effects
+2899: occurring <em>after</em> the batch insertions into the <a>node tree</a> is complete. This ensures
+2900: that all pending <a>node tree</a> insertions completely finish before more insertions can occur.
+2901: </div>
+2902: 
+2903: <div algorithm>
+2904: <p><a lt="other applicable specifications">Specifications</a> may define
+2905: <dfn export id=concept-node-children-changed-ext>children changed steps</dfn> for all or some
+2906: <a for=/>nodes</a>. The algorithm is passed no argument and is called from <a for=/>insert</a>,
+2907: <a for=/>remove</a>, and <a for=/>replace data</a>.
+2908: </div>
+2909: 
+2910: <div algorithm=insert>
+2911: <p>To <dfn export id=concept-node-insert>insert</dfn> a <a for=/>node</a> <var>node</var> into a
+2912: <a for=/>node</a> <var>parent</var> before null or a <a for=/>node</a> <var>child</var>, with an
+2913: optional boolean <dfn for="insert"><var>suppressObservers</var></dfn> (default false):
+2914: 
+2915: <ol>
+2916:  <li><p>Let <var>nodes</var> be <var>node</var>'s <a for=tree>children</a>, if <var>node</var> is a
+2917:  {{DocumentFragment}} <a for=/>node</a>; otherwise « <var>node</var> ».
+2918: 
+2919:  <li><p>Let <var>count</var> be <var>nodes</var>'s <a for=set>size</a>.
+2920: 
+2921:  <li><p>If <var>count</var> is 0, then return.
+2922: 
+2923:  <li>
+2924:   <p>If <var>node</var> is a {{DocumentFragment}} <a for=/>node</a>:
+2925: 
+2926:   <ol>
+2927:    <li><p><a for=/>Remove</a> its <a for=tree>children</a> with
+2928:    <a for=remove><i>suppressObservers</i></a> set to true.
+2929: 
+2930:    <li>
+2931:     <p><a>Queue a tree mutation record</a> for <var>node</var> with « », <var>nodes</var>, null, and
+2932:     null.
+2933: 
+2934:     <p class=note>This step intentionally does not pay attention to <var>suppressObservers</var>.
+2935:   </ol>
+2936: 
+2937:  <li>
+2938:   <p>If <var>child</var> is non-null:
+2939: 
+2940:   <ol>
+2941:    <li><p>For each <a>live range</a> whose <a for=range>start node</a> is <var>parent</var> and
+2942:    <a for=range>start offset</a> is greater than <var>child</var>'s <a for=tree>index</a>: increase
+2943:    its <a for=range>start offset</a> by <var>count</var>.
+2944: 
+2945:    <li><p>For each <a>live range</a> whose <a for=range>end node</a> is <var>parent</var> and
+2946:    <a for=range>end offset</a> is greater than <var>child</var>'s <a for=tree>index</a>: increase
+2947:    its <a for=range>end offset</a> by <var>count</var>.
+2948:   </ol>
+2949: 
+2950:  <li><p>Let <var>previousSibling</var> be <var>child</var>'s <a>previous sibling</a> or
+2951:  <var>parent</var>'s <a>last child</a> if <var>child</var> is null.
+2952: 
+2953:  <li>
+2954:   <p>For each <var>node</var> in <var>nodes</var>, in <a>tree order</a>:
+2955: 
+2956:   <ol>
+2957:    <li><p><a>Adopt</a> <var>node</var> into <var>parent</var>'s <a for=Node>node document</a>.
+2958: 
+2959:    <li><p>If <var>child</var> is null, then <a for=set>append</a> <var>node</var> to
+2960:    <var>parent</var>'s <a for=tree>children</a>.
+2961: 
+2962:    <li><p>Otherwise, <a for=set>insert</a> <var>node</var> into <var>parent</var>'s
+2963:    <a for=tree>children</a> before <var>child</var>'s <a for=tree>index</a>.
+2964: 
+2965:    <li><p>If <var>parent</var> is a <a for=Element>shadow host</a> whose <a for=/>shadow root</a>'s
+2966:    <a for=ShadowRoot>slot assignment</a> is "<code>named</code>" and <var>node</var> is a
+2967:    <a>slottable</a>, then <a>assign a slot</a> for <var>node</var>.
+2968: 
+2969:    <li><p>If <var>parent</var>'s <a for=tree>root</a> is a <a for=/>shadow root</a>, and
+2970:    <var>parent</var> is a <a>slot</a> whose <a for=slot>assigned nodes</a> is the empty list,
+2971:    then run <a>signal a slot change</a> for <var>parent</var>.
+2972: 
+2973:    <li><p>Run <a>assign slottables for a tree</a> with <var>node</var>'s <a for=tree>root</a>.
+2974: 
+2975:    <li>
+2976:     <p>For each <a>shadow-including inclusive descendant</a> <var>inclusiveDescendant</var> of
+2977:     <var>node</var>, in <a>shadow-including tree order</a>:
+2978: 
+2979:     <ol>
+2980:      <li><p>Run the <a>insertion steps</a> with <var>inclusiveDescendant</var>.
+2981: 
+2982:      <li><p>If <var>inclusiveDescendant</var> is not <a>connected</a>, then
+2983:      <a for=iteration>continue</a>.
+2984: 
+2985:      <li>
+2986:       <p>If <var>inclusiveDescendant</var> is an <a for=/>element</a> and
+2987:       <var>inclusiveDescendant</var>'s <a for=Element>custom element registry</a> is non-null:
+2988: 
+2989:       <ol>
+2990:        <li><p>If <var>inclusiveDescendant</var>'s <a for=Element>custom element registry</a>'s
+2991:        <a for=CustomElementRegistry>is scoped</a> is true, then <a for=set>append</a>
+2992:        <var>inclusiveDescendant</var>'s <a for=Node>node document</a> to
+2993:        <var>inclusiveDescendant</var>'s <a for=Element>custom element registry</a>'s
+2994:        <a for=CustomElementRegistry>scoped document set</a>.
+2995: 
+2996:        <li><p>If <var>inclusiveDescendant</var> is <a for=Element>custom</a>, then
+2997:        <a>enqueue a custom element callback reaction</a> with <var>inclusiveDescendant</var>,
+2998:        callback name "<code>connectedCallback</code>", and « ».
+2999: 
+3000:        <li>
+3001:         <p>Otherwise, <a lt="try to upgrade an element">try to upgrade</a>
+3002:         <var>inclusiveDescendant</var>.
+3003: 
+3004:         <p class=note>If this successfully upgrades <var>inclusiveDescendant</var>, its
+3005:         <code>connectedCallback</code> will be enqueued automatically during the
+3006:         <a>upgrade an element</a> algorithm.
+3007:       </ol>
+3008: 
+3009:      <li><p>Otherwise, if <var>inclusiveDescendant</var> is a <a for=/>shadow root</a>,
+3010:      <var>inclusiveDescendant</var>'s <a for=ShadowRoot>custom element registry</a> is non-null, and
+3011:      <var>inclusiveDescendant</var>'s <a for=ShadowRoot>custom element registry</a>'s
+3012:      <a for=CustomElementRegistry>is scoped</a> is true, then <a for=set>append</a>
+3013:      <var>inclusiveDescendant</var>'s <a for=Node>node document</a> to
+3014:      <var>inclusiveDescendant</var>'s <a for=ShadowRoot>custom element registry</a>'s
+3015:      <a for=CustomElementRegistry>scoped document set</a>.
+3016:     </ol>
+3017:   </ol>
+3018: 
+3019:  <li><p>If <var>suppressObservers</var> is false, then <a>queue a tree mutation record</a> for
+3020:  <var>parent</var> with <var>nodes</var>, « », <var>previousSibling</var>, and <var>child</var>.
+3021: 
+3022:  <li><p>Run the <a>children changed steps</a> for <var>parent</var>.
+3023: 
+3024:  <li>
+3025:   <p>Let <var>staticNodeList</var> be a <a for=/>list</a> of <a for=/>nodes</a>, initially « ».
+3026: 
+3027:   <p class="note">We collect all <a for=/>nodes</a> <em>before</em> calling the
+3028:   <a>post-connection steps</a> on any one of them, instead of calling the
+3029:   <a>post-connection steps</a> <em>while</em> we're traversing the <a>node tree</a>. This is because
+3030:   the <a>post-connection steps</a> can modify the tree's structure, making live traversal unsafe,
+3031:   possibly leading to the <a>post-connection steps</a> being called multiple times on the same
+3032:   <a for=/>node</a>.
+3033:  </li>
+3034: 
+3035:  <li>
+3036:   <p>For each <var>node</var> of <var>nodes</var>, in <a>tree order</a>:
+3037: 
+3038:   <ol>
+3039:    <li><p>For each <a>shadow-including inclusive descendant</a> <var>inclusiveDescendant</var> of
+3040:    <var>node</var>, in <a>shadow-including tree order</a>: <a for=list>append</a>
+3041:    <var>inclusiveDescendant</var> to <var>staticNodeList</var>.
+3042:   </ol>
+3043:  </li>
+3044: 
+3045:  <li><p><a for=list>For each</a> <var>node</var> of <var>staticNodeList</var>: if <var>node</var> is
+3046:  <a>connected</a>, then run the <a>post-connection steps</a> with <var>node</var>.
+3047: </ol>
+3048: </div>
+3175: 
+3176:   <ol>
+3177:    <li><p>Let <var>isSubtreeRoot</var> be true if <var>inclusiveDescendant</var> is
+3178:    <var>node</var>; otherwise false.
+3179: 
+3180:    <li>
+3181:     <p>Run the <a>moving steps</a> with <var>inclusiveDescendant</var>, <var>isSubtreeRoot</var>,
+3182:     and <var>oldParent</var>.
+3183: 
+3184:     <p class="note">Because the <a>move</a> algorithm is a separate primitive from
+3185:     <a for=/>insert</a> and <a for=/>remove</a>, it does not invoke the <a>insertion steps</a>
+3186:     or <a>removing steps</a> for <var>inclusiveDescendant</var>.
+3187:    </li>
+3188: 
+3189:    <li><p>If <var>inclusiveDescendant</var> is <a for=Element>custom</a> and <var>newParent</var> is
+3190:    <a>connected</a>, then <a>enqueue a custom element callback reaction</a> with
+3191:    <var>inclusiveDescendant</var>, callback name "<code>connectedMoveCallback</code>", and « ».
+3192:   </ol>
+3193:  </li>
+3194: 
+3195:  <li><p><a>Queue a tree mutation record</a> for <var>oldParent</var> with « », « <var>node</var> »,
+3196:  <var>oldPreviousSibling</var>, and <var>oldNextSibling</var>.
+3197: 
+3198:  <li><p><a>Queue a tree mutation record</a> for <var>newParent</var> with « <var>node</var> », « »,
+3199:  <var>newPreviousSibling</var>, and <var>child</var>.
+3200: </ol>
+3201: </div>
+3202: 
+3203: <hr>
+3204: 
+3205: <div algorithm>
+3206: <p>To <dfn export id=concept-node-replace>replace</dfn> a <a for=/>node</a> <var>child</var> with
+3207: a <a for=/>node</a> <var>node</var> within a <a for=/>node</a> <var>parent</var>:
+3208: 
+3209: <ol>
+3210:  <li><p><a>Ensure pre-insert validity</a> given <var>node</var>, <var>parent</var>,
+3211:  <var>child</var>, and « <var>child</var> ».
+3212: 
+3213:  <li><p>Let <var>referenceChild</var> be <var>child</var>'s <a for=tree>next sibling</a>.
+3214: 
+3215:  <li><p>If <var>referenceChild</var> is <var>node</var>, then set <var>referenceChild</var> to
+3216:  <var>node</var>'s <a for=tree>next sibling</a>.
+3217: 
+3218:  <li><p>Let <var>previousSibling</var> be <var>child</var>'s <a>previous sibling</a>.
+3219: 
+3220:  <li><p>Let <var>removedNodes</var> be the empty set.
+3221: 
+3222:  <li><p><a>Adopt</a> <var>node</var> into <var>parent</var>'s <a for=Node>node document</a>.
+3223: 
+3224:  <li>
+3225:   <p>If <var>child</var>'s <a for=tree>parent</a> is non-null:
+3226: 
+3227:   <ol>
+3228:    <li><p>Set <var>removedNodes</var> to « <var>child</var> ».
+3229: 
+3230:    <li><p><a for=/>Remove</a> <var>child</var> with <a for=remove><i>suppressObservers</i></a> set
+3231:    to true.
+3232:   </ol>
+3233: 
+3234:   <p class=note>The above can only be false if <var>child</var> is <var>node</var>.
+3235: 
+3236:  <li><p>Let <var>nodes</var> be <var>node</var>'s <a for=tree>children</a> if <var>node</var> is a
+3237:  {{DocumentFragment}} <a for=/>node</a>; otherwise « <var>node</var> ».
+3238:  <!-- This needs to come before insert as that removes the children of a
+3239:       DocumentFragment node. -->
+3240: 
+3241:  <li><p><a for=/>Insert</a> <var>node</var> into <var>parent</var> before <var>referenceChild</var>
+3242:  with <a for=insert><i>suppressObservers</i></a> set to true.
+3243: 
+3244:  <li><p><a>Queue a tree mutation record</a> for <var>parent</var> with <var>nodes</var>,
+3245:  <var>removedNodes</var>, <var>previousSibling</var>, and <var>referenceChild</var>.
+3246: 
+3247:  <li><p>Return <var>child</var>.
+3248: </ol>
+3249: </div>
+3252: <p>To <dfn export for=Node id=concept-node-replace-all>replace all</dfn> with a <a for=/>node</a> or
+3253: null <var>node</var> within a <a for=/>node</a> <var>parent</var>:
+3254: 
+3255: <ol>
+3256:  <li><p>Let <var>removedNodes</var> be <var>parent</var>'s <a for=tree>children</a>.
+3257: 
+3258:  <li><p>Let <var>addedNodes</var> be the empty set.
+3259: 
+3260:  <li><p>If <var>node</var> is a {{DocumentFragment}} <a for=/>node</a>, then set
+3261:  <var>addedNodes</var> to <var>node</var>'s <a for=tree>children</a>.
+3262: 
+3263:  <li><p>Otherwise, if <var>node</var> is non-null, set <var>addedNodes</var> to « <var>node</var> ».
+3264: 
+3265:  <li><p><a for=/>Remove</a> all <var>parent</var>'s <a for=tree>children</a>, in <a>tree order</a>,
+3266:  with <a for=remove><i>suppressObservers</i></a> set to true.
+3267: 
+3268:  <li><p>If <var>node</var> is non-null, then <a for=/>insert</a> <var>node</var> into
+3269:  <var>parent</var> before null with <a for=insert><i>suppressObservers</i></a> set to true.
+3270: 
+3271:  <li><p>If either <var>addedNodes</var> or <var>removedNodes</var> <a for=set>is not empty</a>,
+3272:  then <a>queue a tree mutation record</a> for <var>parent</var> with <var>addedNodes</var>,
+3273:  <var>removedNodes</var>, null, and null.
+3274: </ol>
+3275: 
+3276: <p class=note>This algorithm does not make any checks with regards to the
+3277: <a>node tree</a> constraints. Specification authors need to use it wisely.
+3278: </div>
+3279: 
+3280: <hr>
+3281: 
+3282: <div algorithm>
+3283: <p>To <dfn export id=concept-node-pre-remove>pre-remove</dfn> a <a for=/>node</a> <var>child</var>
+3284: from a <a for=/>node</a> <var>parent</var>:
+3285: 
+3286: <ol>
+3287:  <li><p>If <var>child</var>'s <a for=tree>parent</a> is not <var>parent</var>, then <a>throw</a> a
+3288:  "{{NotFoundError!!exception}}" {{DOMException}}.
+3289: 
+3290:  <li><p><a for=/>Remove</a> <var>child</var>.
+3291: 
+3292:  <li><p>Return <var>child</var>.
+3293:  <!-- Technically this is post-remove. -->
+3294: </ol>
+3295: </div>
+3296: 
+3297: <div algorithm>
+3298: <p><a lt="Other applicable specifications">Specifications</a> may define
+3299: <dfn export id=concept-node-remove-ext>removing steps</dfn> for all or some <a for=/>nodes</a>. The
+3300: algorithm is passed a <a for=/>node</a> <var ignore>removedNode</var>, a boolean
+3301: <var ignore>isSubtreeRoot</var>, and a <a for=/>node</a> <var ignore>oldAncestor</var> as indicated
+3302: in the <a for=/>remove</a> algorithm below.
+3303: </div>
+3304: 
+3305: <div algorithm=remove>
+3306: <p>To <dfn export id=concept-node-remove>remove</dfn> a <a for=/>node</a> <var>node</var>, with an
+3307: optional boolean <dfn for=remove><var>suppressObservers</var></dfn> (default false):
+3308: 
+3309: <ol>
+3310:  <li><p>Let <var>parent</var> be <var>node</var>'s <a for=tree>parent</a>.
+3311: 
+3312:  <li><p>Assert: <var>parent</var> is non-null.
+3313: 
+3314:  <li><p>Run the <a>live range pre-remove steps</a>, given <var>node</var>.
+3315: 
+3316:  <li><p>For each {{NodeIterator}} object <var>iterator</var> whose
+3317:  <a for=traversal>root</a>'s <a for=Node>node document</a> is <var>node</var>'s
+3318:  <a for=Node>node document</a>: run the <a><code>NodeIterator</code> pre-remove steps</a> given
+3319:  <var>node</var> and <var>iterator</var>.
+3320: 
+3321:  <li><p>Let <var>oldPreviousSibling</var> be <var>node</var>'s <a>previous sibling</a>.
+3322: 
+3323:  <li><p>Let <var>oldNextSibling</var> be <var>node</var>'s <a for=tree>next sibling</a>.
+3324: 
+3325:  <li><p><a for=set>Remove</a> <var>node</var> from its <var>parent</var>'s <a for=tree>children</a>.
+3326: 
+3327:  <li><p>If <var>node</var> is <a for=slottable>assigned</a>, then run <a>assign slottables</a> for
+3328:  <var>node</var>'s <a>assigned slot</a>.
+3329: 
+3330:  <li><p>If <var>parent</var>'s <a for=tree>root</a> is a <a for=/>shadow root</a>, and
+3331:  <var>parent</var> is a <a>slot</a> whose <a for=slot>assigned nodes</a> is the empty list,
+3332:  then run <a>signal a slot change</a> for <var>parent</var>.
+3333: 
+3334:  <li>
+3335:   <p>If <var>node</var> has an <a>inclusive descendant</a> that is a <a>slot</a>:
+3336: 
+3337:   <ol>
+3338:    <li><p>Run <a>assign slottables for a tree</a> with <var>parent</var>'s <a for=tree>root</a>.
+3339: 
+3340:    <li><p>Run <a>assign slottables for a tree</a> with <var>node</var>.
+3341:   </ol>
+3342: 
+3343:  <li><p>Run the <a>removing steps</a> with <var>node</var>, true, and <var>parent</var>.
+3344: 
+3345:  <li><p>Let <var>isParentConnected</var> be <var>parent</var>'s <a>connected</a>.
+3346: 
+3347:  <li>
+3348:   <p>If <var>node</var> is <a for=Element>custom</a> and <var>isParentConnected</var> is true, then
+3349:   <a>enqueue a custom element callback reaction</a> with <var>node</var>, callback name
+3350:   "<code>disconnectedCallback</code>", and « ».
+3351: 
+3352:   <p class=note>It is intentional for now that <a for=Element>custom</a> <a for=/>elements</a> do
+3353:   not get <var>parent</var> passed. This might change in the future if there is a need.
+3354: 
+3355:  <li>
+3356:   <p>For each <a>shadow-including descendant</a> <var>descendant</var> of <var>node</var>, in
+3357:   <a>shadow-including tree order</a>:
+3358: 
+3359:   <ol>
+3360:    <li><p>Run the <a>removing steps</a> with <var>descendant</var>, false, and <var>parent</var>.
+3361: 
+3362:    <li><p>If <var>descendant</var> is <a for=Element>custom</a> and <var>isParentConnected</var>
+3363:    is true, then <a>enqueue a custom element callback reaction</a> with <var>descendant</var>,
+3364:    callback name "<code>disconnectedCallback</code>", and « ».
+3365:   </ol>
+3366:  </li>
+3367: 
+3368:  <li><p><a>Add transient registered observers</a> given <var>node</var> and <var>parent</var>.
+3369: 
+3370:  <li><p>If <var>suppressObservers</var> is false, then <a>queue a tree mutation record</a> for
+3371:  <var>parent</var> with « », « <var>node</var> », <var>oldPreviousSibling</var>, and
+3372:  <var>oldNextSibling</var>.
+3373: 
+3374:  <li><p>Run the <a>children changed steps</a> for <var>parent</var>.
+3375: </ol>
+3376: </div>
+6167: <div algorithm>
+6168: <p>The <dfn method for=Document><code>importNode(<var>node</var>, <var>options</var>)</code></dfn>
+6169: method steps are:
+6170: 
+6171: <ol>
+6172:  <li><p>If <var>node</var> is a <a for=/>document</a> or <a for=/>shadow root</a>, then <a>throw</a>
+6173:  a "{{NotSupportedError!!exception}}" {{DOMException}}.
+6174: 
+6175:  <li><p>Let <var>subtree</var> be false.
+6176: 
+6177:  <li><p>Let <var>registry</var> be null.
+6178: 
+6179:  <li><p>If <var>options</var> is a boolean, then set <var>subtree</var> to <var>options</var>.
+6180: 
+6181:  <li>
+6182:   <p>Otherwise:
+6183: 
+6184:   <ol>
+6185:    <li><p>Set <var>subtree</var> to the negation of
+6186:    <var>options</var>["{{ImportNodeOptions/selfOnly}}"].
+6187: 
+6188:    <li><p>If <var>options</var>["{{ImportNodeOptions/customElementRegistry}}"]
+6189:    <a for=map>exists</a>, then set <var>registry</var> to it.
+6190: 
+6191:    <li><p>If <var>registry</var>'s <a for=CustomElementRegistry>is scoped</a> is false and
+6192:    <var>registry</var> is not <a>this</a>'s <a for=Document>custom element registry</a>, then
+6193:    <a>throw</a> a "{{NotSupportedError!!exception}}" {{DOMException}}.
+6194:   </ol>
+6195: 
+6196:  <li><p>If <var>registry</var> is null, then set <var>registry</var> to the result of
+6197:  <a for=/>looking up a custom element registry</a> given <a>this</a>.
+6198: 
+6199:  <li><p>Return the result of <a>cloning a node</a> given <var>node</var> with
+6200:  <a for="clone a node"><i>document</i></a> set to <a>this</a>,
+6201:  <a for="clone a node"><i>subtree</i></a> set to <var>subtree</var>, and
+6202:  <a for="clone a node"><i>fallbackRegistry</i></a> set to <var>registry</var>.
+6203: </ol>
+6204: </div>
+6205: 
+6206: <div algorithm>
+6207: <p><a lt="Other applicable specifications">Specifications</a> may define
+6208: <dfn export id=concept-node-adopt-ext>adopting steps</dfn> for all or some <a for=/>nodes</a>. The
+6209: algorithm is passed <var ignore>node</var> and <var ignore>oldDocument</var>, as indicated in the
+6210: <a>adopt</a> algorithm.
+6211: </div>
+6212: 
+6213: <div algorithm>
+6214: <p>To <dfn export id=concept-node-adopt>adopt</dfn> a <a for=/>node</a> <var>node</var> into a
+6215: <a for=/>document</a> <var>document</var>:
+6216: 
+6217: <ol>
+6218:  <li><p>Let <var>oldDocument</var> be <var>node</var>'s <a for=Node>node document</a>.
+6219: 
+6220:  <li><p>If <var>node</var>'s <a for=tree>parent</a> is non-null, then <a for=/>remove</a>
+6221:  <var>node</var>.
+6222: 
+6223:  <li>
+6224:   <p>If <var>document</var> is not <var>oldDocument</var>, then for each
+6225:   <var>inclusiveDescendant</var> of <var>node</var>'s <a>shadow-including inclusive descendants</a>,
+6226:   in <a>shadow-including tree order</a>:
+6227: 
+6228:   <ol>
+6229:    <li><p>Set <var>inclusiveDescendant</var>'s <a for=Node>node document</a> to <var>document</var>.
+6230: 
+6231:    <li>
+6232:     <p>If <var>inclusiveDescendant</var> is a <a for=/>shadow root</a> and if any of the following
+6233:     are true:
+6234: 
+6235:     <ul>
+6236:      <li><p><var>inclusiveDescendant</var>'s <a for=ShadowRoot>custom element registry</a> is null
+6237:      and <var>inclusiveDescendant</var>'s <a for=ShadowRoot>keep custom element registry null</a> is
+6238:      false; or
+6239: 
+6240:      <li><p><var>inclusiveDescendant</var>'s <a for=ShadowRoot>custom element registry</a>
+6241:      <a>is a global custom element registry</a>,
+6242:     </ul>
+6243: 
+6244:     <p>then set <var>inclusiveDescendant</var>'s <a for=ShadowRoot>custom element registry</a> to
+6245:     <var>document</var>'s <a for=Document>custom element registry</a>'s
+6246:     <a>effective global custom element registry</a>.
+6247: 
+6248:    <li>
+6249:     <p>Otherwise, if <var>inclusiveDescendant</var> is an <a for=/>element</a>:
+6250: 
+6251:     <ol>
+6252:      <li><p>Set the <a for=Node>node document</a> of each <a>attribute</a> in
+6253:      <var>inclusiveDescendant</var>'s <a for=Element>attribute list</a> to <var>document</var>.
+6254: 
+6255:      <li>
+6256:       <p>If <var>inclusiveDescendant</var>'s <a for=Element>custom element registry</a> is null or
+6257:       <var>inclusiveDescendant</var>'s <a for=Element>custom element registry</a>'s
+6258:       <a for=CustomElementRegistry>is scoped</a> is false:
+6259: 
+6260:       <ol>
+6261:        <li><p>Let <var>registry</var> be null.
+6262: 
+6263:        <li><p>If <var>inclusiveDescendant</var>'s <a for=Element>custom element registry</a> is
+6264:        non-null, <var>inclusiveDescendant</var>'s <a for=tree>parent</a> is null, or
+6265:        <var>inclusiveDescendant</var>'s <a for=tree>parent</a> is an
+6266:        <a>exclusive <code>DocumentFragment</code> node</a>, then set <var>registry</var> to
+6267:        <var>document</var>'s <a for=Document>custom element registry</a>.
+6268: 
+6269:        <li><p>Otherwise, set <var>registry</var> to the result of
+6270:        <a for=/>looking up a custom element registry</a> given <var>inclusiveDescendant</var>'s
+6271:        <a for=tree>parent</a>.
+6272: 
+6273:        <li><p>Set <var>inclusiveDescendant</var>'s <a for=Element>custom element registry</a> to
+6274:        <var>registry</var>'s <a>effective global custom element registry</a>.
+6275:       </ol>
+6276: 
+6277:      <li><p>If <var>inclusiveDescendant</var> is <a for=Element>custom</a>, then
+6278:      <a>enqueue a custom element callback reaction</a> with <var>inclusiveDescendant</var>, callback
+6279:      name "<code>adoptedCallback</code>", and « <var>oldDocument</var>, <var>document</var> ».
+6280:      <!-- attributeChangedCallback is also old, then new -->
+6281:     </ol>
+6282: 
+6283:    <li><p>Run the <a>adopting steps</a> with <var>inclusiveDescendant</var> and
+6284:    <var>oldDocument</var>.
+6285:   </ol>
+6286: </ol>
+6287: </div>
+6288: 
+6289: <div algorithm>
+6290: <p>The <dfn method for=Document><code>adoptNode(<var>node</var>)</code></dfn> method steps are:
+6291: 
+6292: <ol>
+6293:  <li><p>If <var>node</var> is a <a for=/>document</a>, then <a>throw</a> a
+6294:  "{{NotSupportedError!!exception}}" {{DOMException}}.
+6295: 
+6296:  <li><p>If <var>node</var> is a <a for=/>shadow root</a>, then <a>throw</a> a
+6297:  "{{HierarchyRequestError!!exception}}" {{DOMException}}.
+6298: 
+6299:  <li><p><a>Adopt</a> <var>node</var> into <a>this</a>.
+6300: 
+6301:  <li><p>Return <var>node</var>.
+6302: </ol>
+6303: </div>
+6304: 
+6305: <hr>
+6306: 
+6307: <p>Null or a {{CustomElementRegistry}} object <var>registry</var>
+6308: <dfn>is a global custom element registry</dfn> if <var>registry</var> is non-null and
+6309: <var>registry</var>'s <a for=CustomElementRegistry>is scoped</a> is false.
+6310: 
+6311: <p>Null or a {{CustomElementRegistry}} object <var>registry</var>'s
+6312: <dfn>effective global custom element registry</dfn> is:
+6313: 
+6314: <ol>
+6315:  <li><p>If <var>registry</var> <a>is a global custom element registry</a>, then return
+6316:  <var>registry</var>.
+6317: 
+6318:  <li><p>Return null.
+6319: </ol>
+6631: <dfn export id=concept-doctype-systemid for=DocumentType>system ID</dfn> (a string).
+6632: 
+6633: <div algorithm>
+6634: <p>To <dfn export>create a doctype</dfn> given a <a for=/>document</a> <var>document</var>, a string
+6635: <var>name</var>, and optionally a string <var>publicId</var> (default the empty string) and a string
+6636: <var>systemId</var> (default the empty string):
+6637: 
+6638: <ol>
+6639:  <li><p>Let <var>doctype</var> be the result of <a>creating a node</a> that implements
+6640:  {{DocumentType}}, given <var>document</var>.
+6641: 
+6642:  <li><p>Set <var>doctype</var>'s <a for=DocumentType>name</a> to <var>name</var>, <a>public ID</a> to
+6643:  <var>publicId</var>, and <a>system ID</a> to <var>systemId</var>.
+6644: 
+6645:  <li><p>Return <var>doctype</var>.
+6646: </ol>
+6647: </div>
+6648: 
+6649: <p>The <dfn attribute for=DocumentType><code>name</code></dfn> getter steps are to return
+6650: <a>this</a>'s <a for=DocumentType>name</a>.
+6651: 
+6652: <p>The <dfn attribute for=DocumentType><code>publicId</code></dfn> getter steps are to return
+6653: <a>this</a>'s <a>public ID</a>.
+6654: 
+6655: <p>The <dfn attribute for=DocumentType><code>systemId</code></dfn> getter steps are to return
+6656: <a>this</a>'s <a>system ID</a>.
+6657: 
+6658: 
+6659: <h3 id=interface-documentfragment>Interface {{DocumentFragment}}</h3>
+6660: 
+6661: <pre class=idl>
+6662: [Exposed=Window]
+6663: interface DocumentFragment : Node {
+6664:   constructor();
+6665: };
+6666: </pre>
+6667: 
+6668: <dl class=domintro>
+6669:  <dt><code><var ignore>tree</var> = new {{DocumentFragment()}}</code>
+6670:  <dd>Returns a new {{DocumentFragment}} <a for=/>node</a>.
+6671: </dl>
+6672: 
+6673: <hr>
+6674: 
+6675: <div algorithm>
+6676: <p>An <dfn export>exclusive {{DocumentFragment}} node</dfn> is a {{DocumentFragment}}
+6677: <a for=/>node</a> that is not a {{ShadowRoot}} <a for=/>node</a>.
+6678: </div>
+6679: 
+6680: <p>A {{DocumentFragment}} <a for=/>node</a> has an associated
+6681: <dfn export id=concept-documentfragment-host for=DocumentFragment>host</dfn> (null or an
+6682: <a for=/>element</a> in a different <a>node tree</a>). It is null unless otherwise stated.
+6683: 
+6684: <div algorithm>
+6685: <p>An object <var>A</var> is a
+6686: <dfn export id=concept-tree-host-including-inclusive-ancestor>host-including inclusive ancestor</dfn>
+6687: of an object <var>B</var>, if either <var>A</var> is an <a for=tree>inclusive ancestor</a> of <var>B</var>,
+6688: or if <var>B</var>'s <a for=tree>root</a> has a non-null <a for=DocumentFragment>host</a> and
+6689: <var>A</var> is a <a>host-including inclusive ancestor</a> of <var>B</var>'s <a for=tree>root</a>'s
+6690: <a for=DocumentFragment>host</a>.
+6691: </div>
+6692: 
+6693: <p class=note>The {{DocumentFragment}} <a for=/>node</a>'s <a for=DocumentFragment>host</a>
+6694: concept is useful for HTML's <{template}> element and for <a for=/>shadow roots</a>, and impacts the
+6695: <a>pre-insert</a> and <a>replace</a> algorithms.
+6696: 
+6697: <div algorithm>
+6698: <p>To <dfn export>create a document fragment</dfn> given a <a for=/>document</a>
+6699: <var>document</var>: return the result of <a>creating a node</a> that implements
+6700: {{DocumentFragment}}, given <var>document</var>.
+6701: </div>
+6702: 
+6703: <div algorithm>
+6704: <p>The
+6705: <dfn constructor for=DocumentFragment lt=DocumentFragment()><code>new DocumentFragment()</code></dfn>
+6706: constructor steps are to set <a>this</a>'s <a for=Node>node document</a> to
+6707: <a>current global object</a>'s <a>associated <code>Document</code></a>.
+6708: </div>
+6709: 
+6710: 
+6711: <h3 id=interface-shadowroot>Interface {{ShadowRoot}}</h3>
+6712: 
+6713: <pre class=idl>
+6714: [Exposed=Window]
+6715: interface ShadowRoot : DocumentFragment {
+6716:   readonly attribute ShadowRootMode mode;
+6717:   readonly attribute boolean delegatesFocus;
+6718:   readonly attribute boolean serializable;
+6719:   readonly attribute SlotAssignmentMode slotAssignment;
+6720:   readonly attribute boolean clonable;
+6721:   readonly attribute Element host;
+6722: 
+6723:   attribute EventHandler onslotchange;
+6724: };
+6725: 
+6726: enum ShadowRootMode { "open", "closed" };
+6727: enum SlotAssignmentMode { "manual", "named" };
+6728: </pre>
+6729: 
+6730: <p>{{ShadowRoot}} <a for=/>nodes</a> are simply known as
+6731: <dfn export id=concept-shadow-root lt="shadow root">shadow roots</dfn>.
+6732: 
+6733: <p><a for=/>Shadow roots</a>'s associated <a for=DocumentFragment>host</a> is never null.
+6734: <!-- If we ever change this, e.g., add a ShadowRoot object constructor, that would have serious
+6735:      consequences for innerHTML. -->
+6736: 
+6737: <p><a for=/>Shadow roots</a> have an associated <dfn for=ShadowRoot>mode</dfn> ("<code>open</code>"
+6738: or "<code>closed</code>").
+6739: 
+6740: <p><a for=/>Shadow roots</a> have an associated <dfn export for=ShadowRoot>delegates focus</dfn>
+6741: (a boolean). It is initially set to false.
+6742: 
+6743: <p><a for=/>Shadow roots</a> have an associated
+6744: <dfn export for=ShadowRoot>available to element internals</dfn> (a boolean). It is initially set to
+6745: false.
+6746: 
+6747: <p><a for=/>Shadow roots</a> have an associated <dfn export for=ShadowRoot>declarative</dfn>
+6748: (a boolean). It is initially set to false.
+6749: 
+6750: <p><a for=/>Shadow roots</a> have an associated <dfn for=ShadowRoot>serializable</dfn> (a boolean).
+6751: It is initially set to false.
+6752: 
+6753: <p><a for=/>Shadow roots</a> have an associated <dfn for=ShadowRoot>slot assignment</dfn>
+6754: ("<code>manual</code>" or "<code>named</code>").
+6755: 
+6756: <p><a for=/>Shadow roots</a> have an associated <dfn for=ShadowRoot>clonable</dfn> (a boolean).
+6757: It is initially set to false.
+6758: 
+6759: <p><a for=/>Shadow roots</a> have an associated <dfn for=ShadowRoot>custom element registry</dfn>
+6760: (null or a {{CustomElementRegistry}} object). It is initially null.
+6761: 
+6762: <p><a for=/>Shadow roots</a> have an associated
+6763: <dfn for=ShadowRoot>keep custom element registry null</dfn> (a boolean). It is initially false.
+6764: 
+6765: <p class=note>This can only ever be true in combination with declarative shadow roots. And it only
+6766: matters for as long as the <a for=/>shadow root</a>'s <a for=ShadowRoot>custom element registry</a>
+6767: is null.
+6768: 
+6769: <hr>
+6770: 
+6771: <p>A <a for=/>shadow root</a>'s <a>get the parent</a> algorithm, given an <var>event</var>, returns
+6772: null if <var>event</var>'s <a>composed flag</a> is unset and <a for=/>shadow root</a> is the
+6773: <a for=tree>root</a> of <var>event</var>'s <a for=Event>path</a>'s first <a>event path item</a>'s
+6774: <a for="event path item">invocation target</a>; otherwise <a for=/>shadow root</a>'s
+6775: <a for=DocumentFragment>host</a>.
+6776: 
+6777: <hr>
+6778: 
+6779: <p>The <dfn attribute for=ShadowRoot><code>mode</code></dfn> getter steps are to return
+6780: <a>this</a>'s <a for=ShadowRoot>mode</a>.
+6781: 
+6782: <p>The <dfn attribute for=ShadowRoot><code>delegatesFocus</code></dfn> getter steps are to return
+6783: <a>this</a>'s <a for=ShadowRoot>delegates focus</a>.
+6784: 
+6785: <p>The <dfn attribute for=ShadowRoot><code>serializable</code></dfn> getter steps are to return
+6786: <a>this</a>'s <a for=ShadowRoot>serializable</a>.
+6787: 
+6788: <p>The <dfn attribute for=ShadowRoot><code>slotAssignment</code></dfn> getter steps are to return
+6789: <a>this</a>'s <a for=ShadowRoot>slot assignment</a>.
+6790: 
+6791: <p>The <dfn attribute for=ShadowRoot><code>clonable</code></dfn> getter steps are to return
+6792: <a>this</a>'s <a for=ShadowRoot>clonable</a>.
+6793: 
+6794: <p>The <dfn attribute for=ShadowRoot><code>host</code></dfn> getter steps are to return
+6795: <a>this</a>'s <a for=DocumentFragment>host</a>.
+6796: 
+6797: <hr>
+6798: 
+6799: <p>The <dfn attribute for=ShadowRoot><code>onslotchange</code></dfn> attribute is an
+6800: <a>event handler IDL attribute</a> for the
+6801: <dfn for=ShadowRoot export><code>onslotchange</code></dfn> <a>event handler</a>, whose
+6802: <a>event handler event type</a> is {{HTMLSlotElement/slotchange}}.
+6803: 
+6804: <hr>
+6805: 
+6806: <p>In <dfn export id=concept-shadow-including-tree-order>shadow-including tree order</dfn> is
+6807: <a>shadow-including preorder, depth-first traversal</a> of a <a>node tree</a>.
+6808: <dfn noexport>Shadow-including preorder, depth-first traversal</dfn> of a <a>node tree</a>
+6809: <var>tree</var> is preorder, depth-first traversal of <var>tree</var>, with for each
+6810: <a for=Element>shadow host</a> encountered in <var>tree</var>,
+6811: <a>shadow-including preorder, depth-first traversal</a> of that <a for=/>element</a>'s
+6812: <a for=Element>shadow root</a>'s <a>node tree</a> just after it is encountered.
+6813: 
+6814: <p>The <dfn export id=concept-shadow-including-root>shadow-including root</dfn> of an object is its
+6815: <a for=tree>root</a>'s <a for=DocumentFragment>host</a>'s <a>shadow-including root</a>, if the
+6816: object's <a for=tree>root</a> is a <a for=/>shadow root</a>; otherwise its <a for=tree>root</a>.
+6817: 
+6818: <p>An object <var>A</var> is a
+6819: <dfn export id=concept-shadow-including-descendant>shadow-including descendant</dfn> of an object
+6820: <var>B</var>, if <var>A</var> is a <a for=tree>descendant</a> of <var>B</var>, or <var>A</var>'s
+6821: <a for=tree>root</a> is a <a for=/>shadow root</a> and <var>A</var>'s <a for=tree>root</a>'s
+6822: <a for=DocumentFragment>host</a> is a <a>shadow-including inclusive descendant</a> of <var>B</var>.
+6823: 
+6824: <p>A
+6825: <dfn export id=concept-shadow-including-inclusive-descendant>shadow-including inclusive descendant</dfn>
+6826: is an object or one of its <a>shadow-including descendants</a>.
+6827: 
+6828: <p>An object <var>A</var> is a
+6829: <dfn export id=concept-shadow-including-ancestor>shadow-including ancestor</dfn> of an object
+6830: <var>B</var>, if and only if <var>B</var> is a <a>shadow-including descendant</a> of <var>A</var>.
+6831: 
+6832: <p>A
+6833: <dfn export id=concept-shadow-including-inclusive-ancestor>shadow-including inclusive ancestor</dfn>
+6834: is an object or one of its <a>shadow-including ancestors</a>.
+6966: </dl>
+6967: 
+6968: <p>When an <a for=/>element</a> is <a lt="create an element">created</a>, all of these values are
+6969: initialized.
+6970: 
+6971: <p>An <a for=/>element</a> whose <a for=Element>custom element state</a> is
+6972: "<code>uncustomized</code>" or "<code>custom</code>" is said to be
+6973: <dfn export id=concept-element-defined for=Element>defined</dfn>. An <a for=/>element</a> whose
+6974: <a for=Element>custom element state</a> is "<code>custom</code>" is said to be
+6975: <dfn export id=concept-element-custom for=Element>custom</dfn>.
+6976: 
+6977: <p class=note>Whether or not an element is <a for=Element>defined</a> is used to determine the
+6978: behavior of the '':defined'' pseudo-class. Whether or not an element is <a for=Element>custom</a> is
+6979: used to determine the behavior of the <a href=#mutation-algorithms>mutation algorithms</a>. The
+6980: "<code>failed</code>" and "<code>precustomized</code>" states are used to ensure that if a
+6981: <a>custom element constructor</a> fails to execute correctly the first time, it is not executed
+6982: again by an <a lt="upgrade an element">upgrade</a>.
+6983: 
+6984: <div class=example id=example-c5b21302>
+6985:  <p>The following code illustrates elements in each of these four states:
+6986: 
+6987:  <pre><code class=lang-html>
+6988:   &lt;!DOCTYPE html>
+6989:   &lt;script>
+6990:     window.customElements.define("sw-rey", class extends HTMLElement {})
+6991:     window.customElements.define("sw-finn", class extends HTMLElement {}, { extends: "p" })
+6992:     window.customElements.define("sw-kylo", class extends HTMLElement {
+6993:       constructor() {
+6994:         // super() intentionally omitted for this example
+6995:       }
+6996:     })
+6997:   &lt;/script>
+6998: 
+6999:   &lt;!-- "undefined" (not defined, not custom) -->
+7000:   &lt;sw-han>&lt;/sw-han>
+7001:   &lt;p is="sw-luke">&lt;/p>
+7002:   &lt;p is="asdf">&lt;/p>
+7003: 
+7004:   &lt;!-- "failed" (not defined, not custom) -->
+7005:   &lt;sw-kylo>&lt;/sw-kylo>
+7006: 
+7007:   &lt;!-- "uncustomized" (defined, not custom) -->
+7008:   &lt;p>&lt;/p>
+7009:   &lt;asdf>&lt;/asdf>
+7010: 
+7011:   &lt;!-- "custom" (defined, custom) -->
+7012:   &lt;sw-rey>&lt;/sw-rey>
+7013:   &lt;p is="sw-finn">&lt;/p>
+7014:  </code></pre>
+7015: </div>
+7016: 
+7017: <p><a for=/>Elements</a> also have an associated
+7018: <dfn export id=concept-element-shadow-root for=Element>shadow root</dfn> (null or a
+7019: <a for=/>shadow root</a>). It is null unless otherwise stated. An <a for=/>element</a> is a
+7020: <dfn export for=Element>shadow host</dfn> if its <a for=Element>shadow root</a> is non-null.
+7172:        <li><p>If <var>result</var>'s <a for=Node>node document</a> is not <var>document</var>, then
+7173:        <a>throw</a> a "{{NotSupportedError!!exception}}" {{DOMException}}.
+7174: 
+7175:        <li><p>If <var>result</var>'s <a for=Element>local name</a> is not equal to
+7176:        <var>localName</var>, then <a>throw</a> a "{{NotSupportedError!!exception}}" {{DOMException}}.
+7177: 
+7178:        <li><p>Set <var>result</var>'s <a for=Element>namespace prefix</a> to <var>prefix</var>.
+7179: 
+7180:        <li><p>Set <var>result</var>'s <a for=Element><code>is</code> value</a> to null.
+7181: 
+7182:        <li><p>Set <var>result</var>'s <a for=Element>custom element registry</a> to
+7183:        <var>registry</var>.
+7184:       </ol>
+7185: 
+7186:       <p>If any of these steps threw an exception <var>exception</var>:
+7187: 
+7188:       <ol>
+7189:        <li><p><a lt="report an exception">Report</a> <var>exception</var> for
+7190:        <var>definition</var>'s <a for="custom element definition">constructor</a>'s corresponding
+7191:        JavaScript object's <a>associated realm</a>'s <a for="realm">global object</a>.
+7192: 
+7193:        <li><p>Set <var>result</var> to the result of <a>creating an element internal</a> given
+7194:        <var>document</var>, {{HTMLUnknownElement}}, <var>localName</var>, the <a>HTML namespace</a>,
+7195:        <var>prefix</var>, "<code>failed</code>", null, and <var>registry</var>.
+7196:       </ol>
+7197: 
+7198:      <li><p>If <var>previousRegistry</var> is null, then <a for=map>remove</a> the
+7199:      <a>surrounding agent</a>'s
+7200:      <a for="similar-origin window agent">active custom element constructor map</a>[<var>C</var>].
+7201: 
+7202:      <li><p>Otherwise, <a for=map>set</a> the <a>surrounding agent</a>'s
+7203:      <a for="similar-origin window agent">active custom element constructor map</a>[<var>C</var>] to
+7204:      <var>previousRegistry</var>.
+7205:     </ol>
+7206: 
+7207:    <li>
+7208:     <p>Otherwise:
+7209: 
+7210:     <ol>
+7211:      <li><p>Set <var>result</var> to the result of <a>creating an element internal</a> given
+7212:      <var>document</var>, {{HTMLElement}}, <var>localName</var>, the <a>HTML namespace</a>,
+7213:      <var>prefix</var>, "<code>undefined</code>", null, and <var>registry</var>.
+7214: 
+7215:      <li><p><a>Enqueue a custom element upgrade reaction</a> given <var>result</var> and
+7216:      <var>definition</var>.
+7217:     </ol>
+7218:    </li>
+7219:   </ol>
+7220:  </li>
+7221: 
+7222:  <li>
+7223:   <p>Otherwise:
+7224: 
+7225:   <ol>
+7226:    <li><p>Let <var>interface</var> be the <a>element interface</a> for <var>localName</var> and
+7227:    <var>namespace</var>.
+7228: 
+7229:    <li><p>Set <var>result</var> to the result of <a>creating an element internal</a> given
+7230:    <var>document</var>, <var>interface</var>, <var>localName</var>, <var>namespace</var>,
+7231:    <var>prefix</var>, "<code>uncustomized</code>", <var>is</var>, and <var>registry</var>.
+7232: 
+7233:    <li><p>If <var>namespace</var> is the <a>HTML namespace</a>, and either <var>localName</var> is a
+7234:    <a>valid custom element name</a> or <var>is</var> is non-null, then set <var>result</var>'s
+7235:    <a for=Element>custom element state</a> to "<code>undefined</code>".
+7236:   </ol>
+7237:  </li>
+7854: </ol>
+7855: </div>
+7856: 
+7857: <hr>
+7858: 
+7859: <div algorithm>
+7860: <p>The <dfn method for=Element><code>getAttributeNode(<var>qualifiedName</var>)</code></dfn> method
+7861: steps are to return the result of <a lt="get an attribute by name">getting an attribute</a> given
+7862: <var>qualifiedName</var> and <a>this</a>.
+7863: </div>
+7864: 
+7865: <div algorithm>
+7866: <p>The
+7867: <dfn method for=Element><code>getAttributeNodeNS(<var>namespace</var>, <var>localName</var>)</code></dfn>
+7868: method steps are to return the result of
+7869: <a lt="get an attribute by namespace and local name">getting an attribute</a> given
+7870: <var>namespace</var>, <var>localName</var>, and <a>this</a>.
+7871: </div>
+7872: 
+7873: <div algorithm=Element/setAttributeNode>
+7874: <p>The <dfn method for=Element><code>setAttributeNode(<var>attr</var>)</code></dfn> and
+7875: <dfn method for=Element><code>setAttributeNodeNS(<var>attr</var>)</code></dfn> methods steps are to
+7876: return the result of <a lt="set an attribute">setting an attribute</a> given <var>attr</var> and
+7877: <a>this</a>.
+7878: </div>
+7879: 
+7880: <div algorithm>
+7881: <p>The <dfn method for=Element><code>removeAttributeNode(<var>attr</var>)</code></dfn> method steps
+7882: are:
+7883: 
+7884: <ol>
+7885:  <li><p>If <a>this</a>'s <a for=Element>attribute list</a> does not <a for=list>contain</a>
+7886:  <var>attr</var>, then <a>throw</a> a "{{NotFoundError!!exception}}" {{DOMException}}.
+7887: 
+7888:  <li><p><a lt="remove an attribute">Remove</a> <var>attr</var>.
+7889: 
+7890:  <li><p>Return <var>attr</var>.
+7891: </ol>
+7892: </div>
+7893: 
+7894: <hr>
+7895: 
+7896: <dl class=domintro>
+7897:  <dt><code><var>shadow</var> = <var>element</var> . {{attachShadow(init)}}</code>
+7898:  <dd><p>Creates a <a for=/>shadow root</a> for <var>element</var> and returns it.
+7899: 
+7900:  <dt><code><var>shadow</var> = <var>element</var> . {{shadowRoot}}</code>
+7901:  <dd><p>Returns <var>element</var>'s <a for=Element>shadow root</a>, if any, and if
+7902:  <a for=/>shadow root</a>'s <a for=ShadowRoot>mode</a> is "<code>open</code>"; otherwise null.
+7903: </dl>
+7904: 
+7905: <p>A <dfn export>valid shadow host name</dfn> is:
+7906: 
+7907: <ul class=brief>
+7908:  <li>a <a>valid custom element name</a>
+7909:  <li>"<code>article</code>",
+7910:  "<code>aside</code>",
+7911:  "<code>blockquote</code>",
+7912:  "<code>body</code>",
+7913:  "<code>div</code>",
+7914:  "<code>footer</code>",
+7915:  "<code>h1</code>",
+7916:  "<code>h2</code>",
+7917:  "<code>h3</code>",
+7918:  "<code>h4</code>",
+7919:  "<code>h5</code>",
+7920:  "<code>h6</code>",
+7921:  "<code>header</code>",
+7922:  "<code>main</code>",
+7923:  "<code>nav</code>",
+7924:  "<code>p</code>",
+7925:  "<code>section</code>", or
+7926:  "<code>span</code>"
+7927: </ul>
+7928: 
+7929: <p class=note>This list is intentionally limited so that built-in elements can gain internal
+7930: <a>shadow trees</a> over time as needed.
+7931: 
+7932: <div algorithm>
+7933: <p>The <dfn method for=Element><code>attachShadow(<var>init</var>)</code></dfn> method steps are:
+7934: 
+7935: <ol>
+7936:  <li><p>Let <var>registry</var> be <a>this</a>'s <a>node document</a>'s
+7937:  <a for=Document>custom element registry</a>.
+7938: 
+7939:  <li><p>If <var>init</var>["{{ShadowRootInit/customElementRegistry}}"] <a for=map>exists</a>, then
+7940:  set <var>registry</var> to it.
+7941: 
+7942:  <li><p>If <var>registry</var> is non-null, <var>registry</var>'s
+7943:  <a for=CustomElementRegistry>is scoped</a> is false, and <var>registry</var> is not <a>this</a>'s
+7944:  <a>node document</a>'s <a for=Document>custom element registry</a>, then <a>throw</a> a
+7945:  "{{NotSupportedError!!exception}}" {{DOMException}}.
+7946: 
+7947:  <li><p>Run <a>attach a shadow root</a> with <a>this</a>,
+7948:  <var>init</var>["{{ShadowRootInit/mode}}"],
+7949:  <var>init</var>["{{ShadowRootInit/delegatesFocus}}"],
+7950:  <var>init</var>["{{ShadowRootInit/serializable}}"],
+7951:  <var>init</var>["{{ShadowRootInit/slotAssignment}}"],
+7952:  <var>init</var>["{{ShadowRootInit/clonable}}"], and <var>registry</var>.
+7953: 
+7954:  <li><p>Return <a>this</a>'s <a for=Element>shadow root</a>.
+7955: </ol>
+7956: </div>
+7957: 
+7958: <div algorithm>
+7959: <p>To <dfn id=concept-attach-a-shadow-root>attach a shadow root</dfn>, given an <a for=/>element</a>
+7960: <var>element</var>, a string <var>mode</var>, a boolean <var>delegatesFocus</var>, a boolean
+7961: <var>serializable</var>, a string <var>slotAssignment</var>, a boolean <var>clonable</var>, and null
+7962: or a {{CustomElementRegistry}} object <var>registry</var>:
+7963: 
+7964: <ol>
+7965:  <li><p>If <var>element</var>'s <a for=Element>namespace</a> is not the <a>HTML namespace</a>,
+7966:  then <a>throw</a> a "{{NotSupportedError!!exception}}" {{DOMException}}.
+7967: 
+7968:  <li><p>If <var>element</var>'s <a for=Element>local name</a> is not a
+7969:  <a>valid shadow host name</a>, then <a>throw</a> a "{{NotSupportedError!!exception}}"
+7970:  {{DOMException}}.
+7971: 
+7972:  <li>
+7973:   <p>If <var>element</var>'s <a for=Element>local name</a> is a <a>valid custom element name</a>, or
+7974:   <var>element</var>'s <a for=Element><code>is</code> value</a> is non-null:
+7975: 
+7976:   <ol>
+7977:    <li><p>Let <var>definition</var> be the result of <a>looking up a custom element definition</a>
+7978:    given <var>element</var>'s <a for=Element>custom element registry</a>, its
+7979:    <a for=Element>namespace</a>, its <a for=Element>local name</a>, and its
+7980:    <a for=Element><code>is</code> value</a>.
+7981: 
+7982:    <li><p>If <var>definition</var> is non-null and <var>definition</var>'s
+7983:    <a for="custom element definition">disable shadow</a> is true, then <a>throw</a> a
+7984:    "{{NotSupportedError!!exception}}" {{DOMException}}.
+7985:   </ol>
+7986:  </li>
+7987: 
+7988:  <li>
+7989:   <p>If <var>element</var> is a <a for=Element>shadow host</a>:
+7990: 
+7991:   <ol>
+7992:    <li><p>Let <var>currentShadowRoot</var> be <var>element</var>'s <a for=Element>shadow root</a>.
+7993: 
+7994:    <li>
+7995:     <p>If any of the following are true:
+7996: 
+7997:     <ul>
+7998:      <li><p><var>currentShadowRoot</var>'s <a for=ShadowRoot>declarative</a> is false; or
+7999: 
+8000:      <li><p><var>currentShadowRoot</var>'s <a for=ShadowRoot>mode</a> is not <var>mode</var>,
+8001:     </ul>
+8002: 
+8003:     <p>then <a>throw</a> a "{{NotSupportedError!!exception}}" {{DOMException}}.
+8004: 
+8005:    <li><p><a for=/>Remove</a> all of <var>currentShadowRoot</var>'s <a for=tree>children</a>, in
+8006:    <a>tree order</a>.
+8007: 
+8008:    <li><p>Set <var>currentShadowRoot</var>'s <a for=ShadowRoot>declarative</a> to false.
+8009: 
+8010:    <li><p>Return.
+8011:   </ol>
+8012: 
+8013:  <li><p>Let <var>shadow</var> be the result of <a>creating a node</a> that implements
+8014:  {{ShadowRoot}}, given <var>element</var>'s <a for=Node>node document</a>.
+8015: 
+8016:  <li><p>Set <var>shadow</var>'s <a for=DocumentFragment>host</a> to <var>element</var>.
+8017: 
+8018:  <li><p>Set <var>shadow</var>'s <a for=ShadowRoot>mode</a> to <var>mode</var>.
+8019: 
+8020:  <li><p>Set <var>shadow</var>'s <a for=ShadowRoot>delegates focus</a> to <var>delegatesFocus</var>.
+8021: 
+8022:  <li><p>If <var>element</var>'s <a for=Element>custom element state</a> is
+8023:  "<code>precustomized</code>" or "<code>custom</code>", then set <var>shadow</var>'s
+8024:  <a for=ShadowRoot>available to element internals</a> to true.
+8025: 
+8026:  <li><p>Set <var>shadow</var>'s <a for=ShadowRoot>declarative</a> to false.
+8027: 
+8028:  <li><p>Set <var>shadow</var>'s <a for=ShadowRoot>serializable</a> to <var>serializable</var>.
+8029: 
+8030:  <li><p>Set <var>shadow</var>'s <a for=ShadowRoot>slot assignment</a> to <var>slotAssignment</var>.
+8031: 
+8032:  <li><p>Set <var>shadow</var>'s <a for=ShadowRoot>clonable</a> to <var>clonable</var>.
+8033: 
+8034:  <li><p>Set <var>shadow</var>'s <a for=ShadowRoot>custom element registry</a> to
+8035:  <var>registry</var>.
+8036: 
+8037:  <li><p>Set <var>element</var>'s <a for=Element>shadow root</a> to <var>shadow</var>.
+8038: </ol>
+8039: </div>
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\awk.exe","arguments":["(NR>=197&&NR<=228)||(NR>=2346&&NR<=2481)||(NR>=2695&&NR<=2832)||(NR>=2880&&NR<=3048)||(NR>=3175&&NR<=3249)||(NR>=3252&&NR<=3376)||(NR>=6167&&NR<=6319)||(NR>=6631&&NR<=6834)||(NR>=6966&&NR<=7020)||(NR>=7172&&NR<=7237)||(NR>=7854&&NR<=8039) {print NR\": \"$0}","C:\\src\\fairpane\\out\\whatwg-dom-bs-3071e5f269448350fdea79bb284eedaf17bc431e"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T21:36:36.279Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":21}
