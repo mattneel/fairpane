@@ -1,0 +1,12 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","--version"]
+v26.7.0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["--version"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:06:47.359Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const bits=x=>{const b=Buffer.alloc(8);b.writeDoubleBE(x);return '0x'+b.toString('hex').toUpperCase()};const z=n=>'0'.repeat(n);for(const [s,d] of [['0.'+z(1000001)+'1e1000005','vector 1'],['1'+z(1000000)+'e-1000001','vector 2'],['0.'+z(1000001)+'1e1000000','vector 3'],['0.'+z(1000001)+'1e'+'9'.repeat(25),'vector 4'],['1'+z(1000000)+'e-'+'9'.repeat(25),'vector 5']]){const v=Number(s);console.log(d, String(v), bits(v))}"]
+vector 1 1000 0x408F400000000000
+vector 2 0.1 0x3FB999999999999A
+vector 3 0.01 0x3F847AE147AE147B
+vector 4 Infinity 0x7FF0000000000000
+vector 5 0 0x0000000000000000
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const bits=x=>{const b=Buffer.alloc(8);b.writeDoubleBE(x);return '0x'+b.toString('hex').toUpperCase()};const z=n=>'0'.repeat(n);for(const [s,d] of [['0.'+z(1000001)+'1e1000005','vector 1'],['1'+z(1000000)+'e-1000001','vector 2'],['0.'+z(1000001)+'1e1000000','vector 3'],['0.'+z(1000001)+'1e'+'9'.repeat(25),'vector 4'],['1'+z(1000000)+'e-'+'9'.repeat(25),'vector 5']]){const v=Number(s);console.log(d, String(v), bits(v))}"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T12:06:47.433Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":41}

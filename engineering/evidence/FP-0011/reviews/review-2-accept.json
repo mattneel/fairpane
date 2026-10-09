@@ -1,0 +1,130 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "60c0c90690fcde15e02b83fadc603b108200df0e",
+    "a1b2d1c3106a47c9120c5fc31e708b9200fb2220",
+    "6771856"
+  ],
+  "summary": "I accept revision 1 of FP-0011. I found no blocker and no major finding. Three minor findings and five notes remain.\n\nHow I reviewed: I read the local tree, every revision 1 log, script, and receipt under engineering/evidence/FP-0011, the locked std parse_float/decimal.zig, and the GitHub API file lists of 60c0c90 and a1b2d1c. I built and ran nothing.\n\nBoth majors from review 1 are fixed.\n\n1. Effect boundary. A Context now stores its heap only as `*SealedHeap(effects)` (runtime.zig:165-179). SealedHeap is a separate opaque type for each effect set. Only the non-pub `unseal` (runtime.zig:182) and the non-pub `heapOf` (runtime.zig:222) turn it back into a heap pointer. The kernels live in kernels.zig, which never touches `.heap`, `@ptrCast`, `rootContext`, or Heap methods; it uses only `Rt.Heap.catalog.Slot` as a type. Each method that allocates, mutates, throws, collects, or calls user code checks its effect set at compile time. `rootContext` accepts only `*Runtime` (runtime.zig:159). `Scope` and `Local` hold a different opaque type (runtime.zig:173, 187-212). No context method returns a heap pointer, a runtime pointer, or a wider context.\n   - Case 34 shows the refused member (`no field or member function named 'allocateString' in ...SealedHeap(@fromBackingInt(0))`).\n   - Case 35 shows both widening routes refused, through `rootContext(ctx.heap)` and through `.{ .heap = ctx.heap }`.\n   - Both fixtures compiled with exit status 0 on the base (tests-before-r1.log:387-391).\n\n2. StringToNumber. The value is 0.D×10^(scale+exponent) with |scale| ≤ length. The exponent saturates at length+400, so a saturated value is at least 10^399 or below 10^-400, which rounds to infinity or zero whatever the digits. Clamping to ±2000 keeps that result. 768 significant digits plus a sticky '1' are enough, because every binary64 halfway point has at most 767 significant digits. Zig's Decimal (max_digits 768, truncated flag) then rounds correctly, so the result is the correctly rounded value, which is one of the RoundMVResult options.\n   - I checked all five case 38 vectors by hand: 10^3, 10^-1, 10^-2, +Infinity, and +0.\n   - Four of them fail on the base (tests-before-r1.log:243-247).\n\nOther checks:\n- **decl_names probe:** It shows that only pub declarations are listed, and that a kernel without `pub` is reported as missing.\n- **Case 36:** Both fixtures name their stubs. mutation-r1.log removes each direction of the binding check in turn, the matching fixture fails, and the file hash returns to its original value.\n- **Case 37:** The fixture now also expects the exact `Context(@fromBackingInt(15))` text.\n- **Left-root mutation:** It is redone on kernels.zig with recorded `git apply` and `git apply -R` and matching hashes. Case 11 fails (AD19, dead_resolutions 4) while case 31 passes.\n- **Gates:** They are bound to 60c0c90 by r1-integration-binding.log (HEAD plus an empty status including ignored files, before and after) and by the same source digest 28e22668… in every receipt. The uncached run passed 62/62 steps and 178/178 tests.\n- **6771856:** The change is test-only. Case 14 now uses a backing allocator that fails every remap. FP-0050's review covers and accepts it, and measurements never compile test blocks.\n\nMeasurements:\n- **Raw logs:** Each of the six raw logs has 84 samples, every checksum is correct, and every run exits with status 0.\n- **ADR §4 table:** All 42 min/median/max rows match measure-summary-r1.log. I recomputed them for the spot-checked series from the raw samples.\n- **ADR §5 outcomes:** I recomputed every separability outcome by hand from the ranges, and all match.\n- **Rules (§6), applied literally:**\n  - nan_box is faster on 4 workloads but separably slower on mark-generated in both runs, so it does not qualify.\n  - These outcomes hold under any subset of the samples:\n    - nan_box mark-generated is at least 7.5 ms, while reference is at most 2.84 ms in run 1 and at most 8.48 ms (against nan_box's 16.18 ms) in run 2.\n    - tagged_index is slower on add-small-int.\n    - The reference and tagged_index tracer comparisons overlap in run 1.\n  - So reference stays the default representation.\n  - The generated tracer wins because no representation shows it separably slower. Under nan_box, only the run 2 mark-manual shift decides that outcome, and §5 and §6 state this.\n- **Level shifts:** The shift script's DECIDES output matches §5. Its prefix/suffix, 1.5× definition was chosen after the data was seen. Even so, no other subset could change a rule outcome, so the definition hides nothing that matters to a decision.\n- **[INFERENCE] markers:** Both are present: the affinity of the measurement processes (§3) and the core-complex cause of the levels (§7).\n\nThe remaining minor findings: the affinity record required by the contract is only inferred; the idle-machine claims are not backed by any record; and a1b2d1c adds an acceptance criterion to FP-0012 in plan.json inside the FP-0011 evidence commit.\n\nEarlier findings:\n- Majors 1 and 2: resolved.\n- Minors on worker-log binding, regime-shift disclosure, and mutation commands: resolved.\n- Notes on the observed-fact amendment, decl_names and case 36 fixtures, case 37 text, and the 25-unit comment: resolved.\n- Note on noteWrite counting from the outermost invoke: intentionally unchanged (heap.zig:419-423). It conforms to the contract.",
+  "criteria": [
+    {
+      "criterion": "No Context gives its holder a heap, runtime, or wider context except through effect-checked methods (sealed types and file split; cases 34 and 35).",
+      "met": true,
+      "evidence": "runtime.zig:165-184 makes SealedHeap(effects) a separate opaque type for each effect set; seal and unseal are non-pub. heapOf (runtime.zig:222) is non-pub. rootContext(rt: *Rt) (runtime.zig:159) is the only root source. narrow (runtime.zig:254-260) only shrinks the effect set. Scope and Local hold SealedScopeHeap (runtime.zig:173, 187-212). kernels.zig has no .heap, ptrCast, rootContext, or Heap calls (grep). Case 34 and case 35 diagnostics are in probe-r1.log, and build.zig:75-79 expects them. tests-before-r1.log:378-391 shows both fixtures failing their checks on the base and compiling with exit 0 there."
+    },
+    {
+      "criterion": "Binding-check fixtures (case 36) and the case 37 message.",
+      "met": true,
+      "evidence": "tests/compile_fail/binding_missing_kernel.zig and binding_stray_kernel.zig; build.zig:80-81 expects both messages. probe-r1.log shows both messages. mutation-r1.log:6-22 and 100-129 show each fixture failing when its direction is removed, with runtime.zig hashes returning to 3fcecbbd…. Case 37: build.zig:62 expects the full Context(@fromBackingInt(15))/Context(@fromBackingInt(0)) text, which probe-r1.log also records."
+    },
+    {
+      "criterion": "stringToNumber returns the correctly rounded value, a RoundMVResult option, for every StrDecimalLiteral, including the five case 38 vectors.",
+      "met": true,
+      "evidence": "number.zig:198-272. scale is the exact decimal-point offset and |scale| ≤ length. exponent_bound = length+400 (244-255) and saturating arithmetic make every clamped case 0 or ∞, as the true value is. The 768 digits plus sticky '1' feed the locked std Decimal (max_digits 768, truncated flag), which gives correct rounding. All five vectors match exact arithmetic (number_vectors.zig:193-199). tests-before-r1.log:243-247 shows vectors 1, 2, 4, and 5 failing on the base. r1-integration-tests.log passes 178/178 at 60c0c90."
+    },
+    {
+      "criterion": "decl_names probe recorded and stated in the ADR.",
+      "met": true,
+      "evidence": "probe-r1.log: 'same file: public_function public_constant; other file: public_function public_constant', and a non-pub kernel gives 'operation Number::add has no kernel'. ADR 0008:51-57 and the runtime.zig bindKernels doc comment state this."
+    },
+    {
+      "criterion": "Mutation controls record their apply and reverse commands and hashes, and fail as specified.",
+      "met": true,
+      "evidence": "mutation-left-root-r1.log:2-11, 150-155: git apply and apply -R, kernels.zig 24160216… → ca4c9f48… → 24160216…. The run gives 177/178 with case 11 'scenario AD19 under reference: dead_resolutions 4' (lines 16-17, 83), so case 31 passes. mutation-r1.log covers both binding directions."
+    },
+    {
+      "criterion": "Gates bind to 60c0c90.",
+      "met": true,
+      "evidence": "r1-integration-binding.log: HEAD 60c0c90 at 10:08:09.661Z, with empty status including ignored files at 10:08:09.733Z and 10:09:43.144Z. The repo-check, controller-test, zig-fmt, and zig-test receipts carry the identical source digest 28e22668… before and after. r1-integration-tests.log (10:08:59Z, fresh cache) gives 62/62 steps and 178/178 tests. FP-0027/raw/r1-binding.log:21-23 records HEAD 60c0c90 at 10:10:32Z."
+    },
+    {
+      "criterion": "The six runs, the summary, and the shift analysis are faithful to the raw sample logs and the frozen rules.",
+      "met": true,
+      "evidence": "Each measure-*-r1-run*.log has a header, 84 sample lines, and RESULT exit 0 at the contract order and times. The run starts are contiguous. Spot checks of nan_box run 2 and reference run 1 mark-generated match the SERIES lines in measure-summary-r1.log. The summary script takes min/median/max as sorted[0]/[5]/[10], and separability requires non-overlap in both runs, as frozen at CONTRACT.md §5. The shift script output (measure-shift-decisions-r1.log) matches my manual recomputation."
+    },
+    {
+      "criterion": "ADR 0008 sections 3-8 cite only recorded values and apply the rules literally (nan_box does not qualify, reference stays default, the generated tracer outcome is decided by a level shift stated in §5).",
+      "met": true,
+      "evidence": "All 42 rows of the §4 table equal the STATS lines. The peak bytes, executable bytes, and cells_allocated match. The §5 tables match the PAIR and TRACER lines. §5 'Level shifts' lists all 5 shifted series and the 3 deciding ones. §6 (ADR 0008:269-287) states that nan_box is slower on mark-generated with no deciding shift, that reference stays default, and that the generated tracer outcome under nan_box depends on the run 2 mark-manual shift. I verified the rule outcomes are robust to every other shift."
+    },
+    {
+      "criterion": "[INFERENCE] items are marked.",
+      "met": true,
+      "evidence": "ADR 0008:140 (affinity of the measurement processes) and ADR 0008:§7 (the two-CCD cache explanation) carry [INFERENCE] markers."
+    },
+    {
+      "criterion": "The integrator's environment and idle-machine statements are supported by records.",
+      "met": false,
+      "evidence": "Supported: the power scheme (environment-r1.log:2-3), the affinity of a sibling PowerShell process (environment-r1.log:5-8), doctor-r1.log, measure-build-r1.log, and contiguous integrator command timestamps (11:24:22 to 11:25:04). Not recorded: the affinity of the measurement processes (marked [INFERENCE]), and the 'three agent sessions … instructed to … execute nothing' claim (ADR 0008:160). The FP-0014 worker's last recorded command (FP-0014/raw/fmt.log, 11:23:13Z) came 69 s before the measurement worktree was created, and the ADR does not mention that worker. See findings."
+    },
+    {
+      "criterion": "No protected path changes; no Rust shell code reaches the engine.",
+      "met": true,
+      "evidence": "The 60c0c90 file list (GitHub API) touches only build.zig, engineering/decisions, engineering/evidence/FP-0011, src/js, and tests/compile_fail. a1b2d1c touches the ADR, FP-0011 evidence, engineering/plan.json, and engineering/state.json. None of these is in policy.json protected_paths. No Rust file changed. plan.json is a policy root; see the finding."
+    },
+    {
+      "criterion": "Every earlier finding is resolved.",
+      "met": true,
+      "evidence": "Major 1 (sealed heap and cases 34/35): resolved. Major 2 (exponent saturation and case 38): resolved. Minor worker-log binding: resolved, since the measurements were rerun in a 60c0c90 worktree with binding records and the integration tests are bound. Minor regime shift: resolved by ADR §5 level shifts and §7. Minor mutation commands: resolved. Notes on the observed fact, decl_names fixtures, case 37 text, and the 25-unit comment: resolved. The noteWrite note is intentionally unchanged and conforms to the contract."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0011/raw/environment-r1.log",
+      "line": 5,
+      "issue": "Contract Revision 1 (CONTRACT.md:892) requires the integrator to record 'that the measurement processes keep the default processor affinity'. The record shows the affinity mask of a separate PowerShell process only. ADR 0008:140 correctly marks the claim about the measurement processes as [INFERENCE], so the required record does not exist. No rule outcome depends on it: the nan_box and tagged_index non-qualification and the reference tracer comparison hold under any sample subset.",
+      "recommendation": "In FP-0012, or in a future rerun, record each measurement process's own affinity mask. Examples are a harness header field from GetProcessAffinityMask, or a query made while the process runs. Until then, keep the ADR's [INFERENCE] marking."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/decisions/0008-javascript-values-and-heap.md",
+      "line": 160,
+      "issue": "The contract requires the runs on an otherwise idle machine with no worker building (CONTRACT.md:891). The statement 'Three agent sessions were open, one review and two contract drafts, and each was instructed to install, build, and execute nothing' has no record behind it and is not marked [INFERENCE]. No processor-load reading exists. The FP-0014 build worker (worktree tb5fa5c781) last recorded a command at 11:23:13Z (FP-0014/raw/fmt.log:3), 69 s before the measurement worktree was created at 11:24:22Z. The ADR does not mention that worker. The integrator's own contiguous command sequence (11:24:22-11:25:04) is supported.",
+      "recommendation": "Mark the session statement as an unrecorded observation. State that the FP-0014 worker's last recorded command was at 11:23:13Z. For FP-0012, record a process list or processor-load samples around the runs."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/plan.json",
+      "line": 558,
+      "issue": "Commit a1b2d1c, the FP-0011 evidence and ADR commit, also adds an acceptance criterion to FP-0012 in engineering/plan.json, a policy root. AGENTS.md says 'Keep acceptance-policy changes separate and require independent approval.' The change only adds requirements and weakens nothing, but it was bundled rather than landed and approved separately.",
+      "recommendation": "Record independent approval of the FP-0012 plan addition, for example in FP-0012's contract freeze or a separate reviewed commit. Keep future plan changes out of task evidence commits."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/number_vectors.zig",
+      "line": 191,
+      "issue": "The case 38 vectors are described as 'checked against Node v26.7.0 by the integrator on 2026-10-09' (also CONTRACT.md:862 and ADR 0008:71), but no raw log records that Node run. The values are exact powers of ten, 0, and +∞, and I confirmed them by arithmetic.",
+      "recommendation": "Record the Node cross-check with `record` under raw/, or describe the values as derived by exact arithmetic."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0011/raw/measure-shift-decisions-r1-attempt-1.log",
+      "line": 3,
+      "issue": "The attempt logs hash the script under its old name (69ccad5815…). No record ties that hash to the kept copy raw/measure-shift-decisions-r1-attempt-1.mjs after the rename.",
+      "recommendation": "Append a sha256sum record of measure-shift-decisions-r1-attempt-1.mjs that shows 69ccad5815…."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/decisions/0008-javascript-values-and-heap.md",
+      "line": 101,
+      "issue": "Revision 1 asks for doctor to be rerun 'at the integration commit'. doctor-r1.log ran in the main checkout, whose HEAD at 11:24:33Z was not 60c0c90 and is not recorded. The ADR states 'main checkout'. The doctor output is environment-only, so the measurements are unaffected.",
+      "recommendation": "Record HEAD next to doctor, or state why doctor runs outside the worktree: the worktree has no .tools compiler."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/runtime.zig",
+      "line": 354,
+      "issue": "hostContext and hostContextOf need no effects and hand any context holder the raw host_context `?*anyopaque`. If a host stores a `*Runtime` or `*Heap` there, a leaf context can reach it with one @ptrCast. ADR 0008:35-38 covers this as the owner's choice and puts deliberate casts outside the boundary, so this is consistent with the contract.",
+      "recommendation": "For FP-0012, consider documenting at allocateFunction that host_context must not hold the runtime or heap. Alternatively, require an effect to read host_context."
+    },
+    {
+      "severity": "note",
+      "path": "src/js/heap.zig",
+      "line": 419,
+      "issue": "Carried from review 1: noteWrite still counts existing-cell writes against the outermost invoke boundary only. This matches the contract and was intentionally left unchanged.",
+      "recommendation": "No change is required for FP-0011."
+    }
+  ],
+  "commands_run": []
+}

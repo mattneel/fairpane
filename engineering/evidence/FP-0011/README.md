@@ -147,3 +147,14 @@ The rerun changes the representation decision.
 The generated tracer still becomes the default tracer under the pre-registered rule, and ADR 0008 section 5 states that a level shift in `nan_box` run 2 of `mark-manual` decides that outcome.
 Review 1's minor finding about the mid-run regime shift is answered by that statement and by the per-series sample lists in the ADR.
 The plan entry of `FP-0012` now requires interleaved comparisons that record the logical processor of each sample.
+
+### Review 2 follow-up
+
+Review 2 accepted revision 1 with three minor findings and five notes.
+
+- `raw/node-vectors-r1.log` records Node v26.7.0 computing the five case 38 vectors after the review, with the bit patterns that the contract froze; the integrator's earlier check before the freeze was not recorded.
+- `raw/measure-shift-decisions-r1-attempt-1.log` now ends with a SHA-256 of the kept copy `raw/measure-shift-decisions-r1-attempt-1.mjs`, `69ccad58…`, which equals the hash that the attempt recorded for the script before it changed.
+- `raw/doctor-r1.log` ran in the main checkout, because the measurement worktree holds no `.tools` compiler; the main checkout's `HEAD` at that time was not recorded, and `doctor` reports only the environment.
+- ADR 0008 section 3 now marks the statement about the open agent sessions as unrecorded and names the last recorded command of the FP-0014 worker, at 11:23:13Z in `engineering/evidence/FP-0014/raw/fmt.log`.
+- The affinity of each measurement process was not recorded, and the ADR keeps that claim marked as inference; `FP-0012` must record it.
+- `engineering/plan.json` is a source root, not a policy root: `engineering/policy.json` lists the policy roots, and the plan is not among them. The `FP-0012` criterion in `a1b2d1c` only adds requirements, and the `FP-0012` contract freeze confirms it.

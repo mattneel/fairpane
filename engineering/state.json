@@ -193,7 +193,7 @@
       ]
     },
     "FP-0011": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "fairpane-js workers FP0011Js and FP0011R1, integrated and measured by root-integrator",
       "evidence": [
         "engineering/evidence/FP-0011/README.md",
@@ -207,15 +207,17 @@
         "engineering/evidence/FP-0011/raw/r1-integration-tests.log",
         "engineering/evidence/FP-0011/raw/r1-measure-binding.log",
         "engineering/evidence/FP-0011/raw/measure-summary-r1.log",
-        "engineering/evidence/FP-0011/raw/measure-shift-decisions-r1.log"
+        "engineering/evidence/FP-0011/raw/measure-shift-decisions-r1.log",
+        "engineering/evidence/FP-0011/raw/node-vectors-r1.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0011/reviews/review-2-accept.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0011/CONTRACT.md, drafted by worker FP0011Contract and frozen on commit 8af0f20.",
         "Commit 84b7b14 implements it with 132 of 132 Zig tests in the integrated tree.",
         "fairpane-review rejected 84b7b14 and ba3a352 in reviews/review-1-reject.json: a leaf context reaches the heap, and StringToNumber rounds long literals wrongly. Contract revision 1 is frozen in f95fab6.",
         "Commit 60c0c90 implements revision 1 with 181 of 181 controller tests and 178 of 178 Zig tests.",
-        "The integrator's measurement runs at 60c0c90 replace the worker's runs: nan_box is now separably slower on mark-generated, so reference stays FP-0012's default representation, and the generated tracer stays the default tracer by an outcome that a level shift decides, as ADR 0008 states. Awaiting fairpane-review."
+        "The integrator's measurement runs at 60c0c90 replace the worker's runs: nan_box is now separably slower on mark-generated, so reference stays FP-0012's default representation, and the generated tracer stays the default tracer by an outcome that a level shift decides, as ADR 0008 states.",
+        "fairpane-review accepted 60c0c90, a1b2d1c, and 6771856 in reviews/review-2-accept.json with three minor findings and five notes; the README's review 2 section records each, and FP-0012 carries the per-process affinity record and the host_context note."
       ]
     },
     "FP-0012": {

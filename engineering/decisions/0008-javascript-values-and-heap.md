@@ -157,7 +157,8 @@ tagged_index run 2: {"format":"fairpane-js-measure","version":1,"representation"
 The runs followed the order `reference`, `nan_box`, `tagged_index`, `reference`, `nan_box`, `tagged_index`.
 They started at 11:24:50Z, 11:24:52Z, 11:24:53Z, 11:24:56Z, 11:24:58Z, and 11:25:00Z, and every run exited with status 0.
 The integrator's session ran no other command during the runs.
-Three agent sessions were open, one review and two contract drafts, and each was instructed to install, build, and execute nothing.
+Three agent sessions were open, one review and two contract drafts, each instructed to install, build, and execute nothing; no record shows their processes [INFERENCE: from the instructions, not from a process record].
+The FP-0014 worker's last recorded command ran at 11:23:13Z, before the runs.
 No processor-load reading was recorded.
 
 ## 4. Measurements
