@@ -11,6 +11,7 @@ A careless commit, a rewritten public commit, or a leaked credential is a defect
 
 On October 8, 2026, the owner authorized public development on the remote `origin`.
 The owner's instruction was to always commit and push.
+On October 9, 2026, the owner reported that pushing every commit floods CI and asked that batched pushes be codified here, as "Push rules" states.
 The remote URL is `git@github.com:mattneel/fairpane.git`.
 The integration branch is `master`.
 Do not create, rename to, or push a branch named `main`.
@@ -27,12 +28,12 @@ Public visibility does not select a license.
 6. Run the gates that the change affects.
 7. Commit with a message that follows the message rules.
 8. Run `git status --short` and confirm a clean working tree.
-9. Run `git push origin master`.
-10. Run `git status -sb` and confirm that `master` matches `origin/master`.
+9. At a push boundary, run `git push origin master`; otherwise keep the commit local and continue with the next checkpoint.
+10. After a push, run `git status -sb` and confirm that `master` matches `origin/master`.
 
 ## Commit rules
 
-- Commit each coherent checkpoint as soon as its checks pass, and push it immediately.
+- Commit each coherent checkpoint as soon as its checks pass, and push it at the next push boundary.
 - Keep one logical change in each commit.
 - Keep acceptance-policy changes, compiler upgrades, and implementation changes in separate commits.
 - Leave the repository check and controller tests passing at every commit on `master`.
@@ -43,6 +44,23 @@ Public visibility does not select a license.
   `engineering/evidence/.gitattributes` disables line-ending conversion there.
 - After an evidence commit, check each committed blob against the recorded digests.
 - Change line-ending normalization only in a dedicated commit.
+
+## Push rules
+
+Each push runs the full `Gates` workflow on Windows and on Linux for the pushed head, however many commits the push carries.
+One push for each commit floods CI, so commits are pushed in batches.
+
+- Push only at a push boundary:
+  - before a review request that names a commit, because reviewers read commits from `origin`;
+  - before an acceptance that needs the `Gates` run of a head that is still local;
+  - before dispatching the `Gates` workflow, which runs on the pushed head;
+  - before a session ends, and before the handoff names a head.
+- Push again only after the previous push's `Gates` run has concluded, unless a session is ending.
+- Dispatch the `Gates` workflow only when a contract requires dispatched runs.
+  One set of dispatched runs on a head serves every contract that asks for runs on that head.
+  Keep at most two dispatched runs queued or in progress at once.
+- Never cancel a run to make room: the acceptance rule in `docs/AGENT_OPERATIONS.md` requires a concluded run of the same head to replace a cancelled one.
+- Run the checks of the commit procedure before every commit, because a batch's run tests only its head.
 
 ## Message rules
 
