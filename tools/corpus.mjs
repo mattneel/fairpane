@@ -4,6 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
 import { invariant, readJson, writeJson, sha256, resolveExecutable } from './lib.mjs';
+import { FILE_SET_IDS, FILE_SET_RULES, classifyFileSet, deriveFileSet, fetchFileSet, verifyFileSet } from './fileset.mjs';
 
 const OID = /^[0-9a-f]{40}$/, HASH = /^[0-9a-f]{64}$/;
 const COMMIT_DATE = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d[+-]\d\d:\d\d$/;
@@ -334,11 +335,19 @@ export function validateSnapshotRecord(r, { allowFileUpstream = false } = {}) {
 }
 
 const isCount = n => Number.isSafeInteger(n) && n >= 0;
-/** A valid record has an explicit denominator: `selected + excluded + unclassified = discovered`. */
+/**
+ * A valid record has an explicit denominator: `selected + excluded + unclassified = discovered`.
+ * A Git corpus names its `commit`; a file-set corpus names its `version` and the `inventories` of its sources instead.
+ */
 export function validateApplicability(a) {
   invariant(a?.schema_version === 1, 'The applicability schema is invalid.');
   invariant(typeof a.corpus === 'string' && a.corpus.length > 0, 'Applicability needs a corpus ID.');
-  invariant(typeof a.commit === 'string' && OID.test(a.commit), 'Applicability needs a 40-hex corpus commit.');
+  if (FILE_SET_IDS.includes(a.corpus)) {
+    invariant(a.commit === undefined, 'File-set applicability names a version, not a commit.');
+    invariant(typeof a.version === 'string' && a.version.trim().length > 0, 'File-set applicability needs a version.');
+    const inventories = a.inventories && typeof a.inventories === 'object' ? Object.values(a.inventories) : [];
+    invariant(inventories.length > 0 && inventories.every(h => typeof h === 'string' && HASH.test(h)), 'File-set applicability needs its inventory digests.');
+  } else invariant(typeof a.commit === 'string' && OID.test(a.commit), 'Applicability needs a 40-hex corpus commit.');
   invariant(a.status === 'counted', 'Applicability status must be counted.');
   invariant(typeof a.discovery?.rule === 'string' && a.discovery.rule.trim(), 'Applicability needs an exact discovery rule.');
   invariant(Array.isArray(a.excluded), 'Applicability needs an exclusion list.');
@@ -502,8 +511,15 @@ async function replaceSnapshot(root, id, { upstream, ref, commit, corporaDir, ch
   }
 }
 
-/** Fetch the pinned commit: the `specs/corpora.json` revision, or else the commit of the existing snapshot record. */
-export async function fetchCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false } = {}) {
+/**
+ * Fetch the pinned commit: the `specs/corpora.json` revision, or else the commit of the existing snapshot record.
+ * A file-set corpus downloads its frozen sources instead; controller tests pass `rules` and `allowFileSources` for `file://` fixture sources.
+ */
+export async function fetchCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false,
+  rules = FILE_SET_RULES, allowFileSources = false } = {}) {
+  if (Object.hasOwn(rules, id)) {
+    return fetchFileSet(root, id, { corporaDir, policy: corpusPolicy(policyFile, id, allowFileUpstream), rule: rules[id], allowFileSources });
+  }
   corpusRule(id);
   const policy = corpusPolicy(policyFile, id, allowFileUpstream), recordFile = recordPath(root, id);
   let pins = policy, pinSource = 'specs/corpora.json';
@@ -524,6 +540,8 @@ export async function fetchCorpus(root, id, { corporaDir = corporaRoot(root), po
 
 /** Move a snapshot to the upstream branch head. The new commit needs a protected `specs/corpora.json` change before verification passes. */
 export async function repinCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false } = {}) {
+  invariant(!FILE_SET_IDS.includes(id), `corpus-repin does not apply to the file-set corpus ${id}: version selection is a contract decision. ` +
+    'A task contract freezes the sources in tools/fileset.mjs, and corpus-fetch downloads exactly those sources.');
   corpusRule(id);
   const policy = corpusPolicy(policyFile, id, allowFileUpstream);
   console.log(`Git: ${gitExecutable()} (${(await git(null, ['--version'])).toString('utf8').trim()})`);
@@ -535,10 +553,10 @@ export async function repinCorpus(root, id, { corporaDir = corporaRoot(root), po
       'specs/corpora.json pins nothing that differs from this snapshot.') };
 }
 
-/** List each corpus with a snapshot rule whose applicability record is missing or has no valid denominator. */
+/** List each pinnable corpus whose applicability record is missing or has no valid denominator. */
 function missingDenominators(root) {
   const missing = [];
-  for (const id of Object.keys(CORPUS_RULES)) {
+  for (const id of [...Object.keys(CORPUS_RULES), ...FILE_SET_IDS]) {
     const file = applicabilityPath(root, id);
     if (!fs.existsSync(file)) { missing.push({ corpus: id, reason: `Missing specs/applicability/${id}.json` }); continue; }
     try { validateApplicability(readJson(file)); } catch (e) { missing.push({ corpus: id, reason: e.message }); }
@@ -546,7 +564,18 @@ function missingDenominators(root) {
   return missing;
 }
 
-export async function verifyCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false } = {}) {
+export async function verifyCorpus(root, id, { corporaDir = corporaRoot(root), policyFile = defaultPolicyFile(root), allowFileUpstream = false,
+  allowFileSources = false } = {}) {
+  if (FILE_SET_IDS.includes(id)) {
+    const policy = corpusPolicy(policyFile, id, allowFileUpstream);
+    const { record, applicability } = verifyFileSet(root, id, { corporaDir, policy, discoveryKind: FILE_SET_RULES[id].discovery,
+      validateApplicability, allowFileSources });
+    const missing = missingDenominators(root);
+    return { result: missing.length ? 'incomplete' : 'pass', corpus: id, kind: 'file-set', version: record.version,
+      sources: record.sources.map(s => ({ id: s.id, size: s.size, sha256: s.sha256, inventory: s.inventory })),
+      selected: record.selected.length, derived: record.derived.length, applicability, missing_denominators: missing,
+      note: 'Verification rehashed the local sources, their inventories, and every selected, derived, and license file. It does not qualify any engine behavior.' };
+  }
   const { record, gitDir } = await loadSnapshot(root, id, corporaDir, allowFileUpstream);
   const policy = corpusPolicy(policyFile, id, allowFileUpstream), problems = [];
   const expect = (field, recorded, actual) => {
@@ -594,7 +623,13 @@ async function checkApplicability(root, id, gitDir, record, entries, manifest, p
 }
 
 /** Write `specs/applicability/<id>.json` from the local snapshot. No network access and no corpus code are used. */
-export async function classifyCorpus(root, id, { corporaDir = corporaRoot(root), allowFileUpstream = false } = {}) {
+export async function classifyCorpus(root, id, { corporaDir = corporaRoot(root), allowFileUpstream = false, allowFileSources = false } = {}) {
+  if (FILE_SET_IDS.includes(id)) {
+    const a = classifyFileSet(root, id, { corporaDir, discoveryKind: FILE_SET_RULES[id].discovery, allowFileSources });
+    validateApplicability(a);
+    writeJson(applicabilityPath(root, id), a);
+    return { result: 'pass', record: `specs/applicability/${id}.json`, ...a };
+  }
   const { record, gitDir } = await loadSnapshot(root, id, corporaDir, allowFileUpstream);
   await commitObject(gitDir, record.commit);
   const entries = await listTree(gitDir, record.commit);
@@ -610,9 +645,16 @@ export async function classifyCorpus(root, id, { corporaDir = corporaRoot(root),
   return { result: 'pass', record: `specs/applicability/${id}.json`, ...a };
 }
 
+/** Run each declared import-tool derivation of a file-set corpus and record it. */
+export async function deriveCorpus(root, id, { corporaDir = corporaRoot(root) } = {}) {
+  invariant(FILE_SET_IDS.includes(id), `corpus-derive applies only to the file-set corpora: ${FILE_SET_IDS.join(', ')}.`);
+  return deriveFileSet(root, id, { corporaDir, rule: FILE_SET_RULES[id] });
+}
+
 export async function corpusCommand(root, command, args) {
   invariant(args.length === 1, `Usage: ${command} <corpus-id>`);
-  const run = { 'corpus-fetch': fetchCorpus, 'corpus-repin': repinCorpus, 'corpus-verify': verifyCorpus, 'corpus-applicability': classifyCorpus }[command];
+  const run = { 'corpus-fetch': fetchCorpus, 'corpus-repin': repinCorpus, 'corpus-verify': verifyCorpus, 'corpus-applicability': classifyCorpus,
+    'corpus-derive': deriveCorpus }[command];
   invariant(run, `Unknown corpus command: ${command}`);
   return run(root, args[0]);
 }

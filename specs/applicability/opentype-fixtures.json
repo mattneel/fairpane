@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "corpus": "opentype-fixtures",
+  "version": "fixtures-1",
+  "inventories": {
+    "noto-cjk-otf": "68a3fc98800b2a27b371f2fb79991daf3633bd89309d4ffaa6946fd587f375b5",
+    "noto-sans": "7a89803f84f9f2d467a638fde34d41e21ca27db2a872214ad4932d4f766393f6",
+    "noto-sans-arabic": "b514d6c53440bec68de505c3ad51dbc3751b319c6acc613566681a20d8ca28f3",
+    "noto-sans-devanagari": "c846b179249d8a4e7f4104a70780b14ee0408d5edc4616b2f1c1235a551d9999"
+  },
+  "status": "counted",
+  "discovery": {
+    "rule": "Count the members of each zip source whose path ends in \".ttf\" or \".otf\", compared case-insensitively, and each file source whose URL ends in \".ttf\" or \".otf\". A font is selected when the record extracts it or derives a fixture from it. Every other font is unclassified.",
+    "command": "node tools/fairpane.mjs corpus-applicability opentype-fixtures"
+  },
+  "discovered": 741,
+  "selected": 4,
+  "excluded": [],
+  "unclassified": 737,
+  "breakdown": {
+    "by": "source ID",
+    "counts": {
+      "noto-cjk-otf": 1,
+      "noto-sans": 370,
+      "noto-sans-arabic": 185,
+      "noto-sans-devanagari": 185
+    }
+  }
+}

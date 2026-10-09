@@ -90,6 +90,15 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run the bootstrap Zig unit tests and the laboratory executable cases");
     test_step.dependOn(&run_tests.step);
 
+    const text_tests = b.addTest(.{ .root_module = b.createModule(.{
+        .root_source_file = b.path("tests/text/root.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{.{ .name = "fairpane", .module = module }},
+    }) });
+    const run_text_tests = b.addRunArtifact(text_tests);
+    test_step.dependOn(&run_text_tests.step);
+
     const lab_exe = b.addExecutable(.{
         .name = "fairpane-lab",
         .root_module = b.createModule(.{
@@ -141,6 +150,7 @@ pub fn build(b: *std.Build) void {
     const check_step = b.step("check", "Compile the library, the laboratory, and unit tests without execution");
     check_step.dependOn(&lib.step);
     check_step.dependOn(&unit_tests.step);
+    check_step.dependOn(&text_tests.step);
     check_step.dependOn(&lab_exe.step);
     check_step.dependOn(&lab_check.step);
 

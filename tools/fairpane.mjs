@@ -10,6 +10,7 @@ import { corpusCommand } from './corpus.mjs';
 import { AttestationError, candidateIdentity, candidateRepository, enclosingGitDirectories, isInside, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
 import { abiCheck, abiExports, abiGenerate } from './abi.mjs';
 import { lockedCompiler, provenanceStatement, reproduceCheck, reproduceExitCode, sourceArchive } from './release.mjs';
+import { ucdCheck, ucdGenerate } from './ucd.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command = 'help', ...args] = process.argv.slice(2);
@@ -36,10 +37,11 @@ function help() {
                               Run one command without a shell and append its
                               output and exit status to an evidence log.
   evidence-check <path>       Check a receipt against current inputs.
-  corpus-fetch <id>           Fetch the pinned commit into a fresh snapshot and write its record.
-  corpus-repin <id>           Move a snapshot to the upstream branch head and write its record.
-  corpus-applicability <id>   Count discovered tests in a local snapshot.
+  corpus-fetch <id>           Fetch the pinned commit, or the frozen file-set sources, into a fresh snapshot and write its record.
+  corpus-repin <id>           Move a Git snapshot to the upstream branch head and write its record. File sets refuse.
+  corpus-applicability <id>   Count discovered tests or files in a local snapshot.
   corpus-verify <id>          Recompute a local snapshot and compare its records and pins.
+  corpus-derive <id>          Run the declared import-tool derivations of a file-set corpus and record them.
   attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>
                               Verify a signed result against protected trust
                               input and a full commit ID in a candidate
@@ -64,6 +66,9 @@ function help() {
   reproduce-check <commit>    Build a full commit ID twice in fresh work trees
                               under out/ and exit with status 1 unless every
                               installed file matches.
+  ucd-generate                Read the imported UCD files and write src/unicode/tables.zig.
+  ucd-check                   Regenerate src/unicode/tables.zig in memory and exit with
+                              status 1 when the committed file differs.
   release-check               Check release prerequisites and fail closed.
   help                        Print these commands.
 
@@ -106,6 +111,9 @@ try {
   } else if (command === 'abi-exports') {
     if (args.length !== 1) throw new Error('Usage: abi-exports <repository-relative static library path>');
     const r = abiExports(root, args[0]); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
+  } else if (command === 'ucd-generate') output(ucdGenerate(root));
+  else if (command === 'ucd-check') {
+    const r = ucdCheck(root); output(r); process.exitCode = r.result === 'pass' ? 0 : 1;
   } else if (command === 'install-zig') output(await installZig(root));
   else if (command === 'run') {
     const rest = [...args], at = rest.indexOf('--evidence-dir');

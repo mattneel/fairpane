@@ -1,0 +1,58 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","-e","const fs=require('fs'),p=require('path');const files=['src/web_string.zig','src/unicode/properties_test.zig','src/unicode/reference_test.zig','tests/text/seed_test.zig','tests/text/fixture_test.zig','tests/text/synthetic_test.zig','tests/text/malformed_test.zig','tools/ucd.test.mjs','tools/fileset.test.mjs'];const seen=new Map();for(const f of files){for(const m of fs.readFileSync(f,'utf8').matchAll(/FP-0013 case (\\d+): [^\"'\\x60]*/g)){const n=+m[1];if(!seen.has(n))seen.set(n,[]);seen.get(n).push(f+': '+m[0]);}}for(let n=1;n<=49;n++){if(!seen.has(n)){console.log('MISSING case '+n);process.exitCode=1;continue;}for(const l of seen.get(n))console.log(l);}console.log('cases found: '+seen.size);"]
+tools/ucd.test.mjs: FP-0013 case 1: @missing lines apply in order, then data lines, and every value resolves through PropertyValueAliases.txt
+tools/ucd.test.mjs: FP-0013 case 2: a line without 
+src/unicode/reference_test.zig: FP-0013 case 3: an independent, test-only parser of the embedded UCD files.
+//! It is the generic reference path for the generated tables in 
+src/unicode/reference_test.zig: FP-0013 case 3: lookup equals an independent parse of the embedded UCD files for every code point
+tools/ucd.test.mjs: FP-0013 case 3: ucd-check passes on the committed files, every input names version 18.0.0, and the Zig reference test embeds every input
+tools/ucd.test.mjs: FP-0013 case 3: /);
+    for (const file of UCD_FILES) assert.ok(reference.includes(
+tools/ucd.test.mjs: FP-0013 case 4: one changed byte of tables.zig or of a UCD file makes ucd-check exit with status 1 and name the file and line
+src/unicode/properties_test.zig: FP-0013 case 5: every alias of the six enumerated properties resolves through fromAlias
+src/unicode/properties_test.zig: FP-0013 case 6: unlisted code points take the @missing defaults
+src/unicode/properties_test.zig: FP-0013 case 7: lookup rejects values above U+10FFFF and states version 18.0.0
+src/web_string.zig: FP-0013 case 8: View.codePoints pairs surrogates and keeps lone surrogates
+tests/text/seed_test.zig: FP-0013 case 9: the seed format rejects malformed seeds, and each committed seed decodes to its code points
+tests/text/seed_test.zig: FP-0013 case 10: every property of every seed equals unicode.lookup
+tests/text/seed_test.zig: FP-0013 case 11: every coverage entry of every seed matches glyphIndex on the embedded fixture
+tests/text/fixture_test.zig: FP-0013 case 12: each embedded font
+tests/text/fixture_test.zig: FP-0013 case 13: each fixture parses under .reject and equals every field of its expectation file
+tests/text/fixture_test.zig: FP-0013 case 14: the CJK subset is a CFF font whose name table keeps only IDs 0, 7, 13, and 14
+tests/text/synthetic_test.zig: FP-0013 case 15: B_TT builds deterministically with a whole-file sum of 0xB1B0AFBA and clean integrity
+tests/text/synthetic_test.zig: FP-0013 case 16: B_TT maps, measures, and describes its glyphs and optional tables
+tests/text/synthetic_test.zig: FP-0013 case 17: B_CFF exposes its CFF table and maps U+0041
+tests/text/malformed_test.zig: FP-0013 case 18: every proper prefix of B_TT and B_CFF fails, and a cut directory is Truncated
+tests/text/malformed_test.zig: FP-0013 case 19: numTables 0xFFFF on B_TT returns Truncated
+tests/text/malformed_test.zig: FP-0013 case 20: collection, WOFF, WOFF2, Type 1, and unknown sfnt versions are rejected by name
+tests/text/malformed_test.zig: FP-0013 case 21: records past the end of the font return TableOutOfBounds
+tests/text/malformed_test.zig: FP-0013 case 22: a head offset moved by 2 returns MisalignedTable
+tests/text/malformed_test.zig: FP-0013 case 23: unsorted and duplicate directory tags are rejected
+tests/text/malformed_test.zig: FP-0013 case 24: overlapping known tables are rejected, and an unknown table may overlap
+tests/text/malformed_test.zig: FP-0013 case 25: missing required tables and mixed outline formats are rejected
+tests/text/malformed_test.zig: FP-0013 case 26: checksum mismatches are reported or rejected
+tests/text/malformed_test.zig: FP-0013 case 27: malformed head tables return InvalidHead
+tests/text/malformed_test.zig: FP-0013 case 28: malformed maxp tables return InvalidMaxp
+tests/text/malformed_test.zig: FP-0013 case 29: malformed hhea and hmtx tables return InvalidHhea and InvalidHmtx
+tests/text/malformed_test.zig: FP-0013 case 30: malformed loca tables fail parsing, and malformed glyph headers fail on access
+tests/text/malformed_test.zig: FP-0013 case 31: malformed cmap headers return InvalidCmap, and no Unicode subtable returns NoUnicodeCmap
+tests/text/malformed_test.zig: FP-0013 case 32: malformed format 4 subtables return InvalidCmap even when unselected
+tests/text/malformed_test.zig: FP-0013 case 33: malformed format 12 subtables return InvalidCmap
+tests/text/malformed_test.zig: FP-0013 case 34: malformed name tables are rejected with the matching defect without failing the font
+tests/text/malformed_test.zig: FP-0013 case 35: OS/2 versions and lengths
+tests/text/malformed_test.zig: FP-0013 case 36: post lengths, glyph counts, string indexes, and versions
+tests/text/malformed_test.zig: FP-0013 case 37: malformed GSUB and GPOS tables are rejected with the matching defect
+tests/text/malformed_test.zig: FP-0013 case 38: GDEF versions, lengths, and offsets
+tests/text/malformed_test.zig: FP-0013 case 39: malformed CFF tables return InvalidCff
+tests/text/malformed_test.zig: FP-0013 case 40: font.parse takes no allocator
+tools/fileset.test.mjs: FP-0013 case 41: a zip with two stored members, one deflated member, and one directory yields the hand-computed inventory
+tools/fileset.test.mjs: FP-0013 case 42: the zip reader rejects ZIP64, encryption, 
+tools/fileset.test.mjs: FP-0013 case 43: corpus-fetch of file sources writes the record and extracted files, honors pins, and changes nothing on failure
+tools/fileset.test.mjs: FP-0013 case 44: corpus-verify fails for changed extracted and derived files, a missing source, a license mismatch, a count mismatch, and an upstream mismatch
+tools/fileset.test.mjs: FP-0013 case 45: file-set applicability reports the per-directory breakdown with an explicit denominator, and a zip without file members fails
+tools/fileset.test.mjs: FP-0013 case 46: corpus-repin unicode exits with status 1 and names the contract decision
+tools/fileset.test.mjs: FP-0013 case 47: record validation rejects missing license digests, releases, tool versions, input digests, argv, and reserved font names
+tools/fileset.test.mjs: FP-0013 case 48: every selected, derived, and license path of the committed unicode and opentype-fixtures records matches its size and SHA-256
+tools/fileset.test.mjs: FP-0013 case 49: the committed capability record validates with exactly the frozen obligations and existing owner tasks
+cases found: 49
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["-e","const fs=require('fs'),p=require('path');const files=['src/web_string.zig','src/unicode/properties_test.zig','src/unicode/reference_test.zig','tests/text/seed_test.zig','tests/text/fixture_test.zig','tests/text/synthetic_test.zig','tests/text/malformed_test.zig','tools/ucd.test.mjs','tools/fileset.test.mjs'];const seen=new Map();for(const f of files){for(const m of fs.readFileSync(f,'utf8').matchAll(/FP-0013 case (\\d+): [^\"'\\x60]*/g)){const n=+m[1];if(!seen.has(n))seen.set(n,[]);seen.get(n).push(f+': '+m[0]);}}for(let n=1;n<=49;n++){if(!seen.has(n)){console.log('MISSING case '+n);process.exitCode=1;continue;}for(const l of seen.get(n))console.log(l);}console.log('cases found: '+seen.size);"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T05:24:48.515Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":32}

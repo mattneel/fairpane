@@ -1,0 +1,112 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0013-cache-mutation"]
+test
++- run test 32 pass, 1 fail (33 total)
+error: 'malformed_test.test.FP-0013 case 23: unsorted and duplicate directory tags are rejected' failed:
+       expected error.UnsortedTableDirectory, found .{ .bytes = { 0, 1, 0, 0, 0, 13, 0, 128, 0, 3, 0, 80, 71, 68, 69, 70, 0, 1, 0, 0, 0, 0, 0, 220, 0, 0, 0, 12, 71, 80, 79, 83, 108, 145, 116, 143, 0, 0, 0, 232, 0, 0, 0, 32, 71, 83, 85, 66, 184, 255, 184, 254, 0, 0, 1, 8, 0, 0, 0, 48, 79, 83, 47, 50, 102, 40, 98, 236, 0, 0, 1, 56, 0, 0, 0, 96, 103, 108, 121, 102, 242, 212, 112, 212, 0, 0, 2, 16, 0, 0, 0, 80, 99, 109, 97, 112, 0, 134, 237, 186, 0, 0, 1, 152, 0, 0, 0, 120, 104, 101, 97, 100, 97, 118, 67, 161, 0, 0, 2, 96, 0, 0, 0, 54, 104, 104, 101, 97, 5, 112, 1, 148, 0, 0, 2, 152, 0, 0, 0, 36, 104, 109, 116, 120, 5, 80, 0, 60, 0, 0, 2, 188, 0, 0, 0, 14, 108, 111, 99, 97, 0, 57, 0, 49, 0, 0, 2, 204, 0, 0, 0, 10, 109, 97, 120, 112, 0, 8, 0, 10, 0, 0, 2, 216, 0, 0, 0, 32, 110, 97, 109, 101, 2, 117, 10, 154, 0, 0, 2, 248, 0, 0, 0, 56, 112, 111, 115, 116, 255, 159, 0, 50, 0, 0, 3, 48, 0, 0, 0, 32, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 10, 0, 28, 0, 30, 0, 1, 108, 97, 116, 110, 0, 8, 0, 4, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 10, 0, 44, 0, 46, 0, 2, 68, 70, 76, 84, 0, 14, 108, 97, 116, 110, 0, 24, 0, 4, 0, 0, 0, 0, 255, 255, 0, 0, 0, 4, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 4, 1, 194, 1, 144, 0, 5, 0, 0, 2, 138, 2, 88, 0, 0, 0, 75, 2, 138, 2, 88, 0, 0, 1, 94, 0, 50, 0, 250, 0, 0, 2, 11, 5, 2, 4, 5, 4, 2, 2, 4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 78, 79, 78, 69, 0, 64, 0, 32, 255, 255, 3, 32, 255, 56, 0, 0, 3, 32, 0, 200, 0, 0, 0, 1, 0, 0, 0, 0, 1, 244, 2, 188, 0, 0, 0, 32, 0, 1, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 28, 0, 3, 0, 1, 0, 0, 0, 28, 0, 3, 0, 10, 0, 0, 0, 68, 0, 4, 0, 40, 0, 0, 0, 6, 0, 4, 0, 1, 0, 2, 0, 32, 0, 65, 255, 255, 0, 0, 0, 32, 0, 65, 255, 255, 255, 225, 255, 193, 0, 1, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 32, 0, 0, 0, 32, 0, 0, 0, 1, 0, 0, 0, 65, 0, 0, 0, 65, 0, 0, 0, 2, 0, 1, 246, 0, 0, 1, 246, 0, 0, 0, 0, 3, 0, 1, 0, 50, 0, 0, 1, 194, 2, 188, 0, 3, 0, 0, 1, 1, 1, 1, 0, 50, 0, 0, 1, 144, 0, 0, 0, 0, 2, 188, 0, 0, 253, 68, 0, 1, 0, 10, 0, 0, 2, 78, 2, 188, 0, 2, 0, 0, 1, 1, 1, 0, 10, 1, 34, 1, 34, 0, 0, 2, 188, 253, 68, 0, 255, 255, 0, 10, 0, 0, 2, 78, 2, 188, 0, 2, 0, 2, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 244, 107, 38, 136, 95, 15, 60, 245, 0, 11, 3, 232, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 2, 78, 2, 188, 0, 0, 0, 8, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 32, 255, 56, 0, 0, 2, 88, 0, 0, 0, 0, 2, 78, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 244, 0, 50, 0, 250, 0, 0, 2, 88, 0, 10, 0, 10, 0, 0, 0, 0, 0, 17, 0, 17, 0, 32, 0, 40, 0, 0, 0, 1, 0, 0, 0, 4, 0, 4, 0, 1, 0, 3, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 2, 0, 30, 0, 3, 0, 1, 4, 9, 0, 1, 0, 12, 0, 0, 0, 3, 0, 1, 4, 9, 0, 2, 0, 14, 0, 12, 0, 70, 0, 80, 0, 32, 0, 77, 0, 105, 0, 110, 0, 82, 0, 101, 0, 103, 0, 117, 0, 108, 0, 97, 0, 114, 0, 3, 0, 0, 0, 0, 0, 0, 255, 156, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, .outline_kind = .truetype, .num_tables = 13, .known = .{ .values = { null, null, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... } } }, .integrity_result = .{ .mismatched = .{ .bits = .{ ... } }, .unknown_mismatches = 0, .head_adjustment_ok = true }, .head_table = .{ .major_version = 1, .minor_version = 0, .font_revision = 65536, .checksum_adjustment = 4100662920, .magic_number = 1594834165, .flags = 11, .units_per_em = 1000, .created = 0, .modified = 0, .x_min = 10, .y_min = 0, .x_max = 590, .y_max = 700, .mac_style = 0, .lowest_rec_ppem = 8, .font_direction_hint = 2, .index_to_loc_format = 0, .glyph_data_format = 0 }, .hhea_table = .{ .major_version = 1, .minor_version = 0, .ascender = 800, .descender = -200, .line_gap = 0, .advance_width_max = 600, .min_left_side_bearing = 0, .min_right_side_bearing = 0, .x_max_extent = 590, .caret_slope_rise = 1, .caret_slope_run = 0, .caret_offset = 0, .metric_data_format = 0, .number_of_h_metrics = 3 }, .maxp_table = .{ .version = 65536, .num_glyphs = 4, .v1 = .{ .max_points = 4, .max_contours = 1, .max_composite_points = 3, .max_composite_contours = 1, .max_zones = 2, .max_twilight_points = 0, .max_storage = 0, .max_function_defs = 0, .max_instruction_defs = 0, .max_stack_elements = 0, .max_size_of_instructions = 0, .max_component_elements = 1, .max_component_depth = 1 } }, .hmtx_table = .{ .bytes = { 1, 244, 0, 50, 0, 250, 0, 0, 2, 88, 0, 10, 0, 10 } }, .loca_table = .{ .table = .{ .bytes = { ... } }, .long = false }, .glyf_table = .{ .bytes = { 0, 1, 0, 50, 0, 0, 1, 194, 2, 188, 0, 3, 0, 0, 1, 1, 1, 1, 0, 50, 0, 0, 1, 144, 0, 0, 0, 0, 2, 188, 0, 0, 253, 68, 0, 1, 0, 10, 0, 0, 2, 78, 2, 188, 0, 2, 0, 0, 1, 1, 1, 0, 10, 1, 34, 1, 34, 0, 0, 2, 188, 253, 68, 0, 255, 255, 0, 10, 0, 0, 2, 78, 2, 188, 0, 2, 0, 2, 0, 0 } }, .cmap_table = .{ .table = .{ .bytes = { ... } }, .record_count = 3, .selection = .{ .platform_id = 3, .encoding_id = 10, .format = 12 }, .selected = .{ .bytes = { ... } } }, .cff_table = null }
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:634:9: 0x7ff7b204a6aa in expectError__func_841 (test_zcu.obj)
+               return error.TestExpectedError;
+               ^
+       C:\Users\requi\.omp\wt\td072b9a64\m\tests\text\malformed_test.zig:22:5: 0x7ff7b204a8e8 in expectParseError (test_zcu.obj)
+           try testing.expectError(expected, font.parse(bytes, .{}));
+           ^
+       C:\Users\requi\.omp\wt\td072b9a64\m\tests\text\malformed_test.zig:28:5: 0x7ff7b209ed9e in expectTtError (test_zcu.obj)
+           try expectParseError(expected, &set, &.{}, overrides);
+           ^
+       C:\Users\requi\.omp\wt\td072b9a64\m\tests\text\malformed_test.zig:94:5: 0x7ff7b209f279 in test.FP-0013 case 23: unsorted and duplicate directory tags are rejected (test_zcu.obj)
+           try expectTtError(error.UnsortedTableDirectory, &.{.{ .swap_records = .{ "cmap".*, "glyf".* } }});
+           ^
+failed command: ".\\out\\fp0013-cache-mutation\\o\\24d97e7fa1db09f452573d1906fa9298\\test.exe" "--cache-dir=.\\out\\fp0013-cache-mutation" --seed=0xc4cd0872 --listen=-
+
+Build Summary: 17/19 steps succeeded (1 failed); 140/141 tests passed (1 failed)
+test transitive failure
++- run test 108 pass (108 total) 288ms MaxRSS:17M
+|  +- compile test debug native success 4s MaxRSS:494M
++- run test 32 pass, 1 fail (33 total)
+|  +- compile test debug native success 3s MaxRSS:403M
++- FP-0007 case 13: case 2 passes with exit status 0 success 39ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:332M
++- FP-0007 case 13: case 3 fails with exit status 1 success 37ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 37ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 35ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 67ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 5ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 41ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:314M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 36ms
+   +- compile exe fairpane-lab-check debug native (reused)
+   +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0xc4cd0872 test --summary all --cache-dir out/fp0013-cache-mutation
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0013-cache-mutation"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T05:22:20.369Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":8147,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0013-cache-mutation"]
+test
++- run test 32 pass, 1 fail (33 total)
+error: 'malformed_test.test.FP-0013 case 23: unsorted and duplicate directory tags are rejected' failed:
+       expected error.UnsortedTableDirectory, found .{ .bytes = { 0, 1, 0, 0, 0, 13, 0, 128, 0, 3, 0, 80, 71, 68, 69, 70, 0, 1, 0, 0, 0, 0, 0, 220, 0, 0, 0, 12, 71, 80, 79, 83, 108, 145, 116, 143, 0, 0, 0, 232, 0, 0, 0, 32, 71, 83, 85, 66, 184, 255, 184, 254, 0, 0, 1, 8, 0, 0, 0, 48, 79, 83, 47, 50, 102, 40, 98, 236, 0, 0, 1, 56, 0, 0, 0, 96, 103, 108, 121, 102, 242, 212, 112, 212, 0, 0, 2, 16, 0, 0, 0, 80, 99, 109, 97, 112, 0, 134, 237, 186, 0, 0, 1, 152, 0, 0, 0, 120, 104, 101, 97, 100, 97, 118, 67, 161, 0, 0, 2, 96, 0, 0, 0, 54, 104, 104, 101, 97, 5, 112, 1, 148, 0, 0, 2, 152, 0, 0, 0, 36, 104, 109, 116, 120, 5, 80, 0, 60, 0, 0, 2, 188, 0, 0, 0, 14, 108, 111, 99, 97, 0, 57, 0, 49, 0, 0, 2, 204, 0, 0, 0, 10, 109, 97, 120, 112, 0, 8, 0, 10, 0, 0, 2, 216, 0, 0, 0, 32, 110, 97, 109, 101, 2, 117, 10, 154, 0, 0, 2, 248, 0, 0, 0, 56, 112, 111, 115, 116, 255, 159, 0, 50, 0, 0, 3, 48, 0, 0, 0, 32, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 10, 0, 28, 0, 30, 0, 1, 108, 97, 116, 110, 0, 8, 0, 4, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 10, 0, 44, 0, 46, 0, 2, 68, 70, 76, 84, 0, 14, 108, 97, 116, 110, 0, 24, 0, 4, 0, 0, 0, 0, 255, 255, 0, 0, 0, 4, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 4, 1, 194, 1, 144, 0, 5, 0, 0, 2, 138, 2, 88, 0, 0, 0, 75, 2, 138, 2, 88, 0, 0, 1, 94, 0, 50, 0, 250, 0, 0, 2, 11, 5, 2, 4, 5, 4, 2, 2, 4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 78, 79, 78, 69, 0, 64, 0, 32, 255, 255, 3, 32, 255, 56, 0, 0, 3, 32, 0, 200, 0, 0, 0, 1, 0, 0, 0, 0, 1, 244, 2, 188, 0, 0, 0, 32, 0, 1, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 28, 0, 3, 0, 1, 0, 0, 0, 28, 0, 3, 0, 10, 0, 0, 0, 68, 0, 4, 0, 40, 0, 0, 0, 6, 0, 4, 0, 1, 0, 2, 0, 32, 0, 65, 255, 255, 0, 0, 0, 32, 0, 65, 255, 255, 255, 225, 255, 193, 0, 1, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 32, 0, 0, 0, 32, 0, 0, 0, 1, 0, 0, 0, 65, 0, 0, 0, 65, 0, 0, 0, 2, 0, 1, 246, 0, 0, 1, 246, 0, 0, 0, 0, 3, 0, 1, 0, 50, 0, 0, 1, 194, 2, 188, 0, 3, 0, 0, 1, 1, 1, 1, 0, 50, 0, 0, 1, 144, 0, 0, 0, 0, 2, 188, 0, 0, 253, 68, 0, 1, 0, 10, 0, 0, 2, 78, 2, 188, 0, 2, 0, 0, 1, 1, 1, 0, 10, 1, 34, 1, 34, 0, 0, 2, 188, 253, 68, 0, 255, 255, 0, 10, 0, 0, 2, 78, 2, 188, 0, 2, 0, 2, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 244, 107, 38, 136, 95, 15, 60, 245, 0, 11, 3, 232, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 2, 78, 2, 188, 0, 0, 0, 8, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 32, 255, 56, 0, 0, 2, 88, 0, 0, 0, 0, 2, 78, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 244, 0, 50, 0, 250, 0, 0, 2, 88, 0, 10, 0, 10, 0, 0, 0, 0, 0, 17, 0, 17, 0, 32, 0, 40, 0, 0, 0, 1, 0, 0, 0, 4, 0, 4, 0, 1, 0, 3, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 2, 0, 30, 0, 3, 0, 1, 4, 9, 0, 1, 0, 12, 0, 0, 0, 3, 0, 1, 4, 9, 0, 2, 0, 14, 0, 12, 0, 70, 0, 80, 0, 32, 0, 77, 0, 105, 0, 110, 0, 82, 0, 101, 0, 103, 0, 117, 0, 108, 0, 97, 0, 114, 0, 3, 0, 0, 0, 0, 0, 0, 255, 156, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, .outline_kind = .truetype, .num_tables = 13, .known = .{ .values = { null, null, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... }, .{ ... } } }, .integrity_result = .{ .mismatched = .{ .bits = .{ ... } }, .unknown_mismatches = 0, .head_adjustment_ok = true }, .head_table = .{ .major_version = 1, .minor_version = 0, .font_revision = 65536, .checksum_adjustment = 4100662920, .magic_number = 1594834165, .flags = 11, .units_per_em = 1000, .created = 0, .modified = 0, .x_min = 10, .y_min = 0, .x_max = 590, .y_max = 700, .mac_style = 0, .lowest_rec_ppem = 8, .font_direction_hint = 2, .index_to_loc_format = 0, .glyph_data_format = 0 }, .hhea_table = .{ .major_version = 1, .minor_version = 0, .ascender = 800, .descender = -200, .line_gap = 0, .advance_width_max = 600, .min_left_side_bearing = 0, .min_right_side_bearing = 0, .x_max_extent = 590, .caret_slope_rise = 1, .caret_slope_run = 0, .caret_offset = 0, .metric_data_format = 0, .number_of_h_metrics = 3 }, .maxp_table = .{ .version = 65536, .num_glyphs = 4, .v1 = .{ .max_points = 4, .max_contours = 1, .max_composite_points = 3, .max_composite_contours = 1, .max_zones = 2, .max_twilight_points = 0, .max_storage = 0, .max_function_defs = 0, .max_instruction_defs = 0, .max_stack_elements = 0, .max_size_of_instructions = 0, .max_component_elements = 1, .max_component_depth = 1 } }, .hmtx_table = .{ .bytes = { 1, 244, 0, 50, 0, 250, 0, 0, 2, 88, 0, 10, 0, 10 } }, .loca_table = .{ .table = .{ .bytes = { ... } }, .long = false }, .glyf_table = .{ .bytes = { 0, 1, 0, 50, 0, 0, 1, 194, 2, 188, 0, 3, 0, 0, 1, 1, 1, 1, 0, 50, 0, 0, 1, 144, 0, 0, 0, 0, 2, 188, 0, 0, 253, 68, 0, 1, 0, 10, 0, 0, 2, 78, 2, 188, 0, 2, 0, 0, 1, 1, 1, 0, 10, 1, 34, 1, 34, 0, 0, 2, 188, 253, 68, 0, 255, 255, 0, 10, 0, 0, 2, 78, 2, 188, 0, 2, 0, 2, 0, 0 } }, .cmap_table = .{ .table = .{ .bytes = { ... } }, .record_count = 3, .selection = .{ .platform_id = 3, .encoding_id = 10, .format = 12 }, .selected = .{ .bytes = { ... } } }, .cff_table = null }
+       C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib\std\testing.zig:634:9: 0x7ff65f9fa6aa in expectError__func_841 (test_zcu.obj)
+               return error.TestExpectedError;
+               ^
+       C:\Users\requi\.omp\wt\td072b9a64\m\tests\text\malformed_test.zig:22:5: 0x7ff65f9fa8e8 in expectParseError (test_zcu.obj)
+           try testing.expectError(expected, font.parse(bytes, .{}));
+           ^
+       C:\Users\requi\.omp\wt\td072b9a64\m\tests\text\malformed_test.zig:28:5: 0x7ff65fa4f94e in expectTtError (test_zcu.obj)
+           try expectParseError(expected, &set, &.{}, overrides);
+           ^
+       C:\Users\requi\.omp\wt\td072b9a64\m\tests\text\malformed_test.zig:94:5: 0x7ff65fa4fe29 in test.FP-0013 case 23: unsorted and duplicate directory tags are rejected (test_zcu.obj)
+           try expectTtError(error.UnsortedTableDirectory, &.{.{ .swap_records = .{ "cmap".*, "glyf".* } }});
+           ^
+failed command: ".\\out\\fp0013-cache-mutation\\o\\548d67ff47b52e4b825aea41268374c4\\test.exe" "--cache-dir=.\\out\\fp0013-cache-mutation" --seed=0x3e4751fb --listen=-
+
+Build Summary: 17/19 steps succeeded (1 failed); 141/142 tests passed (1 failed)
+test transitive failure
++- run test 109 pass (109 total) 285ms MaxRSS:17M
+|  +- compile test debug native success 3s MaxRSS:495M
++- run test 32 pass, 1 fail (33 total)
+|  +- compile test debug native success 2s MaxRSS:404M
++- FP-0007 case 13: case 2 passes with exit status 0 success 37ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:333M
++- FP-0007 case 13: case 3 fails with exit status 1 success 34ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 34ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 35ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 63ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 9ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 13ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:314M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 34ms
+   +- compile exe fairpane-lab-check debug native (reused)
+   +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x3e4751fb test --summary all --cache-dir out/fp0013-cache-mutation
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0013-cache-mutation"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T05:28:12.093Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":6855,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

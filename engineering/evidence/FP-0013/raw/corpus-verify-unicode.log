@@ -1,0 +1,77 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-verify","unicode"]
+{
+  "result": "incomplete",
+  "corpus": "unicode",
+  "kind": "file-set",
+  "version": "18.0.0",
+  "sources": [
+    {
+      "id": "ucd-zip",
+      "size": 5657953,
+      "sha256": "7b3e555514060b92290d154f53655c5eb0fa62b16eb04c03434ff72d1a66a0d8",
+      "inventory": {
+        "entry_count": 71,
+        "total_bytes": 39580113,
+        "sha256": "37761bcf3660066413756e978f9d5ec7c7be3c187738f5d95785203c8dd8b2f4"
+      }
+    },
+    {
+      "id": "unicode-license",
+      "size": 1995,
+      "sha256": "e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96"
+    }
+  ],
+  "selected": 9,
+  "derived": 0,
+  "applicability": {
+    "discovered": 71,
+    "selected": 8,
+    "excluded": 0,
+    "unclassified": 63
+  },
+  "missing_denominators": [
+    {
+      "corpus": "opentype-fixtures",
+      "reason": "Missing specs/applicability/opentype-fixtures.json"
+    }
+  ],
+  "note": "Verification rehashed the local sources, their inventories, and every selected, derived, and license file. It does not qualify any engine behavior."
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-verify","unicode"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T05:23:46.157Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":269,"environment_overrides":{"FAIRPANE_CORPORA_DIR":"C:\\src\\fairpane\\.tools\\corpora"}}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-verify","unicode"]
+{
+  "result": "pass",
+  "corpus": "unicode",
+  "kind": "file-set",
+  "version": "18.0.0",
+  "sources": [
+    {
+      "id": "ucd-zip",
+      "size": 5657953,
+      "sha256": "7b3e555514060b92290d154f53655c5eb0fa62b16eb04c03434ff72d1a66a0d8",
+      "inventory": {
+        "entry_count": 71,
+        "total_bytes": 39580113,
+        "sha256": "37761bcf3660066413756e978f9d5ec7c7be3c187738f5d95785203c8dd8b2f4"
+      }
+    },
+    {
+      "id": "unicode-license",
+      "size": 1995,
+      "sha256": "e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96"
+    }
+  ],
+  "selected": 9,
+  "derived": 0,
+  "applicability": {
+    "discovered": 71,
+    "selected": 8,
+    "excluded": 0,
+    "unclassified": 63
+  },
+  "missing_denominators": [],
+  "note": "Verification rehashed the local sources, their inventories, and every selected, derived, and license file. It does not qualify any engine behavior."
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-verify","unicode"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T05:23:53.905Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":278,"environment_overrides":{"FAIRPANE_CORPORA_DIR":"C:\\src\\fairpane\\.tools\\corpora"}}

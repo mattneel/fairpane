@@ -1,0 +1,62 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","diff","--stat","HEAD","--","tools/workflow-check.mjs"]
+ tools/workflow-check.mjs | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["diff","--stat","HEAD","--","tools/workflow-check.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T05:24:43.138Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":19}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/wc-check/tools/workflow-check.test.mjs"]
+TAP version 13
+ok 1 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+ok 2 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+ok 3 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+ok 4 - FP-0033 3: A workflow permission other than contents: read fails
+ok 5 - FP-0033 3: A job permission other than contents: read fails
+ok 6 - FP-0033 4: continue-on-error on a step or a job fails
+ok 7 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+ok 8 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+ok 9 - FP-0033 4: A workflow_run trigger fails
+ok 10 - FP-0033 8: An expression outside the allowlist fails
+ok 11 - FP-0033 9: A gate step that can be skipped or rerouted fails
+ok 12 - FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+ok 13 - FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+ok 14 - FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+ok 15 - FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+ok 16 - FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+ok 17 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+ok 18 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+ok 19 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+1..19
+# tests 19
+# pass 19
+# fail 0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/wc-check/tools/workflow-check.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T05:24:43.206Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":44}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/workflow-check.test.mjs"]
+TAP version 13
+ok 1 - FP-0033 2-4, 6: Every workflow file has exactly its reviewed policy problems
+ok 2 - FP-0033: The Gates workflow runs the contract gates in order on pinned runner images
+ok 3 - FP-0033 2: A uses reference without a full 40-hex commit SHA fails
+ok 4 - FP-0033 3: A workflow permission other than contents: read fails
+ok 5 - FP-0033 3: A job permission other than contents: read fails
+ok 6 - FP-0033 4: continue-on-error on a step or a job fails
+ok 7 - FP-0033 4: Checkout that persists credentials or omits persist-credentials fails
+ok 8 - FP-0033 4: A pull_request_target trigger fails in mapping, list, and scalar form
+ok 9 - FP-0033 4: A workflow_run trigger fails
+ok 10 - FP-0033 8: An expression outside the allowlist fails
+ok 11 - FP-0033 9: A gate step that can be skipped or rerouted fails
+not ok 12 - FP-0033 12: The Gates workflow allowlists report every other key, action, input, command, and upload condition
+  ---
+  message: "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   'Line 22: uses actions/setup-node@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb # v7.1.0 is not a reviewed action commit.',\n+   'Line 31: uses actions/upload-artifact@cccccccccccccccccccccccccccccccccccccccc # v7.0.2 is not a reviewed action commit.'\n+ ]\n- []\n"
+  ...
+ok 13 - FP-0033 13: A run: value with a ${{ }} expression fails in every workflow
+ok 14 - FP-0033 14: A trigger other than push, pull_request, and workflow_dispatch fails
+ok 15 - FP-0033 15: A permission problem names the exact grants, so widening pages.yml fails its reviewed list
+ok 16 - FP-0033 16: A block scalar whose leading blank line has more spaces than its first content line fails to parse
+ok 17 - FP-0033: The parser reads the accepted subset and its block scalars exactly
+ok 18 - FP-0033: The parser rejects syntax outside its subset instead of guessing
+ok 19 - FP-0033 7: Characters that a YAML parser reads as line breaks or separators fail to parse
+1..19
+# tests 19
+# pass 18
+# fail 1
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/workflow-check.test.mjs"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T05:24:43.299Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":45}

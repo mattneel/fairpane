@@ -22,6 +22,9 @@ import { attestationCases, removeAttestationFixtures } from './attest.test.mjs';
 import { workflowCases } from './workflow-check.test.mjs';
 import { abiCases, removeAbiFixtures } from './abi.test.mjs';
 import { releaseCases, removeReleaseFixtures } from './release.test.mjs';
+import { ucdCases, removeUcdFixtures } from './ucd.test.mjs';
+import { fileSetCases, removeFileSetFixtures } from './fileset.test.mjs';
+import { FILE_SET_IDS } from './fileset.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cases = [], temporary = [];
@@ -224,6 +227,8 @@ for (const c of attestationCases) test(c.name, c.fn);
 for (const c of workflowCases) test(c.name, c.fn);
 for (const c of abiCases) test(c.name, c.fn);
 for (const c of releaseCases) test(c.name, c.fn);
+for (const c of ucdCases) test(c.name, c.fn);
+for (const c of fileSetCases) test(c.name, c.fn);
 test('15: release-check still exits with status 1', () => {
   const r = spawnSync(process.execPath, [path.join(root, 'tools/fairpane.mjs'), 'release-check'], { cwd: root, encoding: 'utf8', windowsHide: true });
   assert.equal(r.status, 1, r.stderr);
@@ -751,10 +756,15 @@ const wptManifest = oid => ({ items: {
   testharness: { dom: { 'a.html': [oid('dom/a.html'), [null, {}]],
     'b.any.js': [oid('dom/b.any.js'), ['dom/b.any.html', {}], ['dom/b.any.worker.html', {}]] } },
 }, url_base: '/', version: 9 });
-/** A counted record for the corpus that a fixture does not snapshot, so every applicability record has a denominator. */
+/** A counted record for a corpus that a fixture does not snapshot, so every applicability record has a denominator. */
 function otherApplicability(dir, id) {
-  writeJson(path.join(dir, 'specs/applicability', `${id}.json`), { schema_version: 1, corpus: id, commit: 'a'.repeat(40), status: 'counted',
+  const location = FILE_SET_IDS.includes(id) ? { version: 'fixture', inventories: { fixture: 'a'.repeat(64) } } : { commit: 'a'.repeat(40) };
+  writeJson(path.join(dir, 'specs/applicability', `${id}.json`), { schema_version: 1, corpus: id, ...location, status: 'counted',
     discovery: { rule: 'Fixture rule.' }, discovered: 1, selected: 0, excluded: [], unclassified: 1, breakdown: { by: 'fixture', counts: { fixture: 1 } } });
+}
+/** Counted records for every pinnable corpus except `id`. */
+function otherApplicabilities(dir, id) {
+  for (const other of ['test262', 'wpt', ...FILE_SET_IDS]) if (other !== id) otherApplicability(dir, other);
 }
 /** The repository's corpus policy with every pin removed, so a fixture snapshot meets only the pins that its test sets. */
 function unpinnedCorpora() {
@@ -780,7 +790,7 @@ async function corpusFixture(id, files, { manifest } = {}) {
   const upstream = readJson(policyFile).corpora.find(c => c.id === id).upstream;
   const record = await buildSnapshotRecord(g, { corpus: id, upstream, ref, commit, retrieved_at: '2026-10-08T00:00:00.000Z' }, { manifestFile });
   const recordFile = path.join(dir, 'specs/snapshots', `${id}.json`); writeJson(recordFile, record);
-  otherApplicability(dir, id === 'wpt' ? 'test262' : 'wpt');
+  otherApplicabilities(dir, id);
   const applicability = await classifyCorpus(dir, id, { corporaDir });
   return { dir, corporaDir, g, commit, record, recordFile, policyFile, manifestFile, applicability,
     applicabilityFile: path.join(dir, 'specs/applicability', `${id}.json`),
@@ -850,7 +860,7 @@ test('Verification fails when the license digest, the commit date, or an applica
 });
 test('corpus-verify exits with status 1 through the controller command on an inventory digest mismatch', async () => {
   const f = await corpusFixture('test262', T262_FILES);
-  for (const file of ['fairpane.mjs', 'lib.mjs', 'corpus.mjs', 'attest.mjs', 'abi.mjs', 'release.mjs']) put(f.dir, `tools/${file}`, fs.readFileSync(path.join(root, 'tools', file)));
+  for (const file of fs.readdirSync(path.join(root, 'tools')).filter(name => name.endsWith('.mjs'))) put(f.dir, `tools/${file}`, fs.readFileSync(path.join(root, 'tools', file)));
   const cli = () => spawnSync(process.execPath, [path.join(f.dir, 'tools/fairpane.mjs'), 'corpus-verify', 'test262'],
     { cwd: f.dir, encoding: 'utf8', env: { ...process.env, FAIRPANE_CORPORA_DIR: f.corporaDir }, windowsHide: true });
   const pass = cli();
@@ -1023,7 +1033,7 @@ function upstreamFixture() {
   };
   const options = policyFile => ({ corporaDir, policyFile, allowFileUpstream: true });
   const recordFile = path.join(dir, 'specs/snapshots/test262.json'), snapshot = snapshotGitDir(corporaDir, 'test262');
-  const classify = () => { otherApplicability(dir, 'wpt'); return classifyCorpus(dir, 'test262', { corporaDir, allowFileUpstream: true }); };
+  const classify = () => { otherApplicabilities(dir, 'test262'); return classifyCorpus(dir, 'test262', { corporaDir, allowFileUpstream: true }); };
   return { upstream, url, dir, corporaDir, first, policy, move, options, recordFile, snapshot, classify,
     fetch: policyFile => corpus.fetchCorpus(dir, 'test262', options(policyFile)),
     verify: policyFile => verifyCorpus(dir, 'test262', options(policyFile)) };
@@ -1099,6 +1109,8 @@ for (const dir of temporary.reverse()) {
 for (const problem of removeAttestationFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
 for (const problem of removeAbiFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
 for (const problem of removeReleaseFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+for (const problem of removeUcdFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+for (const problem of removeFileSetFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
 console.log(`1..${cases.length}`);
 console.log(`# tests ${cases.length}\n# pass ${cases.length - failures}\n# fail ${failures}`);
 console.log('# Scope: controller behavior only. No renderer or JavaScript conformance claim.');

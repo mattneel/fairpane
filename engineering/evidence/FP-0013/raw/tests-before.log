@@ -1,0 +1,141 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0013-cache-before"]
+test
++- run test
+   +- compile test debug native 2 errors
+src\font\opentype.zig:1:1: error: unable to load "opentype.zig": FileNotFound
+src\root.zig:6:26: note: file imported here
+pub const font = @import("font/opentype.zig");
+                         ^~~~~~~~~~~~~~~~~~~
+src\unicode\properties.zig:1:1: error: unable to load "properties.zig": FileNotFound
+src\root.zig:8:29: note: file imported here
+pub const unicode = @import("unicode/properties.zig");
+                            ^~~~~~~~~~~~~~~~~~~~~~~~
+error: 2 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0013-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- run test
+   +- compile test debug native 4 errors
+src\font\opentype.zig:1:1: error: unable to load "opentype.zig": FileNotFound
+src\root.zig:6:26: note: file imported here
+pub const font = @import("font/opentype.zig");
+                         ^~~~~~~~~~~~~~~~~~~
+src\unicode\properties.zig:1:1: error: unable to load "properties.zig": FileNotFound
+src\root.zig:8:29: note: file imported here
+pub const unicode = @import("unicode/properties.zig");
+                            ^~~~~~~~~~~~~~~~~~~~~~~~
+tests\text\malformed_test.zig:658:55: error: binary operator '*' has whitespace on one side, but not the other
+    try expectCffSpecError(.{ .prefix = &([_]u8{0x8B} ** 49 ++ [_]u8{ 0x0C, 0x07 }) }); // 49 operands
+                                                      ^
+tests\text\seed.zig:68:18: error: function parameter shadows declaration of 'object'
+fn requireFields(object: std.json.ObjectMap, comptime allowed: []const []const u8) Error!void {
+                 ^~~~~~
+tests\text\seed.zig:92:1: note: declared here
+fn object(value: std.json.Value) Error!std.json.ObjectMap {
+^~
+error: 4 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug --dep fairpane "-Mroot=tests\\text\\root.zig" -Odebug "-Mfairpane=src\\root.zig" --cache-dir "out\\fp0013-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 14/19 steps succeeded (2 failed)
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 2 errors
++- run test transitive failure
+|  +- compile test debug native 4 errors
++- FP-0007 case 13: case 2 passes with exit status 0 success 37ms
+|  +- install fairpane-lab success
+|     +- compile exe fairpane-lab debug native success 2s MaxRSS:333M
++- FP-0007 case 13: case 3 fails with exit status 1 success 37ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 success 40ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 success 38ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result success 36ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body success 66ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check success 10ms
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal success 14ms
+|  +- compile exe fairpane-lab-check debug native success 2s MaxRSS:314M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case success 39ms
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing success 35ms
+   +- compile exe fairpane-lab-check debug native (reused)
+   +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x119b6ad5 test --summary all --cache-dir out/fp0013-cache-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0013-cache-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T04:58:17.948Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":5537,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test","--summary","all","--cache-dir","out/fp0013-cache-before"]
+test
++- run test
+   +- compile test debug native 2 errors
+src\font\opentype.zig:1:1: error: unable to load "opentype.zig": FileNotFound
+src\root.zig:6:26: note: file imported here
+pub const font = @import("font/opentype.zig");
+                         ^~~~~~~~~~~~~~~~~~~
+src\unicode\properties.zig:1:1: error: unable to load "properties.zig": FileNotFound
+src\root.zig:8:29: note: file imported here
+pub const unicode = @import("unicode/properties.zig");
+                            ^~~~~~~~~~~~~~~~~~~~~~~~
+error: 2 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug --dep fairpane "-Mroot=tests\\text\\root.zig" -Odebug "-Mfairpane=src\\root.zig" --cache-dir "out\\fp0013-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+test
++- run test
+   +- compile test debug native 2 errors
+src\font\opentype.zig:1:1: error: unable to load "opentype.zig": FileNotFound
+src\root.zig:6:26: note: file imported here
+pub const font = @import("font/opentype.zig");
+                         ^~~~~~~~~~~~~~~~~~~
+src\unicode\properties.zig:1:1: error: unable to load "properties.zig": FileNotFound
+src\root.zig:8:29: note: file imported here
+pub const unicode = @import("unicode/properties.zig");
+                            ^~~~~~~~~~~~~~~~~~~~~~~~
+error: 2 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir "out\\fp0013-cache-before" --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 14/19 steps succeeded (2 failed)
+test transitive failure
++- run test transitive failure
+|  +- compile test debug native 2 errors
++- run test transitive failure
+|  +- compile test debug native 2 errors
++- FP-0007 case 13: case 2 passes with exit status 0 cached
+|  +- install fairpane-lab cached
+|     +- compile exe fairpane-lab debug native cached 34ms MaxRSS:18M
++- FP-0007 case 13: case 3 fails with exit status 1 cached
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 4 is unsupported with exit status 2 cached
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 1 is a harness error with exit status 3 cached
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: case 8 times out with exit status 4 cached
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 13: an unknown command exits with status 64 and writes no result cached
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body cached
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: the minimized case fails the same check cached
+|  +- install fairpane-lab (+1 more reused dependencies)
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: the minimized document body is 1-minimal cached
+|  +- compile exe fairpane-lab-check debug native cached 35ms MaxRSS:18M
+|  +- FP-0007 case 14: minimize reduces a failing fetch case with a 4096-byte body (+1 more reused dependencies)
++- FP-0007 case 14: minimize refuses a passing case cached
+|  +- install fairpane-lab (+1 more reused dependencies)
++- FP-0007 case 14: a refused minimization writes nothing cached
+   +- compile exe fairpane-lab-check debug native (reused)
+   +- FP-0007 case 14: minimize refuses a passing case (+1 more reused dependencies)
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x1a13a543 test --summary all --cache-dir out/fp0013-cache-before
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test","--summary","all","--cache-dir","out/fp0013-cache-before"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T04:58:44.385Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":130,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}

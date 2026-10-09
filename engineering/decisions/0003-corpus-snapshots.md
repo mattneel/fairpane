@@ -95,7 +95,9 @@ The controller enforces no operating-system network policy; it simply opens no c
 11. Write `specs/snapshots/<corpus-id>.json`.
 
 Each network operation has a one-hour watchdog.
-Only `wpt` and `test262` have fetch rules, because only they are Git corpora with known license files.
+Only `wpt` and `test262` have Git fetch rules, because only they are Git corpora with known license files.
+Task FP-0013 added the file-set kind for `unicode` and `opentype-fixtures`.
+`specs/README.md` describes that kind, and `engineering/evidence/FP-0013/CONTRACT.md` defines its records and fetch checks.
 
 Controller tests 19 through 21 run `corpus-fetch` and `corpus-repin` against local fixture upstreams.
 They pass an `allowFileUpstream` option that accepts a `file://` upstream in a fixture `corpora.json`.

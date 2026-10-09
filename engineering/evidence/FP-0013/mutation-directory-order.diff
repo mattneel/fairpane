@@ -1,0 +1,13 @@
+--- a/src/font/opentype.zig
++++ b/src/font/opentype.zig
+@@ -341,8 +341,8 @@
+         const record: TableRecord = .{ .tag = r.tagAt(at).?, .checksum = r.u32At(at + 4).?, .offset = r.u32At(at + 8).?, .length = r.u32At(at + 12).? };
+         if (i > 0) switch (std.mem.order(u8, &previous, &record.tag)) {
+             .lt => {},
+-            .eq => return error.DuplicateTable,
+-            .gt => return error.UnsortedTableDirectory,
++            .eq => {},
++            .gt => {},
+         };
+         previous = record.tag;
+         if (!r.fits(record.offset, record.length)) return error.TableOutOfBounds;

@@ -1,0 +1,31 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","corpus-applicability","unicode"]
+{
+  "result": "pass",
+  "record": "specs/applicability/unicode.json",
+  "schema_version": 1,
+  "corpus": "unicode",
+  "version": "18.0.0",
+  "inventories": {
+    "ucd-zip": "37761bcf3660066413756e978f9d5ec7c7be3c187738f5d95785203c8dd8b2f4"
+  },
+  "status": "counted",
+  "discovery": {
+    "rule": "Count the file members of each zip source; directory members are not counted. A member is selected when the record extracts it. Every other member is an unclassified later import.",
+    "command": "node tools/fairpane.mjs corpus-applicability unicode"
+  },
+  "discovered": 71,
+  "selected": 8,
+  "excluded": [],
+  "unclassified": 63,
+  "breakdown": {
+    "by": "first path component of each zip file member; \".\" for a member at the top level",
+    "counts": {
+      ".": 45,
+      "auxiliary": 11,
+      "emoji": 3,
+      "extracted": 12
+    }
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","corpus-applicability","unicode"],"cwd":"C:\\Users\\requi\\.omp\\wt\\td072b9a64\\m","started_at":"2026-10-09T05:23:45.833Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":275,"environment_overrides":{"FAIRPANE_CORPORA_DIR":"C:\\src\\fairpane\\.tools\\corpora"}}

@@ -2,10 +2,17 @@
 
 ## Status
 
-This file states requirements for later imports.
-Task FP-0003 imports no font, Unicode data, or CLDR data.
-The `unicode`, `cldr`, and `opentype-fixtures` entries in `specs/corpora.json` remain `not-fetched`.
+This file states the requirements for every Unicode, CLDR, and font-fixture import.
 Bracketed identifiers name primary sources in `specs/sources.json`.
+
+Task FP-0013 imports Unicode 18.0.0 data and four OpenType font fixtures as the file-set corpora `unicode` and `opentype-fixtures`.
+`specs/snapshots/unicode.json` and `specs/snapshots/opentype-fixtures.json` record their sources, extracted files, and derived files.
+The `unicode` import takes `ucd/UCD.zip` and eight of its members into `src/unicode/ucd/`, with `https://www.unicode.org/license.txt` beside them.
+Those members are `Scripts.txt`, `ScriptExtensions.txt`, `PropertyValueAliases.txt`, `extracted/DerivedBidiClass.txt`, `extracted/DerivedJoiningType.txt`, `extracted/DerivedGeneralCategory.txt`, `IndicSyllabicCategory.txt`, and `IndicPositionalCategory.txt`.
+Every other file of the table below remains a later import, which task FP-0055 owns.
+The `opentype-fixtures` import takes Noto Sans, Noto Sans Arabic, and Noto Sans Devanagari unchanged, and a recorded subset of Noto Sans CJK JP, into `tests/text/fonts/`.
+The `specs/corpora.json` entries keep their `not-fetched` status until a separate protected commit applies the reviewed pins.
+CLDR remains unimported.
 
 ## Common rules
 
@@ -56,6 +63,7 @@ The directory layout below was observed in the Unicode 18.0.0 directory. [S43]
 | `ucd/BidiBrackets.txt` | Paired bracket properties for the Unicode Bidirectional Algorithm (UAX #9) | [S14], [S27] |
 | `ucd/BidiMirroring.txt` | `Bidi_Mirroring_Glyph` for bidirectional mirroring (UAX #9) | [S14], [S27] |
 | `ucd/extracted/DerivedBidiClass.txt` | `Bidi_Class` values, including defaults for unassigned code points (UAX #9) | [S14], [S27] |
+| `ucd/extracted/DerivedGeneralCategory.txt` | `General_Category`, listed explicitly for every range including `Cn`; the qualification seeds and the Universal Shaping Engine categories; imported by FP-0013 | [S27], [S50] |
 | `ucd/Scripts.txt` | `Script` (UAX #24) and RegExp `Script` property escapes | [S38], [S30] |
 | `ucd/ScriptExtensions.txt` | `Script_Extensions` (UAX #24) and RegExp `Script_Extensions` property escapes | [S38], [S30] |
 | `ucd/VerticalOrientation.txt` | `Vertical_Orientation` (UAX #50) for CSS `text-orientation: mixed` | [S42], [S27] |

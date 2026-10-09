@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "family": "text-fonts",
+  "unicode_version": "18.0.0",
+  "obligations": [
+    {
+      "id": "unicode-properties",
+      "status": "implemented",
+      "owner_task": "FP-0013",
+      "summary": "General_Category, Script, Script_Extensions, Bidi_Class, Joining_Type, Indic_Syllabic_Category, and Indic_Positional_Category from the Unicode 18.0.0 UCD.",
+      "engine_behavior": "fairpane.unicode.lookup returns all seven properties for every code point from U+0000 to U+10FFFF without allocation and returns error.NotCodePoint above U+10FFFF."
+    },
+    {
+      "id": "opentype-core-tables",
+      "status": "implemented",
+      "owner_task": "FP-0013",
+      "summary": "The sfnt table directory and the head, hhea, maxp, hmtx, loca, glyf header, cmap, name, OS/2, post, CFF, GDEF, GSUB, and GPOS table headers.",
+      "engine_behavior": "fairpane.font.parse validates the directory and required tables without allocation, maps code points through cmap formats 4 and 12, returns advances and glyph headers, and reports optional-table defects as TableStatus values."
+    },
+    {
+      "id": "unicode-remaining-data",
+      "status": "remaining",
+      "owner_task": "FP-0055",
+      "summary": "Every other file of the specs/IMPORT_REQUIREMENTS.md table, including case mapping, normalization, segmentation, line breaking, emoji, IDNA, and the conformance test files.",
+      "engine_behavior": "No API. The engine has no Unicode data beyond the seven properties above."
+    },
+    {
+      "id": "bidi-algorithm",
+      "status": "remaining",
+      "owner_task": "FP-0015",
+      "summary": "The Unicode Bidirectional Algorithm (UAX #9) with paired brackets and mirroring.",
+      "engine_behavior": "No API. The engine exposes Bidi_Class only and resolves no embedding levels."
+    },
+    {
+      "id": "grapheme-segmentation",
+      "status": "remaining",
+      "owner_task": "FP-0015",
+      "summary": "Extended grapheme cluster boundaries (UAX #29) for caret movement and selection.",
+      "engine_behavior": "No API. The engine iterates code points only."
+    },
+    {
+      "id": "line-breaking",
+      "status": "remaining",
+      "owner_task": "FP-0015",
+      "summary": "Line break opportunities (UAX #14) integrated with inline layout.",
+      "engine_behavior": "No API."
+    },
+    {
+      "id": "shaping",
+      "status": "remaining",
+      "owner_task": "FP-0015",
+      "summary": "GSUB and GPOS lookups, Arabic joining, and Indic and Universal Shaping Engine reordering.",
+      "engine_behavior": "No API. GSUB and GPOS expose only their script tags, feature tags, and lookup counts; no lookup runs."
+    },
+    {
+      "id": "font-fallback",
+      "status": "remaining",
+      "owner_task": "FP-0015",
+      "summary": "Per-code-point font selection across a fallback list, including the uncovered-emoji seed.",
+      "engine_behavior": "No API. glyphIndex returns 0 for an unmapped code point, and nothing selects another font."
+    },
+    {
+      "id": "glyph-rasterization",
+      "status": "remaining",
+      "owner_task": "FP-0056",
+      "summary": "glyf outline and composite decoding, CFF Type 2 charstrings, and scan conversion.",
+      "engine_behavior": "No API. glyphHeader returns only the 10-byte glyf header, and no outline point, flag, component, or charstring is decoded."
+    },
+    {
+      "id": "truetype-hinting",
+      "status": "remaining",
+      "owner_task": "FP-0057",
+      "summary": "A decision on TrueType bytecode and CFF hinting and its implementation.",
+      "engine_behavior": "No API. Hinting instructions are never interpreted."
+    },
+    {
+      "id": "woff",
+      "status": "remaining",
+      "owner_task": "FP-0058",
+      "summary": "WOFF 1.0 decoding.",
+      "engine_behavior": "font.parse returns error.UnsupportedWoff for the wOFF signature."
+    },
+    {
+      "id": "woff2-brotli",
+      "status": "remaining",
+      "owner_task": "FP-0058",
+      "summary": "WOFF2 decoding with a first-party Brotli decoder.",
+      "engine_behavior": "font.parse returns error.UnsupportedWoff2 for the wOF2 signature."
+    },
+    {
+      "id": "font-collections",
+      "status": "remaining",
+      "owner_task": "FP-0059",
+      "summary": "TrueType and OpenType collections.",
+      "engine_behavior": "font.parse returns error.UnsupportedCollection for the ttcf signature."
+    },
+    {
+      "id": "cff2-and-variations",
+      "status": "remaining",
+      "owner_task": "FP-0059",
+      "summary": "CFF2 outlines, the item variation store, and fvar, avar, gvar, HVAR, and MVAR.",
+      "engine_behavior": "font.parse returns error.UnsupportedCff2 for a CFF font with a CFF2 table; variation tables are not read, so a variable font exposes only its default instance."
+    },
+    {
+      "id": "color-fonts",
+      "status": "remaining",
+      "owner_task": "FP-0060",
+      "summary": "COLR, CPAL, sbix, CBDT and CBLC, and SVG glyphs.",
+      "engine_behavior": "No API. Color and bitmap tables are not read."
+    },
+    {
+      "id": "vertical-metrics",
+      "status": "remaining",
+      "owner_task": "FP-0061",
+      "summary": "vhea, vmtx, and VORG.",
+      "engine_behavior": "No API. Vertical metric tables are not read."
+    },
+    {
+      "id": "cmap-variation-and-legacy-formats",
+      "status": "remaining",
+      "owner_task": "FP-0061",
+      "summary": "cmap format 14 variation sequences and the legacy and symbol cmap formats.",
+      "engine_behavior": "Formats 0, 2, 6, 8, 10, 13, and 14 pass only a header and length check, and font.parse returns error.NoUnicodeCmap when no (3, 10) or (0, 4) format 12 or (3, 1) or (0, 3) format 4 subtable exists."
+    },
+    {
+      "id": "layout-auxiliary-tables",
+      "status": "remaining",
+      "owner_task": "FP-0062",
+      "summary": "kern, BASE, JSTF, and MATH.",
+      "engine_behavior": "No API. These tables are not read."
+    },
+    {
+      "id": "platform-font-discovery",
+      "status": "remaining",
+      "owner_task": "FP-0063",
+      "summary": "Enumeration of installed fonts through narrow platform adapters.",
+      "engine_behavior": "No API. The engine parses only font bytes that its caller supplies."
+    }
+  ]
+}

@@ -38,6 +38,12 @@ pub const View = struct {
     pub fn order(self: View, other: View) std.math.Order {
         return std.mem.order(u16, self.units, other.units);
     }
+
+    /// Iterates code points as ECMAScript `CodePointAt` does, without allocating.
+    /// A lone surrogate yields its own code point, so the result is not always a scalar value.
+    pub fn codePoints(self: View) CodePointIterator {
+        return .{ .units = self.units };
+    }
 };
 
 /// An owned, immutable sequence of UTF-16 code units.
@@ -286,11 +292,11 @@ const Utf8Decoder = struct {
 /// Iterates code points as ECMAScript `CodePointAt` does.
 /// A high surrogate pairs only with an immediately following low surrogate.
 /// Every other surrogate yields its own surrogate code point.
-const CodePointIterator = struct {
+pub const CodePointIterator = struct {
     units: []const u16,
     index: usize = 0,
 
-    fn next(self: *CodePointIterator) ?u21 {
+    pub fn next(self: *CodePointIterator) ?u21 {
         if (self.index == self.units.len) return null;
         const first = self.units[self.index];
         self.index += 1;
@@ -654,4 +660,14 @@ test "an empty view rejects every index" {
     try testing.expectEqual(@as(usize, 0), empty.codeUnitLen());
     try testing.expectEqual(@as(?u16, null), empty.codeUnitAt(cu(0)));
     try testing.expectEqual(@as(?u16, null), empty.codeUnitAt(cu(std.math.maxInt(usize))));
+}
+
+test "FP-0013 case 8: View.codePoints pairs surrogates and keeps lone surrogates" {
+    const units = [_]u16{ 0x0041, 0xD800, 0xD83D, 0xDE00, 0xDC00 };
+    const view: View = .{ .units = &units };
+    var code_points = view.codePoints();
+    var seen: [8]u21 = undefined;
+    var count: usize = 0;
+    while (code_points.next()) |code_point| : (count += 1) seen[count] = code_point;
+    try testing.expectEqualSlices(u21, &.{ 0x41, 0xD800, 0x1F600, 0xDC00 }, seen[0..count]);
 }

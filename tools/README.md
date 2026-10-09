@@ -24,10 +24,11 @@ It does not publish code, change approval settings, or choose an account identit
 | `run <gate-id> [--evidence-dir <dir>]` | Executes a gate without a command shell and writes its receipt. |
 | `record [--cwd <dir>] [--env NAME=VALUE]... <log> <executable> [arguments...]` | Runs one command without a shell and appends its output and result to an evidence log. |
 | `evidence-check <path>` | Checks a passed receipt against current inputs and output artifacts. |
-| `corpus-fetch <id>` | Fetches the pinned corpus commit into a fresh snapshot and writes its record. |
-| `corpus-repin <id>` | Moves a corpus snapshot to the upstream branch head and writes its record. |
-| `corpus-applicability <id>` | Counts discovered tests in a local snapshot without network access or corpus code. |
+| `corpus-fetch <id>` | Fetches the pinned corpus commit, or the frozen file-set sources, into a fresh snapshot and writes its record. |
+| `corpus-repin <id>` | Moves a Git corpus snapshot to the upstream branch head and writes its record. A file-set corpus exits with status 1. |
+| `corpus-applicability <id>` | Counts discovered tests or files in a local snapshot without network access or corpus code. |
 | `corpus-verify <id>` | Recomputes a local snapshot and compares its records and `specs/corpora.json` pins. |
+| `corpus-derive <id>` | Runs the declared import-tool derivations of a file-set corpus, requires each output to match any existing fixture byte for byte, and records it. |
 | `attest-verify --repository <path> --trust-policy <path> --candidate <commit> <envelope>` | Verifies a signed result against protected trust input and a full commit ID in a candidate repository. |
 | `abi-generate` | Validates the ABI schema and failure scenarios, then writes `include/fairpane.h`, `src/abi_generated.zig`, and `tests/c/abi_layout.h`. |
 | `abi-check` | Regenerates the ABI files in memory and exits with status 1 when a committed file differs. |
@@ -35,6 +36,8 @@ It does not publish code, change approval settings, or choose an account identit
 | `source-archive <commit> <output-dir>` | Writes `fairpane-<commit>.tar` and `fairpane-<commit>.manifest.json` for a full commit ID into a directory outside the repository. |
 | `provenance <commit> <artifact>...` | Prints an unsigned in-toto statement with a SLSA provenance predicate for the artifacts. |
 | `reproduce-check <commit>` | Builds a full commit ID twice in fresh work trees under `out/reproduce/` and exits with status 1 unless every installed file matches. |
+| `ucd-generate` | Reads the imported UCD files under `src/unicode/ucd/` and writes `src/unicode/tables.zig`. |
+| `ucd-check` | Regenerates `src/unicode/tables.zig` in memory and exits with status 1, naming the first differing line, when the committed file differs. |
 | `release-check` | Reports unmet obligations and returns a nonzero status. |
 
 Each command uses this repository, independent of the caller's current directory.
@@ -244,6 +247,45 @@ The two trees have different paths, so an output that embeds its build path repo
 `tools/release.test.mjs` holds the FP-0027 cases, and `node tools/fairpane.mjs test` runs them.
 `node tools/release.test.mjs` runs those cases without the rest of the controller.
 They run `reproduce-check` with a stand-in compiler that runs the fixture commit's own `build.mjs`, so they need no Zig installation.
+## Generate the Unicode property tables
+
+`tools/ucd.mjs` reads the eight Unicode 18.0.0 files under `src/unicode/ucd/` and generates `src/unicode/tables.zig`.
+It applies each `# @missing:` line in file order and then each data line, so a later line overrides earlier defaults for its range.
+It resolves every value, including a long `@missing` value such as `Left_To_Right`, through `PropertyValueAliases.txt`.
+A `ScriptExtensions.txt` value of `<script>` means that the code point's Script value is its Script_Extensions value.
+An unknown value, a reversed range, a code point above `10FFFF`, or a data line without `;` fails generation with the file and line number.
+The generated header lists each input's path, byte size, and SHA-256, and it reproduces `src/unicode/ucd/license.txt`.
+
+1. Run `node tools/fairpane.mjs corpus-fetch unicode` to replace the inputs from the pinned sources.
+2. Run `node tools/fairpane.mjs ucd-generate`.
+3. Run `node tools/fairpane.mjs ucd-check`.
+4. Read the reported line on exit status 1.
+
+`tools/ucd.test.mjs` holds FP-0013 cases 1 through 4.
+`src/unicode/reference_test.zig` holds the Zig part of case 3, which parses the embedded files independently and compares every code point.
+
+## Import a file-set corpus
+
+`tools/fileset.mjs` freezes the sources of the `unicode` and `opentype-fixtures` corpora.
+A change to those sources needs a frozen task contract, so `corpus-repin` refuses a file-set corpus.
+
+1. Run `node tools/fairpane.mjs corpus-fetch <id>`.
+2. For `opentype-fixtures`, install fontTools as `engineering/dependencies.json` describes.
+3. For `opentype-fixtures`, run `node tools/fairpane.mjs corpus-derive opentype-fixtures`.
+4. Run `node tools/fairpane.mjs corpus-applicability <id>`.
+5. Run `node tools/fairpane.mjs corpus-verify <id>`.
+
+Install fontTools with these steps.
+
+1. Download the wheel that `engineering/dependencies.json` names into `.tools/downloads/`.
+2. Check its SHA-256 against the recorded digest.
+3. Run `python -m venv .tools/python/fonttools-4.66.1`.
+4. Run `.tools/python/fonttools-4.66.1/Scripts/python -m pip install --no-index --no-deps` with the verified wheel.
+
+`corpus-derive` runs only the frozen argument vector of each derived file and never changes an existing fixture.
+A different output fails the command, because the derivation is not reproducible.
+`tools/fonts/font_expectations.py` writes each font's expectation file with the same fontTools environment.
+`tools/fileset.test.mjs` holds FP-0013 cases 41 through 49, which read `file://` fixture sources and never use the network.
 
 ## Extend the controller
 
