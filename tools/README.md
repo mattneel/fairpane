@@ -223,9 +223,12 @@ These commands write local records only, and none of them signs, publishes, or u
 1. Select a full 40-hex commit ID.
 2. Run `node tools/fairpane.mjs source-archive <commit> <output-dir>` with an output directory outside the repository.
 3. Run `node tools/fairpane.mjs reproduce-check <commit>`.
-4. Check the tar's SHA-256 against its manifest, extract it into a new directory, and build there with `zig build -Doptimize=ReleaseSafe --prefix zig-out`.
-   Remove every inherited `ZIG_*` variable, and set only `ZIG_LOCAL_CACHE_DIR` and `ZIG_GLOBAL_CACHE_DIR` to fresh directories inside the new directory.
-5. Run `node tools/fairpane.mjs provenance <commit> <artifact>...` and save its standard output.
+4. Check the tar's SHA-256 against its manifest.
+5. Extract the tar into a new directory.
+6. Remove every inherited `ZIG_*` variable.
+7. Set `ZIG_LOCAL_CACHE_DIR` and `ZIG_GLOBAL_CACHE_DIR` to fresh directories inside the new directory.
+8. Run `zig build -Doptimize=ReleaseSafe --prefix zig-out` in the new directory.
+9. Run `node tools/fairpane.mjs provenance <commit> <artifact>...` and save its standard output.
 
 `source-archive` takes the tar from `git archive --format=tar --prefix=fairpane-<commit>/ <commit>` through the verifier's hardened Git calls.
 It also pins `core.autocrlf`, `core.eol`, and `tar.umask`, so user configuration cannot change the bytes.

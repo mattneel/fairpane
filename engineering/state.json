@@ -341,7 +341,7 @@
       "notes": []
     },
     "FP-0027": {
-      "status": "implemented",
+      "status": "accepted",
       "owner": "root-integrator",
       "evidence": [
         "engineering/evidence/FP-0027/README.md",
@@ -355,15 +355,18 @@
         "engineering/evidence/FP-0027/raw/r2-provenance.log",
         "engineering/evidence/FP-0027/raw/r2-reproduce-check.log",
         "engineering/evidence/FP-0027/raw/provenance-c0cbf85c65a51892318c7f4076d3a9b3e8842907.json",
-        "engineering/evidence/FP-0027/raw/fairpane-c0cbf85c65a51892318c7f4076d3a9b3e8842907.manifest.json"
+        "engineering/evidence/FP-0027/raw/fairpane-c0cbf85c65a51892318c7f4076d3a9b3e8842907.manifest.json",
+        "engineering/evidence/FP-0027/raw/r2-statement-copy-helper.mjs",
+        "engineering/evidence/FP-0027/raw/r2-statement-copy-helper.log"
       ],
-      "review": null,
+      "review": "engineering/evidence/FP-0027/reviews/review-3-accept.json",
       "notes": [
         "The frozen contract is engineering/evidence/FP-0027/CONTRACT.md, based on commit 97aa319.",
         "Commit 493edb6 implements it with 167 of 167 controller tests. The worker's real reproduce-check of ba3a352 reports different, which FP-0066 addresses.",
         "fairpane-review rejected 493edb6 and 2b766fa in reviews/review-1-reject.json because the real release records ran on ba3a352. Contract revision 1, frozen in 3531b1a, is implemented in ea3433a.",
         "The revision 1 release records ran on ea3433a, but provenance and reproduce-check executed from a checkout at 60c0c90 with an unchanged release-tool closure, and some README claims had no recorded output.",
-        "fairpane-review rejected revision 1 in reviews/review-2-reject.json. Contract revision 2, frozen in 3f45a3b, is implemented in c0cbf85, whose release records ran in one uninterrupted sequence from the main checkout at c0cbf85: source-archive, a release build with a recorded install tree, and provenance pass, and reproduce-check reports different for lib/fairpane.lib, which FP-0066 owns. Awaiting fairpane-review."
+        "fairpane-review rejected revision 1 in reviews/review-2-reject.json. Contract revision 2, frozen in 3f45a3b, is implemented in c0cbf85, whose release records ran in one uninterrupted sequence from the main checkout at c0cbf85: source-archive, a release build with a recorded install tree, and provenance pass, and reproduce-check reports different for lib/fairpane.lib, which FP-0066 owns.",
+        "fairpane-review accepted c0cbf85, ba28c19, and 6e142bb with five minor findings. The README wording findings are fixed in the acceptance commit. The process findings stand as recorded limits: the statement copy is checked by JSON deep equality rather than by sha256sum, the helper's write run and the manifest copy are not recorded commands, and the helper's digest was recorded after the sequence. docs/AGENT_OPERATIONS.md already requires recorded commands for every evidence step."
       ]
     },
     "FP-0028": {

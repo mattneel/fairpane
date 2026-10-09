@@ -1,0 +1,147 @@
+{
+  "verdict": "accept",
+  "reviewed_commits": [
+    "c0cbf85c65a51892318c7f4076d3a9b3e8842907",
+    "ba28c199714fbbdca1a1a6019b8500a50d9ead30",
+    "6e142bb9bb0d0e70bdc377f0c3d9df797d96644d"
+  ],
+  "summary": "I accept revision 2. I found no blocker or major finding, and five minor findings remain open.\n\nThe four code and document changes are present and correct.\n- ADR 0009:50-61 adds an externalParameters table and states that internalParameters is empty. The table matches provenanceStatement in tools/release.mjs:245-250: source {commit, tree}, command [...BUILD_COMMAND] (line 24 gives ['zig','build','-Doptimize=ReleaseSafe','--prefix','zig-out']), and toolchain {zig_version: lock.version, platform: hostPlatform(), archive_sha256: locked.sha256}. candidateIdentity (attest.mjs:197) enforces the full 40-hex commit. The ea3433a statement already has the same fields, so documenting them does not change what build type 1 means.\n- tools/README.md:226-227 states the tar digest check, the removal of every inherited ZIG_* variable, and the two fresh caches.\n- release.test.mjs:263 asserts that same.build_type_command equals [...BUILD_COMMAND], and case 4 (line 231) pins the literal value.\n- The README row for reproduce-diagnosis.log (line 35) no longer says the build was fresh.\n\nThe evidence sequence holds, checked against the reflog. c0cbf85 was committed at 10:24:09Z and ba28c19 at 10:28:58Z. r2-binding.log starts at 10:24:24.889Z with HEAD c0cbf85, an empty `status --porcelain --untracked-files=all --ignored` over exactly the 30 policy.json source_roots, Git, Node, and Zig versions, and an empty `[]` list of ZIG_* variables. Then come the two gates (10:24:25.370-10:24:57.330, both pass, with the same source 9d253d42…/235 and policy 020a784a…/22 fingerprints before and after, and 181 of 181 tests including ok 90-98 for FP-0027). Then source-archive into a new directory in %TEMP%, made with a non-recursive mkdir; sha256sum agrees on tar cf304d8c… and manifest 7e6b2b1d…. Then the release build in a new directory, made with a non-recursive mkdir:\n- sha256sum of the tar before extraction;\n- tar extraction;\n- zig build with environment_overrides showing only the two caches;\n- `find -type f` listing exactly include/fairpane.h and lib/fairpane.lib;\n- sha256sum 845b602f… and ba9a5ba9…, both recorded before provenance began at 10:25:59.539Z.\nProvenance subjects equal those digests. The manifest copy hashes the same as its source. reproduce-check c0cbf85 regenerated tar cf304d8c…, reported different for lib/fairpane.lib only, removed both trees, and exited 1. The final HEAD and status at 10:28:04Z match the opening ones. The timestamps show no gap. The withdrawn revision 1 claims now match the records (README:74, 76). The account of the hung job (README:80-83) is consistent with r1-release-build.log, whose build ended at 09:50:52.298+62.839s=09:51:55Z with no dangling COMMAND line, and with r1-binding.log at 10:10:32Z. The kind of process substitution, the cancellation method, and its time are prose only.\n\nRemaining problems:\n- The statement copy was checked with a JSON deep-equality helper, not with `sha256sum` beside its source, as revision 2 item 5 asks.\n- The helper's `write` run and the manifest copy are unrecorded.\n- The helper's digest was recorded at 10:29:09Z, after ba28c19 and outside the sequence.\n- README:95 says every revision 2 record ran in the sequence at c0cbf85. That is false for tests-r2.log (run at 3f45a3b) and for the helper log.\n- README:100 calls a `--stat` output 'the diff'.\n- README:33 still says the worker build had 'fresh caches' without a record.\n\nProtected policy: the policy digest moved from 70e1709e… (the FP-0011 gate at 10:08) to 020a784a… (FP-0027 at 10:24). Comparing the two committed manifests shows that only specs/sources.json changed among the policy-root files (26555 to 32193 bytes). Every protected path keeps the same digest. The pre-commit diff --stat for c0cbf85 touches no policy root. [INFERENCE] The change comes from c283c70 (FP-0008 contract freeze). The new sources.json entry describes text 'that the FP-0008 contract freezes'.\n\nThis change has no shell code, so it adds no access to the engine outside the embedding contract. I had no git tool. I read the working tree at HEAD 8dd827b, the reflog, and the committed records, and I did not view the commit diffs directly.",
+  "criteria": [
+    {
+      "criterion": "R2 change: ADR 0009 'Build type 1' documents the externalParameters schema (source.commit, source.tree, command, toolchain.zig_version, toolchain.platform, toolchain.archive_sha256)",
+      "met": true,
+      "evidence": "ADR 0009:50-61 has a six-row table and 'Its internalParameters object is empty.' Each row matches tools/release.mjs:245-250 (provenanceStatement) and BUILD_COMMAND at line 24. The platform row matches hostPlatform() together with the invariant at line 237 that the lock names that platform. The r2 statement (raw/provenance-c0cbf85….json) has exactly these fields, and the ea3433a statement has the same shape, so the documentation changes no existing meaning (ADR:64-65)."
+    },
+    {
+      "criterion": "R2 change: tools/README.md step 4 states the fresh caches, the removal of inherited ZIG_* variables, and the tar digest check before extraction",
+      "met": true,
+      "evidence": "tools/README.md:226 says 'Check the tar's SHA-256 against its manifest, extract it into a new directory, and build there…'. Line 227 says 'Remove every inherited ZIG_* variable, and set only ZIG_LOCAL_CACHE_DIR and ZIG_GLOBAL_CACHE_DIR to fresh directories inside the new directory.' tests-r2.log diff --stat shows 'tools/README.md | 3 ++-'."
+    },
+    {
+      "criterion": "R2 change: case 5 asserts that build_type_command equals BUILD_COMMAND",
+      "met": true,
+      "evidence": "tools/release.test.mjs:248 imports BUILD_COMMAND, and line 263 asserts `same.build_type_command` deepEqual `[...BUILD_COMMAND]`. Line 231 pins BUILD_COMMAND to the literal array. tests-r2.log shows 9 of 9 passing (before the commit), and controller-test ccd6d13d ok 94 passes on c0cbf85. No log shows the new assertion failing beforehand, which revision 2 does not require."
+    },
+    {
+      "criterion": "R2 change: the README row for raw/reproduce-diagnosis.log states what the log shows without claiming a fresh build",
+      "met": true,
+      "evidence": "README:35 now says 'A second extraction and build in the existing path … The log records no removal of the earlier tree or its caches, so it does not show a fresh build.' reproduce-diagnosis.log shows extraction into out/fp0027-build/a and 8 UTF-8 occurrences of the path. The 'same digest' claim holds because provenance.log (05:37:55Z, between the two builds) records 6682cffc… for the first build, and the diagnosis log records the same digest for the second."
+    },
+    {
+      "criterion": "Evidence 1: one uninterrupted sequence from the main checkout at c0cbf85, with HEAD, a status including ignored files for every source root, git/node/zig versions, and an empty list of inherited ZIG_* variables; no commit or source edit during it",
+      "met": true,
+      "evidence": "r2-binding.log at 10:24:24.889-10:24:25.233Z: cwd C:\\src\\fairpane, HEAD c0cbf85…, and an empty status with exit 0 whose path list equals the 30 policy.json source_roots, git 2.54.0.windows.1, node v26.7.0, zig 0.18.0-dev.120+9fe22a29b, and `[]` from a case-insensitive /^zig_/i filter of process.env. The reflog shows c0cbf85 at 10:24:09Z and ba28c19 at 10:28:58Z, with no HEAD move in between. The command timestamps run continuously from 10:24:24.889Z to 10:28:04.539Z. Caveats: the driver that ran the sequence is not preserved, and the statement-copy write and the manifest copy are not recorded commands (minor finding)."
+    },
+    {
+      "criterion": "Evidence 2: repo-check and controller-test with --evidence-dir engineering/evidence/FP-0027/gates",
+      "met": true,
+      "evidence": "gates/2026-10-09T10-24-25-369Z-repo-check-203be9dd.json passes (10:24:25.370-10:24:25.546Z). gates/2026-10-09T10-24-25-657Z-controller-test-ccd6d13d.json passes (10:24:25.658-10:24:57.330Z), and its log shows 1..181 with 181 passing, 0 failing, and ok 90-98 for FP-0027. Source 9d253d42…/235 and policy 020a784a…/22 are equal before and after. Both runs fall between the opening and closing binding records at HEAD c0cbf85."
+    },
+    {
+      "criterion": "Evidence 3: source-archive into a new directory outside the repository, with sha256sum of its tar and manifest",
+      "met": true,
+      "evidence": "r2-source-archive.log: a non-recursive `fs.mkdirSync` of %TEMP%\\fairpane-fp0027-r2-c0cbf85… exits 0, and it would fail with EEXIST on an existing path. source-archive exits 0 with tree c7ed6f8…, 966 files, tar 11253760 bytes cf304d8c…, and manifest 7e6b2b1d…. GNU sha256sum (10:24:57.885Z) prints the same two digests. The copied manifest header records the same commit, tree, tar digest, and git_version. Its 5810 lines fit 12 header lines, 966×6 entry lines, and 2 closing lines."
+    },
+    {
+      "criterion": "Evidence 4: release build in a directory that did not exist before, with the tar SHA-256 before extraction, the extraction, the build with only the two cache overrides, a recursive listing, and sha256sum of each installed file, all before any later step",
+      "met": true,
+      "evidence": "r2-release-build.log runs these steps in order:\n- a non-recursive mkdir of out\\fp0027-r2-release (10:24:57.977Z);\n- sha256sum of the tar, cf304d8c… (10:24:58.059Z), equal to the manifest;\n- tar.exe -xf … --strip-components 1, exit 0;\n- zig build -Doptimize=ReleaseSafe --prefix …\\zig-out, exit 0, whose environment_overrides holds exactly ZIG_LOCAL_CACHE_DIR and ZIG_GLOBAL_CACHE_DIR inside the new directory (runProcess adds only `env`, lib.mjs:387);\n- `find out/fp0027-r2-release/zig-out -type f` (10:25:59.375Z), listing include/fairpane.h and lib/fairpane.lib;\n- sha256sum (10:25:59.470Z), giving 845b602f… and ba9a5ba9….\nAll of this precedes provenance at 10:25:59.539Z. r2-binding.log records the absence of inherited ZIG_* variables. `-type f` would omit an installed symbolic link (note)."
+    },
+    {
+      "criterion": "Evidence 5: provenance for every listed file with subjects equal to the recorded digests, and copies of the statement and manifest with sha256sum of each copy beside its source",
+      "met": true,
+      "evidence": "r2-provenance.log: provenance c0cbf85 runs on both listed files and exits 0, with subjects fairpane.h 845b602f… and fairpane.lib ba9a5ba9…, equal to the release-build sha256sum. The toolchain digest a48ff20a… equals toolchains/zig.lock.json x86_64-windows. sha256sum prints 7e6b2b1d… for both the manifest and its copy. Partial deviation: the statement copy is checked by out/fp0027-statement-copy.mjs `check`, which prints 'equal' and exits 0 after a JSON deep-equality comparison, not by sha256sum beside a saved standard output. Reading both files, the copy is textually identical to the logged statement (a non-record check). Minor finding."
+    },
+    {
+      "criterion": "Evidence 6: reproduce-check on c0cbf85",
+      "met": true,
+      "evidence": "r2-reproduce-check.log: reproduce-check c0cbf85… from cwd C:\\src\\fairpane during the bound sequence. source_tar_sha256 cf304d8c… equals source-archive. build_type_command equals BUILD_COMMAND. Both builds exit 0 with fresh caches inside their trees. include/fairpane.h matches (845b602f…, equal to the release build). differing is ['lib/fairpane.lib'], removal.removed is true with no errors, and the exit status is 1. FP-0066 owns the path dependence."
+    },
+    {
+      "criterion": "Evidence 7: HEAD and status again after the last step",
+      "met": true,
+      "evidence": "r2-binding.log at 10:28:04.473Z shows HEAD c0cbf85…, and at 10:28:04.539Z an empty status over the same source roots. reproduce-check ended at 10:25:59.922Z + 124502 ms = 10:28:04.424Z."
+    },
+    {
+      "criterion": "Withdrawn revision 1 claims and the hung-job account match the records",
+      "met": true,
+      "evidence": "README:74 says 'No revision 1 log records the copy's digest.' README:76 says 'No revision 1 log records the installed file set or the installed files' digests.' The unsupported claims are gone. README:81 gives the end of the build as 09:51:55Z, which equals r1-release-build.log 09:50:52.298Z + 62839 ms. The log ends with that RESULT and has no dangling COMMAND, which fits the README's statement that the listing was not a recorded command. README:82's 60c0c90 checkout and empty release-tool diff match r1-binding.log 10:10:32Z. The kind of process substitution, the harness cancellation, and its time ('shortly before 10:10:32Z') have no recorded output."
+    },
+    {
+      "criterion": "No protected-policy change in revision 2",
+      "met": true,
+      "evidence": "Every protected path (AGENTS.md, docs/CHARTER.md, qualification.json, policy.json, gates.json, toolchains/zig.lock.json, specs/corpora.json) has the same SHA-256 in the ea3433a and c0cbf85 manifests. Among policy-root files, only specs/sources.json differs (26555 to 32193 bytes, 00817eb7… to f2a914af…), which explains the move of the policy digest from 70e1709e… (FP-0011 gate at 10:08) to 020a784a…. c0cbf85's pre-commit diff --stat (tests-r2.log) touches only the ADR, the evidence README, tools/README.md, and tools/release.test.mjs. [INFERENCE] The sources.json change belongs to c283c70 (FP-0008 freeze)."
+    },
+    {
+      "criterion": "Review 2 minor findings and notes resolved",
+      "met": true,
+      "evidence": "Major (unrecorded install set and digests): superseded by a recorded r2 listing and sha256sum, and the r1 claims are withdrawn. Minor (hung command not preserved): the README gives a prose account and explains the missing COMMAND line, and the r2 sequence had no hang. Minor (state.json 'ran on ea3433a'): state.json:362 now qualifies the 60c0c90 execution. Minor (ZIG_* not stripped in the manual build): resolved by recording the absence `[]` (r2-binding.log), the option review 2 offered. Minor (diagnosis row 'fresh'): resolved at README:35. Note (state evidence list): it now lists the r2 records, but it omits the preserved helper. Note (tests-after-r1 binding): tests-r2.log records HEAD and diff --stat, and the gate binds c0cbf85. Note (externalParameters schema and README step 4): resolved. Note (assert build_type_command): resolved at release.test.mjs:263."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0027/raw/r2-provenance.log",
+      "line": null,
+      "issue": "Revision 2 evidence item 5 asks for 'the copies of the statement and the manifest with `sha256sum` of each copy beside its source'. The manifest copy has that. The statement copy does not. Instead the log runs `node out/fp0027-statement-copy.mjs check …`, which parses the statement out of the log and compares it with the copy by isDeepStrictEqual (raw/r2-statement-copy-helper.mjs:13-14). That is semantic equality, not byte identity. The helper's `write` run, which created the copy, is not a recorded command, and neither is the manifest copy. The README (line 106) describes the check accurately, so no false claim is made, but the contract item is met only in substance. Reproduce: search raw/ for a sha256sum whose arguments include provenance-c0cbf85….json. There is none.",
+      "recommendation": "In future runs, save provenance's standard output to a file, as tools/README.md:228 instructs, and record `sha256sum` of that file and its committed copy. Record any copy operation through `record`. For this record, optionally log `sha256sum` of the committed statement next to a file extracted from the log."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0027/README.md",
+      "line": 95,
+      "issue": "'Every revision 2 record ran in one uninterrupted sequence from the main checkout at c0cbf85' is false for two records in the same table. tests-r2.log ran at 10:23:39Z with HEAD 3f45a3b and uncommitted edits (row 100 says 'Before the commit'). r2-statement-copy-helper.log ran at 10:29:09Z, after the final status (10:28:04Z) and after commit ba28c19 (reflog 1791541738, about 10:28:58Z). As a result, the helper's digest 9840cbb9… is bound to the file 3 minutes after the check at 10:25:59.772Z, not at check time.",
+      "recommendation": "Limit the sentence to the binding, gate, source-archive, release-build, provenance, and reproduce-check records. State that tests-r2.log precedes the commit and that the helper digest was recorded after the sequence."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0027/README.md",
+      "line": 100,
+      "issue": "The row says tests-r2.log records 'the diff of the revision 2 edits'. The log records only `git diff --stat` (four files, 20 insertions, 4 deletions), not the diff content. No record shows that c0cbf85, committed 30 s later, consists of exactly those edits.",
+      "recommendation": "Say 'the diff --stat of the revision 2 edits'. Alternatively, record `git diff` or `git diff --stat 3f45a3b c0cbf85` after the commit."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0027/README.md",
+      "line": 33,
+      "issue": "The worker row for raw/release-build.log still says the build used 'fresh caches'. The log records only extraction into out/fp0027-build/a and the build with cache overrides inside it. It records no creation of a new directory and no removal of earlier caches. This is the same kind of unsupported freshness claim that review 1 flagged for the diagnosis row, which revision 2 corrected at line 35.",
+      "recommendation": "Reword the row to state what the log shows: cache overrides inside out/fp0027-build/a, with no record that the directory or the caches were new."
+    },
+    {
+      "severity": "minor",
+      "path": "engineering/evidence/FP-0027/README.md",
+      "line": 82,
+      "issue": "The account of the hung revision 1 job ('a bash process substitution, which was not a recorded command', 'cancelled the job through the harness shortly before 10:10:32Z') has no recorded output. It is consistent with the records: r1-release-build.log ends with the zig build RESULT and no dangling COMMAND, and r1-binding.log resumes at 10:10:32Z. But the cancellation time is approximate, and the method is asserted, not logged. Review 2's minor finding asked for an explicit record or a separate log.",
+      "recommendation": "State explicitly that the job and its cancellation were not recorded, so the time and method come from the integrator's account, not from a log. Alternatively, attach the harness's job record if one exists."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/state.json",
+      "line": 343,
+      "issue": "The FP-0027 evidence list omits raw/r2-statement-copy-helper.mjs and raw/r2-statement-copy-helper.log. The README (line 108) relies on them for the statement-copy check.",
+      "recommendation": "Add both files to the evidence list."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0027/raw/r2-release-build.log",
+      "line": null,
+      "issue": "The listing uses `find … -type f`, which omits installed symbolic links. Revision 2 asks for 'a recursive listing of the installed files'. On this Windows build, the reproduce-check report independently found the same two files (include/fairpane.h and lib/fairpane.lib), so coverage is not in doubt here.",
+      "recommendation": "Use `find zig-out ! -type d` or a listing that names each entry's type, so that a symbolic link install is listed and covered by provenance."
+    },
+    {
+      "severity": "note",
+      "path": "engineering/evidence/FP-0027/README.md",
+      "line": 102,
+      "issue": "The policy fingerprint in the r2 gate receipts (020a784a…/22) differs from the r1 receipts (70e1709e…/22). The README does not mention or explain this. The committed manifests show that only specs/sources.json changed among the policy-root files, and no protected path changed. [INFERENCE] The change comes from c283c70 (FP-0008 freeze), not c0cbf85.",
+      "recommendation": "Note in the README that the policy digest changed between the revisions because of specs/sources.json, and that no protected path or FP-0027 file caused it."
+    },
+    {
+      "severity": "note",
+      "path": "tools/README.md",
+      "line": 226,
+      "issue": "Step 4 joins three instructions in one sentence ('Check …, extract …, and build …'), and line 227 joins two more. AGENTS.md 'Technical prose' requires one instruction per sentence in a procedure.",
+      "recommendation": "Split step 4 into separate numbered steps: check the digest, extract into a new directory, remove the ZIG_* variables and set the caches, and build."
+    }
+  ],
+  "commands_run": []
+}

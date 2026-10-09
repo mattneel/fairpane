@@ -30,7 +30,7 @@ The worker did not commit, so every real run below names that commit, not the im
 | `raw/fairpane-ba3a352bbc5123599d3183fd7e4306540636bea5.manifest.json` | The manifest of that run, copied from the temporary output directory outside the repository, and not signed. The integrator kept the 5611520-byte tar out of Git, because it duplicates the repository and `source-archive ba3a352` reproduces it; the manifest and the log record its SHA-256. |
 | `raw/reproduce-check-attempt-1.log` | Exit status 1 with result `error`. The locked compiler's build runner rejected the `--global-cache-dir` argument of the first implementation, which now passes the fresh caches through `ZIG_LOCAL_CACHE_DIR` and `ZIG_GLOBAL_CACHE_DIR`. |
 | `raw/reproduce-check.log` | Exit status 1 with result `different`. Both builds exit with status 0. `include/fairpane.h` matches, and `lib/fairpane.lib` differs between the two work trees. Both work trees were removed. |
-| `raw/release-build.log` | The source tar extracted into `out/fp0027-build/a` and built there with `zig build -Doptimize=ReleaseSafe` and fresh caches, with exit status 0. |
+| `raw/release-build.log` | The source tar extracted into `out/fp0027-build/a` and built there with `zig build -Doptimize=ReleaseSafe` and cache overrides inside that directory, with exit status 0. The log records no creation of a new directory and no removal of earlier caches. |
 | `raw/provenance.log` | `provenance` exits with status 0 for that build's `fairpane.lib`, SHA-256 `6682cffca19ad0109ca8303940a4ff98e7aedbab4fbed76f0d45ed0ff3678895`, and `fairpane.h`, with the builder `fairpane-local-unsigned`. |
 | `raw/reproduce-diagnosis.log` | A second extraction and build in the existing path `out/fp0027-build/a` produces the same `fairpane.lib` digest, and the library contains the build directory name 8 times. The log records no removal of the earlier tree or its caches, so it does not show a fresh build. |
 
@@ -92,12 +92,14 @@ The root integrator implemented contract revision 2 in `c0cbf85`.
 - Case 5 asserts the report's `build_type_command`.
 - The worker record above no longer calls the diagnosis build fresh.
 
-Every revision 2 record ran in one uninterrupted sequence from the main checkout at `c0cbf85`, with no commit or source edit during it.
+Every revision 2 record except `raw/tests-r2.log` and the helper records ran in one uninterrupted sequence from the main checkout at `c0cbf85`, with no commit or source edit during it.
+`raw/tests-r2.log` ran before the commit, at `3f45a3b` with the uncommitted revision 2 edits, and the helper's digests were recorded after the sequence.
 No step stopped responding.
+The policy fingerprint in the revision 2 gate receipts, `020a784a…`, differs from the revision 1 receipts' `70e1709e…`, because `c283c70` added sources S85 to S100 to the policy root `specs/sources.json`; no protected path changed.
 
 | Log | RESULT |
 | --- | --- |
-| `raw/tests-r2.log` | Before the commit, `HEAD` `3f45a3b`, the diff of the revision 2 edits, and `node tools/release.test.mjs` with 9 of 9 passing. |
+| `raw/tests-r2.log` | Before the commit, `HEAD` `3f45a3b`, `git diff --stat` of the revision 2 edits, and `node tools/release.test.mjs` with 9 of 9 passing. |
 | `raw/r2-binding.log` | `HEAD` `c0cbf85`, an empty status including ignored files for every source root, Git 2.54.0.windows.1, Node v26.7.0, Zig 0.18.0-dev.120+9fe22a29b, and an empty list `[]` of inherited `ZIG_*` variables. After the last step, `HEAD` is still `c0cbf85` and the status is still empty. |
 | `gates/2026-10-09T10-24-25-369Z-repo-check-203be9dd.json` | `pass` on `c0cbf85`. |
 | `gates/2026-10-09T10-24-25-657Z-controller-test-ccd6d13d.json` | `pass` on `c0cbf85`. |
