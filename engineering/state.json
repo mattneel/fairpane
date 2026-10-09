@@ -246,13 +246,25 @@
       ]
     },
     "FP-0014": {
-      "status": "active",
-      "owner": "fairpane-core worker FP0014Css",
-      "evidence": [],
+      "status": "implemented",
+      "owner": "fairpane-core worker FP0014Css, integrated by root-integrator",
+      "evidence": [
+        "engineering/evidence/FP-0014/README.md",
+        "engineering/evidence/FP-0014/gates/2026-10-09T11-43-15-320Z-repo-check-c749976d.json",
+        "engineering/evidence/FP-0014/gates/2026-10-09T11-43-15-648Z-controller-test-39b1d226.json",
+        "engineering/evidence/FP-0014/gates/2026-10-09T11-43-50-490Z-zig-fmt-239185c0.json",
+        "engineering/evidence/FP-0014/gates/2026-10-09T11-43-50-779Z-zig-test-64e8acf0.json",
+        "engineering/evidence/FP-0014/raw/tests-before.log",
+        "engineering/evidence/FP-0014/raw/mutation-cascade-origin.log",
+        "engineering/evidence/FP-0014/raw/integration-tests.log",
+        "engineering/evidence/FP-0014/raw/named-colors-check.log"
+      ],
       "review": null,
       "notes": [
         "The frozen contract is engineering/evidence/FP-0014/CONTRACT.md, drafted by worker FP0014Contract and frozen by the root integrator with the decisions it lists.",
-        "Tasks FP-0068 to FP-0074 own the obligations that the contract leaves unsupported."
+        "Tasks FP-0068 to FP-0074 own the obligations that the contract leaves unsupported.",
+        "Integrator amendments 1 (43edcec) and 2 (1323095) corrected the case 39 expected dump and replaced the two ZON tables with data-only Zig files.",
+        "Commit ef8ad1c implements it with 192 of 192 controller tests and 272 of 272 Zig tests, and the 148 named colors match the pinned Color 4 table. Awaiting fairpane-review."
       ]
     },
     "FP-0015": {

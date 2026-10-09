@@ -120,3 +120,23 @@ No cited source contradicted any other expected value.
 
 - Compare every row of `src/css/named_colors.zig` with the named-color table of `css-color-4/Overview.bs` at the pinned commit; the worker transcribed the rows from that table.
 - Record `HEAD` and status, then run `repo-check`, `controller-test`, `zig-fmt`, and `zig-test` with `--evidence-dir engineering/evidence/FP-0014/gates`.
+
+## Integration
+
+The integrator applied the patch without conflicts and committed it as `ef8ad1c`.
+The merged tree also holds the FP-0008, FP-0013, and FP-0050 changes that landed after the worker's base, and case 48 already uses the remap-failing backing allocator of commit `6771856`.
+
+`raw/named-colors-check.log` records `HEAD` `ef8ad1c`, a fresh download of `css-color-4/Overview.bs` at `58354dac99cc8783a9b7b28957ece56bb48579eb` with SHA-256 `5b0be760…`, and `raw/named-colors-check.mjs`.
+The script reads the 148 rows of section 6.1, checks each row's hexadecimal form against its decimal form, and compares the rows with `src/css/named_colors.zig` by position, name, and value.
+It reports 148 rows on each side and result `pass`, with exit status 0.
+
+One uninterrupted sequence ran on `ef8ad1c`, with no commit or source edit during it.
+`raw/integration-binding.log` records `HEAD` `ef8ad1c` and an empty status, including ignored files, for every source root before the gates, and both again after the last run.
+
+- `gates/2026-10-09T11-43-15-320Z-repo-check-c749976d.json`
+- `gates/2026-10-09T11-43-15-648Z-controller-test-39b1d226.json`, with 192 of 192 controller tests.
+- `gates/2026-10-09T11-43-50-490Z-zig-fmt-239185c0.json`
+- `gates/2026-10-09T11-43-50-779Z-zig-test-64e8acf0.json`
+
+`raw/integration-tests.log` runs `zig build test --summary all` with the fresh local cache `out/fp0014-integration-cache` and the recorded override `ZIG_GLOBAL_CACHE_DIR`: 65 of 65 build steps and 272 of 272 tests.
+`raw/integration-bun.log` records Bun 1.4.2 with 192 of 192 controller tests.

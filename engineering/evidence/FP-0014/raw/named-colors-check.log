@@ -1,0 +1,19 @@
+
+COMMAND ["C:\\Program Files\\Git\\cmd\\git.exe","rev-parse","HEAD"]
+ef8ad1c7c63fe9c1f7dbce0fcc4b56572b82d1c7
+RESULT {"executable":"C:\\Program Files\\Git\\cmd\\git.exe","arguments":["rev-parse","HEAD"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T11:50:22.171Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":18}
+
+COMMAND ["C:\\Windows\\system32\\curl.exe","-sfL","-o","out/fp0014-css-color-4-58354dac.bs","https://raw.githubusercontent.com/w3c/csswg-drafts/58354dac99cc8783a9b7b28957ece56bb48579eb/css-color-4/Overview.bs"]
+RESULT {"executable":"C:\\Windows\\system32\\curl.exe","arguments":["-sfL","-o","out/fp0014-css-color-4-58354dac.bs","https://raw.githubusercontent.com/w3c/csswg-drafts/58354dac99cc8783a9b7b28957ece56bb48579eb/css-color-4/Overview.bs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T11:50:22.254Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":229}
+
+COMMAND ["C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","out/fp0014-css-color-4-58354dac.bs","engineering/evidence/FP-0014/raw/named-colors-check.mjs","src/css/named_colors.zig"]
+5b0be760953b089dab7aac0c15dbd6fbf98ad275ed984eedd52d06e52e4f1e66 *out/fp0014-css-color-4-58354dac.bs
+eff1870c6bae9e90418bd089f14f79c5a6b6a0e8eafb4feea74f6c049b0b94de *engineering/evidence/FP-0014/raw/named-colors-check.mjs
+2395cefc91815d71bda2e9183141dee6bbbd8b5b881ee5796e216fba0f78f1c2 *src/css/named_colors.zig
+RESULT {"executable":"C:\\Program Files\\Git\\usr\\bin\\sha256sum.exe","arguments":["out/fp0014-css-color-4-58354dac.bs","engineering/evidence/FP-0014/raw/named-colors-check.mjs","src/css/named_colors.zig"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T11:50:22.542Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":16}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","engineering/evidence/FP-0014/raw/named-colors-check.mjs","out/fp0014-css-color-4-58354dac.bs","src/css/named_colors.zig"]
+specification rows: 148
+named_colors.zig rows: 148
+result: pass
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["engineering/evidence/FP-0014/raw/named-colors-check.mjs","out/fp0014-css-color-4-58354dac.bs","src/css/named_colors.zig"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T11:50:22.630Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
