@@ -1,0 +1,50 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","reproduce-check","ba3a352bbc5123599d3183fd7e4306540636bea5"]
+{
+  "result": "error",
+  "commit": "ba3a352bbc5123599d3183fd7e4306540636bea5",
+  "tree": "dd445a3b171ac0d88e95d9527e5d694e9cebcf9a",
+  "source_tar_sha256": "8a75c1c66e63ee333999fb035b1d6ec1ad90c30dcf58f832a467e8c740db9213",
+  "build_command": [
+    "zig",
+    "build",
+    "-Doptimize=ReleaseSafe",
+    "--prefix",
+    "zig-out"
+  ],
+  "work_trees": [
+    "C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\out\\reproduce\\ba3a352bbc51-usY4EB\\a",
+    "C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\out\\reproduce\\ba3a352bbc51-usY4EB\\b"
+  ],
+  "builds": [
+    {
+      "work_tree": "C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\out\\reproduce\\ba3a352bbc51-usY4EB\\a",
+      "executable": "C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe",
+      "arguments": [
+        "build",
+        "-Doptimize=ReleaseSafe",
+        "--prefix",
+        "C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\out\\reproduce\\ba3a352bbc51-usY4EB\\a\\zig-out",
+        "--cache-dir",
+        "C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\out\\reproduce\\ba3a352bbc51-usY4EB\\a\\.zig-cache",
+        "--global-cache-dir",
+        "C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\out\\reproduce\\ba3a352bbc51-usY4EB\\a\\.zig-global-cache"
+      ],
+      "exit_code": 1,
+      "signal": null,
+      "timed_out": false,
+      "error": null,
+      "duration_ms": 123,
+      "stdout": "",
+      "stderr": "info: to access the help menu: zig build -h\nerror: unrecognized argument: --global-cache-dir\nerror: the following build command exited with code 1:\nC:\\Users\\requi\\AppData\\Local\\zig\\o\\253f29e51d3f235ff7bb0cfb57b92bf7\\maker.exe build --zig-lib=C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib --zig=C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe --global-cache=C:\\Users\\requi\\AppData\\Local\\zig --seed=0x7d9406de -Doptimize=ReleaseSafe --prefix C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\out\\reproduce\\ba3a352bbc51-usY4EB\\a\\zig-out --cache-dir C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\out\\reproduce\\ba3a352bbc51-usY4EB\\a\\.zig-cache --global-cache-dir C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\out\\reproduce\\ba3a352bbc51-usY4EB\\a\\.zig-global-cache\n"
+    }
+  ],
+  "files": [],
+  "differing": [],
+  "error": "The build in C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m\\out\\reproduce\\ba3a352bbc51-usY4EB\\a failed: exit status 1.",
+  "removal": {
+    "removed": true,
+    "errors": []
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","reproduce-check","ba3a352bbc5123599d3183fd7e4306540636bea5"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m","started_at":"2026-10-09T05:32:52.310Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":892}

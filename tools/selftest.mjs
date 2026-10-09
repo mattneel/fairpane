@@ -21,6 +21,7 @@ import * as corpus from './corpus.mjs';
 import { attestationCases, removeAttestationFixtures } from './attest.test.mjs';
 import { workflowCases } from './workflow-check.test.mjs';
 import { abiCases, removeAbiFixtures } from './abi.test.mjs';
+import { releaseCases, removeReleaseFixtures } from './release.test.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cases = [], temporary = [];
@@ -222,6 +223,7 @@ test('1: A forged local receipt passes validateReceipt without gate execution', 
 for (const c of attestationCases) test(c.name, c.fn);
 for (const c of workflowCases) test(c.name, c.fn);
 for (const c of abiCases) test(c.name, c.fn);
+for (const c of releaseCases) test(c.name, c.fn);
 test('15: release-check still exits with status 1', () => {
   const r = spawnSync(process.execPath, [path.join(root, 'tools/fairpane.mjs'), 'release-check'], { cwd: root, encoding: 'utf8', windowsHide: true });
   assert.equal(r.status, 1, r.stderr);
@@ -848,7 +850,7 @@ test('Verification fails when the license digest, the commit date, or an applica
 });
 test('corpus-verify exits with status 1 through the controller command on an inventory digest mismatch', async () => {
   const f = await corpusFixture('test262', T262_FILES);
-  for (const file of ['fairpane.mjs', 'lib.mjs', 'corpus.mjs', 'attest.mjs', 'abi.mjs']) put(f.dir, `tools/${file}`, fs.readFileSync(path.join(root, 'tools', file)));
+  for (const file of ['fairpane.mjs', 'lib.mjs', 'corpus.mjs', 'attest.mjs', 'abi.mjs', 'release.mjs']) put(f.dir, `tools/${file}`, fs.readFileSync(path.join(root, 'tools', file)));
   const cli = () => spawnSync(process.execPath, [path.join(f.dir, 'tools/fairpane.mjs'), 'corpus-verify', 'test262'],
     { cwd: f.dir, encoding: 'utf8', env: { ...process.env, FAIRPANE_CORPORA_DIR: f.corporaDir }, windowsHide: true });
   const pass = cli();
@@ -1096,6 +1098,7 @@ for (const dir of temporary.reverse()) {
 }
 for (const problem of removeAttestationFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
 for (const problem of removeAbiFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
+for (const problem of removeReleaseFixtures()) { failures++; console.error(`Temporary fixture cleanup failed: ${problem}`); }
 console.log(`1..${cases.length}`);
 console.log(`# tests ${cases.length}\n# pass ${cases.length - failures}\n# fail ${failures}`);
 console.log('# Scope: controller behavior only. No renderer or JavaScript conformance claim.');

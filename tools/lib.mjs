@@ -111,20 +111,19 @@ export function hostPlatform(platform = process.platform, arch = process.arch) {
   invariant(a && o, `No locked archive exists for ${platform}/${arch}.`);
   return `${a}-${o}`;
 }
-export function compilerPath(root) {
-  const lock = readJson(safePath(root, 'toolchains/zig.lock.json'));
+/** The locked compiler's path for this host. `lock` defaults to the working tree's lock, and a caller can pass a commit's lock. */
+export function compilerPath(root, lock = readJson(safePath(root, 'toolchains/zig.lock.json'))) {
   validateLock(lock);
   const target = hostPlatform();
   invariant(lock.platforms[target], `No locked artifact exists for ${target}.`);
   return path.join(root, '.tools', 'zig', lock.version, target, process.platform === 'win32' ? 'zig.exe' : 'zig');
 }
-export function checkCompiler(root) {
-  const compiler = compilerPath(root);
+export function checkCompiler(root, lock = readJson(safePath(root, 'toolchains/zig.lock.json'))) {
+  const compiler = compilerPath(root, lock);
   invariant(fs.existsSync(compiler), 'The locked compiler is absent. Run the local compiler installer.');
   const result = spawnSync(compiler, ['version'], { encoding: 'utf8', timeout: 30000, windowsHide: true });
   invariant(!result.error && result.status === 0, `Compiler version check failed: ${result.error?.message ?? result.stderr}`);
-  const expected = readJson(safePath(root, 'toolchains/zig.lock.json')).version;
-  invariant(result.stdout.trim() === expected, `Compiler mismatch: expected ${expected}, found ${result.stdout.trim()}.`);
+  invariant(result.stdout.trim() === lock.version, `Compiler mismatch: expected ${lock.version}, found ${result.stdout.trim()}.`);
   return compiler;
 }
 export function verifyArchive(file, artifact) {

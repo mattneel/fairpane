@@ -1,0 +1,66 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/fairpane.mjs","provenance","ba3a352bbc5123599d3183fd7e4306540636bea5","out/fp0027-build/a/zig-out/lib/fairpane.lib","out/fp0027-build/a/zig-out/include/fairpane.h"]
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "fairpane.lib",
+      "digest": {
+        "sha256": "6682cffca19ad0109ca8303940a4ff98e7aedbab4fbed76f0d45ed0ff3678895"
+      }
+    },
+    {
+      "name": "fairpane.h",
+      "digest": {
+        "sha256": "845b602f10c46a62bc29897a649200bcef8e57a477cff23bb91bc170d216b410"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://github.com/mattneel/fairpane/blob/master/engineering/decisions/0009-release-and-stewardship.md#build-type-1",
+      "externalParameters": {
+        "source": {
+          "commit": "ba3a352bbc5123599d3183fd7e4306540636bea5",
+          "tree": "dd445a3b171ac0d88e95d9527e5d694e9cebcf9a"
+        },
+        "command": [
+          "zig",
+          "build",
+          "-Doptimize=ReleaseSafe",
+          "--prefix",
+          "zig-out"
+        ],
+        "toolchain": {
+          "zig_version": "0.18.0-dev.120+9fe22a29b",
+          "platform": "x86_64-windows",
+          "archive_sha256": "a48ff20a7357640cf67ad7be819d3f988e9a5085362fe67dc9b94e02a42571ae"
+        }
+      },
+      "internalParameters": {},
+      "resolvedDependencies": [
+        {
+          "name": "fairpane-ba3a352bbc5123599d3183fd7e4306540636bea5",
+          "digest": {
+            "gitCommit": "ba3a352bbc5123599d3183fd7e4306540636bea5",
+            "gitTree": "dd445a3b171ac0d88e95d9527e5d694e9cebcf9a"
+          }
+        },
+        {
+          "name": "zig-x86_64-windows-0.18.0-dev.120+9fe22a29b",
+          "uri": "https://ziglang.org/builds/zig-x86_64-windows-0.18.0-dev.120+9fe22a29b.zip",
+          "digest": {
+            "sha256": "a48ff20a7357640cf67ad7be819d3f988e9a5085362fe67dc9b94e02a42571ae"
+          }
+        }
+      ]
+    },
+    "runDetails": {
+      "builder": {
+        "id": "fairpane-local-unsigned"
+      }
+    }
+  }
+}
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/fairpane.mjs","provenance","ba3a352bbc5123599d3183fd7e4306540636bea5","out/fp0027-build/a/zig-out/lib/fairpane.lib","out/fp0027-build/a/zig-out/include/fairpane.h"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t57b458d75\\m","started_at":"2026-10-09T05:37:55.769Z","exit_code":0,"signal":null,"timed_out":false,"error":null,"duration_ms":147}

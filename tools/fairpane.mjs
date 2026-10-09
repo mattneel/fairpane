@@ -9,6 +9,7 @@ import { readJson, checkRepository, readyTasks, qualificationProblems, fingerpri
 import { corpusCommand } from './corpus.mjs';
 import { AttestationError, candidateIdentity, candidateRepository, enclosingGitDirectories, isInside, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
 import { abiCheck, abiExports, abiGenerate } from './abi.mjs';
+import { lockedCompiler, provenanceStatement, reproduceCheck, reproduceExitCode, sourceArchive } from './release.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [command = 'help', ...args] = process.argv.slice(2);
@@ -52,6 +53,17 @@ function help() {
   abi-exports <library>       Exit with status 1 when a static library exports
                               an fp_ symbol that the schema does not declare or
                               lacks one that it declares.
+  source-archive <commit> <output-dir>
+                              Write fairpane-<commit>.tar and its manifest for a
+                              full commit ID into a directory outside the
+                              repository. The path resolves from the current
+                              directory.
+  provenance <commit> <artifact>...
+                              Print an unsigned in-toto statement with a SLSA
+                              provenance predicate. It is not an attestation.
+  reproduce-check <commit>    Build a full commit ID twice in fresh work trees
+                              under out/ and exit with status 1 unless every
+                              installed file matches.
   release-check               Check release prerequisites and fail closed.
   help                        Print these commands.
 
@@ -153,6 +165,16 @@ try {
       output({ result: 'rejected', code: e.code, message: e.message });
       process.exitCode = 1;
     }
+  } else if (command === 'source-archive') {
+    if (args.length !== 2) throw new Error('Usage: source-archive <commit> <output-dir>');
+    output(sourceArchive(root, args[0], args[1]));
+  } else if (command === 'provenance') {
+    if (args.length < 2) throw new Error('Usage: provenance <commit> <artifact>...');
+    output(provenanceStatement(root, args[0], args.slice(1)));
+  } else if (command === 'reproduce-check') {
+    if (args.length !== 1) throw new Error('Usage: reproduce-check <commit>');
+    const r = reproduceCheck(root, args[0], { compiler: lockedCompiler(root, args[0]) });
+    output(r); process.exitCode = reproduceExitCode(r);
   } else if (command === 'release-check') {
     output({ result: 'not-qualified', problems: qualificationProblems(load('engineering/qualification.json')), browser_complete: false });
     process.exitCode = 1;

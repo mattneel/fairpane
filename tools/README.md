@@ -32,10 +32,13 @@ It does not publish code, change approval settings, or choose an account identit
 | `abi-generate` | Validates the ABI schema and failure scenarios, then writes `include/fairpane.h`, `src/abi_generated.zig`, and `tests/c/abi_layout.h`. |
 | `abi-check` | Regenerates the ABI files in memory and exits with status 1 when a committed file differs. |
 | `abi-exports <library>` | Exits with status 1 when a static library exports an `fp_` symbol that the ABI schema does not declare, or lacks one that it declares. |
+| `source-archive <commit> <output-dir>` | Writes `fairpane-<commit>.tar` and `fairpane-<commit>.manifest.json` for a full commit ID into a directory outside the repository. |
+| `provenance <commit> <artifact>...` | Prints an unsigned in-toto statement with a SLSA provenance predicate for the artifacts. |
+| `reproduce-check <commit>` | Builds a full commit ID twice in fresh work trees under `out/reproduce/` and exits with status 1 unless every installed file matches. |
 | `release-check` | Reports unmet obligations and returns a nonzero status. |
 
 Each command uses this repository, independent of the caller's current directory.
-The exception is `attest-verify`, whose path arguments resolve from the current directory.
+The exceptions are `attest-verify`, `source-archive`, and `provenance`, whose path arguments resolve from the current directory.
 The Windows wrapper uses an installed Node executable, then Bun as a fallback.
 The installer does not replace an existing compiler directory or weaken PowerShell policy.
 
@@ -208,6 +211,39 @@ Generation reads only arrays for ordered collections, so the output never depend
 
 `abi-exports` reads the archive symbol table of a static library in the GNU, System V, COFF, or BSD layout.
 The `c-abi` gate runs it on the library that it builds, before it compiles the C smoke test.
+
+## Produce release records
+
+ADR 0009 defines the release records and the owner decisions that a public release still needs.
+These commands write local records only, and none of them signs, publishes, or uploads anything.
+
+1. Select a full 40-hex commit ID.
+2. Run `node tools/fairpane.mjs source-archive <commit> <output-dir>` with an output directory outside the repository.
+3. Run `node tools/fairpane.mjs reproduce-check <commit>`.
+4. Build the release artifacts from the extracted archive with `zig build -Doptimize=ReleaseSafe --prefix zig-out`.
+5. Run `node tools/fairpane.mjs provenance <commit> <artifact>...` and save its standard output.
+
+`source-archive` takes the tar from `git archive --format=tar --prefix=fairpane-<commit>/ <commit>` through the verifier's hardened Git calls.
+It also pins `core.autocrlf`, `core.eol`, and `tar.umask`, so user configuration cannot change the bytes.
+The manifest lists every regular file and symbolic link of the commit's tree with its path, mode, size, and SHA-256, sorted by path bytes.
+It records the commit, the tree, and the tar's SHA-256 in the format `fairpane-source-manifest`, version 1.
+The command parses the tar and fails before any write when the tar does not hold exactly the manifest's files, as an `export-ignore` or `export-subst` attribute would cause.
+An abbreviated ID, a ref name, a missing commit, and an output directory inside the repository or its Git directory also fail before any write.
+
+`provenance` reads the Zig lock from the commit's tree, not from the working tree, and names the host platform's compiler archive digest.
+Each subject is an artifact's file name with its SHA-256, so two artifacts with the same file name fail.
+The statement names the builder `fairpane-local-unsigned`.
+It is a record format for a later protected runner, not an attestation, and no verifier may trust that builder.
+
+`reproduce-check` extracts the source archive into two fresh work trees and builds each with the commit's locked compiler.
+`ZIG_LOCAL_CACHE_DIR` and `ZIG_GLOBAL_CACHE_DIR` name fresh caches inside each tree, and no other inherited `ZIG_*` variable reaches the build.
+It compares the SHA-256 of every file under each tree's `zig-out`.
+It reports `reproducible` with exit status 0, `different` with the differing paths, or `error` for a failed extraction, a failed build, or an empty installation.
+It removes both work trees afterward, and a removal failure appears in the report's `removal` field and makes the exit status 1.
+The two trees have different paths, so an output that embeds its build path reports `different`.
+`tools/release.test.mjs` holds the FP-0027 cases, and `node tools/fairpane.mjs test` runs them.
+`node tools/release.test.mjs` runs those cases without the rest of the controller.
+They run `reproduce-check` with a stand-in compiler that runs the fixture commit's own `build.mjs`, so they need no Zig installation.
 
 ## Extend the controller
 

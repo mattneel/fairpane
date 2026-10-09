@@ -88,7 +88,7 @@ function realInside(target, directory) {
  * Resolving every ancestor means that an alias of the candidate root, such as a short name, a junction,
  * a symbolic link to an ancestor, or a substituted drive, cannot spell a path from outside the candidate.
  */
-function passesInside(target, directory) {
+export function passesInside(target, directory) {
   const resolvedDirectory = fs.realpathSync.native(directory);
   for (let current = path.resolve(target); ; current = path.dirname(current)) {
     let real = null;
@@ -132,11 +132,14 @@ function resolveOnPath(name) {
   }
   throw new Error(`No ${name} executable exists on PATH.`);
 }
-/** Run Git without replace objects, inherited GIT_* variables, or prompts. A spawn failure or timeout is a tool failure, not a rejection. */
-function readGit(repository, args) {
+/**
+ * Run Git without replace objects, inherited GIT_* variables, or prompts. A spawn failure or timeout is a tool failure, not a rejection.
+ * `raw: true` returns output as bytes instead of UTF-8 text, `input` feeds standard input, and `maxBuffer` bounds the captured output.
+ */
+export function readGit(repository, args, { raw = false, input, maxBuffer = 1024 * 1024, timeout = 30000 } = {}) {
   const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !/^GIT_/i.test(name)));
   const r = spawnSync(resolveOnPath('git'), ['--no-replace-objects', '-C', repository, ...args],
-    { encoding: 'utf8', timeout: 30000, windowsHide: true, env: { ...env, GIT_TERMINAL_PROMPT: '0' } });
+    { ...(raw ? {} : { encoding: 'utf8' }), input, maxBuffer, timeout, windowsHide: true, env: { ...env, GIT_TERMINAL_PROMPT: '0' } });
   if (r.error || r.signal) throw new Error(`Git could not read the candidate repository: ${r.error?.message ?? `signal ${r.signal}`}`);
   return r;
 }

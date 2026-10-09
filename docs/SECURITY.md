@@ -88,6 +88,54 @@ Branch protections remain owner-controlled repository settings, as `docs/GIT_OPE
 ## Vulnerability operations
 
 The project needs a private reporting channel before a public browser release.
-The owner selects that channel without a fabricated email address.
-A release requires severity triage, coordinated disclosure, and a reproducible patch process.
-The public issue tracker must not expose user secrets or live exploit credentials.
+The channel stays an owner decision, and ADR 0009 records it as `open` until an owner record exists.
+The agent does not create, choose, or announce a channel, and it never fabricates an email address.
+The public issue tracker must not expose user secrets, exploit details, or live exploit credentials.
+
+### Reporting channel requirements
+
+A channel qualifies when it meets every one of these requirements.
+
+- It keeps each report private between the reporter and the security responders until disclosure.
+- It reaches at least two maintainers with release authority, so one absence cannot stall a report.
+- It records when each report arrives, so the response deadlines below are measurable.
+- It lets responders share a fix privately with the reporter before release.
+- It supports a published advisory and a vulnerability identifier after disclosure.
+
+GitHub private vulnerability reporting can meet these requirements when the owner enables it for the repository.
+Enabling it remains the owner's decision.
+
+### Triage severities
+
+These response targets are proposals that the owner approves together with the reporting channel.
+Responders acknowledge each report within 3 business days.
+They assign a severity within 7 days of the report and record the reason.
+The target is the latest date for a patch release after the report.
+
+| Severity | Condition | Target |
+| --- | --- | --- |
+| Critical | Web content escapes the renderer, runs code in a privileged process, or reads another origin's data without user action. | 7 days |
+| High | Web content runs code in a renderer, bypasses an origin or permission check, or corrupts memory, with limited preconditions. | 30 days |
+| Medium | A security boundary weakens only with user interaction, an unusual configuration, or a local attacker. | 90 days |
+| Low | A defense-in-depth gap or a minor information leak. | The next scheduled release |
+
+### Coordinated disclosure
+
+Responders publish an advisory when a fixed release is available or 90 days after the report, whichever comes first.
+They extend the 90-day limit only with the reporter's agreement and a recorded reason.
+They publish within 7 days when an issue is exploited in the wild, with mitigations if no fix exists yet.
+They credit the reporter in the advisory unless the reporter declines.
+
+### Patch release
+
+A security fix follows the normal release procedure in private until disclosure.
+
+1. Develop the fix in a private workspace, such as a temporary private fork of a repository security advisory.
+2. Add a regression test that fails before the fix.
+3. Run every applicable gate on the fix commit.
+4. Run `source-archive`, `provenance`, and `reproduce-check` for the fix commit, as ADR 0009 describes.
+5. Obtain approval from the release approval authority.
+6. Sign the source manifest and the provenance statement with the release signing key.
+7. Publish the fixed release, its evidence, and the advisory together.
+
+No patch release is possible until the owner records the release decisions that ADR 0009 lists.
