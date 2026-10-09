@@ -1,0 +1,54 @@
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","tools/attest.test.mjs"]
+file:///C:/src/fairpane/tools/attest.test.mjs:13
+import { AttestationError, candidateIdentity, candidateRepository, decodePublicKey, enclosingGitDirectory, loadTrustPolicy, signResult, verifyBytes, verifyResult } from './attest.mjs';
+                                                                                    ^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: The requested module './attest.mjs' does not provide an export named 'enclosingGitDirectory'
+    at #asyncInstantiate (node:internal/modules/esm/module_job:463:21)
+    at async ModuleJob.run (node:internal/modules/esm/module_job:561:5)
+    at async node:internal/modules/esm/loader:650:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v26.7.0
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["tools/attest.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:49:26.048Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":37}
+
+COMMAND ["C:\\nvm4w\\nodejs\\node.exe","out/fp0051-before/tools/attest.test.mjs"]
+TAP version 13
+ok 1 - 2: A valid envelope signed by a trusted key verifies
+ok 2 - 3: RFC 8032 test vector 1 verifies through the same key decoding path
+ok 3 - 4: A key outside the trust policy fails, whether it names itself or a trusted key
+ok 4 - 5: One changed payload byte fails as bad-signature
+ok 5 - 6: A truncated envelope and a truncated payload each fail
+ok 6 - 7: A trusted signature over a payload with a missing, unknown, or mistyped field fails as malformed
+ok 7 - 8: A payload for another commit or tree fails as stale-candidate
+ok 8 - 9: A payload with another policy digest fails as changed-policy
+ok 9 - 10: Zero discovered and zero selected each fail as zero-denominator
+ok 10 - 11: Negative, fractional, unsafe, and mismatched counts fail as inconsistent-counts
+ok 11 - 12: A runner key that differs from the signature key fails as key-mismatch
+not ok 12 - 13: attest-verify checks a candidate repository from a separate verifier location and rejects a trust policy inside it
+  ---
+  message: "Fairpane: The --repository path must be the top-level directory of a Git work tree, C:\\src\\fairpane.\n\n\n1 !== 3\n"
+  ...
+ok 13 - 14: Candidate identity comes from Git objects, ignores replace refs and inherited Git variables, and rejects other names
+ok 14 - 16: A trusted signature over a noncanonical payload fails as malformed
+not ok 15 - FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result
+  ---
+  message: "{\n  \"result\": \"verified\",\n  \"key_id\": \"runner-1\",\n  \"record\": {\n    \"schema\": \"fairpane-result\",\n    \"version\": 1,\n    \"candidate\": {\n      \"commit\": \"5bc5223ce70862ee3710f1ad6051bd42ecd86c32\",\n      \"tree\": \"3ab2e03dea1bc23d0ef6715fd6395ce1629f1889\"\n    },\n    \"acceptance_policy_sha256\": \"7ad262816cd5cff92967c2638495a8bc0e4fd41940e40024f2a993d756affac9\",\n    \"suite\": {\n      \"id\": \"fixture-suite\",\n      \"manifest_sha256\": \"72fe0d961c89cdc8cf6a0c8663484fa8d2259521a0ecbdf00ad49be1a3a07b78\"\n    },\n    \"counts\": {\n      \"discovered\": 10,\n      \"selected\": 8,\n      \"pass\": 5,\n      \"fail\": 1,\n      \"unsupported\": 1,\n      \"excluded\": 0,\n      \"crash\": 1,\n      \"timeout\": 0,\n      \"harness_error\": 0\n    },\n    \"runner\": {\n      \"key_id\": \"runner-1\"\n    },\n    \"issued_at\": \"2026-10-09T01:00:00.000Z\"\n  },\n  \"candidate\": {\n    \"commit\": \"5bc5223ce70862ee3710f1ad6051bd42ecd86c32\",\n    \"tree\": \"3ab2e03dea1bc23d0ef6715fd6395ce1629f1889\"\n  },\n  \"verifier\": \"outside-candidate\",\n  \"note\": \"A verified result authenticates one record. It is not release qualification.\"\n}\n\n\n0 !== 3\n"
+  ...
+not ok 16 - FP-0051 2: enclosingGitDirectory finds the common directory through .git directories and .git files
+  ---
+  message: "C:\\Users\\requi\\AppData\\Local\\Temp\\fairpane-attest-SaquiA\n+ actual - expected\n\n+ null\n- 'C:\\\\Users\\\\requi\\\\AppData\\\\Local\\\\Temp\\\\fairpane-attest-SaquiA\\\\.git'\n"
+  ...
+not ok 17 - FP-0051 3: A corrupt commit object is a tool error, and a missing one is unknown-candidate
+  ---
+  message: "The input did not match the regular expression /^error: Git could not look up the candidate commit/. Input:\n\n'unknown-candidate'\n"
+  ...
+not ok 18 - FP-0051 4: A policy path inside the candidate fails even when a link leads outside
+  ---
+  message: "Expected rejection unprotected-policy, got success"
+  ...
+1..18
+# tests 18
+# pass 13
+# fail 5
+RESULT {"executable":"C:\\nvm4w\\nodejs\\node.exe","arguments":["out/fp0051-before/tools/attest.test.mjs"],"cwd":"C:\\src\\fairpane","started_at":"2026-10-09T02:49:34.621Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":2847}

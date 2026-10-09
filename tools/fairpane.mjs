@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { readJson, checkRepository, readyTasks, qualificationProblems, fingerprints,
   validateReceipt, runGate, recordCommand, installZig, compilerPath, checkCompiler, safePath } from './lib.mjs';
 import { corpusCommand } from './corpus.mjs';
-import { AttestationError, candidateIdentity, candidateRepository, isInside, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
+import { AttestationError, candidateIdentity, candidateRepository, enclosingGitDirectory, isInside, loadTrustPolicy, readEnvelope, verifyResult } from './attest.mjs';
 import { abiCheck, abiGenerate } from './abi.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -131,7 +131,9 @@ try {
       const repository = candidateRepository(path.resolve(options.repository));
       const trust = loadTrustPolicy(path.resolve(options.policy), [repository.root, repository.gitDirectory]);
       const candidate = candidateIdentity(repository.root, options.candidate);
-      const advisory = isInside(root, repository.root) || isInside(root, repository.gitDirectory);
+      // A verifier in another work tree of the candidate repository shares its Git directory, which a workspace writer controls.
+      const advisory = isInside(root, repository.root) || isInside(root, repository.gitDirectory) ||
+        enclosingGitDirectory(root) === repository.gitDirectory;
       const verified = verifyResult(readEnvelope(path.resolve(files[0])), trust, candidate);
       output({ ...verified, result: advisory ? 'verified-advisory' : 'verified', candidate,
         verifier: advisory ? 'inside-candidate' : 'outside-candidate',

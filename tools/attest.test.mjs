@@ -10,7 +10,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { AttestationError, candidateIdentity, candidateRepository, decodePublicKey, signResult, verifyBytes, verifyResult } from './attest.mjs';
+import { AttestationError, candidateIdentity, candidateRepository, decodePublicKey, enclosingGitDirectory, loadTrustPolicy, signResult, verifyBytes, verifyResult } from './attest.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SPKI_ED25519_PREFIX = '302a300506032b6570032100';
@@ -196,7 +196,10 @@ export const attestationCases = [
     rejects(() => candidateIdentity(candidate.dir, runGit(candidate.dir, ['rev-parse', 'fixture-tag'])), 'unknown-candidate');
     fs.mkdirSync(path.join(candidate.dir, 'nested'));
     assert.match(codeOf(() => candidateRepository(path.join(candidate.dir, 'nested'))), /^error: .*top-level directory/);
-    assert.match(codeOf(() => candidateRepository(temp())), /^error: The candidate repository cannot be read/);
+    // The temporary directory can sit inside a work tree, such as a dotfiles checkout, so the expected tool error depends on that.
+    const outside = temp();
+    assert.match(codeOf(() => candidateRepository(outside)),
+      enclosingGitDirectory(outside) === null ? /^error: The candidate repository cannot be read/ : /^error: .*top-level directory/);
     const searchPath = process.env.PATH;
     process.env.PATH = '';
     try { assert.match(codeOf(() => candidateIdentity(candidate.dir, candidate.first)), /^error: No git executable exists on PATH/); }
@@ -213,6 +216,44 @@ export const attestationCases = [
       signText(canonical.replace('"version":1,', '"version":1,"version":1,'), runner.privateKey),
       signText(JSON.stringify(record(), null, 1), runner.privateKey)];
     assert.deepEqual(envelopes.map(text => codeOf(() => verifyResult(text, trustPolicy(), CANDIDATE))), ['malformed', 'malformed', 'malformed']);
+  }],
+  ['FP-0051 1: A verifier copy inside a linked work tree of the candidate reports an advisory result', () => {
+    const candidate = fixtureRepository(), dir = temp(), linked = path.join(dir, 'linked');
+    runGit(candidate.dir, ['worktree', 'add', '-q', '--detach', linked, candidate.first]);
+    fs.cpSync(path.join(root, 'tools'), path.join(linked, 'tools'), { recursive: true });
+    const envelopeFile = path.join(dir, 'result.json'), policyFile = path.join(dir, 'trust-policy.json');
+    fs.writeFileSync(envelopeFile, signResult(record({ candidate: { commit: candidate.first, tree: candidate.firstTree } }), runner.privateKey, 'runner-1'));
+    fs.writeFileSync(policyFile, JSON.stringify(trustPolicy()));
+    const r = spawnSync(process.execPath, [path.join(linked, 'tools/fairpane.mjs'), 'attest-verify', '--repository', candidate.dir,
+      '--trust-policy', policyFile, '--candidate', candidate.first, envelopeFile], { cwd: dir, encoding: 'utf8', windowsHide: true });
+    assert.equal(r.status, 3, r.stdout + r.stderr);
+    assert.equal(JSON.parse(r.stdout).result, 'verified-advisory');
+  }],
+  ['FP-0051 2: enclosingGitDirectory finds the common directory through .git directories and .git files', () => {
+    const candidate = fixtureRepository(), dir = temp(), linked = path.join(dir, 'linked');
+    const common = fs.realpathSync.native(path.join(candidate.dir, '.git'));
+    fs.mkdirSync(path.join(candidate.dir, 'sub', 'deeper'), { recursive: true });
+    runGit(candidate.dir, ['worktree', 'add', '-q', '--detach', linked, candidate.first]);
+    for (const where of [candidate.dir, path.join(candidate.dir, 'sub', 'deeper'), linked]) assert.equal(enclosingGitDirectory(where), common, where);
+    const broken = temp();
+    fs.writeFileSync(path.join(broken, '.git'), 'not a gitdir line\n');
+    assert.match(codeOf(() => enclosingGitDirectory(broken)), /^error: .*does not name a Git directory/);
+  }],
+  ['FP-0051 3: A corrupt commit object is a tool error, and a missing one is unknown-candidate', () => {
+    const candidate = fixtureRepository();
+    const loose = path.join(candidate.dir, '.git', 'objects', candidate.first.slice(0, 2), candidate.first.slice(2));
+    fs.chmodSync(loose, 0o644);
+    fs.writeFileSync(loose, 'not a zlib stream');
+    assert.match(codeOf(() => candidateIdentity(candidate.dir, candidate.first)), /^error: Git could not look up the candidate commit/);
+    rejects(() => candidateIdentity(candidate.dir, 'f'.repeat(40)), 'unknown-candidate');
+  }],
+  ['FP-0051 4: A policy path inside the candidate fails even when a link leads outside', () => {
+    const candidate = fixtureRepository(), outside = temp();
+    fs.writeFileSync(path.join(outside, 'trust-policy.json'), JSON.stringify(trustPolicy()));
+    fs.symlinkSync(outside, path.join(candidate.dir, 'link'), process.platform === 'win32' ? 'junction' : 'dir');
+    const locations = [fs.realpathSync.native(candidate.dir), fs.realpathSync.native(path.join(candidate.dir, '.git'))];
+    rejects(() => loadTrustPolicy(path.join(candidate.dir, 'link', 'trust-policy.json'), locations), 'unprotected-policy');
+    assert.equal(loadTrustPolicy(path.join(outside, 'trust-policy.json'), locations).keys.size, 1);
   }],
 ].map(([name, fn]) => ({ name, fn }));
 
