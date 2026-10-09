@@ -1,0 +1,103 @@
+
+COMMAND ["C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","build","test"]
+test
++- run test
+   +- compile test debug native 23 errors
+src\web_string.zig:24:47: error: use of undeclared identifier 'WebString'
+fn expectUnits(expected: []const u16, string: WebString) !void {
+                                              ^~~~~~~~~
+src\web_string.zig:29:22: error: use of undeclared identifier 'WebString'
+    var string = try WebString.fromUtf8Lossy(testing.allocator, bytes);
+                     ^~~~~~~~~
+src\web_string.zig:35:22: error: use of undeclared identifier 'WebString'
+    var string = try WebString.fromCodeUnits(testing.allocator, units);
+                     ^~~~~~~~~
+src\web_string.zig:43:22: error: use of undeclared identifier 'WebString'
+    var string = try WebString.fromCodeUnits(testing.allocator, units);
+                     ^~~~~~~~~
+src\web_string.zig:48:21: error: use of undeclared identifier 'CodeUnitIndex'
+fn cu(index: usize) CodeUnitIndex {
+                    ^~~~~~~~~~~~~
+src\web_string.zig:52:29: error: use of undeclared identifier 'Utf8ByteIndex'
+fn byteOffset(index: usize) Utf8ByteIndex {
+                            ^~~~~~~~~~~~~
+src\web_string.zig:58:22: error: use of undeclared identifier 'WebString'
+    var string = try WebString.fromCodeUnits(testing.allocator, &units);
+                     ^~~~~~~~~
+src\web_string.zig:67:26: error: use of undeclared identifier 'WebString'
+    var from_units = try WebString.fromCodeUnits(failing, &.{});
+                         ^~~~~~~~~
+src\web_string.zig:87:22: error: use of undeclared identifier 'WebString'
+    var string = try WebString.fromUtf8(testing.allocator, "a\x00b");
+                     ^~~~~~~~~
+src\web_string.zig:103:26: error: use of undeclared identifier 'WebString'
+        var string = try WebString.fromUtf8(testing.allocator, case.bytes);
+                         ^~~~~~~~~
+src\web_string.zig:120:52: error: use of undeclared identifier 'WebString'
+        try testing.expectError(error.InvalidUtf8, WebString.fromUtf8(testing.allocator, bytes));
+                                                   ^~~~~~~~~
+src\web_string.zig:146:22: error: use of undeclared identifier 'WebString'
+    var string = try WebString.fromCodeUnits(testing.allocator, &.{ 0x0061, 0xD800, 0x0062, 0xDC00, 0xD83D, 0xDE00 });
+                     ^~~~~~~~~
+src\web_string.zig:169:20: error: use of undeclared identifier 'WebString'
+    var pair = try WebString.fromCodeUnits(testing.allocator, &.{ 0xD83D, 0xDE00 });
+                   ^~~~~~~~~
+src\web_string.zig:184:22: error: use of undeclared identifier 'WebString'
+    var string = try WebString.fromCodeUnits(testing.allocator, &.{ 0x0061, 0x0062, 0x0063 });
+                     ^~~~~~~~~
+src\web_string.zig:195:50: error: use of undeclared identifier 'codeUnitIndexForUtf8Offset'
+        try testing.expectEqual(cu(pair[1]), try codeUnitIndexForUtf8Offset(case_14_text, byteOffset(pair[0])));
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~
+src\web_string.zig:204:23: error: use of undeclared identifier 'WebString'
+    var decoded = try WebString.fromUtf8(testing.allocator, case_14_text);
+                      ^~~~~~~~~
+src\web_string.zig:214:21: error: use of undeclared identifier 'WebString'
+    var units = try WebString.fromCodeUnits(gpa, &.{ 0x0061, 0xD83D });
+                    ^~~~~~~~~
+src\web_string.zig:241:23: error: use of undeclared identifier 'WebString'
+    var decoded = try WebString.fromUtf8(testing.allocator, case_14_text);
+                      ^~~~~~~~~
+src\web_string.zig:158:56: error: no field or member function named 'order' in 'web_string.View'
+    try testing.expectEqual(std.math.Order.gt, composed.order(decomposed));
+                                               ~~~~~~~~^~~~~~
+src\web_string.zig:5:18: note: struct declared here
+pub const View = struct {
+                 ^~~~~~
+referenced by:
+    web_string: src\root.zig:5:32
+    test_0: src\root.zig:14:9
+src\web_string.zig:164:57: error: no field or member function named 'order' in 'web_string.View'
+    try testing.expectEqual(std.math.Order.gt, halfwidth.order(emoji));
+                                               ~~~~~~~~~^~~~~~
+src\web_string.zig:5:18: note: struct declared here
+pub const View = struct {
+                 ^~~~~~
+src\web_string.zig:252:48: error: no field or member function named 'codeUnitLen' in 'web_string.View'
+    try testing.expectEqual(@as(usize, 4), view.codeUnitLen());
+                                           ~~~~^~~~~~~~~~~~
+src\web_string.zig:5:18: note: struct declared here
+pub const View = struct {
+                 ^~~~~~
+src\web_string.zig:261:48: error: no field or member function named 'codeUnitLen' in 'web_string.View'
+    try testing.expectEqual(@as(usize, 2), view.codeUnitLen());
+                                           ~~~~^~~~~~~~~~~~
+src\web_string.zig:5:18: note: struct declared here
+pub const View = struct {
+                 ^~~~~~
+src\web_string.zig:267:49: error: no field or member function named 'codeUnitLen' in 'web_string.View'
+    try testing.expectEqual(@as(usize, 0), empty.codeUnitLen());
+                                           ~~~~~^~~~~~~~~~~~
+src\web_string.zig:5:18: note: struct declared here
+pub const View = struct {
+                 ^~~~~~
+error: 23 compilation errors
+failed command: "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe" test -Odebug "-Mroot=src\\root.zig" --cache-dir .zig-cache --global-cache-dir "C:\\src\\fairpane\\.zig-cache\\global" --build-root . --name test --zig-lib-dir "C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\lib\\" --listen=-
+
+Build Summary: 0/3 steps succeeded (1 failed)
+test transitive failure
++- run test transitive failure
+   +- compile test debug native 23 errors
+
+error: the following build command exited with code 1:
+C:\src\fairpane\.zig-cache\global\o\253f29e51d3f235ff7bb0cfb57b92bf7\maker.exe build --zig-lib=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\lib --zig=C:\src\fairpane\.tools\zig\0.18.0-dev.120+9fe22a29b\x86_64-windows\zig.exe --global-cache=C:\src\fairpane\.zig-cache\global --seed=0x30e38a20 test
+RESULT {"executable":"C:\\src\\fairpane\\.tools\\zig\\0.18.0-dev.120+9fe22a29b\\x86_64-windows\\zig.exe","arguments":["build","test"],"cwd":"C:\\Users\\requi\\.omp\\wt\\t5f6095e05\\m","started_at":"2026-10-09T01:02:19.604Z","exit_code":1,"signal":null,"timed_out":false,"error":null,"duration_ms":5432,"environment_overrides":{"ZIG_GLOBAL_CACHE_DIR":"C:\\src\\fairpane\\.zig-cache\\global"}}
