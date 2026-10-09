@@ -23,59 +23,72 @@
     ],
     "external_runtime_dependencies": [],
     "external_build_dependencies": [],
-    "policy": "First-party code, the Rust standard library, and Rust toolchain facilities only. No third-party runtime or build dependency, no framework-specific feature, and no async runtime requirement. Regenerating declarations is a separate development operation."
+    "policy": "The canonical wrapper uses only first-party code, the Rust standard library, and Rust toolchain facilities. It has no third-party runtime or build dependency, no framework-specific feature, and no async runtime requirement. Regenerating declarations is a separate development operation."
   },
-  "rust_browser_shell": {
+  "rust_browser_application": {
     "decision": "engineering/decisions/0004-first-party-wrapper-language.md",
     "source_roots": [
       "apps/browser"
     ],
-    "policy": "Qualified third-party crates are welcome for user interface and application services. Every crate is pinned in a committed Cargo.lock and passes license, advisory, source, and ban checks across every declared target configuration, including build dependencies. The shell adopts the newest qualified, compatible stack, not the independently newest version of every package.",
+    "policy": "The browser application welcomes qualified third-party crates for user interface and application services. A committed Cargo.lock pins every crate. Every crate passes license, advisory, source, ban, and duplicate checks across every declared target configuration, including build dependencies. The application adopts the newest qualified, compatible stack, not the independently newest version of every package.",
     "acceptable_uses": [
-      "A UI framework hosts windows, routes input and IME events, and presents engine-produced frames.",
-      "A graphics library presents an engine-produced frame.",
+      "A UI framework hosts windows, routes input and IME events, bridges accessibility, and presents engine-produced frames.",
+      "A graphics library, such as wgpu, presents an engine-produced surface in the shell.",
       "An HTTP library supplies transport that the broker authorizes.",
       "An accessibility adapter exposes platform objects for engine-provided semantics.",
-      "Host services such as async I/O, diagnostics, configuration, profile directories, clipboard transport, file dialogs, and notifications."
+      "A crate supplies a host service, such as asynchronous I/O, diagnostics, configuration, profile directories, clipboard transport, file dialogs, or notifications.",
+      "The optional Rhai component runs extension code under the extension contract."
     ],
     "outside_the_exception": [
-      "Delegating page or chrome layout, text shaping, or painting to a crate.",
-      "Supplying missing page-rendering behavior behind a callback.",
-      "Letting a transport crate's defaults replace the engine's Fetch semantics, including redirects, cookies, and response transformation.",
-      "Reconstructing page semantics from pixels.",
-      "Any WebView, embedded browser engine, or JavaScript or WebAssembly engine.",
-      "URL parsing, origin computation, or any security decision that the engine or broker owns."
+      "A crate parses, styles, lays out, shapes, paints, or scripts web content or chrome.",
+      "A crate supplies missing page-rendering behavior behind a callback.",
+      "A crate implements web-visible network semantics, such as redirect handling, cookies, caching, or CORS, which the engine applies.",
+      "A transport crate's defaults replace the engine's Fetch semantics or transform responses.",
+      "The shell reconstructs page semantics from pixels.",
+      "A crate parses URLs, computes origins, or makes a security decision that the engine or broker owns.",
+      "A crate supplies a WebView, an embedded browser engine, or a JavaScript or WebAssembly engine.",
+      "A graphics library implements the engine's WebGPU behavior, including behind a callback, without a separate owner decision."
     ],
     "candidates": [
       {
         "crate": "gpui",
-        "role": "Lead interface framework: windows, input, IME delivery, AccessKit accessibility, and frame presentation. Hosts engine-rendered chrome.",
-        "status": "candidate pending the FP-0032 qualification prototype"
+        "role": "GPUI is the lead interface framework. It hosts windows, input, IME delivery, AccessKit accessibility, frame presentation, and the engine-rendered chrome. GPUI Kit publishes its paired GPUI snapshot as the gpui-pre package.",
+        "status": "candidate pending FP-0032 and FP-0030"
       },
       {
         "crate": "gpui-kit",
-        "role": "Selected behavior facilities only, paired with its specified GPUI snapshot. Its WebView and JavaScript-extension packages are excluded.",
-        "status": "candidate pending the FP-0032 qualification prototype"
+        "role": "The shell uses only selected GPUI Kit behavior facilities, paired with their specified GPUI snapshot. GPUI Kit documented version 0.7.1 on October 9, 2026.",
+        "status": "candidate pending FP-0032 and FP-0030"
       },
       {
         "crate": "tokio",
-        "role": "Host-service runtime, not the engine's event loop or a wrapper requirement.",
+        "role": "Tokio is a host-service runtime, not the engine's event loop or a wrapper requirement.",
         "status": "candidate"
       },
       {
         "crate": "reqwest with rustls",
-        "role": "Transport adapter under the broker, with redirects returned unconsumed, no cookie store, and no response transformation.",
+        "role": "The pair is a transport adapter under the broker. It returns redirects unconsumed, keeps no cookie store, and transforms no response.",
         "status": "candidate"
       },
       {
         "crate": "tracing",
-        "role": "Structured shell diagnostics correlated with engine requests and frames.",
+        "role": "Tracing emits structured shell spans correlated with engine requests and frames.",
         "status": "candidate"
       },
       {
         "crate": "cargo-deny",
-        "role": "Development check for licenses, advisories, bans, and sources.",
+        "role": "Cargo-deny is a development check for advisories and approved dependency sources.",
         "status": "candidate development tool"
+      },
+      {
+        "crate": "rhai",
+        "role": "Rhai runs extension code in the optional Rhai component, outside the engine and the canonical wrapper. It never executes web content or chrome.",
+        "status": "candidate pending FP-0037"
+      },
+      {
+        "crate": "wgpu",
+        "role": "wgpu can present engine-produced surfaces in the shell. It never implements the engine's WebGPU behavior without a separate owner decision.",
+        "status": "candidate pending FP-0045"
       }
     ],
     "excluded": [
@@ -84,6 +97,10 @@
       "Any WebView or embedded browser engine",
       "Any JavaScript or WebAssembly engine"
     ]
+  },
+  "optional_language_hosts": {
+    "decision": "engineering/decisions/0006-language-sdk-obligation.md",
+    "policy": "Each language-support host is optional. Its runtime dependencies belong to that host, outside the Zig engine and the canonical wrappers. A host never executes web content or chrome, and it never replaces Fairpane's JavaScript runtime in the JavaScript extension adapter. The default browser installation carries no third-party language runtime."
   },
   "development": {
     "required_hosts": [

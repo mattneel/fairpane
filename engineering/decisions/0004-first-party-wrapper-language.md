@@ -3,7 +3,7 @@
 Status: accepted.
 Owner: the project owner.
 Date: 2026-10-09.
-Related tasks: `FP-0017`, `FP-0020`, `FP-0021`, `FP-0023`, `FP-0029`, `FP-0030`, `FP-0032`, `FP-0033`.
+Related tasks: `FP-0017`, `FP-0020`, `FP-0021`, `FP-0023`, `FP-0029`, `FP-0030`, `FP-0032`, `FP-0033`, `FP-0034`, `FP-0035`.
 
 ## Decision
 
@@ -21,6 +21,9 @@ The quoted statement is the owner's wording for this record.
 Zig gives Fairpane an independent engine.
 Rust gives it an ecosystem-native application.
 The public contract makes each one accountable to the other.
+
+The owner's first answer extended the dependency exception to the Rust wrapper.
+The owner's memo then placed the exception at the browser application, and this record follows the memo.
 
 Fairpane renders all browser chrome as a trusted document.
 GPUI hosts that engine-rendered chrome and the page documents in the shell's windows.
@@ -62,7 +65,7 @@ FFI declarations do not establish foreign-code safety, so their correctness is p
 - It provides scoped buffer views and retained frames with documented lifetime rules.
 - It accepts typed input and host-request batches.
 - It states thread restrictions and cancellation behavior explicitly.
-- Shell code never handles raw engine pointers and never imports `fairpane-sys` directly.
+- Ordinary shell code never handles raw engine pointers and never imports `fairpane-sys` directly.
 - Unsafe code stays inside the wrapper and narrow platform adapters.
 
 The initial `Engine` type implements neither `Send` nor `Sync`.
@@ -85,6 +88,7 @@ The wrapper implements standard-library traits and leaves ecosystem adapters to 
 GPUI is the lead interface framework for the shell, with selected GPUI Kit facilities.
 GPUI hosts windows, input, IME delivery, accessibility through AccessKit, and presentation of engine frames.
 It does not render the chrome; Fairpane renders the chrome as a trusted document.
+GPUI's documentation describes AccessKit integration, and custom controls still require correct semantics and keyboard behavior.
 
 A qualification prototype selects the framework through Fairpane's actual needs.
 
@@ -97,12 +101,17 @@ A qualification prototype selects the framework through Fairpane's actual needs.
 | Application behavior | Multiple windows keep distinct identity and recover after a renderer failure. |
 | Efficiency | Idle CPU use and interaction latency meet explicit budgets. |
 
+`FP-0032` produces the evidence for engine frames, presentation, application behavior, and efficiency, and it confirms IME event delivery.
+The text input and accessibility areas need engine editing and accessibility, so `FP-0030` produces their evidence.
+The GPUI selection stays provisional until both tasks pass.
+
 The first frame path uploads already-decoded software frames through GPUI's `RenderImage` input.
 That path does not establish zero-copy GPU interoperability.
 Shared textures need a separate experiment with explicit ownership and synchronization contracts.
 An accessibility-tree assertion does not prove screen-reader behavior.
 
 GPUI is pre-1.0, and GPUI Kit pairs each release with a specific GPUI snapshot.
+GPUI Kit documented version 0.7.1 on October 9, 2026, and it warns against independent snapshot upgrades.
 The shell adopts the newest qualified, compatible stack, not the independently newest version of every package.
 It adds no other window framework or graphics abstraction without a concrete role.
 The GPUI Kit WebView and JavaScript-extension packages are not part of the shell.
@@ -115,11 +124,12 @@ The following crates are candidates for their stated roles, not a preapproved ma
 | Asynchronous host services | Tokio | A host-service runtime, not the engine's event loop or a wrapper requirement. |
 | HTTP transport and TLS | reqwest with rustls | A transport adapter under the resource broker's control. |
 | Structured diagnostics | tracing | Shell spans correlated with engine requests and frames. |
-| Dependency policy | cargo-deny | Development checks for licenses, advisories, bans, and sources. |
+| Dependency policy | cargo-deny | Development checks for advisories and approved dependency sources. |
 
 The transport adapter never consumes a redirect that the engine needs to evaluate.
 It returns redirect responses through the public resource contract.
-It applies no cookie policy and no response transformation of its own.
+The same principle applies to cookie policy and response transformations.
+Application convenience never overrides observable web behavior.
 The engine applies web semantics, and the broker independently authorizes privileged operations.
 
 ## Process arrangement
@@ -129,8 +139,12 @@ The Rust wrapper runs inside each renderer process.
 A small Rust renderer host calls the wrapper and services the process protocol.
 The privileged browser application communicates with renderer hosts through validated messages.
 The C ABI stays a local boundary inside the renderer process, and no native pointer crosses a process boundary.
-The trusted chrome document runs in its own renderer, separate from every page renderer.
 A direct in-process example remains valuable for library consumers, and it qualifies a separate deployment profile.
+
+Fairpane adds one design choice beyond the memo.
+The trusted chrome document runs in its own renderer, separate from every page renderer.
+A compromised page renderer then cannot reach the chrome's authority.
+This choice continues the default direction that `docs/SECURITY.md` recorded before this decision.
 
 ## Independence as a build result
 
@@ -140,7 +154,8 @@ Continuous integration builds three separate consumers.
 2. A minimal Rust consumer builds against the distributed wrapper outside the browser workspace.
 3. The browser shell executes application workflows through the same wrapper.
 
-The separate Rust consumer matters because Cargo unifies features inside a workspace.
+The separate Rust consumer matters because Cargo unifies dependency features in defined circumstances.
+A workspace build can therefore exercise a different configuration from an independent consumer.
 The dependency check covers every declared target configuration and every build dependency.
 A shell-only workaround cannot satisfy a wrapper test, and a private export cannot satisfy a public-ABI test.
 
@@ -161,10 +176,13 @@ TypeScript on Node or Bun was ineligible because the shell would carry V8 or Jav
 ## Consequences
 
 `FP-0029` builds and qualifies `fairpane-sys` and `fairpane`.
+`FP-0035` exposes frames and input, including IME composition, through the public contract.
 `FP-0032` qualifies GPUI through the prototype evidence above.
 `FP-0017` opens the first Rust window, hosted in GPUI, with engine-rendered chrome.
 `FP-0030` adds the editing, IME, focus, and accessibility that the chrome needs through the public contract.
-`FP-0033` runs the three consumers in continuous integration.
+`FP-0020` runs renderers as Rust renderer hosts behind the broker and the process protocol.
+`FP-0033` runs the repository gates in continuous integration.
+`FP-0034` builds the three consumers in continuous integration.
 
 ## Reversal condition
 

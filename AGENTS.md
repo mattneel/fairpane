@@ -21,8 +21,16 @@ The result requires mechanically demonstrated behavior and sustained maintainabi
 - Use the exact Zig master pin in `toolchains/zig.lock.json`.
 - Keep third-party renderer code and runtime dependencies out of the portable core.
 - Keep the canonical wrappers, including the `fairpane-sys` and `fairpane` crates, free of third-party dependencies.
-- Use qualified, pinned crates only in the Rust browser shell, and never to supply engine behavior.
-- Never let a crate lay out, shape, paint, or script web content or chrome, or make a security decision that the engine or broker owns.
+- Use qualified, pinned crates only in the Rust browser application, never to supply engine behavior.
+- Never let a crate parse, style, lay out, shape, paint, or script web content or chrome, or make a security decision that the engine or broker owns.
+- Keep the runtime dependencies of each language host in that optional host, outside the engine and the canonical wrappers.
+- Let an extension choose its language, never its privileges or its access to Fairpane's capabilities.
+- Keep the engine embedding API and the permissioned extension API distinct.
+- Make every officially supported language SDK power a maintained first-party Fairpane integration and a useful reference extension.
+- Build each first-party integration against the same distributed SDK and public contracts that everyone else receives.
+- Expose actual frontend behavior through each language SDK, not only browser commands.
+- Keep GPUI out of the frontend programming model and out of every public contract.
+- Never let a callback or adapter make a third-party library implement required engine behavior, such as WebGPU.
 - Keep the public C ABI separate from internal Zig interfaces and the process protocol.
 - Preserve JavaScript and web-platform semantics before any speculative fast path.
 - Treat performance mechanisms as hypotheses until measurements support them.

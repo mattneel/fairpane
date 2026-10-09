@@ -28,6 +28,15 @@ The browser presents the page with minimal chrome.
 It treats web applications as applications without hiding origin identity or browser security decisions.
 The engine also remains useful independently of the browser application.
 
+Fairpane is extensible through one extension contract.
+An extension chooses its language, not its privileges or access to Fairpane's capabilities.
+Rhai and JavaScript are its first clients, and they receive equal capabilities through idiomatic interfaces.
+Every officially supported language SDK powers a maintained first-party Fairpane integration and a useful reference extension.
+Those consumers use the same public contracts and distributed SDKs available to everyone else.
+Language support stays optional, so the default browser remains the address bar and the page.
+A frontend in any qualified language can use Fairpane's document model and receive accelerated output.
+It needs neither a hidden JavaScript application nor the browser shell's framework.
+
 No calendar deadline or token budget justifies false completeness.
 Compute availability permits stronger experiments and independent review.
 It does not remove the need for bounded tests, cancellation, or controlled worker concurrency.
